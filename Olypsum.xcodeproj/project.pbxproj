@@ -1,0 +1,348 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1111013014F292FD0088422F /* LinearMath.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1111012F14F292FD0088422F /* LinearMath.framework */; };
+		1111013214F293030088422F /* BulletCollision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1111013114F293030088422F /* BulletCollision.framework */; };
+		1111013414F293090088422F /* BulletDynamics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1111013314F293090088422F /* BulletDynamics.framework */; };
+		1118251B14F2553A00F198A7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118251A14F2553A00F198A7 /* Cocoa.framework */; };
+		1118252514F2553A00F198A7 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1118252314F2553A00F198A7 /* InfoPlist.strings */; };
+		1118252714F2553A00F198A7 /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1118252614F2553A00F198A7 /* main.mm */; };
+		1118252B14F2553A00F198A7 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 1118252914F2553A00F198A7 /* Credits.rtf */; };
+		1118253114F2553A00F198A7 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1118252F14F2553A00F198A7 /* MainMenu.xib */; };
+		1118253A14F2556A00F198A7 /* SDLMain.mm in Sources */ = {isa = PBXBuildFile; fileRef = 1118253914F2556A00F198A7 /* SDLMain.mm */; };
+		1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254114F2559600F198A7 /* OpenGL.framework */; };
+		1118254414F2559B00F198A7 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254314F2559B00F198A7 /* OpenAL.framework */; };
+		1118254614F255A100F198A7 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254514F255A100F198A7 /* SDL.framework */; };
+		1118254B14F25BB200F198A7 /* AppMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1118254A14F25BB200F198A7 /* AppMain.cpp */; };
+		1118254E14F27BF200F198A7 /* InputController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1118254D14F27BF200F198A7 /* InputController.cpp */; };
+		11C8A7C414F29773001FEE4E /* ShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11C8A7C314F29773001FEE4E /* ShaderProgram.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1111012F14F292FD0088422F /* LinearMath.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LinearMath.framework; path = Library/Frameworks/LinearMath.framework; sourceTree = SDKROOT; };
+		1111013114F293030088422F /* BulletCollision.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletCollision.framework; path = Library/Frameworks/BulletCollision.framework; sourceTree = SDKROOT; };
+		1111013314F293090088422F /* BulletDynamics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletDynamics.framework; path = Library/Frameworks/BulletDynamics.framework; sourceTree = SDKROOT; };
+		1118251614F2553A00F198A7 /* Olypsum.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Olypsum.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1118251A14F2553A00F198A7 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		1118251D14F2553A00F198A7 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		1118251E14F2553A00F198A7 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		1118251F14F2553A00F198A7 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		1118252214F2553A00F198A7 /* Olypsum-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Olypsum-Info.plist"; sourceTree = "<group>"; };
+		1118252414F2553A00F198A7 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		1118252614F2553A00F198A7 /* main.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
+		1118252A14F2553A00F198A7 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		1118253014F2553A00F198A7 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		1118253814F2556A00F198A7 /* SDLMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDLMain.h; sourceTree = "<group>"; };
+		1118253914F2556A00F198A7 /* SDLMain.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SDLMain.mm; sourceTree = "<group>"; };
+		1118254114F2559600F198A7 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		1118254314F2559B00F198A7 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
+		1118254514F255A100F198A7 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = Library/Frameworks/SDL.framework; sourceTree = SDKROOT; };
+		1118254A14F25BB200F198A7 /* AppMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppMain.cpp; sourceTree = "<group>"; };
+		1118254C14F25BCA00F198A7 /* AppMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppMain.h; sourceTree = "<group>"; };
+		1118254D14F27BF200F198A7 /* InputController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = InputController.cpp; sourceTree = "<group>"; };
+		1118254F14F27BFE00F198A7 /* InputController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputController.h; sourceTree = "<group>"; };
+		11C8A7C314F29773001FEE4E /* ShaderProgram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderProgram.cpp; sourceTree = "<group>"; };
+		11C8A7C614F29781001FEE4E /* ShaderProgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShaderProgram.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1118251314F2553900F198A7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1111013414F293090088422F /* BulletDynamics.framework in Frameworks */,
+				1111013214F293030088422F /* BulletCollision.framework in Frameworks */,
+				1111013014F292FD0088422F /* LinearMath.framework in Frameworks */,
+				1118254614F255A100F198A7 /* SDL.framework in Frameworks */,
+				1118254414F2559B00F198A7 /* OpenAL.framework in Frameworks */,
+				1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */,
+				1118251B14F2553A00F198A7 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1118250B14F2553900F198A7 = {
+			isa = PBXGroup;
+			children = (
+				1118252014F2553A00F198A7 /* Olypsum */,
+				1118251914F2553A00F198A7 /* Frameworks */,
+				1118251714F2553A00F198A7 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1118251714F2553A00F198A7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1118251614F2553A00F198A7 /* Olypsum.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1118251914F2553A00F198A7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1111013314F293090088422F /* BulletDynamics.framework */,
+				1111013114F293030088422F /* BulletCollision.framework */,
+				1111012F14F292FD0088422F /* LinearMath.framework */,
+				1118254514F255A100F198A7 /* SDL.framework */,
+				1118254314F2559B00F198A7 /* OpenAL.framework */,
+				1118254114F2559600F198A7 /* OpenGL.framework */,
+				1118251A14F2553A00F198A7 /* Cocoa.framework */,
+				1118251C14F2553A00F198A7 /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		1118251C14F2553A00F198A7 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1118251D14F2553A00F198A7 /* AppKit.framework */,
+				1118251E14F2553A00F198A7 /* CoreData.framework */,
+				1118251F14F2553A00F198A7 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		1118252014F2553A00F198A7 /* Olypsum */ = {
+			isa = PBXGroup;
+			children = (
+				11C8A7C614F29781001FEE4E /* ShaderProgram.h */,
+				11C8A7C314F29773001FEE4E /* ShaderProgram.cpp */,
+				1118254F14F27BFE00F198A7 /* InputController.h */,
+				1118254D14F27BF200F198A7 /* InputController.cpp */,
+				1118254C14F25BCA00F198A7 /* AppMain.h */,
+				1118254A14F25BB200F198A7 /* AppMain.cpp */,
+				1118253714F2556A00F198A7 /* macCompCode */,
+				1118252F14F2553A00F198A7 /* MainMenu.xib */,
+				1118252114F2553A00F198A7 /* Supporting Files */,
+			);
+			path = Olypsum;
+			sourceTree = "<group>";
+		};
+		1118252114F2553A00F198A7 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				1118252214F2553A00F198A7 /* Olypsum-Info.plist */,
+				1118252314F2553A00F198A7 /* InfoPlist.strings */,
+				1118252614F2553A00F198A7 /* main.mm */,
+				1118252914F2553A00F198A7 /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		1118253714F2556A00F198A7 /* macCompCode */ = {
+			isa = PBXGroup;
+			children = (
+				1118253814F2556A00F198A7 /* SDLMain.h */,
+				1118253914F2556A00F198A7 /* SDLMain.mm */,
+			);
+			path = macCompCode;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1118251514F2553900F198A7 /* Olypsum */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1118253414F2553A00F198A7 /* Build configuration list for PBXNativeTarget "Olypsum" */;
+			buildPhases = (
+				1118251214F2553900F198A7 /* Sources */,
+				1118251314F2553900F198A7 /* Frameworks */,
+				1118251414F2553900F198A7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Olypsum;
+			productName = Olypsum;
+			productReference = 1118251614F2553A00F198A7 /* Olypsum.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1118250D14F2553900F198A7 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0430;
+			};
+			buildConfigurationList = 1118251014F2553900F198A7 /* Build configuration list for PBXProject "Olypsum" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 1118250B14F2553900F198A7;
+			productRefGroup = 1118251714F2553A00F198A7 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1118251514F2553900F198A7 /* Olypsum */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1118251414F2553900F198A7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1118252514F2553A00F198A7 /* InfoPlist.strings in Resources */,
+				1118252B14F2553A00F198A7 /* Credits.rtf in Resources */,
+				1118253114F2553A00F198A7 /* MainMenu.xib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1118251214F2553900F198A7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1118252714F2553A00F198A7 /* main.mm in Sources */,
+				1118253A14F2556A00F198A7 /* SDLMain.mm in Sources */,
+				1118254B14F25BB200F198A7 /* AppMain.cpp in Sources */,
+				1118254E14F27BF200F198A7 /* InputController.cpp in Sources */,
+				11C8A7C414F29773001FEE4E /* ShaderProgram.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		1118252314F2553A00F198A7 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1118252414F2553A00F198A7 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		1118252914F2553A00F198A7 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1118252A14F2553A00F198A7 /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		1118252F14F2553A00F198A7 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1118253014F2553A00F198A7 /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		1118253214F2553A00F198A7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		1118253314F2553A00F198A7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		1118253514F2553A00F198A7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "Olypsum/Olypsum-Info.plist";
+				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SHARED_PRECOMPS_DIR = "$(CACHE_ROOT)/SharedPrecompiledHeaders";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		1118253614F2553A00F198A7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "Olypsum/Olypsum-Info.plist";
+				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SHARED_PRECOMPS_DIR = "$(CACHE_ROOT)/SharedPrecompiledHeaders";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1118251014F2553900F198A7 /* Build configuration list for PBXProject "Olypsum" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1118253214F2553A00F198A7 /* Debug */,
+				1118253314F2553A00F198A7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1118253414F2553A00F198A7 /* Build configuration list for PBXNativeTarget "Olypsum" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1118253514F2553A00F198A7 /* Debug */,
+				1118253614F2553A00F198A7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1118250D14F2553900F198A7 /* Project object */;
+}
