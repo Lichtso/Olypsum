@@ -3,10 +3,11 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 20.02.12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #import "InputController.h"
+#import "AppMain.h"
 
 Uint8* keyState;
 SDLMod modKeyState;
@@ -21,10 +22,8 @@ void handleKeyDown(SDL_keysym* key) {
 }
 
 void handleKeyUp(SDL_keysym* key) {
-    if(key->sym == SDLK_ESCAPE) {
-        SDL_Quit();
-        exit(0);
-    }
+    if(key->sym == SDLK_ESCAPE)
+        AppTerminate();
     
 }
 

@@ -72,16 +72,22 @@ static NSString *getApplicationName(void)
 @implementation SDLMain
 
 /* Set the working directory to the .app's parent directory */
-- (void)setupWorkingDirectory:(BOOL)shouldChdir {
-    if(shouldChdir) {
-        char parentdir[MAXPATHLEN];
-        CFURLRef url = CFBundleCopyBundleURL(CFBundleGetMainBundle());
-        CFURLRef url2 = CFURLCreateCopyDeletingLastPathComponent(0, url);
-        if(CFURLGetFileSystemRepresentation(url2, 1, (UInt8 *)parentdir, MAXPATHLEN))
-            chdir(parentdir);   /* chdir to the binary app's parent */
-        CFRelease(url);
-        CFRelease(url2);
-    }
+- (void)setupWorkingDirectory {
+    NSURL* parentURL = [[NSBundle mainBundle] resourceURL];
+    for(unsigned int i = 0; i < 3; i ++)
+        parentURL = [parentURL URLByDeletingLastPathComponent];
+    NSString* resourceURL = [[NSBundle mainBundle] resourcePath];
+    
+    unsigned long length = max([[parentURL path] length], [resourceURL length])+1;
+    char buffer[length];
+    [[parentURL path] getCString:buffer maxLength:length encoding:NSASCIIStringEncoding];
+    parentDir = std::string(buffer);
+    
+    [resourceURL getCString:buffer maxLength:length encoding:NSASCIIStringEncoding];
+    resourcesDir = std::string(buffer);
+    chdir(resourcesDir.c_str());
+    
+    //TODO: gameDataDir
 }
 
 static void setApplicationMenu(void) {
@@ -236,7 +242,7 @@ static void CustomApplicationMain(int argc, char **argv) {
 /* Called when the internal event loop has just started running */
 - (void)applicationDidFinishLaunching:(NSNotification *) note {
     /* Set the working directory to the .app's parent directory */
-    [self setupWorkingDirectory:gFinderLaunch];
+    [self setupWorkingDirectory];
     
     /* Hand off to main application code */
     gCalledAppMainline = TRUE;

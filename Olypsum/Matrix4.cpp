@@ -1,0 +1,328 @@
+//
+//  Matrix4.cpp
+//  Olypsum
+//
+//  Created by Alexander Meißner on 21.02.12.
+//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//
+
+#import "Matrix4.h"
+
+Matrix4::Matrix4() {
+    
+}
+
+Matrix4::Matrix4(Matrix4 const &mat) {
+    x = mat.x;
+    y = mat.y;
+    z = mat.z;
+    pos = mat.pos;
+}
+
+Matrix4::Matrix4(btTransform const &mat) {
+    btScalar matData[16];
+    mat.getOpenGLMatrix(matData);
+    x = Vector3(matData[0], matData[1], matData[2], matData[3]);
+    y = Vector3(matData[4], matData[5], matData[6], matData[7]);
+    z = Vector3(matData[8], matData[9], matData[10], matData[11]);
+    pos = Vector3(matData[12], matData[13], matData[14], matData[15]);
+}
+
+Matrix4::Matrix4(float matData[16]) {
+    x = Vector3(matData[0], matData[1], matData[2], matData[3]);
+    y = Vector3(matData[4], matData[5], matData[6], matData[7]);
+    z = Vector3(matData[8], matData[9], matData[10], matData[11]);
+    pos = Vector3(matData[12], matData[13], matData[14], matData[15]);
+}
+
+void Matrix4::print() {
+    printf("Matrix4:\n");
+    printf("x: %f, %f, %f, %f\n", x.x, x.y, x.z, x.w);
+    printf("y: %f, %f, %f, %f\n", y.x, y.y, y.z, y.w);
+    printf("z: %f, %f, %f, %f\n", z.x, z.y, z.z, z.w);
+    printf("pos: %f, %f, %f, %f\n", pos.x, pos.y, pos.z, pos.w);
+}
+
+btTransform Matrix4::getMatrix() {
+    float matDataA[16];
+    getOpenGLMatrix4(matDataA);
+    btTransform mat;
+    btScalar matDataB[16];
+    for(unsigned char i = 0; i < 16; i ++)
+        matDataB[i] = (btScalar)matDataA[i];
+    mat.setFromOpenGLMatrix(matDataB);
+    return mat;
+}
+
+void Matrix4::getOpenGLMatrix3(float matData[9]) {
+    matData[0] = x.x;
+    matData[1] = y.x;
+    matData[2] = z.x;
+    matData[3] = x.y;
+    matData[4] = y.y;
+    matData[5] = z.y;
+    matData[6] = x.z;
+    matData[7] = y.z;
+    matData[8] = z.z;
+    /*matData[0] = x.x;
+    matData[1] = x.y;
+    matData[2] = x.z;
+    matData[3] = y.x;
+    matData[4] = y.y;
+    matData[5] = y.z;
+    matData[6] = z.x;
+    matData[7] = z.y;
+    matData[8] = z.z;*/
+}
+
+void Matrix4::getOpenGLMatrix4(float matData[16]) {
+    matData[0] = x.x;
+    matData[1] = y.x;
+    matData[2] = z.x;
+    matData[3] = pos.x;
+    matData[4] = x.y;
+    matData[5] = y.y;
+    matData[6] = z.y;
+    matData[7] = pos.y;
+    matData[8] = x.z;
+    matData[9] = y.z;
+    matData[10] = z.z;
+    matData[11] = pos.z;
+    matData[12] = x.w;
+    matData[13] = y.w;
+    matData[14] = z.w;
+    matData[15] = pos.w;
+    /*matData[0] = x.x;
+    matData[1] = x.y;
+    matData[2] = x.z;
+    matData[3] = x.w;
+    matData[4] = y.x;
+    matData[5] = y.y;
+    matData[6] = y.z;
+    matData[7] = y.w;
+    matData[8] = z.x;
+    matData[9] = z.y;
+    matData[10] = z.z;
+    matData[11] = z.w;
+    matData[12] = pos.x;
+    matData[13] = pos.y;
+    matData[14] = pos.z;
+    matData[15] = pos.w;*/
+}
+
+void Matrix4::setMatrix3(const Matrix4& mat) {
+    x = Vector3(mat.x.x, mat.x.y, mat.x.z, x.w);
+    y = Vector3(mat.y.x, mat.y.y, mat.y.z, y.w);
+    z = Vector3(mat.z.x, mat.z.y, mat.z.z, z.w);
+}
+
+void Matrix4::setIdentity() {
+    x = Vector3(1, 0, 0, 0);
+    y = Vector3(0, 1, 0, 0);
+    z = Vector3(0, 0, 1, 0);
+    pos = Vector3(0, 0, 0, 1);
+}
+
+void Matrix4::setZero() {
+    x = Vector3(0, 0, 0, 0);
+    y = Vector3(0, 0, 0, 0);
+    z = Vector3(0, 0, 0, 0);
+    pos = Vector3(0, 0, 0, 0);
+}
+
+Matrix4 Matrix4::getTransposed() {
+    Matrix4 b;
+    b.x.x = x.x;
+    b.x.y = y.x;
+    b.x.z = z.x;
+    b.x.w = pos.x;
+    b.y.x = x.y;
+    b.y.y = y.y;
+    b.y.z = z.y;
+    b.y.w = pos.y;
+    b.z.x = x.z;
+    b.z.y = y.z;
+    b.z.z = z.z;
+    b.z.w = pos.z;
+    b.pos.x = x.w;
+    b.pos.y = y.w;
+    b.pos.z = z.w;
+    b.pos.w = pos.w;
+    return b;
+}
+
+Matrix4 Matrix4::getInverse() {
+    //return Matrix4(getMatrix().inverse());
+    Matrix4 a = getTransposed();
+    a.x.w = a.y.w = a.z.w = 0;
+    a.pos = Vector3(0, 0, 0);
+    a.pos = (pos*-1.0)*a;
+    return a;
+}
+
+Matrix4 Matrix4::operator*(const Matrix4& b) {
+    Matrix4 a;
+    a.x = Vector3(x.x*b.x.x+x.y*b.y.x+x.z*b.z.x+x.w*b.pos.x,
+                  x.x*b.x.y+x.y*b.y.y+x.z*b.z.y+x.w*b.pos.y,
+                  x.x*b.x.z+x.y*b.y.z+x.z*b.z.z+x.w*b.pos.z,
+                  x.x*b.x.w+x.y*b.y.w+x.z*b.z.w+x.w*b.pos.w);
+    a.y = Vector3(y.x*b.x.x+y.y*b.y.x+y.z*b.z.x+y.w*b.pos.x,
+                  y.x*b.x.y+y.y*b.y.y+y.z*b.z.y+y.w*b.pos.y,
+                  y.x*b.x.z+y.y*b.y.z+y.z*b.z.z+y.w*b.pos.z,
+                  y.x*b.x.w+y.y*b.y.w+y.z*b.z.w+y.w*b.pos.w);
+    a.z = Vector3(z.x*b.x.x+z.y*b.y.x+z.z*b.z.x+z.w*b.pos.x,
+                  z.x*b.x.y+z.y*b.y.y+z.z*b.z.y+z.w*b.pos.y,
+                  z.x*b.x.z+z.y*b.y.z+z.z*b.z.z+z.w*b.pos.z,
+                  z.x*b.x.w+z.y*b.y.w+z.z*b.z.w+z.w*b.pos.w);
+    a.pos = Vector3(pos.x*b.x.x+pos.y*b.y.x+pos.z*b.z.x+pos.w*b.pos.x,
+                    pos.x*b.x.y+pos.y*b.y.y+pos.z*b.z.y+pos.w*b.pos.y,
+                    pos.x*b.x.z+pos.y*b.y.z+pos.z*b.z.z+pos.w*b.pos.z,
+                    pos.x*b.x.w+pos.y*b.y.w+pos.z*b.z.w+pos.w*b.pos.w);/*
+    a.x = Vector3(x.x*b.x.x+y.x*b.x.y+z.x*b.x.z+pos.x*b.x.w,
+                  x.x*b.y.x+y.x*b.y.y+z.x*b.y.z+pos.x*b.y.w,
+                  x.x*b.z.x+y.x*b.z.y+z.x*b.z.z+pos.x*b.z.w,
+                  x.x*b.pos.x+y.x*b.pos.y+z.x*b.pos.z+pos.x*b.pos.w);
+    a.y = Vector3(x.y*b.x.x+y.y*b.x.y+z.y*b.x.z+pos.y*b.x.w,
+                  x.y*b.y.x+y.y*b.y.y+z.y*b.y.z+pos.y*b.y.w,
+                  x.y*b.z.x+y.y*b.z.y+z.y*b.z.z+pos.y*b.z.w,
+                  x.y*b.pos.x+y.y*b.pos.y+z.y*b.pos.z+pos.y*b.pos.w);
+    a.z = Vector3(x.z*b.x.x+y.z*b.x.y+z.z*b.x.z+pos.z*b.x.w,
+                  x.z*b.y.x+y.z*b.y.y+z.z*b.y.z+pos.z*b.y.w,
+                  x.z*b.z.x+y.z*b.z.y+z.z*b.z.z+pos.z*b.z.w,
+                  x.z*b.pos.x+y.z*b.pos.y+z.z*b.pos.z+pos.z*b.pos.w);
+    a.pos = Vector3(x.w*b.x.x+y.w*b.x.y+z.w*b.x.z+pos.w*b.x.w,
+                    x.w*b.y.x+y.w*b.y.y+z.w*b.y.z+pos.w*b.y.w,
+                    x.w*b.z.x+y.w*b.z.y+z.w*b.z.z+pos.w*b.z.w,
+                    x.w*b.pos.x+y.w*b.pos.y+z.w*b.pos.z+pos.w*b.pos.w);*/
+    return a;
+}
+
+Matrix4& Matrix4::operator*=(const Matrix4& b) {
+    Matrix4 a;
+    a.x = Vector3(x.x*b.x.x+x.y*b.y.x+x.z*b.z.x+x.w*b.pos.x,
+                  x.x*b.x.y+x.y*b.y.y+x.z*b.z.y+x.w*b.pos.y,
+                  x.x*b.x.z+x.y*b.y.z+x.z*b.z.z+x.w*b.pos.z,
+                  x.x*b.x.w+x.y*b.y.w+x.z*b.z.w+x.w*b.pos.w);
+    a.y = Vector3(y.x*b.x.x+y.y*b.y.x+y.z*b.z.x+y.w*b.pos.x,
+                  y.x*b.x.y+y.y*b.y.y+y.z*b.z.y+y.w*b.pos.y,
+                  y.x*b.x.z+y.y*b.y.z+y.z*b.z.z+y.w*b.pos.z,
+                  y.x*b.x.w+y.y*b.y.w+y.z*b.z.w+y.w*b.pos.w);
+    a.z = Vector3(z.x*b.x.x+z.y*b.y.x+z.z*b.z.x+z.w*b.pos.x,
+                  z.x*b.x.y+z.y*b.y.y+z.z*b.z.y+z.w*b.pos.y,
+                  z.x*b.x.z+z.y*b.y.z+z.z*b.z.z+z.w*b.pos.z,
+                  z.x*b.x.w+z.y*b.y.w+z.z*b.z.w+z.w*b.pos.w);
+    a.pos = Vector3(pos.x*b.x.x+pos.y*b.y.x+pos.z*b.z.x+pos.w*b.pos.x,
+                    pos.x*b.x.y+pos.y*b.y.y+pos.z*b.z.y+pos.w*b.pos.y,
+                    pos.x*b.x.z+pos.y*b.y.z+pos.z*b.z.z+pos.w*b.pos.z,
+                    pos.x*b.x.w+pos.y*b.y.w+pos.z*b.z.w+pos.w*b.pos.w);
+    *this = a;
+    return *this;
+}
+
+Matrix4& Matrix4::operator=(const Matrix4& mat) {
+    x = mat.x;
+    y = mat.y;
+    z = mat.z;
+    pos = mat.pos;
+    return *this;
+}
+
+Matrix4& Matrix4::operator*=(const float& factor) {
+    x *= factor;
+    y *= factor;
+    z *= factor;
+    pos *= factor;
+    return *this;
+}
+
+Matrix4& Matrix4::translate(Vector3 vec) {
+    pos += vec;
+    return *this;
+}
+
+Matrix4& Matrix4::scale(Vector3 vec) {
+    Matrix4 b;
+    b.setIdentity();
+    b.pos.x = vec.x;
+    b.pos.y = vec.y;
+    b.pos.z = vec.z;
+    return (*this *= b);
+}
+
+Matrix4& Matrix4::rotateX(float value) {
+    float sinValue = sin(value), cosValue = cos(value);
+    Matrix4 b;
+    b.setIdentity();
+    b.y.y = cosValue;
+    b.y.z = -sinValue;
+    b.z.y = sinValue;
+    b.z.z = cosValue;
+    return (*this *= b);
+}
+
+Matrix4& Matrix4::rotateY(float value) {
+    float sinValue = sin(value), cosValue = cos(value);
+    Matrix4 b;
+    b.setIdentity();
+    b.x.x = cosValue;
+    b.x.z = sinValue;
+    b.z.x = -sinValue;
+    b.z.z = cosValue;
+    return (*this *= b);
+}
+
+Matrix4& Matrix4::rotateZ(float value) {
+    float sinValue = sin(value), cosValue = cos(value);
+    Matrix4 b;
+    b.setIdentity();
+    b.x.x = cosValue;
+    b.x.y = -sinValue;
+    b.y.x = sinValue;
+    b.y.y = cosValue;
+    return (*this *= b);
+}
+
+Matrix4& Matrix4::lookAt(Vector3 pos, Vector3 at, Vector3 up, float zoomDist) {
+    Matrix4 b;
+    b.setIdentity();
+    b.z = (pos-at).normalize();
+    b.x = (up/b.z).normalize();
+    b.y = (b.z/b.x);
+    b.pos = pos-b.z*zoomDist;
+    return (*this *= b);
+}
+
+Matrix4& Matrix4::perspective(float fovy, float aspect, float n, float f) {
+    float a = 1.0/tan(fovy*0.5);
+    Matrix4 b;
+    b.setIdentity();
+    b.x.x = a/aspect;
+    b.y.y = a;
+    b.z.z = (n+f)/(n-f);
+    b.z.w = (2.0*n*f)/(n-f);
+    b.pos.z = -1.0;
+    b.pos.w = 0.0;
+    return (*this *= b);
+}
+
+Matrix4& Matrix4::frustum(float w, float h, float n, float f) {
+    Matrix4 b;
+    b.setIdentity();
+    b.x.x = n/w;
+    b.y.y = n/h;
+    b.z.z = (n+f)/(n-f);
+    b.z.w = (2.0*n*f)/(n-f);
+    b.pos.z = -1.0;
+    b.pos.w = 0.0;
+    return (*this *= b);
+}
+
+Matrix4& Matrix4::ortho(float w, float h, float n, float f) {
+    Matrix4 b;
+    b.setIdentity();
+    b.x.x = 1.0/w;
+    b.y.y = 1.0/h;
+    b.z.z = -2.0/(f-n);
+    b.z.w = -(f+n)/(f-n);
+    return (*this *= b);
+}
