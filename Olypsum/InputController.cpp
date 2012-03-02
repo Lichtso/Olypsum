@@ -30,13 +30,16 @@ void handleKeyUp(SDL_keysym* key) {
 
 
 void handleMouseDown(SDL_MouseButtonEvent* mouse) {
-    
+    if(currentScreenView)
+        currentScreenView->handleMouseDown(mouse->x, mouse->y);
 }
 
 void handleMouseUp(SDL_MouseButtonEvent* mouse) {
-    
+    if(currentScreenView)
+        currentScreenView->handleMouseUp(mouse->x, mouse->y);
 }
 
 void handleMouseMove(SDL_MouseMotionEvent* mouse) {
-    
+    if(currentScreenView)
+        currentScreenView->handleMouseMove(mouse->x, mouse->y);
 }

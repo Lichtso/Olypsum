@@ -9,47 +9,36 @@
 #include "GUIRect.h"
 
 GUIRect::GUIRect() {
+    visible = true;
     posX = 0;
     posY = 0;
     width = 100;
-    height = 25;
+    height = 100;
 }
 
-void GUIRect::recalculateSize() {
+void GUIRect::getLimSize(GUIClipRect* parentClipRect, GUIClipRect* clipRect) {
+    clipRect->minPosX = -width;
+    clipRect->minPosY = -height;
+    clipRect->maxPosX = width;
+    clipRect->maxPosY = height;
+    
+    if(posX+clipRect->minPosX < parentClipRect->minPosX)
+        clipRect->minPosX = parentClipRect->minPosX-posX;
+    if(posY+clipRect->minPosY < parentClipRect->minPosY)
+        clipRect->minPosY = parentClipRect->minPosY-posY;
+    if(posX+clipRect->maxPosX > parentClipRect->maxPosX)
+        clipRect->maxPosX = parentClipRect->maxPosX-posX;
+    if(posY+clipRect->maxPosY > parentClipRect->maxPosY)
+        clipRect->maxPosY = parentClipRect->maxPosY-posY;
+}
+
+void GUIRect::updateContent() {
     
 }
 
-void GUIRect::getLimSize(GUIClipRect& clipRect) {
-    clipRect.minPosX = -width;
-    clipRect.minPosY = -height;
-    clipRect.maxPosX = width;
-    clipRect.maxPosY = height;
-    
-    if(posX+clipRect.minPosX < -parent->width)
-        clipRect.minPosX = -parent->width-posX;
-    if(posY+clipRect.minPosY < -parent->height)
-        clipRect.minPosY = -parent->height-posY;
-    if(posX+clipRect.maxPosX > parent->width)
-        clipRect.maxPosX = parent->width-posX;
-    if(posY+clipRect.maxPosY > parent->height)
-        clipRect.maxPosY = parent->height-posY;
-}
-
-void GUIRect::handleMouseDown(Vector3 relativePos) {
-    
-}
-
-void GUIRect::handleMouseUp(Vector3 relativePos) {
-    
-}
-
-void GUIRect::handleMouseMove(Vector3 relativePos) {
-    
-}
-
-void GUIRect::draw(Matrix4& parentTransform) {
+void GUIRect::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
     GUIClipRect clipRect;
-    getLimSize(clipRect);
+    getLimSize(parentClipRect, &clipRect);
     Vector3 minFactor(clipRect.minPosX/width*0.5+0.5, clipRect.minPosY/height*0.5+0.5, 0.0),
             maxFactor(clipRect.maxPosX/width*0.5+0.5, clipRect.maxPosY/height*0.5+0.5, 0.0);
     
@@ -68,6 +57,19 @@ void GUIRect::draw(Matrix4& parentTransform) {
     modelMat.translate(Vector3(posX, posY, 0.0));
     spriteShaderProgram->use();
     spriteShaderProgram->setAttribute(VERTEX_ATTRIBUTE, 2, 4*sizeof(float), vertices);
-    spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 4*sizeof(float), &vertices[2]);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    //spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 4*sizeof(float), &vertices[2]);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDrawArrays(GL_LINE_LOOP, 0, 4);
+}
+
+void GUIRect::handleMouseDown(int mouseX, int mouseY) {
+    
+}
+
+void GUIRect::handleMouseUp(int mouseX, int mouseY) {
+    
+}
+
+void GUIRect::handleMouseMove(int mouseX, int mouseY) {
+    
 }

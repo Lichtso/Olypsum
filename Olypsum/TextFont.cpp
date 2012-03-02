@@ -28,7 +28,7 @@ void TextFont::loadTTF(const char* fileName) {
     }
 }
 
-GLuint TextFont::renderStringToTexture(const char* str, SDL_Color colorB, bool antialiasing, unsigned int& width, unsigned int& height) {
+GLuint TextFont::renderStringToTexture(const char* str, SDL_Color colorB, bool antialiasing, int& width, int& height) {
     SDL_Surface *surfaceB;
     GLuint texture;
     glGenTextures(1, &texture);
@@ -62,6 +62,8 @@ GLuint TextFont::renderStringToTexture(const char* str, SDL_Color colorB, bool a
     SDL_FreeSurface(surfaceB);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     
     return texture;
 }
@@ -125,7 +127,7 @@ void TextFont::renderStringToSurface(const char* str, SDL_Surface* surfaceB, int
 }
 
 void TextFont::renderStringToScreen(const char* str, Vector3 pos, float scale, SDL_Color colorB, bool antialiasing) {
-    unsigned int width, height;
+    int width, height;
     GLuint texture = renderStringToTexture(str, colorB, antialiasing, width, height);
     
     Vector3 size = Vector3(width*scale, height*scale, 0.0);

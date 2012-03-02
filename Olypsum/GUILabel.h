@@ -15,7 +15,14 @@
 #define GUITextAlign_Middle 1
 #define GUITextAlign_Right 2
 
+struct GUILabelLine {
+    GLuint texture;
+    int posX, posY, width, height;
+    GUIClipRect clipRect;
+};
+
 class GUILabel : public GUIRect {
+    std::vector<GUILabelLine> lines;
     public:
     SDL_Color color;
     TextFont* font;
@@ -24,8 +31,8 @@ class GUILabel : public GUIRect {
     unsigned char textAlign;
     std::string text;
     GUILabel();
-    void recalculateSize();
-    void draw(Matrix4& parentTransform);
+    void updateContent();
+    void draw(Matrix4& parentTransform, GUIClipRect* parentClipRect);
 };
 
 #endif

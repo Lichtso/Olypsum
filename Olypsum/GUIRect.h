@@ -18,14 +18,15 @@ struct GUIClipRect {
 class GUIRect {
     public:
     GUIRect* parent;
-    unsigned int posX, posY, width, height;
+    bool visible;
+    int posX, posY, width, height;
     GUIRect();
-    virtual void recalculateSize();
-    virtual void getLimSize(GUIClipRect& clipRect);
-    virtual void handleMouseDown(Vector3 relativePos);
-    virtual void handleMouseUp(Vector3 relativePos);
-    virtual void handleMouseMove(Vector3 relativePos);
-    virtual void draw(Matrix4& parentTransform);
+    virtual void getLimSize(GUIClipRect* parentClipRect, GUIClipRect* clipRect);
+    virtual void updateContent();
+    virtual void draw(Matrix4& parentTransform, GUIClipRect* parentClipRect);
+    virtual void handleMouseDown(int mouseX, int mouseY);
+    virtual void handleMouseUp(int mouseX, int mouseY);
+    virtual void handleMouseMove(int mouseX, int mouseY);
 };
 
 #endif

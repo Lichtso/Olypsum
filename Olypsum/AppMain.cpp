@@ -47,7 +47,7 @@ void AppMain(int argc, char *argv[]) {
     //glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClearColor(0, 0, 0, 0);
+    glClearColor(1, 1, 1, 0);
     
     //Init Cams
     mainCam = new Cam();
@@ -85,9 +85,27 @@ void AppMain(int argc, char *argv[]) {
     currentScreenView = NULL;
     currentScreenView = new GUIScreenView();
     
+    GUIButton* button = new GUIButton();
+    button->autoSize = true;
+    currentScreenView->addChild(button);
+    
     GUILabel* label = new GUILabel();
-    label->text = std::string("Hallo, ok,\nja ja gut,\nLoading ...");
-    currentScreenView->addChild(label);
+    label->text = std::string("Ja Button xD");
+    button->addChild(label);
+    
+    GUIButton* buttonB = new GUIButton();
+    buttonB->autoSize = true;
+    buttonB->posY = -65;
+    currentScreenView->addChild(buttonB);
+    
+    GUILabel* labelB = new GUILabel();
+    labelB->text = std::string("Nein Button xD");
+    buttonB->addChild(labelB);
+    
+    GUILabel* labelC = new GUILabel();
+    labelC->text = std::string("ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789\n!?\"='.:,;-_+#*$%&/([{}])");
+    labelC->posY = -250;
+    currentScreenView->addChild(labelC);
     
     //Init Game {
     tex = new Texture();
@@ -148,9 +166,10 @@ void AppMain(int argc, char *argv[]) {
         //Step Game {
         animationTime += animationFactor;
         mainCam->camMat.setIdentity();
-        mainCam->camMat.translate(Vector3(0,0,5));
+        mainCam->camMat.translate(Vector3(0,-0.5,2));
         mainCam->camMat.rotateY(animationTime);
         mainCam->calculate();
+        mainCam->use();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         /*char fpsStr[32];
         sprintf(fpsStr, "FPS: %d", (int)round(1.0/animationFactor));
@@ -159,7 +178,7 @@ void AppMain(int argc, char *argv[]) {
         mainFont->renderStringToScreen(fpsStr, btVector3(0.0, 0.5, 0.0), 0.002, color, true);
         */
         if(currentScreenView)
-            currentScreenView->draw();
+        currentScreenView->draw();
         SDL_GL_SwapBuffers();
         //}
         

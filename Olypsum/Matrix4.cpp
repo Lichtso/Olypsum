@@ -299,8 +299,8 @@ Matrix4& Matrix4::perspective(float fovy, float aspect, float n, float f) {
     b.x.x = a/aspect;
     b.y.y = a;
     b.z.z = (n+f)/(n-f);
-    b.z.w = (2.0*n*f)/(n-f);
-    b.pos.z = -1.0;
+    b.pos.z = (2.0*n*f)/(n-f);
+    b.z.w = -1.0;
     b.pos.w = 0.0;
     return (*this *= b);
 }
@@ -311,8 +311,8 @@ Matrix4& Matrix4::frustum(float w, float h, float n, float f) {
     b.x.x = n/w;
     b.y.y = n/h;
     b.z.z = (n+f)/(n-f);
-    b.z.w = (2.0*n*f)/(n-f);
-    b.pos.z = -1.0;
+    b.pos.z = (2.0*n*f)/(n-f);
+    b.z.w = -1.0;
     b.pos.w = 0.0;
     return (*this *= b);
 }
@@ -323,6 +323,6 @@ Matrix4& Matrix4::ortho(float w, float h, float n, float f) {
     b.x.x = 1.0/w;
     b.y.y = 1.0/h;
     b.z.z = -2.0/(f-n);
-    b.z.w = -(f+n)/(f-n);
+    b.pos.z = -((f+n)/(f-n));
     return (*this *= b);
 }

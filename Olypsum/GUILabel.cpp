@@ -10,46 +10,28 @@
 
 GUILabel::GUILabel() {
     font = mainFont;
-    color.r = color.g = color.b = 255;
+    color.r = color.g = color.b = 0;
     color.unused = 255;
     textAlign = GUITextAlign_Middle;
     autoSize = true;
     fontHeight = 50;
 }
 
-void GUILabel::recalculateSize() {
-    if(!autoSize) return;
-    width = height = 0;
-    int w, h;
-    const char *startPos = text.c_str(), *lastPos = startPos, *endPos = startPos+text.size();
-    for(const char* pos = startPos; pos < endPos; pos ++) {
-        if(pos[0] != '\\' && pos < endPos-1 && pos[1] != 'n') continue;
-        std::string line = text.substr(startPos-lastPos, pos-lastPos);
-        TTF_SizeText(font->ttf, text.c_str(), &w, &h);
-        width = fmax(width, 0.5*fontHeight/(float)h*w);
-        height += fontHeight>>1;
-        lastPos = pos;
-    }
-}
-
-struct LabelLine {
-    GLuint texture;
-    int posX, posY;
-    unsigned int width, height;
-    GUIClipRect clipRect;
-};
-
-void GUILabel::draw(Matrix4& parentTransform) {
-    std::vector<LabelLine> lines;
+void GUILabel::updateContent() {
+    if(autoSize)
+        width = height = 0;
     
-    width = height = 0;
+    for(unsigned int i = 0; i < lines.size(); i ++)
+        glDeleteTextures(1, &lines[i].texture);
+    lines.clear();
+    
     const char *startPos = text.c_str(), *lastPos = startPos, *endPos = startPos+text.size();
     for(const char* pos = startPos; pos < endPos; pos ++)
         if(pos == endPos-1 || pos[0] == '\n') {
             if(lastPos != startPos) lastPos ++;
             if(pos == endPos-1) pos ++;
             std::string lineStr = text.substr(lastPos-startPos, pos-lastPos);
-            LabelLine line;
+            GUILabelLine line;
             line.texture = font->renderStringToTexture(lineStr.c_str(), color, true, line.width, line.height);
             line.width = 0.5*fontHeight/(float)line.height*line.width;
             line.height = fontHeight>>1;
@@ -60,13 +42,20 @@ void GUILabel::draw(Matrix4& parentTransform) {
             }
             lastPos = pos;
         }
+}
+
+void GUILabel::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
+    if(!visible || text.size() == 0 || fontHeight == 0) return;
+    
+    if(lines.size() == 0)
+        updateContent();
     
     GUIClipRect clipRect;
-    getLimSize(clipRect);
+    getLimSize(parentClipRect, &clipRect);
     modelMat = parentTransform;
     modelMat.translate(Vector3(posX, posY, 0.0));
     
-    LabelLine* line;
+    GUILabelLine* line;
     unsigned int renderY = height-(fontHeight>>1);
     float minFactorX, minFactorY, maxFactorX, maxFactorY;
     for(unsigned int i = 0; i < lines.size(); i ++) {
@@ -92,9 +81,9 @@ void GUILabel::draw(Matrix4& parentTransform) {
         
         if(line->clipRect.minPosX > line->clipRect.maxPosX || line->clipRect.minPosY > line->clipRect.maxPosY) continue;
         minFactorX = 0.5+0.5*(line->clipRect.minPosX-line->posX)/line->width;
-        minFactorY = 0.5+0.5*(line->clipRect.minPosY-line->posY)/line->height;
+        minFactorY = 0.5-0.5*(line->clipRect.maxPosY-line->posY)/line->height;
         maxFactorX = 0.5+0.5*(line->clipRect.maxPosX-line->posX)/line->width;
-        maxFactorY = 0.5+0.5*(line->clipRect.maxPosY-line->posY)/line->height;
+        maxFactorY = 0.5-0.5*(line->clipRect.minPosY-line->posY)/line->height;
         
         float vertices[] = {
             line->clipRect.maxPosX, line->clipRect.minPosY,
@@ -112,6 +101,5 @@ void GUILabel::draw(Matrix4& parentTransform) {
         spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 4*sizeof(float), &vertices[2]);
         glBindTexture(GL_TEXTURE_2D, lines[i].texture);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-        glDeleteTextures(1, &lines[i].texture);
     }
 }
