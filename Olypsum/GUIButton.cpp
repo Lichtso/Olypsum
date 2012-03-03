@@ -46,7 +46,7 @@ GUIButton::GUIButton() {
     clicked = NULL;
     paddingX = 10;
     paddingY = 5;
-    autoSize = false;
+    autoSize = true;
     state = GUIButtonStateNormal;
     roundedCorners = GUITopLeftCorner | GUITopRightCorner | GUIBottomLeftCorner | GUIBottomRightCorner;
 }
@@ -175,27 +175,25 @@ void GUIButton::updateContent() {
 
 void GUIButton::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
     if(!visible) return;
-    
-    if(texture == 0)
-        updateContent();
+    if(texture == 0) updateContent();
     
     GUIClipRect clipRect;
     getLimSize(parentClipRect, &clipRect);
-    Vector3 minFactor(clipRect.minPosX/width*0.5+0.5, clipRect.minPosY/height*0.5+0.5, 0.0),
-    maxFactor(clipRect.maxPosX/width*0.5+0.5, clipRect.maxPosY/height*0.5+0.5, 0.0);
+    if(clipRect.minPosX > clipRect.maxPosX || clipRect.minPosY > clipRect.maxPosY) return;
+    
+    Vector3 minFactor(0.5+0.5*clipRect.minPosX/width, 0.5-0.5*clipRect.maxPosY/height, 0.0),
+            maxFactor(0.5+0.5*clipRect.maxPosX/width, 0.5-0.5*clipRect.minPosY/height, 0.0);
     
     float vertices[] = {
         clipRect.maxPosX, clipRect.minPosY,
         maxFactor.x, maxFactor.y,
         clipRect.maxPosX, clipRect.maxPosY,
-        maxFactor.y, minFactor.y,
+        maxFactor.x, minFactor.y,
         clipRect.minPosX, clipRect.maxPosY,
         minFactor.x, minFactor.y,
         clipRect.minPosX, clipRect.minPosY,
         minFactor.x, maxFactor.y
     };
-    
-    //GUIRect::draw(parentTransform);
     
     modelMat = parentTransform;
     modelMat.translate(Vector3(posX, posY, 0.0));
@@ -209,10 +207,11 @@ void GUIButton::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
         children[i]->draw(modelMat, &clipRect);
 }
 
-void GUIButton::handleMouseDown(int mouseX, int mouseY) {
-    if(mouseX < -width || mouseX > width || mouseY < -height || mouseY > height || state == GUIButtonStateDisabled) return;
+bool GUIButton::handleMouseDown(int mouseX, int mouseY) {
+    if(mouseX < -width || mouseX > width || mouseY < -height || mouseY > height || state == GUIButtonStateDisabled) return false;
     state = GUIButtonStatePressed;
     updateContent();
+    return true;
 }
 
 void GUIButton::handleMouseUp(int mouseX, int mouseY) {

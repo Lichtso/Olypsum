@@ -85,27 +85,27 @@ void AppMain(int argc, char *argv[]) {
     currentScreenView = NULL;
     currentScreenView = new GUIScreenView();
     
-    GUIButton* button = new GUIButton();
-    button->autoSize = true;
-    currentScreenView->addChild(button);
+    const char* buttonLabels[] = { "Alpha", "Beta", "Gamma", "Delta", "Epsilon" };
     
-    GUILabel* label = new GUILabel();
-    label->text = std::string("Ja Button xD");
-    button->addChild(label);
+    for(int j = 1; j <= 5; j ++) {
+        GUIButtonList* buttonList = new GUIButtonList();
+        buttonList->posX = 300-j*200;
+        //buttonList->posY = 300-j*70;
+        //buttonList->vertical = false;
+        for(int i = 0; i < j; i ++) {
+            GUIButton* button = new GUIButton();
+            GUILabel* label = new GUILabel();
+            label->text = std::string(buttonLabels[i]);
+            button->addChild(label);
+            buttonList->addChild(button);
+        }
+        currentScreenView->addChild(buttonList);
+    }
     
-    GUIButton* buttonB = new GUIButton();
-    buttonB->autoSize = true;
-    buttonB->posY = -65;
-    currentScreenView->addChild(buttonB);
-    
-    GUILabel* labelB = new GUILabel();
-    labelB->text = std::string("Nein Button xD");
-    buttonB->addChild(labelB);
-    
-    GUILabel* labelC = new GUILabel();
-    labelC->text = std::string("ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789\n!?\"='.:,;-_+#*$%&/([{}])");
-    labelC->posY = -250;
-    currentScreenView->addChild(labelC);
+    GUILabel* labelD = new GUILabel();
+    labelD->text = std::string("ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789\n!?\"='.:,;-_+#*$%&/([{}])");
+    labelD->posY = -250;
+    currentScreenView->addChild(labelD);
     
     //Init Game {
     tex = new Texture();

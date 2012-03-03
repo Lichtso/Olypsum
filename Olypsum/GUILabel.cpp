@@ -46,12 +46,12 @@ void GUILabel::updateContent() {
 
 void GUILabel::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
     if(!visible || text.size() == 0 || fontHeight == 0) return;
-    
-    if(lines.size() == 0)
-        updateContent();
+    if(lines.size() == 0) updateContent();
     
     GUIClipRect clipRect;
     getLimSize(parentClipRect, &clipRect);
+    if(clipRect.minPosX > clipRect.maxPosX || clipRect.minPosY > clipRect.maxPosY) return;
+    
     modelMat = parentTransform;
     modelMat.translate(Vector3(posX, posY, 0.0));
     

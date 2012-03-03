@@ -64,15 +64,6 @@ void Matrix4::getOpenGLMatrix3(float matData[9]) {
     matData[6] = x.z;
     matData[7] = y.z;
     matData[8] = z.z;
-    /*matData[0] = x.x;
-    matData[1] = x.y;
-    matData[2] = x.z;
-    matData[3] = y.x;
-    matData[4] = y.y;
-    matData[5] = y.z;
-    matData[6] = z.x;
-    matData[7] = z.y;
-    matData[8] = z.z;*/
 }
 
 void Matrix4::getOpenGLMatrix4(float matData[16]) {
@@ -92,22 +83,6 @@ void Matrix4::getOpenGLMatrix4(float matData[16]) {
     matData[13] = y.w;
     matData[14] = z.w;
     matData[15] = pos.w;
-    /*matData[0] = x.x;
-    matData[1] = x.y;
-    matData[2] = x.z;
-    matData[3] = x.w;
-    matData[4] = y.x;
-    matData[5] = y.y;
-    matData[6] = y.z;
-    matData[7] = y.w;
-    matData[8] = z.x;
-    matData[9] = z.y;
-    matData[10] = z.z;
-    matData[11] = z.w;
-    matData[12] = pos.x;
-    matData[13] = pos.y;
-    matData[14] = pos.z;
-    matData[15] = pos.w;*/
 }
 
 void Matrix4::setMatrix3(const Matrix4& mat) {

@@ -39,31 +39,24 @@ void GUIRect::updateContent() {
 void GUIRect::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
     GUIClipRect clipRect;
     getLimSize(parentClipRect, &clipRect);
-    Vector3 minFactor(clipRect.minPosX/width*0.5+0.5, clipRect.minPosY/height*0.5+0.5, 0.0),
-            maxFactor(clipRect.maxPosX/width*0.5+0.5, clipRect.maxPosY/height*0.5+0.5, 0.0);
     
     float vertices[] = {
         clipRect.maxPosX, clipRect.minPosY,
-        maxFactor.x, maxFactor.y,
         clipRect.maxPosX, clipRect.maxPosY,
-        maxFactor.y, minFactor.y,
         clipRect.minPosX, clipRect.maxPosY,
-        minFactor.x, minFactor.y,
         clipRect.minPosX, clipRect.minPosY,
-        minFactor.x, maxFactor.y
     };
     
     modelMat = parentTransform;
     modelMat.translate(Vector3(posX, posY, 0.0));
     spriteShaderProgram->use();
-    spriteShaderProgram->setAttribute(VERTEX_ATTRIBUTE, 2, 4*sizeof(float), vertices);
-    //spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 4*sizeof(float), &vertices[2]);
+    spriteShaderProgram->setAttribute(VERTEX_ATTRIBUTE, 2, 2*sizeof(float), vertices);
     glBindTexture(GL_TEXTURE_2D, 0);
     glDrawArrays(GL_LINE_LOOP, 0, 4);
 }
 
-void GUIRect::handleMouseDown(int mouseX, int mouseY) {
-    
+bool GUIRect::handleMouseDown(int mouseX, int mouseY) {
+    return false;
 }
 
 void GUIRect::handleMouseUp(int mouseX, int mouseY) {

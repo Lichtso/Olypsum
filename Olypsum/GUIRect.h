@@ -24,7 +24,7 @@ class GUIRect {
     virtual void getLimSize(GUIClipRect* parentClipRect, GUIClipRect* clipRect);
     virtual void updateContent();
     virtual void draw(Matrix4& parentTransform, GUIClipRect* parentClipRect);
-    virtual void handleMouseDown(int mouseX, int mouseY);
+    virtual bool handleMouseDown(int mouseX, int mouseY);
     virtual void handleMouseUp(int mouseX, int mouseY);
     virtual void handleMouseMove(int mouseX, int mouseY);
 };

@@ -11,7 +11,6 @@
 void GUIView::addChild(GUIRect* child) {
     children.push_back(child);
     child->parent = this;
-    
 }
 
 void GUIView::updateContent() {
@@ -24,6 +23,7 @@ void GUIView::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
     
     GUIClipRect clipRect;
     getLimSize(parentClipRect, &clipRect);
+    if(clipRect.minPosX > clipRect.maxPosX || clipRect.minPosY > clipRect.maxPosY) return;
     
     Matrix4 transform(parentTransform);
     transform.translate(Vector3(posX, posY, 0.0));
@@ -31,24 +31,21 @@ void GUIView::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
         children[i]->draw(transform, &clipRect);
 }
 
-void GUIView::handleMouseDown(int mouseX, int mouseY) {
-    if(mouseX < posX-width || mouseX > posX+width || mouseY < posY-height || mouseY > posY+height) return;
-    mouseX -= posX; mouseY -= posY;
-    for(unsigned int i = 0; i < children.size(); i ++)
-        children[i]->handleMouseDown(mouseX-children[i]->posX, mouseY-children[i]->posY);
+bool GUIView::handleMouseDown(int mouseX, int mouseY) {
+    if(mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
+    for(int i = (int)children.size()-1; i >= 0; i --)
+        if(children[i]->handleMouseDown(mouseX-children[i]->posX, mouseY-children[i]->posY))
+            return true;
+    return false;
 }
 
 void GUIView::handleMouseUp(int mouseX, int mouseY) {
-    if(mouseX < posX-width || mouseX > posX+width || mouseY < posY-height || mouseY > posY+height) return;
-    mouseX -= posX; mouseY -= posY;
-    for(unsigned int i = 0; i < children.size(); i ++)
+    for(int i = (int)children.size()-1; i >= 0; i --)
         children[i]->handleMouseUp(mouseX-children[i]->posX, mouseY-children[i]->posY);
 }
 
 void GUIView::handleMouseMove(int mouseX, int mouseY) {
-    if(mouseX < posX-width || mouseX > posX+width || mouseY < posY-height || mouseY > posY+height) return;
-    mouseX -= posX; mouseY -= posY;
-    for(unsigned int i = 0; i < children.size(); i ++)
+    for(int i = (int)children.size()-1; i >= 0; i --)
         children[i]->handleMouseMove(mouseX-children[i]->posX, mouseY-children[i]->posY);
 }
 
@@ -80,12 +77,13 @@ void GUIScreenView::updateContent() {
 void GUIScreenView::draw() {
     if(!visible) return;
     
+    GUIClipRect clipRect;
+    getLimSize(&clipRect);
+    if(clipRect.minPosX > clipRect.maxPosX || clipRect.minPosY > clipRect.maxPosY) return;
+    
     glDisable(GL_DEPTH_TEST);
     guiCam->use();
     spriteShaderProgram->setUnfiformF("light", 1.0);
-    
-    GUIClipRect clipRect;
-    getLimSize(&clipRect);
     
     Matrix4 transform;
     transform.setIdentity();
@@ -98,8 +96,8 @@ void GUIScreenView::draw() {
     glEnable(GL_DEPTH_TEST);
 }
 
-void GUIScreenView::handleMouseDown(int mouseX, int mouseY) {
-    GUIView::handleMouseDown(mouseX-width, height-mouseY);
+bool GUIScreenView::handleMouseDown(int mouseX, int mouseY) {
+    return GUIView::handleMouseDown(mouseX-width, height-mouseY);
 }
 
 void GUIScreenView::handleMouseUp(int mouseX, int mouseY) {
