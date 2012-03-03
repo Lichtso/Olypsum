@@ -48,7 +48,7 @@ GUIButton::GUIButton() {
     paddingY = 5;
     autoSize = true;
     state = GUIButtonStateNormal;
-    roundedCorners = GUITopLeftCorner | GUITopRightCorner | GUIBottomLeftCorner | GUIBottomRightCorner;
+    roundedCorners = (GUICorners) (GUITopLeftCorner | GUITopRightCorner | GUIBottomLeftCorner | GUIBottomRightCorner);
 }
 
 void GUIButton::updateContent() {
@@ -226,12 +226,12 @@ void GUIButton::handleMouseUp(int mouseX, int mouseY) {
     }
     updateContent();
     if(triggerEvent && clicked)
-        clicked();
+        clicked(this);
 }
 
 void GUIButton::handleMouseMove(int mouseX, int mouseY) {
     if(state == GUIButtonStateDisabled) return;
-    char prevState = state;
+    GUIButtonState prevState = state;
     if(mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) {
         state = GUIButtonStateNormal;
     }else if(state == GUIButtonStatePressed)

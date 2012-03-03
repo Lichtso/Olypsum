@@ -14,7 +14,7 @@ GUILabel::GUILabel() {
     color.unused = 255;
     textAlign = GUITextAlign_Middle;
     autoSize = true;
-    fontHeight = 50;
+    fontHeight = 30;
 }
 
 void GUILabel::updateContent() {

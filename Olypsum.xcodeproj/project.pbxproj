@@ -21,6 +21,7 @@
 		1118254B14F25BB200F198A7 /* AppMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1118254A14F25BB200F198A7 /* AppMain.cpp */; };
 		1118254E14F27BF200F198A7 /* InputController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1118254D14F27BF200F198A7 /* InputController.cpp */; };
 		112125C415020909000419A7 /* GUIButtonList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112125C315020909000419A7 /* GUIButtonList.cpp */; };
+		112125C71502546E000419A7 /* GUITabs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112125C61502546E000419A7 /* GUITabs.cpp */; };
 		112DC3C914F2D35F00C7F7F7 /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 112DC3C814F2D35F00C7F7F7 /* SDL_image.framework */; };
 		112DC3CC14F2D36900C7F7F7 /* SDL_net.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 112DC3CB14F2D36900C7F7F7 /* SDL_net.framework */; };
 		112DC3CE14F2D37400C7F7F7 /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 112DC3CD14F2D37400C7F7F7 /* SDL_ttf.framework */; };
@@ -74,6 +75,8 @@
 		1118254F14F27BFE00F198A7 /* InputController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputController.h; sourceTree = "<group>"; };
 		112125C1150208F1000419A7 /* GUIButtonList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIButtonList.h; sourceTree = "<group>"; };
 		112125C315020909000419A7 /* GUIButtonList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIButtonList.cpp; sourceTree = "<group>"; };
+		112125C515025450000419A7 /* GUITabs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUITabs.h; sourceTree = "<group>"; };
+		112125C61502546E000419A7 /* GUITabs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUITabs.cpp; sourceTree = "<group>"; };
 		112DC3C814F2D35F00C7F7F7 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = Library/Frameworks/SDL_image.framework; sourceTree = SDKROOT; };
 		112DC3CB14F2D36900C7F7F7 /* SDL_net.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_net.framework; path = Library/Frameworks/SDL_net.framework; sourceTree = SDKROOT; };
 		112DC3CD14F2D37400C7F7F7 /* SDL_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_ttf.framework; path = Library/Frameworks/SDL_ttf.framework; sourceTree = SDKROOT; };
@@ -293,6 +296,8 @@
 				113C66E414FD438C0038C12E /* GUIButton.cpp */,
 				112125C1150208F1000419A7 /* GUIButtonList.h */,
 				112125C315020909000419A7 /* GUIButtonList.cpp */,
+				112125C515025450000419A7 /* GUITabs.h */,
+				112125C61502546E000419A7 /* GUITabs.cpp */,
 			);
 			name = GUI;
 			sourceTree = "<group>";
@@ -407,6 +412,7 @@
 				113C66E214FD41F40038C12E /* GUILabel.cpp in Sources */,
 				113C66E514FD438C0038C12E /* GUIButton.cpp in Sources */,
 				112125C415020909000419A7 /* GUIButtonList.cpp in Sources */,
+				112125C71502546E000419A7 /* GUITabs.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

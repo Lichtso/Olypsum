@@ -11,9 +11,11 @@
 #ifndef GUILabel_h
 #define GUILabel_h
 
-#define GUITextAlign_Left 0
-#define GUITextAlign_Middle 1
-#define GUITextAlign_Right 2
+enum GUITextAlign {
+    GUITextAlign_Left = 0,
+    GUITextAlign_Middle = 1,
+    GUITextAlign_Right = 2,
+};
 
 struct GUILabelLine {
     GLuint texture;
@@ -28,7 +30,7 @@ class GUILabel : public GUIRect {
     TextFont* font;
     bool autoSize;
     unsigned int fontHeight;
-    unsigned char textAlign;
+    GUITextAlign textAlign;
     std::string text;
     GUILabel();
     void updateContent();

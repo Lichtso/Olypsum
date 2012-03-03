@@ -11,7 +11,7 @@
 
 TextFont::TextFont() {
     ttf = NULL;
-    size = 30;
+    size = 20;
 }
 
 TextFont::~TextFont() {

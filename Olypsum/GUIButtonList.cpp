@@ -9,7 +9,7 @@
 #import "GUIButtonList.h"
 
 GUIButtonList::GUIButtonList() {
-    vertical = true;
+    orientation = GUIOrientationVertical;
     autoSize = true;
 }
 
@@ -29,7 +29,7 @@ void GUIButtonList::updateContent() {
         button = (GUIButton*)children[i];
         button->autoSize = true;
         button->updateContent();
-        if(vertical) {
+        if(orientation & GUIOrientationHorizontal) {
             widthAux = max(widthAux, button->width);
             heightAux += button->height;
         }else{
@@ -38,7 +38,7 @@ void GUIButtonList::updateContent() {
         }
     }
     
-    if(vertical)
+    if(orientation & GUIOrientationHorizontal)
         heightAux -= ceil(children.size() / 2.0) - 1;
     else
         widthAux -= ceil(children.size() / 2.0) - 1;
@@ -46,19 +46,19 @@ void GUIButtonList::updateContent() {
     int posCounter = 0;
     for(unsigned int i = 0; i < children.size(); i ++) {
         button = (GUIButton*)children[i];
-        if(vertical) {
+        if(orientation & GUIOrientationHorizontal) {
             button->width = widthAux;
             button->posX = 0;
             button->posY = heightAux-posCounter-button->height;
-            button->roundedCorners = (i == 0) ? GUITopLeftCorner | GUITopRightCorner : 0;
-            if(i == children.size()-1) button->roundedCorners |= GUIBottomLeftCorner | GUIBottomRightCorner;
+            button->roundedCorners = (GUICorners) ((i == 0) ? GUITopLeftCorner | GUITopRightCorner : 0);
+            if(i == children.size()-1) button->roundedCorners = (GUICorners) (button->roundedCorners | GUIBottomLeftCorner | GUIBottomRightCorner);
             posCounter += button->height*2-1;
         }else{
             button->height = heightAux;
             button->posX = -widthAux+posCounter+button->width;
             button->posY = 0;
-            button->roundedCorners = (i == 0) ? GUITopLeftCorner | GUIBottomLeftCorner : 0;
-            if(i == children.size()-1) button->roundedCorners |= GUITopRightCorner | GUIBottomRightCorner;
+            button->roundedCorners = (GUICorners) ((i == 0) ? GUITopLeftCorner | GUIBottomLeftCorner : 0);
+            if(i == children.size()-1) button->roundedCorners = (GUICorners) (button->roundedCorners | GUITopRightCorner | GUIBottomRightCorner);
             posCounter += button->width*2-1;
         }
         button->autoSize = false;

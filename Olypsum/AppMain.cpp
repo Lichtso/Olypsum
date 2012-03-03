@@ -88,14 +88,16 @@ void AppMain(int argc, char *argv[]) {
     const char* buttonLabels[] = { "Alpha", "Beta", "Gamma", "Delta", "Epsilon" };
     
     for(int j = 1; j <= 5; j ++) {
-        GUIButtonList* buttonList = new GUIButtonList();
-        buttonList->posX = 300-j*200;
-        //buttonList->posY = 300-j*70;
-        //buttonList->vertical = false;
+        GUITabs* buttonList = new GUITabs();
+        buttonList->orientation = GUIOrientationBottom;
+        //buttonList->posX = 200-j*200;
+        buttonList->posY = 300-j*70;
+        //buttonList->vertical = false;0;
         for(int i = 0; i < j; i ++) {
             GUIButton* button = new GUIButton();
             GUILabel* label = new GUILabel();
             label->text = std::string(buttonLabels[i]);
+            label->fontHeight = 40;
             button->addChild(label);
             buttonList->addChild(button);
         }

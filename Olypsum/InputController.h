@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUIButtonList.h"
+#import "GUITabs.h"
 
 #ifndef InputController_h
 #define InputController_h

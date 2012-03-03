@@ -11,15 +11,19 @@
 #ifndef GUIButton_h
 #define GUIButton_h
 
-#define GUITopLeftCorner 1
-#define GUITopRightCorner 2
-#define GUIBottomLeftCorner 4
-#define GUIBottomRightCorner 8
+enum GUICorners {
+    GUITopLeftCorner = 1,
+    GUITopRightCorner = 2,
+    GUIBottomLeftCorner = 4,
+    GUIBottomRightCorner = 8
+};
 
-#define GUIButtonStateDisabled 0
-#define GUIButtonStateNormal 1
-#define GUIButtonStateHighlighted 2
-#define GUIButtonStatePressed 3
+enum GUIButtonState {
+    GUIButtonStateDisabled = 0,
+    GUIButtonStateNormal = 1,
+    GUIButtonStateHighlighted = 2,
+    GUIButtonStatePressed = 3
+};
 
 class GUIButton : public GUIView {
     GLuint texture;
@@ -28,8 +32,9 @@ class GUIButton : public GUIView {
     public:
     bool autoSize;
     int paddingX, paddingY;
-    char roundedCorners, state;
-    void (*clicked)();
+    GUICorners roundedCorners;
+    GUIButtonState state;
+    void (*clicked)(GUIButton* button);
     GUIButton();
     void updateContent();
     void draw(Matrix4& parentTransform, GUIClipRect* parentClipRect);
