@@ -13,8 +13,8 @@ GUIView::GUIView() {
 }
 
 void GUIView::addChild(GUIRect* child) {
-    children.push_back(child);
     child->parent = this;
+    children.push_back(child);
 }
 
 void GUIView::updateContent() {

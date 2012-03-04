@@ -63,7 +63,6 @@ void GUIButton::updateContent() {
     for(unsigned int i = 0; i < children.size(); i ++) {
         if(children[i]->type == GUITypeLabel) {
             GUILabel* label = (GUILabel*)children[i];
-            label->font = titleFont;
             switch(state) {
                 case GUIButtonStateDisabled:
                     label->color.r = label->color.g = label->color.b = 60;
@@ -72,7 +71,7 @@ void GUIButton::updateContent() {
                 case GUIButtonStateHighlighted:
                     switch(buttonType) {
                         case GUIButtonTypeNormal:
-                        case GUIButtonTypeRadio:
+                        case GUIButtonTypeLockable:
                             label->color.r = label->color.g = label->color.b = 60;
                         break;
                         case GUIButtonTypeDelete:
@@ -92,7 +91,7 @@ void GUIButton::updateContent() {
                         case GUIButtonTypeDelete:
                         case GUIButtonTypeAdd:
                         case GUIButtonTypeEdit:
-                        case GUIButtonTypeRadio:
+                        case GUIButtonTypeLockable:
                             label->color.r = label->color.g = label->color.b = 240;
                         break;
                     }
@@ -129,7 +128,7 @@ void GUIButton::updateContent() {
                 case GUIButtonStateNormal:
                     switch(buttonType) {
                         case GUIButtonTypeNormal:
-                        case GUIButtonTypeRadio:
+                        case GUIButtonTypeLockable:
                             pixel[0] = 240-30.0*y/height;
                             pixel[1] = pixel[0];
                             pixel[2] = pixel[0];
@@ -154,7 +153,7 @@ void GUIButton::updateContent() {
                 case GUIButtonStateHighlighted:
                     switch(buttonType) {
                         case GUIButtonTypeNormal:
-                        case GUIButtonTypeRadio:
+                        case GUIButtonTypeLockable:
                             pixel[0] = 250-20.0*y/height;
                             pixel[1] = pixel[0];
                             pixel[2] = pixel[0];
@@ -194,7 +193,7 @@ void GUIButton::updateContent() {
                             pixel[2] = pixel[0];
                         break;
                         case GUIButtonTypeEdit:
-                        case GUIButtonTypeRadio:
+                        case GUIButtonTypeLockable:
                             pixel[0] = 70.0*y/height;
                             pixel[1] = 60+70.0*y/height;
                             pixel[2] = 160+40.0*y/height;

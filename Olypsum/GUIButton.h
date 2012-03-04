@@ -30,7 +30,7 @@ enum GUIButtonType {
     GUIButtonTypeDelete = 1,
     GUIButtonTypeAdd = 2,
     GUIButtonTypeEdit = 3,
-    GUIButtonTypeRadio = 4
+    GUIButtonTypeLockable = 4
 };
 
 class GUIButton : public GUIView {

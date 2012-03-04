@@ -30,7 +30,7 @@ void GUITabs::updateContent() {
     
     for(unsigned int i = 0; i < children.size(); i ++) {
         button = (GUIButton*)children[i];
-        button->buttonType = GUIButtonTypeRadio;
+        button->buttonType = GUIButtonTypeLockable;
         button->autoSize = true;
         button->updateContent();
         if(orientation & GUIOrientationVertical) {

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		110EFC821503852E003E8182 /* GUICheckBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 110EFC811503852E003E8182 /* GUICheckBox.cpp */; };
 		1111013014F292FD0088422F /* LinearMath.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1111012F14F292FD0088422F /* LinearMath.framework */; };
 		1111013214F293030088422F /* BulletCollision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1111013114F293030088422F /* BulletCollision.framework */; };
 		1111013414F293090088422F /* BulletDynamics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1111013314F293090088422F /* BulletDynamics.framework */; };
@@ -52,6 +53,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		110EFC7F1503851B003E8182 /* GUICheckBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUICheckBox.h; sourceTree = "<group>"; };
+		110EFC811503852E003E8182 /* GUICheckBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUICheckBox.cpp; sourceTree = "<group>"; };
 		1111012F14F292FD0088422F /* LinearMath.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LinearMath.framework; path = Library/Frameworks/LinearMath.framework; sourceTree = SDKROOT; };
 		1111013114F293030088422F /* BulletCollision.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletCollision.framework; path = Library/Frameworks/BulletCollision.framework; sourceTree = SDKROOT; };
 		1111013314F293090088422F /* BulletDynamics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletDynamics.framework; path = Library/Frameworks/BulletDynamics.framework; sourceTree = SDKROOT; };
@@ -294,6 +297,8 @@
 				113C66E114FD41F40038C12E /* GUILabel.cpp */,
 				113C66E314FD42550038C12E /* GUIButton.h */,
 				113C66E414FD438C0038C12E /* GUIButton.cpp */,
+				110EFC7F1503851B003E8182 /* GUICheckBox.h */,
+				110EFC811503852E003E8182 /* GUICheckBox.cpp */,
 				112125C1150208F1000419A7 /* GUIButtonList.h */,
 				112125C315020909000419A7 /* GUIButtonList.cpp */,
 				112125C515025450000419A7 /* GUITabs.h */,
@@ -413,6 +418,7 @@
 				113C66E514FD438C0038C12E /* GUIButton.cpp in Sources */,
 				112125C415020909000419A7 /* GUIButtonList.cpp in Sources */,
 				112125C71502546E000419A7 /* GUITabs.cpp in Sources */,
+				110EFC821503852E003E8182 /* GUICheckBox.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

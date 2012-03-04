@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "GUIButton.h"
+#import "GUICheckBox.h"
 
 #ifndef GUIButtonList_h
 #define GUIButtonList_h

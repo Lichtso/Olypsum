@@ -98,24 +98,18 @@ void AppMain(int argc, char *argv[]) {
         GUIButton* button = new GUIButton();
         GUILabel* label = new GUILabel();
         label->text = std::string(buttonLabels[i]);
+        label->font = titleFont;
         label->fontHeight = 40;
         button->addChild(label);
         tabs->addChild(button);
     }
     currentScreenView->addChild(tabs);
     
-    GUIButtonList* buttonList = new GUIButtonList();
-    buttonList->orientation = GUIOrientationVertical;
-    buttonList->posY = 0;
     for(int i = 0; i < 5; i ++) {
-        GUIButton* button = new GUIButton();
-        GUILabel* label = new GUILabel();
-        label->text = std::string(buttonLabels[i]);
-        label->fontHeight = 40;
-        button->addChild(label);
-        buttonList->addChild(button);
+        GUICheckBox* checkBox = new GUICheckBox();
+        checkBox->posX = -100+i*50;
+        currentScreenView->addChild(checkBox);
     }
-    currentScreenView->addChild(buttonList);
     
     GUILabel* labelD = new GUILabel();
     labelD->text = std::string("ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789\n!?\"='.:,;-_+#*$%&/([{}])");
