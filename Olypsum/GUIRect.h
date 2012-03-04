@@ -11,12 +11,23 @@
 #ifndef GUIRect_h
 #define GUIRect_h
 
+enum GUIElementType {
+    GUITypeRect = 0,
+    GUITypeView = 1,
+    GUITypeScreenView = 2,
+    GUITypeLabel = 3,
+    GUITypeButton = 4,
+    GUITypeButtonList = 5,
+    GUITypeTabs = 6
+};
+
 struct GUIClipRect {
     int minPosX, minPosY, maxPosX, maxPosY;
 };
 
 class GUIRect {
     public:
+    GUIElementType type;
     GUIRect* parent;
     bool visible;
     int posX, posY, width, height;

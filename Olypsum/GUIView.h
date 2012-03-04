@@ -15,6 +15,7 @@ class GUIView : public GUIRect {
     protected:
     std::vector<GUIRect*> children;
     public:
+    GUIView();
     virtual void addChild(GUIRect* child);
     void updateContent();
     void draw(Matrix4& parentTransform, GUIClipRect* parentClipRect);

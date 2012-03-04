@@ -9,6 +9,7 @@
 #import "GUITabs.h"
 
 GUITabs::GUITabs() {
+    type = GUITypeTabs;
     selectedIndex = -1;
     deactivatable = true;
     clicked = NULL;
@@ -29,9 +30,10 @@ void GUITabs::updateContent() {
     
     for(unsigned int i = 0; i < children.size(); i ++) {
         button = (GUIButton*)children[i];
+        button->buttonType = GUIButtonTypeRadio;
         button->autoSize = true;
         button->updateContent();
-        if(orientation & GUIOrientationHorizontal) {
+        if(orientation & GUIOrientationVertical) {
             widthAux = max(widthAux, button->width);
             heightAux += button->height;
         }else{
@@ -40,7 +42,7 @@ void GUITabs::updateContent() {
         }
     }
     
-    if(orientation & GUIOrientationHorizontal)
+    if(orientation & GUIOrientationVertical)
         heightAux -= ceil(children.size() / 2.0) - 1;
     else
         widthAux -= ceil(children.size() / 2.0) - 1;
@@ -52,7 +54,7 @@ void GUITabs::updateContent() {
             button->state = (i == selectedIndex) ? GUIButtonStatePressed : GUIButtonStateNormal;
         button->roundedCorners = (GUICorners) 0;
         
-        if(orientation & GUIOrientationHorizontal) {
+        if(orientation & GUIOrientationVertical) {
             button->width = widthAux;
             button->posX = 0;
             button->posY = heightAux-posCounter-button->height;

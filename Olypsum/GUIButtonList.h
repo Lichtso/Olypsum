@@ -16,8 +16,8 @@ enum GUIOrientation {
     GUIOrientationRight = 2,
     GUIOrientationTop = 4,
     GUIOrientationBottom = 8,
-    GUIOrientationHorizontal = 3,
-    GUIOrientationVertical = 12
+    GUIOrientationVertical = 3,
+    GUIOrientationHorizontal = 12
 };
 
 class GUIButtonList : public GUIView {

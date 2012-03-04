@@ -62,7 +62,11 @@ void AppMain(int argc, char *argv[]) {
     
     //Init Resources
     mainFont = new TextFont();
+    mainFont->size = 20;
     mainFont->loadTTF("font.ttf");
+    titleFont = new TextFont();
+    titleFont->size = 30;
+    titleFont->loadTTF("font.ttf");
     mainShaderProgram = new ShaderProgram();
     mainShaderProgram->loadShader(GL_VERTEX_SHADER, "main.vsh");
     mainShaderProgram->loadShader(GL_FRAGMENT_SHADER, "main.fsh");
@@ -87,22 +91,31 @@ void AppMain(int argc, char *argv[]) {
     
     const char* buttonLabels[] = { "Alpha", "Beta", "Gamma", "Delta", "Epsilon" };
     
-    for(int j = 1; j <= 5; j ++) {
-        GUITabs* buttonList = new GUITabs();
-        buttonList->orientation = GUIOrientationBottom;
-        //buttonList->posX = 200-j*200;
-        buttonList->posY = 300-j*70;
-        //buttonList->vertical = false;0;
-        for(int i = 0; i < j; i ++) {
-            GUIButton* button = new GUIButton();
-            GUILabel* label = new GUILabel();
-            label->text = std::string(buttonLabels[i]);
-            label->fontHeight = 40;
-            button->addChild(label);
-            buttonList->addChild(button);
-        }
-        currentScreenView->addChild(buttonList);
+    GUITabs* tabs = new GUITabs();
+    tabs->orientation = GUIOrientationBottom;
+    tabs->posY = 200;
+    for(int i = 0; i < 5; i ++) {
+        GUIButton* button = new GUIButton();
+        GUILabel* label = new GUILabel();
+        label->text = std::string(buttonLabels[i]);
+        label->fontHeight = 40;
+        button->addChild(label);
+        tabs->addChild(button);
     }
+    currentScreenView->addChild(tabs);
+    
+    GUIButtonList* buttonList = new GUIButtonList();
+    buttonList->orientation = GUIOrientationVertical;
+    buttonList->posY = 0;
+    for(int i = 0; i < 5; i ++) {
+        GUIButton* button = new GUIButton();
+        GUILabel* label = new GUILabel();
+        label->text = std::string(buttonLabels[i]);
+        label->fontHeight = 40;
+        button->addChild(label);
+        buttonList->addChild(button);
+    }
+    currentScreenView->addChild(buttonList);
     
     GUILabel* labelD = new GUILabel();
     labelD->text = std::string("ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789\n!?\"='.:,;-_+#*$%&/([{}])");

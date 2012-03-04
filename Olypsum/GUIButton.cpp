@@ -35,18 +35,21 @@ void GUIButton::setInnerShadowRect(unsigned char* pixels, unsigned int minX, uns
                 for(unsigned int x2 = x0; x2 <= x1; x2 ++)
                     value += (float)pixels[(y2*width*8)+x2*4+3]/255.0;
             pixel = pixels+(y*width*8)+x*4;
-            pixel[0] *= value/(4.0*shadowWidth*shadowWidth+4.0*shadowWidth+1.0);
-            pixel[1] = pixel[0];
-            pixel[2] = pixel[0];
+            value /= 4.0*shadowWidth*shadowWidth+4.0*shadowWidth+1.0;
+            pixel[0] *= value;
+            pixel[1] *= value;
+            pixel[2] *= value;
         }
 }
 
 GUIButton::GUIButton() {
+    type = GUITypeButton;
     texture = 0;
     clicked = NULL;
     paddingX = 10;
     paddingY = 5;
     autoSize = true;
+    buttonType = GUIButtonTypeNormal;
     state = GUIButtonStateNormal;
     roundedCorners = (GUICorners) (GUITopLeftCorner | GUITopRightCorner | GUIBottomLeftCorner | GUIBottomRightCorner);
 }
@@ -58,14 +61,51 @@ void GUIButton::updateContent() {
     }
     
     for(unsigned int i = 0; i < children.size(); i ++) {
+        if(children[i]->type == GUITypeLabel) {
+            GUILabel* label = (GUILabel*)children[i];
+            label->font = titleFont;
+            switch(state) {
+                case GUIButtonStateDisabled:
+                    label->color.r = label->color.g = label->color.b = 60;
+                break;
+                case GUIButtonStateNormal:
+                case GUIButtonStateHighlighted:
+                    switch(buttonType) {
+                        case GUIButtonTypeNormal:
+                        case GUIButtonTypeRadio:
+                            label->color.r = label->color.g = label->color.b = 60;
+                        break;
+                        case GUIButtonTypeDelete:
+                        case GUIButtonTypeAdd:
+                        case GUIButtonTypeEdit:
+                            label->color.r = label->color.g = label->color.b = 240;
+                        break;
+                    }
+                break;
+                case GUIButtonStatePressed:
+                    switch(buttonType) {
+                        case GUIButtonTypeNormal:
+                            label->color.r = 30;
+                            label->color.g = 110;
+                            label->color.b = 200;
+                        break;
+                        case GUIButtonTypeDelete:
+                        case GUIButtonTypeAdd:
+                        case GUIButtonTypeEdit:
+                        case GUIButtonTypeRadio:
+                            label->color.r = label->color.g = label->color.b = 240;
+                        break;
+                    }
+                break;
+            }
+        }
         children[i]->updateContent();
-        if(!autoSize) continue;
         
+        if(!autoSize) continue;
         if(children[i]->posX+children[i]->width+paddingX > width)
             width = children[i]->posX+children[i]->width+paddingX;
         if(children[i]->posY+children[i]->height+paddingY > height)
             height = children[i]->posY+children[i]->height+paddingY;
-        
         if(children[i]->posX-children[i]->width-paddingX < -width)
             width = children[i]->width-children[i]->posX+paddingX;
         if(children[i]->posY-children[i]->height-paddingY < -height)
@@ -83,19 +123,85 @@ void GUIButton::updateContent() {
             switch(state) {
                 case GUIButtonStateDisabled:
                     pixel[0] = 200-50.0*y/height;
+                    pixel[1] = pixel[0];
+                    pixel[2] = pixel[0];
                 break;
                 case GUIButtonStateNormal:
-                    pixel[0] = 230-30.0*y/height;
+                    switch(buttonType) {
+                        case GUIButtonTypeNormal:
+                        case GUIButtonTypeRadio:
+                            pixel[0] = 240-30.0*y/height;
+                            pixel[1] = pixel[0];
+                            pixel[2] = pixel[0];
+                            break;
+                        case GUIButtonTypeDelete:
+                            pixel[0] = 240-40.0*y/height;
+                            pixel[1] = 140-70.0*y/height;
+                            pixel[2] = pixel[1];
+                        break;
+                        case GUIButtonTypeAdd:
+                            pixel[0] = 140-70.0*y/height;
+                            pixel[1] = 240-50.0*y/height;
+                            pixel[2] = pixel[0];
+                        break;
+                        case GUIButtonTypeEdit:
+                            pixel[0] = 140-70.0*y/height;
+                            pixel[1] = 200-70.0*y/height;
+                            pixel[2] = 240-40.0*y/height;
+                        break;
+                    }
                 break;
                 case GUIButtonStateHighlighted:
-                    pixel[0] = 250-30.0*y/height;
+                    switch(buttonType) {
+                        case GUIButtonTypeNormal:
+                        case GUIButtonTypeRadio:
+                            pixel[0] = 250-20.0*y/height;
+                            pixel[1] = pixel[0];
+                            pixel[2] = pixel[0];
+                        break;
+                        case GUIButtonTypeDelete:
+                            pixel[0] = 250-30.0*y/height;
+                            pixel[1] = 150-60.0*y/height;
+                            pixel[2] = pixel[1];
+                        break;
+                        case GUIButtonTypeAdd:
+                            pixel[0] = 140-60.0*y/height;
+                            pixel[1] = 240-40.0*y/height;
+                            pixel[2] = pixel[0];
+                        break;
+                        case GUIButtonTypeEdit:
+                            pixel[0] = 160-70.0*y/height;
+                            pixel[1] = 220-70.0*y/height;
+                            pixel[2] = 240-30.0*y/height;
+                        break;
+                    }
                 break;
                 case GUIButtonStatePressed:
-                    pixel[0] = 180+30.0*y/height;
+                    switch(buttonType) {
+                        case GUIButtonTypeNormal:
+                            pixel[0] = 180+30.0*y/height;
+                            pixel[1] = pixel[0];
+                            pixel[2] = pixel[0];
+                        break;
+                        case GUIButtonTypeDelete:
+                            pixel[0] = 160+40.0*y/height;
+                            pixel[1] = 70.0*y/height;
+                            pixel[2] = pixel[1];
+                        break;
+                        case GUIButtonTypeAdd:
+                            pixel[0] = 70.0*y/height;
+                            pixel[1] = 140+50.0*y/height;
+                            pixel[2] = pixel[0];
+                        break;
+                        case GUIButtonTypeEdit:
+                        case GUIButtonTypeRadio:
+                            pixel[0] = 70.0*y/height;
+                            pixel[1] = 60+70.0*y/height;
+                            pixel[2] = 160+40.0*y/height;
+                        break;
+                    }
                 break;
             }
-            pixel[1] = pixel[0];
-            pixel[2] = pixel[0];
             pixel[3] = 255;
             if((roundedCorners & GUITopLeftCorner) && x < cornerRadius && y < cornerRadius) {
                 if(cornerRadius-x-cos(asin((float)(cornerRadius-y)/cornerRadius))*cornerRadius > 0)

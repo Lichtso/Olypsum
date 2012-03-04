@@ -9,6 +9,7 @@
 #include "GUIRect.h"
 
 GUIRect::GUIRect() {
+    type = GUITypeRect;
     visible = true;
     posX = 0;
     posY = 0;

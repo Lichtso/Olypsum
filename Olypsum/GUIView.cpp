@@ -8,6 +8,10 @@
 
 #include "GUIView.h"
 
+GUIView::GUIView() {
+    type = GUITypeView;
+}
+
 void GUIView::addChild(GUIRect* child) {
     children.push_back(child);
     child->parent = this;
@@ -52,6 +56,7 @@ void GUIView::handleMouseMove(int mouseX, int mouseY) {
 
 
 GUIScreenView::GUIScreenView() {
+    type = GUITypeScreenView;
     parent = NULL;
     width = currentCam->viewport[2] >> 1;
     height = currentCam->viewport[3] >> 1;

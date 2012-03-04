@@ -25,6 +25,14 @@ enum GUIButtonState {
     GUIButtonStatePressed = 3
 };
 
+enum GUIButtonType {
+    GUIButtonTypeNormal = 0,
+    GUIButtonTypeDelete = 1,
+    GUIButtonTypeAdd = 2,
+    GUIButtonTypeEdit = 3,
+    GUIButtonTypeRadio = 4
+};
+
 class GUIButton : public GUIView {
     GLuint texture;
     void setBorderPixel(unsigned char* pixels, unsigned int x, unsigned int y);
@@ -32,6 +40,7 @@ class GUIButton : public GUIView {
     public:
     bool autoSize;
     int paddingX, paddingY;
+    GUIButtonType buttonType;
     GUICorners roundedCorners;
     GUIButtonState state;
     void (*clicked)(GUIButton* button);

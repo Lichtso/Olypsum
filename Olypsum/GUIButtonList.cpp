@@ -9,6 +9,7 @@
 #import "GUIButtonList.h"
 
 GUIButtonList::GUIButtonList() {
+    type = GUITypeButtonList;
     orientation = GUIOrientationVertical;
     autoSize = true;
 }
@@ -29,7 +30,7 @@ void GUIButtonList::updateContent() {
         button = (GUIButton*)children[i];
         button->autoSize = true;
         button->updateContent();
-        if(orientation & GUIOrientationHorizontal) {
+        if(orientation & GUIOrientationVertical) {
             widthAux = max(widthAux, button->width);
             heightAux += button->height;
         }else{
@@ -38,7 +39,7 @@ void GUIButtonList::updateContent() {
         }
     }
     
-    if(orientation & GUIOrientationHorizontal)
+    if(orientation & GUIOrientationVertical)
         heightAux -= ceil(children.size() / 2.0) - 1;
     else
         widthAux -= ceil(children.size() / 2.0) - 1;
@@ -46,7 +47,7 @@ void GUIButtonList::updateContent() {
     int posCounter = 0;
     for(unsigned int i = 0; i < children.size(); i ++) {
         button = (GUIButton*)children[i];
-        if(orientation & GUIOrientationHorizontal) {
+        if(orientation & GUIOrientationVertical) {
             button->width = widthAux;
             button->posX = 0;
             button->posY = heightAux-posCounter-button->height;

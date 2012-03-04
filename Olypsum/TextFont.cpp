@@ -11,7 +11,7 @@
 
 TextFont::TextFont() {
     ttf = NULL;
-    size = 20;
+    size = 12;
 }
 
 TextFont::~TextFont() {
@@ -157,4 +157,4 @@ void TextFont::renderStringToScreen(const char* str, Vector3 pos, float scale, S
     glDeleteTextures(1, &texture);
 }
 
-TextFont* mainFont;
+TextFont *mainFont, *titleFont;
