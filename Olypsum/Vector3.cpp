@@ -42,7 +42,7 @@ Vector3::Vector3(float xB, float yB, float zB, float wB) {
 }
 
 void Vector3::print() {
-	printf("Vector3: %f, %f, %f, %f\n", x, y, z, w);
+	printf("Vector3: %f, %f, %f\n", x, y, z);
 }
 
 btVector3 Vector3::getVector() {

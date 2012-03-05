@@ -16,7 +16,9 @@ class GUIView : public GUIRect {
     std::vector<GUIRect*> children;
     public:
     GUIView();
+    ~GUIView();
     virtual void addChild(GUIRect* child);
+    void removeChild(unsigned int index);
     void updateContent();
     void draw(Matrix4& parentTransform, GUIClipRect* parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);

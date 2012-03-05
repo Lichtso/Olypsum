@@ -18,7 +18,8 @@ enum GUIElementType {
     GUITypeLabel = 3,
     GUITypeButton = 4,
     GUITypeButtonList = 5,
-    GUITypeTabs = 6
+    GUITypeTabs = 6,
+    GUITypeSilder = 7
 };
 
 struct GUIClipRect {

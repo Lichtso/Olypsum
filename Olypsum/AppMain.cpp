@@ -105,11 +105,21 @@ void AppMain(int argc, char *argv[]) {
     }
     currentScreenView->addChild(tabs);
     
+    /*
     for(int i = 0; i < 5; i ++) {
         GUICheckBox* checkBox = new GUICheckBox();
         checkBox->posX = -100+i*50;
         currentScreenView->addChild(checkBox);
-    }
+    }*/
+    
+    GUISilder* slider = new GUISilder();
+    slider->posX = -50;
+    currentScreenView->addChild(slider);
+    
+    GUISilder* sliderB = new GUISilder();
+    sliderB->posX = 100;
+    sliderB->orientation = GUIOrientationVertical;
+    currentScreenView->addChild(sliderB);
     
     GUILabel* labelD = new GUILabel();
     labelD->text = std::string("ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789\n!?\"='.:,;-_+#*$%&/([{}])");

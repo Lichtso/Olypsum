@@ -43,7 +43,7 @@ class GUIButton : public GUIView {
     GUIButtonType buttonType;
     GUICorners roundedCorners;
     GUIButtonState state;
-    void (*clicked)(GUIButton* button);
+    void (*onClick)(GUIButton* button);
     GUIButton();
     void updateContent();
     void draw(Matrix4& parentTransform, GUIClipRect* parentClipRect);

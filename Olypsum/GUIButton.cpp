@@ -45,7 +45,7 @@ void GUIButton::setInnerShadowRect(unsigned char* pixels, unsigned int minX, uns
 GUIButton::GUIButton() {
     type = GUITypeButton;
     texture = 0;
-    clicked = NULL;
+    onClick = NULL;
     paddingX = 10;
     paddingY = 5;
     autoSize = true;
@@ -114,8 +114,7 @@ void GUIButton::updateContent() {
     if(texture > 0)
         glDeleteTextures(1, &texture);
     
-    unsigned char pixels[width*height*16];
-    unsigned char* pixel;
+    unsigned char pixels[width*height*16], *pixel;
     for(unsigned int y = 0; y < height*2; y ++)
         for(unsigned int x = 0; x < width*2; x ++) {
             pixel = pixels+(y*width*8)+x*4;
@@ -313,14 +312,14 @@ void GUIButton::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
 }
 
 bool GUIButton::handleMouseDown(int mouseX, int mouseY) {
-    if(mouseX < -width || mouseX > width || mouseY < -height || mouseY > height || state == GUIButtonStateDisabled) return false;
+    if(!visible || state == GUIButtonStateDisabled || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
     state = GUIButtonStatePressed;
     updateContent();
     return true;
 }
 
 void GUIButton::handleMouseUp(int mouseX, int mouseY) {
-    if(state == GUIButtonStateDisabled) return;
+    if(!visible || state == GUIButtonStateDisabled) return;
     bool triggerEvent = false;
     if(mouseX < -width || mouseX > width || mouseY < -height || mouseY > height)
         state = GUIButtonStateNormal;
@@ -330,12 +329,12 @@ void GUIButton::handleMouseUp(int mouseX, int mouseY) {
         state = GUIButtonStateHighlighted;
     }
     updateContent();
-    if(triggerEvent && clicked)
-        clicked(this);
+    if(triggerEvent && onClick)
+        onClick(this);
 }
 
 void GUIButton::handleMouseMove(int mouseX, int mouseY) {
-    if(state == GUIButtonStateDisabled) return;
+    if(!visible || state == GUIButtonStateDisabled) return;
     GUIButtonState prevState = state;
     if(mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) {
         state = GUIButtonStateNormal;

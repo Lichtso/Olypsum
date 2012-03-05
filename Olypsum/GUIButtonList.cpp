@@ -71,18 +71,3 @@ void GUIButtonList::updateContent() {
         height = heightAux;
     }
 }
-
-void GUIButtonList::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
-    if(!visible || children.size() == 0) return;
-    
-    GUIClipRect clipRect;
-    getLimSize(parentClipRect, &clipRect);
-    if(clipRect.minPosX > clipRect.maxPosX || clipRect.minPosY > clipRect.maxPosY) return;
-    
-    //GUIRect::draw(parentTransform, parentClipRect);
-    
-    Matrix4 transform(parentTransform);
-    transform.translate(Vector3(posX, posY, 0.0));
-    for(unsigned int i = 0; i < children.size(); i ++)
-        children[i]->draw(transform, &clipRect);
-}

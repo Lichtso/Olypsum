@@ -27,7 +27,6 @@ class GUIButtonList : public GUIView {
     GUIOrientation orientation;
     GUIButtonList();
     void updateContent();
-    void draw(Matrix4& parentTransform, GUIClipRect* parentClipRect);
 };
 
 #endif

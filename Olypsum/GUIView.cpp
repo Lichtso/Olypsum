@@ -12,9 +12,19 @@ GUIView::GUIView() {
     type = GUITypeView;
 }
 
+GUIView::~GUIView() {
+    for(unsigned int i = 0; i < children.size(); i ++)
+        delete children[i];
+}
+
 void GUIView::addChild(GUIRect* child) {
     child->parent = this;
     children.push_back(child);
+}
+
+void GUIView::removeChild(unsigned int index) {
+    delete children[index];
+    children.erase(children.begin()+index);
 }
 
 void GUIView::updateContent() {
@@ -36,7 +46,7 @@ void GUIView::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
 }
 
 bool GUIView::handleMouseDown(int mouseX, int mouseY) {
-    if(mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
+    if(!visible || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
     for(int i = (int)children.size()-1; i >= 0; i --)
         if(children[i]->handleMouseDown(mouseX-children[i]->posX, mouseY-children[i]->posY))
             return true;
@@ -44,11 +54,13 @@ bool GUIView::handleMouseDown(int mouseX, int mouseY) {
 }
 
 void GUIView::handleMouseUp(int mouseX, int mouseY) {
+    if(!visible) return;
     for(int i = (int)children.size()-1; i >= 0; i --)
         children[i]->handleMouseUp(mouseX-children[i]->posX, mouseY-children[i]->posY);
 }
 
 void GUIView::handleMouseMove(int mouseX, int mouseY) {
+    if(!visible) return;
     for(int i = (int)children.size()-1; i >= 0; i --)
         children[i]->handleMouseMove(mouseX-children[i]->posX, mouseY-children[i]->posY);
 }

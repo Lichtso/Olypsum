@@ -14,7 +14,6 @@
 class GUICheckBox : public GUIButton {
     public:
     GUICheckBox();
-    ~GUICheckBox();
     void addChild(GUIRect* child);
     void updateContent();
     bool handleMouseDown(int mouseX, int mouseY);

@@ -12,7 +12,7 @@ GUITabs::GUITabs() {
     type = GUITypeTabs;
     selectedIndex = -1;
     deactivatable = true;
-    clicked = NULL;
+    onChange = NULL;
 }
 
 void GUITabs::addChild(GUIButton* child) {
@@ -120,7 +120,8 @@ void GUITabs::updateContent() {
 }
 
 bool GUITabs::handleMouseDown(int mouseXo, int mouseYo) {
-    if(mouseXo < -width || mouseXo > width || mouseYo < -height || mouseYo > height) return false;
+    if(!visible || mouseXo < -width || mouseXo > width || mouseYo < -height || mouseYo > height) return false;
+    
     GUIButton* button;
     int mouseX, mouseY;
     for(int i = (int)children.size()-1; i >= 0; i --) {
@@ -132,10 +133,10 @@ bool GUITabs::handleMouseDown(int mouseXo, int mouseYo) {
         if(selectedIndex != i) {
             button->state = GUIButtonStatePressed;
             selectedIndex = i;
-            if(button->clicked)
-                button->clicked(button);
-            if(clicked)
-                clicked(this);
+            if(button->onClick)
+                button->onClick(button);
+            if(onChange)
+                onChange(this);
         }else if(deactivatable) {
             button->state = GUIButtonStateHighlighted;
             selectedIndex = -1;
@@ -157,6 +158,8 @@ void GUITabs::handleMouseUp(int mouseXo, int mouseYo) {
 }
 
 void GUITabs::handleMouseMove(int mouseXo, int mouseYo) {
+    if(!visible) return;
+    
     GUIButton* button;
     int mouseX, mouseY;
     for(int i = (int)children.size()-1; i >= 0; i --) {
