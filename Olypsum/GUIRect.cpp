@@ -67,3 +67,11 @@ void GUIRect::handleMouseUp(int mouseX, int mouseY) {
 void GUIRect::handleMouseMove(int mouseX, int mouseY) {
     
 }
+
+void GUIRect::handleKeyDown(SDL_keysym* key) {
+    
+}
+
+void GUIRect::handleKeyUp(SDL_keysym* key) {
+    
+}

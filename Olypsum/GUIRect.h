@@ -39,6 +39,8 @@ class GUIRect {
     virtual bool handleMouseDown(int mouseX, int mouseY);
     virtual void handleMouseUp(int mouseX, int mouseY);
     virtual void handleMouseMove(int mouseX, int mouseY);
+    virtual void handleKeyDown(SDL_keysym* key);
+    virtual void handleKeyUp(SDL_keysym* key);
 };
 
 #endif

@@ -28,6 +28,7 @@ class GUIView : public GUIRect {
 
 class GUIScreenView : public GUIView {
     public:
+    GUIRect* firstResponder;
     GUIScreenView();
     void getLimSize(GUIClipRect* clipRect);
     void updateContent();
@@ -35,6 +36,8 @@ class GUIScreenView : public GUIView {
     bool handleMouseDown(int mouseX, int mouseY);
     void handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
+    void handleKeyDown(SDL_keysym* key);
+    void handleKeyUp(SDL_keysym* key);
 };
 
 extern GUIScreenView* currentScreenView;

@@ -70,6 +70,7 @@ void GUIView::handleMouseMove(int mouseX, int mouseY) {
 GUIScreenView::GUIScreenView() {
     type = GUITypeScreenView;
     parent = NULL;
+    firstResponder = NULL;
     width = currentCam->viewport[2] >> 1;
     height = currentCam->viewport[3] >> 1;
 }
@@ -123,6 +124,16 @@ void GUIScreenView::handleMouseUp(int mouseX, int mouseY) {
 
 void GUIScreenView::handleMouseMove(int mouseX, int mouseY) {
     GUIView::handleMouseMove(mouseX-width, height-mouseY);
+}
+
+void GUIScreenView::handleKeyDown(SDL_keysym* key) {
+    if(firstResponder)
+        firstResponder->handleKeyDown(key);
+}
+
+void GUIScreenView::handleKeyUp(SDL_keysym* key) {
+    if(firstResponder)
+        firstResponder->handleKeyUp(key);
 }
 
 

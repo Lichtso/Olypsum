@@ -14,7 +14,7 @@
 
 void GUIButton::setBorderPixel(unsigned char* pixels, unsigned int x, unsigned int y) {
     unsigned char* pixel = pixels+(y*width*8)+x*4;
-    pixel[0] = 100;
+    pixel[0] = 130;
     pixel[1] = pixel[0];
     pixel[2] = pixel[0];
     pixel[3] = 255;
