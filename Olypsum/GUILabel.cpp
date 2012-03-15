@@ -9,7 +9,7 @@
 #import "GUILabel.h"
 
 GUILabel::GUILabel() {
-    type = GUITypeLabel;
+    type = GUIType_Label;
     font = mainFont;
     color.r = color.g = color.b = 0;
     color.unused = 255;

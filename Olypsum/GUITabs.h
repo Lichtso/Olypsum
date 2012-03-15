@@ -15,7 +15,7 @@ class GUITabs : public GUIButtonList {
     public:
     int selectedIndex;
     bool deactivatable;
-    void (*onChange)(GUITabs* tabs);
+    void (*onChange)(GUITabs*);
     GUITabs();
     void addChild(GUIButton* child);
     void updateContent();

@@ -12,18 +12,24 @@
 #define GUIRect_h
 
 enum GUIElementType {
-    GUITypeRect = 0,
-    GUITypeView = 1,
-    GUITypeScreenView = 2,
-    GUITypeLabel = 3,
-    GUITypeButton = 4,
-    GUITypeButtonList = 5,
-    GUITypeTabs = 6,
-    GUITypeSilder = 7
+    GUIType_Rect = 0,
+    GUIType_View = 1,
+    GUIType_ScreenView = 2,
+    GUIType_Label = 3,
+    GUIType_Button = 4,
+    GUIType_CheckBox = 5,
+    GUIType_ButtonList = 6,
+    GUIType_Tabs = 7,
+    GUIType_Silder = 8,
+    GUIType_TextField = 9
 };
 
 struct GUIClipRect {
     int minPosX, minPosY, maxPosX, maxPosY;
+};
+
+struct GUIColor {
+    unsigned char r, g, b, a;
 };
 
 class GUIRect {
@@ -33,14 +39,16 @@ class GUIRect {
     bool visible;
     int posX, posY, width, height;
     GUIRect();
+    GUIRect* getRootParent();
+    virtual void updateFirstResponderStatus();
     virtual void getLimSize(GUIClipRect* parentClipRect, GUIClipRect* clipRect);
     virtual void updateContent();
     virtual void draw(Matrix4& parentTransform, GUIClipRect* parentClipRect);
     virtual bool handleMouseDown(int mouseX, int mouseY);
     virtual void handleMouseUp(int mouseX, int mouseY);
     virtual void handleMouseMove(int mouseX, int mouseY);
-    virtual void handleKeyDown(SDL_keysym* key);
-    virtual void handleKeyUp(SDL_keysym* key);
+    virtual bool handleKeyDown(SDL_keysym* key);
+    virtual bool handleKeyUp(SDL_keysym* key);
 };
 
 #endif

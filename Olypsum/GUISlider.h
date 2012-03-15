@@ -1,5 +1,5 @@
 //
-//  GUISilder.h
+//  GUISlider.h
 //  Olypsum
 //
 //  Created by Alexander Meißner on 05.03.12.
@@ -8,10 +8,10 @@
 
 #import "GUITabs.h"
 
-#ifndef GUISilder_h
-#define GUISilder_h
+#ifndef GUISlider_h
+#define GUISlider_h
 
-class GUISilder : public GUIRect {
+class GUISlider : public GUIRect {
     GLuint textureL, textureM, textureR;
     int mouseDragPos;
     bool highlighted;
@@ -23,8 +23,8 @@ class GUISilder : public GUIRect {
     float value;
     bool enabled;
     GUIOrientation orientation;
-    void (*onChange)(GUISilder* tabs);
-    GUISilder();
+    void (*onChange)(GUISlider*);
+    GUISlider();
     void updateContent();
     void draw(Matrix4& parentTransform, GUIClipRect* parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);

@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "GUIRect.h"
+#import "GUIRoundedRect.h"
 
 #ifndef GUIView_h
 #define GUIView_h
@@ -36,8 +36,8 @@ class GUIScreenView : public GUIView {
     bool handleMouseDown(int mouseX, int mouseY);
     void handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
-    void handleKeyDown(SDL_keysym* key);
-    void handleKeyUp(SDL_keysym* key);
+    bool handleKeyDown(SDL_keysym* key);
+    bool handleKeyUp(SDL_keysym* key);
 };
 
 extern GUIScreenView* currentScreenView;

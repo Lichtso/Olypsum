@@ -92,7 +92,7 @@ void AppMain(int argc, char *argv[]) {
     const char* buttonLabels[] = { "Alpha", "Beta", "Gamma", "Delta", "Epsilon" };
     
     GUITabs* tabs = new GUITabs();
-    tabs->orientation = GUIOrientationBottom;
+    tabs->orientation = GUIOrientation_Bottom;
     tabs->posY = 200;
     for(int i = 0; i < 5; i ++) {
         GUIButton* button = new GUIButton();
@@ -112,14 +112,18 @@ void AppMain(int argc, char *argv[]) {
         currentScreenView->addChild(checkBox);
     }*/
     
-    GUISilder* slider = new GUISilder();
-    slider->posX = -50;
+    GUISlider* slider = new GUISlider();
+    slider->posX = -150;
     currentScreenView->addChild(slider);
     
-    GUISilder* sliderB = new GUISilder();
-    sliderB->posX = 100;
-    sliderB->orientation = GUIOrientationVertical;
+    GUISlider* sliderB = new GUISlider();
+    sliderB->orientation = GUIOrientation_Vertical;
+    sliderB->posX = -300;
     currentScreenView->addChild(sliderB);
+    
+    GUITextField* textField = new GUITextField();
+    textField->posX = 50;
+    currentScreenView->addChild(textField);
     
     GUILabel* labelD = new GUILabel();
     labelD->text = std::string("ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789\n!?\"='.:,;-_+#*$%&/([{}])");

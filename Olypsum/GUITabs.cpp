@@ -9,7 +9,7 @@
 #import "GUITabs.h"
 
 GUITabs::GUITabs() {
-    type = GUITypeTabs;
+    type = GUIType_Tabs;
     selectedIndex = -1;
     deactivatable = true;
     onChange = NULL;
@@ -33,7 +33,7 @@ void GUITabs::updateContent() {
         button->buttonType = GUIButtonTypeLockable;
         button->autoSize = true;
         button->updateContent();
-        if(orientation & GUIOrientationVertical) {
+        if(orientation & GUIOrientation_Vertical) {
             widthAux = max(widthAux, button->width);
             heightAux += button->height;
         }else{
@@ -42,7 +42,7 @@ void GUITabs::updateContent() {
         }
     }
     
-    if(orientation & GUIOrientationVertical)
+    if(orientation & GUIOrientation_Vertical)
         heightAux -= ceil(children.size() / 2.0) - 1;
     else
         widthAux -= ceil(children.size() / 2.0) - 1;
@@ -54,25 +54,25 @@ void GUITabs::updateContent() {
             button->state = (i == selectedIndex) ? GUIButtonStatePressed : GUIButtonStateNormal;
         button->roundedCorners = (GUICorners) 0;
         
-        if(orientation & GUIOrientationVertical) {
+        if(orientation & GUIOrientation_Vertical) {
             button->width = widthAux;
             button->posX = 0;
             button->posY = heightAux-posCounter-button->height;
             
             switch((int)orientation) {
-                case GUIOrientationLeft:
+                case GUIOrientation_Left:
                     if(i == 0)
                         button->roundedCorners = (GUICorners) (button->roundedCorners | GUITopRightCorner);
                     if(i == children.size()-1)
                         button->roundedCorners = (GUICorners) (button->roundedCorners | GUIBottomRightCorner);
                 break;
-                case GUIOrientationRight:
+                case GUIOrientation_Right:
                     if(i == 0)
                         button->roundedCorners = (GUICorners) (button->roundedCorners | GUITopLeftCorner);
                     if(i == children.size()-1)
                         button->roundedCorners = (GUICorners) (button->roundedCorners | GUIBottomLeftCorner);
                 break;
-                case GUIOrientationVertical:
+                case GUIOrientation_Vertical:
                     if(i == 0)
                         button->roundedCorners = (GUICorners) (button->roundedCorners | GUITopLeftCorner | GUITopRightCorner);
                     if(i == children.size()-1)
@@ -87,19 +87,19 @@ void GUITabs::updateContent() {
             button->posY = 0;
             
             switch((int)orientation) {
-                case GUIOrientationTop:
+                case GUIOrientation_Top:
                     if(i == 0)
                         button->roundedCorners = (GUICorners) (button->roundedCorners | GUIBottomLeftCorner);
                     if(i == children.size()-1)
                         button->roundedCorners = (GUICorners) (button->roundedCorners | GUIBottomRightCorner);
                     break;
-                case GUIOrientationBottom:
+                case GUIOrientation_Bottom:
                     if(i == 0)
                         button->roundedCorners = (GUICorners) (button->roundedCorners | GUITopLeftCorner);
                     if(i == children.size()-1)
                         button->roundedCorners = (GUICorners) (button->roundedCorners | GUITopRightCorner);
                     break;
-                case GUIOrientationHorizontal:
+                case GUIOrientation_Horizontal:
                     if(i == 0)
                         button->roundedCorners = (GUICorners) (button->roundedCorners | GUITopLeftCorner | GUIBottomLeftCorner);
                     if(i == children.size()-1)

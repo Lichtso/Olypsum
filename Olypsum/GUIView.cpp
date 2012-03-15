@@ -9,7 +9,7 @@
 #include "GUIView.h"
 
 GUIView::GUIView() {
-    type = GUITypeView;
+    type = GUIType_View;
 }
 
 GUIView::~GUIView() {
@@ -68,7 +68,7 @@ void GUIView::handleMouseMove(int mouseX, int mouseY) {
 
 
 GUIScreenView::GUIScreenView() {
-    type = GUITypeScreenView;
+    type = GUIType_ScreenView;
     parent = NULL;
     firstResponder = NULL;
     width = currentCam->viewport[2] >> 1;
@@ -126,14 +126,16 @@ void GUIScreenView::handleMouseMove(int mouseX, int mouseY) {
     GUIView::handleMouseMove(mouseX-width, height-mouseY);
 }
 
-void GUIScreenView::handleKeyDown(SDL_keysym* key) {
-    if(firstResponder)
-        firstResponder->handleKeyDown(key);
+bool GUIScreenView::handleKeyDown(SDL_keysym* key) {
+    if(!firstResponder) return false;
+    firstResponder->handleKeyDown(key);
+    return true;
 }
 
-void GUIScreenView::handleKeyUp(SDL_keysym* key) {
-    if(firstResponder)
-        firstResponder->handleKeyUp(key);
+bool GUIScreenView::handleKeyUp(SDL_keysym* key) {
+    if(!firstResponder) return false;
+    firstResponder->handleKeyUp(key);
+    return true;
 }
 
 

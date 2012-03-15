@@ -9,6 +9,7 @@
 #import "GUICheckBox.h"
 
 GUICheckBox::GUICheckBox() {
+    type = GUIType_CheckBox;
     paddingX = 4;
     paddingY = 0;
     GUILabel* label = new GUILabel();

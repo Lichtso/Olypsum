@@ -11,13 +11,6 @@
 #ifndef GUIButton_h
 #define GUIButton_h
 
-enum GUICorners {
-    GUITopLeftCorner = 1,
-    GUITopRightCorner = 2,
-    GUIBottomLeftCorner = 4,
-    GUIBottomRightCorner = 8
-};
-
 enum GUIButtonState {
     GUIButtonStateDisabled = 0,
     GUIButtonStateNormal = 1,
@@ -35,15 +28,14 @@ enum GUIButtonType {
 
 class GUIButton : public GUIView {
     GLuint texture;
-    void setBorderPixel(unsigned char* pixels, unsigned int x, unsigned int y);
-    void setInnerShadowRect(unsigned char* pixels, unsigned int minX, unsigned int maxX, unsigned int minY, unsigned int maxY);
+    void setInnerPixel(unsigned char* pixel, unsigned int x, unsigned int y);
     public:
     bool autoSize;
     int paddingX, paddingY;
     GUIButtonType buttonType;
     GUICorners roundedCorners;
     GUIButtonState state;
-    void (*onClick)(GUIButton* button);
+    void (*onClick)(GUIButton*);
     GUIButton();
     void updateContent();
     void draw(Matrix4& parentTransform, GUIClipRect* parentClipRect);

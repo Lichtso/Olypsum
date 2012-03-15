@@ -9,12 +9,23 @@
 #include "GUIRect.h"
 
 GUIRect::GUIRect() {
-    type = GUITypeRect;
+    type = GUIType_Rect;
     visible = true;
     posX = 0;
     posY = 0;
     width = 100;
     height = 100;
+}
+
+GUIRect* GUIRect::getRootParent() {
+    GUIRect* node = parent;
+    while(node->parent)
+        node = node->parent;
+    return node;
+}
+
+void GUIRect::updateFirstResponderStatus() {
+    
 }
 
 void GUIRect::getLimSize(GUIClipRect* parentClipRect, GUIClipRect* clipRect) {
@@ -68,10 +79,10 @@ void GUIRect::handleMouseMove(int mouseX, int mouseY) {
     
 }
 
-void GUIRect::handleKeyDown(SDL_keysym* key) {
-    
+bool GUIRect::handleKeyDown(SDL_keysym* key) {
+    return false;
 }
 
-void GUIRect::handleKeyUp(SDL_keysym* key) {
-    
+bool GUIRect::handleKeyUp(SDL_keysym* key) {
+    return false;
 }

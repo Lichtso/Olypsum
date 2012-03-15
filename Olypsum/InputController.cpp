@@ -18,12 +18,19 @@ void updateKeyState() {
 }
 
 void handleKeyDown(SDL_keysym* key) {
+    if(currentScreenView && currentScreenView->handleKeyDown(key))
+        return;
     
 }
 
 void handleKeyUp(SDL_keysym* key) {
-    if(key->sym == SDLK_ESCAPE)
+    if(key->sym == SDLK_ESCAPE) {
         AppTerminate();
+        return;
+    }
+    
+    if(currentScreenView && currentScreenView->handleKeyUp(key))
+        return;
     
 }
 

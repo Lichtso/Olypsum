@@ -12,12 +12,12 @@
 #define GUIButtonList_h
 
 enum GUIOrientation {
-    GUIOrientationLeft = 1,
-    GUIOrientationRight = 2,
-    GUIOrientationTop = 4,
-    GUIOrientationBottom = 8,
-    GUIOrientationVertical = 3,
-    GUIOrientationHorizontal = 12
+    GUIOrientation_Left = 1,
+    GUIOrientation_Right = 2,
+    GUIOrientation_Top = 4,
+    GUIOrientation_Bottom = 8,
+    GUIOrientation_Vertical = 3,
+    GUIOrientation_Horizontal = 12
 };
 
 class GUIButtonList : public GUIView {
