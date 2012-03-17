@@ -33,14 +33,21 @@ bool GUITextField::isFirstResponder() {
 void GUITextField::updateContent() {
     if(texture) glDeleteTextures(1, &texture);
     
-    label->width = width;
-    label->height = label->fontHeight >> 1;
+    label->width = width-10;
+    label->height = (label->fontHeight >> 1);
     
     GUIRoundedRect roundedRect;
     roundedRect.texture = &texture;
     roundedRect.width = width;
     roundedRect.height = height;
     roundedRect.cornerRadius = 8;
+    if(isFirstResponder()) {
+        roundedRect.borderColor.r = 80;
+        roundedRect.borderColor.g = 130;
+        roundedRect.borderColor.b = 255;
+    }else{
+        roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 130;
+    }
     roundedRect.drawInTexture();
 }
 
@@ -99,7 +106,15 @@ void GUITextField::handleMouseMove(int mouseX, int mouseY) {
 }
 
 bool GUITextField::handleKeyDown(SDL_keysym* key) {
-    
+    if(key->sym == SDLK_BACKSPACE) {
+        if(label->text.size() == 0) return true;
+        label->text = label->text.substr(0, label->text.size()-1);
+        label->updateContent();
+    }else if((key->unicode & 0xFF00) == 0 && (key->unicode & 0x00FF) > 0) {
+        char str[] = { (char)(key->unicode & 0xFF), 0 };
+        label->text += str;
+        label->updateContent();
+    }
     return true;
 }
 

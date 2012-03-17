@@ -20,8 +20,9 @@ enum GUIElementType {
     GUIType_CheckBox = 5,
     GUIType_ButtonList = 6,
     GUIType_Tabs = 7,
-    GUIType_Silder = 8,
-    GUIType_TextField = 9
+    GUIType_ProgressBar = 8,
+    GUIType_Silder = 9,
+    GUIType_TextField = 10
 };
 
 struct GUIClipRect {

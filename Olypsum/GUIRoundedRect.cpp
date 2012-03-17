@@ -14,8 +14,8 @@ GUIRoundedRect::GUIRoundedRect() {
     cornerRadius = 8;
     shadowWidth = 0;
     width = height = 0;
-    topColor.r = topColor.g = topColor.b = 240;
-    bottomColor.r = bottomColor.g = bottomColor.b = 230;
+    topColor.r = topColor.g = topColor.b = 230;
+    bottomColor.r = bottomColor.g = bottomColor.b = 255;
     borderColor.r = borderColor.g = borderColor.b = 130;
     topColor.a = bottomColor.a = borderColor.a = 255;
 }
@@ -100,8 +100,8 @@ void GUIRoundedRect::drawInTexture() {
     for(unsigned int y = yMinA; y < yMaxA; y ++) setBorderPixel(0, y);
     for(unsigned int y = yMinB; y < yMaxB; y ++) setBorderPixel(width*2-1, y);
     
-    int error, x, y;
-    for(unsigned int radius = cornerRadius-1; radius < cornerRadius+1; radius ++) {
+    int error, x, y, radius = cornerRadius;
+    //for(unsigned int radius = cornerRadius; radius <= cornerRadius; radius ++) {
         error = -radius;
         x = radius;
         y = 0;
@@ -129,13 +129,13 @@ void GUIRoundedRect::drawInTexture() {
                 error -= x;
             }
         }
-    }
+    //}
     
     glGenTextures(1, texture);
     glBindTexture(GL_TEXTURE_2D, *texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width*2, height*2, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     

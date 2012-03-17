@@ -8,8 +8,8 @@
 
 #import "GUISlider.h"
 
-#define barHeight 10
-#define sliderRadius 11
+#define barHeight 6
+#define sliderRadius 12
 
 GUISlider::GUISlider() {
     type = GUIType_Silder;
@@ -22,18 +22,10 @@ GUISlider::GUISlider() {
     enabled = true;
 }
 
-void GUISlider::setBarBorderPixel(unsigned char* pixels, unsigned int barLength, unsigned int x, unsigned int y) {
-    unsigned char* pixel = pixels+(y*barLength*4)+x*4;
-    pixel[0] = 150;
-    pixel[1] = pixel[0];
-    pixel[2] = pixel[0];
-    pixel[3] = 255;
-}
-
 void GUISlider::generateBar(bool filled) {
     GUIRoundedRect roundedRect;
     roundedRect.texture = (filled) ? &textureL : &textureR;
-    roundedRect.width = ((orientation & GUIOrientation_Horizontal) ? width*2 : height*2)-sliderRadius*2+barHeight;
+    roundedRect.width = ((orientation & GUIOrientation_Horizontal) ? width : height)-sliderRadius+barHeight;
     roundedRect.height = barHeight;
     roundedRect.cornerRadius = barHeight;
     roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 160;
@@ -63,14 +55,6 @@ void GUISlider::generateBar(bool filled) {
         }
     }
     roundedRect.drawInTexture();
-}
-
-void GUISlider::setBorderPixel(unsigned char* pixels, unsigned int x, unsigned int y) {
-    unsigned char* pixel = pixels+(y*sliderRadius*8)+x*4;
-    pixel[0] = 100;
-    pixel[1] = pixel[0];
-    pixel[2] = pixel[0];
-    pixel[3] = 255;
 }
 
 void GUISlider::updateContent() {
@@ -120,19 +104,20 @@ void GUISlider::drawBar(GUIClipRect* clipRect, unsigned int barLength, bool fill
     GUIClipRect clipRectB;
     int silderPos = (int)(barLength*value);
     Vector3 minFactor, maxFactor;
-    barLength += barHeight;
+    barLength += barHeight*2;
+    
     if(orientation & GUIOrientation_Horizontal) {
         if(filled) {
-            clipRectB.minPosX = max(clipRect->minPosX, sliderRadius-width-(barHeight>>1));
+            clipRectB.minPosX = max(clipRect->minPosX, sliderRadius-width-barHeight);
             clipRectB.maxPosX = min(clipRect->maxPosX, sliderRadius-width+silderPos);
         }else{
             clipRectB.minPosX = max(clipRect->minPosX, sliderRadius-width+silderPos);
-            clipRectB.maxPosX = min(clipRect->maxPosX, width-sliderRadius+(barHeight>>1)+1);
+            clipRectB.maxPosX = min(clipRect->maxPosX, width-sliderRadius+barHeight);
         }
-        clipRectB.minPosY = max(clipRect->minPosY, -(barHeight>>1));
-        clipRectB.maxPosY = min(clipRect->maxPosY, barHeight>>1);
-        minFactor = Vector3(0.5+(float)clipRectB.minPosX/barLength, 0.5-(float)clipRectB.maxPosY/barHeight, 0.0);
-        maxFactor = Vector3(0.5+(float)clipRectB.maxPosX/barLength, 0.5-(float)clipRectB.minPosY/barHeight, 0.0);
+        clipRectB.minPosY = max(clipRect->minPosY, -barHeight);
+        clipRectB.maxPosY = min(clipRect->maxPosY, barHeight);
+        minFactor = Vector3(0.5+(float)clipRectB.minPosX/barLength, 0.5-0.5*clipRectB.maxPosY/barHeight, 0.0);
+        maxFactor = Vector3(0.5+(float)clipRectB.maxPosX/barLength, 0.5-0.5*clipRectB.minPosY/barHeight, 0.0);
         if(clipRectB.minPosX > clipRectB.maxPosX || clipRectB.minPosY > clipRectB.maxPosY) return;
         float vertices[] = {
             clipRectB.maxPosX, clipRectB.minPosY,
@@ -147,17 +132,17 @@ void GUISlider::drawBar(GUIClipRect* clipRect, unsigned int barLength, bool fill
         spriteShaderProgram->setAttribute(VERTEX_ATTRIBUTE, 2, 4*sizeof(float), vertices);
         spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 4*sizeof(float), &vertices[2]);
     }else{
-        clipRectB.minPosX = max(clipRect->minPosX, -(barHeight>>1));
-        clipRectB.maxPosX = min(clipRect->maxPosX, barHeight>>1);
+        clipRectB.minPosX = max(clipRect->minPosX, -barHeight);
+        clipRectB.maxPosX = min(clipRect->maxPosX, barHeight);
         if(filled) {
-            clipRectB.minPosY = max(clipRect->minPosY, sliderRadius-height-(barHeight>>1));
+            clipRectB.minPosY = max(clipRect->minPosY, sliderRadius-height-barHeight);
             clipRectB.maxPosY = min(clipRect->maxPosY, sliderRadius-height+silderPos);
         }else{
             clipRectB.minPosY = max(clipRect->minPosY, sliderRadius-height+silderPos);
-            clipRectB.maxPosY = min(clipRect->maxPosY, height-sliderRadius+(barHeight>>1));
+            clipRectB.maxPosY = min(clipRect->maxPosY, height-sliderRadius+barHeight);
         }
-        minFactor = Vector3(0.5-(float)clipRectB.maxPosY/barLength, 0.5+(float)clipRectB.maxPosX/barHeight, 0.0);
-        maxFactor = Vector3(0.5-(float)clipRectB.minPosY/barLength, 0.5+(float)clipRectB.minPosX/barHeight, 0.0);
+        minFactor = Vector3(0.5-(float)clipRectB.maxPosY/barLength, 0.5+0.5*clipRectB.maxPosX/barHeight, 0.0);
+        maxFactor = Vector3(0.5-(float)clipRectB.minPosY/barLength, 0.5+0.5*clipRectB.minPosX/barHeight, 0.0);
         if(clipRectB.minPosX > clipRectB.maxPosX || clipRectB.minPosY > clipRectB.maxPosY) return;
         float vertices[] = {
             clipRectB.maxPosX, clipRectB.minPosY,

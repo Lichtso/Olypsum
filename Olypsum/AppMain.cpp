@@ -29,6 +29,7 @@ void AppMain(int argc, char *argv[]) {
         exit(3);
     }
     
+    SDL_EnableUNICODE(1);
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
@@ -44,7 +45,7 @@ void AppMain(int argc, char *argv[]) {
     
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_CULL_FACE);
+    glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(1, 1, 1, 0);
@@ -112,8 +113,8 @@ void AppMain(int argc, char *argv[]) {
         currentScreenView->addChild(checkBox);
     }*/
     
-    GUISlider* slider = new GUISlider();
-    slider->posX = -150;
+    GUIProgressBar* slider = new GUIProgressBar();
+    slider->posX = -50;
     currentScreenView->addChild(slider);
     
     GUISlider* sliderB = new GUISlider();
@@ -122,7 +123,7 @@ void AppMain(int argc, char *argv[]) {
     currentScreenView->addChild(sliderB);
     
     GUITextField* textField = new GUITextField();
-    textField->posX = 50;
+    textField->posX = 300;
     currentScreenView->addChild(textField);
     
     GUILabel* labelD = new GUILabel();
@@ -200,6 +201,10 @@ void AppMain(int argc, char *argv[]) {
         mainFont->renderStringToScreen(fpsStr, btVector3(-1.0, -0.5, 0.0), 0.002, color, true);
         mainFont->renderStringToScreen(fpsStr, btVector3(0.0, 0.5, 0.0), 0.002, color, true);
         */
+        
+        slider->value += animationFactor*0.1;
+        if(slider->value > 1.0) slider->value = 0.0;
+        
         if(currentScreenView)
         currentScreenView->draw();
         SDL_GL_SwapBuffers();

@@ -48,6 +48,7 @@
 		1193BED71504FD01000ADF1E /* GUISlider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1193BED61504FD01000ADF1E /* GUISlider.cpp */; };
 		11A09DC5150FE849000B7891 /* GUITextField.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A09DC4150FE849000B7891 /* GUITextField.cpp */; };
 		11A09DC815112ACF000B7891 /* GUIRoundedRect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A09DC715112ACF000B7891 /* GUIRoundedRect.cpp */; };
+		11B6C0A5151511EB00719E13 /* GUIProgressBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11B6C0A4151511EB00719E13 /* GUIProgressBar.cpp */; };
 		11C8A7C414F29773001FEE4E /* ShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11C8A7C314F29773001FEE4E /* ShaderProgram.cpp */; };
 		11D7E1CE14F6C45A003359B9 /* Frustum3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11D7E1CD14F6C45A003359B9 /* Frustum3.cpp */; };
 		11D7E1D114F6C4FC003359B9 /* Plane3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11D7E1D014F6C4FC003359B9 /* Plane3.cpp */; };
@@ -116,12 +117,14 @@
 		113C66E114FD41F40038C12E /* GUILabel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUILabel.cpp; sourceTree = "<group>"; };
 		113C66E314FD42550038C12E /* GUIButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIButton.h; sourceTree = "<group>"; };
 		113C66E414FD438C0038C12E /* GUIButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIButton.cpp; sourceTree = "<group>"; };
-		1193BED41504FCF9000ADF1E /* GUISlider.h */ = {isa = PBXFileReference; fileEncoding = 4; path = GUISlider.h; sourceTree = "<group>"; };
+		1193BED41504FCF9000ADF1E /* GUISlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUISlider.h; sourceTree = "<group>"; };
 		1193BED61504FD01000ADF1E /* GUISlider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUISlider.cpp; sourceTree = "<group>"; };
 		11A09DC2150FE825000B7891 /* GUITextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUITextField.h; sourceTree = "<group>"; };
 		11A09DC4150FE849000B7891 /* GUITextField.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUITextField.cpp; sourceTree = "<group>"; };
 		11A09DC615112AC7000B7891 /* GUIRoundedRect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIRoundedRect.h; sourceTree = "<group>"; };
 		11A09DC715112ACF000B7891 /* GUIRoundedRect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIRoundedRect.cpp; sourceTree = "<group>"; };
+		11B6C0A2151511D300719E13 /* GUIProgressBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIProgressBar.h; sourceTree = "<group>"; };
+		11B6C0A4151511EB00719E13 /* GUIProgressBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIProgressBar.cpp; sourceTree = "<group>"; };
 		11C8A7C314F29773001FEE4E /* ShaderProgram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderProgram.cpp; sourceTree = "<group>"; };
 		11C8A7C614F29781001FEE4E /* ShaderProgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShaderProgram.h; sourceTree = "<group>"; };
 		11D7E1CC14F6C441003359B9 /* Frustum3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Frustum3.h; sourceTree = "<group>"; };
@@ -314,6 +317,8 @@
 				112125C315020909000419A7 /* GUIButtonList.cpp */,
 				112125C515025450000419A7 /* GUITabs.h */,
 				112125C61502546E000419A7 /* GUITabs.cpp */,
+				11B6C0A2151511D300719E13 /* GUIProgressBar.h */,
+				11B6C0A4151511EB00719E13 /* GUIProgressBar.cpp */,
 				1193BED41504FCF9000ADF1E /* GUISlider.h */,
 				1193BED61504FD01000ADF1E /* GUISlider.cpp */,
 				11A09DC2150FE825000B7891 /* GUITextField.h */,
@@ -437,6 +442,7 @@
 				1193BED71504FD01000ADF1E /* GUISlider.cpp in Sources */,
 				11A09DC5150FE849000B7891 /* GUITextField.cpp in Sources */,
 				11A09DC815112ACF000B7891 /* GUIRoundedRect.cpp in Sources */,
+				11B6C0A5151511EB00719E13 /* GUIProgressBar.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
