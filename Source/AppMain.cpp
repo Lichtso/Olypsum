@@ -92,6 +92,12 @@ void AppMain(int argc, char *argv[]) {
     
     const char* buttonLabels[] = { "Alpha", "Beta", "Gamma", "Delta", "Epsilon" };
     
+    GUIScrollView* scrollView = new GUIScrollView();
+    scrollView->width = scrollView->scrollWidth = 500;
+    scrollView->height = 300;
+    scrollView->scrollHeight = 1000;
+    currentScreenView->addChild(scrollView);
+    
     GUITabs* tabs = new GUITabs();
     tabs->orientation = GUIOrientation_Bottom;
     tabs->posY = 200;
@@ -104,7 +110,7 @@ void AppMain(int argc, char *argv[]) {
         button->addChild(label);
         tabs->addChild(button);
     }
-    currentScreenView->addChild(tabs);
+    scrollView->addChild(tabs);
     
     /*
     for(int i = 0; i < 5; i ++) {
@@ -115,21 +121,21 @@ void AppMain(int argc, char *argv[]) {
     
     GUIProgressBar* slider = new GUIProgressBar();
     slider->posX = -50;
-    currentScreenView->addChild(slider);
+    scrollView->addChild(slider);
     
     GUISlider* sliderB = new GUISlider();
     sliderB->orientation = GUIOrientation_Vertical;
     sliderB->posX = -300;
-    currentScreenView->addChild(sliderB);
+    scrollView->addChild(sliderB);
     
     GUITextField* textField = new GUITextField();
     textField->posX = 300;
-    currentScreenView->addChild(textField);
+    scrollView->addChild(textField);
     
     GUILabel* labelD = new GUILabel();
     labelD->text = std::string("ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789\n!?\"='.:,;-_+#*$%&/([{}])");
-    labelD->posY = -250;
-    currentScreenView->addChild(labelD);
+    labelD->posY = -300;
+    scrollView->addChild(labelD);
     
     //Init Game {
     tex = new Texture();

@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "GUIView.h"
+#import "GUIScrollView.h"
 
 #ifndef GUILabel_h
 #define GUILabel_h

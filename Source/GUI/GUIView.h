@@ -24,6 +24,7 @@ class GUIView : public GUIRect {
     bool handleMouseDown(int mouseX, int mouseY);
     void handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
+    bool handleMouseWheel(int mouseX, int mouseY, float delta);
 };
 
 class GUIScreenView : public GUIView {
@@ -36,6 +37,7 @@ class GUIScreenView : public GUIView {
     bool handleMouseDown(int mouseX, int mouseY);
     void handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
+    bool handleMouseWheel(int mouseX, int mouseY, float delta);
     bool handleKeyDown(SDL_keysym* key);
     bool handleKeyUp(SDL_keysym* key);
 };

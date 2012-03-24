@@ -14,15 +14,16 @@
 enum GUIElementType {
     GUIType_Rect = 0,
     GUIType_View = 1,
-    GUIType_ScreenView = 2,
-    GUIType_Label = 3,
-    GUIType_Button = 4,
-    GUIType_CheckBox = 5,
-    GUIType_ButtonList = 6,
-    GUIType_Tabs = 7,
-    GUIType_ProgressBar = 8,
-    GUIType_Silder = 9,
-    GUIType_TextField = 10
+    GUIType_ScrollView = 2,
+    GUIType_ScreenView = 3,
+    GUIType_Label = 4,
+    GUIType_Button = 5,
+    GUIType_CheckBox = 6,
+    GUIType_ButtonList = 7,
+    GUIType_Tabs = 8,
+    GUIType_ProgressBar = 9,
+    GUIType_Silder = 10,
+    GUIType_TextField = 11
 };
 
 struct GUIClipRect {
@@ -48,6 +49,7 @@ class GUIRect {
     virtual bool handleMouseDown(int mouseX, int mouseY);
     virtual void handleMouseUp(int mouseX, int mouseY);
     virtual void handleMouseMove(int mouseX, int mouseY);
+    virtual bool handleMouseWheel(int mouseX, int mouseY, float delta);
     virtual bool handleKeyDown(SDL_keysym* key);
     virtual bool handleKeyUp(SDL_keysym* key);
 };

@@ -65,6 +65,14 @@ void GUIView::handleMouseMove(int mouseX, int mouseY) {
         children[i]->handleMouseMove(mouseX-children[i]->posX, mouseY-children[i]->posY);
 }
 
+bool GUIView::handleMouseWheel(int mouseX, int mouseY, float delta) {
+    if(!visible || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
+    for(int i = (int)children.size()-1; i >= 0; i --)
+        if(children[i]->handleMouseWheel(mouseX-children[i]->posX, mouseY-children[i]->posY, delta))
+            return true;
+    return false;
+}
+
 
 
 GUIScreenView::GUIScreenView() {
@@ -124,6 +132,10 @@ void GUIScreenView::handleMouseUp(int mouseX, int mouseY) {
 
 void GUIScreenView::handleMouseMove(int mouseX, int mouseY) {
     GUIView::handleMouseMove(mouseX-width, height-mouseY);
+}
+
+bool GUIScreenView::handleMouseWheel(int mouseX, int mouseY, float delta) {
+    return GUIView::handleMouseWheel(mouseX-width, height-mouseY, delta);
 }
 
 bool GUIScreenView::handleKeyDown(SDL_keysym* key) {

@@ -79,6 +79,10 @@ void GUIRect::handleMouseMove(int mouseX, int mouseY) {
     
 }
 
+bool GUIRect::handleMouseWheel(int mouseX, int mouseY, float delta) {
+    return false;
+}
+
 bool GUIRect::handleKeyDown(SDL_keysym* key) {
     return false;
 }

@@ -37,8 +37,19 @@ void handleKeyUp(SDL_keysym* key) {
 
 
 void handleMouseDown(SDL_MouseButtonEvent* mouse) {
-    if(currentScreenView)
-        currentScreenView->handleMouseDown(mouse->x, mouse->y);
+    if(currentScreenView) {
+        switch(mouse->button) {
+            case SDL_BUTTON_LEFT:
+                currentScreenView->handleMouseDown(mouse->x, mouse->y);
+            break;
+            case SDL_BUTTON_WHEELDOWN:
+                currentScreenView->handleMouseWheel(mouse->x, mouse->y, -1.0);
+            break;
+            case SDL_BUTTON_WHEELUP:
+                currentScreenView->handleMouseWheel(mouse->x, mouse->y, 1.0);
+            break;
+        }
+    }
 }
 
 void handleMouseUp(SDL_MouseButtonEvent* mouse) {
