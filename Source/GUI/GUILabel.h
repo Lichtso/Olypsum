@@ -33,8 +33,9 @@ class GUILabel : public GUIRect {
     GUITextAlign textAlign;
     std::string text;
     GUILabel();
+    ~GUILabel();
     void updateContent();
-    void draw(Matrix4& parentTransform, GUIClipRect* parentClipRect);
+    void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
 };
 
 #endif

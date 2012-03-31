@@ -14,13 +14,14 @@
 class GUIProgressBar : public GUIRect {
     GLuint textureL, textureR;
     void generateBar(bool filled);
-    void drawBar(GUIClipRect* clipRect, unsigned int barLength, bool filled);
+    void drawBar(GUIClipRect clipRect, bool filled);
     public:
     float value;
     GUIOrientation orientation;
     GUIProgressBar();
+    ~GUIProgressBar();
     void updateContent();
-    void draw(Matrix4& parentTransform, GUIClipRect* parentClipRect);
+    void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
 };
 
 #endif

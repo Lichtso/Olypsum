@@ -18,6 +18,12 @@ GUILabel::GUILabel() {
     fontHeight = 30;
 }
 
+GUILabel::~GUILabel() {
+    for(unsigned int i = 0; i < lines.size(); i ++)
+        glDeleteTextures(1, &lines[i].texture);
+    lines.clear();
+}
+
 void GUILabel::updateContent() {
     if(autoSize)
         width = height = 0;
@@ -45,13 +51,12 @@ void GUILabel::updateContent() {
         }
 }
 
-void GUILabel::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
+void GUILabel::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     if(!visible || text.size() == 0 || fontHeight == 0) return;
     if(lines.size() == 0) updateContent();
     
     GUIClipRect clipRect;
-    getLimSize(parentClipRect, &clipRect);
-    if(clipRect.minPosX > clipRect.maxPosX || clipRect.minPosY > clipRect.maxPosY) return;
+    if(!getLimSize(clipRect, parentClipRect)) return;
     
     modelMat = parentTransform;
     modelMat.translate(Vector3(posX, posY, 0.0));

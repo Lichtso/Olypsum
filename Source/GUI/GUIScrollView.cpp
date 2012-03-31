@@ -8,50 +8,156 @@
 
 #import "GUIScrollView.h"
 
+int GUIScrollView::getBarWidth() {
+    return ((float)width/scrollWidth)*width;
+}
+
+int GUIScrollView::getBarHeight() {
+    return ((float)height/scrollHeight)*height;
+}
+
+int GUIScrollView::getBarPosX() {
+    int barWidth = getBarWidth();
+    return (float)scrollPosX/(scrollWidth-width)*(width*2-barWidth*2-5)-width+barWidth+2;
+}
+
+int GUIScrollView::getBarPosY() {
+    int barHeight = getBarHeight();
+    return (1.0-(float)scrollPosY/(scrollHeight-height))*(height*2-barHeight*2-5)-height+barHeight+2;
+}
+
 GUIScrollView::GUIScrollView() {
     scrollPosX = scrollPosY = 0;
     scrollWidth = width;
     scrollHeight = height;
+    textureV = textureH = 0;
+    mouseDragPosX = mouseDragPosY = -2;
+    hideSliderX = hideSliderY = true;
+}
+
+GUIScrollView::~GUIScrollView() {
+    if(textureV) {
+        glDeleteTextures(1, &textureV);
+        glDeleteTextures(1, &textureH);
+    }
 }
 
 void GUIScrollView::updateContent() {
+    GUIRoundedRect roundedRect;
+    roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 220;
+    roundedRect.topColor.r = roundedRect.topColor.g = roundedRect.topColor.b = 240;
+    roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 240;
     
+    roundedRect.texture = &textureH;
+    roundedRect.width = getBarWidth();
+    roundedRect.height = 6;
+    roundedRect.cornerRadius = 6;
+    roundedRect.drawInTexture();
+    
+    roundedRect.texture = &textureV;
+    roundedRect.width = 6;
+    roundedRect.height = getBarHeight();
+    roundedRect.cornerRadius = 6;
+    roundedRect.drawInTexture();
 }
 
-void GUIScrollView::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
+void GUIScrollView::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     
-    GUIClipRect clipRect;
-    getLimSize(parentClipRect, &clipRect);
-    if(clipRect.minPosX > clipRect.maxPosX || clipRect.minPosY > clipRect.maxPosY) return;
+    if(!textureV)
+        updateContent();
     
-    GUIRect::draw(parentTransform, parentClipRect);
-    clipRect.minPosX -= scrollPosX;
-    clipRect.maxPosX -= scrollPosX;
+    GUIClipRect clipRect, barClipRect;
+    if(!getLimSize(clipRect, parentClipRect)) return;
+    barClipRect = clipRect;
+    
+    clipRect.minPosX += scrollPosX;
+    clipRect.maxPosX += scrollPosX;
     clipRect.minPosY -= scrollPosY;
     clipRect.maxPosY -= scrollPosY;
     
     Matrix4 transform(parentTransform);
-    transform.translate(Vector3(posX+scrollPosX, posY+scrollPosY, 0.0));
+    transform.translate(Vector3(posX-scrollPosX, posY+scrollPosY, 0.0));
     for(unsigned int i = 0; i < children.size(); i ++)
-        children[i]->draw(transform, &clipRect);
+        children[i]->draw(transform, clipRect);
+    
+    modelMat = parentTransform;
+    spriteShaderProgram->use();
+    GUIRoundedRect roundedRect;
+    
+    if(scrollWidth > width && mouseDragPosX > -2) {
+        roundedRect.texture = &textureH;
+        roundedRect.width = getBarWidth();
+        roundedRect.height = 6;
+        roundedRect.drawOnScreen(false, getBarPosX(), 8-height, barClipRect);
+    }
+    
+    if(scrollHeight > height && mouseDragPosY > -2) {
+        roundedRect.texture = &textureV;
+        roundedRect.width = 6;
+        roundedRect.height = getBarHeight();
+        roundedRect.drawOnScreen(false, width-9, getBarPosY(), barClipRect);
+    }
+    
+    GUIRect::draw(parentTransform, parentClipRect);
 }
 
 bool GUIScrollView::handleMouseDown(int mouseX, int mouseY) {
     if(!visible || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
+    
+    int barPosY = getBarPosY(), barHeight = getBarHeight();
+    if(scrollHeight > height && mouseX >= width-15 && mouseX <= width-3 && mouseY >= barPosY-barHeight && mouseY <= barPosY+barHeight) {
+        mouseDragPosY = mouseY-barPosY+barHeight;
+        return true;
+    }
+    
+    int barPosX = getBarPosX(), barWidth = getBarWidth();
+    if(scrollWidth > width && mouseX >= barPosX-barWidth && mouseX <= barPosX+barWidth && mouseY >= 3-height && mouseY <= 15-height) {
+        mouseDragPosX = mouseX-barPosX+barWidth;
+        return true;
+    }
+    
     return GUIView::handleMouseDown(mouseX-scrollPosX, mouseY-scrollPosY);
 }
 
 void GUIScrollView::handleMouseUp(int mouseX, int mouseY) {
+    mouseDragPosX = (scrollWidth > width && (!hideSliderX || (mouseX >= -width && mouseX <= width && mouseY >= -height && mouseY <= 18-height))) ? -1 : -2;
+    mouseDragPosY = (scrollHeight > height && (!hideSliderY || (mouseX >= width-18 && mouseX <= width && mouseY >= -height && mouseY <= height))) ? -1 : -2;
+    
     GUIView::handleMouseUp(mouseX-scrollPosX, mouseY-scrollPosY);
 }
 
 void GUIScrollView::handleMouseMove(int mouseX, int mouseY) {
+    if(scrollWidth > width) {
+        int barWidth = getBarWidth();
+        if(mouseDragPosX >= 0) {
+            scrollPosX = ((float)mouseX-1+width-mouseDragPosX)/(width*2-barWidth*2-4)*(scrollWidth-width);
+            if(scrollPosX < 0) scrollPosX = 0;
+            else if(scrollPosX > scrollWidth-width) scrollPosX = scrollWidth-width;
+            return;
+        }else mouseDragPosX = (!hideSliderX || (mouseX >= -width && mouseX <= width && mouseY >= -height && mouseY <= 18-height)) ? -1 : -2;
+    }else mouseDragPosX = -2;
+    
+    if(scrollHeight > height) {
+        int barHeight = getBarHeight();
+        if(mouseDragPosY >= 0) {
+            scrollPosY = ((float)height-mouseY-barHeight*2-2+mouseDragPosY)/(height*2-barHeight*2-3)*(scrollHeight-height);
+            if(scrollPosY < 0) scrollPosY = 0;
+            else if(scrollPosY > scrollHeight-height) scrollPosY = scrollHeight-height;
+            return;
+        }else mouseDragPosY = (!hideSliderY || (mouseX >= width-18 && mouseX <= width && mouseY >= -height && mouseY <= height)) ? -1 : -2;
+    }else mouseDragPosY = -2;
+    
     GUIView::handleMouseMove(mouseX-scrollPosX, mouseY-scrollPosY);
 }
 
 bool GUIScrollView::handleMouseWheel(int mouseX, int mouseY, float delta) {
-    if(!visible || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height || scrollHeight < height) return false;
+    if(!visible || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
+    for(int i = (int)children.size()-1; i >= 0; i --)
+        if(children[i]->handleMouseWheel(mouseX-children[i]->posX, mouseY-children[i]->posY, delta))
+            return true;
+    
+    if(scrollHeight < height) return false;
     
     scrollPosY -= delta*20.0;
     if(scrollPosY < 0) scrollPosY = 0;

@@ -17,11 +17,23 @@ GUIProgressBar::GUIProgressBar() {
     height = 10;
 }
 
+GUIProgressBar::~GUIProgressBar() {
+    if(textureL) {
+        glDeleteTextures(1, &textureL);
+        glDeleteTextures(1, &textureR);
+    }
+}
+
 void GUIProgressBar::generateBar(bool filled) {
     GUIRoundedRect roundedRect;
     roundedRect.texture = (filled) ? &textureL : &textureR;
-    roundedRect.width = width;
-    roundedRect.height = height;
+    if(orientation & GUIOrientation_Horizontal) {
+        roundedRect.width = width;
+        roundedRect.height = height;
+    }else{
+        roundedRect.width = height;
+        roundedRect.height = width;
+    }
     roundedRect.cornerRadius = 6;
     roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 160;
     if(filled) {
@@ -32,98 +44,53 @@ void GUIProgressBar::generateBar(bool filled) {
         roundedRect.bottomColor.g = 150;
         roundedRect.bottomColor.b = 50;
     }else{
-        roundedRect.topColor.r = roundedRect.topColor.g =roundedRect.topColor.b = 180;
-        roundedRect.bottomColor.r = roundedRect.bottomColor.g =roundedRect.bottomColor.b = 255;
+        roundedRect.topColor.r = roundedRect.topColor.g = roundedRect.topColor.b = 180;
+        roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 255;
     }
     roundedRect.drawInTexture();
 }
 
 void GUIProgressBar::updateContent() {
-    if(textureL > 0) {
-        glDeleteTextures(1, &textureL);
-        glDeleteTextures(1, &textureR);
-    }
-    
-    glGenTextures(1, &textureL);
-    glGenTextures(1, &textureR);
-    
     generateBar(true);
     generateBar(false);
 }
 
-void GUIProgressBar::drawBar(GUIClipRect* clipRect, unsigned int barLength, bool filled) {
-    GUIClipRect clipRectB;
-    int splitPos = (int)(barLength*value);
-    Vector3 minFactor, maxFactor;
+void GUIProgressBar::drawBar(GUIClipRect clipRect, bool filled) {
+    int splitPos = ((orientation & GUIOrientation_Horizontal) ? width : height)*(value*2.0-1.0);
     
+    GUIRoundedRect roundedRect;
+    roundedRect.texture = (filled) ? &textureL : &textureR;
     if(orientation & GUIOrientation_Horizontal) {
-        if(filled) {
-            clipRectB.minPosX = max(clipRect->minPosX, -width);
-            clipRectB.maxPosX = min(clipRect->maxPosX, -width+splitPos);
-        }else{
-            clipRectB.minPosX = max(clipRect->minPosX, -width+splitPos);
-            clipRectB.maxPosX = min(clipRect->maxPosX, width);
-        }
-        clipRectB.minPosY = max(clipRect->minPosY, -height);
-        clipRectB.maxPosY = min(clipRect->maxPosY, height);
-        minFactor = Vector3(0.5+(float)clipRectB.minPosX/barLength, 0.5-0.5*clipRectB.maxPosY/height, 0.0);
-        maxFactor = Vector3(0.5+(float)clipRectB.maxPosX/barLength, 0.5-0.5*clipRectB.minPosY/height, 0.0);
-        if(clipRectB.minPosX > clipRectB.maxPosX || clipRectB.minPosY > clipRectB.maxPosY) return;
-        float vertices[] = {
-            clipRectB.maxPosX, clipRectB.minPosY,
-            maxFactor.x, maxFactor.y,
-            clipRectB.maxPosX, clipRectB.maxPosY,
-            maxFactor.x, minFactor.y,
-            clipRectB.minPosX, clipRectB.maxPosY,
-            minFactor.x, minFactor.y,
-            clipRectB.minPosX, clipRectB.minPosY,
-            minFactor.x, maxFactor.y
-        };
-        spriteShaderProgram->setAttribute(VERTEX_ATTRIBUTE, 2, 4*sizeof(float), vertices);
-        spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 4*sizeof(float), &vertices[2]);
+        roundedRect.width = width;
+        roundedRect.height = height;
+        if(filled)
+            clipRect.maxPosX = min(clipRect.maxPosX, splitPos);
+        else
+            clipRect.minPosX = max(clipRect.minPosX, splitPos);
+        roundedRect.drawOnScreen(false, 0, 0, clipRect);
     }else{
-        clipRectB.minPosX = max(clipRect->minPosX, -width);
-        clipRectB.maxPosX = min(clipRect->maxPosX, width);
-        if(filled) {
-            clipRectB.minPosY = max(clipRect->minPosY, -height);
-            clipRectB.maxPosY = min(clipRect->maxPosY, -height+splitPos);
-        }else{
-            clipRectB.minPosY = max(clipRect->minPosY, -height+splitPos);
-            clipRectB.maxPosY = min(clipRect->maxPosY, height);
-        }
-        minFactor = Vector3(0.5-(float)clipRectB.maxPosY/barLength, 0.5+0.5*clipRectB.maxPosX/width, 0.0);
-        maxFactor = Vector3(0.5-(float)clipRectB.minPosY/barLength, 0.5+0.5*clipRectB.minPosX/width, 0.0);
-        if(clipRectB.minPosX > clipRectB.maxPosX || clipRectB.minPosY > clipRectB.maxPosY) return;
-        float vertices[] = {
-            clipRectB.maxPosX, clipRectB.minPosY,
-            maxFactor.x, minFactor.y,
-            clipRectB.maxPosX, clipRectB.maxPosY,
-            minFactor.x, minFactor.y,
-            clipRectB.minPosX, clipRectB.maxPosY,
-            minFactor.x, maxFactor.y,
-            clipRectB.minPosX, clipRectB.minPosY,
-            maxFactor.x, maxFactor.y
-        };
-        spriteShaderProgram->setAttribute(VERTEX_ATTRIBUTE, 2, 4*sizeof(float), vertices);
-        spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 4*sizeof(float), &vertices[2]);
+        roundedRect.width = height;
+        roundedRect.height = width;
+        if(filled)
+            clipRect.maxPosY = min(clipRect.maxPosY, splitPos);
+        else
+            clipRect.minPosY = max(clipRect.maxPosY, splitPos);
+        roundedRect.drawOnScreen(true, 0, 0, clipRect);
     }
-    glBindTexture(GL_TEXTURE_2D, (filled) ? textureL : textureR);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
-void GUIProgressBar::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
+void GUIProgressBar::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     if(!textureL) updateContent();
     
-    GUIClipRect clipRect;
-    getLimSize(parentClipRect, &clipRect);
-    if(clipRect.minPosX > clipRect.maxPosX || clipRect.minPosY > clipRect.maxPosY) return;
+    GUIClipRect clipRectL, clipRectR;
+    if(!getLimSize(clipRectL, parentClipRect)) return;
+    clipRectR = clipRectL;
     
     modelMat = parentTransform;
     modelMat.translate(Vector3(posX, posY, 0.0));
     spriteShaderProgram->use();
     
-    int barLength = ((orientation & GUIOrientation_Horizontal) ? width*2 : height*2);
-    drawBar(&clipRect, barLength, true);
-    drawBar(&clipRect, barLength, false);
+    drawBar(clipRectL, true);
+    drawBar(clipRectR, false);
 }

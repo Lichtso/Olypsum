@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "TextFont.h"
+#import "GUIClipRect.h"
 
 #ifndef GUIRect_h
 #define GUIRect_h
@@ -26,10 +26,6 @@ enum GUIElementType {
     GUIType_TextField = 11
 };
 
-struct GUIClipRect {
-    int minPosX, minPosY, maxPosX, maxPosY;
-};
-
 struct GUIColor {
     unsigned char r, g, b, a;
 };
@@ -43,9 +39,9 @@ class GUIRect {
     GUIRect();
     GUIRect* getRootParent();
     virtual void updateFirstResponderStatus();
-    virtual void getLimSize(GUIClipRect* parentClipRect, GUIClipRect* clipRect);
+    virtual bool getLimSize(GUIClipRect& clipRect, GUIClipRect& parentClipRect);
     virtual void updateContent();
-    virtual void draw(Matrix4& parentTransform, GUIClipRect* parentClipRect);
+    virtual void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
     virtual bool handleMouseDown(int mouseX, int mouseY);
     virtual void handleMouseUp(int mouseX, int mouseY);
     virtual void handleMouseMove(int mouseX, int mouseY);

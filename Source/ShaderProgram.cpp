@@ -8,10 +8,37 @@
 
 #import "ShaderProgram.h"
 
-void ShaderProgram::loadShader(unsigned int shaderType, const char *fileName) {
-	FILE *fp = fopen(fileName, "rb");
+ShaderProgram::ShaderProgram(const char* fileName) {
+    GLname = glCreateProgram();
+    loadShader(GL_VERTEX_SHADER, fileName);
+    loadShader(GL_FRAGMENT_SHADER, fileName);
+}
+
+ShaderProgram::~ShaderProgram() {
+    if(currentShaderProgram == this)
+        currentShaderProgram = NULL;
+    
+	glDeleteProgram(GLname);
+}
+
+void ShaderProgram::loadShader(unsigned int shaderType, const char* fileName) {
+    std::string url("Shaders/");
+    url += fileName;
+    switch(shaderType) {
+        case GL_VERTEX_SHADER:
+            url += ".vsh";
+        break;
+        case GL_FRAGMENT_SHADER:
+            url += ".fsh";
+        break;
+        default:
+            printf("Unsupported shader type: %d.", shaderType);
+            return;
+    }
+    
+	FILE *fp = fopen(url.c_str(), "rb");
 	if(!fp) {
-		printf("The file %s couldn't be found.", fileName);
+		printf("The file %s couldn't be found.", url.c_str());
 		return;
 	}
 	fseek(fp, 0, SEEK_END);
@@ -35,17 +62,6 @@ void ShaderProgram::loadShader(unsigned int shaderType, const char *fileName) {
 	}
 	glAttachShader(GLname, shaderId);
     glDeleteShader(shaderId);
-}
-
-ShaderProgram::ShaderProgram () {
-    GLname = glCreateProgram();
-}
-
-ShaderProgram::~ShaderProgram () {
-    if(currentShaderProgram == this)
-        currentShaderProgram = NULL;
-    
-	glDeleteProgram(GLname);
 }
 
 void ShaderProgram::addAttribute(unsigned int index, const char* attributeName) {

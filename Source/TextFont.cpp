@@ -21,9 +21,14 @@ TextFont::~TextFont() {
 
 void TextFont::loadTTF(const char* fileName) {
     if(ttf) return;
-    ttf = TTF_OpenFont(fileName, size);
+    
+    std::string url("Fonts/");
+    url += fileName;
+    url += ".ttf";
+    
+    ttf = TTF_OpenFont(url.c_str(), size);
     if(ttf == NULL) {
-        printf("Unable to load font %s:\nERROR: %s\n", fileName, TTF_GetError());
+        printf("Unable to load font %s:\nERROR: %s\n", url.c_str(), TTF_GetError());
         return;
     }
 }

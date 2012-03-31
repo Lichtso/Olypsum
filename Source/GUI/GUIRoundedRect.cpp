@@ -142,11 +142,16 @@ void GUIRoundedRect::drawInTexture() {
     delete [] pixels;
 }
 
-void GUIRoundedRect::drawOnScreen(GUIClipRect& clipRect) {
+void GUIRoundedRect::drawOnScreen(bool fliped, int posX, int posY, GUIClipRect& parentClipRect) {
+    GUIClipRect clipRect;
+    clipRect.minPosX = max(parentClipRect.minPosX, posX-width);
+    clipRect.minPosY = max(parentClipRect.minPosY, posY-height);
+    clipRect.maxPosX = min(parentClipRect.maxPosX, posX+width);
+    clipRect.maxPosY = min(parentClipRect.maxPosY, posY+height);
     if(clipRect.minPosX > clipRect.maxPosX || clipRect.minPosY > clipRect.maxPosY) return;
     
-    Vector3 minFactor(0.5+0.5*clipRect.minPosX/width, 0.5-0.5*clipRect.maxPosY/height, 0.0),
-    maxFactor(0.5+0.5*clipRect.maxPosX/width, 0.5-0.5*clipRect.minPosY/height, 0.0);
+    Vector3 minFactor(0.5+0.5*(clipRect.minPosX-posX)/width, 0.5-0.5*(clipRect.maxPosY-posY)/height, 0.0),
+            maxFactor(0.5+0.5*(clipRect.maxPosX-posX)/width, 0.5-0.5*(clipRect.minPosY-posY)/height, 0.0);
     
     float vertices[] = {
         clipRect.maxPosX, clipRect.minPosY,

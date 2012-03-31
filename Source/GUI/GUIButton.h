@@ -37,8 +37,9 @@ class GUIButton : public GUIView {
     GUIButtonState state;
     void (*onClick)(GUIButton*);
     GUIButton();
+    ~GUIButton();
     void updateContent();
-    void draw(Matrix4& parentTransform, GUIClipRect* parentClipRect);
+    void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);
     void handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);

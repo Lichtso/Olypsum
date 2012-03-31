@@ -20,6 +20,11 @@ GUIButton::GUIButton() {
     roundedCorners = (GUICorners) (GUITopLeftCorner | GUITopRightCorner | GUIBottomLeftCorner | GUIBottomRightCorner);
 }
 
+GUIButton::~GUIButton() {
+    if(texture)
+        glDeleteTextures(1, &texture);
+}
+
 void GUIButton::updateContent() {
     if(autoSize) {
         width = 12+paddingX;
@@ -182,23 +187,23 @@ void GUIButton::updateContent() {
     roundedRect.drawInTexture();
 }
 
-void GUIButton::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
+void GUIButton::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     if(!texture) updateContent();
     
+    GUIClipRect clipRect;
+    if(!getLimSize(clipRect, parentClipRect)) return;
     modelMat = parentTransform;
     modelMat.translate(Vector3(posX, posY, 0.0));
-    GUIClipRect clipRect;
-    getLimSize(parentClipRect, &clipRect);
     
     GUIRoundedRect roundedRect;
     roundedRect.texture = &texture;
     roundedRect.width = width;
     roundedRect.height = height;
-    roundedRect.drawOnScreen(clipRect);
+    roundedRect.drawOnScreen(false, 0, 0, clipRect);
     
     for(unsigned int i = 0; i < children.size(); i ++)
-        children[i]->draw(modelMat, &clipRect);
+        children[i]->draw(modelMat, clipRect);
 }
 
 bool GUIButton::handleMouseDown(int mouseX, int mouseY) {

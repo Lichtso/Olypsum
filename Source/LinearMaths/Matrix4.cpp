@@ -152,23 +152,7 @@ Matrix4 Matrix4::operator*(const Matrix4& b) {
     a.pos = Vector3(pos.x*b.x.x+pos.y*b.y.x+pos.z*b.z.x+pos.w*b.pos.x,
                     pos.x*b.x.y+pos.y*b.y.y+pos.z*b.z.y+pos.w*b.pos.y,
                     pos.x*b.x.z+pos.y*b.y.z+pos.z*b.z.z+pos.w*b.pos.z,
-                    pos.x*b.x.w+pos.y*b.y.w+pos.z*b.z.w+pos.w*b.pos.w);/*
-    a.x = Vector3(x.x*b.x.x+y.x*b.x.y+z.x*b.x.z+pos.x*b.x.w,
-                  x.x*b.y.x+y.x*b.y.y+z.x*b.y.z+pos.x*b.y.w,
-                  x.x*b.z.x+y.x*b.z.y+z.x*b.z.z+pos.x*b.z.w,
-                  x.x*b.pos.x+y.x*b.pos.y+z.x*b.pos.z+pos.x*b.pos.w);
-    a.y = Vector3(x.y*b.x.x+y.y*b.x.y+z.y*b.x.z+pos.y*b.x.w,
-                  x.y*b.y.x+y.y*b.y.y+z.y*b.y.z+pos.y*b.y.w,
-                  x.y*b.z.x+y.y*b.z.y+z.y*b.z.z+pos.y*b.z.w,
-                  x.y*b.pos.x+y.y*b.pos.y+z.y*b.pos.z+pos.y*b.pos.w);
-    a.z = Vector3(x.z*b.x.x+y.z*b.x.y+z.z*b.x.z+pos.z*b.x.w,
-                  x.z*b.y.x+y.z*b.y.y+z.z*b.y.z+pos.z*b.y.w,
-                  x.z*b.z.x+y.z*b.z.y+z.z*b.z.z+pos.z*b.z.w,
-                  x.z*b.pos.x+y.z*b.pos.y+z.z*b.pos.z+pos.z*b.pos.w);
-    a.pos = Vector3(x.w*b.x.x+y.w*b.x.y+z.w*b.x.z+pos.w*b.x.w,
-                    x.w*b.y.x+y.w*b.y.y+z.w*b.y.z+pos.w*b.y.w,
-                    x.w*b.z.x+y.w*b.z.y+z.w*b.z.z+pos.w*b.z.w,
-                    x.w*b.pos.x+y.w*b.pos.y+z.w*b.pos.z+pos.w*b.pos.w);*/
+                    pos.x*b.x.w+pos.y*b.y.w+pos.z*b.z.w+pos.w*b.pos.w);
     return a;
 }
 

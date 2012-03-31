@@ -14,14 +14,6 @@
 		1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254114F2559600F198A7 /* OpenGL.framework */; };
 		1118254414F2559B00F198A7 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254314F2559B00F198A7 /* OpenAL.framework */; };
 		1118254614F255A100F198A7 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254514F255A100F198A7 /* SDL.framework */; };
-		11273821151E06B800E5BFED /* font.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 112737D1151E06B800E5BFED /* font.ttf */; };
-		11273822151E06B800E5BFED /* logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 112737D3151E06B800E5BFED /* logo.png */; };
-		11273823151E06B800E5BFED /* main.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 112737D6151E06B800E5BFED /* main.fsh */; };
-		11273824151E06B900E5BFED /* main.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 112737D7151E06B800E5BFED /* main.vsh */; };
-		11273825151E06B900E5BFED /* shadow.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 112737D8151E06B800E5BFED /* shadow.fsh */; };
-		11273826151E06B900E5BFED /* shadow.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 112737D9151E06B800E5BFED /* shadow.vsh */; };
-		11273827151E06B900E5BFED /* sprite.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 112737DA151E06B800E5BFED /* sprite.fsh */; };
-		11273828151E06B900E5BFED /* sprite.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 112737DB151E06B800E5BFED /* sprite.vsh */; };
 		11273829151E06B900E5BFED /* AppMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112737DE151E06B800E5BFED /* AppMain.cpp */; };
 		1127382A151E06B900E5BFED /* Cam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112737E0151E06B800E5BFED /* Cam.cpp */; };
 		1127382B151E06B900E5BFED /* GUIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112737E3151E06B800E5BFED /* GUIButton.cpp */; };
@@ -54,6 +46,12 @@
 		112DC3C914F2D35F00C7F7F7 /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 112DC3C814F2D35F00C7F7F7 /* SDL_image.framework */; };
 		112DC3CC14F2D36900C7F7F7 /* SDL_net.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 112DC3CB14F2D36900C7F7F7 /* SDL_net.framework */; };
 		112DC3CE14F2D37400C7F7F7 /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 112DC3CD14F2D37400C7F7F7 /* SDL_ttf.framework */; };
+		117C88FB151E1347003889EF /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = 117C88F6151E1347003889EF /* Fonts */; };
+		117C88FC151E1347003889EF /* Images in Resources */ = {isa = PBXBuildFile; fileRef = 117C88F7151E1347003889EF /* Images */; };
+		117C88FD151E1347003889EF /* Languages in Resources */ = {isa = PBXBuildFile; fileRef = 117C88F8151E1347003889EF /* Languages */; };
+		117C88FE151E1347003889EF /* Shaders in Resources */ = {isa = PBXBuildFile; fileRef = 117C88F9151E1347003889EF /* Shaders */; };
+		117C88FF151E1347003889EF /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = 117C88FA151E1347003889EF /* Sounds */; };
+		11F4A11E15263D1F003C118E /* GUIClipRect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11F4A11D15263D1F003C118E /* GUIClipRect.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -68,14 +66,6 @@
 		1118254114F2559600F198A7 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		1118254314F2559B00F198A7 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 		1118254514F255A100F198A7 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = Library/Frameworks/SDL.framework; sourceTree = SDKROOT; };
-		112737D1151E06B800E5BFED /* font.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = font.ttf; sourceTree = "<group>"; };
-		112737D3151E06B800E5BFED /* logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = logo.png; sourceTree = "<group>"; };
-		112737D6151E06B800E5BFED /* main.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = main.fsh; sourceTree = "<group>"; };
-		112737D7151E06B800E5BFED /* main.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = main.vsh; sourceTree = "<group>"; };
-		112737D8151E06B800E5BFED /* shadow.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = shadow.fsh; sourceTree = "<group>"; };
-		112737D9151E06B800E5BFED /* shadow.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = shadow.vsh; sourceTree = "<group>"; };
-		112737DA151E06B800E5BFED /* sprite.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = sprite.fsh; sourceTree = "<group>"; };
-		112737DB151E06B800E5BFED /* sprite.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = sprite.vsh; sourceTree = "<group>"; };
 		112737DE151E06B800E5BFED /* AppMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppMain.cpp; sourceTree = "<group>"; };
 		112737DF151E06B800E5BFED /* AppMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppMain.h; sourceTree = "<group>"; };
 		112737E0151E06B800E5BFED /* Cam.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Cam.cpp; sourceTree = "<group>"; };
@@ -140,6 +130,13 @@
 		112DC3C814F2D35F00C7F7F7 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = Library/Frameworks/SDL_image.framework; sourceTree = SDKROOT; };
 		112DC3CB14F2D36900C7F7F7 /* SDL_net.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_net.framework; path = Library/Frameworks/SDL_net.framework; sourceTree = SDKROOT; };
 		112DC3CD14F2D37400C7F7F7 /* SDL_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_ttf.framework; path = Library/Frameworks/SDL_ttf.framework; sourceTree = SDKROOT; };
+		117C88F6151E1347003889EF /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fonts; sourceTree = "<group>"; };
+		117C88F7151E1347003889EF /* Images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Images; sourceTree = "<group>"; };
+		117C88F8151E1347003889EF /* Languages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Languages; sourceTree = "<group>"; };
+		117C88F9151E1347003889EF /* Shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Shaders; sourceTree = "<group>"; };
+		117C88FA151E1347003889EF /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sounds; sourceTree = "<group>"; };
+		11F4A11D15263D1F003C118E /* GUIClipRect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIClipRect.cpp; sourceTree = "<group>"; };
+		11F4A12015263D5D003C118E /* GUIClipRect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIClipRect.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -212,56 +209,13 @@
 		112737CF151E06B800E5BFED /* Resoucres */ = {
 			isa = PBXGroup;
 			children = (
-				112737D0151E06B800E5BFED /* Fonts */,
-				112737D2151E06B800E5BFED /* Images */,
-				112737D4151E06B800E5BFED /* Languages */,
-				112737D5151E06B800E5BFED /* Shaders */,
-				112737DC151E06B800E5BFED /* Sounds */,
+				117C88F6151E1347003889EF /* Fonts */,
+				117C88F7151E1347003889EF /* Images */,
+				117C88F8151E1347003889EF /* Languages */,
+				117C88F9151E1347003889EF /* Shaders */,
+				117C88FA151E1347003889EF /* Sounds */,
 			);
 			path = Resoucres;
-			sourceTree = "<group>";
-		};
-		112737D0151E06B800E5BFED /* Fonts */ = {
-			isa = PBXGroup;
-			children = (
-				112737D1151E06B800E5BFED /* font.ttf */,
-			);
-			path = Fonts;
-			sourceTree = "<group>";
-		};
-		112737D2151E06B800E5BFED /* Images */ = {
-			isa = PBXGroup;
-			children = (
-				112737D3151E06B800E5BFED /* logo.png */,
-			);
-			path = Images;
-			sourceTree = "<group>";
-		};
-		112737D4151E06B800E5BFED /* Languages */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Languages;
-			sourceTree = "<group>";
-		};
-		112737D5151E06B800E5BFED /* Shaders */ = {
-			isa = PBXGroup;
-			children = (
-				112737D6151E06B800E5BFED /* main.fsh */,
-				112737D7151E06B800E5BFED /* main.vsh */,
-				112737D8151E06B800E5BFED /* shadow.fsh */,
-				112737D9151E06B800E5BFED /* shadow.vsh */,
-				112737DA151E06B800E5BFED /* sprite.fsh */,
-				112737DB151E06B800E5BFED /* sprite.vsh */,
-			);
-			path = Shaders;
-			sourceTree = "<group>";
-		};
-		112737DC151E06B800E5BFED /* Sounds */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Sounds;
 			sourceTree = "<group>";
 		};
 		112737DD151E06B800E5BFED /* Source */ = {
@@ -293,6 +247,8 @@
 		112737E2151E06B800E5BFED /* GUI */ = {
 			isa = PBXGroup;
 			children = (
+				11F4A12015263D5D003C118E /* GUIClipRect.h */,
+				11F4A11D15263D1F003C118E /* GUIClipRect.cpp */,
 				112737EE151E06B800E5BFED /* GUIRect.h */,
 				112737ED151E06B800E5BFED /* GUIRect.cpp */,
 				112737F0151E06B800E5BFED /* GUIRoundedRect.h */,
@@ -414,16 +370,13 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				11273823151E06B800E5BFED /* main.fsh in Resources */,
-				11273824151E06B900E5BFED /* main.vsh in Resources */,
-				11273825151E06B900E5BFED /* shadow.fsh in Resources */,
-				11273826151E06B900E5BFED /* shadow.vsh in Resources */,
-				11273827151E06B900E5BFED /* sprite.fsh in Resources */,
-				11273828151E06B900E5BFED /* sprite.vsh in Resources */,
-				11273821151E06B800E5BFED /* font.ttf in Resources */,
-				11273822151E06B800E5BFED /* logo.png in Resources */,
 				1127383F151E06B900E5BFED /* InfoPlist.strings in Resources */,
 				11273840151E06B900E5BFED /* MainMenu.xib in Resources */,
+				117C88FB151E1347003889EF /* Fonts in Resources */,
+				117C88FC151E1347003889EF /* Images in Resources */,
+				117C88FD151E1347003889EF /* Languages in Resources */,
+				117C88FE151E1347003889EF /* Shaders in Resources */,
+				117C88FF151E1347003889EF /* Sounds in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -461,6 +414,7 @@
 				11273844151E06B900E5BFED /* ShaderProgram.cpp in Sources */,
 				11273845151E06B900E5BFED /* TextFont.cpp in Sources */,
 				11273846151E06B900E5BFED /* Texture.cpp in Sources */,
+				11F4A11E15263D1F003C118E /* GUIClipRect.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -12,11 +12,19 @@
 #define GUIScrollView_h
 
 class GUIScrollView : public GUIView {
+    GLuint textureV, textureH;
+    int mouseDragPosX, mouseDragPosY;
+    int getBarWidth();
+    int getBarHeight();
+    int getBarPosX();
+    int getBarPosY();
     public:
+    bool hideSliderX, hideSliderY;
     int scrollPosX, scrollPosY, scrollWidth, scrollHeight;
     GUIScrollView();
+    ~GUIScrollView();
     void updateContent();
-    void draw(Matrix4& parentTransform, GUIClipRect* parentClipRect);
+    void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);
     void handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);

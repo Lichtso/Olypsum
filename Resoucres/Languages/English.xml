@@ -1,0 +1,9 @@
+<language>
+	<title>English</title>
+	<localization>
+		<entry key="olypsum">Olypsum</entry>
+		<entry key="newGame">New Game</entry>
+		<entry key="loadGame">Load Game</entry>
+		<entry key="loading">Loading ...</entry>
+	</localization>
+</language>

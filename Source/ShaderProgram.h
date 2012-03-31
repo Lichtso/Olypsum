@@ -20,7 +20,7 @@
 class ShaderProgram {
     public:
 	GLuint GLname;
-	ShaderProgram();
+	ShaderProgram(const char* fileName);
 	~ShaderProgram();
 	void loadShader(unsigned int shaderType, const char* fileName);
     void addAttribute(unsigned int index, const char* attributeName);

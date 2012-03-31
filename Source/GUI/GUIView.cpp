@@ -32,17 +32,18 @@ void GUIView::updateContent() {
         children[i]->updateContent();
 }
 
-void GUIView::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
+void GUIView::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     
     GUIClipRect clipRect;
-    getLimSize(parentClipRect, &clipRect);
-    if(clipRect.minPosX > clipRect.maxPosX || clipRect.minPosY > clipRect.maxPosY) return;
+    if(!getLimSize(clipRect, parentClipRect)) return;
     
     Matrix4 transform(parentTransform);
     transform.translate(Vector3(posX, posY, 0.0));
     for(unsigned int i = 0; i < children.size(); i ++)
-        children[i]->draw(transform, &clipRect);
+        children[i]->draw(transform, clipRect);
+    
+    GUIRect::draw(parentTransform, parentClipRect);
 }
 
 bool GUIView::handleMouseDown(int mouseX, int mouseY) {
@@ -83,13 +84,14 @@ GUIScreenView::GUIScreenView() {
     height = currentCam->viewport[3] >> 1;
 }
 
-void GUIScreenView::getLimSize(GUIClipRect* clipRect) {
+bool GUIScreenView::getLimSize(GUIClipRect& clipRect) {
     width = currentCam->viewport[2] >> 1;
     height = currentCam->viewport[3] >> 1;
-    clipRect->minPosX = -width;
-    clipRect->minPosY = -height;
-    clipRect->maxPosX = width;
-    clipRect->maxPosY = height;
+    clipRect.minPosX = -width;
+    clipRect.minPosY = -height;
+    clipRect.maxPosX = width;
+    clipRect.maxPosY = height;
+    return (clipRect.minPosX <= clipRect.maxPosX && clipRect.minPosY <= clipRect.maxPosY);
 }
 
 void GUIScreenView::updateContent() {
@@ -104,8 +106,7 @@ void GUIScreenView::draw() {
     if(!visible) return;
     
     GUIClipRect clipRect;
-    getLimSize(&clipRect);
-    if(clipRect.minPosX > clipRect.maxPosX || clipRect.minPosY > clipRect.maxPosY) return;
+    if(!getLimSize(clipRect)) return;
     
     glDisable(GL_DEPTH_TEST);
     guiCam->use();
@@ -115,7 +116,7 @@ void GUIScreenView::draw() {
     transform.setIdentity();
     transform.translate(Vector3(0.0, 0.0, -1.0));
     for(unsigned int i = 0; i < children.size(); i ++)
-        children[i]->draw(transform, &clipRect);
+        children[i]->draw(transform, clipRect);
     
     glDisableVertexAttribArray(VERTEX_ATTRIBUTE);
     glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);

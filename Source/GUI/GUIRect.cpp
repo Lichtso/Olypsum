@@ -28,29 +28,31 @@ void GUIRect::updateFirstResponderStatus() {
     
 }
 
-void GUIRect::getLimSize(GUIClipRect* parentClipRect, GUIClipRect* clipRect) {
-    clipRect->minPosX = -width;
-    clipRect->minPosY = -height;
-    clipRect->maxPosX = width;
-    clipRect->maxPosY = height;
+bool GUIRect::getLimSize(GUIClipRect& clipRect, GUIClipRect& parentClipRect) {
+    clipRect.minPosX = -width;
+    clipRect.minPosY = -height;
+    clipRect.maxPosX = width;
+    clipRect.maxPosY = height;
     
-    if(posX+clipRect->minPosX < parentClipRect->minPosX)
-        clipRect->minPosX = parentClipRect->minPosX-posX;
-    if(posY+clipRect->minPosY < parentClipRect->minPosY)
-        clipRect->minPosY = parentClipRect->minPosY-posY;
-    if(posX+clipRect->maxPosX > parentClipRect->maxPosX)
-        clipRect->maxPosX = parentClipRect->maxPosX-posX;
-    if(posY+clipRect->maxPosY > parentClipRect->maxPosY)
-        clipRect->maxPosY = parentClipRect->maxPosY-posY;
+    if(parentClipRect.minPosX > posX-width)
+        clipRect.minPosX = parentClipRect.minPosX-posX;
+    if(parentClipRect.minPosY > posY-height)
+        clipRect.minPosY = parentClipRect.minPosY-posY;
+    if(parentClipRect.maxPosX < posX+width)
+        clipRect.maxPosX = parentClipRect.maxPosX-posX;
+    if(parentClipRect.maxPosY < posY+height)
+        clipRect.maxPosY = parentClipRect.maxPosY-posY;
+    
+    return (clipRect.minPosX <= clipRect.maxPosX && clipRect.minPosY <= clipRect.maxPosY);
 }
 
 void GUIRect::updateContent() {
     
 }
 
-void GUIRect::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
+void GUIRect::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     GUIClipRect clipRect;
-    getLimSize(parentClipRect, &clipRect);
+    if(!getLimSize(clipRect, parentClipRect)) return;
     
     float vertices[] = {
         clipRect.maxPosX, clipRect.minPosY,

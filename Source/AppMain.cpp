@@ -62,28 +62,23 @@ void AppMain(int argc, char *argv[]) {
     guiCam->calculate();
     
     //Init Resources
+    loadLocalization("English");
     mainFont = new TextFont();
     mainFont->size = 20;
-    mainFont->loadTTF("font.ttf");
+    mainFont->loadTTF("font");
     titleFont = new TextFont();
     titleFont->size = 30;
-    titleFont->loadTTF("font.ttf");
-    mainShaderProgram = new ShaderProgram();
-    mainShaderProgram->loadShader(GL_VERTEX_SHADER, "main.vsh");
-    mainShaderProgram->loadShader(GL_FRAGMENT_SHADER, "main.fsh");
+    titleFont->loadTTF("font");
+    mainShaderProgram = new ShaderProgram("main");
     mainShaderProgram->addAttribute(VERTEX_ATTRIBUTE, "vertex");
     mainShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     mainShaderProgram->addAttribute(NORMAL_ATTRIBUTE, "normal");
     mainShaderProgram->link();
-    spriteShaderProgram = new ShaderProgram();
-    spriteShaderProgram->loadShader(GL_VERTEX_SHADER, "sprite.vsh");
-    spriteShaderProgram->loadShader(GL_FRAGMENT_SHADER, "sprite.fsh");
+    spriteShaderProgram = new ShaderProgram("sprite");
     spriteShaderProgram->addAttribute(VERTEX_ATTRIBUTE, "vertex");
     spriteShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     spriteShaderProgram->link();
-    shadowShaderProgram = new ShaderProgram();
-    shadowShaderProgram->loadShader(GL_VERTEX_SHADER, "shadow.vsh");
-    shadowShaderProgram->loadShader(GL_FRAGMENT_SHADER, "shadow.fsh");
+    shadowShaderProgram = new ShaderProgram("shadow");
     shadowShaderProgram->addAttribute(VERTEX_ATTRIBUTE, "vertex");
     shadowShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shadowShaderProgram->link();
@@ -93,13 +88,15 @@ void AppMain(int argc, char *argv[]) {
     const char* buttonLabels[] = { "Alpha", "Beta", "Gamma", "Delta", "Epsilon" };
     
     GUIScrollView* scrollView = new GUIScrollView();
-    scrollView->width = scrollView->scrollWidth = 500;
+    scrollView->width = 500;
+    scrollView->scrollWidth = 1000;
     scrollView->height = 300;
     scrollView->scrollHeight = 1000;
     currentScreenView->addChild(scrollView);
     
     GUITabs* tabs = new GUITabs();
     tabs->orientation = GUIOrientation_Bottom;
+    tabs->posX = -300;
     tabs->posY = 200;
     for(int i = 0; i < 5; i ++) {
         GUIButton* button = new GUIButton();

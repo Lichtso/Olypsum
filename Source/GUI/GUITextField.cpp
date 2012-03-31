@@ -21,6 +21,8 @@ GUITextField::GUITextField() {
 }
 
 GUITextField::~GUITextField() {
+    if(texture)
+        glDeleteTextures(1, &texture);
     delete label;
 }
 
@@ -51,22 +53,22 @@ void GUITextField::updateContent() {
     roundedRect.drawInTexture();
 }
 
-void GUITextField::draw(Matrix4& parentTransform, GUIClipRect* parentClipRect) {
+void GUITextField::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     if(!texture) updateContent();
     
+    GUIClipRect clipRect;
+    if(!getLimSize(clipRect, parentClipRect)) return;
     modelMat = parentTransform;
     modelMat.translate(Vector3(posX, posY, 0.0));
-    GUIClipRect clipRect;
-    getLimSize(parentClipRect, &clipRect);
     
     GUIRoundedRect roundedRect;
     roundedRect.texture = &texture;
     roundedRect.width = width;
     roundedRect.height = height;
-    roundedRect.drawOnScreen(clipRect);
+    roundedRect.drawOnScreen(false, 0, 0, clipRect);
     
-    label->draw(modelMat, &clipRect);
+    label->draw(modelMat, clipRect);
 }
 
 bool GUITextField::handleMouseDown(int mouseX, int mouseY) {

@@ -24,7 +24,10 @@ Texture::~Texture() {
 
 void Texture::loadImageInRAM(const char* fileName) {
     if(surface) return;
-    surface = IMG_Load(fileName);
+    
+    std::string url("Images/");
+    url += fileName;
+    surface = IMG_Load(url.c_str());
     
     if(!surface) {
         printf("ERROR: %s\n", IMG_GetError());

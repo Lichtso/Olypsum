@@ -16,15 +16,16 @@ class GUISlider : public GUIRect {
     int mouseDragPos;
     bool highlighted;
     void generateBar(bool filled);
-    void drawBar(GUIClipRect* clipRect, unsigned int barLength, bool filled);
+    void drawBar(GUIClipRect& clipRect, unsigned int barLength, bool filled);
     public:
     float value;
     bool enabled;
     GUIOrientation orientation;
     void (*onChange)(GUISlider*);
     GUISlider();
+    ~GUISlider();
     void updateContent();
-    void draw(Matrix4& parentTransform, GUIClipRect* parentClipRect);
+    void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);
     void handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);

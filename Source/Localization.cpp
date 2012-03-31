@@ -8,7 +8,8 @@
 
 #include "Localization.h"
 
-std::string languagesDir("Languages/"), languagesExtension(".txt");
+#define xmlUsedCharType char
+std::string languagesDir("Languages/"), languagesExtension(".xml");
 
 std::vector<std::string> getLocalizableLanguages() {
     std::vector<std::string> languages;
@@ -32,9 +33,11 @@ std::vector<std::string> getLocalizableLanguages() {
     return languages;
 }
 
-void loadLocalization(char* language) {
+void loadLocalization(const char* language) {
+    localization.name = std::string(language);
+    
     std::string url(languagesDir);
-    url += std::string(language);
+    url += localization.name;
     url += languagesExtension;
     
     FILE* fp = fopen(url.c_str(), "r");
@@ -42,43 +45,51 @@ void loadLocalization(char* language) {
         printf("Error: No localizations found for language %s.\n", language);
         return;
     }
+    localization.strings.clear();
     
     fseek(fp, 0, SEEK_END);
 	long dataSize = ftell(fp);
 	rewind(fp);
-	char data[dataSize];
+	char data[dataSize+1];
 	fread(data, 1, dataSize, fp);
     fclose(fp);
+    data[dataSize] = 0;
     
-    localizationStrings.clear();
+    rapidxml::xml_document<xmlUsedCharType> doc;
+    rapidxml::xml_node<xmlUsedCharType> *rootNode, *titleNode, *localizationNode, *entryNode;
+    rapidxml::xml_attribute<xmlUsedCharType> *entryKeyAttribute;
+    doc.parse<0>(data);
     
-    unsigned long line = 0;
-    char *lastPos = data, *key = NULL;
-    for(char* pos = data; pos < data+dataSize; pos ++) {
-        if(*pos != '\n') continue;
-        if(pos-lastPos < 3) {
-            printf("Warning: Too short key or value in language file %s, line %lu.\n", language, line);
-            continue;
-        }
-        *pos = 0;
-        line ++;
-        if(key == NULL) {
-            key = lastPos;
-        }else{
-            localizationStrings[std::string(key)] = std::string(lastPos+1);
-            key = NULL;
-        }
-        lastPos = pos+1;
+    rootNode = doc.first_node("language");
+    if(!rootNode) goto endParsingXML;
+    
+    titleNode = rootNode->first_node("title");
+    if(!titleNode) goto endParsingXML;
+    localization.title = std::string(titleNode->value());
+    
+    localizationNode = rootNode->first_node("localization");
+    if(!localizationNode) goto endParsingXML;
+    
+    entryNode = localizationNode->first_node("entry");
+    while(entryNode) {
+        entryKeyAttribute = entryNode->first_attribute("key");
+        if(!entryKeyAttribute) goto endParsingXML;
+        
+        localization.strings[std::string(entryKeyAttribute->value())] = std::string(entryNode->value());
+        entryNode = entryNode->next_sibling("entry");
     }
+    
+    endParsingXML:
+    doc.clear();
 }
 
-const char* localizeString(char* key) {
-    std::map<std::string, std::string>::iterator iterator = localizationStrings.find(std::string(key));
-    if(iterator == localizationStrings.end()) {
+const char* localizeString(const char* key) {
+    std::map<std::string, std::string>::iterator iterator = localization.strings.find(std::string(key));
+    if(iterator == localization.strings.end()) {
         printf("Error: No localization found for key: %s.\n", key);
         return key;
     }
     return iterator->second.c_str();
 }
 
-std::map<std::string, std::string> localizationStrings;
+Localization localization;
