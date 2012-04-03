@@ -89,14 +89,13 @@ void AppMain(int argc, char *argv[]) {
     
     GUIScrollView* scrollView = new GUIScrollView();
     scrollView->width = 500;
-    scrollView->scrollWidth = 1000;
+    scrollView->scrollWidth = 500;
     scrollView->height = 300;
     scrollView->scrollHeight = 1000;
     currentScreenView->addChild(scrollView);
     
     GUITabs* tabs = new GUITabs();
     tabs->orientation = GUIOrientation_Bottom;
-    tabs->posX = -300;
     tabs->posY = 200;
     for(int i = 0; i < 5; i ++) {
         GUIButton* button = new GUIButton();
@@ -117,16 +116,18 @@ void AppMain(int argc, char *argv[]) {
     }*/
     
     GUIProgressBar* slider = new GUIProgressBar();
-    slider->posX = -50;
+    slider->width = 200;
+    slider->height = 10;
+    slider->orientation = GUIOrientation_Horizontal;
     scrollView->addChild(slider);
     
     GUISlider* sliderB = new GUISlider();
-    sliderB->orientation = GUIOrientation_Vertical;
-    sliderB->posX = -300;
+    sliderB->orientation = GUIOrientation_Horizontal;
+    sliderB->posX = -330;
     scrollView->addChild(sliderB);
     
     GUITextField* textField = new GUITextField();
-    textField->posX = 300;
+    textField->posX = 330;
     scrollView->addChild(textField);
     
     GUILabel* labelD = new GUILabel();

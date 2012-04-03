@@ -34,6 +34,7 @@ void GUIProgressBar::generateBar(bool filled) {
         roundedRect.width = height;
         roundedRect.height = width;
     }
+    
     roundedRect.cornerRadius = 6;
     roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 160;
     if(filled) {
@@ -60,21 +61,19 @@ void GUIProgressBar::drawBar(GUIClipRect clipRect, bool filled) {
     
     GUIRoundedRect roundedRect;
     roundedRect.texture = (filled) ? &textureL : &textureR;
+    roundedRect.width = width;
+    roundedRect.height = height;
     if(orientation & GUIOrientation_Horizontal) {
-        roundedRect.width = width;
-        roundedRect.height = height;
         if(filled)
             clipRect.maxPosX = min(clipRect.maxPosX, splitPos);
         else
             clipRect.minPosX = max(clipRect.minPosX, splitPos);
         roundedRect.drawOnScreen(false, 0, 0, clipRect);
     }else{
-        roundedRect.width = height;
-        roundedRect.height = width;
         if(filled)
             clipRect.maxPosY = min(clipRect.maxPosY, splitPos);
         else
-            clipRect.minPosY = max(clipRect.maxPosY, splitPos);
+            clipRect.minPosY = max(clipRect.minPosY, splitPos);
         roundedRect.drawOnScreen(true, 0, 0, clipRect);
     }
 }

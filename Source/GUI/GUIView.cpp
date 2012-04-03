@@ -42,8 +42,6 @@ void GUIView::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     transform.translate(Vector3(posX, posY, 0.0));
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->draw(transform, clipRect);
-    
-    GUIRect::draw(parentTransform, parentClipRect);
 }
 
 bool GUIView::handleMouseDown(int mouseX, int mouseY) {

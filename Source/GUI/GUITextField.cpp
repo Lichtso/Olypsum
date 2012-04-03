@@ -112,6 +112,12 @@ bool GUITextField::handleKeyDown(SDL_keysym* key) {
         if(label->text.size() == 0) return true;
         label->text = label->text.substr(0, label->text.size()-1);
         label->updateContent();
+    }else if(key->sym == SDLK_TAB || key->sym == SDLK_ESCAPE) {
+        GUIScreenView* screenView = (GUIScreenView*)getRootParent();
+        if(!screenView || screenView->firstResponder != this) return false;
+        updateFirstResponderStatus();
+        screenView->firstResponder = NULL;
+        updateContent();
     }else if((key->unicode & 0xFF00) == 0 && (key->unicode & 0x00FF) > 0) {
         char str[] = { (char)(key->unicode & 0xFF), 0 };
         label->text += str;

@@ -31,7 +31,7 @@ class GUIRoundedRect {
     void setBorderPixel(unsigned int x, unsigned int y);
     void setInnerShadowRect(unsigned int minX, unsigned int maxX, unsigned int minY, unsigned int maxY);
     void drawInTexture();
-    void drawOnScreen(bool fliped, int posX, int posY, GUIClipRect& parentClipRect);
+    void drawOnScreen(bool transposed, int posX, int posY, GUIClipRect& parentClipRect);
 };
 
 #endif

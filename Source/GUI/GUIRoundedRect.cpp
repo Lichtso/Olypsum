@@ -142,7 +142,7 @@ void GUIRoundedRect::drawInTexture() {
     delete [] pixels;
 }
 
-void GUIRoundedRect::drawOnScreen(bool fliped, int posX, int posY, GUIClipRect& parentClipRect) {
+void GUIRoundedRect::drawOnScreen(bool transposed, int posX, int posY, GUIClipRect& parentClipRect) {
     GUIClipRect clipRect;
     clipRect.minPosX = max(parentClipRect.minPosX, posX-width);
     clipRect.minPosY = max(parentClipRect.minPosY, posY-height);
@@ -150,23 +150,37 @@ void GUIRoundedRect::drawOnScreen(bool fliped, int posX, int posY, GUIClipRect& 
     clipRect.maxPosY = min(parentClipRect.maxPosY, posY+height);
     if(clipRect.minPosX > clipRect.maxPosX || clipRect.minPosY > clipRect.maxPosY) return;
     
-    Vector3 minFactor(0.5+0.5*(clipRect.minPosX-posX)/width, 0.5-0.5*(clipRect.maxPosY-posY)/height, 0.0),
-            maxFactor(0.5+0.5*(clipRect.maxPosX-posX)/width, 0.5-0.5*(clipRect.minPosY-posY)/height, 0.0);
+    spriteShaderProgram->use();
+    
+    if(transposed) {
+        Vector3 minFactor(0.5-0.5*(clipRect.maxPosY-posY)/height, 0.5+0.5*(clipRect.minPosX-posX)/width, 0.0),
+                maxFactor(0.5-0.5*(clipRect.minPosY-posY)/height, 0.5+0.5*(clipRect.maxPosX-posX)/width, 0.0);
+        float texCoords[] = {
+            maxFactor.x, maxFactor.y,
+            minFactor.x, maxFactor.y,
+            minFactor.x, minFactor.y,
+            maxFactor.x, minFactor.y
+        };
+        spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 2*sizeof(float), texCoords);
+    }else{
+        Vector3 minFactor(0.5+0.5*(clipRect.minPosX-posX)/width, 0.5-0.5*(clipRect.maxPosY-posY)/height, 0.0),
+                maxFactor(0.5+0.5*(clipRect.maxPosX-posX)/width, 0.5-0.5*(clipRect.minPosY-posY)/height, 0.0);
+        float texCoords[] = {
+            maxFactor.x, maxFactor.y,
+            maxFactor.x, minFactor.y,
+            minFactor.x, minFactor.y,
+            minFactor.x, maxFactor.y
+        };
+        spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 2*sizeof(float), texCoords);
+    }
     
     float vertices[] = {
         clipRect.maxPosX, clipRect.minPosY,
-        maxFactor.x, maxFactor.y,
         clipRect.maxPosX, clipRect.maxPosY,
-        maxFactor.x, minFactor.y,
         clipRect.minPosX, clipRect.maxPosY,
-        minFactor.x, minFactor.y,
-        clipRect.minPosX, clipRect.minPosY,
-        minFactor.x, maxFactor.y
+        clipRect.minPosX, clipRect.minPosY
     };
-    
-    spriteShaderProgram->use();
-    spriteShaderProgram->setAttribute(VERTEX_ATTRIBUTE, 2, 4*sizeof(float), vertices);
-    spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 4*sizeof(float), &vertices[2]);
+    spriteShaderProgram->setAttribute(VERTEX_ATTRIBUTE, 2, 2*sizeof(float), vertices);
     glBindTexture(GL_TEXTURE_2D, *texture);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
