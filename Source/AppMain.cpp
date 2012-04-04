@@ -89,7 +89,7 @@ void AppMain(int argc, char *argv[]) {
     
     GUIScrollView* scrollView = new GUIScrollView();
     scrollView->width = 500;
-    scrollView->scrollWidth = 500;
+    scrollView->scrollWidth = 1000;
     scrollView->height = 300;
     scrollView->scrollHeight = 1000;
     currentScreenView->addChild(scrollView);

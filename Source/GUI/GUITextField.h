@@ -13,9 +13,13 @@
 
 class GUITextField : public GUIRect {
     GLuint texture;
+    unsigned char cursorDrawTick;
     bool highlighted;
-    bool isFirstResponder();
+    void removeChar();
+    void moveCursorLeft();
+    void moveCursorRight();
     public:
+    int cursorIndexX;
     GUILabel* label;
     bool enabled;
     void (*onFocus)(GUITextField*);
@@ -23,6 +27,7 @@ class GUITextField : public GUIRect {
     void (*onBlur)(GUITextField*);
     GUITextField();
     ~GUITextField();
+    void removeFirstResponderStatus();
     void updateContent();
     void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);

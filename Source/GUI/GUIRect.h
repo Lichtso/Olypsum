@@ -38,7 +38,8 @@ class GUIRect {
     int posX, posY, width, height;
     GUIRect();
     GUIRect* getRootParent();
-    virtual void updateFirstResponderStatus();
+    bool isFirstResponder();
+    virtual void removeFirstResponderStatus();
     virtual bool getLimSize(GUIClipRect& clipRect, GUIClipRect& parentClipRect);
     virtual void updateContent();
     virtual void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);

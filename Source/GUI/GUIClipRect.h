@@ -16,6 +16,7 @@ class GUIClipRect {
     int minPosX, minPosY, maxPosX, maxPosY;
     GUIClipRect();
     GUIClipRect(GUIClipRect const &);
+    bool getLimSize(int posX, int posY, int width, int height, GUIClipRect& parentClipRect);
     GUIClipRect& operator=(const GUIClipRect&);
 };
 

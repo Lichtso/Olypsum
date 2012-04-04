@@ -130,7 +130,10 @@ bool GUIScrollView::handleMouseDown(int mouseX, int mouseY) {
         return true;
     }
     
-    return GUIView::handleMouseDown(mouseX+scrollPosX, mouseY-scrollPosY);
+    for(int i = (int)children.size()-1; i >= 0; i --)
+        if(children[i]->handleMouseDown(mouseX-children[i]->posX+scrollPosX, mouseY-children[i]->posY-scrollPosY))
+            return true;
+    return false;
 }
 
 void GUIScrollView::handleMouseUp(int mouseX, int mouseY) {

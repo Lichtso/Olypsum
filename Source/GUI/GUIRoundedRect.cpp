@@ -181,6 +181,9 @@ void GUIRoundedRect::drawOnScreen(bool transposed, int posX, int posY, GUIClipRe
         clipRect.minPosX, clipRect.minPosY
     };
     spriteShaderProgram->setAttribute(VERTEX_ATTRIBUTE, 2, 2*sizeof(float), vertices);
-    glBindTexture(GL_TEXTURE_2D, *texture);
+    if(texture)
+        glBindTexture(GL_TEXTURE_2D, *texture);
+    else
+        glBindTexture(GL_TEXTURE_2D, 0);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }

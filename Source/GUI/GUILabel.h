@@ -20,12 +20,13 @@ enum GUITextAlign {
 struct GUILabelLine {
     GLuint texture;
     int posX, posY, width, height;
+    std::string text;
     GUIClipRect clipRect;
 };
 
 class GUILabel : public GUIRect {
-    std::vector<GUILabelLine> lines;
     public:
+    std::vector<GUILabelLine> lines;
     SDL_Color color;
     TextFont* font;
     bool autoSize;
@@ -36,6 +37,7 @@ class GUILabel : public GUIRect {
     ~GUILabel();
     void updateContent();
     void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
+    void getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int& posX, int& posY);
 };
 
 #endif

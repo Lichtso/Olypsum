@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#include "GUIRect.h"
+#include "GUIView.h"
 
 GUIRect::GUIRect() {
     type = GUIType_Rect;
@@ -24,26 +24,18 @@ GUIRect* GUIRect::getRootParent() {
     return node;
 }
 
-void GUIRect::updateFirstResponderStatus() {
+bool GUIRect::isFirstResponder() {
+    GUIScreenView* screenView = (GUIScreenView*)getRootParent();
+    if(!screenView || screenView->type != GUIType_ScreenView) return false;
+    return (screenView->firstResponder == this);
+}
+
+void GUIRect::removeFirstResponderStatus() {
     
 }
 
 bool GUIRect::getLimSize(GUIClipRect& clipRect, GUIClipRect& parentClipRect) {
-    clipRect.minPosX = -width;
-    clipRect.minPosY = -height;
-    clipRect.maxPosX = width;
-    clipRect.maxPosY = height;
-    
-    if(parentClipRect.minPosX > posX-width)
-        clipRect.minPosX = parentClipRect.minPosX-posX;
-    if(parentClipRect.minPosY > posY-height)
-        clipRect.minPosY = parentClipRect.minPosY-posY;
-    if(parentClipRect.maxPosX < posX+width)
-        clipRect.maxPosX = parentClipRect.maxPosX-posX;
-    if(parentClipRect.maxPosY < posY+height)
-        clipRect.maxPosY = parentClipRect.maxPosY-posY;
-    
-    return (clipRect.minPosX <= clipRect.maxPosX && clipRect.minPosY <= clipRect.maxPosY);
+    return clipRect.getLimSize(posX, posY, width, height, parentClipRect);
 }
 
 void GUIRect::updateContent() {
