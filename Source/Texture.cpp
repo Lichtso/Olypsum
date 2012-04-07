@@ -25,7 +25,7 @@ Texture::~Texture() {
 void Texture::loadImageInRAM(const char* fileName) {
     if(surface) return;
     
-    std::string url("Images/");
+    std::string url("Textures/");
     url += fileName;
     surface = IMG_Load(url.c_str());
     

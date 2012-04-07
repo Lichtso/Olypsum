@@ -46,7 +46,7 @@
 		112DC3CC14F2D36900C7F7F7 /* SDL_net.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 112DC3CB14F2D36900C7F7F7 /* SDL_net.framework */; };
 		112DC3CE14F2D37400C7F7F7 /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 112DC3CD14F2D37400C7F7F7 /* SDL_ttf.framework */; };
 		117C88FB151E1347003889EF /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = 117C88F6151E1347003889EF /* Fonts */; };
-		117C88FC151E1347003889EF /* Images in Resources */ = {isa = PBXBuildFile; fileRef = 117C88F7151E1347003889EF /* Images */; };
+		117C88FC151E1347003889EF /* Textures in Resources */ = {isa = PBXBuildFile; fileRef = 117C88F7151E1347003889EF /* Textures */; };
 		117C88FD151E1347003889EF /* Languages in Resources */ = {isa = PBXBuildFile; fileRef = 117C88F8151E1347003889EF /* Languages */; };
 		117C88FE151E1347003889EF /* Shaders in Resources */ = {isa = PBXBuildFile; fileRef = 117C88F9151E1347003889EF /* Shaders */; };
 		117C88FF151E1347003889EF /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = 117C88FA151E1347003889EF /* Sounds */; };
@@ -130,7 +130,7 @@
 		112DC3CB14F2D36900C7F7F7 /* SDL_net.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_net.framework; path = Library/Frameworks/SDL_net.framework; sourceTree = SDKROOT; };
 		112DC3CD14F2D37400C7F7F7 /* SDL_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_ttf.framework; path = Library/Frameworks/SDL_ttf.framework; sourceTree = SDKROOT; };
 		117C88F6151E1347003889EF /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fonts; sourceTree = "<group>"; };
-		117C88F7151E1347003889EF /* Images */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Images; sourceTree = "<group>"; };
+		117C88F7151E1347003889EF /* Textures */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Textures; sourceTree = "<group>"; };
 		117C88F8151E1347003889EF /* Languages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Languages; sourceTree = "<group>"; };
 		117C88F9151E1347003889EF /* Shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Shaders; sourceTree = "<group>"; };
 		117C88FA151E1347003889EF /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sounds; sourceTree = "<group>"; };
@@ -211,7 +211,7 @@
 			isa = PBXGroup;
 			children = (
 				117C88F6151E1347003889EF /* Fonts */,
-				117C88F7151E1347003889EF /* Images */,
+				117C88F7151E1347003889EF /* Textures */,
 				117C88F8151E1347003889EF /* Languages */,
 				117C88F9151E1347003889EF /* Shaders */,
 				117C88FA151E1347003889EF /* Sounds */,
@@ -374,7 +374,7 @@
 			files = (
 				11273840151E06B900E5BFED /* MainMenu.xib in Resources */,
 				117C88FB151E1347003889EF /* Fonts in Resources */,
-				117C88FC151E1347003889EF /* Images in Resources */,
+				117C88FC151E1347003889EF /* Textures in Resources */,
 				117C88FD151E1347003889EF /* Languages in Resources */,
 				117C88FE151E1347003889EF /* Shaders in Resources */,
 				117C88FF151E1347003889EF /* Sounds in Resources */,
