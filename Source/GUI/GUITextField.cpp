@@ -36,13 +36,13 @@ void GUITextField::removeChar() {
 }
 
 void GUITextField::moveCursorLeft() {
-    if(cursorIndexX == 0) return true;
+    if(cursorIndexX == 0) return;
     cursorIndexX --;
     cursorDrawTick = 0;
 }
 
 void GUITextField::moveCursorRight() {
-    if(cursorIndexX == label->text.size()) return true;
+    if(cursorIndexX == label->text.size()) return;
     cursorIndexX ++;
     cursorDrawTick = 0;
 }
