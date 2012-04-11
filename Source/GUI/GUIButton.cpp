@@ -109,10 +109,10 @@ void GUIButton::updateContent() {
                     roundedRect.bottomColor.g = roundedRect.bottomColor.b = 0;
                     break;
                 case GUIButtonTypeAdd:
-                    roundedRect.topColor.b = 140;
-                    roundedRect.topColor.r = roundedRect.topColor.b = 0;
-                    roundedRect.bottomColor.b = 240;
-                    roundedRect.bottomColor.r = roundedRect.bottomColor.b = 140;
+                    roundedRect.topColor.g = 240;
+                    roundedRect.topColor.r = roundedRect.topColor.b = 140;
+                    roundedRect.bottomColor.g = 140;
+                    roundedRect.bottomColor.r = roundedRect.bottomColor.b = 0;
                     break;
                 case GUIButtonTypeEdit:
                     roundedRect.topColor.r = 140;
@@ -138,10 +138,10 @@ void GUIButton::updateContent() {
                     roundedRect.bottomColor.g = roundedRect.bottomColor.b = 30;
                     break;
                 case GUIButtonTypeAdd:
-                    roundedRect.topColor.g = 140;
-                    roundedRect.topColor.r = roundedRect.topColor.b = 20;
-                    roundedRect.bottomColor.g = 240;
-                    roundedRect.bottomColor.r = roundedRect.bottomColor.b = 160;
+                    roundedRect.topColor.g = 250;
+                    roundedRect.topColor.r = roundedRect.topColor.b = 170;
+                    roundedRect.bottomColor.g = 150;
+                    roundedRect.bottomColor.r = roundedRect.bottomColor.b = 30;
                     break;
                 case GUIButtonTypeEdit:
                     roundedRect.topColor.r = 160;
@@ -160,16 +160,16 @@ void GUIButton::updateContent() {
                     roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 240;
                     break;
                 case GUIButtonTypeDelete:
-                    roundedRect.topColor.r = 160;
-                    roundedRect.topColor.g = roundedRect.topColor.b = 240;
-                    roundedRect.bottomColor.r = 0;
-                    roundedRect.bottomColor.g = roundedRect.bottomColor.b = 140;
+                    roundedRect.topColor.r = 140;
+                    roundedRect.topColor.g = roundedRect.topColor.b = 0;
+                    roundedRect.bottomColor.r = 240;
+                    roundedRect.bottomColor.g = roundedRect.bottomColor.b = 160;
                     break;
                 case GUIButtonTypeAdd:
-                    roundedRect.topColor.g = 0;
-                    roundedRect.topColor.r = roundedRect.topColor.b = 70;
-                    roundedRect.bottomColor.g = 140;
-                    roundedRect.bottomColor.r = roundedRect.bottomColor.b = 240;
+                    roundedRect.topColor.g = 140;
+                    roundedRect.topColor.r = roundedRect.topColor.b = 0;
+                    roundedRect.bottomColor.g = 240;
+                    roundedRect.bottomColor.r = roundedRect.bottomColor.b = 140;
                     break;
                 case GUIButtonTypeEdit:
                 case GUIButtonTypeLockable:

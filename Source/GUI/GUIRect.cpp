@@ -56,7 +56,7 @@ void GUIRect::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     modelMat = parentTransform;
     modelMat.translate(Vector3(posX, posY, 0.0));
     spriteShaderProgram->use();
-    spriteShaderProgram->setAttribute(VERTEX_ATTRIBUTE, 2, 2*sizeof(float), vertices);
+    spriteShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
     glBindTexture(GL_TEXTURE_2D, 0);
     glDrawArrays(GL_LINE_LOOP, 0, 4);
 }

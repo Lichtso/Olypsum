@@ -116,7 +116,7 @@ void GUIScreenView::draw() {
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->draw(transform, clipRect);
     
-    glDisableVertexAttribArray(VERTEX_ATTRIBUTE);
+    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
     glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
     glEnable(GL_DEPTH_TEST);
 }

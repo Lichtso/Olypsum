@@ -49,29 +49,31 @@ GUIScrollView::GUIScrollView() {
 }
 
 GUIScrollView::~GUIScrollView() {
-    if(textureV) {
-        glDeleteTextures(1, &textureV);
-        glDeleteTextures(1, &textureH);
-    }
+    if(textureV) glDeleteTextures(1, &textureV);
+    if(textureH) glDeleteTextures(1, &textureH);
 }
 
 void GUIScrollView::updateContent() {
     GUIRoundedRect roundedRect;
     roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 220;
-    roundedRect.topColor.r = roundedRect.topColor.g = roundedRect.topColor.b = 240;
-    roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 240;
+    roundedRect.topColor.r = roundedRect.topColor.g = roundedRect.topColor.b = 140;
+    roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 140;
     
-    roundedRect.texture = &textureH;
-    roundedRect.width = getBarWidth();
-    roundedRect.height = scrollBarWidth;
-    roundedRect.cornerRadius = scrollBarWidth;
-    roundedRect.drawInTexture();
+    if(scrollWidth > width) {
+        roundedRect.texture = &textureH;
+        roundedRect.width = getBarWidth();
+        roundedRect.height = scrollBarWidth;
+        roundedRect.cornerRadius = scrollBarWidth;
+        roundedRect.drawInTexture();
+    }
     
-    roundedRect.texture = &textureV;
-    roundedRect.width = scrollBarWidth;
-    roundedRect.height = getBarHeight();
-    roundedRect.cornerRadius = scrollBarWidth;
-    roundedRect.drawInTexture();
+    if(scrollHeight > height) {
+        roundedRect.texture = &textureV;
+        roundedRect.width = scrollBarWidth;
+        roundedRect.height = getBarHeight();
+        roundedRect.cornerRadius = scrollBarWidth;
+        roundedRect.drawInTexture();
+    }
 }
 
 void GUIScrollView::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {

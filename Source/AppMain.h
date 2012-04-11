@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Model.h"
+#import "FileManager.h"
 
 #ifndef AppMain_h
 #define AppMain_h

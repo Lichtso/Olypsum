@@ -45,12 +45,14 @@
 		112DC3C914F2D35F00C7F7F7 /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 112DC3C814F2D35F00C7F7F7 /* SDL_image.framework */; };
 		112DC3CC14F2D36900C7F7F7 /* SDL_net.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 112DC3CB14F2D36900C7F7F7 /* SDL_net.framework */; };
 		112DC3CE14F2D37400C7F7F7 /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 112DC3CD14F2D37400C7F7F7 /* SDL_ttf.framework */; };
+		115732761531AE5700CBEDEE /* Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 115732751531AE5700CBEDEE /* Utilities.cpp */; };
 		117C88FB151E1347003889EF /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = 117C88F6151E1347003889EF /* Fonts */; };
 		117C88FC151E1347003889EF /* Textures in Resources */ = {isa = PBXBuildFile; fileRef = 117C88F7151E1347003889EF /* Textures */; };
 		117C88FD151E1347003889EF /* Languages in Resources */ = {isa = PBXBuildFile; fileRef = 117C88F8151E1347003889EF /* Languages */; };
 		117C88FE151E1347003889EF /* Shaders in Resources */ = {isa = PBXBuildFile; fileRef = 117C88F9151E1347003889EF /* Shaders */; };
 		117C88FF151E1347003889EF /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = 117C88FA151E1347003889EF /* Sounds */; };
 		11929B37152F3FB4001DF2C1 /* Model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11929B36152F3FB4001DF2C1 /* Model.cpp */; };
+		11AEE0E11530819E00D57BBA /* FileManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11AEE0E01530819E00D57BBA /* FileManager.cpp */; };
 		11F4A11E15263D1F003C118E /* GUIClipRect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11F4A11D15263D1F003C118E /* GUIClipRect.cpp */; };
 /* End PBXBuildFile section */
 
@@ -129,6 +131,7 @@
 		112DC3C814F2D35F00C7F7F7 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = Library/Frameworks/SDL_image.framework; sourceTree = SDKROOT; };
 		112DC3CB14F2D36900C7F7F7 /* SDL_net.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_net.framework; path = Library/Frameworks/SDL_net.framework; sourceTree = SDKROOT; };
 		112DC3CD14F2D37400C7F7F7 /* SDL_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_ttf.framework; path = Library/Frameworks/SDL_ttf.framework; sourceTree = SDKROOT; };
+		115732751531AE5700CBEDEE /* Utilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utilities.cpp; sourceTree = "<group>"; };
 		117C88F6151E1347003889EF /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fonts; sourceTree = "<group>"; };
 		117C88F7151E1347003889EF /* Textures */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Textures; sourceTree = "<group>"; };
 		117C88F8151E1347003889EF /* Languages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Languages; sourceTree = "<group>"; };
@@ -136,6 +139,8 @@
 		117C88FA151E1347003889EF /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sounds; sourceTree = "<group>"; };
 		11929B36152F3FB4001DF2C1 /* Model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Model.cpp; sourceTree = "<group>"; };
 		11929B39152F3FC8001DF2C1 /* Model.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Model.h; sourceTree = "<group>"; };
+		11AEE0DE1530817000D57BBA /* FileManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FileManager.h; sourceTree = "<group>"; };
+		11AEE0E01530819E00D57BBA /* FileManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileManager.cpp; sourceTree = "<group>"; };
 		11F4A11D15263D1F003C118E /* GUIClipRect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIClipRect.cpp; sourceTree = "<group>"; };
 		11F4A12015263D5D003C118E /* GUIClipRect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIClipRect.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -223,6 +228,7 @@
 			isa = PBXGroup;
 			children = (
 				11273820151E06B800E5BFED /* Utilities.h */,
+				115732751531AE5700CBEDEE /* Utilities.cpp */,
 				112737FD151E06B800E5BFED /* LinearMaths */,
 				1127381F151E06B800E5BFED /* Texture.h */,
 				1127381E151E06B800E5BFED /* Texture.cpp */,
@@ -240,6 +246,8 @@
 				112737FB151E06B800E5BFED /* InputController.cpp */,
 				11929B39152F3FC8001DF2C1 /* Model.h */,
 				11929B36152F3FB4001DF2C1 /* Model.cpp */,
+				11AEE0DE1530817000D57BBA /* FileManager.h */,
+				11AEE0E01530819E00D57BBA /* FileManager.cpp */,
 				112737DF151E06B800E5BFED /* AppMain.h */,
 				112737DE151E06B800E5BFED /* AppMain.cpp */,
 				1127380C151E06B800E5BFED /* macCompCode */,
@@ -417,6 +425,8 @@
 				11273846151E06B900E5BFED /* Texture.cpp in Sources */,
 				11F4A11E15263D1F003C118E /* GUIClipRect.cpp in Sources */,
 				11929B37152F3FB4001DF2C1 /* Model.cpp in Sources */,
+				11AEE0E11530819E00D57BBA /* FileManager.cpp in Sources */,
+				115732761531AE5700CBEDEE /* Utilities.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

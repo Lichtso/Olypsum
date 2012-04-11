@@ -180,7 +180,7 @@ void GUIRoundedRect::drawOnScreen(bool transposed, int posX, int posY, GUIClipRe
         clipRect.minPosX, clipRect.maxPosY,
         clipRect.minPosX, clipRect.minPosY
     };
-    spriteShaderProgram->setAttribute(VERTEX_ATTRIBUTE, 2, 2*sizeof(float), vertices);
+    spriteShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
     if(texture)
         glBindTexture(GL_TEXTURE_2D, *texture);
     else

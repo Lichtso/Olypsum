@@ -19,8 +19,8 @@ TextFont::~TextFont() {
         TTF_CloseFont(ttf);
 }
 
-void TextFont::loadTTF(const char* fileName) {
-    if(ttf) return;
+bool TextFont::loadTTF(const char* fileName) {
+    if(ttf) return false;
     
     std::string url("Fonts/");
     url += fileName;
@@ -29,8 +29,10 @@ void TextFont::loadTTF(const char* fileName) {
     ttf = TTF_OpenFont(url.c_str(), size);
     if(ttf == NULL) {
         printf("Unable to load font %s:\nERROR: %s\n", url.c_str(), TTF_GetError());
-        return;
+        return false;
     }
+    
+    return true;
 }
 
 GLuint TextFont::renderStringToTexture(const char* str, SDL_Color colorB, bool antialiasing, int& width, int& height) {
@@ -154,10 +156,10 @@ void TextFont::renderStringToScreen(const char* str, Vector3 pos, float scale, S
     spriteShaderProgram->use();
     spriteShaderProgram->setUnfiformF("light", 1.0);
     
-    spriteShaderProgram->setAttribute(VERTEX_ATTRIBUTE, 2, 4*sizeof(float), vertices);
+    spriteShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 4*sizeof(float), vertices);
     spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 4*sizeof(float), &vertices[2]);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-    glDisableVertexAttribArray(VERTEX_ATTRIBUTE);
+    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
     glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
     glDeleteTextures(1, &texture);
 }

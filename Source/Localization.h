@@ -7,21 +7,19 @@
 //
 
 #import "Cam.h"
-#import "rapidxml.hpp"
-#import <map>
-#import <vector>
-#import <dirent.h>
 
 #ifndef Localization_h
 #define Localization_h
 
-std::vector<std::string> getLocalizableLanguages();
-void loadLocalization(const char* language);
-const char* localizeString(const char* key);
+bool parseXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const char* filePath);
 
-struct Localization {
+class Localization {
+    public:
     std::map<std::string, std::string> strings;
-    std::string name, title;
+    std::string title;
+    std::vector<std::string> getLocalizableLanguages();
+    bool loadLocalization(const char* filePath);
+    const char* localizeString(const char* key);
 };
 
 extern Localization localization;

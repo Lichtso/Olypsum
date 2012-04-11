@@ -8,13 +8,12 @@
 
 #include "Localization.h"
 
-#define xmlUsedCharType char
-std::string languagesDir("Languages/"), languagesExtension(".xml");
+std::string LanguagesDir("Languages/"), LanguagesExtension(".xml");
 
-std::vector<std::string> getLocalizableLanguages() {
+std::vector<std::string> Localization::getLocalizableLanguages() {
     std::vector<std::string> languages;
     
-    DIR* dp = opendir(languagesDir.c_str());
+    DIR* dp = opendir(LanguagesDir.c_str());
     if(dp == NULL) {
         printf("Error: Languages directory not found.\n");
         return languages;
@@ -22,50 +21,36 @@ std::vector<std::string> getLocalizableLanguages() {
     
     dirent* ep;
     while((ep = readdir(dp))) {
-        if(strlen(ep->d_name) < languagesExtension.length()) continue;
+        if(strlen(ep->d_name) < 4) continue;
         std::string fileName(ep->d_name);
-        std::string fileExtension = fileName.substr(strlen(ep->d_name)-languagesExtension.length(), languagesExtension.length());
-        if(fileExtension != languagesExtension) continue;
-        languages.push_back(fileName.substr(0, strlen(ep->d_name)-languagesExtension.length()));
+        std::string fileExtension = fileName.substr(strlen(ep->d_name)-LanguagesExtension.size(), LanguagesExtension.size());
+        if(fileExtension.compare(LanguagesExtension) != 0) continue;
+        languages.push_back(fileName.substr(0, strlen(ep->d_name)-LanguagesExtension.size()));
     }
     
     closedir(dp);
     return languages;
 }
 
-void loadLocalization(const char* language) {
-    localization.name = std::string(language);
-    
-    std::string url(languagesDir);
-    url += localization.name;
-    url += languagesExtension;
-    
-    FILE* fp = fopen(url.c_str(), "r");
-    if(!fp) {
-        printf("Error: No localizations found for language %s.\n", language);
-        return;
-    }
-    localization.strings.clear();
-    
-    fseek(fp, 0, SEEK_END);
-	long dataSize = ftell(fp);
-	rewind(fp);
-	char data[dataSize+1];
-	fread(data, 1, dataSize, fp);
-    fclose(fp);
-    data[dataSize] = 0;
-    
+bool Localization::loadLocalization(const char* filePath) {
     rapidxml::xml_document<xmlUsedCharType> doc;
+    if(!parseXmlFile(doc, filePath)) return false;
+    
     rapidxml::xml_node<xmlUsedCharType> *rootNode, *titleNode, *localizationNode, *entryNode;
     rapidxml::xml_attribute<xmlUsedCharType> *entryKeyAttribute;
-    doc.parse<0>(data);
     
     rootNode = doc.first_node("language");
     if(!rootNode) goto endParsingXML;
     
     titleNode = rootNode->first_node("title");
     if(!titleNode) goto endParsingXML;
-    localization.title = std::string(titleNode->value());
+    else {
+        std::string name(titleNode->value());
+        if(title.compare(name) > 0) {
+            strings.clear();
+            title = name;
+        }
+    }
     
     localizationNode = rootNode->first_node("localization");
     if(!localizationNode) goto endParsingXML;
@@ -75,17 +60,18 @@ void loadLocalization(const char* language) {
         entryKeyAttribute = entryNode->first_attribute("key");
         if(!entryKeyAttribute) goto endParsingXML;
         
-        localization.strings[std::string(entryKeyAttribute->value())] = std::string(entryNode->value());
+        strings[std::string(entryKeyAttribute->value())] = std::string(entryNode->value());
         entryNode = entryNode->next_sibling("entry");
     }
     
     endParsingXML:
     doc.clear();
+    return true;
 }
 
-const char* localizeString(const char* key) {
-    std::map<std::string, std::string>::iterator iterator = localization.strings.find(std::string(key));
-    if(iterator == localization.strings.end()) {
+const char* Localization::localizeString(const char* key) {
+    std::map<std::string, std::string>::iterator iterator = strings.find(std::string(key));
+    if(iterator == strings.end()) {
         printf("Error: No localization found for key: %s.\n", key);
         return key;
     }

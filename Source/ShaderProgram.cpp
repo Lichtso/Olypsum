@@ -8,10 +8,10 @@
 
 #import "ShaderProgram.h"
 
-ShaderProgram::ShaderProgram(const char* fileName) {
+const char* seperatorString = "#|#|#";
+
+ShaderProgram::ShaderProgram() {
     GLname = glCreateProgram();
-    loadShader(GL_VERTEX_SHADER, fileName);
-    loadShader(GL_FRAGMENT_SHADER, fileName);
 }
 
 ShaderProgram::~ShaderProgram() {
@@ -21,47 +21,52 @@ ShaderProgram::~ShaderProgram() {
 	glDeleteProgram(GLname);
 }
 
-void ShaderProgram::loadShader(unsigned int shaderType, const char* fileName) {
-    std::string url("Shaders/");
-    url += fileName;
-    switch(shaderType) {
-        case GL_VERTEX_SHADER:
-            url += ".vsh";
-        break;
-        case GL_FRAGMENT_SHADER:
-            url += ".fsh";
-        break;
-        default:
-            printf("Unsupported shader type: %d.", shaderType);
-            return;
-    }
-    
-	FILE *fp = fopen(url.c_str(), "rb");
-	if(!fp) {
-		printf("The file %s couldn't be found.", url.c_str());
-		return;
-	}
-	fseek(fp, 0, SEEK_END);
-	long dataSize = ftell(fp);
-	rewind(fp);
-	char data[dataSize];
-	fread(data, 1, dataSize, fp);
-    fclose(fp);
-	
+bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode) {
 	unsigned int shaderId = glCreateShader(shaderType);
-	const GLchar* dataArray[1];
-	dataArray[0] = data;
-	glShaderSource(shaderId, 1, dataArray, (GLint*) &dataSize);
+	GLint dataSize = strlen(soucreCode);
+	glShaderSource(shaderId, 1, (const GLchar**)&soucreCode, &dataSize);
 	glCompileShader(shaderId);
 	int infoLogLength = 1024;
 	char infoLog[infoLogLength];
 	glGetShaderInfoLog(shaderId, infoLogLength, &infoLogLength, (GLchar*) &infoLog);
 	if(infoLogLength > 0) {
-		printf("SHADER %s\nERROR: %s", fileName, infoLog);
-		return;
+		printf("SHADER:\n%s%s\n\n", soucreCode, infoLog);
+		return false;
 	}
 	glAttachShader(GLname, shaderId);
     glDeleteShader(shaderId);
+    return true;
+}
+
+bool ShaderProgram::loadShaderProgram(const char* fileName) {
+    std::string url("Shaders/");
+    url += fileName;
+    url += ".glsl";
+    
+    FILE *fp = fopen(url.c_str(), "rb");
+	if(!fp) {
+		printf("The file %s couldn't be found.", url.c_str());
+		return false;
+	}
+	fseek(fp, 0, SEEK_END);
+	long dataSize = ftell(fp);
+	rewind(fp);
+	char data[dataSize+1];
+	fread(data, 1, dataSize, fp);
+    fclose(fp);
+    
+    char* seperator = strstr(data, seperatorString);
+    if(!seperator) {
+        printf("The file %s doesn't contain any seperators.", url.c_str());
+        return false;
+    }
+    *seperator = 0;
+    data[dataSize] = 0;
+    
+    loadShader(GL_VERTEX_SHADER, data);
+	loadShader(GL_FRAGMENT_SHADER, seperator+strlen(seperatorString));
+    
+    return true;
 }
 
 void ShaderProgram::addAttribute(unsigned int index, const char* attributeName) {

@@ -108,7 +108,7 @@ void GUILabel::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
         };
         
         spriteShaderProgram->use();
-        spriteShaderProgram->setAttribute(VERTEX_ATTRIBUTE, 2, 4*sizeof(float), vertices);
+        spriteShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 4*sizeof(float), vertices);
         spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 4*sizeof(float), &vertices[2]);
         glBindTexture(GL_TEXTURE_2D, lines[i].texture);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);

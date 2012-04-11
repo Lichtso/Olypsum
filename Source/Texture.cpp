@@ -9,10 +9,11 @@
 #import "Texture.h"
 
 Texture::Texture() {
-    surface = NULL;
+    useCounter = 1;
     GLname = 0;
     minFilter = GL_NEAREST;
     magFilter = GL_LINEAR;
+    surface = NULL;
 }
 
 Texture::~Texture() {
@@ -22,16 +23,14 @@ Texture::~Texture() {
         glDeleteTextures(1, &GLname);
 }
 
-void Texture::loadImageInRAM(const char* fileName) {
-    if(surface) return;
+bool Texture::loadImageInRAM(const char* filePath) {
+    if(surface) return false;
     
-    std::string url("Textures/");
-    url += fileName;
-    surface = IMG_Load(url.c_str());
+    surface = IMG_Load(filePath);
     
     if(!surface) {
         printf("ERROR: %s\n", IMG_GetError());
-        return;
+        return false;
     }
     
     switch(surface->format->BitsPerPixel) {
@@ -40,14 +39,16 @@ void Texture::loadImageInRAM(const char* fileName) {
         case 32:
             break;
         default:
-            printf("Couldn't load image %s.\nERROR: Unsupported bit-depth %d.\n", fileName, surface->format->BitsPerPixel);
-            return;
+            printf("Couldn't load image %s.\nERROR: Unsupported bit-depth %d.\n", filePath, surface->format->BitsPerPixel);
+            return false;
     }
     
     if(surface->format->palette) {
-        printf("Couldn't load image %s:\nERROR: Image uses a color palette.\n", fileName);
-        return;
+        printf("Couldn't load image %s:\nERROR: Image uses a color palette.\n", filePath);
+        return false;
     }
+    
+    return true;
 }
 
 void Texture::unloadFromRAM() {

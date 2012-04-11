@@ -13,12 +13,13 @@
 
 class Texture {
     public:
+    unsigned int useCounter;
     GLuint GLname;
     GLenum minFilter, magFilter;
     SDL_Surface *surface;
     Texture();
     ~Texture();
-    void loadImageInRAM(const char* fileName);
+    bool loadImageInRAM(const char* filePath);
     void unloadFromRAM();
     void uploadToVRAM();
     void unloadFromVRAM();

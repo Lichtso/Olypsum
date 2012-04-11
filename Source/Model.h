@@ -11,10 +11,25 @@
 #ifndef Model_h
 #define Model_h
 
-class Model {
-    
+class Mesh {
     public:
-    void loadCollada(const char* fileName);
+    GLuint vboF, vboI, ibo;
+    unsigned int elementsCount;
+    int postions, texcoords, normals, tangents, bitangents;
+    Texture *diffuse, *normalMap;
+    Mesh();
+    ~Mesh();
+    void draw();
+};
+
+class Model {
+    public:
+    unsigned int useCounter;
+    std::vector<Mesh*> meshes;
+    Model();
+    ~Model();
+    bool loadCollada(const char* filePath);
+    void draw();
 };
 
 #endif

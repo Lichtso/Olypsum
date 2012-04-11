@@ -62,82 +62,48 @@ void AppMain(int argc, char *argv[]) {
     guiCam->calculate();
     
     //Init Resources
-    loadLocalization("English");
+    fileManager.loadPackage(NULL);
     mainFont = new TextFont();
     mainFont->size = 20;
     mainFont->loadTTF("font");
     titleFont = new TextFont();
     titleFont->size = 30;
     titleFont->loadTTF("font");
-    mainShaderProgram = new ShaderProgram("main");
-    mainShaderProgram->addAttribute(VERTEX_ATTRIBUTE, "vertex");
+    mainShaderProgram = new ShaderProgram();
+    mainShaderProgram->loadShaderProgram("main");
+    mainShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
     mainShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     mainShaderProgram->addAttribute(NORMAL_ATTRIBUTE, "normal");
     mainShaderProgram->link();
-    spriteShaderProgram = new ShaderProgram("sprite");
-    spriteShaderProgram->addAttribute(VERTEX_ATTRIBUTE, "vertex");
+    spriteShaderProgram = new ShaderProgram();
+    spriteShaderProgram->loadShaderProgram("sprite");
+    spriteShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
     spriteShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     spriteShaderProgram->link();
-    shadowShaderProgram = new ShaderProgram("shadow");
-    shadowShaderProgram->addAttribute(VERTEX_ATTRIBUTE, "vertex");
+    shadowShaderProgram = new ShaderProgram();
+    shadowShaderProgram->loadShaderProgram("shadow");
+    shadowShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
     shadowShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shadowShaderProgram->link();
     currentScreenView = NULL;
     currentScreenView = new GUIScreenView();
     
-    const char* buttonLabels[] = { "Alpha", "Beta", "Gamma", "Delta", "Epsilon" };
-    
     GUIScrollView* scrollView = new GUIScrollView();
     scrollView->width = 500;
-    scrollView->scrollWidth = 1000;
     scrollView->height = 300;
+    scrollView->scrollWidth = 0;
     scrollView->scrollHeight = 1000;
     currentScreenView->addChild(scrollView);
     
-    GUITabs* tabs = new GUITabs();
-    tabs->orientation = GUIOrientation_Bottom;
-    tabs->posY = 200;
-    for(int i = 0; i < 5; i ++) {
-        GUIButton* button = new GUIButton();
-        GUILabel* label = new GUILabel();
-        label->text = std::string(buttonLabels[i]);
-        label->font = titleFont;
-        label->fontHeight = 40;
-        button->addChild(label);
-        tabs->addChild(button);
-    }
-    scrollView->addChild(tabs);
-    
-    /*
-    for(int i = 0; i < 5; i ++) {
-        GUICheckBox* checkBox = new GUICheckBox();
-        checkBox->posX = -100+i*50;
-        currentScreenView->addChild(checkBox);
-    }*/
-    
-    GUIProgressBar* slider = new GUIProgressBar();
-    slider->width = 200;
-    slider->height = 10;
-    slider->orientation = GUIOrientation_Horizontal;
-    scrollView->addChild(slider);
-    
-    GUISlider* sliderB = new GUISlider();
-    sliderB->orientation = GUIOrientation_Horizontal;
-    sliderB->posX = -330;
-    scrollView->addChild(sliderB);
-    
-    GUITextField* textField = new GUITextField();
-    textField->posX = 330;
-    scrollView->addChild(textField);
-    
     GUILabel* labelD = new GUILabel();
     labelD->text = std::string("ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789\n!?\"='.:,;-_+#*$%&/([{}])");
-    labelD->posY = -300;
+    labelD->posY = 0;
     scrollView->addChild(labelD);
     
     //Init Game {
-    tex = new Texture();
-    tex->loadImageInRAM("logo.png");
+    tex = fileManager.getPackage(NULL)->getTexture("logo.png");
+    //tex = new Texture();
+    //tex->loadImageInRAM("Textures/logo.png");
     tex->magFilter = GL_NEAREST;
     tex->uploadToVRAM();
     tex->unloadFromRAM();
@@ -205,9 +171,6 @@ void AppMain(int argc, char *argv[]) {
         mainFont->renderStringToScreen(fpsStr, btVector3(-1.0, -0.5, 0.0), 0.002, color, true);
         mainFont->renderStringToScreen(fpsStr, btVector3(0.0, 0.5, 0.0), 0.002, color, true);
         */
-        
-        slider->value += animationFactor*0.1;
-        if(slider->value > 1.0) slider->value = 0.0;
         
         if(currentScreenView)
         currentScreenView->draw();

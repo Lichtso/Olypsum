@@ -20,7 +20,7 @@ class TextFont {
     SDL_Color color, backgroundColor;
     TextFont();
     ~TextFont();
-    void loadTTF(const char* fileName);
+    bool loadTTF(const char* fileName);
     GLuint renderStringToTexture(const char* str, SDL_Color colorB, bool antialiasing, int& width, int& height);
     void renderStringToSurface(const char* str, SDL_Surface* surface, int x, int y, SDL_Color colorB, bool antialiasing);
     void renderStringToScreen(const char* str, Vector3 pos, float scale, SDL_Color color, bool antialiasing);

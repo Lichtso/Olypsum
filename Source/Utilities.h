@@ -13,9 +13,17 @@
 #import <math.h>
 #import <time.h>
 #import <string>
+#import "rapidxml.hpp"
+#import <map>
+#import <vector>
+#import <dirent.h>
 
 #ifndef Utilities_h
 #define Utilities_h
+
+#define xmlUsedCharType char
+
+bool parseXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const char* filePath);
 
 template <class T> void swap(T &a, T &b) {
 	T c = a;
