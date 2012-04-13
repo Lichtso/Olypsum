@@ -16,11 +16,13 @@ class Mesh {
     GLuint vboF, vboI, ibo;
     unsigned int elementsCount;
     int postions, texcoords, normals, tangents, bitangents;
-    Texture *diffuse, *normalMap;
+    Texture *diffuse, *normalMap, *effectMap;
     Mesh();
     ~Mesh();
     void draw();
 };
+
+class FilePackage;
 
 class Model {
     public:
@@ -28,7 +30,7 @@ class Model {
     std::vector<Mesh*> meshes;
     Model();
     ~Model();
-    bool loadCollada(const char* filePath);
+    bool loadCollada(FilePackage* filePackage, const char* filePath);
     void draw();
 };
 

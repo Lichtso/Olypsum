@@ -29,7 +29,7 @@ class GUILabel : public GUIRect {
     std::vector<GUILabelLine> lines;
     SDL_Color color;
     TextFont* font;
-    bool autoSize;
+    GUISizeAlignment sizeAlignment;
     unsigned int fontHeight;
     GUITextAlign textAlign;
     std::string text;

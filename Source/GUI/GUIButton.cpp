@@ -14,7 +14,7 @@ GUIButton::GUIButton() {
     onClick = NULL;
     paddingX = 10;
     paddingY = 5;
-    autoSize = true;
+    sizeAlignment = GUISizeAlignment_All;
     buttonType = GUIButtonTypeNormal;
     state = GUIButtonStateNormal;
     roundedCorners = (GUICorners) (GUITopLeftCorner | GUITopRightCorner | GUIBottomLeftCorner | GUIBottomRightCorner);
@@ -26,10 +26,11 @@ GUIButton::~GUIButton() {
 }
 
 void GUIButton::updateContent() {
-    if(autoSize) {
+    if(sizeAlignment & GUISizeAlignment_Width)
         width = 12+paddingX;
+    
+    if(sizeAlignment & GUISizeAlignment_Height)
         height = 12+paddingY;
-    }
     
     for(unsigned int i = 0; i < children.size(); i ++) {
         if(children[i]->type == GUIType_Label) {
@@ -71,15 +72,19 @@ void GUIButton::updateContent() {
         }
         children[i]->updateContent();
         
-        if(!autoSize) continue;
-        if(children[i]->posX+children[i]->width+paddingX > width)
-            width = children[i]->posX+children[i]->width+paddingX;
-        if(children[i]->posY+children[i]->height+paddingY > height)
-            height = children[i]->posY+children[i]->height+paddingY;
-        if(children[i]->posX-children[i]->width-paddingX < -width)
-            width = children[i]->width-children[i]->posX+paddingX;
-        if(children[i]->posY-children[i]->height-paddingY < -height)
-            height = children[i]->height-children[i]->posY+paddingY;
+        if(sizeAlignment & GUISizeAlignment_Width) {
+            if(children[i]->posX+children[i]->width+paddingX > width)
+                width = children[i]->posX+children[i]->width+paddingX;
+            if(children[i]->posX-children[i]->width-paddingX < -width)
+                width = children[i]->width-children[i]->posX+paddingX;
+        }
+        
+        if(sizeAlignment & GUISizeAlignment_Height) {
+            if(children[i]->posY+children[i]->height+paddingY > height)
+                height = children[i]->posY+children[i]->height+paddingY;
+            if(children[i]->posY-children[i]->height-paddingY < -height)
+                height = children[i]->height-children[i]->posY+paddingY;
+        }
     }
     
     GUIRoundedRect roundedRect;

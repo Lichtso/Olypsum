@@ -13,7 +13,7 @@
 
 class Texture {
     public:
-    unsigned int useCounter;
+    unsigned int useCounter, width, height;
     GLuint GLname;
     GLenum minFilter, magFilter;
     SDL_Surface *surface;
@@ -23,7 +23,7 @@ class Texture {
     void unloadFromRAM();
     void uploadToVRAM();
     void unloadFromVRAM();
-    void use();
+    void use(GLuint index);
 };
 
 #endif

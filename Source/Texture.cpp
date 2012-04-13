@@ -11,16 +11,14 @@
 Texture::Texture() {
     useCounter = 1;
     GLname = 0;
-    minFilter = GL_NEAREST;
+    minFilter = GL_LINEAR_MIPMAP_LINEAR;
     magFilter = GL_LINEAR;
     surface = NULL;
 }
 
 Texture::~Texture() {
-    if(surface)
-        SDL_FreeSurface(surface);
-    if(GLname)
-        glDeleteTextures(1, &GLname);
+    if(surface) SDL_FreeSurface(surface);
+    if(GLname) glDeleteTextures(1, &GLname);
 }
 
 bool Texture::loadImageInRAM(const char* filePath) {
@@ -48,20 +46,22 @@ bool Texture::loadImageInRAM(const char* filePath) {
         return false;
     }
     
+    width = surface->w;
+    height = surface->h;
+    
     return true;
 }
 
 void Texture::unloadFromRAM() {
-    if(surface)
-        SDL_FreeSurface(surface);
+    if(surface) SDL_FreeSurface(surface);
     surface = NULL;
 }
 
 void Texture::uploadToVRAM() {
     if(!surface) return;
     
-    if(!GLname)
-        glGenTextures(1, &GLname);
+    if(!GLname) glGenTextures(1, &GLname);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, GLname);
     
     unsigned int formatA, formatB;
@@ -87,17 +87,21 @@ void Texture::uploadToVRAM() {
         return;
     }
     
-    glTexImage2D(GL_TEXTURE_2D, 0, formatA, surface->w, surface->h, 0, formatB, GL_UNSIGNED_BYTE, surface->pixels);
+    width = surface->w;
+    height = surface->h;
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, formatA, width, height, 0, formatB, GL_UNSIGNED_BYTE, surface->pixels);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+    glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 void Texture::unloadFromVRAM() {
-    if(GLname)
-        glDeleteTextures(1, &GLname);
-    GLname = NULL;
+    if(GLname) glDeleteTextures(1, &GLname);
+    GLname = 0;
 }
 
-void Texture::use() {
+void Texture::use(GLuint index) {
+    glActiveTexture(GL_TEXTURE0+index);
     glBindTexture(GL_TEXTURE_2D, GLname);
 }

@@ -14,7 +14,7 @@ GUILabel::GUILabel() {
     color.r = color.g = color.b = 0;
     color.unused = 255;
     textAlign = GUITextAlign_Middle;
-    autoSize = true;
+    sizeAlignment = GUISizeAlignment_All;
     fontHeight = 30;
 }
 
@@ -25,7 +25,8 @@ GUILabel::~GUILabel() {
 }
 
 void GUILabel::updateContent() {
-    if(autoSize)
+    int prevWidth = width, prevHeight = height;
+    if(sizeAlignment != GUISizeAlignment_None)
         width = height = 0;
     
     for(unsigned int i = 0; i < lines.size(); i ++)
@@ -43,7 +44,7 @@ void GUILabel::updateContent() {
             line.width = fontHeight*0.5/line.height*line.width;
             line.height = fontHeight>>1;
             lines.push_back(line);
-            if(autoSize) {
+            if(sizeAlignment != GUISizeAlignment_None) {
                 width = fmax(width, line.width);
                 height += line.height;
             }
@@ -68,6 +69,12 @@ void GUILabel::updateContent() {
         line->posY = renderY;
         renderY -= fontHeight;
     }
+    
+    if((sizeAlignment & GUISizeAlignment_Width) == 0)
+        width = prevWidth;
+    
+    if((sizeAlignment & GUISizeAlignment_Height) == 0)
+        height = prevHeight;
 }
 
 void GUILabel::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
@@ -110,6 +117,7 @@ void GUILabel::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
         spriteShaderProgram->use();
         spriteShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 4*sizeof(float), vertices);
         spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 4*sizeof(float), &vertices[2]);
+        glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, lines[i].texture);
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     }

@@ -11,8 +11,6 @@
 #ifndef Localization_h
 #define Localization_h
 
-bool parseXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const char* filePath);
-
 class Localization {
     public:
     std::map<std::string, std::string> strings;

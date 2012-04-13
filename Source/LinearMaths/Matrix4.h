@@ -27,6 +27,7 @@ class Matrix4 {
     void setZero();
     Matrix4 getTransposed();
     Matrix4 getInverse();
+    Matrix4& normalize();
     Matrix4 operator*(const Matrix4&);
     Matrix4& operator*=(const Matrix4&);
     Matrix4& operator=(const Matrix4&);

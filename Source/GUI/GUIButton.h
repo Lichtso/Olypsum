@@ -30,7 +30,7 @@ class GUIButton : public GUIView {
     GLuint texture;
     void setInnerPixel(unsigned char* pixel, unsigned int x, unsigned int y);
     public:
-    bool autoSize;
+    GUISizeAlignment sizeAlignment;
     int paddingX, paddingY;
     GUIButtonType buttonType;
     GUICorners roundedCorners;

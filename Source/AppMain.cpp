@@ -8,9 +8,9 @@
 
 #import "AppMain.h"
 
-Texture* tex;
-
 float animationTime = 0;
+
+Model* duckModel;
 
 void AppMain(int argc, char *argv[]) {
     if(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) < 0) {
@@ -85,47 +85,24 @@ void AppMain(int argc, char *argv[]) {
     shadowShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
     shadowShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shadowShaderProgram->link();
-    currentScreenView = NULL;
     currentScreenView = new GUIScreenView();
     
-    GUIScrollView* scrollView = new GUIScrollView();
-    scrollView->width = 500;
-    scrollView->height = 300;
-    scrollView->scrollWidth = 0;
-    scrollView->scrollHeight = 1000;
-    currentScreenView->addChild(scrollView);
+    duckModel = fileManager.getPackage(NULL)->getModel("Duck.dae");
+    
+    GUIImage* image = new GUIImage();
+    image->texture = fileManager.getPackage(NULL)->getTexture("logo.png");
+    image->sizeAlignment = GUISizeAlignment_Height;
+    image->width = 400;
+    image->posY = -350;
+    currentScreenView->addChild(image);
     
     GUILabel* labelD = new GUILabel();
-    labelD->text = std::string("ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz\n0123456789\n!?\"='.:,;-_+#*$%&/([{}])");
-    labelD->posY = 0;
-    scrollView->addChild(labelD);
+    labelD->text = std::string("COLLADA Tests");
+    labelD->posY = 400;
+    currentScreenView->addChild(labelD);
     
     //Init Game {
-    tex = fileManager.getPackage(NULL)->getTexture("logo.png");
-    //tex = new Texture();
-    //tex->loadImageInRAM("Textures/logo.png");
-    tex->magFilter = GL_NEAREST;
-    tex->uploadToVRAM();
-    tex->unloadFromRAM();
-    tex->use();
     
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glBegin(GL_TRIANGLE_FAN);
-    glColor3f(1, 1, 1);
-    glTexCoord2f(1, 1);
-    glVertex3f(1.6, -0.2, -1);
-    glTexCoord2f(1, 0);
-    glVertex3f(1.6, 0.2, -1);
-    glTexCoord2f(0, 0);
-    glVertex3f(-1.6, 0.2, -1);
-    glTexCoord2f(0, 1);
-    glVertex3f(-1.6, -0.2, -1);
-    glEnd();
-    
-    SDL_Color color = { 200, 200, 255, 255 };
-    guiCam->use();
-    mainFont->renderStringToScreen("Loading ...", btVector3(0.0, -250.0, -1.0), 1.0, color, true);
-    SDL_GL_SwapBuffers();
     //}
     
     unsigned long thenTicks = 0, nowTicks;
@@ -158,13 +135,20 @@ void AppMain(int argc, char *argv[]) {
         updateKeyState();
         
         //Step Game {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         animationTime += animationFactor;
         mainCam->camMat.setIdentity();
-        mainCam->camMat.translate(Vector3(0,-0.5,2));
-        mainCam->camMat.rotateY(animationTime);
+        mainCam->camMat.translate(Vector3(0,0,5));
         mainCam->calculate();
         mainCam->use();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        modelMat.setIdentity();
+        modelMat.scale(Vector3(0.05, 0.05, 0.05));
+        modelMat.translate(Vector3(0,-1.5,0));
+        modelMat.rotateY(animationTime);
+        
+        mainShaderProgram->use();
+        duckModel->draw();
+        
         /*char fpsStr[32];
         sprintf(fpsStr, "FPS: %d", (int)round(1.0/animationFactor));
         mainFont->renderStringToScreen(fpsStr, btVector3(1.0, -0.5, 0.0), 0.002, color, true);
@@ -173,7 +157,7 @@ void AppMain(int argc, char *argv[]) {
         */
         
         if(currentScreenView)
-        currentScreenView->draw();
+            currentScreenView->draw();
         SDL_GL_SwapBuffers();
         //}
         

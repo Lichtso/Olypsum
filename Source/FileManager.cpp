@@ -70,7 +70,7 @@ Model* FilePackage::getModel(const char* fileName) {
     }
     Model* model = new Model();
     std::string url = getUrlOfFile("Models", fileName);
-    if(model->loadCollada(url.c_str()))
+    if(model->loadCollada(this, url.c_str()))
         return model;
     delete model;
     return NULL;

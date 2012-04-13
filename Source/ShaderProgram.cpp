@@ -100,7 +100,8 @@ void ShaderProgram::use () {
 	glUseProgram(GLname);
     currentShaderProgram = this;
     setUnfiformMatrix4("modelMat", &modelMat);
-    setUnfiformMatrix3("normalMat", &modelMat);
+    Matrix4 normalMat = Matrix4(modelMat).normalize();
+    setUnfiformMatrix3("normalMat", &normalMat);
     if(currentCam) {
         setUnfiformMatrix4("viewMat", &currentCam->viewMat);
         setUnfiformMatrix4("shadowMat", &currentCam->shadowMat);
@@ -141,7 +142,7 @@ void ShaderProgram::setUnfiformMatrix3(const char* name, Matrix4* mat) {
     if(location < 0) return;
     btScalar matData[9];
     mat->getOpenGLMatrix3(matData);
-    glUniformMatrix4fv(location, 1, false, matData);
+    glUniformMatrix3fv(location, 1, false, matData);
 }
 
 void ShaderProgram::setUnfiformMatrix4(const char* name, btTransform* mat) {

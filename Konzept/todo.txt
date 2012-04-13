@@ -1,5 +1,6 @@
 GUITextField Copy & Paste
 OpenAL Sound Engine
+Texture Mipmaping
 Collada Model Loader
 Lighting/Shadows Shader
 Animations

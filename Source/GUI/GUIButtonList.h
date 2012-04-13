@@ -23,7 +23,7 @@ enum GUIOrientation {
 class GUIButtonList : public GUIView {
     public:
     void addChild(GUIButton* child);
-    bool autoSize;
+    GUISizeAlignment sizeAlignment;
     GUIOrientation orientation;
     GUIButtonList();
     void updateContent();

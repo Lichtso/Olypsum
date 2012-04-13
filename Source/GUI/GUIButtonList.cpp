@@ -11,7 +11,7 @@
 GUIButtonList::GUIButtonList() {
     type = GUIType_ButtonList;
     orientation = GUIOrientation_Vertical;
-    autoSize = true;
+    sizeAlignment = GUISizeAlignment_All;
 }
 
 void GUIButtonList::addChild(GUIButton* child) {
@@ -28,7 +28,7 @@ void GUIButtonList::updateContent() {
     
     for(unsigned int i = 0; i < children.size(); i ++) {
         button = (GUIButton*)children[i];
-        button->autoSize = true;
+        button->sizeAlignment = GUISizeAlignment_All;
         button->updateContent();
         if(orientation & GUIOrientation_Vertical) {
             widthAux = max(widthAux, button->width);
@@ -62,12 +62,13 @@ void GUIButtonList::updateContent() {
             if(i == children.size()-1) button->roundedCorners = (GUICorners) (button->roundedCorners | GUITopRightCorner | GUIBottomRightCorner);
             posCounter += button->width*2-1;
         }
-        button->autoSize = false;
+        button->sizeAlignment = GUISizeAlignment_None;
         button->updateContent();
     }
     
-    if(autoSize) {
+    if(sizeAlignment & GUISizeAlignment_Width)
         width = widthAux;
+    
+    if(sizeAlignment & GUISizeAlignment_Height)
         height = heightAux;
-    }
 }

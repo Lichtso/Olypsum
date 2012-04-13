@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUITextField.h"
+#import "GUIImage.h"
 
 #ifndef InputController_h
 #define InputController_h

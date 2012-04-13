@@ -36,7 +36,7 @@ void main() {
 	
 	vec3 light = texture2D(sampler1, sTexCoord.st/sTexCoord.q).rgb;
 	float depthRef = light.r+light.g/256.0+light.b/65536.0;
-	light = vec3(1.0);
+	light = vec3(max(0.15, vNormal.z));
 	
 	if(shadows > 0)
 		if(depthRef == 0.0 || depthRef*0.9989 < -sTexCoord.z) {
@@ -45,7 +45,7 @@ void main() {
 			light = vec3(0.2);
 		}
 	
-	vPosition;
-	
+    vPosition;
+    
 	gl_FragColor.rgb *= light.rgb;
 }

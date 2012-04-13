@@ -132,6 +132,7 @@ void GUIRoundedRect::drawInTexture() {
     //}
     
     glGenTextures(1, texture);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, *texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width*2, height*2, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -181,9 +182,7 @@ void GUIRoundedRect::drawOnScreen(bool transposed, int posX, int posY, GUIClipRe
         clipRect.minPosX, clipRect.minPosY
     };
     spriteShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
-    if(texture)
-        glBindTexture(GL_TEXTURE_2D, *texture);
-    else
-        glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, (texture) ? *texture : 0);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }

@@ -31,7 +31,7 @@ void GUITabs::updateContent() {
     for(unsigned int i = 0; i < children.size(); i ++) {
         button = (GUIButton*)children[i];
         button->buttonType = GUIButtonTypeLockable;
-        button->autoSize = true;
+        button->sizeAlignment = GUISizeAlignment_All;
         button->updateContent();
         if(orientation & GUIOrientation_Vertical) {
             widthAux = max(widthAux, button->width);
@@ -109,14 +109,15 @@ void GUITabs::updateContent() {
             
             posCounter += button->width*2-1;
         }
-        button->autoSize = false;
+        button->sizeAlignment = GUISizeAlignment_None;
         button->updateContent();
     }
     
-    if(autoSize) {
+    if(sizeAlignment & GUISizeAlignment_Width)
         width = widthAux;
+    
+    if(sizeAlignment & GUISizeAlignment_Height)
         height = heightAux;
-    }
 }
 
 bool GUITabs::handleMouseDown(int mouseXo, int mouseYo) {

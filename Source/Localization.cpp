@@ -34,7 +34,8 @@ std::vector<std::string> Localization::getLocalizableLanguages() {
 
 bool Localization::loadLocalization(const char* filePath) {
     rapidxml::xml_document<xmlUsedCharType> doc;
-    if(!parseXmlFile(doc, filePath)) return false;
+    char* fileData = parseXmlFile(doc, filePath);
+    if(!fileData) return false;
     
     rapidxml::xml_node<xmlUsedCharType> *rootNode, *titleNode, *localizationNode, *entryNode;
     rapidxml::xml_attribute<xmlUsedCharType> *entryKeyAttribute;
@@ -66,6 +67,7 @@ bool Localization::loadLocalization(const char* filePath) {
     
     endParsingXML:
     doc.clear();
+    delete [] fileData;
     return true;
 }
 

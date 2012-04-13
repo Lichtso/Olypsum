@@ -108,6 +108,7 @@ void GUIScreenView::draw() {
     
     glDisable(GL_DEPTH_TEST);
     guiCam->use();
+    spriteShaderProgram->use();
     spriteShaderProgram->setUnfiformF("light", 1.0);
     
     Matrix4 transform;

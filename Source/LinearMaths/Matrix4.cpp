@@ -127,12 +127,18 @@ Matrix4 Matrix4::getTransposed() {
 }
 
 Matrix4 Matrix4::getInverse() {
-    //return Matrix4(getMatrix().inverse());
     Matrix4 a = getTransposed();
     a.x.w = a.y.w = a.z.w = 0;
     a.pos = Vector3(0, 0, 0);
     a.pos = (pos*-1.0)*a;
     return a;
+}
+
+Matrix4& Matrix4::normalize() {
+    x.normalize();
+    y.normalize();
+    z.normalize();
+    return *this;
 }
 
 Matrix4 Matrix4::operator*(const Matrix4& b) {
@@ -202,9 +208,9 @@ Matrix4& Matrix4::translate(Vector3 vec) {
 Matrix4& Matrix4::scale(Vector3 vec) {
     Matrix4 b;
     b.setIdentity();
-    b.pos.x = vec.x;
-    b.pos.y = vec.y;
-    b.pos.z = vec.z;
+    b.x.x = vec.x;
+    b.y.y = vec.y;
+    b.z.z = vec.z;
     return (*this *= b);
 }
 

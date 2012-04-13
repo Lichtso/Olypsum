@@ -39,6 +39,7 @@ GLuint TextFont::renderStringToTexture(const char* str, SDL_Color colorB, bool a
     SDL_Surface *surfaceB;
     GLuint texture;
     glGenTextures(1, &texture);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
     
     if(antialiasing) {

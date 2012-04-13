@@ -57,12 +57,14 @@ void GUIRect::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     modelMat.translate(Vector3(posX, posY, 0.0));
     spriteShaderProgram->use();
     spriteShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, 0);
     glDrawArrays(GL_LINE_LOOP, 0, 4);
 }
 
 bool GUIRect::handleMouseDown(int mouseX, int mouseY) {
-    return false;
+    if(!visible || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
+    return true;
 }
 
 void GUIRect::handleMouseUp(int mouseX, int mouseY) {

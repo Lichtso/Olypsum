@@ -23,7 +23,7 @@
 
 #define xmlUsedCharType char
 
-bool parseXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const char* filePath);
+char* parseXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const char* filePath);
 
 template <class T> void swap(T &a, T &b) {
 	T c = a;
