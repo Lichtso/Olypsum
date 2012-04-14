@@ -8,9 +8,10 @@
 
 #import "AppMain.h"
 
-float animationTime = 0;
+static float animationTime = 0;
 
-Model* duckModel;
+Model* humanModel;
+SkeletonPose* skeletonPose;
 
 void AppMain(int argc, char *argv[]) {
     if(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) < 0) {
@@ -75,19 +76,29 @@ void AppMain(int argc, char *argv[]) {
     mainShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     mainShaderProgram->addAttribute(NORMAL_ATTRIBUTE, "normal");
     mainShaderProgram->link();
-    spriteShaderProgram = new ShaderProgram();
-    spriteShaderProgram->loadShaderProgram("sprite");
-    spriteShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
-    spriteShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    spriteShaderProgram->link();
     shadowShaderProgram = new ShaderProgram();
     shadowShaderProgram->loadShaderProgram("shadow");
     shadowShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
     shadowShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shadowShaderProgram->link();
+    spriteShaderProgram = new ShaderProgram();
+    spriteShaderProgram->loadShaderProgram("sprite");
+    spriteShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
+    spriteShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
+    spriteShaderProgram->link();
+    mainSkeletonShaderProgram = new ShaderProgram();
+    mainSkeletonShaderProgram->loadShaderProgram("mainSkeleton");
+    mainSkeletonShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
+    mainSkeletonShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
+    mainSkeletonShaderProgram->addAttribute(NORMAL_ATTRIBUTE, "normal");
+    mainSkeletonShaderProgram->addAttribute(WEIGHT_ATTRIBUTE, "weights");
+    mainSkeletonShaderProgram->addAttribute(JOINT_ATTRIBUTE, "joints");
+    mainSkeletonShaderProgram->link();
     currentScreenView = new GUIScreenView();
     
-    duckModel = fileManager.getPackage(NULL)->getModel("Duck.dae");
+    //Init Game {
+    humanModel = fileManager.getPackage(NULL)->getModel("human.dae");
+    skeletonPose = new SkeletonPose(humanModel->skeleton);
     
     GUIImage* image = new GUIImage();
     image->texture = fileManager.getPackage(NULL)->getTexture("logo.png");
@@ -100,8 +111,6 @@ void AppMain(int argc, char *argv[]) {
     labelD->text = std::string("COLLADA Tests");
     labelD->posY = 400;
     currentScreenView->addChild(labelD);
-    
-    //Init Game {
     
     //}
     
@@ -138,16 +147,32 @@ void AppMain(int argc, char *argv[]) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         animationTime += animationFactor;
         mainCam->camMat.setIdentity();
-        mainCam->camMat.translate(Vector3(0,0,5));
+        mainCam->camMat.translate(Vector3(0,0,3));
         mainCam->calculate();
         mainCam->use();
         modelMat.setIdentity();
-        modelMat.scale(Vector3(0.05, 0.05, 0.05));
-        modelMat.translate(Vector3(0,-1.5,0));
-        modelMat.rotateY(animationTime);
         
         mainShaderProgram->use();
-        duckModel->draw();
+        skeletonPose->bonePoses["Back"]->poseMat.setIdentity();
+        skeletonPose->bonePoses["Back"]->poseMat.rotateY(0.3);
+        skeletonPose->bonePoses["Back"]->poseMat.translate(Vector3(0.0, sin(animationTime)*0.5-0.8, 0.0));
+        float thighRotX = (1.0-sin(animationTime))*0.6,
+              shinRotX = -0.8*(1.0-sin(animationTime)),
+              footRotX = 0.4-0.8*(1.0+sin(animationTime));
+        skeletonPose->bonePoses["Thigh_Right"]->poseMat.setIdentity();
+        skeletonPose->bonePoses["Thigh_Right"]->poseMat.rotateX(thighRotX);
+        skeletonPose->bonePoses["Thigh_Left"]->poseMat.setIdentity();
+        skeletonPose->bonePoses["Thigh_Left"]->poseMat.rotateX(thighRotX);
+        skeletonPose->bonePoses["Shin_Right"]->poseMat.setIdentity();
+        skeletonPose->bonePoses["Shin_Right"]->poseMat.rotateX(shinRotX);
+        skeletonPose->bonePoses["Shin_Left"]->poseMat.setIdentity();
+        skeletonPose->bonePoses["Shin_Left"]->poseMat.rotateX(shinRotX);
+        skeletonPose->bonePoses["Foot_Right"]->poseMat.setIdentity();
+        skeletonPose->bonePoses["Foot_Right"]->poseMat.rotateX(footRotX);
+        skeletonPose->bonePoses["Foot_Left"]->poseMat.setIdentity();
+        skeletonPose->bonePoses["Foot_Left"]->poseMat.rotateX(footRotX);
+        skeletonPose->calculateBonePose(humanModel->skeleton->rootBone, NULL);
+        humanModel->draw(skeletonPose);
         
         /*char fpsStr[32];
         sprintf(fpsStr, "FPS: %d", (int)round(1.0/animationFactor));
@@ -178,6 +203,3 @@ void AppTerminate() {
     SDL_Quit();
     exit(0);
 }
-
-float animationFactor;
-std::string resourcesDir, gameDataDir, parentDir;

@@ -11,11 +11,23 @@
 #ifndef Model_h
 #define Model_h
 
+struct Bone {
+    Matrix4 staticMat;
+    unsigned int jointIndex;
+    std::string name;
+    std::vector<Bone*> children;
+};
+
+struct Skeleton {
+    Bone* rootBone;
+    std::map<std::string, Bone*> bones;
+};
+
 class Mesh {
     public:
-    GLuint vboF, vboI, ibo;
+    GLuint vbo, ibo;
     unsigned int elementsCount;
-    int postions, texcoords, normals, tangents, bitangents;
+    int postions, texcoords, normals, tangents, bitangents, weightJoints;
     Texture *diffuse, *normalMap, *effectMap;
     Mesh();
     ~Mesh();
@@ -24,14 +36,30 @@ class Mesh {
 
 class FilePackage;
 
+struct BonePose {
+    Matrix4 poseMat, dynamicMat;
+};
+
+class SkeletonPose {
+    public:
+    std::map<std::string, BonePose*> bonePoses;
+    SkeletonPose();
+    SkeletonPose(Skeleton* skeleton);
+    ~SkeletonPose();
+    void calculateBonePose(Bone* bone, Bone* parentBone);
+    void calculateDisplayMatrix(Bone* bone, Bone* parentBone, Matrix4* mats);
+};
+
 class Model {
     public:
     unsigned int useCounter;
     std::vector<Mesh*> meshes;
+    Skeleton* skeleton;
     Model();
     ~Model();
     bool loadCollada(FilePackage* filePackage, const char* filePath);
     void draw();
+    void draw(SkeletonPose* skeletonPose);
 };
 
 #endif

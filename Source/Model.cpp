@@ -8,24 +8,29 @@
 
 #import "FileManager.h"
 
+#define AXIS_X 0
+#define AXIS_Y 1
+#define AXIS_Z 2
+#define jointsPerVertex 3
+#define maxJointsCount 64
+
 Mesh::Mesh() {
     elementsCount = 0;
-    vboF = vboI = ibo = 0;
+    vbo = ibo = 0;
     postions = texcoords = normals = -1;
-    tangents = bitangents = -1;
-    diffuse = normalMap = NULL;
+    tangents = bitangents = weightJoints = -1;
+    diffuse = normalMap = effectMap = NULL;
 }
 
 Mesh::~Mesh() {
-    if(vboF) glDeleteBuffers(1, &vboF);
-    if(vboI) glDeleteBuffers(1, &vboI);
+    if(vbo) glDeleteBuffers(1, &vbo);
     if(ibo) glDeleteBuffers(1, &ibo);
     if(diffuse) fileManager.releaseTexture(diffuse);
     if(normalMap) fileManager.releaseTexture(normalMap);
 }
 
 void Mesh::draw() {
-    if(!vboF || elementsCount == 0) {
+    if(!vbo || elementsCount == 0) {
         printf("ERROR: No vertex data to draw in mesh.\n");
         return;
     }
@@ -37,18 +42,23 @@ void Mesh::draw() {
     if(diffuse) diffuse->use(0);
     if(normalMap) normalMap->use(1);
     
-    glBindBuffer(GL_ARRAY_BUFFER, vboF);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
     unsigned int byteStride = 3;
     if(texcoords >= 0) byteStride += 2;
     if(normals >= 0) byteStride += 3;
     if(tangents >= 0) byteStride += 3;
     if(bitangents >= 0) byteStride += 3;
+    if(weightJoints >= 0) byteStride += jointsPerVertex*2;
     byteStride *= sizeof(float);
     currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, byteStride, (float*)(postions*sizeof(float)));
     if(texcoords >= 0) currentShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, byteStride, (float*)(texcoords*sizeof(float)));
     if(normals >= 0) currentShaderProgram->setAttribute(NORMAL_ATTRIBUTE, 3, byteStride, (float*)(normals*sizeof(float)));
     if(tangents >= 0) currentShaderProgram->setAttribute(TANGENT_ATTRIBUTE, 3, byteStride, (float*)(tangents*sizeof(float)));
     if(bitangents >= 0) currentShaderProgram->setAttribute(BITANGENT_ATTRIBUTE, 3, byteStride, (float*)(bitangents*sizeof(float)));
+    if(weightJoints >= 0) {
+        currentShaderProgram->setAttribute(WEIGHT_ATTRIBUTE, jointsPerVertex, byteStride, (float*)(weightJoints*sizeof(float)));
+        currentShaderProgram->setAttribute(JOINT_ATTRIBUTE, jointsPerVertex, byteStride, (float*)((weightJoints+jointsPerVertex)*sizeof(float)));
+    }
     
     if(ibo) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
@@ -63,14 +73,10 @@ void Mesh::draw() {
     glDisableVertexAttribArray(NORMAL_ATTRIBUTE);
     glDisableVertexAttribArray(TANGENT_ATTRIBUTE);
     glDisableVertexAttribArray(BITANGENT_ATTRIBUTE);
+    glDisableVertexAttribArray(WEIGHT_ATTRIBUTE);
+    glDisableVertexAttribArray(JOINT_ATTRIBUTE);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
-
-
-
-#define AXIS_X 0
-#define AXIS_Y 1
-#define AXIS_Z 2
 
 struct FloatArray {
     float* data;
@@ -114,20 +120,86 @@ static void readIntStr(char* dataStr, IntArray& array) {
         dataStr = strchr(lastPos, ' ');
         if(dataStr) *dataStr = 0;
         sscanf(lastPos, "%d", &array.data[i]);
-        //printf("%p %d => %s\n", lastPos, i, lastPos);
         lastPos = dataStr+1;
     }
     
     return;
 }
 
+static Matrix4 readTransform(rapidxml::xml_node<xmlUsedCharType>* dataNode) {
+    Matrix4 result, mat;
+    result.setIdentity();
+    rapidxml::xml_node<xmlUsedCharType>* transformNode = dataNode->first_node();
+    while(transformNode) {
+        if(strcmp(transformNode->name(), "matrix") == 0) {
+            FloatArray matrixData;
+            matrixData.count = 16;
+            readFloatStr(transformNode->value(), matrixData);
+            result = Matrix4(matrixData.data).getTransposed();
+            delete [] matrixData.data;
+        }else if(strcmp(transformNode->name(), "translate") == 0) {
+            FloatArray vectorData;
+            vectorData.count = 3;
+            readFloatStr(transformNode->value(), vectorData);
+            mat.setIdentity();
+            mat.translate(Vector3(vectorData.data[0], vectorData.data[1], vectorData.data[2]));
+            result = mat * result;
+            delete [] vectorData.data;
+        }else if(strcmp(transformNode->name(), "rotate") == 0) {
+            FloatArray vectorData;
+            vectorData.count = 4;
+            readFloatStr(transformNode->value(), vectorData);
+            mat.setIdentity();
+            mat.rotateV(Vector3(vectorData.data[0], vectorData.data[1], vectorData.data[2]), vectorData.data[3]/180.0*M_PI);
+            result = mat * result;
+            delete [] vectorData.data;
+        }else if(strcmp(transformNode->name(), "scale") == 0) {
+            FloatArray vectorData;
+            vectorData.count = 3;
+            readFloatStr(transformNode->value(), vectorData);
+            mat.setIdentity();
+            mat.scale(Vector3(vectorData.data[0], vectorData.data[1], vectorData.data[2]));
+            result = mat * result;
+            delete [] vectorData.data;
+        }
+        transformNode = transformNode->next_sibling();
+    }
+    return result;
+}
+
+static Bone* readBone(Skeleton& skeleton, Matrix4& parentMat, rapidxml::xml_node<xmlUsedCharType>* dataNode) {
+    rapidxml::xml_attribute<xmlUsedCharType> *typeAttribute = dataNode->first_attribute("type"),
+                                             *sidAttribute = dataNode->first_attribute("sid");
+    if(!typeAttribute || !sidAttribute || strcmp(typeAttribute->value(), "JOINT") != 0) return NULL;
+    Bone *child, *bone = new Bone;
+    bone->name = sidAttribute->value();
+    bone->staticMat = readTransform(dataNode) * parentMat;
+    rapidxml::xml_node<xmlUsedCharType>* childNode = dataNode->first_node("node");
+    while (childNode) {
+        child = readBone(skeleton, bone->staticMat, childNode);
+        if(child)
+            bone->children.push_back(child);
+        childNode = childNode->next_sibling("node");
+    }
+    skeleton.bones[bone->name] = bone;
+    return bone;
+}
+
 Model::Model() {
     useCounter = 1;
+    skeleton = NULL;
 }
 
 Model::~Model() {
     for(unsigned int i = 0; i < meshes.size(); i ++)
         delete meshes[i];
+    
+    if(skeleton) {
+        std::map<std::string, Bone*>::iterator iterator;
+        for(iterator = skeleton->bones.begin(); iterator != skeleton->bones.end(); iterator ++)
+            delete iterator->second;
+        delete skeleton;
+    }
 }
 
 bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
@@ -141,8 +213,10 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
     rapidxml::xml_attribute<xmlUsedCharType> *dataAttribute;
     std::map<std::string, std::string> textureURLs;
     std::map<std::string, Material> materials;
-    
+    FloatArray skinData;
+    skinData.data = NULL;
     char upAxis = AXIS_Y, *id;
+    Matrix4 modelTransformMat;
     Mesh* mesh;
     
     collada = doc.first_node("COLLADA");
@@ -161,6 +235,11 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             upAxis = AXIS_Z;
         }
     }
+    modelTransformMat.setIdentity();
+    if(upAxis == AXIS_X)
+        modelTransformMat.rotateZ(M_PI_2);
+    else if(upAxis == AXIS_Z)
+        modelTransformMat.rotateX(M_PI_2);
     
     //Load TextureURLs
     library = collada->first_node("library_images");
@@ -281,38 +360,195 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
         while(geometry) {
             meshNode = geometry->first_node("node");
             while(meshNode) {
+                //Map Materials
                 source = meshNode->first_node("instance_controller");
                 if(!source) source = meshNode->first_node("instance_geometry");
-                if(!source) {
-                    meshNode = meshNode->next_sibling("node");
-                    continue;
+                if(source) {
+                    dataNode = source->first_node("bind_material");
+                    if(dataNode) {
+                        dataNode = dataNode->first_node("technique_common");
+                        if(!dataNode) goto endParsingXML;
+                        dataNode = dataNode->first_node("instance_material");
+                        if(!dataNode) goto endParsingXML;
+                        dataAttribute = dataNode->first_attribute("symbol");
+                        if(!dataAttribute) goto endParsingXML;
+                        id = dataAttribute->value();
+                        dataAttribute = dataNode->first_attribute("target");
+                        if(!dataAttribute) goto endParsingXML;
+                        std::map<std::string, Material>::iterator iterator = materials.find(dataAttribute->value()+1);
+                        if(iterator == materials.end()) {
+                            printf("ERROR: No material by id %s found.\n", dataAttribute->value()+1);
+                            goto endParsingXML;
+                        }
+                        materials[id] = iterator->second;
+                    }
                 }
-                dataNode = source->first_node("bind_material");
-                if(!dataNode) {
-                    meshNode = meshNode->next_sibling("node");
-                    continue;
+                
+                //Load Skeletons
+                source = meshNode->first_node("node");
+                if(source) {
+                    dataAttribute = source->first_attribute("type");
+                    if(dataAttribute && strcmp(dataAttribute->value(), "JOINT") == 0) {
+                        if(skeleton) {
+                            printf("ERROR: More than one skeleton found.\n");
+                            goto endParsingXML;
+                        }
+                        skeleton = new Skeleton();
+                        skeleton->rootBone = readBone(*skeleton, modelTransformMat, source);
+                        if(skeleton->bones.size() > maxJointsCount) {
+                            printf("ERROR: More joints (%lu) found than supported (%d).\n", skeleton->bones.size(), maxJointsCount);
+                            goto endParsingXML;
+                        }
+                    }
                 }
-                dataNode = dataNode->first_node("technique_common");
-                if(!dataNode) goto endParsingXML;
-                dataNode = dataNode->first_node("instance_material");
-                if(!dataNode) goto endParsingXML;
-                dataAttribute = dataNode->first_attribute("symbol");
-                if(!dataAttribute) goto endParsingXML;
-                id = dataAttribute->value();
-                dataAttribute = dataNode->first_attribute("target");
-                if(!dataAttribute) goto endParsingXML;
-                std::map<std::string, Material>::iterator iterator = materials.find(dataAttribute->value()+1);
-                if(iterator == materials.end()) {
-                    printf("ERROR: No material by id %s found.\n", dataAttribute->value()+1);
-                    goto endParsingXML;
-                }
-                materials[id] = iterator->second;
+                
                 meshNode = meshNode->next_sibling("node");
             }
             geometry = geometry->next_sibling("visual_scene");
         }
     }
     
+    //Load Controllers
+    library = collada->first_node("library_controllers");
+    if(library) {
+        geometry = library->first_node("controller");
+        if(!skeleton || !geometry) {
+            printf("ERROR: Controller found but no skeleton loaded.\n");
+            goto endParsingXML;
+        }
+        meshNode = geometry->first_node("skin");
+        if(!meshNode) goto endParsingXML;
+        
+        std::vector<Bone*> boneIndexMap(skeleton->bones.size());
+        FloatArray weightData;
+        weightData.data = NULL;
+        source = meshNode->first_node("source");
+        while(source) {
+            dataNode = source->first_node("technique_common");
+            if(!dataNode) goto endParsingXML;
+            dataNode = dataNode->first_node("accessor");
+            if(!dataNode) goto endParsingXML;
+            dataNode = dataNode->first_node("param");
+            if(!dataNode) goto endParsingXML;
+            dataAttribute = dataNode->first_attribute("name");
+            if(!dataAttribute) goto endParsingXML;
+            
+            if(strcmp(dataAttribute->value(), "JOINT") == 0) {
+                dataNode = source->first_node("Name_array");
+                if(!dataNode) goto endParsingXML;
+                dataAttribute = dataNode->first_attribute("count");
+                if(!dataAttribute) goto endParsingXML;
+                unsigned int count;
+                sscanf(dataAttribute->value(), "%d", &count);
+                if(count != skeleton->bones.size()) {
+                    printf("ERROR: Controller found but bone count does not match the bone count of skeleton.\n");
+                    goto endParsingXML;
+                }
+                char *dataStr = dataNode->value(), *lastPos = dataStr;
+                for(unsigned int i = 0; i < skeleton->bones.size(); i ++) {
+                    dataStr = strchr(lastPos, ' ');
+                    if(dataStr) *dataStr = 0;
+                    std::map<std::string, Bone*>::iterator boneIterator = skeleton->bones.find(lastPos);
+                    if(boneIterator == skeleton->bones.end()) {
+                        printf("ERROR: No bone by name %s found.\n", lastPos);
+                        goto endParsingXML;
+                    }
+                    boneIndexMap[i] = boneIterator->second;
+                    boneIterator->second->jointIndex = i;
+                    lastPos = dataStr+1;
+                }
+            }else if(strcmp(dataAttribute->value(), "WEIGHT") == 0) {
+                dataNode = source->first_node("float_array");
+                if(!dataNode) goto endParsingXML;
+                dataAttribute = dataNode->first_attribute("count");
+                if(!dataAttribute) goto endParsingXML;
+                sscanf(dataAttribute->value(), "%d", &weightData.count);
+                readFloatStr(dataNode->value(), weightData);
+            }
+            
+            source = source->next_sibling("source");
+        }
+        if(!weightData.data) {
+            printf("ERROR: No vertex weights found.\n");
+            goto endParsingXML;
+        }
+        
+        source = meshNode->first_node("vertex_weights");
+        if(!source) goto endParsingXML;
+        
+        int jointOffset = 1, weightOffset = -1;
+        dataNode = source->first_node("input");
+        while(dataNode) {
+            dataAttribute = dataNode->first_attribute("semantic");
+            if(!dataAttribute) goto endParsingXML;
+            if(strcmp(dataAttribute->value(), "JOINT") == 0) {
+                dataAttribute = dataNode->first_attribute("offset");
+                if(!dataAttribute) goto endParsingXML;
+                sscanf(dataAttribute->value(), "%d", &jointOffset);
+            }else if(strcmp(dataAttribute->value(), "WEIGHT") == 0) {
+                dataAttribute = dataNode->first_attribute("offset");
+                if(!dataAttribute) goto endParsingXML;
+                sscanf(dataAttribute->value(), "%d", &weightOffset);
+            }
+            dataNode = dataNode->next_sibling("input");
+        }
+        
+        if(jointOffset < 0 || weightOffset < 0) {
+            printf("ERROR: Joint- or weight-offset missing in vertex_weights.\n");
+            goto endParsingXML;
+        }
+        
+        IntArray vcount, skinIndecies;
+        vcount.data = NULL;
+        skinIndecies.data = NULL;
+        dataAttribute = source->first_attribute("count");
+        if(!dataAttribute) goto endParsingXML;
+        sscanf(dataAttribute->value(), "%d", &vcount.count);
+        dataNode = source->first_node("vcount");
+        if(!dataNode) goto endParsingXML;
+        readIntStr(dataNode->value(), vcount);
+        skinIndecies.count = 0;
+        for(unsigned int i = 0; i < vcount.count; i ++) {
+            if(vcount.data[i] > jointsPerVertex) {
+                printf("ERROR: More joints per vertex (%d) found than supported (%d).\n", vcount.data[i], jointsPerVertex);
+                goto endParsingXML;
+            }
+            skinIndecies.count += vcount.data[i]*2;
+        }
+        dataNode = source->first_node("v");
+        if(!dataNode) goto endParsingXML;
+        readIntStr(dataNode->value(), skinIndecies);
+        skinData.count = vcount.count*jointsPerVertex*2;
+        skinData.stride = jointsPerVertex*2;
+        skinData.data = new float[vcount.count*jointsPerVertex*2];
+        skinIndecies.count = 0;
+        for(unsigned int i = 0; i < vcount.count; i ++) {
+            for(unsigned int j = 0; j < jointsPerVertex; j ++) {
+                if(j < vcount.data[i]) {
+                    skinData.data[jointsPerVertex*2*i+j] = weightData.data[skinIndecies.data[skinIndecies.count+j*2+weightOffset]];
+                    skinData.data[jointsPerVertex*2*i+jointsPerVertex+j] = skinIndecies.data[skinIndecies.count+j*2+jointOffset];
+                }else{
+                    skinData.data[jointsPerVertex*2*i+j] = 0.0;
+                    skinData.data[jointsPerVertex*2*i+jointsPerVertex+j] = 0.0;
+                }
+            }
+            skinIndecies.count += vcount.data[i]*2;
+        }
+        
+        delete [] vcount.data;
+        delete [] skinIndecies.data;
+        delete [] weightData.data;
+        
+        geometry = geometry->next_sibling("controllers");
+        if(!skeleton) {
+            printf("ERROR: More than one controller found.\n");
+            goto endParsingXML;
+        }
+    }
+    if(skeleton && !skinData.data) {
+        printf("ERROR: No skin for skeleton found.\n");
+        goto endParsingXML;
+    }
     
     //Load Geometries
     library = collada->first_node("library_geometries");
@@ -347,16 +583,8 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             if(!dataAttribute) goto endParsingXML;
             floatArrays[dataAttribute->value()] = floatArray;
             if(floatArray.stride == 3 && upAxis != AXIS_Y) {
-                Matrix4 mat;
-                mat.setIdentity();
-                
-                if(upAxis == AXIS_X)
-                    mat.rotateZ(M_PI_2);
-                else if(upAxis == AXIS_Z)
-                    mat.rotateX(M_PI_2);
-                
                 for(unsigned int i = 0; i < floatArray.count; i ++) {
-                    Vector3 vec = Vector3(floatArray.data[i*3], floatArray.data[i*3+1], floatArray.data[i*3+2]) * mat;
+                    Vector3 vec = Vector3(floatArray.data[i*3], floatArray.data[i*3+1], floatArray.data[i*3+2]) * modelTransformMat;
                     floatArray.data[i*3  ] = vec.x;
                     floatArray.data[i*3+1] = vec.y;
                     floatArray.data[i*3+2] = vec.z;
@@ -416,11 +644,10 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             }
             
             unsigned int dataIndex, valueIndex, indexCount = 0, strideIndex = 0;
-            std::map<char*, VertexReference> vertexReferences;
+            std::map<std::string, VertexReference> vertexReferences;
             
             dataNode = source->first_node("input");
             while(dataNode) {
-                VertexReference vertexReference;
                 unsigned int offset;
                 dataAttribute = dataNode->first_attribute("offset");
                 if(!dataAttribute) goto endParsingXML;
@@ -429,6 +656,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 if(!dataAttribute) goto endParsingXML;
                 iteratorB = vertexReferenceArrays.find(dataAttribute->value()+1);
                 if(iteratorB == vertexReferenceArrays.end()) {
+                    VertexReference vertexReference;
                     vertexReference.source = &floatArrays[dataAttribute->value()+1];
                     vertexReference.offset = offset;
                     dataAttribute = dataNode->first_attribute("semantic");
@@ -451,7 +679,17 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 goto endParsingXML;
             }
             
-            std::map<char*, VertexReference>::iterator iterator;
+            std::map<std::string, VertexReference>::iterator iterator;
+            if(skeleton) {
+                iterator = vertexReferences.find("POSITION");
+                if(iterator == vertexReferences.end()) goto endParsingXML;
+                VertexReference vertexReference;
+                vertexReference.source = &skinData;
+                vertexReference.offset = iterator->second.offset;
+                vertexReference.name = (char*) "WEIGHTJOINT";
+                vertexReferences[vertexReference.name] = vertexReference;
+            }
+            
             for(iterator = vertexReferences.begin(); iterator != vertexReferences.end(); iterator ++) {
                 if(strcmp(iterator->second.name, "POSITION") == 0) {
                     mesh->postions = strideIndex;
@@ -463,6 +701,8 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                     mesh->tangents = strideIndex;
                 }else if(strcmp(iterator->second.name, "BITANGENT") == 0) {
                     mesh->bitangents = strideIndex;
+                }else if(strcmp(iterator->second.name, "WEIGHTJOINT") == 0) {
+                    mesh->weightJoints = strideIndex;
                 }else{
                     printf("ERROR: Unknown vertex type: %s\n", iterator->second.name);
                     goto endParsingXML;
@@ -535,8 +775,8 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             
             //Indecizer
             float dataBuffer[strideIndex*mesh->elementsCount];
-            glGenBuffers(1, &mesh->vboF);
-            glBindBuffer(GL_ARRAY_BUFFER, mesh->vboF);
+            glGenBuffers(1, &mesh->vbo);
+            glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
             if(indexCount > 1) { //Use IndexBuffer
                 int combinationIndex, combinationCount = 0;
                 unsigned int indecies[mesh->elementsCount];
@@ -598,9 +838,14 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             delete iteratorB->second;
         
         geometry = geometry->next_sibling("geometry");
+        if(skeleton && geometry) {
+            printf("ERROR: More than one geometry but only one controller found.\n");
+            goto endParsingXML;
+        }
     }
     
     endParsingXML:
+    if(skinData.data) delete skinData.data;
     doc.clear();
     delete [] fileData;
     return true;
@@ -609,4 +854,62 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
 void Model::draw() {
     for(unsigned int i = 0; i < meshes.size(); i ++)
         meshes[i]->draw();
+}
+
+void Model::draw(SkeletonPose* skeletonPose) {
+    if(!skeleton) {
+        printf("ERROR: No Skeleton for pose found.\n");
+        return;
+    }
+    mainSkeletonShaderProgram->use();
+    Matrix4* mats = new Matrix4[skeleton->bones.size()];
+    skeletonPose->calculateDisplayMatrix(skeleton->rootBone, NULL, mats);
+    currentShaderProgram->setUniformMatrix4("jointMats", mats, skeleton->bones.size());
+    delete [] mats;
+    modelMat = skeletonPose->bonePoses[skeleton->rootBone->name]->poseMat;
+    meshes[0]->draw();
+}
+
+SkeletonPose::SkeletonPose() {
+    
+}
+
+SkeletonPose::SkeletonPose(Skeleton* skeleton) {
+    std::map<std::string, Bone*>::iterator boneIterator;
+    for(boneIterator = skeleton->bones.begin(); boneIterator != skeleton->bones.end(); boneIterator ++) {
+        BonePose* bonePose = new BonePose;
+        bonePose->poseMat.setIdentity();
+        bonePose->dynamicMat.setIdentity();
+        bonePoses[boneIterator->second->name] = bonePose;
+    }
+}
+
+SkeletonPose::~SkeletonPose() {
+    std::map<std::string, BonePose*>::iterator bonePoseIterator;
+    for(bonePoseIterator = bonePoses.begin(); bonePoseIterator != bonePoses.end(); bonePoseIterator ++)
+        delete bonePoseIterator->second;
+}
+
+void SkeletonPose::calculateBonePose(Bone* bone, Bone* parentBone) {
+    BonePose* bonePose = bonePoses[bone->name];
+    bonePose->dynamicMat.setIdentity();
+    if(parentBone) {
+        bonePose->dynamicMat = bonePose->poseMat;
+        bonePose->dynamicMat.translate(bone->staticMat.pos-parentBone->staticMat.pos);
+        bonePose->dynamicMat *= bonePoses[parentBone->name]->dynamicMat;
+    }else{
+        bonePose->dynamicMat = bonePose->poseMat;
+        bonePose->dynamicMat.translate(bone->staticMat.pos);
+    }
+    for(unsigned int i = 0; i < bone->children.size(); i ++)
+        calculateBonePose(bone->children[i], bone);
+}
+
+void SkeletonPose::calculateDisplayMatrix(Bone* bone, Bone* parentBone, Matrix4* mats) {
+    Matrix4 mat;
+    mat.setIdentity();
+    mat.translate(bone->staticMat.pos*-1);
+    mats[bone->jointIndex] = mat * bonePoses[bone->name]->dynamicMat * currentCam->viewMat;
+    for(unsigned int i = 0; i < bone->children.size(); i ++)
+        calculateDisplayMatrix(bone->children[i], bone, mats);
 }

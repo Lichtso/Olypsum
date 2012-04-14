@@ -25,24 +25,25 @@
 
 char* parseXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const char* filePath);
 
-template <class T> void swap(T &a, T &b) {
+template <class T> inline void swap(T &a, T &b) {
 	T c = a;
 	a = b;
 	b = c;
 }
 
-template <class T> const T max(T a, T b) {
+template <class T> inline const T max(T a, T b) {
 	return (b<a)?a:b;
 }
 
-template <class T> const T min(T a, T b) {
+template <class T> inline const T min(T a, T b) {
 	return (b>a)?a:b;
 }
 
-template <class T> const T clamp(T x, T a, T b) {
+template <class T> inline const T clamp(T x, T a, T b) {
 	return (x<a)?a:((x>b)?b:x);
 }
 
 extern std::string resourcesDir, gameDataDir, parentDir;
+extern float animationFactor;
 
 #endif

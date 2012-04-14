@@ -247,6 +247,22 @@ Matrix4& Matrix4::rotateZ(float value) {
     return (*this *= b);
 }
 
+Matrix4&  Matrix4::rotateV(Vector3 vec, float value) {
+    float sinValue = sin(value), cosValue = cos(value), cosInv = 1.0 - cosValue;
+    Matrix4 b;
+    b.setIdentity();
+    x.x = cosValue+vec.x*vec.x*cosInv;
+    x.y = vec.x*vec.y*cosInv-vec.z*sinValue;
+    x.z = vec.x*vec.z*cosInv+vec.y*sinValue;
+    y.x = vec.x*vec.y*cosInv+vec.z*sinValue;
+    y.y = cosValue+vec.y*vec.y*cosInv;
+    y.z = vec.y*vec.z*cosInv-vec.x*sinValue;
+    z.x = vec.x*vec.z*cosInv-vec.y*sinValue;
+    z.y = vec.y*vec.z*cosInv+vec.x*sinValue;
+    z.z = cosValue+vec.z*vec.z*cosInv;
+    return (*this *= b);
+}
+
 Matrix4& Matrix4::lookAt(Vector3 pos, Vector3 at, Vector3 up, float zoomDist) {
     Matrix4 b;
     b.setIdentity();

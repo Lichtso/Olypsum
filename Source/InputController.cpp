@@ -6,7 +6,6 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "InputController.h"
 #import "AppMain.h"
 
 Uint8* keyState;
@@ -60,4 +59,16 @@ void handleMouseUp(SDL_MouseButtonEvent* mouse) {
 void handleMouseMove(SDL_MouseMotionEvent* mouse) {
     if(currentScreenView)
         currentScreenView->handleMouseMove(mouse->x, mouse->y);
+    
+    float x = 0.5-0.5*mouse->x/currentScreenView->width,
+          y = 0.5-0.5*mouse->y/currentScreenView->height;
+    
+    //TODO: Skeleton-Test
+    skeletonPose->bonePoses["Upperarm_Right"]->poseMat.setIdentity();
+    skeletonPose->bonePoses["Upperarm_Right"]->poseMat.rotateX(y*1.5);
+    skeletonPose->bonePoses["Upperarm_Right"]->poseMat.rotateY(2.0*x-1.0);
+    skeletonPose->bonePoses["Upperarm_Left"]->poseMat.setIdentity();
+    skeletonPose->bonePoses["Upperarm_Left"]->poseMat.rotateZ(-1.5*y);
+    skeletonPose->bonePoses["Upperarm_Left"]->poseMat.rotateY(2.0*x+1.0);
+    
 }

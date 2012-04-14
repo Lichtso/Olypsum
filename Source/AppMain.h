@@ -11,7 +11,8 @@
 #ifndef AppMain_h
 #define AppMain_h
 
-extern float animationFactor;
+//TODO: Skeleton-Test
+extern SkeletonPose* skeletonPose;
 
 void AppMain(int argc, char *argv[]);
 void AppTerminate();

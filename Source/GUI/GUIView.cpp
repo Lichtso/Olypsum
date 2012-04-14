@@ -78,13 +78,13 @@ GUIScreenView::GUIScreenView() {
     type = GUIType_ScreenView;
     parent = NULL;
     firstResponder = NULL;
-    width = currentCam->viewport[2] >> 1;
-    height = currentCam->viewport[3] >> 1;
+    width = guiCam->viewport[2] >> 1;
+    height = guiCam->viewport[3] >> 1;
 }
 
 bool GUIScreenView::getLimSize(GUIClipRect& clipRect) {
-    width = currentCam->viewport[2] >> 1;
-    height = currentCam->viewport[3] >> 1;
+    width = guiCam->viewport[2] >> 1;
+    height = guiCam->viewport[3] >> 1;
     clipRect.minPosX = -width;
     clipRect.minPosY = -height;
     clipRect.maxPosX = width;
@@ -93,9 +93,8 @@ bool GUIScreenView::getLimSize(GUIClipRect& clipRect) {
 }
 
 void GUIScreenView::updateContent() {
-    width = currentCam->viewport[2] >> 1;
-    height = currentCam->viewport[3] >> 1;
-    
+    width = guiCam->viewport[2] >> 1;
+    height = guiCam->viewport[3] >> 1;
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->updateContent();
 }
@@ -109,7 +108,7 @@ void GUIScreenView::draw() {
     glDisable(GL_DEPTH_TEST);
     guiCam->use();
     spriteShaderProgram->use();
-    spriteShaderProgram->setUnfiformF("light", 1.0);
+    spriteShaderProgram->setUniformF("light", 1.0);
     
     Matrix4 transform;
     transform.setIdentity();

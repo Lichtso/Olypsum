@@ -26,3 +26,6 @@ char* parseXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const char* fil
     doc.parse<0>(data);
     return data;
 }
+
+float animationFactor;
+std::string resourcesDir, gameDataDir, parentDir;

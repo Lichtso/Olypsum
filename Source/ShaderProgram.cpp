@@ -99,14 +99,14 @@ void ShaderProgram::link() {
 void ShaderProgram::use () {
 	glUseProgram(GLname);
     currentShaderProgram = this;
-    setUnfiformMatrix4("modelMat", &modelMat);
+    setUniformMatrix4("modelMat", &modelMat);
     Matrix4 normalMat = Matrix4(modelMat).normalize();
-    setUnfiformMatrix3("normalMat", &normalMat);
+    setUniformMatrix3("normalMat", &normalMat);
     if(currentCam) {
-        setUnfiformMatrix4("viewMat", &currentCam->viewMat);
-        setUnfiformMatrix4("shadowMat", &currentCam->shadowMat);
+        setUniformMatrix4("viewMat", &currentCam->viewMat);
+        setUniformMatrix4("shadowMat", &currentCam->shadowMat);
         Matrix4 modelViewMat(modelMat * currentCam->viewMat);
-        setUnfiformMatrix4("modelViewMat", &modelViewMat);
+        setUniformMatrix4("modelViewMat", &modelViewMat);
     }
 }
 
@@ -115,15 +115,15 @@ void ShaderProgram::setAttribute(unsigned int index, unsigned int size, GLsizei 
     glVertexAttribPointer(index, size, GL_FLOAT, false, stride, data);
 }
 
-void ShaderProgram::setUnfiformI(const char* name, int value) {
+void ShaderProgram::setUniformI(const char* name, int value) {
     glUniform1i(glGetUniformLocation(GLname, name), value);
 }
 
-void ShaderProgram::setUnfiformF(const char* name, float value) {
+void ShaderProgram::setUniformF(const char* name, float value) {
     glUniform1f(glGetUniformLocation(GLname, name), value);
 }
 
-void ShaderProgram::setUnfiformMatrix3(const char* name, btMatrix3x3* mat) {
+void ShaderProgram::setUniformMatrix3(const char* name, btMatrix3x3* mat) {
     GLint location = glGetUniformLocation(GLname, name);
     if(location < 0) return;
     btScalar matData[16];
@@ -137,7 +137,7 @@ void ShaderProgram::setUnfiformMatrix3(const char* name, btMatrix3x3* mat) {
     glUniformMatrix3fv(location, 1, false, matData);
 }
 
-void ShaderProgram::setUnfiformMatrix3(const char* name, Matrix4* mat) {
+void ShaderProgram::setUniformMatrix3(const char* name, Matrix4* mat) {
     GLint location = glGetUniformLocation(GLname, name);
     if(location < 0) return;
     btScalar matData[9];
@@ -145,7 +145,7 @@ void ShaderProgram::setUnfiformMatrix3(const char* name, Matrix4* mat) {
     glUniformMatrix3fv(location, 1, false, matData);
 }
 
-void ShaderProgram::setUnfiformMatrix4(const char* name, btTransform* mat) {
+void ShaderProgram::setUniformMatrix4(const char* name, btTransform* mat) {
     GLint location = glGetUniformLocation(GLname, name);
     if(location < 0) return;
     btScalar matData[16];
@@ -153,12 +153,21 @@ void ShaderProgram::setUnfiformMatrix4(const char* name, btTransform* mat) {
     glUniformMatrix4fv(location, 1, false, matData);
 }
 
-void ShaderProgram::setUnfiformMatrix4(const char* name, Matrix4* mat) {
+void ShaderProgram::setUniformMatrix4(const char* name, Matrix4* mat) {
     GLint location = glGetUniformLocation(GLname, name);
     if(location < 0) return;
     btScalar matData[16];
     mat->getOpenGLMatrix4(matData);
     glUniformMatrix4fv(location, 1, false, matData);
+}
+
+void ShaderProgram::setUniformMatrix4(const char* name, Matrix4* mat, unsigned int count) {
+    GLint location = glGetUniformLocation(GLname, name);
+    if(location < 0) return;
+    btScalar matData[count*16];
+    for(unsigned int i = 0; i < count; i ++)
+        mat[i].getOpenGLMatrix4(matData+i*16);
+    glUniformMatrix4fv(location, count, false, matData);
 }
 
 ShaderProgram& ShaderProgram::operator=(const ShaderProgram &b) {
@@ -167,4 +176,6 @@ ShaderProgram& ShaderProgram::operator=(const ShaderProgram &b) {
 }
 
 Matrix4 modelMat;
-ShaderProgram *mainShaderProgram, *spriteShaderProgram, *shadowShaderProgram, *currentShaderProgram;
+ShaderProgram *mainShaderProgram, *shadowShaderProgram,
+              *mainSkeletonShaderProgram, *shadowSkeletonShaderProgram,
+              *spriteShaderProgram, *currentShaderProgram;
