@@ -35,7 +35,6 @@
 		11A79B78153C2FE9002B9F0A /* GUITabs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B3D153C2FE9002B9F0A /* GUITabs.cpp */; };
 		11A79B79153C2FE9002B9F0A /* GUITextField.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B3F153C2FE9002B9F0A /* GUITextField.cpp */; };
 		11A79B7A153C2FE9002B9F0A /* GUIView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B41153C2FE9002B9F0A /* GUIView.cpp */; };
-		11A79B7B153C2FE9002B9F0A /* InputController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B43153C2FE9002B9F0A /* InputController.cpp */; };
 		11A79B7C153C2FE9002B9F0A /* BoundingVolumes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B46153C2FE9002B9F0A /* BoundingVolumes.cpp */; };
 		11A79B7D153C2FE9002B9F0A /* Frustum3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B48153C2FE9002B9F0A /* Frustum3.cpp */; };
 		11A79B7E153C2FE9002B9F0A /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B4A153C2FE9002B9F0A /* Matrix4.cpp */; };
@@ -59,6 +58,7 @@
 		11A79BCE153C35CE002B9F0A /* Textures in Resources */ = {isa = PBXBuildFile; fileRef = 11A79BC8153C35CD002B9F0A /* Textures */; };
 		11BD39AD15414AA6007846B8 /* Light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11BD39AC15414AA6007846B8 /* Light.cpp */; };
 		11BD39B01541725F007846B8 /* Game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11BD39AF1541725F007846B8 /* Game.cpp */; };
+		11FB30A3154453FC00D2B7EE /* InputController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11FB30A1154453CA00D2B7EE /* InputController.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -112,8 +112,6 @@
 		11A79B40153C2FE9002B9F0A /* GUITextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUITextField.h; sourceTree = "<group>"; };
 		11A79B41153C2FE9002B9F0A /* GUIView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIView.cpp; sourceTree = "<group>"; };
 		11A79B42153C2FE9002B9F0A /* GUIView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIView.h; sourceTree = "<group>"; };
-		11A79B43153C2FE9002B9F0A /* InputController.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InputController.cpp; path = Engine/InputController.cpp; sourceTree = "<group>"; };
-		11A79B44153C2FE9002B9F0A /* InputController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputController.h; path = Engine/InputController.h; sourceTree = "<group>"; };
 		11A79B46153C2FE9002B9F0A /* BoundingVolumes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BoundingVolumes.cpp; sourceTree = "<group>"; };
 		11A79B47153C2FE9002B9F0A /* BoundingVolumes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BoundingVolumes.h; sourceTree = "<group>"; };
 		11A79B48153C2FE9002B9F0A /* Frustum3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Frustum3.cpp; sourceTree = "<group>"; };
@@ -157,6 +155,8 @@
 		11BD39AC15414AA6007846B8 /* Light.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Light.cpp; sourceTree = "<group>"; };
 		11BD39AE1541724A007846B8 /* Game.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Game.h; sourceTree = "<group>"; };
 		11BD39AF1541725F007846B8 /* Game.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Game.cpp; sourceTree = "<group>"; };
+		11FB30A1154453CA00D2B7EE /* InputController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = InputController.cpp; sourceTree = "<group>"; };
+		11FB30A2154453CA00D2B7EE /* InputController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InputController.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -232,8 +232,8 @@
 				11A79B1F153C2FE9002B9F0A /* Engine */,
 				11BD39AE1541724A007846B8 /* Game.h */,
 				11BD39AF1541725F007846B8 /* Game.cpp */,
-				11A79B44153C2FE9002B9F0A /* InputController.h */,
-				11A79B43153C2FE9002B9F0A /* InputController.cpp */,
+				11FB30A2154453CA00D2B7EE /* InputController.h */,
+				11FB30A1154453CA00D2B7EE /* InputController.cpp */,
 			);
 			path = Source;
 			sourceTree = "<group>";
@@ -445,7 +445,6 @@
 				11A79B78153C2FE9002B9F0A /* GUITabs.cpp in Sources */,
 				11A79B79153C2FE9002B9F0A /* GUITextField.cpp in Sources */,
 				11A79B7A153C2FE9002B9F0A /* GUIView.cpp in Sources */,
-				11A79B7B153C2FE9002B9F0A /* InputController.cpp in Sources */,
 				11A79B7C153C2FE9002B9F0A /* BoundingVolumes.cpp in Sources */,
 				11A79B7D153C2FE9002B9F0A /* Frustum3.cpp in Sources */,
 				11A79B7E153C2FE9002B9F0A /* Matrix4.cpp in Sources */,
@@ -463,6 +462,7 @@
 				11648F6E153DEE63004CA74D /* FBO.cpp in Sources */,
 				11BD39AD15414AA6007846B8 /* Light.cpp in Sources */,
 				11BD39B01541725F007846B8 /* Game.cpp in Sources */,
+				11FB30A3154453FC00D2B7EE /* InputController.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
