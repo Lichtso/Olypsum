@@ -38,7 +38,7 @@ class Matrix4 {
     Matrix4& rotateY(float y);
     Matrix4& rotateZ(float z);
     Matrix4& rotateV(Vector3 axis, float value);
-    Matrix4& lookAt(Vector3 pos, Vector3 at, Vector3 up, float zoomDist);
+    Matrix4& setDirection(Vector3 dir, Vector3 up);
     Matrix4& perspective(float fovy, float aspect, float near, float far);
     Matrix4& frustum(float width, float height, float near, float far);
     Matrix4& ortho(float width, float height, float near, float far);

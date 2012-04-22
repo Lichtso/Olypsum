@@ -34,6 +34,7 @@ class ShaderProgram {
     void setAttribute(unsigned int index, unsigned int size, GLsizei stride, GLfloat* data);
     void setUniformI(const char* name, int value);
     void setUniformF(const char* name, float value);
+    void setUniformVec3(const char* name, Vector3 value);
     void setUniformMatrix3(const char* name, btMatrix3x3* mat);
     void setUniformMatrix3(const char* name, Matrix4* mat);
     void setUniformMatrix4(const char* name, btTransform* mat);

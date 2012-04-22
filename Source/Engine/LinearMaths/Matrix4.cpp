@@ -201,8 +201,10 @@ Matrix4& Matrix4::operator*=(const float& factor) {
 }
 
 Matrix4& Matrix4::translate(Vector3 vec) {
-    pos += vec;
-    return *this;
+    Matrix4 b;
+    b.setIdentity();
+    b.pos = vec;
+    return (*this *= b);
 }
 
 Matrix4& Matrix4::scale(Vector3 vec) {
@@ -263,13 +265,12 @@ Matrix4&  Matrix4::rotateV(Vector3 vec, float value) {
     return (*this *= b);
 }
 
-Matrix4& Matrix4::lookAt(Vector3 pos, Vector3 at, Vector3 up, float zoomDist) {
+Matrix4& Matrix4::setDirection(Vector3 dir, Vector3 up) {
     Matrix4 b;
     b.setIdentity();
-    b.z = (pos-at).normalize();
+    b.z = dir*-1.0;
     b.x = (up/b.z).normalize();
     b.y = (b.z/b.x);
-    b.pos = pos-b.z*zoomDist;
     return (*this *= b);
 }
 
@@ -280,8 +281,8 @@ Matrix4& Matrix4::perspective(float fovy, float aspect, float n, float f) {
     b.x.x = a/aspect;
     b.y.y = a;
     b.z.z = (n+f)/(n-f);
-    b.pos.z = (2.0*n*f)/(n-f);
     b.z.w = -1.0;
+    b.pos.z = (2.0*n*f)/(n-f);
     b.pos.w = 0.0;
     return (*this *= b);
 }
@@ -292,8 +293,8 @@ Matrix4& Matrix4::frustum(float w, float h, float n, float f) {
     b.x.x = n/w;
     b.y.y = n/h;
     b.z.z = (n+f)/(n-f);
-    b.pos.z = (2.0*n*f)/(n-f);
     b.z.w = -1.0;
+    b.pos.z = (2.0*n*f)/(n-f);
     b.pos.w = 0.0;
     return (*this *= b);
 }

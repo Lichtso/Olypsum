@@ -12,6 +12,7 @@
 #define FBO_h
 
 #define maxFBOSize 1024
+#define maxColorBufferCount 8
 
 struct ColorBuffer {
     bool resizedDisplay;
@@ -21,16 +22,16 @@ struct ColorBuffer {
 
 class FBO {
     GLuint frameBuffer, depthBuffer;
-    std::vector<ColorBuffer> colorBuffers;
     public:
-    FBO();
+    std::vector<ColorBuffer> colorBuffers;
     ~FBO();
+    void init();
     unsigned int addTexture(unsigned int size, bool resizedDisplay);
     void renderInTexture(unsigned int index);
     void useTexture(unsigned int index, GLuint targetIndex);
     void deleteTexture(unsigned int index);
 };
 
-extern FBO* mainFBO;
+extern FBO mainFBO;
 
 #endif

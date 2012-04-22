@@ -42,6 +42,7 @@ void Mesh::draw() {
     
     if(diffuse) diffuse->use(0);
     if(normalMap) normalMap->use(1);
+    if(effectMap) effectMap->use(2);
     
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     unsigned int byteStride = 3;
@@ -853,6 +854,10 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
 }
 
 void Model::draw() {
+    if(currentShaderProgram == shadowShaderProgram || currentShaderProgram == shadowSkeletonShaderProgram)
+        shadowShaderProgram->use();
+    else
+        mainShaderProgram->use();
     for(unsigned int i = 0; i < meshes.size(); i ++)
         meshes[i]->draw();
 }
@@ -862,15 +867,15 @@ void Model::draw(SkeletonPose* skeletonPose) {
         printf("ERROR: No Skeleton for pose found.\n");
         return;
     }
-    if(currentShaderProgram == mainShaderProgram)
-        mainSkeletonShaderProgram->use();
-    else if(currentShaderProgram == shadowShaderProgram)
+    if(currentShaderProgram == shadowShaderProgram || currentShaderProgram == shadowSkeletonShaderProgram)
         shadowSkeletonShaderProgram->use();
+    else
+        mainSkeletonShaderProgram->use();
     Matrix4* mats = new Matrix4[skeleton->bones.size()];
     skeletonPose->calculateDisplayMatrix(skeleton->rootBone, NULL, mats);
     currentShaderProgram->setUniformMatrix4("jointMats", mats, skeleton->bones.size());
     delete [] mats;
-    modelMat = skeletonPose->bonePoses[skeleton->rootBone->name]->poseMat;
+    //modelMat = skeletonPose->bonePoses[skeleton->rootBone->name]->poseMat;
     for(unsigned int i = 0; i < meshes.size(); i ++)
         meshes[i]->draw();
 }

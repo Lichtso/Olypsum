@@ -13,8 +13,7 @@ Cam::Cam() {
     fov = 70.0/180.0*M_PI;
     near = 1.0;
     far = 100000.0;
-    width = 1.0;
-    height = 0.0;
+    width = height = 1.0;
 }
 
 Cam::~Cam() {
@@ -61,24 +60,17 @@ Frustum3 Cam::getFrustumOf(Vector3 screenMin, Vector3 screenMax) {
 }
 
 void Cam::calculate() {
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    float aspect = (float)viewport[2]/(float)viewport[3];
-    
+    float aspect = width/height;
     viewMat = camMat.getInverse();
     
-    //Matrix4 projectionMat;
-    //projectionMat.setIdentity();
-    if(fov > 0.0) {
+    if(fov > 0.0)
         viewMat.perspective(fov, aspect, near, far);
-    }else{
+    else
         viewMat.ortho(width, height, near, far);
-    }
-    //viewMat *= projectionMat;
     
     shadowMat = viewMat;
     shadowMat.scale(Vector3(0.5, 0.5, 1.0));
-    shadowMat.translate(Vector3(0.5, 0.5, 1.0));
+    shadowMat.translate(Vector3(0.5, 0.5, 0.0));
     //shadowMat.scale((aspect >= 1.0) ? Vector3(1.0, 1.0/aspect, 1.0) : Vector3(aspect, 1.0, 1.0));
     
     frustum = getFrustumOf(Vector3(-1, -1, 0), Vector3(1, 1, 0));

@@ -12,46 +12,65 @@
 #define Light_h
 
 enum LightType {
-    LightType_Directional = 0,
-    LightType_Spot = 1,
-    LightType_Positional = 2
+    LightType_Directional = 1,
+    LightType_Spot = 2,
+    LightType_Positional = 3
 };
 
 class Light {
+    protected:
+    Cam* shadowCam;
+    int shadowMap;
     public:
-    bool illuminationActive, shadowActive;
+    int glIndex;
+    unsigned int shadowResolution;
+    float range;
     LightType type;
-    float color[3];
-    //virtual void calculate();
-    //virtual void use();
+    Vector3 color;
     Light();
+    ~Light();
+    virtual bool calculateShadowmap();
+    virtual void use();
 };
-/*
+
 class DirectionalLight : public Light {
     public:
-    Vector3 dir;
-    void calculate();
-    void use();
+    Vector3 direction;
+    float distance, width, height;
     DirectionalLight();
+    bool calculateShadowmap();
+    void use();
 };
 
 class SpotLight : public Light {
     public:
-    Vector3 dir, pos;
+    Vector3 direction, position;
     float cutoff;
-    void calculate();
-    void use();
     SpotLight();
+    bool calculateShadowmap();
+    void use();
 };
 
 class PositionalLight : public Light {
+    int shadowMapB;
     public:
-    Vector3 pos;
-    void calculate();
-    void use();
+    Vector3 position;
     PositionalLight();
-};*/
+    ~PositionalLight();
+    bool calculateShadowmap();
+    void use();
+};
 
-extern std::vector<Light*> lights;
+#define maxLightCount 4
+
+class LightManager {
+    void setLightsForShader();
+    public:
+    std::vector<Light*> lights;
+    ~LightManager();
+    void setLights();
+};
+
+extern LightManager lightManager;
 
 #endif

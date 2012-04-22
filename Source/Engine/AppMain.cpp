@@ -58,12 +58,12 @@ void AppMain(int argc, char *argv[]) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(1, 1, 1, 0);
-    mainFBO = new FBO();
-    mainFBO->addTexture(512, true);
+    mainFBO.init();
     
     //Init Cams
     mainCam = new Cam();
-    mainCam->camMat.translate(Vector3(0,0,1));
+    mainCam->width = videoInfo->current_w/2;
+    mainCam->height = videoInfo->current_h/2;
     mainCam->calculate();
     mainCam->use();
     guiCam = new Cam();
@@ -167,12 +167,14 @@ void AppMain(int argc, char *argv[]) {
         modKeyState = SDL_GetModState();
         
         calculateFrame();
+        if(currentScreenView)
+            currentScreenView->draw();
         SDL_GL_SwapBuffers();
         
         if(thenTicks > 0) {
 			nowTicks = clock();
-			animationFactor = (float)(nowTicks-thenTicks)/CLOCKS_PER_SEC;
-			if(animationFactor < 1.0/50.0) animationFactor = 1.0/50.0;
+			animationFactor = (float)(nowTicks-thenTicks)/(float)CLOCKS_PER_SEC;
+			//if(animationFactor < 1.0/50.0) animationFactor = 1.0/50.0;
             thenTicks = nowTicks;
         }else{
             thenTicks = clock();

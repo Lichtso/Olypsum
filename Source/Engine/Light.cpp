@@ -6,13 +6,167 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "Light.h"
+#import "Game.h"
 
 Light::Light() {
-    illuminationActive = shadowActive = false;
-    color[0] = color[1] = color[2] = 1.0;
+    shadowCam = NULL;
+    shadowMap = -1;
+    glIndex = -1;
+    shadowResolution = 0;
+    color = Vector3(1.0, 1.0, 1.0);
 }
 
+Light::~Light() {
+    if(shadowCam) delete shadowCam;
+    if(shadowMap >= 0) mainFBO.deleteTexture(shadowMap);
+}
 
+bool Light::calculateShadowmap() {
+    if(shadowResolution == 0) return false;
+    if(this->shadowMap < 0) {
+        if(mainFBO.colorBuffers.size()+1 > maxColorBufferCount)
+            shadowResolution = 0;
+        else
+            shadowMap = mainFBO.addTexture(shadowResolution, false);
+        
+        if(shadowMap < 0) {
+            if(shadowCam) {
+                delete shadowCam;
+                shadowCam = NULL;
+            }
+            return false;
+        }
+    }
+    if(!shadowCam)
+        shadowCam = new Cam();
+    return true;
+}
 
-std::vector<Light*> lights;
+void Light::use() {
+    char str[64];
+    sprintf(str, "lightSources[%d].type", glIndex);
+    currentShaderProgram->setUniformF(str, type);
+    sprintf(str, "lightSources[%d].range", glIndex);
+    currentShaderProgram->setUniformF(str, range);
+    sprintf(str, "lightSources[%d].color", glIndex);
+    currentShaderProgram->setUniformVec3(str, color);
+}
+
+DirectionalLight::DirectionalLight() {
+    type = LightType_Directional;
+    direction = Vector3(0.0, -1.0, 0.0).normalize();
+    distance = 50.0;
+    range = 100.0;
+    width = height = 10.0;
+}
+
+bool DirectionalLight::calculateShadowmap() {
+    if(!Light::calculateShadowmap()) return false;
+    shadowCam->camMat.setIdentity();
+    shadowCam->camMat.setDirection(direction, Vector3(0, 0, 1));
+    shadowCam->camMat.translate(direction*distance*-1.0);
+    shadowCam->width = width;
+    shadowCam->height = height;
+    shadowCam->fov = 0.0;
+    shadowCam->near = 1.0;
+    shadowCam->far = range;
+    shadowCam->calculate();
+    shadowCam->use();
+    currentCam = shadowCam;
+    shadowSkeletonShaderProgram->use();
+    shadowSkeletonShaderProgram->setUniformF("lightType", type);
+    shadowShaderProgram->use();
+    shadowShaderProgram->setUniformF("lightType", type);
+    mainFBO.renderInTexture(shadowMap);
+    renderScene();
+    return true;
+}
+
+void DirectionalLight::use() {
+    if(glIndex < 0) return;
+    Light::use();
+    char str[64];
+    sprintf(str, "lightSources[%d].direction", glIndex);
+    currentShaderProgram->setUniformVec3(str, direction*-1.0);
+    sprintf(str, "lightSources[%d].shadowFactor", glIndex);
+    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 0.997 : 0.0);
+    if(shadowMap < 0) return;
+    sprintf(str, "lightSources[%d].shadowMat", glIndex);
+    currentShaderProgram->setUniformMatrix4(str, &shadowCam->shadowMat);
+    mainFBO.useTexture(shadowMap, glIndex*2+3);
+}
+
+SpotLight::SpotLight() {
+    type = LightType_Spot;
+    position = Vector3(0.0, 0.0, 0.0);
+    direction = Vector3(0.0, 0.0, -1.0).normalize();
+    cutoff = 45.0/180.0*M_PI;
+    range = 100.0;
+}
+
+bool SpotLight::calculateShadowmap() {
+    if(!Light::calculateShadowmap()) return false;
+    shadowCam->camMat.setIdentity();
+    shadowCam->camMat.setDirection(direction, Vector3(0, 1, 0));
+    shadowCam->camMat.translate(position);
+    shadowCam->width = 1.0;
+    shadowCam->height = 1.0;
+    shadowCam->fov = cutoff;
+    shadowCam->near = 1.0;
+    shadowCam->far = range;
+    shadowCam->calculate();
+    shadowCam->use();
+    currentCam = shadowCam;
+    shadowSkeletonShaderProgram->use();
+    shadowSkeletonShaderProgram->setUniformF("lightType", type);
+    shadowShaderProgram->use();
+    shadowShaderProgram->setUniformF("lightType", type);
+    mainFBO.renderInTexture(shadowMap);
+    renderScene();
+    return true;
+}
+
+void SpotLight::use() {
+    if(glIndex < 0) return;
+    Light::use();
+    char str[64];
+    sprintf(str, "lightSources[%d].cutoff", glIndex);
+    currentShaderProgram->setUniformF(str, cutoff*0.5);
+    sprintf(str, "lightSources[%d].direction", glIndex);
+    currentShaderProgram->setUniformVec3(str, direction);
+    sprintf(str, "lightSources[%d].shadowFactor", glIndex);
+    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 1.005 : 0.0);
+    sprintf(str, "lightSources[%d].position", glIndex);
+    currentShaderProgram->setUniformVec3(str, position);
+    if(shadowMap < 0) return;
+    sprintf(str, "lightSources[%d].shadowMat", glIndex);
+    currentShaderProgram->setUniformMatrix4(str, &shadowCam->shadowMat);
+    mainFBO.useTexture(shadowMap, glIndex*2+3);
+}
+
+LightManager::~LightManager() {
+    for(unsigned int i = 0; i < lights.size(); i ++)
+        delete lights[i];
+}
+
+void LightManager::setLightsForShader() {
+    for(unsigned int i = 0; i < lights.size(); i ++) {
+        lights[i]->glIndex = (i < maxLightCount) ? i : -1;
+        lights[i]->use();
+    }
+    
+    char str[64];
+    for(unsigned int i = lights.size(); i < maxLightCount; i ++) {
+        sprintf(str, "lightSources[%d].type", i);
+        currentShaderProgram->setUniformF(str, 0);
+    }
+}
+
+void LightManager::setLights() {
+    mainShaderProgram->use();
+    setLightsForShader();
+    mainSkeletonShaderProgram->use();
+    setLightsForShader();
+}
+
+LightManager lightManager;

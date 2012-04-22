@@ -85,14 +85,20 @@ void ShaderProgram::link() {
 	}
     
     glUseProgram(GLname);
-    char buffer[64], samplerIndex = 0;
+    char buffer[64], samplerIndex;
     GLint location;
-    while(samplerIndex < 255) {
+    for(samplerIndex = 0; samplerIndex < 4; samplerIndex ++) {
         sprintf(buffer, "sampler%d", samplerIndex);
         location = glGetUniformLocation(GLname, buffer);
         if(location < 0) break;
         glUniform1i(location, samplerIndex);
-        samplerIndex ++;
+    }
+    
+    for(samplerIndex = 0; samplerIndex < maxLightCount*2; samplerIndex ++) {
+        sprintf(buffer, "shadowMaps[%d]", samplerIndex);
+        location = glGetUniformLocation(GLname, buffer);
+        if(location < 0) break;
+        glUniform1i(location, samplerIndex+3);
     }
 }
 
@@ -121,6 +127,10 @@ void ShaderProgram::setUniformI(const char* name, int value) {
 
 void ShaderProgram::setUniformF(const char* name, float value) {
     glUniform1f(glGetUniformLocation(GLname, name), value);
+}
+
+void ShaderProgram::setUniformVec3(const char* name, Vector3 value) {
+    glUniform3f(glGetUniformLocation(GLname, name), value.x, value.y, value.z);
 }
 
 void ShaderProgram::setUniformMatrix3(const char* name, btMatrix3x3* mat) {
