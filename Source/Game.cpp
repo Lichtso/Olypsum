@@ -16,7 +16,6 @@ static float animationTime = 0;
 void initGame() {
     humanModel = fileManager.getPackage(NULL)->getModel("man.dae");
     skeletonPose = new SkeletonPose(humanModel->skeleton);
-    
     /*
     DirectionalLight* light = new DirectionalLight();
     light->direction = Vector3(0.0, -1.0, 0.0).normalize();
@@ -24,7 +23,7 @@ void initGame() {
     light->range = 100.0;
     light->width = light->height = 2.0;
     light->shadowResolution = 1024;
-    lightManager.lights.push_back((Light*)light);*/
+    lightManager.lights.push_back((Light*)light);
     
     SpotLight* light = new SpotLight();
     light->position = Vector3(-1.0, 2.0, 2.0);
@@ -32,6 +31,13 @@ void initGame() {
     light->cutoff = 20.0/180.0*M_PI;
     light->range = 10.0;
     light->shadowResolution = 512;
+    lightManager.lights.push_back((Light*)light);
+    /* */
+    PositionalLight* light = new PositionalLight();
+    light->position = Vector3(0.0, 1.0, 1.0);
+    light->direction = Vector3(0.0, 0.0, -1.0).normalize();
+    light->range = 10.0;
+    light->shadowResolution = 1024;
     lightManager.lights.push_back((Light*)light);
     
     GUIImage* image = new GUIImage();
@@ -118,9 +124,9 @@ void calculateFrame() {
     
     lightManager.lights[0]->calculateShadowmap();
     lightManager.setLights();
+    //return;
     
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    
     mainCam->camMat.setIdentity();
     mainCam->camMat.translate(Vector3(0,1,3));
     mainCam->setFullScreen();
@@ -128,6 +134,6 @@ void calculateFrame() {
     mainCam->use();
     modelMat.setIdentity();
     mainShaderProgram->use();
-    
+    glClearColor(1, 1, 1, 1);
     renderScene();
 }

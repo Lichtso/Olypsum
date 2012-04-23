@@ -24,6 +24,7 @@ class Light {
     public:
     int glIndex;
     unsigned int shadowResolution;
+    Vector3 direction, upDir;
     float range;
     LightType type;
     Vector3 color;
@@ -35,7 +36,6 @@ class Light {
 
 class DirectionalLight : public Light {
     public:
-    Vector3 direction;
     float distance, width, height;
     DirectionalLight();
     bool calculateShadowmap();
@@ -44,7 +44,7 @@ class DirectionalLight : public Light {
 
 class SpotLight : public Light {
     public:
-    Vector3 direction, position;
+    Vector3 position;
     float cutoff;
     SpotLight();
     bool calculateShadowmap();

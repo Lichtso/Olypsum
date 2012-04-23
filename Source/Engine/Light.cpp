@@ -54,7 +54,8 @@ void Light::use() {
 
 DirectionalLight::DirectionalLight() {
     type = LightType_Directional;
-    direction = Vector3(0.0, -1.0, 0.0).normalize();
+    direction = Vector3(0.0, -1.0, 0.0);
+    upDir = Vector3(0.0, 0.0, 1.0);
     distance = 50.0;
     range = 100.0;
     width = height = 10.0;
@@ -63,7 +64,7 @@ DirectionalLight::DirectionalLight() {
 bool DirectionalLight::calculateShadowmap() {
     if(!Light::calculateShadowmap()) return false;
     shadowCam->camMat.setIdentity();
-    shadowCam->camMat.setDirection(direction, Vector3(0, 0, 1));
+    shadowCam->camMat.setDirection(direction, upDir);
     shadowCam->camMat.translate(direction*distance*-1.0);
     shadowCam->width = width;
     shadowCam->height = height;
@@ -74,11 +75,14 @@ bool DirectionalLight::calculateShadowmap() {
     shadowCam->use();
     currentCam = shadowCam;
     shadowSkeletonShaderProgram->use();
-    shadowSkeletonShaderProgram->setUniformF("lightType", type);
+    shadowSkeletonShaderProgram->setUniformF("paraboloidRange", 0.0);
     shadowShaderProgram->use();
-    shadowShaderProgram->setUniformF("lightType", type);
+    shadowShaderProgram->setUniformF("paraboloidRange", 0.0);
+    glDisable(GL_BLEND);
+    glClearColor(1, 1, 1, 1);
     mainFBO.renderInTexture(shadowMap);
     renderScene();
+    glEnable(GL_BLEND);
     return true;
 }
 
@@ -99,15 +103,16 @@ void DirectionalLight::use() {
 SpotLight::SpotLight() {
     type = LightType_Spot;
     position = Vector3(0.0, 0.0, 0.0);
-    direction = Vector3(0.0, 0.0, -1.0).normalize();
+    direction = Vector3(0.0, 0.0, 1.0);
+    upDir = Vector3(0.0, 1.0, 0.0);
     cutoff = 45.0/180.0*M_PI;
-    range = 100.0;
+    range = 50.0;
 }
 
 bool SpotLight::calculateShadowmap() {
     if(!Light::calculateShadowmap()) return false;
     shadowCam->camMat.setIdentity();
-    shadowCam->camMat.setDirection(direction, Vector3(0, 1, 0));
+    shadowCam->camMat.setDirection(direction, upDir);
     shadowCam->camMat.translate(position);
     shadowCam->width = 1.0;
     shadowCam->height = 1.0;
@@ -118,11 +123,14 @@ bool SpotLight::calculateShadowmap() {
     shadowCam->use();
     currentCam = shadowCam;
     shadowSkeletonShaderProgram->use();
-    shadowSkeletonShaderProgram->setUniformF("lightType", type);
+    shadowSkeletonShaderProgram->setUniformF("paraboloidRange", 0.0);
     shadowShaderProgram->use();
-    shadowShaderProgram->setUniformF("lightType", type);
+    shadowShaderProgram->setUniformF("paraboloidRange", 0.0);
+    glDisable(GL_BLEND);
+    glClearColor(1, 1, 1, 1);
     mainFBO.renderInTexture(shadowMap);
     renderScene();
+    glEnable(GL_BLEND);
     return true;
 }
 
@@ -142,6 +150,67 @@ void SpotLight::use() {
     sprintf(str, "lightSources[%d].shadowMat", glIndex);
     currentShaderProgram->setUniformMatrix4(str, &shadowCam->shadowMat);
     mainFBO.useTexture(shadowMap, glIndex*2+3);
+}
+
+PositionalLight::PositionalLight() {
+    type = LightType_Positional;
+    shadowMapB = -1;
+    position = Vector3(0.0, 0.0, 0.0);
+    direction = Vector3(0.0, 0.0, 1.0);
+    upDir = Vector3(0.0, 1.0, 0.0);
+    range = 10.0;
+}
+
+PositionalLight::~PositionalLight() {
+    if(shadowMapB >= 0) mainFBO.deleteTexture(shadowMapB);
+}
+
+bool PositionalLight::calculateShadowmap() {
+    if(!Light::calculateShadowmap()) return false;
+    shadowCam->camMat.setIdentity();
+    shadowCam->camMat.setDirection(direction, upDir);
+    shadowCam->camMat.translate(position);
+    shadowCam->viewMat = shadowCam->camMat.getInverse();
+    shadowCam->shadowMat = shadowCam->viewMat;
+    shadowCam->use();
+    currentCam = shadowCam;
+    shadowSkeletonShaderProgram->use();
+    shadowSkeletonShaderProgram->setUniformF("paraboloidRange", range);
+    shadowShaderProgram->use();
+    shadowShaderProgram->setUniformF("paraboloidRange", range);
+    glDisable(GL_BLEND);
+    glClearColor(1, 1, 1, 1);
+    if(shadowMapB >= 0) {
+        Matrix4 restoreMat = shadowCam->viewMat;
+        shadowCam->viewMat.setIdentity();
+        shadowCam->viewMat.setDirection(direction*-1.0, upDir);
+        shadowCam->viewMat.translate(position);
+        shadowCam->viewMat = shadowCam->viewMat.getInverse();
+        mainFBO.renderInTexture(shadowMapB);
+        renderScene();
+        shadowCam->viewMat = restoreMat;
+    }
+    mainFBO.renderInTexture(shadowMap);
+    renderScene();
+    glEnable(GL_BLEND);
+    return true;
+}
+
+void PositionalLight::use() {
+    if(glIndex < 0) return;
+    Light::use();
+    char str[64];
+    sprintf(str, "lightSources[%d].direction", glIndex);
+    currentShaderProgram->setUniformVec3(str, direction);
+    sprintf(str, "lightSources[%d].shadowFactor", glIndex);
+    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 1.005 : 0.0);
+    sprintf(str, "lightSources[%d].position", glIndex);
+    currentShaderProgram->setUniformVec3(str, position);
+    if(shadowMap < 0) return;
+    sprintf(str, "lightSources[%d].shadowMat", glIndex);
+    currentShaderProgram->setUniformMatrix4(str, &shadowCam->shadowMat);
+    mainFBO.useTexture(shadowMap, glIndex*2+3);
+    if(shadowMapB >= 0) mainFBO.useTexture(shadowMapB, glIndex*2+4);
 }
 
 LightManager::~LightManager() {

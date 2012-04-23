@@ -854,10 +854,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
 }
 
 void Model::draw() {
-    if(currentShaderProgram == shadowShaderProgram || currentShaderProgram == shadowSkeletonShaderProgram)
-        shadowShaderProgram->use();
-    else
-        mainShaderProgram->use();
+    currentShaderProgram->use();
     for(unsigned int i = 0; i < meshes.size(); i ++)
         meshes[i]->draw();
 }
@@ -867,7 +864,8 @@ void Model::draw(SkeletonPose* skeletonPose) {
         printf("ERROR: No Skeleton for pose found.\n");
         return;
     }
-    if(currentShaderProgram == shadowShaderProgram || currentShaderProgram == shadowSkeletonShaderProgram)
+    ShaderProgram* usedShaderProgram = currentShaderProgram;
+    if(usedShaderProgram == shadowShaderProgram || usedShaderProgram == shadowSkeletonShaderProgram)
         shadowSkeletonShaderProgram->use();
     else
         mainSkeletonShaderProgram->use();
@@ -878,6 +876,7 @@ void Model::draw(SkeletonPose* skeletonPose) {
     //modelMat = skeletonPose->bonePoses[skeleton->rootBone->name]->poseMat;
     for(unsigned int i = 0; i < meshes.size(); i ++)
         meshes[i]->draw();
+    currentShaderProgram = usedShaderProgram;
 }
 
 SkeletonPose::SkeletonPose(Skeleton* skeleton) {

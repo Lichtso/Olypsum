@@ -30,7 +30,7 @@ void main() {
         }else{
             lightDirs[i] = lightSources[i].position-pos;
             if(lightSources[i].type == 3.0) {
-                
+                shadowCoords[i] = vec4(pos, 1.0)*lightSources[i].shadowMat;
             }
         }
         if(lightSources[i].shadowFactor > 0.0 && lightSources[i].type <= 2.0)
@@ -58,28 +58,47 @@ varying vec4 shadowCoords[lightsCount];
 void main() {
 	gl_FragColor = texture2D(sampler0, vTexCoord);
     if(gl_FragColor.a < 0.1) discard;
+    vec3 shadowCoord, lightDir, light = vec3(0.2);
+    float lightDist, len;
+    vec4 depthRef;
+    const vec4 bitSh = vec4(1.0/(256.0*256.0*256.0), 1.0/(256.0*256.0), 1.0/256.0, 1.0);
     
-    vec3 light = vec3(0.2);
     for(int i = 0; i < lightsCount; i ++) {
         if(lightSources[i].type == 0.0) continue;
-        vec3 shadowCoord = shadowCoords[i].xyz/shadowCoords[i].w;
-        shadowCoord.z = shadowCoord.z*0.5+0.5;
-        
-        float len = length(lightDirs[i]);
-        if(lightSources[i].type == 3.0) {
+        lightDir = lightDirs[i];
+        lightDist = length(lightDir);
+        lightDir /= lightDist;
+        lightDist /= lightSources[i].range; //Compiler bug: this statement has to be here
+        if(lightSources[i].type == 3.0 && lightSources[i].shadowFactor > 0.0) {
+            shadowCoord = shadowCoords[i].xyz / shadowCoords[i].w;
+            len = length(shadowCoord);
+            if(shadowCoord.z < 0.0) {
+                shadowCoord.xy /= len * (1.0 - shadowCoord.z);
+                shadowCoord.xy = shadowCoord.xy * 0.5 + vec2(0.5);
+                depthRef = texture2D(shadowMaps[i*2], shadowCoord.st);
+            }else{
+                shadowCoord.xy /= len * (1.0 + shadowCoord.z);
+                shadowCoord.xy = shadowCoord.xy * 0.5 + vec2(0.5);
+                depthRef = texture2D(shadowMaps[i*2+1], shadowCoord.st);
+            }
+            lightDist = shadowCoord.z = len/lightSources[i].range;
+            depthRef.r = dot(depthRef, bitSh)*lightSources[i].shadowFactor;
+            if(depthRef.r < shadowCoord.z) continue;
+        }else if(lightSources[i].type < 3.0) {
+            shadowCoord = shadowCoords[i].xyz/shadowCoords[i].w;
+            shadowCoord.z = shadowCoord.z*0.5+0.5;
             
-        }else{
             if(lightSources[i].type == 1.0 && (shadowCoord.x <= 0.0 || shadowCoord.y <= 0.0 || shadowCoord.x >= 1.0 || shadowCoord.y >= 1.0))
                 continue;
-            else if(lightSources[i].type == 2.0 && acos(-dot(lightSources[i].direction, lightDirs[i])/len) > lightSources[i].cutoff)
+            else if(lightSources[i].type == 2.0 && acos(-dot(lightSources[i].direction, lightDir)) > lightSources[i].cutoff)
                 continue;
             if(lightSources[i].shadowFactor > 0.0) {
-                vec3 depthRef = texture2D(shadowMaps[i], shadowCoord.st).rgb;
-                depthRef.r = (depthRef.r+depthRef.g/256.0+depthRef.b/65536.0)*lightSources[i].shadowFactor;
+                depthRef = texture2D(shadowMaps[i*2], shadowCoord.st);
+                depthRef.r = dot(depthRef, bitSh)*lightSources[i].shadowFactor;
                 if(depthRef.r < shadowCoord.z) continue;
             }
         }
-        light += lightSources[i].color*(1.0-len/lightSources[i].range)*max(dot(vNormal, lightDirs[i]/len), 0.0);
+        light += lightSources[i].color*max(dot(vNormal, lightDir), 0.0)*(1.0-lightDist);
     }
 	
     gl_FragColor.rgb *= min(light, vec3(1.0));

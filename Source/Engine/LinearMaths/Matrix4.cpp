@@ -204,6 +204,7 @@ Matrix4& Matrix4::translate(Vector3 vec) {
     Matrix4 b;
     b.setIdentity();
     b.pos = vec;
+    b.pos.w = 1.0;
     return (*this *= b);
 }
 

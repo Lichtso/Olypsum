@@ -56,8 +56,9 @@ void AppMain(int argc, char *argv[]) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
+    glFrontFace(GL_CCW);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClearColor(1, 1, 1, 0);
+    glClearColor(1, 1, 1, 1);
     mainFBO.init();
     
     //Init Cams
