@@ -8,7 +8,7 @@
 
 #import "Utilities.h"
 
-char* parseXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const char* filePath) {
+char* parseXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const char* filePath, unsigned int& fileSize) {
     FILE* fp = fopen(filePath, "r");
     if(!fp) {
         printf("The file %s couldn't be found.", filePath);
@@ -16,12 +16,12 @@ char* parseXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const char* fil
     }
     
     fseek(fp, 0, SEEK_END);
-	long dataSize = ftell(fp);
+	fileSize = ftell(fp);
 	rewind(fp);
-    char* data = new char[dataSize+1];
-	fread(data, 1, dataSize, fp);
+    char* data = new char[fileSize+1];
+	fread(data, 1, fileSize, fp);
     fclose(fp);
-    data[dataSize] = 0;
+    data[fileSize] = 0;
     
     doc.parse<0>(data);
     return data;

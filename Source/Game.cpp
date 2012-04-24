@@ -32,7 +32,7 @@ void initGame() {
     light->range = 10.0;
     light->shadowResolution = 512;
     lightManager.lights.push_back((Light*)light);
-    /* */
+    */
     PositionalLight* light = new PositionalLight();
     light->position = Vector3(0.0, 1.0, 1.0);
     light->direction = Vector3(0.0, 0.0, -1.0).normalize();

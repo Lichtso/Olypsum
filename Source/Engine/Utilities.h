@@ -22,8 +22,9 @@
 #define Utilities_h
 
 #define xmlUsedCharType char
+#define ENGINE_NAME "Olypsum-Engine 0.0.1"
 
-char* parseXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const char* filePath);
+char* parseXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const char* filePath, unsigned int& fileSize);
 
 template <class T> inline void swap(T &a, T &b) {
 	T c = a;

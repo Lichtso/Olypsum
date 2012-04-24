@@ -7,12 +7,14 @@
 //
 
 #import "FileManager.h"
+#import "rapidxml_print.hpp"
 
 #define AXIS_X 0
 #define AXIS_Y 1
 #define AXIS_Z 2
 #define jointsPerVertex 3
 #define maxJointsCount 64
+//#define reExportModelFiles
 
 Mesh::Mesh() {
     elementsCount = 0;
@@ -169,18 +171,38 @@ static Matrix4 readTransform(rapidxml::xml_node<xmlUsedCharType>* dataNode) {
     return result;
 }
 
-static Bone* readBone(Skeleton& skeleton, Matrix4& parentMat, rapidxml::xml_node<xmlUsedCharType>* dataNode) {
-    rapidxml::xml_attribute<xmlUsedCharType> *typeAttribute = dataNode->first_attribute("type"),
-                                             *sidAttribute = dataNode->first_attribute("sid");
-    if(!typeAttribute || !sidAttribute || strcmp(typeAttribute->value(), "JOINT") != 0) return NULL;
-    Bone *child, *bone = new Bone;
+static Bone* readBone(rapidxml::xml_document<xmlUsedCharType>* exportDoc, Skeleton& skeleton, Matrix4& deTransform, Matrix4& parentMat, rapidxml::xml_node<xmlUsedCharType>* dataNode, rapidxml::xml_node<xmlUsedCharType>* reMeshNode) {
+    rapidxml::xml_attribute<xmlUsedCharType> *typeAttribute, *sidAttribute = dataNode->first_attribute("sid");
+    Bone *bone = new Bone;
     bone->name = sidAttribute->value();
-    bone->staticMat = readTransform(dataNode) * parentMat;
-    rapidxml::xml_node<xmlUsedCharType>* childNode = dataNode->first_node("node");
-    while (childNode) {
-        child = readBone(skeleton, bone->staticMat, childNode);
-        if(child)
-            bone->children.push_back(child);
+    bone->staticMat = readTransform(dataNode);
+    #ifdef reExportModelFiles
+    char matrixData[256], *matrixDataPos = matrixData;
+    float matFloatData[16];
+    Matrix4 reTransform = Matrix4(bone->staticMat) * deTransform;
+    reTransform.getOpenGLMatrix4(matFloatData);
+    for(unsigned int i = 0; i < 16; i ++) {
+        if(i > 0) *(matrixDataPos ++) = ' ';
+        matrixDataPos += sprintf(matrixDataPos, "%1.8f", matFloatData[i]);
+    }
+    rapidxml::xml_node<xmlUsedCharType> *reMatrixNode = exportDoc->allocate_node(rapidxml::node_element, "matrix", exportDoc->allocate_string(matrixData)),
+                                        *reDataNode = exportDoc->allocate_node(rapidxml::node_element, "node");
+    reDataNode->append_attribute(exportDoc->allocate_attribute("type", "JOINT"));
+    reDataNode->append_attribute(exportDoc->allocate_attribute("sid", sidAttribute->value()));
+    reDataNode->append_node(reMatrixNode);
+    reMeshNode->append_node(reDataNode);
+    #endif
+    bone->staticMat *= parentMat;
+    rapidxml::xml_node<xmlUsedCharType> *childNode = dataNode->first_node("node");
+    while(childNode) {
+        typeAttribute = childNode->first_attribute("type");
+        sidAttribute = childNode->first_attribute("sid");
+        if(!typeAttribute || !sidAttribute || strcmp(typeAttribute->value(), "JOINT") != 0) continue;
+        #ifdef reExportModelFiles
+        bone->children.push_back(readBone(exportDoc, skeleton, deTransform, bone->staticMat, childNode, reDataNode));
+        #else
+        bone->children.push_back(readBone(exportDoc, skeleton, deTransform, bone->staticMat, childNode, NULL));
+        #endif
         childNode = childNode->next_sibling("node");
     }
     skeleton.bones[bone->name] = bone;
@@ -207,8 +229,9 @@ Model::~Model() {
 bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
     if(meshes.size() > 0) return false;
     
-    rapidxml::xml_document<xmlUsedCharType> doc;
-    char* fileData = parseXmlFile(doc, filePath);
+    rapidxml::xml_document<xmlUsedCharType> doc, exportDoc;
+    unsigned int fileSize;
+    char* fileData = parseXmlFile(doc, filePath, fileSize);
     if(!fileData) return false;
     
     rapidxml::xml_node<xmlUsedCharType> *collada, *library, *geometry, *meshNode, *source, *dataNode;
@@ -223,6 +246,10 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
     
     collada = doc.first_node("COLLADA");
     if(!collada) goto endParsingXML;
+    #ifdef reExportModelFiles
+    rapidxml::xml_node<xmlUsedCharType> *reCollada, *reLibrary, *reGeometry, *reMeshNode, *reSource, *reDataNode;
+    exportDoc.append_node(reCollada = doc.allocate_node(rapidxml::node_element, "COLLADA"));
+    #endif
     
     //Load Assert
     dataNode = collada->first_node("asset");
@@ -237,6 +264,12 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             upAxis = AXIS_Z;
         }
     }
+    #ifdef reExportModelFiles
+    reCollada->append_node(reLibrary = doc.allocate_node(rapidxml::node_element, "asset"));
+    reLibrary->append_node(reGeometry = doc.allocate_node(rapidxml::node_element, "contributor"));
+    reGeometry->append_node(reMeshNode = doc.allocate_node(rapidxml::node_element, "authoring_tool", ENGINE_NAME));
+    reLibrary->append_node(reGeometry = doc.allocate_node(rapidxml::node_element, "up_axis", "Y_UP"));
+    #endif
     modelTransformMat.setIdentity();
     if(upAxis == AXIS_X)
         modelTransformMat.rotateZ(M_PI_2);
@@ -246,6 +279,9 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
     //Load TextureURLs
     library = collada->first_node("library_images");
     if(library) {
+        #ifdef reExportModelFiles
+        reCollada->append_node(reLibrary = doc.allocate_node(rapidxml::node_element, "library_images"));
+        #endif
         geometry = library->first_node("image");
         while(geometry) {
             dataAttribute = geometry->first_attribute("id");
@@ -254,12 +290,20 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             if(!meshNode) goto endParsingXML;
             textureURLs[dataAttribute->value()] = meshNode->value();
             geometry = geometry->next_sibling("image");
+            #ifdef reExportModelFiles
+            reLibrary->append_node(reGeometry = doc.allocate_node(rapidxml::node_element, "image"));
+            reGeometry->append_attribute(doc.allocate_attribute("id", dataAttribute->value()));
+            reGeometry->append_node(reMeshNode = doc.allocate_node(rapidxml::node_element, "init_from", meshNode->value()));
+            #endif
         }
     }
     
     //Load Materials
     library = collada->first_node("library_effects");
     if(library) {
+        #ifdef reExportModelFiles
+        reCollada->append_node(reLibrary = doc.allocate_node(rapidxml::node_element, "library_effects"));
+        #endif
         geometry = library->first_node("effect");
         while(geometry) {
             dataAttribute = geometry->first_attribute("id");
@@ -268,12 +312,19 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             Material material;
             meshNode = geometry->first_node("profile_COMMON");
             if(!meshNode) goto endParsingXML;
-            
+            #ifdef reExportModelFiles
+            reLibrary->append_node(reGeometry = doc.allocate_node(rapidxml::node_element, "effect"));
+            reGeometry->append_attribute(doc.allocate_attribute("id", id));
+            reGeometry->append_node(reMeshNode = doc.allocate_node(rapidxml::node_element, "profile_COMMON"));
+            #endif
             std::map<std::string, std::string> surfaceURLs, samplerURLs;
             
             //Find Surfaces
             source = meshNode->first_node("newparam");
             while(source) {
+                #ifdef reExportModelFiles
+                reSource = doc.allocate_node(rapidxml::node_element, "newparam");
+                #endif
                 dataNode = source->first_node("surface");
                 if(dataNode) {
                     dataAttribute = dataNode->first_attribute("type");
@@ -287,6 +338,13 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                         goto endParsingXML;
                     }
                     surfaceURLs[dataAttribute->value()] = iterator->second;
+                    #ifdef reExportModelFiles
+                    reSource->append_attribute(doc.allocate_attribute("sid", dataAttribute->value()));
+                    reSource->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "surface"));
+                    reDataNode->append_node(doc.allocate_node(rapidxml::node_element, "init_from", dataNode->value()));
+                    reDataNode->append_attribute(doc.allocate_attribute("type", "2D"));
+                    reMeshNode->append_node(reSource);
+                    #endif
                 }
                 source = source->next_sibling("newparam");
             }
@@ -294,6 +352,9 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             //Find Samplers
             source = meshNode->first_node("newparam");
             while(source) {
+                #ifdef reExportModelFiles
+                reSource = doc.allocate_node(rapidxml::node_element, "newparam");
+                #endif
                 dataNode = source->first_node("sampler2D");
                 if(dataNode) {
                     dataNode = dataNode->first_node("source");
@@ -305,6 +366,12 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                         goto endParsingXML;
                     }
                     samplerURLs[dataAttribute->value()] = iterator->second;
+                    #ifdef reExportModelFiles
+                    reSource->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "sampler2D"));
+                    reDataNode->append_node(doc.allocate_node(rapidxml::node_element, "source", dataNode->value()));
+                    reSource->append_attribute(doc.allocate_attribute("sid", dataAttribute->value()));
+                    reMeshNode->append_node(reSource);
+                    #endif
                 }
                 source = source->next_sibling("newparam");
             }
@@ -314,9 +381,15 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             if(!source) goto endParsingXML;
             source = source->first_node();
             if(!source) goto endParsingXML;
-            
+            #ifdef reExportModelFiles
+            reMeshNode->append_node(reSource = doc.allocate_node(rapidxml::node_element, "technique"));
+            reSource->append_node(reSource = doc.allocate_node(rapidxml::node_element, "phong"));
+            #endif
             dataNode = source->first_node("diffuse");
             if(dataNode) {
+                #ifdef reExportModelFiles
+                reSource->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "diffuse"));
+                #endif
                 dataNode = dataNode->first_node("texture");
                 if(dataNode) {
                     dataAttribute = dataNode->first_attribute("texture");
@@ -327,6 +400,10 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                         goto endParsingXML;
                     }
                     material.diffuseURL = iterator->second;
+                    #ifdef reExportModelFiles
+                    reDataNode->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "texture"));
+                    reDataNode->append_attribute(doc.allocate_attribute("texture", dataAttribute->value()));
+                    #endif
                 }
             }
             materials[id] = material;
@@ -336,6 +413,9 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
     
     library = collada->first_node("library_materials");
     if(library) {
+        #ifdef reExportModelFiles
+        reCollada->append_node(reLibrary = doc.allocate_node(rapidxml::node_element, "library_materials"));
+        #endif
         geometry = library->first_node("material");
         while(geometry) {
             dataAttribute = geometry->first_attribute("id");
@@ -352,20 +432,39 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             }
             materials[id] = iterator->second;
             materials.erase(iterator);
+            #ifdef reExportModelFiles
+            reLibrary->append_node(reGeometry = doc.allocate_node(rapidxml::node_element, "material"));
+            reGeometry->append_attribute(doc.allocate_attribute("id", id));
+            reGeometry->append_node(reMeshNode = doc.allocate_node(rapidxml::node_element, "instance_effect"));
+            reMeshNode->append_attribute(doc.allocate_attribute("url", dataAttribute->value()));
+            #endif
             geometry = geometry->next_sibling("material");
         }
     }
     
     library = collada->first_node("library_visual_scenes");
     if(library) {
+        #ifdef reExportModelFiles
+        reCollada->append_node(reLibrary = doc.allocate_node(rapidxml::node_element, "library_visual_scenes"));
+        #endif
         geometry = library->first_node("visual_scene");
         while(geometry) {
+            #ifdef reExportModelFiles
+            reLibrary->append_node(reGeometry = doc.allocate_node(rapidxml::node_element, "visual_scene"));
+            #endif
             meshNode = geometry->first_node("node");
             while(meshNode) {
+                #ifdef reExportModelFiles
+                reGeometry->append_node(reMeshNode = doc.allocate_node(rapidxml::node_element, "node"));
+                #endif
+                
                 //Map Materials
                 source = meshNode->first_node("instance_controller");
                 if(!source) source = meshNode->first_node("instance_geometry");
                 if(source) {
+                    #ifdef reExportModelFiles
+                    reMeshNode->append_node(reSource = doc.allocate_node(rapidxml::node_element, source->name()));
+                    #endif
                     dataNode = source->first_node("bind_material");
                     if(dataNode) {
                         dataNode = dataNode->first_node("technique_common");
@@ -383,6 +482,13 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                             goto endParsingXML;
                         }
                         materials[id] = iterator->second;
+                        #ifdef reExportModelFiles
+                        reSource->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "bind_material"));
+                        reDataNode->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "technique_common"));
+                        reDataNode->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "instance_material"));
+                        reDataNode->append_attribute(doc.allocate_attribute("symbol", id));
+                        reDataNode->append_attribute(doc.allocate_attribute("target", dataAttribute->value()));
+                        #endif
                     }
                 }
                 
@@ -396,7 +502,11 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                             goto endParsingXML;
                         }
                         skeleton = new Skeleton();
-                        skeleton->rootBone = readBone(*skeleton, modelTransformMat, source);
+                        #ifdef reExportModelFiles
+                        skeleton->rootBone = readBone(&exportDoc, *skeleton, modelTransformMat, modelTransformMat, source, reMeshNode);
+                        #else
+                        skeleton->rootBone = readBone(&exportDoc, *skeleton, modelTransformMat, modelTransformMat, source, NULL);
+                        #endif
                         if(skeleton->bones.size() > maxJointsCount) {
                             printf("ERROR: More joints (%lu) found than supported (%d).\n", skeleton->bones.size(), maxJointsCount);
                             goto endParsingXML;
@@ -420,6 +530,11 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
         }
         meshNode = geometry->first_node("skin");
         if(!meshNode) goto endParsingXML;
+        #ifdef reExportModelFiles
+        reCollada->append_node(reLibrary = doc.allocate_node(rapidxml::node_element, "library_controllers"));
+        reLibrary->append_node(reGeometry = doc.allocate_node(rapidxml::node_element, "controller"));
+        reGeometry->append_node(reMeshNode = doc.allocate_node(rapidxml::node_element, "skin"));
+        #endif
         
         std::vector<Bone*> boneIndexMap(skeleton->bones.size());
         FloatArray weightData;
@@ -435,11 +550,28 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             dataAttribute = dataNode->first_attribute("name");
             if(!dataAttribute) goto endParsingXML;
             
-            if(strcmp(dataAttribute->value(), "JOINT") == 0) {
+            id = dataAttribute->value();
+            if(strcmp(id, "JOINT") != 0 && strcmp(id, "WEIGHT") != 0) {
+                source = source->next_sibling("source");
+                continue;
+            }
+            #ifdef reExportModelFiles
+            reMeshNode->append_node(reSource = doc.allocate_node(rapidxml::node_element, "source"));
+            reSource->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "technique_common"));
+            reDataNode->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "accessor"));
+            reDataNode->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "param"));
+            reDataNode->append_attribute(doc.allocate_attribute("name", id));
+            #endif
+            
+            if(strcmp(id, "JOINT") == 0) {
                 dataNode = source->first_node("Name_array");
                 if(!dataNode) goto endParsingXML;
                 dataAttribute = dataNode->first_attribute("count");
                 if(!dataAttribute) goto endParsingXML;
+                #ifdef reExportModelFiles
+                reSource->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "Name_array", doc.allocate_string(dataNode->value())));
+                reDataNode->append_attribute(doc.allocate_attribute("count", dataAttribute->value()));
+                #endif
                 unsigned int count;
                 sscanf(dataAttribute->value(), "%d", &count);
                 if(count != skeleton->bones.size()) {
@@ -459,15 +591,18 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                     boneIterator->second->jointIndex = i;
                     lastPos = dataStr+1;
                 }
-            }else if(strcmp(dataAttribute->value(), "WEIGHT") == 0) {
+            }else if(strcmp(id, "WEIGHT") == 0) {
                 dataNode = source->first_node("float_array");
                 if(!dataNode) goto endParsingXML;
                 dataAttribute = dataNode->first_attribute("count");
                 if(!dataAttribute) goto endParsingXML;
+                #ifdef reExportModelFiles
+                reSource->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "float_array", doc.allocate_string(dataNode->value())));
+                reDataNode->append_attribute(doc.allocate_attribute("count", dataAttribute->value()));
+                #endif
                 sscanf(dataAttribute->value(), "%d", &weightData.count);
                 readFloatStr(dataNode->value(), weightData);
             }
-            
             source = source->next_sibling("source");
         }
         if(!weightData.data) {
@@ -477,20 +612,36 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
         
         source = meshNode->first_node("vertex_weights");
         if(!source) goto endParsingXML;
+        #ifdef reExportModelFiles
+        reMeshNode->append_node(reSource = doc.allocate_node(rapidxml::node_element, "vertex_weights"));
+        #endif
         
         int jointOffset = 1, weightOffset = -1;
         dataNode = source->first_node("input");
         while(dataNode) {
             dataAttribute = dataNode->first_attribute("semantic");
             if(!dataAttribute) goto endParsingXML;
+            #ifdef reExportModelFiles
+            reSource->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "input"));
+            reDataNode->append_attribute(doc.allocate_attribute("semantic", dataAttribute->value()));
+             #endif
             if(strcmp(dataAttribute->value(), "JOINT") == 0) {
                 dataAttribute = dataNode->first_attribute("offset");
                 if(!dataAttribute) goto endParsingXML;
                 sscanf(dataAttribute->value(), "%d", &jointOffset);
+                #ifdef reExportModelFiles
+                reDataNode->append_attribute(doc.allocate_attribute("offset", dataAttribute->value()));
+                #endif
             }else if(strcmp(dataAttribute->value(), "WEIGHT") == 0) {
                 dataAttribute = dataNode->first_attribute("offset");
                 if(!dataAttribute) goto endParsingXML;
                 sscanf(dataAttribute->value(), "%d", &weightOffset);
+                #ifdef reExportModelFiles
+                reDataNode->append_attribute(doc.allocate_attribute("offset", dataAttribute->value()));
+                #endif
+            }else{
+                printf("ERROR: Unknown input semantic %s found.\n", dataAttribute->value());
+                goto endParsingXML;
             }
             dataNode = dataNode->next_sibling("input");
         }
@@ -505,9 +656,15 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
         skinIndecies.data = NULL;
         dataAttribute = source->first_attribute("count");
         if(!dataAttribute) goto endParsingXML;
+        #ifdef reExportModelFiles
+        reSource->append_attribute(doc.allocate_attribute("count", dataAttribute->value()));
+        #endif
         sscanf(dataAttribute->value(), "%d", &vcount.count);
         dataNode = source->first_node("vcount");
         if(!dataNode) goto endParsingXML;
+        #ifdef reExportModelFiles
+        reSource->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "vcount", doc.allocate_string(dataNode->value())));
+        #endif
         readIntStr(dataNode->value(), vcount);
         skinIndecies.count = 0;
         for(unsigned int i = 0; i < vcount.count; i ++) {
@@ -519,6 +676,9 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
         }
         dataNode = source->first_node("v");
         if(!dataNode) goto endParsingXML;
+        #ifdef reExportModelFiles
+        reSource->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "v", doc.allocate_string(dataNode->value())));
+        #endif
         readIntStr(dataNode->value(), skinIndecies);
         skinData.count = vcount.count*jointsPerVertex*2;
         skinData.stride = jointsPerVertex*2;
@@ -555,11 +715,18 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
     //Load Geometries
     library = collada->first_node("library_geometries");
     if(!library) goto endParsingXML;
+    #ifdef reExportModelFiles
+    reCollada->append_node(reLibrary = doc.allocate_node(rapidxml::node_element, "library_geometries"));
+    #endif
     
     geometry = library->first_node("geometry");
     while(geometry) {
         meshNode = geometry->first_node("mesh");
         if(!meshNode) goto endParsingXML;
+        #ifdef reExportModelFiles
+        reLibrary->append_node(reGeometry = doc.allocate_node(rapidxml::node_element, "geometry"));
+        reGeometry->append_node(reMeshNode = doc.allocate_node(rapidxml::node_element, "mesh"));
+        #endif
         
         //Load Sources
         std::map<std::string, FloatArray> floatArrays;
@@ -569,6 +736,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             if(!dataNode) goto endParsingXML;
             dataAttribute = dataNode->first_attribute("count");
             if(!dataAttribute) goto endParsingXML;
+            char* countStr = dataAttribute->value();
             FloatArray floatArray;
             sscanf(dataAttribute->value(), "%d", &floatArray.count);
             if(!floatArray.count) goto endParsingXML;
@@ -577,21 +745,42 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             if(!dataNode) goto endParsingXML;
             dataNode = dataNode->first_node("accessor");
             if(!dataNode) goto endParsingXML;
+            dataAttribute = source->first_attribute("id");
+            if(!dataAttribute) goto endParsingXML;
+            id = dataAttribute->value();
             dataAttribute = dataNode->first_attribute("stride");
             if(!dataAttribute) goto endParsingXML;
             sscanf(dataAttribute->value(), "%d", &floatArray.stride);
-            floatArray.count /= floatArray.stride;
-            dataAttribute = source->first_attribute("id");
-            if(!dataAttribute) goto endParsingXML;
-            floatArrays[dataAttribute->value()] = floatArray;
+            #ifdef reExportModelFiles
+            reMeshNode->append_node(reSource = doc.allocate_node(rapidxml::node_element, "source"));
+            reSource->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "technique_common"));
+            reDataNode->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "accessor"));
+            reSource->append_attribute(doc.allocate_attribute("id", id));
+            reDataNode->append_attribute(doc.allocate_attribute("stride", dataAttribute->value()));
+            #endif
+            
+            floatArrays[id] = floatArray;
             if(floatArray.stride == 3 && upAxis != AXIS_Y) {
-                for(unsigned int i = 0; i < floatArray.count; i ++) {
+                for(unsigned int i = 0; i < floatArray.count/floatArray.stride; i ++) {
                     Vector3 vec = Vector3(floatArray.data[i*3], floatArray.data[i*3+1], floatArray.data[i*3+2]) * modelTransformMat;
                     floatArray.data[i*3  ] = vec.x;
                     floatArray.data[i*3+1] = vec.y;
                     floatArray.data[i*3+2] = vec.z;
                 }
-            }else if(floatArray.stride == 2)
+            }
+            char floatArrayData[16*floatArray.count], *floatArrayPos = floatArrayData;
+            for(unsigned int i = 0; i < floatArray.count; i ++) {
+                if(i > 0) *(floatArrayPos ++) = ' ';
+                floatArrayPos += sprintf(floatArrayPos, "%4.8f", floatArray.data[i]);
+            }
+            
+            #ifdef reExportModelFiles
+            reSource->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "float_array", doc.allocate_string(floatArrayData)));
+            reDataNode->append_attribute(doc.allocate_attribute("count", countStr));
+            #endif
+            
+            floatArray.count /= floatArray.stride;
+            if(floatArray.stride == 2)
                 for(unsigned int i = 0; i < floatArray.count; i ++)
                     floatArray.data[i*2+1] = 1.0-floatArray.data[i*2+1];
             source = source->next_sibling("source");
@@ -606,16 +795,25 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             if(!dataAttribute) goto endParsingXML;
             id = dataAttribute->value();
             vertexReferenceArrays[id] = new std::vector<VertexReference>();
+            #ifdef reExportModelFiles
+            reMeshNode->append_node(reSource = doc.allocate_node(rapidxml::node_element, "vertices"));
+            reSource->append_attribute(doc.allocate_attribute("id", id));
+            #endif
             dataNode = source->first_node("input");
             while(dataNode) {
                 VertexReference vertexReference;
-                dataAttribute = dataNode->first_attribute("source");
-                if(!dataAttribute) goto endParsingXML;
-                vertexReference.source = &floatArrays[dataAttribute->value()+1];
                 dataAttribute = dataNode->first_attribute("semantic");
                 if(!dataAttribute) goto endParsingXML;
                 vertexReference.name = dataAttribute->value();
+                dataAttribute = dataNode->first_attribute("source");
+                if(!dataAttribute) goto endParsingXML;
+                vertexReference.source = &floatArrays[dataAttribute->value()+1];
                 vertexReferenceArrays[id]->push_back(vertexReference);
+                #ifdef reExportModelFiles
+                reSource->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "input"));
+                reDataNode->append_attribute(doc.allocate_attribute("source", dataAttribute->value()));
+                reDataNode->append_attribute(doc.allocate_attribute("semantic", vertexReference.name));
+                #endif
                 dataNode = dataNode->next_sibling("input");
             }
             source = source->next_sibling("vertices");
@@ -630,6 +828,10 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             mesh = new Mesh();
             meshes.push_back(mesh);
             sscanf(dataAttribute->value(), "%d", &mesh->elementsCount);
+            #ifdef reExportModelFiles
+            reMeshNode->append_node(reSource = doc.allocate_node(rapidxml::node_element, "triangles"));
+            reSource->append_attribute(doc.allocate_attribute("count", dataAttribute->value()));
+            #endif
             
             //Set material
             dataAttribute = source->first_attribute("material");
@@ -644,6 +846,9 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 mesh->diffuse->uploadToVRAM();
                 mesh->diffuse->unloadFromRAM();
             }
+            #ifdef reExportModelFiles
+            reSource->append_attribute(doc.allocate_attribute("material", dataAttribute->value()));
+            #endif
             
             unsigned int dataIndex, valueIndex, indexCount = 0, strideIndex = 0;
             std::map<std::string, VertexReference> vertexReferences;
@@ -654,8 +859,18 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 dataAttribute = dataNode->first_attribute("offset");
                 if(!dataAttribute) goto endParsingXML;
                 sscanf(dataAttribute->value(), "%d", &offset);
+                #ifdef reExportModelFiles
+                reSource->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "input"));
+                reDataNode->append_attribute(doc.allocate_attribute("offset", dataAttribute->value()));
+                dataAttribute = dataNode->first_attribute("semantic");
+                if(!dataAttribute) goto endParsingXML;
+                reDataNode->append_attribute(doc.allocate_attribute("semantic", dataAttribute->value()));
+                #endif
                 dataAttribute = dataNode->first_attribute("source");
                 if(!dataAttribute) goto endParsingXML;
+                #ifdef reExportModelFiles
+                reDataNode->append_attribute(doc.allocate_attribute("source", dataAttribute->value()));
+                #endif
                 iteratorB = vertexReferenceArrays.find(dataAttribute->value()+1);
                 if(iteratorB == vertexReferenceArrays.end()) {
                     VertexReference vertexReference;
@@ -729,7 +944,6 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 mesh->elementsCount *= 3;
                 
                 if(mesh->elementsCount == indexCountBuffer.count*3) { //All Elements are Triangles
-                    printf("Loading COLLADA: Vcount found but useless, please delete the <vcount> tag.\n");
                     delete [] indexCountBuffer.data;
                     indexCountBuffer.data = NULL;
                 }else{ //Triangulation needed
@@ -768,12 +982,23 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                     finishedElements += indexCountBuffer.data[i]*indexCount;
                     mesh->elementsCount += (indexCountBuffer.data[i]-2)*3;
                 }
-                printf("Loading COLLADA: Vcount found: automatic triangulation.\n");
-                printf("Please replace this element with: <p>");
-                for(unsigned int i = 0; i < indexBuffer.count; i ++)
-                    printf("%d ", indexBuffer.data[i]);
-                printf("</p>, set count=\"%d\" and delete the <vcount> tag.\n", mesh->elementsCount/3);
+                #ifdef reExportModelFiles
+                char indexBufferData[indexBuffer.count*8], *indexBufferPos = indexBufferData;
+                for(unsigned int i = 0; i < indexBuffer.count; i ++) {
+                    if(i > 0) *(indexBufferPos ++) = ' ';
+                    indexBufferPos += sprintf(indexBufferPos, "%d", indexBuffer.data[i]);
+                }
+                reSource->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "p", doc.allocate_string(indexBufferData)));
+                char indexBufferLen[16];
+                sprintf(indexBufferLen, "%d", mesh->elementsCount/3);
+                dataAttribute = reSource->first_attribute("count");
+                dataAttribute->value(doc.allocate_string(indexBufferLen));
+                #endif
             }
+            #ifdef reExportModelFiles
+            else
+                reSource->append_node(doc.allocate_node(rapidxml::node_element, "p", dataNode->value()));
+            #endif
             
             //Indecizer
             float dataBuffer[strideIndex*mesh->elementsCount];
@@ -846,9 +1071,29 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
         }
     }
     
+    //Export optimized file
+    #ifdef reExportModelFiles
+    {
+        char exportFileData[fileSize*2],
+             *end = rapidxml::print(exportFileData, exportDoc, 0);
+        *end = 0;
+        
+        std::string url(filePath);
+        url += ".rex";
+        FILE* fp = fopen(url.c_str(), "w");
+        if(!fp) {
+            printf("The file %s couldn't be found.", url.c_str());
+            goto endParsingXML;
+        }
+        fwrite(exportFileData, 1, end-exportFileData, fp);
+        fclose(fp);
+    }
+    #endif
+    
     endParsingXML:
     if(skinData.data) delete skinData.data;
     doc.clear();
+    exportDoc.clear();
     delete [] fileData;
     return true;
 }
