@@ -1,7 +1,3 @@
-Collada Model Loader:
-- Auto File Correcture
-- Skeleton Data
-- Animation Data
 GUITextField Copy & Paste
 OpenAL Sound Engine
 Lighting/Shadows Shader

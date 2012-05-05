@@ -2,4 +2,14 @@
 <Bucket
    type = "1"
    version = "1.0">
+   <ExceptionBreakpoints>
+      <ExceptionBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         scope = "2"
+         stopOnStyle = "0"
+         exceptionName = "malloc_error_break">
+      </ExceptionBreakpoint>
+   </ExceptionBreakpoints>
 </Bucket>

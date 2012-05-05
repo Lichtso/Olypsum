@@ -13,17 +13,20 @@ FilePackage::FilePackage(const char* nameB) {
 }
 
 FilePackage::~FilePackage() {
-    std::map<std::string, Texture*>::iterator textureIterator;
-    for(textureIterator = textures.begin(); textureIterator != textures.end(); textureIterator ++)
-        delete textureIterator->second;
-    
     std::map<std::string, Model*>::iterator modelIterator;
     for(modelIterator = models.begin(); modelIterator != models.end(); modelIterator ++)
         delete modelIterator->second;
+    models.clear();
+    
+    std::map<std::string, Texture*>::iterator textureIterator;
+    for(textureIterator = textures.begin(); textureIterator != textures.end(); textureIterator ++)
+        delete textureIterator->second;
+    textures.clear();
     /*
     std::map<std::string, SoundTrack*>::iterator soundTrackIterator;
     for(soundTrackIterator = soundTracks.begin(); soundTrackIterator != soundTracks.end(); soundTrackIterator ++)
-        delete soundTrackIterator->second;*/
+        delete soundTrackIterator->second;
+    soundTracks.clear();*/
 }
 
 bool FilePackage::load() {
@@ -56,8 +59,10 @@ Texture* FilePackage::getTexture(const char* fileName) {
     }
     Texture* texture = new Texture();
     std::string url = getUrlOfFile("Textures", fileName);
-    if(texture->loadImageInRAM(url.c_str()))
+    if(texture->loadImageInRAM(url.c_str())) {
+        textures[std::string(fileName)] = texture;
         return texture;
+    }
     delete texture;
     return NULL;
 }
@@ -70,8 +75,10 @@ Model* FilePackage::getModel(const char* fileName) {
     }
     Model* model = new Model();
     std::string url = getUrlOfFile("Models", fileName);
-    if(model->loadCollada(this, url.c_str()))
+    if(model->loadCollada(this, url.c_str())) {
+        models[std::string(fileName)] = model;
         return model;
+    }
     delete model;
     return NULL;
 }

@@ -58,7 +58,6 @@ void AppMain(int argc, char *argv[]) {
     glEnable(GL_BLEND);
     glFrontFace(GL_CCW);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClearColor(1, 1, 1, 1);
     mainFBO.init();
     
     //Init Cams
@@ -114,11 +113,12 @@ void AppMain(int argc, char *argv[]) {
     shadowSkeletonShaderProgram->link();
     currentScreenView = new GUIScreenView();
     
+    SDL_Event event;
+    SDL_PollEvent(&event);
     initGame();
     
     unsigned long thenTicks = 0, nowTicks;
     while(true) {
-        SDL_Event event;
         while(SDL_PollEvent(&event)) {
             switch(event.type) {
                 case SDL_KEYDOWN:

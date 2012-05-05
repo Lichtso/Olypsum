@@ -93,7 +93,7 @@ void DirectionalLight::use() {
     sprintf(str, "lightSources[%d].direction", glIndex);
     currentShaderProgram->setUniformVec3(str, direction*-1.0);
     sprintf(str, "lightSources[%d].shadowFactor", glIndex);
-    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 0.997 : 0.0);
+    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 1.001 : 0.0);
     if(shadowMap < 0) return;
     sprintf(str, "lightSources[%d].shadowMat", glIndex);
     currentShaderProgram->setUniformMatrix4(str, &shadowCam->shadowMat);
@@ -143,7 +143,7 @@ void SpotLight::use() {
     sprintf(str, "lightSources[%d].direction", glIndex);
     currentShaderProgram->setUniformVec3(str, direction);
     sprintf(str, "lightSources[%d].shadowFactor", glIndex);
-    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 1.005 : 0.0);
+    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 1.001 : 0.0);
     sprintf(str, "lightSources[%d].position", glIndex);
     currentShaderProgram->setUniformVec3(str, position);
     if(shadowMap < 0) return;
@@ -167,6 +167,11 @@ PositionalLight::~PositionalLight() {
 
 bool PositionalLight::calculateShadowmap() {
     if(!Light::calculateShadowmap()) return false;
+    if(this->shadowMapB < 0) {
+        if(mainFBO.colorBuffers.size()+1 <= maxColorBufferCount)
+            shadowMapB = mainFBO.addTexture(shadowResolution, false);
+    }
+    
     shadowCam->camMat.setIdentity();
     shadowCam->camMat.setDirection(direction, upDir);
     shadowCam->camMat.translate(position);
@@ -203,7 +208,7 @@ void PositionalLight::use() {
     sprintf(str, "lightSources[%d].direction", glIndex);
     currentShaderProgram->setUniformVec3(str, direction);
     sprintf(str, "lightSources[%d].shadowFactor", glIndex);
-    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 1.005 : 0.0);
+    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 1.001 : 0.0);
     sprintf(str, "lightSources[%d].position", glIndex);
     currentShaderProgram->setUniformVec3(str, position);
     if(shadowMap < 0) return;

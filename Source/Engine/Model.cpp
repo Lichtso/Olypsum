@@ -736,7 +736,9 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             if(!dataNode) goto endParsingXML;
             dataAttribute = dataNode->first_attribute("count");
             if(!dataAttribute) goto endParsingXML;
+            #ifdef reExportModelFiles
             char* countStr = dataAttribute->value();
+            #endif
             FloatArray floatArray;
             sscanf(dataAttribute->value(), "%d", &floatArray.count);
             if(!floatArray.count) goto endParsingXML;
@@ -933,6 +935,10 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             indexCountBuffer.data = NULL;
             dataNode = source->first_node("vcount");
             if(dataNode) {
+                #ifdef reExportModelFiles
+                reSource->append_node(doc.allocate_node(rapidxml::node_element, "vcount", doc.allocate_string(dataNode->value())));
+                #endif
+                
                 indexCountBuffer.data = NULL;
                 indexCountBuffer.count = mesh->elementsCount;
                 readIntStr(dataNode->value(), indexCountBuffer);
@@ -946,6 +952,9 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 if(mesh->elementsCount == indexCountBuffer.count*3) { //All Elements are Triangles
                     delete [] indexCountBuffer.data;
                     indexCountBuffer.data = NULL;
+                    #ifdef reExportModelFiles
+                    reSource->remove_node(reSource->first_node("vcount"));
+                    #endif
                 }else{ //Triangulation needed
                     indexBuffer.data = new int[mesh->elementsCount*indexCount];
                 }
@@ -956,6 +965,9 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             
             dataNode = source->first_node("p");
             if(!dataNode) goto endParsingXML;
+            #ifdef reExportModelFiles
+            reSource->append_node(doc.allocate_node(rapidxml::node_element, "p", doc.allocate_string(dataNode->value())));
+            #endif
             readIntStr(dataNode->value(), indexBuffer);
             
             if(indexCountBuffer.data) {
@@ -981,24 +993,21 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                     
                     finishedElements += indexCountBuffer.data[i]*indexCount;
                     mesh->elementsCount += (indexCountBuffer.data[i]-2)*3;
-                }
+                }/*
                 #ifdef reExportModelFiles
                 char indexBufferData[indexBuffer.count*8], *indexBufferPos = indexBufferData;
                 for(unsigned int i = 0; i < indexBuffer.count; i ++) {
                     if(i > 0) *(indexBufferPos ++) = ' ';
                     indexBufferPos += sprintf(indexBufferPos, "%d", indexBuffer.data[i]);
                 }
-                reSource->append_node(reDataNode = doc.allocate_node(rapidxml::node_element, "p", doc.allocate_string(indexBufferData)));
+                reSource->first_node("p")->value(doc.allocate_string(indexBufferData));
                 char indexBufferLen[16];
                 sprintf(indexBufferLen, "%d", mesh->elementsCount/3);
                 dataAttribute = reSource->first_attribute("count");
                 dataAttribute->value(doc.allocate_string(indexBufferLen));
                 #endif
+                */
             }
-            #ifdef reExportModelFiles
-            else
-                reSource->append_node(doc.allocate_node(rapidxml::node_element, "p", dataNode->value()));
-            #endif
             
             //Indecizer
             float dataBuffer[strideIndex*mesh->elementsCount];
