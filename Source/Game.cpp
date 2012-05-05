@@ -39,7 +39,7 @@ void initGame() {
     
     if(true) {
         PositionalLight* lightC = new PositionalLight();
-        lightC->position = Vector3(0.0, 4.0, 0.0);
+        lightC->position = Vector3(-1.0, 3.0, 1.0);
         lightC->direction = Vector3(1.0, 0.0, 0.0).normalize();
         lightC->range = 10.0;
         lightC->shadowResolution = 1024;
@@ -102,7 +102,7 @@ void renderScene() {
     skeletonPose->bonePoses["Fingers2_Right"]->poseMat.setIdentity();
     skeletonPose->bonePoses["Fingers2_Right"]->poseMat.rotateZ(-1.3*(cos(animationTime)*0.5+0.5));
     skeletonPose->calculateBonePose(humanModel->skeleton->rootBone, NULL);
-    humanModel->draw(skeletonPose);
+    humanModel->draw();//skeletonPose);
     
     unsigned int size = 10, index;
     float vertices[48*size*size];
