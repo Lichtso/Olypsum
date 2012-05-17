@@ -188,4 +188,4 @@ ShaderProgram& ShaderProgram::operator=(const ShaderProgram &b) {
 Matrix4 modelMat;
 ShaderProgram *mainShaderProgram, *shadowShaderProgram,
               *mainSkeletonShaderProgram, *shadowSkeletonShaderProgram,
-              *spriteShaderProgram, *currentShaderProgram;
+              *spriteShaderProgram, *blurShaderProgram, *currentShaderProgram;

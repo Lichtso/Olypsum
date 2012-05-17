@@ -12,7 +12,6 @@ Light::Light() {
     shadowCam = NULL;
     shadowMap = -1;
     glIndex = -1;
-    shadowResolution = 0;
     color = Vector3(1.0, 1.0, 1.0);
 }
 
@@ -22,12 +21,11 @@ Light::~Light() {
 }
 
 bool Light::calculateShadowmap() {
-    if(shadowResolution == 0) return false;
     if(this->shadowMap < 0) {
         if(mainFBO.colorBuffers.size()+1 > maxColorBufferCount)
-            shadowResolution = 0;
+            return false;
         else
-            shadowMap = mainFBO.addTexture(shadowResolution, false);
+            shadowMap = mainFBO.addTexture(1024);
         
         if(shadowMap < 0) {
             if(shadowCam) {
@@ -93,7 +91,7 @@ void DirectionalLight::use() {
     sprintf(str, "lightSources[%d].direction", glIndex);
     currentShaderProgram->setUniformVec3(str, direction*-1.0);
     sprintf(str, "lightSources[%d].shadowFactor", glIndex);
-    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 1.001 : 0.0);
+    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 0.01 : 0.0);
     if(shadowMap < 0) return;
     sprintf(str, "lightSources[%d].shadowMat", glIndex);
     currentShaderProgram->setUniformMatrix4(str, &shadowCam->shadowMat);
@@ -130,6 +128,18 @@ bool SpotLight::calculateShadowmap() {
     glClearColor(1, 1, 1, 1);
     mainFBO.renderInTexture(shadowMap);
     renderScene();
+    //Render circle mask
+    float vertices[12] = {
+        -1.0, -1.0, 0.0,
+        1.0, -1.0, 0.0,
+        1.0, 1.0, 0.0,
+        -1.0, 1.0, 0.0
+    };
+    shadowShaderProgram->use();
+    shadowShaderProgram->setUniformF("paraboloidRange", -1.0);
+    shadowShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float), vertices);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
     glEnable(GL_BLEND);
     return true;
 }
@@ -143,7 +153,7 @@ void SpotLight::use() {
     sprintf(str, "lightSources[%d].direction", glIndex);
     currentShaderProgram->setUniformVec3(str, direction);
     sprintf(str, "lightSources[%d].shadowFactor", glIndex);
-    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 1.001 : 0.0);
+    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 0.02 : 0.0);
     sprintf(str, "lightSources[%d].position", glIndex);
     currentShaderProgram->setUniformVec3(str, position);
     if(shadowMap < 0) return;
@@ -169,7 +179,7 @@ bool PositionalLight::calculateShadowmap() {
     if(!Light::calculateShadowmap()) return false;
     if(this->shadowMapB < 0) {
         if(mainFBO.colorBuffers.size()+1 <= maxColorBufferCount)
-            shadowMapB = mainFBO.addTexture(shadowResolution, false);
+            shadowMapB = mainFBO.addTexture(1024);
     }
     
     shadowCam->camMat.setIdentity();
@@ -208,7 +218,7 @@ void PositionalLight::use() {
     sprintf(str, "lightSources[%d].direction", glIndex);
     currentShaderProgram->setUniformVec3(str, direction);
     sprintf(str, "lightSources[%d].shadowFactor", glIndex);
-    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 1.001 : 0.0);
+    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 0.005 : 0.0);
     sprintf(str, "lightSources[%d].position", glIndex);
     currentShaderProgram->setUniformVec3(str, position);
     if(shadowMap < 0) return;

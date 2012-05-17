@@ -27,5 +27,12 @@ char* parseXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const char* fil
     return data;
 }
 
+void msleep(unsigned long microsec) {
+    struct timespec time;
+    time.tv_sec = 0;
+    time.tv_nsec = microsec * 1000;
+    while(nanosleep(&time, &time) == -1) continue;
+}
+
 float animationFactor;
 std::string resourcesDir, gameDataDir, parentDir;

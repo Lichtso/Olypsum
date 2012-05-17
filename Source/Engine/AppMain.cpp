@@ -7,6 +7,7 @@
 //
 
 #import "InputController.h"
+#import <sys/time.h>
 
 Uint8* keyState;
 SDLMod modKeyState;
@@ -49,8 +50,8 @@ void AppMain(int argc, char *argv[]) {
     printf("%s\n", glStr);
     glStr = (char*)glGetString(GL_VERSION);
     printf("%s\n", glStr);
-    //glStr = (char*)glGetString(GL_EXTENSIONS);
-    //printf("%s\n\n", glStr);
+    glStr = (char*)glGetString(GL_EXTENSIONS);
+    printf("%s\n\n", glStr);
     
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_DEPTH_TEST);
@@ -86,16 +87,22 @@ void AppMain(int argc, char *argv[]) {
     mainShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     mainShaderProgram->addAttribute(NORMAL_ATTRIBUTE, "normal");
     mainShaderProgram->link();
+    mainShaderProgram->setUniformF("discardDensity", 1.0);
     shadowShaderProgram = new ShaderProgram();
     shadowShaderProgram->loadShaderProgram("shadow");
     shadowShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
     shadowShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shadowShaderProgram->link();
+    shadowShaderProgram->setUniformF("discardDensity", 1.0);
     spriteShaderProgram = new ShaderProgram();
     spriteShaderProgram->loadShaderProgram("sprite");
     spriteShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
     spriteShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     spriteShaderProgram->link();
+    blurShaderProgram = new ShaderProgram();
+    blurShaderProgram->loadShaderProgram("blur");
+    blurShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
+    blurShaderProgram->link();
     mainSkeletonShaderProgram = new ShaderProgram();
     mainSkeletonShaderProgram->loadShaderProgram("mainSkeleton");
     mainSkeletonShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
@@ -104,6 +111,7 @@ void AppMain(int argc, char *argv[]) {
     mainSkeletonShaderProgram->addAttribute(WEIGHT_ATTRIBUTE, "weights");
     mainSkeletonShaderProgram->addAttribute(JOINT_ATTRIBUTE, "joints");
     mainSkeletonShaderProgram->link();
+    mainSkeletonShaderProgram->setUniformF("discardDensity", 1.0);
     shadowSkeletonShaderProgram = new ShaderProgram();
     shadowSkeletonShaderProgram->loadShaderProgram("shadowSkeleton");
     shadowSkeletonShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
@@ -111,13 +119,15 @@ void AppMain(int argc, char *argv[]) {
     shadowSkeletonShaderProgram->addAttribute(WEIGHT_ATTRIBUTE, "weights");
     shadowSkeletonShaderProgram->addAttribute(JOINT_ATTRIBUTE, "joints");
     shadowSkeletonShaderProgram->link();
+    shadowSkeletonShaderProgram->setUniformF("discardDensity", 1.0);
     currentScreenView = new GUIScreenView();
     
     SDL_Event event;
     SDL_PollEvent(&event);
     initGame();
     
-    unsigned long thenTicks = 0, nowTicks;
+    timeval timeThen, timeNow;
+    gettimeofday(&timeThen, 0);
     while(true) {
         while(SDL_PollEvent(&event)) {
             switch(event.type) {
@@ -168,19 +178,13 @@ void AppMain(int argc, char *argv[]) {
         modKeyState = SDL_GetModState();
         
         calculateFrame();
-        if(currentScreenView)
-            currentScreenView->draw();
+        if(currentScreenView) currentScreenView->draw();
         SDL_GL_SwapBuffers();
         
-        if(thenTicks > 0) {
-			nowTicks = clock();
-			animationFactor = (float)(nowTicks-thenTicks)/(float)CLOCKS_PER_SEC;
-			//if(animationFactor < 1.0/50.0) animationFactor = 1.0/50.0;
-            thenTicks = nowTicks;
-        }else{
-            thenTicks = clock();
-			animationFactor = 0.0;
-        }
+        gettimeofday(&timeNow, 0);
+        animationFactor = timeNow.tv_sec - timeThen.tv_sec;
+        animationFactor += (timeNow.tv_usec - timeThen.tv_usec) / 1000000.0;
+        gettimeofday(&timeThen, 0);
     }
 }
 

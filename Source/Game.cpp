@@ -23,17 +23,15 @@ void initGame() {
         light->distance = 50.0;
         light->range = 100.0;
         light->width = light->height = 2.0;
-        light->shadowResolution = 1024;
         lightManager.lights.push_back((Light*)light);
     }
     
     if(false) {
         SpotLight* lightB = new SpotLight();
-        lightB->position = Vector3(-1.0, 2.0, 2.0);
+        lightB->position = Vector3(-1.5, 3.0, 3.5);
         lightB->direction = Vector3(0.5, -0.5, -1.0).normalize();
         lightB->cutoff = 20.0/180.0*M_PI;
         lightB->range = 10.0;
-        lightB->shadowResolution = 512;
         lightManager.lights.push_back((Light*)lightB);
     }
     
@@ -42,7 +40,6 @@ void initGame() {
         lightC->position = Vector3(-1.0, 3.0, 1.0);
         lightC->direction = Vector3(1.0, 0.0, 0.0).normalize();
         lightC->range = 10.0;
-        lightC->shadowResolution = 1024;
         lightManager.lights.push_back((Light*)lightC);
     }
     
@@ -65,14 +62,17 @@ void initGame() {
 }
 
 static void addVertex(float* vertices, float x, float y) {
-    vertices[0] = (x-0.5)*10.0;
+    vertices[6] = x;
+    vertices[7] = y;
+    x -= 0.5;
+    y -= 0.5;
+    vertices[0] = x*10.0;
     vertices[1] = 0.0;
-    vertices[2] = (y-0.5)*10.0;
+    vertices[2] = y*10.0;
     vertices[3] = 0.0;
     vertices[4] = 1.0;
     vertices[5] = 0.0;
-    vertices[6] = x;
-    vertices[7] = y;
+    
 };
 
 void renderScene() {
@@ -102,7 +102,7 @@ void renderScene() {
     skeletonPose->bonePoses["Fingers2_Right"]->poseMat.setIdentity();
     skeletonPose->bonePoses["Fingers2_Right"]->poseMat.rotateZ(-1.3*(cos(animationTime)*0.5+0.5));
     skeletonPose->calculateBonePose(humanModel->skeleton->rootBone, NULL);
-    humanModel->draw();//skeletonPose);
+    humanModel->draw(skeletonPose);
     
     unsigned int size = 10, index;
     float vertices[48*size*size];
@@ -117,6 +117,7 @@ void renderScene() {
             addVertex(&vertices[index+40], (float)(x+1)/size, (float)y/size);
         }
     
+    //mainFBO.useTexture(0, 0);
     modelMat.setIdentity();
     currentShaderProgram->use();
     currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 8*sizeof(float), vertices);
@@ -124,6 +125,7 @@ void renderScene() {
     currentShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 8*sizeof(float), &vertices[6]);
     glDrawArrays(GL_TRIANGLES, 0, 6*size*size);
     glDisableVertexAttribArray(POSITION_ATTRIBUTE);
+    glDisableVertexAttribArray(NORMAL_ATTRIBUTE);
     glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
 }
 
@@ -133,7 +135,7 @@ void calculateFrame() {
     labelFPS->text = str;
     labelFPS->updateContent();
     
-    animationTime += animationFactor*10.0;
+    animationTime += animationFactor*1.0;
     
     lightManager.lights[0]->calculateShadowmap();
     lightManager.setLights();
@@ -141,7 +143,8 @@ void calculateFrame() {
     
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     mainCam->camMat.setIdentity();
-    mainCam->camMat.translate(Vector3(0,1,3));
+    //mainCam->camMat.rotateX(M_PI_2);
+    mainCam->camMat.translate(Vector3(0,1,2));
     mainCam->setFullScreen();
     mainCam->calculate();
     mainCam->use();

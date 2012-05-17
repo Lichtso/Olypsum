@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "FBO.h"
+#import "ShaderProgram.h"
 
 FBO::~FBO() {
     for(unsigned int i = 0; i < colorBuffers.size(); i ++)
@@ -25,9 +25,8 @@ void FBO::init() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-unsigned int FBO::addTexture(unsigned int size, bool resizedDisplay) {
+unsigned int FBO::addTexture(unsigned int size) {
     ColorBuffer colorBuffer;
-    colorBuffer.resizedDisplay = resizedDisplay;
     colorBuffer.size = size;
     glGenTextures(1, &colorBuffer.texture);
     glBindTexture(GL_TEXTURE_2D, colorBuffer.texture);
@@ -47,14 +46,44 @@ void FBO::renderInTexture(unsigned int index) {
     glViewport(0, 0, colorBuffers[index].size, colorBuffers[index].size);
 }
 
+void FBO::mipmapTexture(unsigned int index) {
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+void FBO::blurTexture(unsigned int index, float blurFactor) {
+    GLuint auxTexture;
+    glGenTextures(1, &auxTexture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, auxTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, colorBuffers[index].size, colorBuffers[index].size, 0);
+    
+    glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+    float vertices[12] = {
+        0.0, 0.0,
+        1.0, 0.0,
+        1.0, 1.0,
+        0.0, 1.0
+    };
+    blurShaderProgram->use();
+    blurShaderProgram->setUniformF("blurWidth", blurFactor);
+    blurShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
+    glEnable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    
+    glDeleteTextures(1, &auxTexture);
+}
+
 void FBO::useTexture(unsigned int index, GLuint targetIndex) {
     glActiveTexture(GL_TEXTURE0+targetIndex);
     glBindTexture(GL_TEXTURE_2D, colorBuffers[index].texture);
-    if(colorBuffers[index].resizedDisplay) {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }else
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 }
 
 void FBO::deleteTexture(unsigned int index) {

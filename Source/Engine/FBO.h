@@ -15,7 +15,6 @@
 #define maxColorBufferCount 8
 
 struct ColorBuffer {
-    bool resizedDisplay;
     unsigned int size;
     GLuint texture;
 };
@@ -26,8 +25,10 @@ class FBO {
     std::vector<ColorBuffer> colorBuffers;
     ~FBO();
     void init();
-    unsigned int addTexture(unsigned int size, bool resizedDisplay);
+    unsigned int addTexture(unsigned int size);
     void renderInTexture(unsigned int index);
+    void mipmapTexture(unsigned int index);
+    void blurTexture(unsigned int index, float blurFactor);
     void useTexture(unsigned int index, GLuint targetIndex);
     void deleteTexture(unsigned int index);
 };

@@ -46,6 +46,6 @@ class ShaderProgram {
 extern Matrix4 modelMat;
 extern ShaderProgram *mainShaderProgram, *shadowShaderProgram,
                      *mainSkeletonShaderProgram, *shadowSkeletonShaderProgram,
-                     *spriteShaderProgram, *currentShaderProgram;
+                     *spriteShaderProgram, *blurShaderProgram, *currentShaderProgram;
 
 #endif

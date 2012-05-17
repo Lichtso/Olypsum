@@ -23,7 +23,6 @@ class Light {
     int shadowMap;
     public:
     int glIndex;
-    unsigned int shadowResolution;
     Vector3 direction, upDir;
     float range;
     LightType type;
