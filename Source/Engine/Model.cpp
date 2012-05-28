@@ -71,15 +71,6 @@ void Mesh::draw() {
     }else{
         glDrawArrays(GL_TRIANGLES, 0, elementsCount);
     }
-    
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
-    glDisableVertexAttribArray(NORMAL_ATTRIBUTE);
-    glDisableVertexAttribArray(TANGENT_ATTRIBUTE);
-    glDisableVertexAttribArray(BITANGENT_ATTRIBUTE);
-    glDisableVertexAttribArray(WEIGHT_ATTRIBUTE);
-    glDisableVertexAttribArray(JOINT_ATTRIBUTE);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 struct FloatArray {
@@ -1107,30 +1098,51 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
     return true;
 }
 
-void Model::draw() {
-    currentShaderProgram->use();
+void Model::draw(float discardDensity) {
+    if(renderingState == RenderingScreen)
+        mainShaderProgram->use();
+    else if(renderingState == RenderingShadow)
+        shadowShaderProgram->use();
+    currentShaderProgram->setUniformF("discardDensity", discardDensity);
+    lightManager.setLights();
+    
     for(unsigned int i = 0; i < meshes.size(); i ++)
         meshes[i]->draw();
+    
+    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
+    glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
+    glDisableVertexAttribArray(NORMAL_ATTRIBUTE);
+    glDisableVertexAttribArray(TANGENT_ATTRIBUTE);
+    glDisableVertexAttribArray(BITANGENT_ATTRIBUTE);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void Model::draw(SkeletonPose* skeletonPose) {
+void Model::draw(float discardDensity, SkeletonPose* skeletonPose) {
     if(!skeleton) {
         printf("ERROR: No Skeleton for pose found.\n");
         return;
     }
-    ShaderProgram* usedShaderProgram = currentShaderProgram;
-    if(usedShaderProgram == shadowShaderProgram || usedShaderProgram == shadowSkeletonShaderProgram)
-        shadowSkeletonShaderProgram->use();
-    else
+    
+    if(renderingState == RenderingScreen)
         mainSkeletonShaderProgram->use();
+    else if(renderingState == RenderingShadow)
+        shadowSkeletonShaderProgram->use();
+    currentShaderProgram->setUniformF("discardDensity", discardDensity);
+    lightManager.setLights();
+    
     Matrix4* mats = new Matrix4[skeleton->bones.size()];
     skeletonPose->calculateDisplayMatrix(skeleton->rootBone, NULL, mats);
     currentShaderProgram->setUniformMatrix4("jointMats", mats, skeleton->bones.size());
     delete [] mats;
-    //modelMat = skeletonPose->bonePoses[skeleton->rootBone->name]->poseMat;
     for(unsigned int i = 0; i < meshes.size(); i ++)
         meshes[i]->draw();
-    currentShaderProgram = usedShaderProgram;
+    
+    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
+    glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
+    glDisableVertexAttribArray(NORMAL_ATTRIBUTE);
+    glDisableVertexAttribArray(WEIGHT_ATTRIBUTE);
+    glDisableVertexAttribArray(JOINT_ATTRIBUTE);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 SkeletonPose::SkeletonPose(Skeleton* skeleton) {

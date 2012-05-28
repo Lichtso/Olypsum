@@ -58,6 +58,7 @@
 		11A79BCE153C35CE002B9F0A /* Textures in Resources */ = {isa = PBXBuildFile; fileRef = 11A79BC8153C35CD002B9F0A /* Textures */; };
 		11BD39AD15414AA6007846B8 /* Light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11BD39AC15414AA6007846B8 /* Light.cpp */; };
 		11BD39B01541725F007846B8 /* Game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11BD39AF1541725F007846B8 /* Game.cpp */; };
+		11F1EEB8156FE49400F7275D /* ParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11F1EEB7156FE49400F7275D /* ParticleSystem.cpp */; };
 		11FB30A3154453FC00D2B7EE /* InputController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11FB30A1154453CA00D2B7EE /* InputController.cpp */; };
 /* End PBXBuildFile section */
 
@@ -155,6 +156,8 @@
 		11BD39AC15414AA6007846B8 /* Light.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Light.cpp; sourceTree = "<group>"; };
 		11BD39AE1541724A007846B8 /* Game.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Game.h; sourceTree = "<group>"; };
 		11BD39AF1541725F007846B8 /* Game.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Game.cpp; sourceTree = "<group>"; };
+		11F1EEB5156FE48B00F7275D /* ParticleSystem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParticleSystem.h; sourceTree = "<group>"; };
+		11F1EEB7156FE49400F7275D /* ParticleSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParticleSystem.cpp; sourceTree = "<group>"; };
 		11FB30A1154453CA00D2B7EE /* InputController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = InputController.cpp; sourceTree = "<group>"; };
 		11FB30A2154453CA00D2B7EE /* InputController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InputController.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -257,6 +260,8 @@
 				11A79B52153C2FE9002B9F0A /* Localization.cpp */,
 				11A79B63153C2FE9002B9F0A /* ShaderProgram.h */,
 				11A79B62153C2FE9002B9F0A /* ShaderProgram.cpp */,
+				11F1EEB5156FE48B00F7275D /* ParticleSystem.h */,
+				11F1EEB7156FE49400F7275D /* ParticleSystem.cpp */,
 				11A79B65153C2FE9002B9F0A /* TextFont.h */,
 				11A79B64153C2FE9002B9F0A /* TextFont.cpp */,
 				11A79B26153C2FE9002B9F0A /* GUI */,
@@ -463,6 +468,7 @@
 				11BD39AD15414AA6007846B8 /* Light.cpp in Sources */,
 				11BD39B01541725F007846B8 /* Game.cpp in Sources */,
 				11FB30A3154453FC00D2B7EE /* InputController.cpp in Sources */,
+				11F1EEB8156FE49400F7275D /* ParticleSystem.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -35,4 +35,11 @@ class FBO {
 
 extern FBO mainFBO;
 
+enum RenderingState {
+    RenderingShadow,
+    RenderingScreen
+};
+
+extern RenderingState renderingState;
+
 #endif

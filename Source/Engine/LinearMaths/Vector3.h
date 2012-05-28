@@ -49,4 +49,8 @@ class Vector3 {
     Vector3& operator*=(const Matrix4&); //Vec *= Mat
 };
 
+inline Vector3 vec3rand(Vector3 min, Vector3 max) {
+    return Vector3(frand(min.x, max.x), frand(min.y, max.y), frand(min.z, max.z));
+}
+
 #endif

@@ -76,6 +76,7 @@ bool DirectionalLight::calculateShadowmap() {
     shadowSkeletonShaderProgram->setUniformF("paraboloidRange", 0.0);
     shadowShaderProgram->use();
     shadowShaderProgram->setUniformF("paraboloidRange", 0.0);
+    renderingState = RenderingShadow;
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
     mainFBO.renderInTexture(shadowMap);
@@ -124,6 +125,7 @@ bool SpotLight::calculateShadowmap() {
     shadowSkeletonShaderProgram->setUniformF("paraboloidRange", 0.0);
     shadowShaderProgram->use();
     shadowShaderProgram->setUniformF("paraboloidRange", 0.0);
+    renderingState = RenderingShadow;
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
     mainFBO.renderInTexture(shadowMap);
@@ -193,6 +195,7 @@ bool PositionalLight::calculateShadowmap() {
     shadowSkeletonShaderProgram->setUniformF("paraboloidRange", range);
     shadowShaderProgram->use();
     shadowShaderProgram->setUniformF("paraboloidRange", range);
+    renderingState = RenderingShadow;
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
     if(shadowMapB >= 0) {
@@ -218,7 +221,7 @@ void PositionalLight::use() {
     sprintf(str, "lightSources[%d].direction", glIndex);
     currentShaderProgram->setUniformVec3(str, direction);
     sprintf(str, "lightSources[%d].shadowFactor", glIndex);
-    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 0.005 : 0.0);
+    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 0.003 : 0.0);
     sprintf(str, "lightSources[%d].position", glIndex);
     currentShaderProgram->setUniformVec3(str, position);
     if(shadowMap < 0) return;
@@ -233,7 +236,7 @@ LightManager::~LightManager() {
         delete lights[i];
 }
 
-void LightManager::setLightsForShader() {
+void LightManager::setLights() {
     for(unsigned int i = 0; i < lights.size(); i ++) {
         lights[i]->glIndex = (i < maxLightCount) ? i : -1;
         lights[i]->use();
@@ -244,13 +247,6 @@ void LightManager::setLightsForShader() {
         sprintf(str, "lightSources[%d].type", i);
         currentShaderProgram->setUniformF(str, 0);
     }
-}
-
-void LightManager::setLights() {
-    mainShaderProgram->use();
-    setLightsForShader();
-    mainSkeletonShaderProgram->use();
-    setLightsForShader();
 }
 
 LightManager lightManager;

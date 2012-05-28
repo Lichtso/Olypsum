@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "ShaderProgram.h"
+#import "ParticleSystem.h"
 #import <SDL/SDL.h>
 #import <SDL_ttf/SDL_ttf.h>
 

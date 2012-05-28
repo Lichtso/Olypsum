@@ -92,3 +92,4 @@ void FBO::deleteTexture(unsigned int index) {
 }
 
 FBO mainFBO;
+RenderingState renderingState;

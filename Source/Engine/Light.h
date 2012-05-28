@@ -63,7 +63,6 @@ class PositionalLight : public Light {
 #define maxLightCount 4
 
 class LightManager {
-    void setLightsForShader();
     public:
     std::vector<Light*> lights;
     ~LightManager();

@@ -9,6 +9,8 @@
 #import <OpenGL/gl.h>
 #import <SDL/SDL.h>
 #import <SDL_image/SDL_image.h>
+#import <SDL/SDL_thread.h>
+#import <SDL/SDL_mutex.h>
 #import <BulletDynamics/btBulletDynamicsCommon.h>
 #import <math.h>
 #import <time.h>
@@ -43,6 +45,10 @@ template <class T> inline const T min(T a, T b) {
 
 template <class T> inline const T clamp(T x, T a, T b) {
 	return (x<a)?a:((x>b)?b:x);
+}
+
+template <class T> inline const T frand(T min, T max) {
+    return ((max-min)*((float)rand()/RAND_MAX))+min;
 }
 
 extern std::string resourcesDir, gameDataDir, parentDir;

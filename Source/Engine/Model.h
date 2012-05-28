@@ -57,8 +57,8 @@ class Model {
     Model();
     ~Model();
     bool loadCollada(FilePackage* filePackage, const char* filePath);
-    void draw();
-    void draw(SkeletonPose* skeletonPose);
+    void draw(float discardDensity);
+    void draw(float discardDensity, SkeletonPose* skeletonPose);
 };
 
 #endif

@@ -28,7 +28,7 @@ void initGame() {
     
     if(false) {
         SpotLight* lightB = new SpotLight();
-        lightB->position = Vector3(-1.5, 3.0, 3.5);
+        lightB->position = Vector3(-2.0, 3.0, 3.5);
         lightB->direction = Vector3(0.5, -0.5, -1.0).normalize();
         lightB->cutoff = 20.0/180.0*M_PI;
         lightB->range = 10.0;
@@ -59,6 +59,20 @@ void initGame() {
     labelFPS->text = std::string("FPS");
     labelFPS->posY = 400;
     currentScreenView->addChild(labelFPS);
+    
+    ParticleSystem* particleSystem = new ParticleSystem();
+    particleSystem->pos = Vector3(0, 1, 0);
+    particleSystem->posMin = Vector3(-0.1, 0, -0.1);
+    particleSystem->posMax = Vector3(0.1, 0, 0.1);
+    particleSystem->sizeMin = 0.05;
+    particleSystem->sizeMax = 0.1;
+    particleSystem->lifeMin = 3.0;
+    particleSystem->lifeMax = 4.0;
+    particleSystem->addMin = 20.0;
+    particleSystem->addMax = 30.0;
+    particleSystem->dirMin = Vector3(-0.1, 1.4, -0.1);
+    particleSystem->dirMax = Vector3(0.1, 1.8, 0.1);
+    particleSystem->texture = fileManager.getPackage(NULL)->getTexture("man.png");
 }
 
 static void addVertex(float* vertices, float x, float y) {
@@ -80,7 +94,7 @@ void renderScene() {
     
     modelMat.setIdentity();
     modelMat.rotateY(0.4);
-    modelMat.translate(Vector3(0.0, sin(animationTime)*0.5+0.2, 0.0));
+    modelMat.translate(Vector3(0.0, sin(animationTime)*0.5+0.15, 0.0));
     skeletonPose->bonePoses["Back"]->poseMat = modelMat;
     float thighRotX = (1.0-sin(animationTime))*0.6,
     shinRotX = -0.8*(1.0-sin(animationTime)),
@@ -102,7 +116,7 @@ void renderScene() {
     skeletonPose->bonePoses["Fingers2_Right"]->poseMat.setIdentity();
     skeletonPose->bonePoses["Fingers2_Right"]->poseMat.rotateZ(-1.3*(cos(animationTime)*0.5+0.5));
     skeletonPose->calculateBonePose(humanModel->skeleton->rootBone, NULL);
-    humanModel->draw(skeletonPose);
+    humanModel->draw(1.0, skeletonPose);
     
     unsigned int size = 10, index;
     float vertices[48*size*size];
@@ -117,9 +131,14 @@ void renderScene() {
             addVertex(&vertices[index+40], (float)(x+1)/size, (float)y/size);
         }
     
-    //mainFBO.useTexture(0, 0);
     modelMat.setIdentity();
-    currentShaderProgram->use();
+    if(renderingState == RenderingScreen)
+        mainShaderProgram->use();
+    else if(renderingState == RenderingShadow)
+        shadowShaderProgram->use();
+    lightManager.setLights();
+    currentShaderProgram->setUniformF("discardDensity", 1.0);
+    
     currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 8*sizeof(float), vertices);
     currentShaderProgram->setAttribute(NORMAL_ATTRIBUTE, 3, 8*sizeof(float), &vertices[3]);
     currentShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 8*sizeof(float), &vertices[6]);
@@ -138,12 +157,11 @@ void calculateFrame() {
     animationTime += animationFactor*1.0;
     
     lightManager.lights[0]->calculateShadowmap();
-    lightManager.setLights();
     //return;
     
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     mainCam->camMat.setIdentity();
-    //mainCam->camMat.rotateX(M_PI_2);
+    //mainCam->camMat.rotateX(0.5);
     mainCam->camMat.translate(Vector3(0,1,2));
     mainCam->setFullScreen();
     mainCam->calculate();
@@ -151,5 +169,6 @@ void calculateFrame() {
     modelMat.setIdentity();
     mainShaderProgram->use();
     glClearColor(1, 1, 1, 1);
+    renderingState = RenderingScreen;
     renderScene();
 }
