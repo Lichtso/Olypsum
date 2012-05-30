@@ -7,6 +7,8 @@
 //
 
 #import <OpenGL/gl.h>
+#import <OpenAL/al.h>
+#import <OpenAL/alc.h>
 #import <SDL/SDL.h>
 #import <SDL_image/SDL_image.h>
 #import <SDL/SDL_thread.h>
@@ -28,12 +30,6 @@
 
 char* parseXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const char* filePath, unsigned int& fileSize);
 void msleep(unsigned long milisec);
-
-template <class T> inline void swap(T &a, T &b) {
-	T c = a;
-	a = b;
-	b = c;
-}
 
 template <class T> inline const T max(T a, T b) {
 	return (b<a)?a:b;

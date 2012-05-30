@@ -43,19 +43,19 @@ void ParticleSystem::setParticleVertex(float* verticesB, unsigned int p, Vector3
     verticesB[7] = corner.y*size;
 }
 
-void ParticleSystem::calculate(float animation) {
+bool ParticleSystem::calculate(float animation) {
     if(systemLife > -1.0) {
         systemLife -= animation;
         if(systemLife <= 0.0) {
             delete this;
-            return;
+            return true;
         }
     }
     
     if(systemLife == -1.0 || systemLife > lifeMax) {
         Particle particle;
         for(addParticles += animation*frand(addMin, addMax); addParticles >= 1.0; addParticles --) {
-            particle.pos = vec3rand(posMin, posMax)+pos;
+            particle.pos = vec3rand(posMin, posMax)+position;
             particle.dir = vec3rand(dirMin, dirMax);
             particle.life = frand(lifeMin, lifeMax);
             particle.size = frand(sizeMin, sizeMax);
@@ -89,12 +89,13 @@ void ParticleSystem::calculate(float animation) {
     vertices = verticesB;
     vertexCount = 6*particles.size();
     SDL_mutexV(particleSystemManager.mutex);
+    return false;
 }
 
 void ParticleSystem::draw() {
     if(renderingState != RenderingScreen) return;
     if(texture) texture->use(0);
-    spriteShaderProgram->setUniformF("light", 1.0);
+    lightManager.setLights(position);
     SDL_mutexP(particleSystemManager.mutex);
     currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 8*sizeof(float), vertices);
     currentShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 3, 8*sizeof(float), &vertices[3]);
@@ -118,12 +119,14 @@ ParticleSystemManager::~ParticleSystemManager() {
 
 void ParticleSystemManager::calculate(float animation) {
     for(unsigned int p = 0; p < particleSystems.size(); p ++)
-        particleSystems[p]->calculate(animation);
+        if(particleSystems[p]->calculate(animation))
+            p --;
 }
 
 void ParticleSystemManager::draw() {
     modelMat.setIdentity();
     spriteShaderProgram->use();
+    spriteShaderProgram->setUniformVec3("color", Vector3(-1, -1, -1));
     glDepthMask(0);
     for(unsigned int p = 0; p < particleSystems.size(); p ++)
         particleSystems[p]->draw();

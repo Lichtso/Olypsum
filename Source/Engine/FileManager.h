@@ -16,17 +16,17 @@ class FilePackage {
     std::string name;
     std::map<std::string, Texture*> textures;
     std::map<std::string, Model*> models;
-    //std::map<std::string, SoundTrack*> soundTracks;
+    std::map<std::string, SoundTrack*> soundTracks;
     FilePackage(const char* name);
     ~FilePackage();
     bool load();
     std::string getUrlOfFile(const char* groupName, const char* fileName);
     Texture* getTexture(const char* fileName);
     Model* getModel(const char* fileName);
-    //SoundTrack* getSoundTrack(const char* fileName);
+    SoundTrack* getSoundTrack(const char* fileName);
     bool releaseTexture(Texture* texture);
     bool releaseModel(Model* model);
-    //bool releaseSoundTrack(SoundTrack* soundTrack);
+    bool releaseSoundTrack(SoundTrack* soundTrack);
 };
 
 class FileManager {
@@ -39,7 +39,7 @@ class FileManager {
     void unloadPackage(const char* name);
     void releaseTexture(Texture* texture);
     void releaseModel(Model* model);
-    //void releaseSoundTrack(SoundTrack* soundTrack);
+    void releaseSoundTrack(SoundTrack* soundTrack);
 };
 
 extern FileManager fileManager;

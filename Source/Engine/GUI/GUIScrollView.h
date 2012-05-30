@@ -11,7 +11,7 @@
 #ifndef GUIScrollView_h
 #define GUIScrollView_h
 
-class GUIScrollView : public GUIView {
+class GUIScrollView : public GUIFramedView {
     GLuint textureV, textureH;
     int mouseDragPosX, mouseDragPosY;
     int getBarWidth();

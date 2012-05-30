@@ -16,6 +16,7 @@ GUILabel::GUILabel() {
     textAlign = GUITextAlign_Middle;
     sizeAlignment = GUISizeAlignment_All;
     fontHeight = 30;
+    height = fontHeight >> 1;
 }
 
 GUILabel::~GUILabel() {
@@ -26,8 +27,7 @@ GUILabel::~GUILabel() {
 
 void GUILabel::updateContent() {
     int prevWidth = width, prevHeight = height;
-    if(sizeAlignment != GUISizeAlignment_None)
-        width = height = 0;
+    width = height = 0;
     
     for(unsigned int i = 0; i < lines.size(); i ++)
         glDeleteTextures(1, &lines[i].texture);
@@ -44,12 +44,13 @@ void GUILabel::updateContent() {
             line.width = fontHeight*0.5/line.height*line.width;
             line.height = fontHeight>>1;
             lines.push_back(line);
-            if(sizeAlignment != GUISizeAlignment_None) {
-                width = fmax(width, line.width);
-                height += line.height;
-            }
+            width = fmax(width, line.width);
+            height += line.height;
             lastPos = pos;
         }
+    
+    if((sizeAlignment & GUISizeAlignment_Width) == 0) width = prevWidth;
+    if((sizeAlignment & GUISizeAlignment_Height) == 0) height = prevHeight;
     
     GUILabelLine* line;
     unsigned int renderY = height-(fontHeight>>1);
@@ -69,12 +70,6 @@ void GUILabel::updateContent() {
         line->posY = renderY;
         renderY -= fontHeight;
     }
-    
-    if((sizeAlignment & GUISizeAlignment_Width) == 0)
-        width = prevWidth;
-    
-    if((sizeAlignment & GUISizeAlignment_Height) == 0)
-        height = prevHeight;
 }
 
 void GUILabel::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {

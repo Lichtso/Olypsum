@@ -9,9 +9,14 @@
 #import "Game.h"
 
 GUILabel* labelFPS;
+GUISlider* soundTrackSlider;
 Model* humanModel;
 SkeletonPose* skeletonPose;
 static float animationTime = 0;
+
+static void updateSoundTrackSlider(GUISlider* slider) {
+    soundSourcesManager.soundSources[0]->setTimeOffset(slider->value * soundSourcesManager.soundSources[0]->soundTrack->getLength());
+}
 
 void initGame() {
     humanModel = fileManager.getPackage(NULL)->getModel("man.dae");
@@ -48,20 +53,40 @@ void initGame() {
     image->sizeAlignment = GUISizeAlignment_Height;
     image->width = 400;
     image->posY = -350;
-    //currentScreenView->addChild(image);
+    currentScreenView->addChild(image);
+    
+    GUIFramedView* view = new GUIFramedView();
+    view->width = 265;
+    view->height = 50;
+    view->posY = 400;
+    currentScreenView->addChild(view);
     
     GUILabel* label = new GUILabel();
-    label->text = std::string("Graphic Tests");
-    label->posY = 450;
-    currentScreenView->addChild(label);
+    label->text = std::string("Dj Bjra - Military Storm");
+    label->posX = -30;
+    label->posY = 10;
+    label->width = 200;
+    label->sizeAlignment = GUISizeAlignment_Height;
+    label->textAlign = GUITextAlign_Left;
+    view->addChild(label);
     
     labelFPS = new GUILabel();
     labelFPS->text = std::string("FPS");
-    labelFPS->posY = 400;
-    currentScreenView->addChild(labelFPS);
+    labelFPS->posX = 220;
+    labelFPS->posY = 10;
+    labelFPS->width = 100;
+    labelFPS->sizeAlignment = GUISizeAlignment_Height;
+    labelFPS->textAlign = GUITextAlign_Left;
+    view->addChild(labelFPS);
+    
+    soundTrackSlider = new GUISlider();
+    soundTrackSlider->width = 250;
+    soundTrackSlider->posY = -25;
+    soundTrackSlider->onChange = updateSoundTrackSlider;
+    view->addChild(soundTrackSlider);
     
     ParticleSystem* particleSystem = new ParticleSystem();
-    particleSystem->pos = Vector3(0, 1, 0);
+    particleSystem->position = Vector3(3, 1, -3);
     particleSystem->posMin = Vector3(-0.1, 0, -0.1);
     particleSystem->posMax = Vector3(0.1, 0, 0.1);
     particleSystem->sizeMin = 0.05;
@@ -73,6 +98,11 @@ void initGame() {
     particleSystem->dirMin = Vector3(-0.1, 1.4, -0.1);
     particleSystem->dirMax = Vector3(0.1, 1.8, 0.1);
     particleSystem->texture = fileManager.getPackage(NULL)->getTexture("man.png");
+    
+    SoundSource* testSoundSource = new SoundSource();
+    testSoundSource->setSoundTrack(fileManager.getPackage(NULL)->getSoundTrack("test.ogg"));
+    testSoundSource->looping = true;
+    testSoundSource->play();
 }
 
 static void addVertex(float* vertices, float x, float y) {
@@ -136,7 +166,7 @@ void renderScene() {
         mainShaderProgram->use();
     else if(renderingState == RenderingShadow)
         shadowShaderProgram->use();
-    lightManager.setLights();
+    lightManager.setLights(Vector3(0, 0, 0));
     currentShaderProgram->setUniformF("discardDensity", 1.0);
     
     currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 8*sizeof(float), vertices);
@@ -153,6 +183,8 @@ void calculateFrame() {
     sprintf(str, "FPS: %d", (int)(1.0/animationFactor));
     labelFPS->text = str;
     labelFPS->updateContent();
+    
+    soundTrackSlider->value = soundSourcesManager.soundSources[0]->getTimeOffset() / soundSourcesManager.soundSources[0]->soundTrack->getLength();
     
     animationTime += animationFactor*1.0;
     

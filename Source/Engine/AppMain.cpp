@@ -28,6 +28,7 @@ static int ParticleThreadFunction(void* pointless) {
 }
 
 void AppMain(int argc, char *argv[]) {
+    //Init SDL
     if(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) < 0) {
         printf("Couldn't init SDL, Quit.\n");
         exit(1);
@@ -58,13 +59,14 @@ void AppMain(int argc, char *argv[]) {
         exit(4);
     }
     
+    //Init OpenGL
     char* glStr = NULL;
     glStr = (char*)glGetString(GL_VENDOR);
-    printf("%s\n", glStr);
+    printf("OpenGL, vendor: %s\n", glStr);
     glStr = (char*)glGetString(GL_RENDERER);
-    printf("%s\n", glStr);
+    printf("OpenGL, renderer: %s\n", glStr);
     glStr = (char*)glGetString(GL_VERSION);
-    printf("%s\n", glStr);
+    printf("OpenGL, version: %s\n", glStr);
     glStr = (char*)glGetString(GL_EXTENSIONS);
     //printf("%s\n\n", glStr);
     
@@ -74,8 +76,6 @@ void AppMain(int argc, char *argv[]) {
     glEnable(GL_BLEND);
     glFrontFace(GL_CCW);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    mainFBO.init();
-    particleThread = SDL_CreateThread(ParticleThreadFunction, NULL);
     
     //Init Cams
     mainCam = new Cam();
@@ -133,8 +133,12 @@ void AppMain(int argc, char *argv[]) {
     shadowSkeletonShaderProgram->addAttribute(WEIGHT_ATTRIBUTE, "weights");
     shadowSkeletonShaderProgram->addAttribute(JOINT_ATTRIBUTE, "joints");
     shadowSkeletonShaderProgram->link();
+    
+    //Init all other stuff
     renderingState = RenderingScreen;
     currentScreenView = new GUIScreenView();
+    mainFBO.init();
+    particleThread = SDL_CreateThread(ParticleThreadFunction, NULL);
     
     SDL_Event event;
     SDL_PollEvent(&event);
@@ -147,12 +151,12 @@ void AppMain(int argc, char *argv[]) {
             switch(event.type) {
                 case SDL_KEYDOWN:
                     if(currentScreenView && currentScreenView->handleKeyDown(&event.key.keysym))
-                        return;
+                        break;
                     handleKeyDown(&event.key.keysym);
                 break;
                 case SDL_KEYUP:
                     if(currentScreenView && currentScreenView->handleKeyUp(&event.key.keysym))
-                        return;
+                        break;
                     handleKeyUp(&event.key.keysym);
                 break;
                 case SDL_MOUSEBUTTONDOWN:
@@ -169,17 +173,20 @@ void AppMain(int argc, char *argv[]) {
                             break;
                         }
                     }
-                    handleMouseDown(&event.button);
+                    if(!currentScreenView || !currentScreenView->modalView)
+                        handleMouseDown(&event.button);
                 break;
                 case SDL_MOUSEBUTTONUP:
                     if(currentScreenView)
                         currentScreenView->handleMouseUp(event.button.x, event.button.y);
-                    handleMouseUp(&event.button);
+                    if(!currentScreenView || !currentScreenView->modalView)
+                        handleMouseUp(&event.button);
                 break;
                 case SDL_MOUSEMOTION:
                     if(currentScreenView)
                         currentScreenView->handleMouseMove(event.button.x, event.button.y);
-                    handleMouseMove(&event.motion);
+                    if(!currentScreenView || !currentScreenView->modalView)
+                        handleMouseMove(&event.motion);
                 break;
                 case SDL_QUIT:
                     AppTerminate();
@@ -190,7 +197,7 @@ void AppMain(int argc, char *argv[]) {
         }
         keyState = SDL_GetKeyState(NULL);
         modKeyState = SDL_GetModState();
-        
+        soundSourcesManager.calculate();
         calculateFrame();
         particleSystemManager.draw();
         if(currentScreenView) currentScreenView->draw();

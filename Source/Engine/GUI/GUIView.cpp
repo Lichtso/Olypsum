@@ -38,7 +38,7 @@ void GUIView::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     GUIClipRect clipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
     
-    Matrix4 transform(parentTransform);
+    Matrix4 transform = parentTransform;
     transform.translate(Vector3(posX, posY, 0.0));
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->draw(transform, clipRect);
@@ -74,9 +74,67 @@ bool GUIView::handleMouseWheel(int mouseX, int mouseY, float delta) {
 
 
 
+GUIFramedView::GUIFramedView() {
+    type = GUIType_View;
+    texture = 0;
+    innerShadow = -8;
+}
+
+GUIFramedView::~GUIFramedView() {
+    if(texture)
+        glDeleteTextures(1, &texture);
+}
+
+void GUIFramedView::updateContent() {
+    if(innerShadow != 0) {
+        GUIRoundedRect roundedRect;
+        roundedRect.texture = &texture;
+        roundedRect.width = width;
+        roundedRect.height = height;
+        roundedRect.innerShadow = innerShadow;
+        roundedRect.cornerRadius = 8;
+        roundedRect.topColor.r = roundedRect.topColor.g = roundedRect.topColor.b = 200;
+        roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 200;
+        roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 200;
+        roundedRect.drawInTexture();
+    }
+    
+    for(unsigned int i = 0; i < children.size(); i ++)
+        children[i]->updateContent();
+}
+
+void GUIFramedView::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
+    if(!visible) return;
+    
+    GUIClipRect clipRect;
+    if(!getLimSize(clipRect, parentClipRect)) return;
+    
+    Matrix4 transform = parentTransform;
+    transform.translate(Vector3(posX, posY, 0.0));
+    
+    if(innerShadow != 0) {
+        if(!texture) updateContent();
+        modelMat = transform;
+        GUIRoundedRect roundedRect;
+        roundedRect.texture = &texture;
+        roundedRect.width = width;
+        roundedRect.height = height;
+        roundedRect.drawOnScreen(false, 0, 0, clipRect);
+        clipRect.minPosX += 8;
+        clipRect.maxPosX -= 8;
+        clipRect.minPosY += 8;
+        clipRect.maxPosY -= 8;
+    }
+    
+    for(unsigned int i = 0; i < children.size(); i ++)
+        children[i]->draw(transform, clipRect);
+}
+
+
+
 GUIScreenView::GUIScreenView() {
     type = GUIType_ScreenView;
-    parent = NULL;
+    modalView = NULL;
     firstResponder = NULL;
     width = videoInfo->current_w >> 1;
     height = videoInfo->current_h >> 1;
@@ -108,13 +166,40 @@ void GUIScreenView::draw() {
     glDisable(GL_DEPTH_TEST);
     guiCam->use();
     spriteShaderProgram->use();
-    spriteShaderProgram->setUniformF("light", 1.0);
+    spriteShaderProgram->setUniformVec3("color", Vector3(0, 0, 0));
     
     Matrix4 transform;
     transform.setIdentity();
     transform.translate(Vector3(0.0, 0.0, -1.0));
+    
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->draw(transform, clipRect);
+    
+    if(modalView) {
+        modelMat = transform;
+        spriteShaderProgram->use();
+        spriteShaderProgram->setUniformVec3("color", Vector3(0.2, 0.2, 0.2));
+        
+        float vertices[] = {
+            width, -height,
+            1.0, 0.0, 0.2,
+            width, height,
+            1.0, 1.0, 0.2,
+            -width, height,
+            0.0, 1.0, 0.2,
+            -width, -height,
+            0.0, 0.0, 0.2
+        };
+        
+        spriteShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 5*sizeof(float), vertices);
+        spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 3, 5*sizeof(float), &vertices[2]);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glDrawArrays(GL_QUADS, 0, 4);
+        
+        spriteShaderProgram->setUniformVec3("color", Vector3(0, 0, 0));
+        modalView->draw(transform, clipRect);
+    }
     
     glDisableVertexAttribArray(POSITION_ATTRIBUTE);
     glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
@@ -122,31 +207,74 @@ void GUIScreenView::draw() {
 }
 
 bool GUIScreenView::handleMouseDown(int mouseX, int mouseY) {
-    return GUIView::handleMouseDown(mouseX-width, height-mouseY);
+    mouseX -= width;
+    mouseY = height-mouseY;
+    
+    if(!visible || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
+    if(modalView)
+        return modalView->handleMouseDown(mouseX-modalView->posX, mouseY-modalView->posY);
+    else
+        for(int i = (int)children.size()-1; i >= 0; i --)
+            if(children[i]->handleMouseDown(mouseX-children[i]->posX, mouseY-children[i]->posY))
+                return true;
+    return false;
 }
 
 void GUIScreenView::handleMouseUp(int mouseX, int mouseY) {
-    GUIView::handleMouseUp(mouseX-width, height-mouseY);
+    if(!visible) return;
+    mouseX -= width;
+    mouseY = height-mouseY;
+    
+    if(modalView)
+        return modalView->handleMouseUp(mouseX-modalView->posX, mouseY-modalView->posY);
+    else
+        for(int i = (int)children.size()-1; i >= 0; i --)
+            children[i]->handleMouseUp(mouseX-children[i]->posX, mouseY-children[i]->posY);
 }
 
 void GUIScreenView::handleMouseMove(int mouseX, int mouseY) {
-    GUIView::handleMouseMove(mouseX-width, height-mouseY);
+    if(!visible) return;
+    mouseX -= width;
+    mouseY = height-mouseY;
+    
+    if(modalView)
+        return modalView->handleMouseMove(mouseX-modalView->posX, mouseY-modalView->posY);
+    else
+        for(int i = (int)children.size()-1; i >= 0; i --)
+            children[i]->handleMouseMove(mouseX-children[i]->posX, mouseY-children[i]->posY);
 }
 
 bool GUIScreenView::handleMouseWheel(int mouseX, int mouseY, float delta) {
-    return GUIView::handleMouseWheel(mouseX-width, height-mouseY, delta);
+    mouseX -= width;
+    mouseY = height-mouseY;
+    
+    if(!visible || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
+    if(modalView)
+        return modalView->handleMouseWheel(mouseX-modalView->posX, mouseY-modalView->posY, delta);
+    else
+        for(int i = (int)children.size()-1; i >= 0; i --)
+            if(children[i]->handleMouseWheel(mouseX-children[i]->posX, mouseY-children[i]->posY, delta))
+                return true;
+    return false;
 }
 
 bool GUIScreenView::handleKeyDown(SDL_keysym* key) {
     if(!firstResponder) return false;
-    firstResponder->handleKeyDown(key);
-    return true;
+    return firstResponder->handleKeyDown(key);
 }
 
 bool GUIScreenView::handleKeyUp(SDL_keysym* key) {
     if(!firstResponder) return false;
-    firstResponder->handleKeyUp(key);
-    return true;
+    return firstResponder->handleKeyUp(key);
+}
+
+void GUIScreenView::setModalView(GUIRect* modalViewB) {
+    if(firstResponder) {
+        firstResponder->removeFirstResponderStatus();
+        firstResponder = NULL;
+    }
+    modalView = modalViewB;
+    if(modalView) modalView->parent = this;
 }
 
 

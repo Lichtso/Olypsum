@@ -2,7 +2,7 @@ attribute vec3 position;
 attribute vec2 texCoord;
 attribute vec3 normal;
 
-#define lightsCount 4
+#define lightsCount 3
 struct lightSource {
     float type, range, cutoff, shadowFactor;
 	vec3 color, position, direction;
@@ -35,7 +35,7 @@ void main() {
 
 #|#|#
 
-#define lightsCount 4
+#define lightsCount 3
 struct lightSource {
     float type, range, cutoff, shadowFactor;
 	vec3 color, position, direction;
@@ -97,9 +97,7 @@ void main() {
             lightIntensity = (1.0 - lightIntensity) * step(shadowCoord.z, depthRef.r);
         }else{
             lightIntensity = 1.0 - lightIntensity;
-            if(lightSources[i].type == 1.0 && (shadowCoord.x <= 0.0 || shadowCoord.y <= 0.0 || shadowCoord.x >= 1.0 || shadowCoord.y >= 1.0))
-                continue;
-            else if(lightSources[i].type == 2.0 && acos(-dot(lightSources[i].direction, lightDir)) > lightSources[i].cutoff)
+            if(lightSources[i].type == 2.0 && acos(-dot(lightSources[i].direction, lightDir)) > lightSources[i].cutoff)
                 continue;
         }
         light += lightSources[i].color*lightIntensity*max(dot(vNormal, lightDir), 0.0);

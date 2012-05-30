@@ -13,7 +13,7 @@
 
 class GUITextField : public GUIRect {
     GLuint texture;
-    unsigned char cursorDrawTick;
+    float cursorDrawTick;
     bool highlighted;
     void removeChar();
     void moveCursorLeft();
@@ -27,6 +27,7 @@ class GUITextField : public GUIRect {
     void (*onBlur)(GUITextField*);
     GUITextField();
     ~GUITextField();
+    void setFirstResponderStatus();
     void removeFirstResponderStatus();
     void updateContent();
     void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
@@ -34,7 +35,6 @@ class GUITextField : public GUIRect {
     void handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
     bool handleKeyDown(SDL_keysym* key);
-    bool handleKeyUp(SDL_keysym* key);
 };
 
 #endif

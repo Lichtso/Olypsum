@@ -10,6 +10,7 @@
 
 GUIRect::GUIRect() {
     type = GUIType_Rect;
+    parent = NULL;
     visible = true;
     posX = 0;
     posY = 0;
@@ -30,8 +31,18 @@ bool GUIRect::isFirstResponder() {
     return (screenView->firstResponder == this);
 }
 
+void GUIRect::setFirstResponderStatus() {
+    GUIScreenView* screenView = (GUIScreenView*)getRootParent();
+    if(!screenView || screenView->type != GUIType_ScreenView) return;
+    if(screenView->firstResponder)
+        screenView->firstResponder->removeFirstResponderStatus();
+    screenView->firstResponder = this;
+}
+
 void GUIRect::removeFirstResponderStatus() {
-    
+    GUIScreenView* screenView = (GUIScreenView*)getRootParent();
+    if(!screenView || screenView->type != GUIType_ScreenView) return;
+    screenView->firstResponder = NULL;
 }
 
 bool GUIRect::getLimSize(GUIClipRect& clipRect, GUIClipRect& parentClipRect) {
@@ -50,7 +61,7 @@ void GUIRect::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
         clipRect.maxPosX, clipRect.minPosY,
         clipRect.maxPosX, clipRect.maxPosY,
         clipRect.minPosX, clipRect.maxPosY,
-        clipRect.minPosX, clipRect.minPosY,
+        clipRect.minPosX, clipRect.minPosY
     };
     
     modelMat = parentTransform;

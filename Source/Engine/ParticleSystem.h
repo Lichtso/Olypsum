@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "ShaderProgram.h"
+#import "Audio.h"
 
 #ifndef ParticleSystem_h
 #define ParticleSystem_h
@@ -22,12 +22,12 @@ class ParticleSystem {
     void setParticleVertex(float* verticesB, unsigned int p, Vector3 corner);
     public:
     std::vector<Particle> particles;
-    Vector3 pos, posMin, posMax, force, dirMin, dirMax;
+    Vector3 position, posMin, posMax, force, dirMin, dirMax;
     float lifeMin, lifeMax, sizeMin, sizeMax, addMin, addMax, systemLife;
     Texture* texture;
     ParticleSystem();
     ~ParticleSystem();
-    void calculate(float animation);
+    bool calculate(float animation);
     void draw();
 };
 

@@ -155,7 +155,6 @@ void TextFont::renderStringToScreen(const char* str, Vector3 pos, float scale, S
     modelMat.translate(pos);
     
     spriteShaderProgram->use();
-    spriteShaderProgram->setUniformF("light", 1.0);
     
     spriteShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 4*sizeof(float), vertices);
     spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 4*sizeof(float), &vertices[2]);

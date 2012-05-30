@@ -39,6 +39,7 @@ class GUIRect {
     GUIRect();
     GUIRect* getRootParent();
     bool isFirstResponder();
+    virtual void setFirstResponderStatus();
     virtual void removeFirstResponderStatus();
     virtual bool getLimSize(GUIClipRect& clipRect, GUIClipRect& parentClipRect);
     virtual void updateContent();

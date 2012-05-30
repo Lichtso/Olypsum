@@ -93,7 +93,7 @@ void GUIButton::updateContent() {
     roundedRect.height = height;
     roundedRect.roundedCorners = roundedCorners;
     roundedRect.cornerRadius = 12;
-    if(state >= GUIButtonStatePressed) roundedRect.shadowWidth = 6;
+    if(state >= GUIButtonStatePressed) roundedRect.innerShadow = 6;
     
     switch(state) {
         case GUIButtonStateDisabled:
@@ -198,8 +198,9 @@ void GUIButton::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     
     GUIClipRect clipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
-    modelMat = parentTransform;
-    modelMat.translate(Vector3(posX, posY, 0.0));
+    Matrix4 transform = parentTransform;
+    transform.translate(Vector3(posX, posY, 0.0));
+    modelMat = transform;
     
     GUIRoundedRect roundedRect;
     roundedRect.texture = &texture;
@@ -208,7 +209,7 @@ void GUIButton::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     roundedRect.drawOnScreen(false, 0, 0, clipRect);
     
     for(unsigned int i = 0; i < children.size(); i ++)
-        children[i]->draw(modelMat, clipRect);
+        children[i]->draw(transform, clipRect);
 }
 
 bool GUIButton::handleMouseDown(int mouseX, int mouseY) {

@@ -20,6 +20,20 @@ Light::~Light() {
     if(shadowMap >= 0) mainFBO.deleteTexture(shadowMap);
 }
 
+float Light::getPriority(Vector3 position) {
+    if(range <= 0.0) return 1.0;
+    switch(type) {
+        case LightType_Directional:
+            return -1.0;
+        case LightType_Spot:
+            return 0.0;
+        case LightType_Positional: {
+            PositionalLight* light = (PositionalLight*)this;
+            return fmin(1.0, (position-light->position).getLength()/range);
+        }
+    }
+}
+
 bool Light::calculateShadowmap() {
     if(this->shadowMap < 0) {
         if(mainFBO.colorBuffers.size()+1 > maxColorBufferCount)
@@ -48,6 +62,10 @@ void Light::use() {
     currentShaderProgram->setUniformF(str, range);
     sprintf(str, "lightSources[%d].color", glIndex);
     currentShaderProgram->setUniformVec3(str, color);
+}
+
+bool LightPrioritySorter::operator()(Light* a, Light* b) {
+    return a->getPriority(position) < b->getPriority(position);
 }
 
 DirectionalLight::DirectionalLight() {
@@ -236,14 +254,29 @@ LightManager::~LightManager() {
         delete lights[i];
 }
 
-void LightManager::setLights() {
+void LightManager::setLights(Vector3 position) {
+    LightPrioritySorter lightPrioritySorter;
+    lightPrioritySorter.position = position;
+    std::sort(lights.begin(), lights.end(), lightPrioritySorter);
+    
+    unsigned int activeLights = 0;
     for(unsigned int i = 0; i < lights.size(); i ++) {
-        lights[i]->glIndex = (i < maxLightCount) ? i : -1;
+        if(lights[i]->getPriority(position) >= 1.0) continue;
+        lights[i]->glIndex = (activeLights < maxLightCount) ? activeLights : -1;
         lights[i]->use();
+        activeLights ++;
     }
     
     char str[64];
-    for(unsigned int i = lights.size(); i < maxLightCount; i ++) {
+    for(unsigned int i = activeLights; i < maxLightCount; i ++) {
+        sprintf(str, "lightSources[%d].type", i);
+        currentShaderProgram->setUniformF(str, 0);
+    }
+}
+
+void LightManager::setAllLightsOff() {
+    char str[64];
+    for(unsigned int i = 0; i < maxLightCount; i ++) {
         sprintf(str, "lightSources[%d].type", i);
         currentShaderProgram->setUniformF(str, 0);
     }

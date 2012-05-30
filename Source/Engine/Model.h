@@ -34,8 +34,6 @@ class Mesh {
     void draw();
 };
 
-class FilePackage;
-
 struct BonePose {
     Matrix4 poseMat, dynamicMat;
 };

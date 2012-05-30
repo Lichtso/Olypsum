@@ -27,9 +27,20 @@ class GUIView : public GUIRect {
     bool handleMouseWheel(int mouseX, int mouseY, float delta);
 };
 
+class GUIFramedView : public GUIView {
+    protected:
+    GLuint texture;
+    public:
+    int innerShadow;
+    GUIFramedView();
+    ~GUIFramedView();
+    void updateContent();
+    void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
+};
+
 class GUIScreenView : public GUIView {
     public:
-    GUIRect* firstResponder;
+    GUIRect *modalView, *firstResponder;
     GUIScreenView();
     bool getLimSize(GUIClipRect& clipRect);
     void updateContent();
@@ -40,6 +51,7 @@ class GUIScreenView : public GUIView {
     bool handleMouseWheel(int mouseX, int mouseY, float delta);
     bool handleKeyDown(SDL_keysym* key);
     bool handleKeyUp(SDL_keysym* key);
+    void setModalView(GUIRect* modalView);
 };
 
 extern GUIScreenView* currentScreenView;

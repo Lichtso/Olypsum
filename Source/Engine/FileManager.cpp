@@ -83,7 +83,21 @@ Model* FilePackage::getModel(const char* fileName) {
     return NULL;
 }
 
-//SoundTrack* FilePackage::getSoundTrack(const char* fileName);
+SoundTrack* FilePackage::getSoundTrack(const char* fileName) {
+    std::map<std::string, SoundTrack*>::iterator iterator = soundTracks.find(std::string(fileName));
+    if(iterator != soundTracks.end()) {
+        iterator->second->useCounter ++;
+        return iterator->second;
+    }
+    SoundTrack* soundTrack = new SoundTrack();
+    std::string url = getUrlOfFile("Sounds", fileName);
+    if(soundTrack->loadOgg(url.c_str())) {
+        soundTracks[std::string(fileName)] = soundTrack;
+        return soundTrack;
+    }
+    delete soundTrack;
+    return NULL;
+}
 
 bool FilePackage::releaseTexture(Texture* texture) {
     std::map<std::string, Texture*>::iterator iterator;
@@ -111,7 +125,18 @@ bool FilePackage::releaseModel(Model* model) {
     return false;
 }
 
-//bool FilePackage::releaseSoundTrack(SoundTrack* soundTrack);
+bool FilePackage::releaseSoundTrack(SoundTrack* soundTrack) {
+    std::map<std::string, SoundTrack*>::iterator iterator;
+    for(iterator = soundTracks.begin(); iterator != soundTracks.end(); iterator ++)
+        if(iterator->second == soundTrack) {
+            iterator->second->useCounter --;
+            if(iterator->second->useCounter > 0) return true;
+            delete iterator->second;
+            soundTracks.erase(iterator);
+            return true;
+        }
+    return false;
+}
 
 
 
@@ -176,6 +201,11 @@ void FileManager::releaseModel(Model* model) {
     printf("Model allready released: %p\n", model);
 }
 
-//void FileManager::releaseSoundTrack(SoundTrack* soundTrack);
+void FileManager::releaseSoundTrack(SoundTrack* soundTrack) {
+    std::map<std::string, FilePackage*>::iterator iterator;
+    for(iterator = filePackages.begin(); iterator != filePackages.end(); iterator ++)
+        if(iterator->second->releaseSoundTrack(soundTrack)) return;
+    printf("SoundTrack allready released: %p\n", soundTrack);
+}
 
 FileManager fileManager;

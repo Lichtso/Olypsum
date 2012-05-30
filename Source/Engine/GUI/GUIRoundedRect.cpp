@@ -12,7 +12,7 @@ GUIRoundedRect::GUIRoundedRect() {
     texture = NULL;
     roundedCorners = (GUICorners) (GUITopLeftCorner | GUITopRightCorner | GUIBottomLeftCorner | GUIBottomRightCorner);
     cornerRadius = 8;
-    shadowWidth = 0;
+    innerShadow = 0;
     width = height = 0;
     topColor.r = topColor.g = topColor.b = 230;
     bottomColor.r = bottomColor.g = bottomColor.b = 255;
@@ -31,22 +31,31 @@ void GUIRoundedRect::setBorderPixel(unsigned int x, unsigned int y) {
 void GUIRoundedRect::setInnerShadowRect(unsigned int minX, unsigned int maxX, unsigned int minY, unsigned int maxY) {
     float value;
     int x0, x1, y0, y1;
+    unsigned int border = abs(innerShadow);
     unsigned char* pixel;
     for(unsigned int y = minY; y < maxY; y ++)
         for(unsigned int x = minX; x < maxX; x ++) {
             value = 0.0;
-            x0 = max(0, (int)(x-shadowWidth));
-            y0 = max(0, (int)(y-shadowWidth));
-            x1 = min(width*2-1, (int)(x+shadowWidth));
-            y1 = min(height*2-1, (int)(y+shadowWidth));
+            x0 = max(0, (int)(x-border));
+            y0 = max(0, (int)(y-border));
+            x1 = min(width*2-1, (int)(x+border));
+            y1 = min(height*2-1, (int)(y+border));
             for(unsigned int y2 = y0; y2 <= y1; y2 ++)
                 for(unsigned int x2 = x0; x2 <= x1; x2 ++)
                     value += (float)pixels[(y2*width*8)+x2*4+3]/255.0;
             pixel = pixels+(y*width*8)+x*4;
-            value /= 4.0*shadowWidth*shadowWidth+4.0*shadowWidth+1.0;
-            pixel[0] *= value;
-            pixel[1] *= value;
-            pixel[2] *= value;
+            value /= 4.0*border*border+4.0*border+1.0;
+            if(innerShadow > 0.0) {
+                value = value*0.8+0.2;
+                pixel[0] *= value;
+                pixel[1] *= value;
+                pixel[2] *= value;
+            }else{
+                value = (1.0-value)*80.0;
+                pixel[0] += value;
+                pixel[1] += value;
+                pixel[2] += value;
+            }
         }
 }
 
@@ -79,7 +88,7 @@ void GUIRoundedRect::drawInTexture() {
             pixel[2] = ((float)bottomColor.b-(float)topColor.b)*0.5*y/height+topColor.b;
         }
     
-    if(shadowWidth > 0) {
+    if(innerShadow != 0) {
         setInnerShadowRect(cornerRadius, width*2-cornerRadius, 0, cornerRadius);
         setInnerShadowRect(cornerRadius, width*2-cornerRadius, height*2-cornerRadius, height*2);
         setInnerShadowRect(0, cornerRadius, 0, height*2);

@@ -24,9 +24,8 @@ class GUIRoundedRect {
     GLuint* texture;
     GUICorners roundedCorners;
     unsigned int cornerRadius;
-    unsigned int shadowWidth;
     GUIColor topColor, bottomColor, borderColor;
-    int width, height;
+    int width, height, innerShadow;
     GUIRoundedRect();
     void setBorderPixel(unsigned int x, unsigned int y);
     void setInnerShadowRect(unsigned int minX, unsigned int maxX, unsigned int minY, unsigned int maxY);

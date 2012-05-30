@@ -78,6 +78,10 @@ void Cam::calculate() {
 
 void Cam::use() {
     currentCam = this;
+    float orientation[] = { camMat.z.x, camMat.z.y, camMat.z.z, camMat.y.x, camMat.y.y, camMat.y.z };
+    alListenerfv(AL_ORIENTATION, orientation);
+    alListener3f(AL_POSITION, camMat.pos.x, camMat.pos.y, camMat.pos.z);
+    //alListener3f(AL_VELOCITY, velocity.x, velocity.y, velocity.z);
 }
 
 void Cam::setFullScreen() {

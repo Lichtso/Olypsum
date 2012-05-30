@@ -1104,7 +1104,7 @@ void Model::draw(float discardDensity) {
     else if(renderingState == RenderingShadow)
         shadowShaderProgram->use();
     currentShaderProgram->setUniformF("discardDensity", discardDensity);
-    lightManager.setLights();
+    lightManager.setLights(modelMat.pos);
     
     for(unsigned int i = 0; i < meshes.size(); i ++)
         meshes[i]->draw();
@@ -1128,7 +1128,7 @@ void Model::draw(float discardDensity, SkeletonPose* skeletonPose) {
     else if(renderingState == RenderingShadow)
         shadowSkeletonShaderProgram->use();
     currentShaderProgram->setUniformF("discardDensity", discardDensity);
-    lightManager.setLights();
+    lightManager.setLights(modelMat.pos);
     
     Matrix4* mats = new Matrix4[skeleton->bones.size()];
     skeletonPose->calculateDisplayMatrix(skeleton->rootBone, NULL, mats);

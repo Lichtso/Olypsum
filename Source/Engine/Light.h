@@ -31,6 +31,13 @@ class Light {
     ~Light();
     virtual bool calculateShadowmap();
     virtual void use();
+    float getPriority(Vector3 position);
+};
+
+class LightPrioritySorter {
+    public:
+    Vector3 position;
+    bool operator()(Light* a, Light* b);
 };
 
 class DirectionalLight : public Light {
@@ -60,13 +67,14 @@ class PositionalLight : public Light {
     void use();
 };
 
-#define maxLightCount 4
+#define maxLightCount 3
 
 class LightManager {
     public:
     std::vector<Light*> lights;
     ~LightManager();
-    void setLights();
+    void setLights(Vector3 position);
+    void setAllLightsOff();
 };
 
 extern LightManager lightManager;

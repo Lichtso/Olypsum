@@ -13,7 +13,7 @@ GUITextField::GUITextField() {
     texture = 0;
     highlighted = false;
     enabled = true;
-    cursorDrawTick = 0;
+    cursorDrawTick = 0.0;
     cursorIndexX = -1;
     onFocus = onChange = onBlur = NULL;
     label = new GUILabel();
@@ -31,24 +31,31 @@ void GUITextField::removeChar() {
     if(cursorIndexX == 0) return;
     label->text = label->text.substr(0, cursorIndexX-1)+label->text.substr(cursorIndexX);
     cursorIndexX --;
-    cursorDrawTick = 0;
+    cursorDrawTick = 0.0;
     label->updateContent();
 }
 
 void GUITextField::moveCursorLeft() {
     if(cursorIndexX == 0) return;
     cursorIndexX --;
-    cursorDrawTick = 0;
+    cursorDrawTick = 0.0;
 }
 
 void GUITextField::moveCursorRight() {
     if(cursorIndexX == label->text.size()) return;
     cursorIndexX ++;
-    cursorDrawTick = 0;
+    cursorDrawTick = 0.0;
+}
+
+void GUITextField::setFirstResponderStatus() {
+    GUIRect::setFirstResponderStatus();
+    cursorDrawTick = 0.0;
+    cursorIndexX = 0;
+    updateContent();
 }
 
 void GUITextField::removeFirstResponderStatus() {
-    cursorDrawTick = 0;
+    GUIRect::removeFirstResponderStatus();
     cursorIndexX = -1;
     updateContent();
 }
@@ -74,11 +81,12 @@ void GUITextField::updateContent() {
 void GUITextField::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     if(!texture) updateContent();
-    
     GUIClipRect clipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
-    modelMat = parentTransform;
-    modelMat.translate(Vector3(posX, posY, 0.0));
+    
+    Matrix4 transform = parentTransform;
+    transform.translate(Vector3(posX, posY, 0.0));
+    modelMat = transform;
     
     GUIRoundedRect roundedRect;
     roundedRect.texture = &texture;
@@ -91,7 +99,7 @@ void GUITextField::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     int cursorPosX, cursorPosY;
     bool cursorActive = isFirstResponder();
     if(cursorActive) {
-        if(cursorDrawTick % 10 == 9) {
+        if(fmod(cursorDrawTick, 0.25) >= 0.2) {
             if(keyState[SDLK_BACKSPACE])
                 removeChar();
             else if(keyState[SDLK_LEFT])
@@ -105,17 +113,15 @@ void GUITextField::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
         label->getPosOfChar(cursorIndexX, 0, cursorPosX, cursorPosY);
         label->posX = -max(width-label->width-8, cursorPosX-width+8);
         
-        cursorDrawTick ++;
-        if(cursorDrawTick > 60)
-            cursorDrawTick = 0;
+        cursorDrawTick += animationFactor;
+        if(cursorDrawTick > 0.5) cursorDrawTick = 0.0;
     }else
         label->posX = label->width-width+8;
     
     label->draw(modelMat, clipRect);
     
-    if(cursorActive && cursorDrawTick <= 30) {
-        modelMat = parentTransform;
-        modelMat.translate(Vector3(posX, posY, 0.0));
+    if(cursorActive && cursorDrawTick <= 0.25) {
+        modelMat = transform;
         GUIRoundedRect cursor;
         cursor.width = 1;
         cursor.height = label->fontHeight >> 1;
@@ -129,17 +135,13 @@ bool GUITextField::handleMouseDown(int mouseX, int mouseY) {
     
     if(!visible || !enabled || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) {
         if(!screenView || screenView->firstResponder != this) return false;
-        screenView->firstResponder = NULL;
         removeFirstResponderStatus();
         return false;
     }
     
     if(!screenView) return true;
-    if(screenView->firstResponder != this) {
-        if(screenView->firstResponder)
-            screenView->firstResponder->removeFirstResponderStatus();
-        screenView->firstResponder = this;
-    }
+    if(screenView->firstResponder != this)
+        setFirstResponderStatus();
     
     unsigned int minIndex = 0, maxIndex = (unsigned int)label->text.size();
     int cursorPosX, cursorPosY;
@@ -162,7 +164,6 @@ bool GUITextField::handleMouseDown(int mouseX, int mouseY) {
             maxIndex = cursorIndexX;
         }
     }
-    cursorDrawTick = 0;
     updateContent();
     return true;
 }
@@ -183,19 +184,16 @@ bool GUITextField::handleKeyDown(SDL_keysym* key) {
     switch(key->sym) {
         case SDLK_TAB:
         case SDLK_RETURN:
-        case SDLK_ESCAPE: {
-            GUIScreenView* screenView = (GUIScreenView*)getRootParent();
-            if(!screenView || screenView->firstResponder != this) return false;
-            screenView->firstResponder = NULL;
+        case SDLK_ESCAPE:
             removeFirstResponderStatus();
-        } break;
+        break;
         case SDLK_UP:
             cursorIndexX = 0;
-            cursorDrawTick = 0;
+            cursorDrawTick = 0.0;
         break;
         case SDLK_DOWN:
             cursorIndexX = (int)label->text.size();
-            cursorDrawTick = 0;
+            cursorDrawTick = 0.0;
         break;
         case SDLK_BACKSPACE:
             removeChar();
@@ -211,14 +209,9 @@ bool GUITextField::handleKeyDown(SDL_keysym* key) {
             char str[] = { (char)(key->unicode & 0xFF), 0 };
             label->text = label->text.substr(0, cursorIndexX)+str+label->text.substr(cursorIndexX);
             cursorIndexX ++;
-            cursorDrawTick = 0;
+            cursorDrawTick = 0.0;
             label->updateContent();
         } break;
     }
-    return true;
-}
-
-bool GUITextField::handleKeyUp(SDL_keysym* key) {
-    
     return true;
 }
