@@ -58,7 +58,7 @@ void initGame() {
     GUIFramedView* view = new GUIFramedView();
     view->width = 265;
     view->height = 50;
-    view->posY = 400;
+    view->posY = 450;
     currentScreenView->addChild(view);
     
     GUILabel* label = new GUILabel();
@@ -186,7 +186,7 @@ void calculateFrame() {
     
     soundTrackSlider->value = soundSourcesManager.soundSources[0]->getTimeOffset() / soundSourcesManager.soundSources[0]->soundTrack->getLength();
     
-    animationTime += animationFactor*1.0;
+    animationTime += animationFactor;
     
     lightManager.lights[0]->calculateShadowmap();
     //return;

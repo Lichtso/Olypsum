@@ -107,10 +107,12 @@ void DirectionalLight::use() {
     if(glIndex < 0) return;
     Light::use();
     char str[64];
+    sprintf(str, "lightSources[%d].cutoff", glIndex);
+    currentShaderProgram->setUniformF(str, 4.0);
     sprintf(str, "lightSources[%d].direction", glIndex);
     currentShaderProgram->setUniformVec3(str, direction*-1.0);
     sprintf(str, "lightSources[%d].shadowFactor", glIndex);
-    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 0.01 : 0.0);
+    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 0.005 : 0.0);
     if(shadowMap < 0) return;
     sprintf(str, "lightSources[%d].shadowMat", glIndex);
     currentShaderProgram->setUniformMatrix4(str, &shadowCam->shadowMat);
@@ -173,7 +175,7 @@ void SpotLight::use() {
     sprintf(str, "lightSources[%d].direction", glIndex);
     currentShaderProgram->setUniformVec3(str, direction);
     sprintf(str, "lightSources[%d].shadowFactor", glIndex);
-    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 0.02 : 0.0);
+    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 0.015 : 0.0);
     sprintf(str, "lightSources[%d].position", glIndex);
     currentShaderProgram->setUniformVec3(str, position);
     if(shadowMap < 0) return;
@@ -236,10 +238,12 @@ void PositionalLight::use() {
     if(glIndex < 0) return;
     Light::use();
     char str[64];
+    sprintf(str, "lightSources[%d].cutoff", glIndex);
+    currentShaderProgram->setUniformF(str, 4.0);
     sprintf(str, "lightSources[%d].direction", glIndex);
     currentShaderProgram->setUniformVec3(str, direction);
     sprintf(str, "lightSources[%d].shadowFactor", glIndex);
-    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 0.003 : 0.0);
+    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 0.002 : 0.0);
     sprintf(str, "lightSources[%d].position", glIndex);
     currentShaderProgram->setUniformVec3(str, position);
     if(shadowMap < 0) return;
