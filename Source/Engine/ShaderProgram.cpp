@@ -109,6 +109,7 @@ void ShaderProgram::use () {
     Matrix4 normalMat = Matrix4(modelMat).normalize();
     setUniformMatrix3("normalMat", &normalMat);
     if(currentCam) {
+        setUniformVec3("camPos", currentCam->camMat.pos);
         setUniformMatrix4("viewMat", &currentCam->viewMat);
         setUniformMatrix4("shadowMat", &currentCam->shadowMat);
         Matrix4 modelViewMat(modelMat * currentCam->viewMat);

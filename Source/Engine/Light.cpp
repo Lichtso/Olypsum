@@ -10,14 +10,14 @@
 
 Light::Light() {
     shadowCam = NULL;
-    shadowMap = -1;
+    shadowMap = NULL;
     glIndex = -1;
     color = Vector3(1.0, 1.0, 1.0);
 }
 
 Light::~Light() {
     if(shadowCam) delete shadowCam;
-    if(shadowMap >= 0) mainFBO.deleteTexture(shadowMap);
+    if(shadowMap) mainFBO.deleteTexture(shadowMap);
 }
 
 float Light::getPriority(Vector3 position) {
@@ -35,23 +35,25 @@ float Light::getPriority(Vector3 position) {
 }
 
 bool Light::calculateShadowmap() {
-    if(this->shadowMap < 0) {
-        if(mainFBO.colorBuffers.size()+1 > maxColorBufferCount)
-            return false;
-        else
-            shadowMap = mainFBO.addTexture(1024);
-        
-        if(shadowMap < 0) {
-            if(shadowCam) {
-                delete shadowCam;
-                shadowCam = NULL;
-            }
+    if(!shadowMap) {
+        shadowMap = mainFBO.addTexture(1024);
+        if(!shadowMap) {
+            deleteShadowmap();
             return false;
         }
+        if(!shadowCam) shadowCam = new Cam();
     }
-    if(!shadowCam)
-        shadowCam = new Cam();
     return true;
+}
+
+void Light::deleteShadowmap() {
+    if(shadowCam) {
+        delete shadowCam;
+        shadowCam = NULL;
+    }
+    if(!shadowMap) return;
+    mainFBO.deleteTexture(shadowMap);
+    shadowMap = NULL;
 }
 
 void Light::use() {
@@ -103,6 +105,10 @@ bool DirectionalLight::calculateShadowmap() {
     return true;
 }
 
+void DirectionalLight::deleteShadowmap() {
+    Light::deleteShadowmap();
+}
+
 void DirectionalLight::use() {
     if(glIndex < 0) return;
     Light::use();
@@ -112,8 +118,8 @@ void DirectionalLight::use() {
     sprintf(str, "lightSources[%d].direction", glIndex);
     currentShaderProgram->setUniformVec3(str, direction*-1.0);
     sprintf(str, "lightSources[%d].shadowFactor", glIndex);
-    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 0.005 : 0.0);
-    if(shadowMap < 0) return;
+    currentShaderProgram->setUniformF(str, (shadowMap) ? 0.005 : 0.0);
+    if(shadowMap == 0) return;
     sprintf(str, "lightSources[%d].shadowMat", glIndex);
     currentShaderProgram->setUniformMatrix4(str, &shadowCam->shadowMat);
     mainFBO.useTexture(shadowMap, glIndex*2+3);
@@ -166,6 +172,10 @@ bool SpotLight::calculateShadowmap() {
     return true;
 }
 
+void SpotLight::deleteShadowmap() {
+    Light::deleteShadowmap();
+}
+
 void SpotLight::use() {
     if(glIndex < 0) return;
     Light::use();
@@ -175,10 +185,10 @@ void SpotLight::use() {
     sprintf(str, "lightSources[%d].direction", glIndex);
     currentShaderProgram->setUniformVec3(str, direction);
     sprintf(str, "lightSources[%d].shadowFactor", glIndex);
-    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 0.015 : 0.0);
+    currentShaderProgram->setUniformF(str, (shadowMap) ? 0.015 : 0.0);
     sprintf(str, "lightSources[%d].position", glIndex);
     currentShaderProgram->setUniformVec3(str, position);
-    if(shadowMap < 0) return;
+    if(shadowMap == 0) return;
     sprintf(str, "lightSources[%d].shadowMat", glIndex);
     currentShaderProgram->setUniformMatrix4(str, &shadowCam->shadowMat);
     mainFBO.useTexture(shadowMap, glIndex*2+3);
@@ -186,23 +196,23 @@ void SpotLight::use() {
 
 PositionalLight::PositionalLight() {
     type = LightType_Positional;
-    shadowMapB = -1;
+    shadowMapB = NULL;
     position = Vector3(0.0, 0.0, 0.0);
     direction = Vector3(0.0, 0.0, 1.0);
     upDir = Vector3(0.0, 1.0, 0.0);
     range = 10.0;
+    omniDirectional = true;
 }
 
 PositionalLight::~PositionalLight() {
-    if(shadowMapB >= 0) mainFBO.deleteTexture(shadowMapB);
+    if(shadowMapB) mainFBO.deleteTexture(shadowMapB);
 }
 
 bool PositionalLight::calculateShadowmap() {
     if(!Light::calculateShadowmap()) return false;
-    if(this->shadowMapB < 0) {
-        if(mainFBO.colorBuffers.size()+1 <= maxColorBufferCount)
-            shadowMapB = mainFBO.addTexture(1024);
-    }
+    
+    if(omniDirectional && !shadowMapB)
+        shadowMapB = mainFBO.addTexture(1024);
     
     shadowCam->camMat.setIdentity();
     shadowCam->camMat.setDirection(direction, upDir);
@@ -218,7 +228,7 @@ bool PositionalLight::calculateShadowmap() {
     renderingState = RenderingShadow;
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
-    if(shadowMapB >= 0) {
+    if(shadowMapB) {
         Matrix4 restoreMat = shadowCam->viewMat;
         shadowCam->viewMat.setIdentity();
         shadowCam->viewMat.setDirection(direction*-1.0, upDir);
@@ -234,28 +244,47 @@ bool PositionalLight::calculateShadowmap() {
     return true;
 }
 
+void PositionalLight::deleteShadowmap() {
+    Light::deleteShadowmap();
+    if(this->shadowMapB == 0) return;
+    mainFBO.deleteTexture(shadowMapB);
+    shadowMapB = NULL;
+}
+
 void PositionalLight::use() {
     if(glIndex < 0) return;
     Light::use();
     char str[64];
     sprintf(str, "lightSources[%d].cutoff", glIndex);
-    currentShaderProgram->setUniformF(str, 4.0);
+    currentShaderProgram->setUniformF(str, (omniDirectional) ? 4.0 : M_PI_2);
     sprintf(str, "lightSources[%d].direction", glIndex);
     currentShaderProgram->setUniformVec3(str, direction);
     sprintf(str, "lightSources[%d].shadowFactor", glIndex);
-    currentShaderProgram->setUniformF(str, (shadowMap >= 0) ? 0.002 : 0.0);
+    currentShaderProgram->setUniformF(str, (shadowMap) ? 0.002 : 0.0);
     sprintf(str, "lightSources[%d].position", glIndex);
     currentShaderProgram->setUniformVec3(str, position);
-    if(shadowMap < 0) return;
+    if(!shadowMap) return;
     sprintf(str, "lightSources[%d].shadowMat", glIndex);
     currentShaderProgram->setUniformMatrix4(str, &shadowCam->shadowMat);
     mainFBO.useTexture(shadowMap, glIndex*2+3);
-    if(shadowMapB >= 0) mainFBO.useTexture(shadowMapB, glIndex*2+4);
+    if(shadowMapB) mainFBO.useTexture(shadowMapB, glIndex*2+4);
 }
 
 LightManager::~LightManager() {
     for(unsigned int i = 0; i < lights.size(); i ++)
         delete lights[i];
+}
+
+void LightManager::calculateShadows(unsigned int maxShadows) {
+    LightPrioritySorter lightPrioritySorter;
+    lightPrioritySorter.position = currentCam->camMat.pos;
+    std::sort(lights.begin(), lights.end(), lightPrioritySorter);
+    
+    for(unsigned int i = 0; i < fmin(maxShadows, lights.size()); i ++)
+        lights[i]->calculateShadowmap();
+    
+    for(unsigned int i = maxShadows; i < lights.size(); i ++)
+        lights[i]->deleteShadowmap();
 }
 
 void LightManager::setLights(Vector3 position) {

@@ -13,6 +13,7 @@
 
 extern Uint8* keyState;
 extern SDLMod modKeyState;
+extern unsigned int currentFPS;
 
 void AppMain(int argc, char *argv[]);
 void AppTerminate();

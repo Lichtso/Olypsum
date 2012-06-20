@@ -16,8 +16,9 @@ class Frustum3 {
     bool hemisphere;
     Plane3 front, back, left, right, bottom, top;
     Frustum3();
+    bool testPointHit(Vector3 pos);
     bool testBsHit(Bs3* bs);
-    bool testAabbHit(Aabb3* aabb);
+    template <class T> bool testBoxHit(T* box);
 };
 
 #endif

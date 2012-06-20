@@ -11,26 +11,38 @@
 #ifndef BoundingVolumes_h
 #define BoundingVolumes_h
 
-class Aabb3 {
+class Plane3;
+
+class BoundingVolume {
+    public:
+    Matrix4* transformation;
+    BoundingVolume(Matrix4* transformation);
+};
+
+class Aabb3 : public BoundingVolume {
     public:
     Vector3 min, max;
-    Aabb3();
-    Aabb3(Vector3 min, Vector3 max);
-    void set(Vector3 min, Vector3 max);
+    Aabb3(Vector3 min, Vector3 max, Matrix4* transformation);
+    void getVertices(Vector3 vertices[8]);
+    void getPlanes(Plane3 planes[6]);
     bool testPointHit(Vector3 pos);
     bool testAabbHit(Aabb3* aabb);
 };
 
-class Bs3 {
+class Box3 : public Aabb3 {
     public:
-    Vector3 center;
+    Box3(Vector3 min, Vector3 max, Matrix4* transformation);
+    void getVertices(Vector3 vertices[8]);
+    void getPlanes(Plane3 planes[6]);
+    bool testPointHit(Vector3 pos);
+};
+
+class Bs3 : public BoundingVolume {
+    public:
     float radius;
-    Bs3();
-    Bs3(Vector3 center, float radius);
-    void set(Vector3 center, float radius);
+    Bs3(float radius, Matrix4* transformation);
     bool testPointHit(Vector3 pos);
     bool testBsHit(Bs3* bs);
-    bool testAabbHit(Aabb3* aabb);
 };
 
 #endif

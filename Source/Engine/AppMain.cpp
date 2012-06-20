@@ -12,6 +12,8 @@
 Uint8* keyState;
 SDLMod modKeyState;
 SDL_Thread* particleThread;
+float timeInLastSec = 0.0;
+unsigned int currentFPS = 0, newFPS = 0;
 
 static int ParticleThreadFunction(void* pointless) {
     timeval timeThen, timeNow;
@@ -207,6 +209,14 @@ void AppMain(int argc, char *argv[]) {
         animationFactor = timeNow.tv_sec - timeThen.tv_sec;
         animationFactor += (timeNow.tv_usec - timeThen.tv_usec) / 1000000.0;
         gettimeofday(&timeThen, 0);
+        
+        newFPS ++;
+        timeInLastSec += animationFactor;
+        if(timeInLastSec >= 1.0) {
+            timeInLastSec -= 1.0;
+            currentFPS = newFPS;
+            newFPS = 0;
+        }
     }
 }
 

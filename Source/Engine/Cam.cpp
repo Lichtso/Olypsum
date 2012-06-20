@@ -48,14 +48,14 @@ Frustum3 Cam::getFrustumOf(Vector3 screenMin, Vector3 screenMax) {
          rayLB = getRayAt(Vector3(screenMin.x, screenMax.y, 0.0)),
          rayRT = getRayAt(Vector3(screenMax.x, screenMin.y, 0.0)),
          rayRB = getRayAt(screenMax);
-    Ray3 front(camMat.pos+camMat.z*near, camMat.z);
+    Ray3 front(camMat.pos+camMat.z*near, camMat.z*-1);
     Frustum3 frustumB;
     frustumB.front.set(front);
-    frustumB.back.set(camMat.pos+camMat.z*far, camMat.z*-1);
-    frustumB.left.set(front.origin, front.origin+rayLB.direction, front.origin+rayLT.direction);
-    frustumB.right.set(front.origin, front.origin+rayRT.direction, front.origin+rayRB.direction);
-    frustumB.bottom.set(front.origin, front.origin+rayRB.direction, front.origin+rayLB.direction);
-    frustumB.top.set(front.origin, front.origin+rayLT.direction, front.origin+rayRT.direction);
+    frustumB.back.set(camMat.pos+camMat.z*far, camMat.z);
+    frustumB.left.set(front.origin, front.origin+rayLT.direction, front.origin+rayLB.direction);
+    frustumB.right.set(front.origin, front.origin+rayRB.direction, front.origin+rayRT.direction);
+    frustumB.bottom.set(front.origin, front.origin+rayLB.direction, front.origin+rayRB.direction);
+    frustumB.top.set(front.origin, front.origin+rayRT.direction, front.origin+rayLT.direction);
     return frustumB;
 }
 

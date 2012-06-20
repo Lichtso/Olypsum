@@ -16,9 +16,15 @@ struct Particle {
     float life, size;
 };
 
-class ParticleSystem {
+struct ParticleDrawArray {
+    Vector3 position;
+    Texture* texture;
     unsigned int vertexCount;
-    float addParticles, *vertices;
+    float* vertices;
+};
+
+class ParticleSystem {
+    float addParticles;
     void setParticleVertex(float* verticesB, unsigned int p, Vector3 corner);
     public:
     std::vector<Particle> particles;
@@ -27,13 +33,14 @@ class ParticleSystem {
     Texture* texture;
     ParticleSystem();
     ~ParticleSystem();
-    bool calculate(float animation);
-    void draw();
+    ParticleDrawArray* calculate(float animation);
 };
 
 class ParticleSystemManager {
-    public:
     SDL_mutex* mutex;
+    std::vector<ParticleDrawArray*>* particleDrawArrays;
+    void cleanParticleDrawArrays();
+    public:
     std::vector<ParticleSystem*> particleSystems;
     ParticleSystemManager();
     ~ParticleSystemManager();

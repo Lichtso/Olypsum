@@ -21,16 +21,17 @@ struct ColorBuffer {
 
 class FBO {
     GLuint frameBuffer, depthBuffer;
+    int getColorBufferIndex(ColorBuffer* colorBuffer);
     public:
-    std::vector<ColorBuffer> colorBuffers;
+    std::vector<ColorBuffer*> colorBuffers;
     ~FBO();
     void init();
-    unsigned int addTexture(unsigned int size);
-    void renderInTexture(unsigned int index);
-    void mipmapTexture(unsigned int index);
-    void blurTexture(unsigned int index, float blurFactor);
-    void useTexture(unsigned int index, GLuint targetIndex);
-    void deleteTexture(unsigned int index);
+    ColorBuffer* addTexture(unsigned int size);
+    void renderInTexture(ColorBuffer* colorBuffer);
+    void mipmapTexture(ColorBuffer* colorBuffer);
+    void blurTexture(ColorBuffer* colorBuffer, float blurFactor);
+    void useTexture(ColorBuffer* colorBuffer, GLuint targetIndex);
+    void deleteTexture(ColorBuffer* colorBuffer);
 };
 
 extern FBO mainFBO;

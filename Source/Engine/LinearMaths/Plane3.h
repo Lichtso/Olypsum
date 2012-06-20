@@ -24,10 +24,14 @@ class Plane3 {
     void set(Vector3 pos, Vector3 normal);
     void set(Vector3 posA, Vector3 posB, Vector3 posC);
     void set(Ray3 ray);
+    float getPointDist(Vector3 pos);
+    float getRayDist(Ray3 ray);
     bool testPointHit(Vector3 pos);
     bool testBsHit(Bs3 bs);
-    bool testAabbHit(Aabb3* aabb);
-    unsigned int testAabbHitCount(Aabb3* aabb);
+    template <class T> bool testBoxHit(T* aabb);
+    template <class T> unsigned int testBoxHitCount(T* box);
+    bool testPolyhedronHit(Vector3* vertices, unsigned int verticesCount);
+    bool testPolyhedronHitCount(Vector3* vertices, unsigned int verticesCount);
 };
 
 #endif

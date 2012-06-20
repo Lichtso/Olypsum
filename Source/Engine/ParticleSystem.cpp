@@ -11,9 +11,7 @@
 
 
 ParticleSystem::ParticleSystem() {
-    vertices = NULL;
     texture = NULL;
-    vertexCount = 0;
     addParticles = 0.0;
     systemLife = -1.0;
     force = Vector3(0, -0.981, 0);
@@ -21,7 +19,6 @@ ParticleSystem::ParticleSystem() {
 }
 
 ParticleSystem::~ParticleSystem() {
-    if(vertices) delete [] vertices;
     if(texture) fileManager.releaseTexture(texture);
     for(unsigned int p = 0; p < particleSystemManager.particleSystems.size(); p ++)
         if(particleSystemManager.particleSystems[p] == this) {
@@ -43,12 +40,12 @@ void ParticleSystem::setParticleVertex(float* verticesB, unsigned int p, Vector3
     verticesB[7] = corner.y*size;
 }
 
-bool ParticleSystem::calculate(float animation) {
+ParticleDrawArray* ParticleSystem::calculate(float animation) {
     if(systemLife > -1.0) {
         systemLife -= animation;
         if(systemLife <= 0.0) {
             delete this;
-            return true;
+            return NULL;
         }
     }
     
@@ -84,53 +81,73 @@ bool ParticleSystem::calculate(float animation) {
         setParticleVertex(&verticesB[index+40], p, Vector3(-1.0,  1.0, 0.0));
     }
     
-    SDL_mutexP(particleSystemManager.mutex);
-    if(vertices) delete [] vertices;
-    vertices = verticesB;
-    vertexCount = 6*particles.size();
-    SDL_mutexV(particleSystemManager.mutex);
-    return false;
-}
-
-void ParticleSystem::draw() {
-    if(renderingState != RenderingScreen) return;
-    if(texture) texture->use(0);
-    lightManager.setLights(position);
-    SDL_mutexP(particleSystemManager.mutex);
-    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 8*sizeof(float), vertices);
-    currentShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 3, 8*sizeof(float), &vertices[3]);
-    currentShaderProgram->setAttribute(TANGENT_ATTRIBUTE, 2, 8*sizeof(float), &vertices[6]);
-    glDrawArrays(GL_TRIANGLES, 0, vertexCount);
-    SDL_mutexV(particleSystemManager.mutex);
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
-    glDisableVertexAttribArray(TANGENT_ATTRIBUTE);
+    ParticleDrawArray* drawArray = new ParticleDrawArray();
+    drawArray->position = position;
+    drawArray->texture = texture;
+    drawArray->vertexCount = 6*particles.size();
+    drawArray->vertices = verticesB;
+    return drawArray;
 }
 
 ParticleSystemManager::ParticleSystemManager() {
     mutex = SDL_CreateMutex();
+    particleDrawArrays = NULL;
 }
 
 ParticleSystemManager::~ParticleSystemManager() {
     SDL_DestroyMutex(mutex);
     for(unsigned int p = 0; p < particleSystems.size(); p ++)
         delete particleSystems[p];
+    cleanParticleDrawArrays();
+}
+
+void ParticleSystemManager::cleanParticleDrawArrays() {
+    if(!particleDrawArrays) return;
+    for(unsigned int p = 0; p < particleDrawArrays->size(); p ++) {
+        delete [] (*particleDrawArrays)[p]->vertices;
+    }
+    delete particleDrawArrays;
+    particleDrawArrays = NULL;
 }
 
 void ParticleSystemManager::calculate(float animation) {
-    for(unsigned int p = 0; p < particleSystems.size(); p ++)
-        if(particleSystems[p]->calculate(animation))
+    std::vector<ParticleDrawArray*>* newArrays = new std::vector<ParticleDrawArray*>();
+    ParticleDrawArray* drawArray;
+    for(unsigned int p = 0; p < particleSystems.size(); p ++) {
+        drawArray = particleSystems[p]->calculate(animation);
+        if(drawArray == NULL)
             p --;
+        else
+            newArrays->push_back(drawArray);
+    }
+    SDL_mutexP(mutex);
+    cleanParticleDrawArrays();
+    particleDrawArrays = newArrays;
+    SDL_mutexV(mutex);
 }
 
 void ParticleSystemManager::draw() {
+    if(renderingState != RenderingScreen) return;
     modelMat.setIdentity();
     spriteShaderProgram->use();
     spriteShaderProgram->setUniformVec3("color", Vector3(-1, -1, -1));
     glDepthMask(0);
-    for(unsigned int p = 0; p < particleSystems.size(); p ++)
-        particleSystems[p]->draw();
+    SDL_mutexP(mutex);
+    ParticleDrawArray* drawArray;
+    for(unsigned int p = 0; p < particleDrawArrays->size(); p ++) {
+        drawArray = (*particleDrawArrays)[p];
+        if(drawArray->texture) drawArray->texture->use(0);
+        lightManager.setLights(drawArray->position);
+        currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 8*sizeof(float), drawArray->vertices);
+        currentShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 3, 8*sizeof(float), &drawArray->vertices[3]);
+        currentShaderProgram->setAttribute(TANGENT_ATTRIBUTE, 2, 8*sizeof(float), &drawArray->vertices[6]);
+        glDrawArrays(GL_TRIANGLES, 0, drawArray->vertexCount);
+    }
+    SDL_mutexV(mutex);
     glDepthMask(1);
+    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
+    glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
+    glDisableVertexAttribArray(TANGENT_ATTRIBUTE);
 }
 
 ParticleSystemManager particleSystemManager;

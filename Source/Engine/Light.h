@@ -20,7 +20,7 @@ enum LightType {
 class Light {
     protected:
     Cam* shadowCam;
-    int shadowMap;
+    ColorBuffer* shadowMap;
     public:
     int glIndex;
     Vector3 direction, upDir;
@@ -30,6 +30,7 @@ class Light {
     Light();
     ~Light();
     virtual bool calculateShadowmap();
+    virtual void deleteShadowmap();
     virtual void use();
     float getPriority(Vector3 position);
 };
@@ -45,6 +46,7 @@ class DirectionalLight : public Light {
     float distance, width, height;
     DirectionalLight();
     bool calculateShadowmap();
+    void deleteShadowmap();
     void use();
 };
 
@@ -54,16 +56,19 @@ class SpotLight : public Light {
     float cutoff;
     SpotLight();
     bool calculateShadowmap();
+    void deleteShadowmap();
     void use();
 };
 
 class PositionalLight : public Light {
-    int shadowMapB;
+    ColorBuffer* shadowMapB;
     public:
     Vector3 position;
+    bool omniDirectional;
     PositionalLight();
     ~PositionalLight();
     bool calculateShadowmap();
+    void deleteShadowmap();
     void use();
 };
 
@@ -73,6 +78,7 @@ class LightManager {
     public:
     std::vector<Light*> lights;
     ~LightManager();
+    void calculateShadows(unsigned int maxShadows);
     void setLights(Vector3 position);
     void setAllLightsOff();
 };

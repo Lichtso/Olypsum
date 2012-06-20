@@ -102,7 +102,7 @@ void initGame() {
     SoundSource* testSoundSource = new SoundSource();
     testSoundSource->setSoundTrack(fileManager.getPackage(NULL)->getSoundTrack("test.ogg"));
     testSoundSource->looping = true;
-    testSoundSource->play();
+    //testSoundSource->play();
 }
 
 static void addVertex(float* vertices, float x, float y) {
@@ -116,7 +116,6 @@ static void addVertex(float* vertices, float x, float y) {
     vertices[3] = 0.0;
     vertices[4] = 1.0;
     vertices[5] = 0.0;
-    
 };
 
 void renderScene() {
@@ -180,15 +179,14 @@ void renderScene() {
 
 void calculateFrame() {
     char str[64];
-    sprintf(str, "FPS: %d", (int)(1.0/animationFactor));
+    sprintf(str, "FPS: %d", currentFPS);
     labelFPS->text = str;
     labelFPS->updateContent();
     
     soundTrackSlider->value = soundSourcesManager.soundSources[0]->getTimeOffset() / soundSourcesManager.soundSources[0]->soundTrack->getLength();
-    
     animationTime += animationFactor;
     
-    lightManager.lights[0]->calculateShadowmap();
+    lightManager.calculateShadows(1);
     //return;
     
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

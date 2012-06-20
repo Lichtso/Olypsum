@@ -13,14 +13,17 @@ uniform lightSource lightSources[lightsCount];
 uniform mat4 modelViewMat;
 uniform mat4 modelMat;
 uniform mat3 normalMat;
+uniform vec3 camPos;
 varying vec2 vTexCoord;
 varying vec3 vNormal;
+varying vec3 vCamVec;
 varying vec3 lightDirs[lightsCount];
 varying vec4 shadowCoords[lightsCount];
 
 void main() {
 	gl_Position = vec4(position, 1.0)*modelViewMat;
 	vec4 pos = vec4(position, 1.0)*modelMat;
+    vCamVec = normalize(pos.xyz/pos.w-camPos);
 	vNormal = normal*normalMat;
 	vTexCoord = texCoord;
     for(int i = 0; i < lightsCount; i ++) {
@@ -48,6 +51,7 @@ uniform sampler2D shadowMaps[lightsCount*2];
 uniform float discardDensity;
 varying vec2 vTexCoord;
 varying vec3 vNormal;
+varying vec3 vCamVec;
 varying vec3 lightDirs[lightsCount];
 varying vec4 shadowCoords[lightsCount];
 
@@ -59,41 +63,43 @@ void main() {
 	gl_FragColor = texture2D(sampler0, vTexCoord);
     if(gl_FragColor.a < 0.1 || random(gl_FragCoord.xy) > discardDensity) discard;
     vec4 depthRef;
-    vec3 shadowCoord, lightDir, light = vec3(0.2);
-    vec2 shadowOffsetNoise;
-    float lightIntensity, len, depthRefFactor, shadowMap;
+    vec3 shadowCoord, lightDir, diffuseLight = vec3(0.2), specularLight = vec3(0.0);
+    float lightIntensity, backFactor, specularFactor, depthRefFactor, shadowMap;
     const vec4 bitSh = vec4(1.0, 1.0/256.0, 1.0/65536.0, 1.0/16777216.0);
     
     for(int i = 0; i < lightsCount; i ++) {
-        if(lightSources[i].type == 0.0) continue;
         lightDir = lightDirs[i];
         lightIntensity = length(lightDir);
         lightDir /= lightIntensity;
+        lightIntensity *= step(0.0, lightSources[i].type);
         lightIntensity = clamp(lightIntensity / lightSources[i].range, step(lightSources[i].cutoff, acos(-dot(lightSources[i].direction, lightDir))), 1.0);
         
         if(lightIntensity < 1.0 && lightSources[i].shadowFactor > 0.0) {
             shadowCoord = shadowCoords[i].xyz / shadowCoords[i].w;
             shadowMap = float(i*2);
             if(lightSources[i].type < 3.0) {
-                shadowOffsetNoise = vec2(random(shadowCoord.xy), random(shadowCoord.yx))*lightSources[i].shadowFactor;
+                shadowCoord.xy += vec2(random(shadowCoord.xy), random(shadowCoord.yx))*lightSources[i].shadowFactor;
                 shadowCoord.z = shadowCoord.z*0.5+0.5;
                 depthRefFactor = 1.001+(lightSources[i].type-1.0)*0.001;
             }else{
-                shadowOffsetNoise = vec2(random(shadowCoord.xz), random(shadowCoord.zy))*lightSources[i].shadowFactor;
-                len = length(shadowCoord);
-                float backFactor = step(shadowCoord.z, 0.0)*2.0-1.0;
-                shadowCoord.xy /= len - shadowCoord.z * backFactor;
+                backFactor = step(shadowCoord.z, 0.0)*2.0-1.0;
+                shadowCoord.xy /= length(shadowCoord) - shadowCoord.z * backFactor;
                 shadowCoord.x *= backFactor;
                 shadowCoord.xy = shadowCoord.xy * 0.5 + vec2(0.5);
                 shadowMap += 0.5-backFactor*0.5;
+                shadowCoord.xy += vec2(random(shadowCoord.xz), random(shadowCoord.zy))*lightSources[i].shadowFactor;
                 shadowCoord.z = lightIntensity;
-                depthRefFactor = 1.025;
+                depthRefFactor = 1.02;
             }
-            depthRef = texture2D(shadowMaps[int(shadowMap)], shadowCoord.st+shadowOffsetNoise, 0.0);
+            depthRef = texture2D(shadowMaps[int(shadowMap)], shadowCoord.st, 0.0);
             lightIntensity = max(lightIntensity, step(dot(depthRef, bitSh)*depthRefFactor, shadowCoord.z));
         }
-        light += lightSources[i].color*(1.0-lightIntensity)*max(dot(vNormal, lightDir), 0.0);
+        
+        diffuseLight += lightSources[i].color*(1.0-lightIntensity)*max(dot(vNormal, lightDir), 0.0);
+        specularFactor = max(dot(reflect(lightDir, vNormal), vCamVec), 0.0);
+        specularLight += lightSources[i].color*(1.0-lightIntensity)*specularFactor;
     }
-	
-    gl_FragColor.rgb *= min(light, vec3(1.0));
+    
+    gl_FragColor.rgb *= min(diffuseLight, vec3(1.0));
+    //gl_FragColor.rgb += min(specularLight, vec3(1.0));
 }

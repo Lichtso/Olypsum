@@ -52,35 +52,48 @@ void Plane3::set(Ray3 ray) {
     normal = ray.direction;
 }
 
+float Plane3::getPointDist(Vector3 pos) {
+    return pos*normal-distance;
+}
+
+float Plane3::getRayDist(Ray3 ray) {
+    return -(ray.origin*normal+distance)/(ray.direction*normal);
+}
+
 bool Plane3::testPointHit(Vector3 pos) {
     return (pos*normal <= distance);
 }
 
 bool Plane3::testBsHit(Bs3 bs) {
-    return (bs.center*normal-distance <= bs.radius);
+    return (bs.transformation->pos*normal-distance <= bs.radius);
 }
 
-bool Plane3::testAabbHit(Aabb3* aabb) {
-    if(Vector3(aabb->min.x, aabb->min.y, aabb->min.z)*normal <= distance) return true;
-    if(Vector3(aabb->min.x, aabb->min.y, aabb->max.z)*normal <= distance) return true;
-    if(Vector3(aabb->min.x, aabb->max.y, aabb->min.z)*normal <= distance) return true;
-    if(Vector3(aabb->min.x, aabb->max.y, aabb->max.z)*normal <= distance) return true;
-    if(Vector3(aabb->max.x, aabb->min.y, aabb->min.z)*normal <= distance) return true;
-    if(Vector3(aabb->max.x, aabb->min.y, aabb->max.z)*normal <= distance) return true;
-    if(Vector3(aabb->max.x, aabb->max.y, aabb->min.z)*normal <= distance) return true;
-    if(Vector3(aabb->max.x, aabb->max.y, aabb->max.z)*normal <= distance) return true;
+template <class T> bool Plane3::testBoxHit(T* box) {
+    Vector3 vertices[8];
+    box->getVertices(vertices);
+    for(unsigned char i = 0; i < 8; i ++)
+        if(vertices[i]*normal <= distance) return true;
     return false;
 }
 
-unsigned int Plane3::testAabbHitCount(Aabb3* aabb) {
+template <class T> unsigned int Plane3::testBoxHitCount(T* box) {
     unsigned int count = 0;
-    if(Vector3(aabb->min.x, aabb->min.y, aabb->min.z)*normal <= distance) count ++;
-    if(Vector3(aabb->min.x, aabb->min.y, aabb->max.z)*normal <= distance) count ++;
-    if(Vector3(aabb->min.x, aabb->max.y, aabb->min.z)*normal <= distance) count ++;
-    if(Vector3(aabb->min.x, aabb->max.y, aabb->max.z)*normal <= distance) count ++;
-    if(Vector3(aabb->max.x, aabb->min.y, aabb->min.z)*normal <= distance) count ++;
-    if(Vector3(aabb->max.x, aabb->min.y, aabb->max.z)*normal <= distance) count ++;
-    if(Vector3(aabb->max.x, aabb->max.y, aabb->min.z)*normal <= distance) count ++;
-    if(Vector3(aabb->max.x, aabb->max.y, aabb->max.z)*normal <= distance) count ++;
+    Vector3 vertices[8];
+    box->getVertices(vertices);
+    for(unsigned char i = 0; i < 8; i ++)
+        if(vertices[i]*normal <= distance) count ++;
+    return count;
+}
+
+bool Plane3::testPolyhedronHit(Vector3* vertices, unsigned int verticesCount) {
+    for(unsigned int i = 0; i < verticesCount; i ++)
+        if(vertices[i]*normal <= distance) return true;
+    return false;
+}
+
+bool Plane3::testPolyhedronHitCount(Vector3* vertices, unsigned int verticesCount) {
+    unsigned int count = 0;
+    for(unsigned int i = 0; i < verticesCount; i ++)
+        if(vertices[i]*normal <= distance) count ++;
     return count;
 }
