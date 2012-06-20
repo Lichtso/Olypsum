@@ -1,4 +1,9 @@
-Test Game GUI
+Test Bounding Volumes
+Implement Speclar Light
+Implement SSAO
+Make GUI
+Level File Formats
+Object Editor
 Use Bullet-Engine
 OpenAL Sound Engine: Add track queue
 GUITextField Copy & Paste
