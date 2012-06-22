@@ -1099,12 +1099,11 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
 }
 
 void Model::draw(float discardDensity) {
-    if(renderingState == RenderingScreen)
-        mainShaderProgram->use();
-    else if(renderingState == RenderingShadow)
-        shadowShaderProgram->use();
+    if(lightManager.currentShadowLight)
+        lightManager.currentShadowLight->selectShaderProgram(false);
+    else
+        shaderPrograms[solidGeometrySP]->use();
     currentShaderProgram->setUniformF("discardDensity", discardDensity);
-    lightManager.setLights(modelMat.pos);
     
     for(unsigned int i = 0; i < meshes.size(); i ++)
         meshes[i]->draw();
@@ -1123,12 +1122,11 @@ void Model::draw(float discardDensity, SkeletonPose* skeletonPose) {
         return;
     }
     
-    if(renderingState == RenderingScreen)
-        mainSkeletonShaderProgram->use();
-    else if(renderingState == RenderingShadow)
-        shadowSkeletonShaderProgram->use();
+    if(lightManager.currentShadowLight)
+        lightManager.currentShadowLight->selectShaderProgram(true);
+    else
+        shaderPrograms[skeletalGeometrySP]->use();
     currentShaderProgram->setUniformF("discardDensity", discardDensity);
-    lightManager.setLights(modelMat.pos);
     
     Matrix4* mats = new Matrix4[skeleton->bones.size()];
     skeletonPose->calculateDisplayMatrix(skeleton->rootBone, NULL, mats);

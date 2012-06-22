@@ -99,45 +99,15 @@ void AppMain(int argc, char *argv[]) {
     titleFont = new TextFont();
     titleFont->size = 30;
     titleFont->loadTTF("font");
-    mainShaderProgram = new ShaderProgram();
-    mainShaderProgram->loadShaderProgram("main");
-    mainShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
-    mainShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    mainShaderProgram->addAttribute(NORMAL_ATTRIBUTE, "normal");
-    mainShaderProgram->link();
-    shadowShaderProgram = new ShaderProgram();
-    shadowShaderProgram->loadShaderProgram("shadow");
-    shadowShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
-    shadowShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shadowShaderProgram->link();
-    spriteShaderProgram = new ShaderProgram();
-    spriteShaderProgram->loadShaderProgram("sprite");
-    spriteShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
-    spriteShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    spriteShaderProgram->addAttribute(TANGENT_ATTRIBUTE, "tangent");
-    spriteShaderProgram->link();
-    blurShaderProgram = new ShaderProgram();
-    blurShaderProgram->loadShaderProgram("blur");
-    blurShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
-    blurShaderProgram->link();
-    mainSkeletonShaderProgram = new ShaderProgram();
-    mainSkeletonShaderProgram->loadShaderProgram("mainSkeleton");
-    mainSkeletonShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
-    mainSkeletonShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    mainSkeletonShaderProgram->addAttribute(NORMAL_ATTRIBUTE, "normal");
-    mainSkeletonShaderProgram->addAttribute(WEIGHT_ATTRIBUTE, "weights");
-    mainSkeletonShaderProgram->addAttribute(JOINT_ATTRIBUTE, "joints");
-    mainSkeletonShaderProgram->link();
-    shadowSkeletonShaderProgram = new ShaderProgram();
-    shadowSkeletonShaderProgram->loadShaderProgram("shadowSkeleton");
-    shadowSkeletonShaderProgram->addAttribute(POSITION_ATTRIBUTE, "position");
-    shadowSkeletonShaderProgram->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shadowSkeletonShaderProgram->addAttribute(WEIGHT_ATTRIBUTE, "weights");
-    shadowSkeletonShaderProgram->addAttribute(JOINT_ATTRIBUTE, "joints");
-    shadowSkeletonShaderProgram->link();
+    
+    //Load Shader Programs
+    for(unsigned int p = 0; p < sizeof(shaderPrograms)/sizeof(ShaderProgram*); p ++) {
+        if(shaderPrograms[p]) delete shaderPrograms[p];
+        shaderPrograms[p] = new ShaderProgram();
+    }
+    loadShaderPrograms();
     
     //Init all other stuff
-    renderingState = RenderingScreen;
     currentScreenView = new GUIScreenView();
     mainFBO.init();
     particleThread = SDL_CreateThread(ParticleThreadFunction, NULL);
@@ -200,8 +170,15 @@ void AppMain(int argc, char *argv[]) {
         keyState = SDL_GetKeyState(NULL);
         modKeyState = SDL_GetModState();
         soundSourcesManager.calculate();
+        
         calculateFrame();
+        lightManager.calculateShadows(1);
+        mainCam->use();
+        glClearColor(0, 0, 0, 1);
+        mainFBO.renderInDeferredBuffers();
+        renderScene();
         particleSystemManager.draw();
+        lightManager.useLights();
         if(currentScreenView) currentScreenView->draw();
         SDL_GL_SwapBuffers();
         

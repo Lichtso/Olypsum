@@ -136,7 +136,7 @@ void GUISlider::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     
     modelMat = parentTransform;
     modelMat.translate(Vector3(posX, posY, 0.0));
-    spriteShaderProgram->use();
+    shaderPrograms[spriteSP]->use();
     
     int barLength = ((orientation & GUIOrientation_Horizontal) ? width*2 : height*2)-sliderRadius*2;
     drawBar(clipRectB, barLength, true);

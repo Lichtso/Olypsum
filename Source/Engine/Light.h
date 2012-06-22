@@ -22,7 +22,6 @@ class Light {
     Cam* shadowCam;
     ColorBuffer* shadowMap;
     public:
-    int glIndex;
     Vector3 direction, upDir;
     float range;
     LightType type;
@@ -32,6 +31,7 @@ class Light {
     virtual bool calculateShadowmap();
     virtual void deleteShadowmap();
     virtual void use();
+    virtual void selectShaderProgram(bool skeletal);
     float getPriority(Vector3 position);
 };
 
@@ -48,6 +48,7 @@ class DirectionalLight : public Light {
     bool calculateShadowmap();
     void deleteShadowmap();
     void use();
+    void selectShaderProgram(bool skeletal);
 };
 
 class SpotLight : public Light {
@@ -58,6 +59,7 @@ class SpotLight : public Light {
     bool calculateShadowmap();
     void deleteShadowmap();
     void use();
+    void selectShaderProgram(bool skeletal);
 };
 
 class PositionalLight : public Light {
@@ -70,17 +72,16 @@ class PositionalLight : public Light {
     bool calculateShadowmap();
     void deleteShadowmap();
     void use();
+    void selectShaderProgram(bool skeletal);
 };
-
-#define maxLightCount 3
 
 class LightManager {
     public:
     std::vector<Light*> lights;
+    Light* currentShadowLight;
     ~LightManager();
     void calculateShadows(unsigned int maxShadows);
-    void setLights(Vector3 position);
-    void setAllLightsOff();
+    void useLights();
 };
 
 extern LightManager lightManager;

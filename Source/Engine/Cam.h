@@ -22,7 +22,6 @@ class Cam {
     Frustum3 getFrustumOf(Vector3 screenMin, Vector3 screenMax);
     void calculate();
     void use();
-    void setFullScreen();
 };
 
 extern Cam *mainCam, *guiCam, *currentCam;

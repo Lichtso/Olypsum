@@ -11,8 +11,8 @@
 #ifndef FBO_h
 #define FBO_h
 
-#define maxFBOSize 1024
-#define maxColorBufferCount 8
+#define maxColorBufferCount 6
+#define dBuffersCount 6
 
 struct ColorBuffer {
     unsigned int size;
@@ -20,27 +20,32 @@ struct ColorBuffer {
 };
 
 class FBO {
-    GLuint frameBuffer, depthBuffer;
+    GLuint frameBuffer, depthBuffer, dBuffers[dBuffersCount];
     int getColorBufferIndex(ColorBuffer* colorBuffer);
+    void initBuffer(unsigned int index);
     public:
     std::vector<ColorBuffer*> colorBuffers;
     ~FBO();
     void init();
+    void renderInDeferredBuffers();
+    void renderDeferred(std::vector<unsigned char>* inBuffers, std::vector<unsigned char>* outBuffers);
     ColorBuffer* addTexture(unsigned int size);
     void renderInTexture(ColorBuffer* colorBuffer);
     void mipmapTexture(ColorBuffer* colorBuffer);
-    void blurTexture(ColorBuffer* colorBuffer, float blurFactor);
     void useTexture(ColorBuffer* colorBuffer, GLuint targetIndex);
     void deleteTexture(ColorBuffer* colorBuffer);
 };
 
-extern FBO mainFBO;
-
-enum RenderingState {
-    RenderingShadow,
-    RenderingScreen
+enum DeferredBufferNames {
+    colorDBuffer = 0,
+    positionDBuffer = 1,
+    normalDBuffer = 2,
+    materialDBuffer = 3,
+    diffuseDBuffer = 4,
+    specularDBuffer = 5
 };
 
-extern RenderingState renderingState;
+extern FBO mainFBO;
+extern unsigned int maxFBOSize;
 
 #endif

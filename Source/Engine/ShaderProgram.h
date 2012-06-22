@@ -26,12 +26,13 @@ class ShaderProgram {
 	GLuint GLname;
 	ShaderProgram();
 	~ShaderProgram();
-	bool loadShader(GLuint shaderType, const char* soucreCode);
-    bool loadShaderProgram(const char* fileName);
+	bool loadShader(GLuint shaderType, const char* soucreCode, std::vector<const char*>* macros);
+    bool loadShaderProgram(const char* fileName, std::vector<const char*>* macros);
     void addAttribute(unsigned int index, const char* attributeName);
 	void link();
 	void use();
     void setAttribute(unsigned int index, unsigned int size, GLsizei stride, GLfloat* data);
+    bool checkUniformExistence(const char* name);
     void setUniformI(const char* name, int value);
     void setUniformF(const char* name, float value);
     void setUniformVec3(const char* name, Vector3 value);
@@ -44,8 +45,29 @@ class ShaderProgram {
 };
 
 extern Matrix4 modelMat;
-extern ShaderProgram *mainShaderProgram, *shadowShaderProgram,
-                     *mainSkeletonShaderProgram, *shadowSkeletonShaderProgram,
-                     *spriteShaderProgram, *blurShaderProgram, *currentShaderProgram;
+extern ShaderProgram *shaderPrograms[18], *currentShaderProgram;
+
+enum ShaderProgramNames {
+    spriteSP = 0,
+    solidGeometrySP = 1,
+    solidShadowSP = 2,
+    solidParabolidShadowSP = 3,
+    skeletalGeometrySP = 4,
+    skeletalShadowSP = 5,
+    skeletalParabolidShadowSP = 6,
+    deferredPrepareSP = 7,
+    directionalLightSP = 8,
+    directionalShadowLightSP = 9,
+    spotLightSP = 10,
+    spotShadowLightSP = 11,
+    positionalLightSP = 12,
+    positionalShadowLightSP = 13,
+    positionalDualShadowLightSP = 14,
+    blurSP = 15,
+    ssaoSP = 16,
+    deferredCombineSP = 17
+};
+
+void loadShaderPrograms();
 
 #endif

@@ -11,7 +11,6 @@
 Light::Light() {
     shadowCam = NULL;
     shadowMap = NULL;
-    glIndex = -1;
     color = Vector3(1.0, 1.0, 1.0);
 }
 
@@ -43,6 +42,7 @@ bool Light::calculateShadowmap() {
         }
         if(!shadowCam) shadowCam = new Cam();
     }
+    lightManager.currentShadowLight = this;
     return true;
 }
 
@@ -57,13 +57,13 @@ void Light::deleteShadowmap() {
 }
 
 void Light::use() {
-    char str[64];
-    sprintf(str, "lightSources[%d].type", glIndex);
-    currentShaderProgram->setUniformF(str, type);
-    sprintf(str, "lightSources[%d].range", glIndex);
-    currentShaderProgram->setUniformF(str, range);
-    sprintf(str, "lightSources[%d].color", glIndex);
-    currentShaderProgram->setUniformVec3(str, color);
+    currentShaderProgram->setUniformF("lRange", range);
+    currentShaderProgram->setUniformVec3("lColor", color);
+    currentShaderProgram->setUniformVec3("lDirection", direction);
+}
+
+void Light::selectShaderProgram(bool skeletal) {
+    printf("ERROR: Unreachable function called!\n");
 }
 
 bool LightPrioritySorter::operator()(Light* a, Light* b) {
@@ -92,11 +92,6 @@ bool DirectionalLight::calculateShadowmap() {
     shadowCam->calculate();
     shadowCam->use();
     currentCam = shadowCam;
-    shadowSkeletonShaderProgram->use();
-    shadowSkeletonShaderProgram->setUniformF("paraboloidRange", 0.0);
-    shadowShaderProgram->use();
-    shadowShaderProgram->setUniformF("paraboloidRange", 0.0);
-    renderingState = RenderingShadow;
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
     mainFBO.renderInTexture(shadowMap);
@@ -110,19 +105,21 @@ void DirectionalLight::deleteShadowmap() {
 }
 
 void DirectionalLight::use() {
-    if(glIndex < 0) return;
+    if(!shadowMap)
+        shaderPrograms[directionalLightSP]->use();
+    else
+        shaderPrograms[directionalShadowLightSP]->use();
     Light::use();
-    char str[64];
-    sprintf(str, "lightSources[%d].cutoff", glIndex);
-    currentShaderProgram->setUniformF(str, 4.0);
-    sprintf(str, "lightSources[%d].direction", glIndex);
-    currentShaderProgram->setUniformVec3(str, direction*-1.0);
-    sprintf(str, "lightSources[%d].shadowFactor", glIndex);
-    currentShaderProgram->setUniformF(str, (shadowMap) ? 0.005 : 0.0);
-    if(shadowMap == 0) return;
-    sprintf(str, "lightSources[%d].shadowMat", glIndex);
-    currentShaderProgram->setUniformMatrix4(str, &shadowCam->shadowMat);
-    mainFBO.useTexture(shadowMap, glIndex*2+3);
+    if(!shadowMap) return;
+    currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowCam->shadowMat);
+    mainFBO.useTexture(shadowMap, 5);
+}
+
+void DirectionalLight::selectShaderProgram(bool skeletal) {
+    if(skeletal)
+        shaderPrograms[skeletalShadowSP]->use();
+    else
+        shaderPrograms[solidShadowSP]->use();
 }
 
 SpotLight::SpotLight() {
@@ -141,34 +138,29 @@ bool SpotLight::calculateShadowmap() {
     shadowCam->camMat.translate(position);
     shadowCam->width = 1.0;
     shadowCam->height = 1.0;
-    shadowCam->fov = cutoff;
+    shadowCam->fov = cutoff*2.0;
     shadowCam->near = 1.0;
     shadowCam->far = range;
     shadowCam->calculate();
     shadowCam->use();
     currentCam = shadowCam;
-    shadowSkeletonShaderProgram->use();
-    shadowSkeletonShaderProgram->setUniformF("paraboloidRange", 0.0);
-    shadowShaderProgram->use();
-    shadowShaderProgram->setUniformF("paraboloidRange", 0.0);
-    renderingState = RenderingShadow;
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
     mainFBO.renderInTexture(shadowMap);
     renderScene();
-    //Render circle mask
-    float vertices[12] = {
+    //Render circle mask -----> TODO <------
+    /*float vertices[12] = {
         -1.0, -1.0, 0.0,
         1.0, -1.0, 0.0,
         1.0, 1.0, 0.0,
         -1.0, 1.0, 0.0
     };
-    shadowShaderProgram->use();
-    shadowShaderProgram->setUniformF("paraboloidRange", -1.0);
-    shadowShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float), vertices);
+    
+    shaderPrograms[solidShadowSP]->use();
+    shaderPrograms[solidShadowSP]->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float), vertices);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    glEnable(GL_BLEND);
+    glEnable(GL_BLEND);*/
     return true;
 }
 
@@ -177,21 +169,23 @@ void SpotLight::deleteShadowmap() {
 }
 
 void SpotLight::use() {
-    if(glIndex < 0) return;
+    if(!shadowMap)
+        shaderPrograms[spotLightSP]->use();
+    else
+        shaderPrograms[spotShadowLightSP]->use();
     Light::use();
-    char str[64];
-    sprintf(str, "lightSources[%d].cutoff", glIndex);
-    currentShaderProgram->setUniformF(str, cutoff*0.5);
-    sprintf(str, "lightSources[%d].direction", glIndex);
-    currentShaderProgram->setUniformVec3(str, direction);
-    sprintf(str, "lightSources[%d].shadowFactor", glIndex);
-    currentShaderProgram->setUniformF(str, (shadowMap) ? 0.015 : 0.0);
-    sprintf(str, "lightSources[%d].position", glIndex);
-    currentShaderProgram->setUniformVec3(str, position);
-    if(shadowMap == 0) return;
-    sprintf(str, "lightSources[%d].shadowMat", glIndex);
-    currentShaderProgram->setUniformMatrix4(str, &shadowCam->shadowMat);
-    mainFBO.useTexture(shadowMap, glIndex*2+3);
+    currentShaderProgram->setUniformF("lCutoff", cutoff);
+    currentShaderProgram->setUniformVec3("lPosition", position);
+    if(!shadowMap) return;
+    currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowCam->shadowMat);
+    mainFBO.useTexture(shadowMap, 5);
+}
+
+void SpotLight::selectShaderProgram(bool skeletal) {
+    if(skeletal)
+        shaderPrograms[skeletalShadowSP]->use();
+    else
+        shaderPrograms[solidShadowSP]->use();
 }
 
 PositionalLight::PositionalLight() {
@@ -210,7 +204,6 @@ PositionalLight::~PositionalLight() {
 
 bool PositionalLight::calculateShadowmap() {
     if(!Light::calculateShadowmap()) return false;
-    
     if(omniDirectional && !shadowMapB)
         shadowMapB = mainFBO.addTexture(1024);
     
@@ -221,11 +214,6 @@ bool PositionalLight::calculateShadowmap() {
     shadowCam->shadowMat = shadowCam->viewMat;
     shadowCam->use();
     currentCam = shadowCam;
-    shadowSkeletonShaderProgram->use();
-    shadowSkeletonShaderProgram->setUniformF("paraboloidRange", range);
-    shadowShaderProgram->use();
-    shadowShaderProgram->setUniformF("paraboloidRange", range);
-    renderingState = RenderingShadow;
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
     if(shadowMapB) {
@@ -252,22 +240,26 @@ void PositionalLight::deleteShadowmap() {
 }
 
 void PositionalLight::use() {
-    if(glIndex < 0) return;
+    if(!shadowMap)
+        shaderPrograms[positionalLightSP]->use();
+    else if(!shadowMapB)
+        shaderPrograms[positionalShadowLightSP]->use();
+    else
+        shaderPrograms[positionalDualShadowLightSP]->use();
     Light::use();
-    char str[64];
-    sprintf(str, "lightSources[%d].cutoff", glIndex);
-    currentShaderProgram->setUniformF(str, (omniDirectional) ? 4.0 : M_PI_2);
-    sprintf(str, "lightSources[%d].direction", glIndex);
-    currentShaderProgram->setUniformVec3(str, direction);
-    sprintf(str, "lightSources[%d].shadowFactor", glIndex);
-    currentShaderProgram->setUniformF(str, (shadowMap) ? 0.002 : 0.0);
-    sprintf(str, "lightSources[%d].position", glIndex);
-    currentShaderProgram->setUniformVec3(str, position);
+    currentShaderProgram->setUniformF("lCutoff", (omniDirectional) ? 4.0 : M_PI_2);
+    currentShaderProgram->setUniformVec3("lPosition", position);
     if(!shadowMap) return;
-    sprintf(str, "lightSources[%d].shadowMat", glIndex);
-    currentShaderProgram->setUniformMatrix4(str, &shadowCam->shadowMat);
-    mainFBO.useTexture(shadowMap, glIndex*2+3);
-    if(shadowMapB) mainFBO.useTexture(shadowMapB, glIndex*2+4);
+    currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowCam->shadowMat);
+    mainFBO.useTexture(shadowMap, 5);
+    if(shadowMapB) mainFBO.useTexture(shadowMapB, 6);
+}
+
+void PositionalLight::selectShaderProgram(bool skeletal) {
+    if(skeletal)
+        shaderPrograms[skeletalParabolidShadowSP]->use();
+    else
+        shaderPrograms[solidParabolidShadowSP]->use();
 }
 
 LightManager::~LightManager() {
@@ -285,34 +277,40 @@ void LightManager::calculateShadows(unsigned int maxShadows) {
     
     for(unsigned int i = maxShadows; i < lights.size(); i ++)
         lights[i]->deleteShadowmap();
+    
+    currentShadowLight = NULL;
 }
 
-void LightManager::setLights(Vector3 position) {
-    LightPrioritySorter lightPrioritySorter;
-    lightPrioritySorter.position = position;
-    std::sort(lights.begin(), lights.end(), lightPrioritySorter);
+void LightManager::useLights() {
+    std::vector<unsigned char> inBuffers, outBuffers;
+    inBuffers.push_back(colorDBuffer);
+    inBuffers.push_back(materialDBuffer);
+    outBuffers.push_back(diffuseDBuffer);
+    outBuffers.push_back(specularDBuffer);
+    shaderPrograms[deferredPrepareSP]->use();
+    mainFBO.renderDeferred(&inBuffers, &outBuffers);
     
-    unsigned int activeLights = 0;
+    inBuffers.clear();
+    inBuffers.push_back(diffuseDBuffer);
+    inBuffers.push_back(specularDBuffer);
+    inBuffers.push_back(positionDBuffer);
+    inBuffers.push_back(normalDBuffer);
+    inBuffers.push_back(materialDBuffer);
+    outBuffers.clear();
+    outBuffers.push_back(diffuseDBuffer);
+    outBuffers.push_back(specularDBuffer);
     for(unsigned int i = 0; i < lights.size(); i ++) {
-        if(lights[i]->getPriority(position) >= 1.0) continue;
-        lights[i]->glIndex = (activeLights < maxLightCount) ? activeLights : -1;
         lights[i]->use();
-        activeLights ++;
+        mainFBO.renderDeferred(&inBuffers, &outBuffers);
     }
     
-    char str[64];
-    for(unsigned int i = activeLights; i < maxLightCount; i ++) {
-        sprintf(str, "lightSources[%d].type", i);
-        currentShaderProgram->setUniformF(str, 0);
-    }
-}
-
-void LightManager::setAllLightsOff() {
-    char str[64];
-    for(unsigned int i = 0; i < maxLightCount; i ++) {
-        sprintf(str, "lightSources[%d].type", i);
-        currentShaderProgram->setUniformF(str, 0);
-    }
+    inBuffers.clear();
+    inBuffers.push_back(colorDBuffer);
+    inBuffers.push_back(diffuseDBuffer);
+    inBuffers.push_back(specularDBuffer);
+    outBuffers.clear();
+    shaderPrograms[deferredCombineSP]->use();
+    mainFBO.renderDeferred(&inBuffers, &outBuffers);
 }
 
 LightManager lightManager;

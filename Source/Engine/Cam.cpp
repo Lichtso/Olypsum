@@ -84,10 +84,6 @@ void Cam::use() {
     //alListener3f(AL_VELOCITY, velocity.x, velocity.y, velocity.z);
 }
 
-void Cam::setFullScreen() {
-    glViewport(0, 0, videoInfo->current_w, videoInfo->current_h);
-}
-
 Cam *mainCam, *guiCam, *currentCam;
 SDL_Surface* screen;
 const SDL_VideoInfo* videoInfo;

@@ -165,8 +165,8 @@ void GUIScreenView::draw() {
     
     glDisable(GL_DEPTH_TEST);
     guiCam->use();
-    spriteShaderProgram->use();
-    spriteShaderProgram->setUniformVec3("color", Vector3(0, 0, 0));
+    shaderPrograms[spriteSP]->use();
+    shaderPrograms[spriteSP]->setUniformVec3("color", Vector3(0, 0, 0));
     
     Matrix4 transform;
     transform.setIdentity();
@@ -177,8 +177,8 @@ void GUIScreenView::draw() {
     
     if(modalView) {
         modelMat = transform;
-        spriteShaderProgram->use();
-        spriteShaderProgram->setUniformVec3("color", Vector3(0.2, 0.2, 0.2));
+        shaderPrograms[spriteSP]->use();
+        shaderPrograms[spriteSP]->setUniformVec3("color", Vector3(0.2, 0.2, 0.2));
         
         float vertices[] = {
             width, -height,
@@ -191,13 +191,13 @@ void GUIScreenView::draw() {
             0.0, 0.0, 0.2
         };
         
-        spriteShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 5*sizeof(float), vertices);
-        spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 3, 5*sizeof(float), &vertices[2]);
+        shaderPrograms[spriteSP]->setAttribute(POSITION_ATTRIBUTE, 2, 5*sizeof(float), vertices);
+        shaderPrograms[spriteSP]->setAttribute(TEXTURE_COORD_ATTRIBUTE, 3, 5*sizeof(float), &vertices[2]);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
         glDrawArrays(GL_QUADS, 0, 4);
         
-        spriteShaderProgram->setUniformVec3("color", Vector3(0, 0, 0));
+        shaderPrograms[spriteSP]->setUniformVec3("color", Vector3(0, 0, 0));
         modalView->draw(transform, clipRect);
     }
     

@@ -160,7 +160,7 @@ void GUIRoundedRect::drawOnScreen(bool transposed, int posX, int posY, GUIClipRe
     clipRect.maxPosY = min(parentClipRect.maxPosY, posY+height);
     if(clipRect.minPosX > clipRect.maxPosX || clipRect.minPosY > clipRect.maxPosY) return;
     
-    spriteShaderProgram->use();
+    shaderPrograms[spriteSP]->use();
     
     if(transposed) {
         Vector3 minFactor(0.5-0.5*(clipRect.maxPosY-posY)/height, 0.5+0.5*(clipRect.minPosX-posX)/width, 0.0),
@@ -171,7 +171,7 @@ void GUIRoundedRect::drawOnScreen(bool transposed, int posX, int posY, GUIClipRe
             minFactor.x, minFactor.y,
             maxFactor.x, minFactor.y
         };
-        spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 2*sizeof(float), texCoords);
+        shaderPrograms[spriteSP]->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 2*sizeof(float), texCoords);
     }else{
         Vector3 minFactor(0.5+0.5*(clipRect.minPosX-posX)/width, 0.5-0.5*(clipRect.maxPosY-posY)/height, 0.0),
                 maxFactor(0.5+0.5*(clipRect.maxPosX-posX)/width, 0.5-0.5*(clipRect.minPosY-posY)/height, 0.0);
@@ -181,7 +181,7 @@ void GUIRoundedRect::drawOnScreen(bool transposed, int posX, int posY, GUIClipRe
             minFactor.x, minFactor.y,
             minFactor.x, maxFactor.y
         };
-        spriteShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 2*sizeof(float), texCoords);
+        shaderPrograms[spriteSP]->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 2*sizeof(float), texCoords);
     }
     
     float vertices[] = {
@@ -190,7 +190,7 @@ void GUIRoundedRect::drawOnScreen(bool transposed, int posX, int posY, GUIClipRe
         clipRect.minPosX, clipRect.maxPosY,
         clipRect.minPosX, clipRect.minPosY
     };
-    spriteShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
+    shaderPrograms[spriteSP]->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, (texture) ? *texture : 0);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);

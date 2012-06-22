@@ -35,7 +35,7 @@ void initGame() {
         SpotLight* lightB = new SpotLight();
         lightB->position = Vector3(-2.0, 3.0, 3.5);
         lightB->direction = Vector3(0.5, -0.5, -1.0).normalize();
-        lightB->cutoff = 20.0/180.0*M_PI;
+        lightB->cutoff = 10.0/180.0*M_PI;
         lightB->range = 10.0;
         lightManager.lights.push_back((Light*)lightB);
     }
@@ -53,7 +53,7 @@ void initGame() {
     image->sizeAlignment = GUISizeAlignment_Height;
     image->width = 400;
     image->posY = -350;
-    currentScreenView->addChild(image);
+    //currentScreenView->addChild(image);
     
     GUIFramedView* view = new GUIFramedView();
     view->width = 265;
@@ -161,11 +161,10 @@ void renderScene() {
         }
     
     modelMat.setIdentity();
-    if(renderingState == RenderingScreen)
-        mainShaderProgram->use();
-    else if(renderingState == RenderingShadow)
-        shadowShaderProgram->use();
-    lightManager.setLights(Vector3(0, 0, 0));
+    if(lightManager.currentShadowLight)
+        lightManager.currentShadowLight->selectShaderProgram(false);
+    else
+        shaderPrograms[solidGeometrySP]->use();
     currentShaderProgram->setUniformF("discardDensity", 1.0);
     
     currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 8*sizeof(float), vertices);
@@ -186,19 +185,10 @@ void calculateFrame() {
     soundTrackSlider->value = soundSourcesManager.soundSources[0]->getTimeOffset() / soundSourcesManager.soundSources[0]->soundTrack->getLength();
     animationTime += animationFactor;
     
-    lightManager.calculateShadows(1);
-    //return;
-    
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     mainCam->camMat.setIdentity();
     //mainCam->camMat.rotateX(0.5);
     mainCam->camMat.translate(Vector3(0,1,2));
-    mainCam->setFullScreen();
     mainCam->calculate();
     mainCam->use();
     modelMat.setIdentity();
-    mainShaderProgram->use();
-    glClearColor(1, 1, 1, 1);
-    renderingState = RenderingScreen;
-    renderScene();
 }

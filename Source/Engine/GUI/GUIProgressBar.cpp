@@ -88,7 +88,7 @@ void GUIProgressBar::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect)
     
     modelMat = parentTransform;
     modelMat.translate(Vector3(posX, posY, 0.0));
-    spriteShaderProgram->use();
+    shaderPrograms[spriteSP]->use();
     
     drawBar(clipRectL, true);
     drawBar(clipRectR, false);

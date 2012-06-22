@@ -127,17 +127,20 @@ void ParticleSystemManager::calculate(float animation) {
 }
 
 void ParticleSystemManager::draw() {
-    if(renderingState != RenderingScreen) return;
+    if(lightManager.currentShadowLight) return;
     modelMat.setIdentity();
-    spriteShaderProgram->use();
-    spriteShaderProgram->setUniformVec3("color", Vector3(-1, -1, -1));
+    shaderPrograms[spriteSP]->use();
+    shaderPrograms[spriteSP]->setUniformVec3("color", Vector3(-1, -1, -1));
     glDepthMask(0);
     SDL_mutexP(mutex);
     ParticleDrawArray* drawArray;
+    Matrix4 mat;
+    Bs3 bs(5.0, &mat);
     for(unsigned int p = 0; p < particleDrawArrays->size(); p ++) {
+        mat.pos = drawArray->position;
+        if(currentCam->frustum.testBsHit(&bs)) continue;
         drawArray = (*particleDrawArrays)[p];
         if(drawArray->texture) drawArray->texture->use(0);
-        lightManager.setLights(drawArray->position);
         currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 8*sizeof(float), drawArray->vertices);
         currentShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 3, 8*sizeof(float), &drawArray->vertices[3]);
         currentShaderProgram->setAttribute(TANGENT_ATTRIBUTE, 2, 8*sizeof(float), &drawArray->vertices[6]);
