@@ -45,7 +45,7 @@ class ShaderProgram {
 };
 
 extern Matrix4 modelMat;
-extern ShaderProgram *shaderPrograms[18], *currentShaderProgram;
+extern ShaderProgram *shaderPrograms[16], *currentShaderProgram;
 
 enum ShaderProgramNames {
     spriteSP = 0,
@@ -55,17 +55,15 @@ enum ShaderProgramNames {
     skeletalGeometrySP = 4,
     skeletalShadowSP = 5,
     skeletalParabolidShadowSP = 6,
-    deferredPrepareSP = 7,
-    directionalLightSP = 8,
-    directionalShadowLightSP = 9,
-    spotLightSP = 10,
-    spotShadowLightSP = 11,
-    positionalLightSP = 12,
-    positionalShadowLightSP = 13,
-    positionalDualShadowLightSP = 14,
-    blurSP = 15,
-    ssaoSP = 16,
-    deferredCombineSP = 17
+    directionalLightSP = 7,
+    directionalShadowLightSP = 8,
+    spotLightSP = 9,
+    spotShadowLightSP = 10,
+    positionalLightSP = 11,
+    positionalShadowLightSP = 12,
+    blurSP = 13,
+    ssaoSP = 14,
+    deferredCombineSP = 15
 };
 
 void loadShaderPrograms();

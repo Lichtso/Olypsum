@@ -64,6 +64,7 @@ class SpotLight : public Light {
 
 class PositionalLight : public Light {
     ColorBuffer* shadowMapB;
+    Matrix4 shadowMatB;
     public:
     Vector3 position;
     bool omniDirectional;

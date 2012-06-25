@@ -21,15 +21,15 @@ Mesh::Mesh() {
     vbo = ibo = 0;
     postions = texcoords = normals = -1;
     tangents = bitangents = weightJoints = -1;
-    diffuse = normalMap = effectMap = NULL;
+    diffuse = effectMap = normalMap = NULL;
 }
 
 Mesh::~Mesh() {
     if(vbo) glDeleteBuffers(1, &vbo);
     if(ibo) glDeleteBuffers(1, &ibo);
     if(diffuse) fileManager.releaseTexture(diffuse);
-    if(normalMap) fileManager.releaseTexture(normalMap);
     if(effectMap) fileManager.releaseTexture(effectMap);
+    if(normalMap) fileManager.releaseTexture(normalMap);
 }
 
 void Mesh::draw() {
@@ -42,9 +42,20 @@ void Mesh::draw() {
         return;
     }
     
-    if(diffuse) diffuse->use(0);
-    if(normalMap) normalMap->use(1);
-    if(effectMap) effectMap->use(2);
+    if(diffuse)
+        diffuse->use(0);
+    if(effectMap)
+        effectMap->use(1);
+    else {
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+    if(normalMap)
+        normalMap->use(2);
+    else {
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
     
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     unsigned int byteStride = 3;

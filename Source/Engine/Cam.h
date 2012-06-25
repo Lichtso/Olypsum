@@ -13,7 +13,7 @@
 
 class Cam {
     public:
-    Matrix4 camMat, viewMat, shadowMat;
+    Matrix4 camMat, viewMat;
     float fov, near, far, width, height;
     Frustum3 frustum;
     Cam();

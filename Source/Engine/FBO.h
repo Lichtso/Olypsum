@@ -27,8 +27,9 @@ class FBO {
     std::vector<ColorBuffer*> colorBuffers;
     ~FBO();
     void init();
+    void clearDeferredBuffers();
     void renderInDeferredBuffers();
-    void renderDeferred(std::vector<unsigned char>* inBuffers, std::vector<unsigned char>* outBuffers);
+    void renderDeferred(unsigned char* inBuffers, unsigned char inBuffersCount, unsigned char* outBuffers, unsigned char outBuffersCount);
     ColorBuffer* addTexture(unsigned int size);
     void renderInTexture(ColorBuffer* colorBuffer);
     void mipmapTexture(ColorBuffer* colorBuffer);

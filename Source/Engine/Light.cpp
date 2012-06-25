@@ -8,6 +8,9 @@
 
 #import "Game.h"
 
+unsigned char inBuffersA[] = { positionDBuffer, normalDBuffer, materialDBuffer, diffuseDBuffer, specularDBuffer }, outBuffersA[] = { diffuseDBuffer, specularDBuffer };
+unsigned char inBuffersB[] = { colorDBuffer, materialDBuffer, diffuseDBuffer, specularDBuffer }, outBuffersB[] = { };
+
 Light::Light() {
     shadowCam = NULL;
     shadowMap = NULL;
@@ -59,7 +62,7 @@ void Light::deleteShadowmap() {
 void Light::use() {
     currentShaderProgram->setUniformF("lRange", range);
     currentShaderProgram->setUniformVec3("lColor", color);
-    currentShaderProgram->setUniformVec3("lDirection", direction);
+    currentShaderProgram->setUniformVec3("lDirection", direction*-1.0);
 }
 
 void Light::selectShaderProgram(bool skeletal) {
@@ -91,7 +94,6 @@ bool DirectionalLight::calculateShadowmap() {
     shadowCam->far = range;
     shadowCam->calculate();
     shadowCam->use();
-    currentCam = shadowCam;
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
     mainFBO.renderInTexture(shadowMap);
@@ -111,8 +113,12 @@ void DirectionalLight::use() {
         shaderPrograms[directionalShadowLightSP]->use();
     Light::use();
     if(!shadowMap) return;
-    currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowCam->shadowMat);
+    Matrix4 shadowMat = shadowCam->viewMat;
+    shadowMat.scale(Vector3(0.5, 0.5, 1.0));
+    shadowMat.translate(Vector3(0.5, 0.5, 0.0));
+    currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowMat);
     mainFBO.useTexture(shadowMap, 5);
+    mainFBO.renderDeferred(inBuffersA, sizeof(inBuffersA)/sizeof(unsigned char), outBuffersA, sizeof(outBuffersA)/sizeof(unsigned char));
 }
 
 void DirectionalLight::selectShaderProgram(bool skeletal) {
@@ -143,7 +149,6 @@ bool SpotLight::calculateShadowmap() {
     shadowCam->far = range;
     shadowCam->calculate();
     shadowCam->use();
-    currentCam = shadowCam;
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
     mainFBO.renderInTexture(shadowMap);
@@ -174,11 +179,15 @@ void SpotLight::use() {
     else
         shaderPrograms[spotShadowLightSP]->use();
     Light::use();
-    currentShaderProgram->setUniformF("lCutoff", cutoff);
+    currentShaderProgram->setUniformF("lCutoff", cos(cutoff));
     currentShaderProgram->setUniformVec3("lPosition", position);
     if(!shadowMap) return;
-    currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowCam->shadowMat);
+    Matrix4 shadowMat = shadowCam->viewMat;
+    shadowMat.scale(Vector3(0.5, 0.5, 1.0));
+    shadowMat.translate(Vector3(0.5, 0.5, 0.0));
+    currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowMat);
     mainFBO.useTexture(shadowMap, 5);
+    mainFBO.renderDeferred(inBuffersA, sizeof(inBuffersA)/sizeof(unsigned char), outBuffersA, sizeof(outBuffersA)/sizeof(unsigned char));
 }
 
 void SpotLight::selectShaderProgram(bool skeletal) {
@@ -207,25 +216,26 @@ bool PositionalLight::calculateShadowmap() {
     if(omniDirectional && !shadowMapB)
         shadowMapB = mainFBO.addTexture(1024);
     
+    shaderPrograms[solidParabolidShadowSP]->use();
+    shaderPrograms[solidParabolidShadowSP]->setUniformF("lRange", range);
+    shaderPrograms[skeletalParabolidShadowSP]->use();
+    shaderPrograms[skeletalParabolidShadowSP]->setUniformF("lRange", range);
     shadowCam->camMat.setIdentity();
     shadowCam->camMat.setDirection(direction, upDir);
     shadowCam->camMat.translate(position);
-    shadowCam->viewMat = shadowCam->camMat.getInverse();
-    shadowCam->shadowMat = shadowCam->viewMat;
     shadowCam->use();
-    currentCam = shadowCam;
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
     if(shadowMapB) {
-        Matrix4 restoreMat = shadowCam->viewMat;
-        shadowCam->viewMat.setIdentity();
-        shadowCam->viewMat.setDirection(direction*-1.0, upDir);
-        shadowCam->viewMat.translate(position);
-        shadowCam->viewMat = shadowCam->viewMat.getInverse();
+        shadowMatB.setIdentity();
+        shadowMatB.setDirection(direction*-1.0, upDir);
+        shadowMatB.translate(position);
+        shadowMatB = shadowMatB.getInverse();
+        shadowCam->viewMat = shadowMatB;
         mainFBO.renderInTexture(shadowMapB);
         renderScene();
-        shadowCam->viewMat = restoreMat;
     }
+    shadowCam->viewMat = shadowCam->camMat.getInverse();
     mainFBO.renderInTexture(shadowMap);
     renderScene();
     glEnable(GL_BLEND);
@@ -242,17 +252,22 @@ void PositionalLight::deleteShadowmap() {
 void PositionalLight::use() {
     if(!shadowMap)
         shaderPrograms[positionalLightSP]->use();
-    else if(!shadowMapB)
-        shaderPrograms[positionalShadowLightSP]->use();
     else
-        shaderPrograms[positionalDualShadowLightSP]->use();
+        shaderPrograms[positionalShadowLightSP]->use();
     Light::use();
-    currentShaderProgram->setUniformF("lCutoff", (omniDirectional) ? 4.0 : M_PI_2);
+    currentShaderProgram->setUniformF("lCutoff", 0.0);
     currentShaderProgram->setUniformVec3("lPosition", position);
     if(!shadowMap) return;
-    currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowCam->shadowMat);
+    shadowCam->viewMat = shadowCam->camMat.getInverse();
+    currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowCam->viewMat);
     mainFBO.useTexture(shadowMap, 5);
-    if(shadowMapB) mainFBO.useTexture(shadowMapB, 6);
+    mainFBO.renderDeferred(inBuffersA, sizeof(inBuffersA)/sizeof(unsigned char), outBuffersA, sizeof(outBuffersA)/sizeof(unsigned char));
+    if(shadowMapB) {
+        currentShaderProgram->setUniformVec3("lDirection", direction);
+        currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowMatB);
+        mainFBO.useTexture(shadowMapB, 5);
+        mainFBO.renderDeferred(inBuffersA, sizeof(inBuffersA)/sizeof(unsigned char), outBuffersA, sizeof(outBuffersA)/sizeof(unsigned char));
+    }
 }
 
 void PositionalLight::selectShaderProgram(bool skeletal) {
@@ -282,35 +297,18 @@ void LightManager::calculateShadows(unsigned int maxShadows) {
 }
 
 void LightManager::useLights() {
-    std::vector<unsigned char> inBuffers, outBuffers;
-    inBuffers.push_back(colorDBuffer);
-    inBuffers.push_back(materialDBuffer);
-    outBuffers.push_back(diffuseDBuffer);
-    outBuffers.push_back(specularDBuffer);
-    shaderPrograms[deferredPrepareSP]->use();
-    mainFBO.renderDeferred(&inBuffers, &outBuffers);
+    glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+    mainFBO.clearDeferredBuffers();
     
-    inBuffers.clear();
-    inBuffers.push_back(diffuseDBuffer);
-    inBuffers.push_back(specularDBuffer);
-    inBuffers.push_back(positionDBuffer);
-    inBuffers.push_back(normalDBuffer);
-    inBuffers.push_back(materialDBuffer);
-    outBuffers.clear();
-    outBuffers.push_back(diffuseDBuffer);
-    outBuffers.push_back(specularDBuffer);
-    for(unsigned int i = 0; i < lights.size(); i ++) {
+    for(unsigned int i = 0; i < lights.size(); i ++)
         lights[i]->use();
-        mainFBO.renderDeferred(&inBuffers, &outBuffers);
-    }
     
-    inBuffers.clear();
-    inBuffers.push_back(colorDBuffer);
-    inBuffers.push_back(diffuseDBuffer);
-    inBuffers.push_back(specularDBuffer);
-    outBuffers.clear();
     shaderPrograms[deferredCombineSP]->use();
-    mainFBO.renderDeferred(&inBuffers, &outBuffers);
+    mainFBO.renderDeferred(inBuffersB, sizeof(inBuffersB)/sizeof(unsigned char), outBuffersB, sizeof(outBuffersB)/sizeof(unsigned char));
+    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
+    glEnable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
 }
 
 LightManager lightManager;

@@ -28,11 +28,11 @@ int FBO::getColorBufferIndex(ColorBuffer* colorBuffer) {
 
 void FBO::initBuffer(unsigned int index) {
     glGenTextures(1, &dBuffers[index]);
-    glBindTexture(GL_TEXTURE_2D, dBuffers[index]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, dBuffers[index]);
+    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
 void FBO::init() {
@@ -43,56 +43,62 @@ void FBO::init() {
     glGenRenderbuffers(1, &depthBuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, maxFBOSize, maxFBOSize);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
     
     initBuffer(colorDBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, videoInfo->current_w, videoInfo->current_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, videoInfo->current_w, videoInfo->current_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     initBuffer(positionDBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA32F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGBA, GL_FLOAT, NULL);
     initBuffer(normalDBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(materialDBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     initBuffer(diffuseDBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(specularDBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
-    
-    //printf("glCheckFramebufferStatus %d\n", glCheckFramebufferStatus(GL_FRAMEBUFFER));
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
     
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void FBO::clearDeferredBuffers() {
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE_ARB, dBuffers[diffuseDBuffer], 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_RECTANGLE_ARB, dBuffers[specularDBuffer], 0);
+    GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+    glDrawBuffers(2, drawBuffers);
+    glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void FBO::renderInDeferredBuffers() {
     glViewport(0, 0, videoInfo->current_w, videoInfo->current_h);
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
     for(unsigned char o = 0; o < 4; o ++)
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+o, GL_TEXTURE_2D, dBuffers[o], 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+o, GL_TEXTURE_RECTANGLE_ARB, dBuffers[o], 0);
     GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
     glDrawBuffers(4, drawBuffers);
+    glClearColor(0, 0, 0, 1);
 }
 
-void FBO::renderDeferred(std::vector<unsigned char>* inBuffers, std::vector<unsigned char>* outBuffers) {
-    if(outBuffers->size() == 0) {
+void FBO::renderDeferred(unsigned char* inBuffers, unsigned char inBuffersCount, unsigned char* outBuffers, unsigned char outBuffersCount) {
+    if(outBuffersCount == 0) {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }else{
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-        GLenum drawBuffers[outBuffers->size()];
-        for(unsigned char o = 0; o < outBuffers->size(); o ++) {
+        GLenum drawBuffers[outBuffersCount];
+        for(unsigned char o = 0; o < outBuffersCount; o ++) {
             drawBuffers[o] = GL_COLOR_ATTACHMENT0+o;
-            glFramebufferTexture2D(GL_FRAMEBUFFER, drawBuffers[o], GL_TEXTURE_2D, dBuffers[(*outBuffers)[o]], 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, drawBuffers[o], GL_TEXTURE_RECTANGLE_ARB, dBuffers[outBuffers[o]], 0);
         }
-        //for(unsigned char o = outBuffers->size(); o < 4; o ++)
-        //    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+o, GL_TEXTURE_2D, 0, 0);
-        glDrawBuffers(outBuffers->size(), drawBuffers);
+        glDrawBuffers(outBuffersCount, drawBuffers);
     }
     
-    for(unsigned char i = 0; i < inBuffers->size(); i ++) {
+    for(unsigned char i = 0; i < inBuffersCount; i ++) {
         glActiveTexture(GL_TEXTURE0+i);
-        glBindTexture(GL_TEXTURE_2D, dBuffers[(*inBuffers)[i]]);
+        glBindTexture(GL_TEXTURE_RECTANGLE_ARB, dBuffers[inBuffers[i]]);
         /*bool trought = false;
         for(unsigned char o = 0; o < outBuffers->size(); o ++)
-            if((*inBuffers)[i] == (*outBuffers)[o]) {
+            if(inBuffers[i] == outBuffers[o]) {
                 trought = true;
                 break;
             }
@@ -100,8 +106,6 @@ void FBO::renderDeferred(std::vector<unsigned char>* inBuffers, std::vector<unsi
         */
     }
     
-    glDisable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
     float vertices[12] = {
         0.0, 0.0,
         1.0, 0.0,
@@ -110,9 +114,6 @@ void FBO::renderDeferred(std::vector<unsigned char>* inBuffers, std::vector<unsi
     };
     currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    glEnable(GL_BLEND);
-    glEnable(GL_DEPTH_TEST);
 }
 
 ColorBuffer* FBO::addTexture(unsigned int size) {
@@ -128,14 +129,18 @@ ColorBuffer* FBO::addTexture(unsigned int size) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, colorBuffer->size, colorBuffer->size, 0, GL_RED, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, colorBuffer->size, colorBuffer->size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     colorBuffers.push_back(colorBuffer);
     return colorBuffer;
 }
 
 void FBO::renderInTexture(ColorBuffer* colorBuffer) {
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer->texture, 0);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, colorBuffer->texture, 0);
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glViewport(0, 0, colorBuffer->size, colorBuffer->size);
 }

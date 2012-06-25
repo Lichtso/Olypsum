@@ -174,7 +174,6 @@ void AppMain(int argc, char *argv[]) {
         calculateFrame();
         lightManager.calculateShadows(1);
         mainCam->use();
-        glClearColor(0, 0, 0, 1);
         mainFBO.renderInDeferredBuffers();
         renderScene();
         particleSystemManager.draw();

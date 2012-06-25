@@ -28,7 +28,7 @@ class Mesh {
     GLuint vbo, ibo;
     unsigned int elementsCount;
     int postions, texcoords, normals, tangents, bitangents, weightJoints;
-    Texture *diffuse, *normalMap, *effectMap;
+    Texture *diffuse, *effectMap, *normalMap;
     Mesh();
     ~Mesh();
     void draw();

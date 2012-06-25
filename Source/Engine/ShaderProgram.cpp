@@ -94,11 +94,13 @@ void ShaderProgram::link() {
     char buffer[64], samplerIndex;
     GLint location;
     for(samplerIndex = 0; samplerIndex < 8; samplerIndex ++) {
-        sprintf(buffer, "sampler%d", samplerIndex);
+        sprintf(buffer, "sampler[%d]", samplerIndex);
         location = glGetUniformLocation(GLname, buffer);
         if(location < 0) break;
         glUniform1i(location, samplerIndex);
     }
+    location = glGetUniformLocation(GLname, "shadowSampler");
+    if(location >= 0) glUniform1i(location, samplerIndex);
 }
 
 void ShaderProgram::use () {
@@ -112,7 +114,6 @@ void ShaderProgram::use () {
     if(currentCam) {
         setUniformVec3("camPos", currentCam->camMat.pos);
         setUniformMatrix4("viewMat", &currentCam->viewMat);
-        setUniformMatrix4("shadowMat", &currentCam->shadowMat);
         if(checkUniformExistence("modelViewMat")) {
             Matrix4 projectionMat(modelMat * currentCam->viewMat);
             setUniformMatrix4("modelViewMat", &projectionMat);
@@ -264,12 +265,6 @@ void loadShaderPrograms() {
     shaderPrograms[skeletalParabolidShadowSP]->link();
     
     shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("PREPARE_BUFFERS 1");
-    shaderPrograms[deferredPrepareSP]->loadShaderProgram("deferredShader", &shaderProgramMacros);
-    shaderPrograms[deferredPrepareSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[deferredPrepareSP]->link();
-    
-    shaderProgramMacros.clear();
     shaderProgramMacros.push_back("LIGHT_TYPE 1");
     shaderProgramMacros.push_back("SHADOWS_ACTIVE 0");
     shaderPrograms[directionalLightSP]->loadShaderProgram("deferredLight", &shaderProgramMacros);
@@ -312,13 +307,6 @@ void loadShaderPrograms() {
     shaderPrograms[positionalShadowLightSP]->link();
     
     shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("LIGHT_TYPE 3");
-    shaderProgramMacros.push_back("SHADOWS_ACTIVE 2");
-    shaderPrograms[positionalDualShadowLightSP]->loadShaderProgram("deferredLight", &shaderProgramMacros);
-    shaderPrograms[positionalDualShadowLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[positionalDualShadowLightSP]->link();
-    
-    shaderProgramMacros.clear();
     shaderPrograms[blurSP]->loadShaderProgram("blur", &shaderProgramMacros);
     shaderPrograms[blurSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[blurSP]->link();
@@ -330,7 +318,6 @@ void loadShaderPrograms() {
     shaderPrograms[ssaoSP]->link();*/
     
     shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("PREPARE_BUFFERS 0");
     shaderPrograms[deferredCombineSP]->loadShaderProgram("deferredShader", &shaderProgramMacros);
     shaderPrograms[deferredCombineSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[deferredCombineSP]->link();

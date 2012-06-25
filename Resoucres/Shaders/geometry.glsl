@@ -37,8 +37,7 @@ void main() {
 
 #separator
 
-uniform sampler2D sampler0; //ColorTexture
-uniform sampler2D sampler1; //MaterialTexture
+uniform sampler2D sampler[2];
 uniform float discardDensity;
 varying vec3 vPosition;
 varying vec2 vTexCoord;
@@ -49,13 +48,13 @@ float random(vec2 co) {
 }
 
 void main() {
-	gl_FragData[0] = texture2D(sampler0, vTexCoord);
+	gl_FragData[0] = texture2D(sampler[0], vTexCoord);
     if(gl_FragData[0].a < 0.1 || random(gl_FragCoord.xy) > discardDensity) discard;
     
     gl_FragData[1].rgb = vPosition;
     gl_FragData[1].a = 1.0;
     gl_FragData[2].xyz = vNormal;
     gl_FragData[2].a = 1.0;
-    gl_FragData[3] = texture2D(sampler1, vTexCoord);
+    gl_FragData[3].rgb = texture2D(sampler[1], vTexCoord).rgb;
     gl_FragData[3].a = 1.0;
 }

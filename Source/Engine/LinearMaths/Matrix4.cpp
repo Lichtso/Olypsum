@@ -306,6 +306,6 @@ Matrix4& Matrix4::ortho(float w, float h, float n, float f) {
     b.x.x = 1.0/w;
     b.y.y = 1.0/h;
     b.z.z = -2.0/(f-n);
-    b.pos.z = -((f+n)/(f-n));
+    b.pos.z = (-f-n)/(f-n);
     return (*this *= b);
 }

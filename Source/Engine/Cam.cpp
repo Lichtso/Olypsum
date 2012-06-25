@@ -60,18 +60,12 @@ Frustum3 Cam::getFrustumOf(Vector3 screenMin, Vector3 screenMax) {
 }
 
 void Cam::calculate() {
-    float aspect = width/height;
     viewMat = camMat.getInverse();
     
     if(fov > 0.0)
-        viewMat.perspective(fov, aspect, near, far);
+        viewMat.perspective(fov, width/height, near, far);
     else
         viewMat.ortho(width, height, near, far);
-    
-    shadowMat = viewMat;
-    shadowMat.scale(Vector3(0.5, 0.5, 1.0));
-    shadowMat.translate(Vector3(0.5, 0.5, 0.0));
-    //shadowMat.scale((aspect >= 1.0) ? Vector3(1.0, 1.0/aspect, 1.0) : Vector3(aspect, 1.0, 1.0));
     
     frustum = getFrustumOf(Vector3(-1, -1, 0), Vector3(1, 1, 0));
 }
