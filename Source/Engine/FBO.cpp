@@ -96,24 +96,7 @@ void FBO::renderDeferred(unsigned char* inBuffers, unsigned char inBuffersCount,
     for(unsigned char i = 0; i < inBuffersCount; i ++) {
         glActiveTexture(GL_TEXTURE0+i);
         glBindTexture(GL_TEXTURE_RECTANGLE_ARB, dBuffers[inBuffers[i]]);
-        /*bool trought = false;
-        for(unsigned char o = 0; o < outBuffers->size(); o ++)
-            if(inBuffers[i] == outBuffers[o]) {
-                trought = true;
-                break;
-            }
-        if(!trought) continue;
-        */
     }
-    
-    float vertices[12] = {
-        0.0, 0.0,
-        1.0, 0.0,
-        1.0, 1.0,
-        0.0, 1.0
-    };
-    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
 ColorBuffer* FBO::addTexture(unsigned int size) {
@@ -161,6 +144,31 @@ void FBO::deleteTexture(ColorBuffer* colorBuffer) {
     glDeleteTextures(1, &colorBuffer->texture);
     colorBuffers.erase(colorBuffers.begin()+index);
     delete colorBuffer;
+}
+
+GLuint FBO::generateNormalMap(GLuint heightMap, unsigned int width, unsigned int height, float processingValue) {
+    GLuint normalMap = 0;
+    glGenTextures(1, &normalMap);
+    if(normalMap == 0) return 0;
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, normalMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glBindTexture(GL_TEXTURE_2D, heightMap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, normalMap, 0);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    glViewport(0, 0, width, height);
+    float vertices[12] = { -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0 };
+    Matrix4 mat;
+    currentShaderProgram->setUniformF("processingValue", processingValue);
+    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
+    glDeleteTextures(1, &heightMap);
+    return normalMap;
 }
 
 FBO mainFBO;

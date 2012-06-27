@@ -35,6 +35,7 @@ class FBO {
     void mipmapTexture(ColorBuffer* colorBuffer);
     void useTexture(ColorBuffer* colorBuffer, GLuint targetIndex);
     void deleteTexture(ColorBuffer* colorBuffer);
+    GLuint generateNormalMap(GLuint heightMap, unsigned int width, unsigned int height, float processingValue);
 };
 
 enum DeferredBufferNames {

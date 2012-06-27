@@ -19,6 +19,8 @@ class Frustum3 {
     bool testPointHit(Vector3 pos);
     bool testBsHit(Bs3* bs);
     template <class T> bool testBoxHit(T* box);
+    bool testPolyhedronInclusiveHit(Vector3* vertices, unsigned int verticesCount);
+    bool testPolyhedronExclusiveHit(Vector3* vertices, unsigned int verticesCount);
 };
 
 #endif

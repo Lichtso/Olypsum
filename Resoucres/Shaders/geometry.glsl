@@ -13,9 +13,16 @@ uniform mat4 modelViewMat;
 uniform mat4 modelMat;
 uniform mat3 normalMat;
 #endif
+
+#if BUMP_MAPPING
+varying vec3 gPosition;
+varying vec2 gTexCoord;
+varying vec3 gNormal;
+#else
 varying vec3 vPosition;
 varying vec2 vTexCoord;
 varying vec3 vNormal;
+#endif
 
 void main() {
     #if SKELETAL_ANIMATION
@@ -25,23 +32,44 @@ void main() {
     mat += weights[2]*jointMats[int(joints[2])];
     vec4 pos = vec4(position, 1.0) * mat;
     gl_Position = pos * viewMat;
+    #if BUMP_MAPPING
+    gPosition = pos.xyz/pos.w;
+    gNormal = normalize((vec4(normal, 0.0) * mat).xyz);
+    gTexCoord = texCoord;
+    #else
     vPosition = pos.xyz/pos.w;
     vNormal = normalize((vec4(normal, 0.0) * mat).xyz);
+    vTexCoord = texCoord;
+    #endif
     #else
     gl_Position = vec4(position, 1.0)*modelViewMat;
+    #if BUMP_MAPPING
+    gPosition = (vec4(position, 1.0)*modelMat).xyz;
+    gNormal = normal*normalMat;
+    gTexCoord = texCoord;
+    #else
 	vPosition = (vec4(position, 1.0)*modelMat).xyz;
     vNormal = normal*normalMat;
+    vTexCoord = texCoord;
     #endif
-	vTexCoord = texCoord;
+    #endif
 }
 
 #separator
 
-uniform sampler2D sampler[2];
-uniform float discardDensity;
 varying vec3 vPosition;
 varying vec2 vTexCoord;
 varying vec3 vNormal;
+#if BUMP_MAPPING
+varying vec3 vTangent;
+varying vec3 vBitangent;
+
+uniform vec3 camPos;
+uniform sampler2D sampler[3];
+#else
+uniform sampler2D sampler[2];
+#endif
+uniform float discardDensity;
 
 float random(vec2 co) {
     return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
@@ -53,8 +81,14 @@ void main() {
     
     gl_FragData[1].rgb = vPosition;
     gl_FragData[1].a = 1.0;
-    gl_FragData[2].xyz = vNormal;
-    gl_FragData[2].a = 1.0;
     gl_FragData[3].rgb = texture2D(sampler[1], vTexCoord).rgb;
     gl_FragData[3].a = 1.0;
+    #if BUMP_MAPPING
+    vec4 bumpMap = texture2D(sampler[2], vTexCoord).rgba;
+    bumpMap.xyz = bumpMap.xyz*2.0-vec3(1.0);
+    gl_FragData[2].xyz = bumpMap*mat3(vTangent, vBitangent, vNormal);
+    #else
+    gl_FragData[2].xyz = vNormal;
+    #endif
+    gl_FragData[2].a = 1.0;
 }

@@ -27,7 +27,7 @@ class ShaderProgram {
 	ShaderProgram();
 	~ShaderProgram();
 	bool loadShader(GLuint shaderType, const char* soucreCode, std::vector<const char*>* macros);
-    bool loadShaderProgram(const char* fileName, std::vector<const char*>* macros);
+    bool loadShaderProgram(const char* fileName, bool geometryShader, std::vector<const char*>* macros);
     void addAttribute(unsigned int index, const char* attributeName);
 	void link();
 	void use();
@@ -45,7 +45,7 @@ class ShaderProgram {
 };
 
 extern Matrix4 modelMat;
-extern ShaderProgram *shaderPrograms[16], *currentShaderProgram;
+extern ShaderProgram *shaderPrograms[18], *currentShaderProgram;
 
 enum ShaderProgramNames {
     spriteSP = 0,
@@ -61,9 +61,11 @@ enum ShaderProgramNames {
     spotShadowLightSP = 10,
     positionalLightSP = 11,
     positionalShadowLightSP = 12,
-    blurSP = 13,
-    ssaoSP = 14,
-    deferredCombineSP = 15
+    positionalShadowDualLightSP = 13,
+    normalMapGenSP = 14,
+    blurSP = 15,
+    ssaoSP = 16,
+    deferredCombineSP = 17
 };
 
 void loadShaderPrograms();

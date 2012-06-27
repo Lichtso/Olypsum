@@ -1,7 +1,10 @@
-attribute vec2 position;
+attribute vec3 position;
+
+uniform mat4 modelViewMat;
 
 void main() {
-	gl_Position = vec4(position.x*2.0-1.0, position.y*2.0-1.0, 0.0, 1.0);
+    gl_Position = vec4(position, 0.0);//*modelViewMat;
+    gl_Position.z = 0.0;
 }
 
 #separator
@@ -18,8 +21,10 @@ uniform vec3 lPosition;
 
 uniform sampler2DRect sampler[5];
 
-#if SHADOWS_ACTIVE
-uniform sampler2DShadow shadowSampler;
+#if SHADOWS_ACTIVE == 1
+uniform sampler2DShadow shadowSampler[1];
+#elif SHADOWS_ACTIVE == 2
+uniform sampler2DShadow shadowSampler[2];
 #endif
 
 #if SHADOWS_ACTIVE > 0
@@ -59,17 +64,30 @@ void main() {
     vec4 shadowCoord = vec4(pos, 1.0) * lShadowMat;
     #if LIGHT_TYPE < 3
     shadowCoord.z = shadowCoord.z*0.5*depthBias+0.5*shadowCoord.w;
-    intensity *= shadow2DProj(shadowSampler, shadowCoord).x;
+    intensity *= shadow2DProj(shadowSampler[0], shadowCoord).x;
     #else
-    shadowCoord.xy /= lightDirLen - shadowCoord.z;
-    shadowCoord.xy = shadowCoord.xy * 0.5 + vec2(0.5);
-    shadowCoord.z = (1.0-intensity) * depthBias;
-    intensity *= shadow2D(shadowSampler, shadowCoord.xyz).x;
+    #if SHADOWS_ACTIVE == 2
+    if(shadowCoord.z < 0.0) {
+    #endif
+        shadowCoord.xy /= lightDirLen - shadowCoord.z;
+        shadowCoord.xy = shadowCoord.xy * 0.5 + vec2(0.5);
+        shadowCoord.z = (1.0-intensity) * depthBias;
+        intensity *= shadow2D(shadowSampler[0], shadowCoord.xyz).x;
+    #if SHADOWS_ACTIVE == 2
+    }else{
+        shadowCoord.xy /= lightDirLen + shadowCoord.z;
+        shadowCoord.x *= -1.0;
+        shadowCoord.xy = shadowCoord.xy * 0.5 + vec2(0.5);
+        shadowCoord.z = (1.0-intensity) * depthBias;
+        intensity *= shadow2D(shadowSampler[1], shadowCoord.xyz).x;
+    }
+    #endif
     #endif
     #endif
     
-    diffuseLight += lColor*intensity*max(dot(lightDir, normal), 0.0);
-    specularLight += lColor*intensity*pow(max(dot(reflect(lightDir, normal), normalize(pos-camPos)), 0.0), material.r*10.0+1.0)*material.g;
+    diffuseLight += vec3(0.5);
+    //diffuseLight += lColor*intensity*max(dot(lightDir, normal), 0.0);
+    //specularLight += lColor*intensity*pow(max(dot(reflect(lightDir, normal), normalize(pos-camPos)), 0.0), material.r*10.0+1.0)*material.g;
     
     gl_FragData[0].rgb = min(diffuseLight, 1.0);
     gl_FragData[0].a = 1.0;

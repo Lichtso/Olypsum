@@ -70,7 +70,7 @@ void AppMain(int argc, char *argv[]) {
     glStr = (char*)glGetString(GL_VERSION);
     printf("OpenGL, version: %s\n", glStr);
     glStr = (char*)glGetString(GL_EXTENSIONS);
-    //printf("%s\n\n", glStr);
+    //printf("OpenGL, extensions: %s\n\n", glStr);
     
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_DEPTH_TEST);
@@ -110,7 +110,8 @@ void AppMain(int argc, char *argv[]) {
     //Init all other stuff
     currentScreenView = new GUIScreenView();
     mainFBO.init();
-    particleThread = SDL_CreateThread(ParticleThreadFunction, NULL);
+    lightManager.init();
+    //particleThread = SDL_CreateThread(ParticleThreadFunction, NULL);
     
     SDL_Event event;
     SDL_PollEvent(&event);
@@ -176,7 +177,7 @@ void AppMain(int argc, char *argv[]) {
         mainCam->use();
         mainFBO.renderInDeferredBuffers();
         renderScene();
-        particleSystemManager.draw();
+        //particleSystemManager.draw();
         lightManager.useLights();
         if(currentScreenView) currentScreenView->draw();
         SDL_GL_SwapBuffers();

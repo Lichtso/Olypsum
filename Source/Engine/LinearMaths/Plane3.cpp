@@ -43,7 +43,7 @@ void Plane3::set(Vector3 pos, Vector3 normalB) {
 }
 
 void Plane3::set(Vector3 posA, Vector3 posB, Vector3 posC) {
-    normal = (posB-posA)/(posC-posA);
+    normal = ((posB-posA)/(posC-posA)).normalize();
     distance = -(normal*posA);
 }
 
@@ -61,18 +61,18 @@ float Plane3::getRayDist(Ray3 ray) {
 }
 
 bool Plane3::testPointHit(Vector3 pos) {
-    return (pos*normal <= distance);
+    return (pos*normal >= distance);
 }
 
-bool Plane3::testBsHit(Bs3 bs) {
-    return (bs.transformation->pos*normal-distance <= bs.radius);
+bool Plane3::testBsHit(Bs3* bs) {
+    return (bs->transformation->pos*normal-distance >= bs->radius);
 }
 
 template <class T> bool Plane3::testBoxHit(T* box) {
     Vector3 vertices[8];
     box->getVertices(vertices);
     for(unsigned char i = 0; i < 8; i ++)
-        if(vertices[i]*normal <= distance) return true;
+        if(vertices[i]*normal >= distance) return true;
     return false;
 }
 
@@ -81,19 +81,18 @@ template <class T> unsigned int Plane3::testBoxHitCount(T* box) {
     Vector3 vertices[8];
     box->getVertices(vertices);
     for(unsigned char i = 0; i < 8; i ++)
-        if(vertices[i]*normal <= distance) count ++;
+        if(vertices[i]*normal >= distance) count ++;
     return count;
 }
 
-bool Plane3::testPolyhedronHit(Vector3* vertices, unsigned int verticesCount) {
+bool Plane3::testPolyhedronInclusiveHit(Vector3* vertices, unsigned int verticesCount) {
     for(unsigned int i = 0; i < verticesCount; i ++)
-        if(vertices[i]*normal <= distance) return true;
+        if(vertices[i]*normal >= distance) return true;
     return false;
 }
 
-bool Plane3::testPolyhedronHitCount(Vector3* vertices, unsigned int verticesCount) {
-    unsigned int count = 0;
+bool Plane3::testPolyhedronExclusiveHit(Vector3* vertices, unsigned int verticesCount) {
     for(unsigned int i = 0; i < verticesCount; i ++)
-        if(vertices[i]*normal <= distance) count ++;
-    return count;
+        if(vertices[i]*normal < distance) return false;
+    return true;
 }

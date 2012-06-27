@@ -22,7 +22,7 @@ class Light {
     Cam* shadowCam;
     ColorBuffer* shadowMap;
     public:
-    Vector3 direction, upDir;
+    Vector3 direction, position, upDir;
     float range;
     LightType type;
     Vector3 color;
@@ -43,7 +43,7 @@ class LightPrioritySorter {
 
 class DirectionalLight : public Light {
     public:
-    float distance, width, height;
+    float width, height;
     DirectionalLight();
     bool calculateShadowmap();
     void deleteShadowmap();
@@ -53,7 +53,6 @@ class DirectionalLight : public Light {
 
 class SpotLight : public Light {
     public:
-    Vector3 position;
     float cutoff;
     SpotLight();
     bool calculateShadowmap();
@@ -66,7 +65,6 @@ class PositionalLight : public Light {
     ColorBuffer* shadowMapB;
     Matrix4 shadowMatB;
     public:
-    Vector3 position;
     bool omniDirectional;
     PositionalLight();
     ~PositionalLight();
@@ -77,10 +75,12 @@ class PositionalLight : public Light {
 };
 
 class LightManager {
+    GLuint lightVolumesVbo, lightVolumesIbo;
     public:
     std::vector<Light*> lights;
     Light* currentShadowLight;
     ~LightManager();
+    void init();
     void calculateShadows(unsigned int maxShadows);
     void useLights();
 };

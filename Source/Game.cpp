@@ -22,12 +22,12 @@ void initGame() {
     humanModel = fileManager.getPackage(NULL)->getModel("man.dae");
     skeletonPose = new SkeletonPose(humanModel->skeleton);
     
-    if(false) {
+    if(true) {
         DirectionalLight* light = new DirectionalLight();
+        light->position = Vector3(0.0, 1.0, 0.0);
         light->direction = Vector3(0.0, -1.0, 0.0).normalize();
-        light->distance = 50.0;
-        light->range = 100.0;
-        light->width = light->height = 2.0;
+        light->range = 1.0;
+        light->width = light->height = 1.0;
         lightManager.lights.push_back((Light*)light);
     }
     
@@ -40,7 +40,7 @@ void initGame() {
         lightManager.lights.push_back((Light*)lightB);
     }
     
-    if(true) {
+    if(false) {
         PositionalLight* lightC = new PositionalLight();
         lightC->position = Vector3(0.0, 3.0, 1.0);
         lightC->direction = Vector3(1.0, 0.0, 0.0).normalize();
