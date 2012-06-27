@@ -1,6 +1,15 @@
 Test Bounding Volumes
-Implement Speclar Light
-Implement SSAO
+Deferred lights volume and frustum culling
+Depth texture to normal map
+Normal mapping
+Spot light shadow map circle
+Parallax mapping
+Occulusion parallax mapping
+Shadow multi sample
+SSAO
+Anti aliasing
+Water
+Enviornment maping
 Make GUI
 Level File Formats
 Object Editor
