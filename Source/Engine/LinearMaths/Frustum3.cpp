@@ -23,18 +23,18 @@ bool Frustum3::testPointHit(Vector3 pos) {
     return true;
 }
 
-bool Frustum3::testBsHit(Bs3* bs) {
-    if(hemisphere) return front.testBsHit(bs);
-    if(!front.testBsHit(bs)) return false;
-    if(!back.testBsHit(bs)) return false;
-    if(!left.testBsHit(bs)) return false;
-    if(!right.testBsHit(bs)) return false;
-    if(!bottom.testBsHit(bs)) return false;
-    if(!top.testBsHit(bs)) return false;
+bool Frustum3::testBsInclusiveHit(Bs3* bs) {
+    if(hemisphere) return front.testBsInclusiveHit(bs);
+    if(!front.testBsInclusiveHit(bs)) return false;
+    if(!back.testBsInclusiveHit(bs)) return false;
+    if(!left.testBsInclusiveHit(bs)) return false;
+    if(!right.testBsInclusiveHit(bs)) return false;
+    if(!bottom.testBsInclusiveHit(bs)) return false;
+    if(!top.testBsInclusiveHit(bs)) return false;
     return true;
 }
 
-template <class T> bool Frustum3::testBoxHit(T* box) {
+template <class T> bool Frustum3::testBoxInclusiveHit(T* box) {
     Vector3 vertices[8];
     box->getVertices(vertices);
     if(hemisphere) return front.testPolyhedronInclusiveHit(vertices, 8);

@@ -29,7 +29,7 @@ class FBO {
     void init();
     void clearDeferredBuffers();
     void renderInDeferredBuffers();
-    void renderDeferred(unsigned char* inBuffers, unsigned char inBuffersCount, unsigned char* outBuffers, unsigned char outBuffersCount);
+    void renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned char inBuffersCount, unsigned char* outBuffers, unsigned char outBuffersCount);
     ColorBuffer* addTexture(unsigned int size);
     void renderInTexture(ColorBuffer* colorBuffer);
     void mipmapTexture(ColorBuffer* colorBuffer);

@@ -13,10 +13,10 @@
 #define sphereAccuracyY 6
 #define parabolidAccuracyY 3
 
+GLuint lightVolumeBuffers[8];
 Vector3 directionalLightVertices[boxVerticesCount];
 Vector3 spotLightVertices[parabolidVerticesCount(coneAccuracy, 0)];
 Vector3 positionalLightVertices[parabolidVerticesCount(sphereAccuracyX, parabolidAccuracyY)];
-Vector3 positionalDualLightVertices[sphereVerticesCount(sphereAccuracyX, sphereAccuracyY)];
 
 static unsigned int copyVertices(Vector3* positions, float* vertices, unsigned int count) {
     for(unsigned int i = 0; i < count; i ++) {
@@ -46,7 +46,7 @@ static bool drawLightVolume(Vector3* verticesSource, unsigned int verticesCount)
         glFrontFace(GL_CW);
     }
     delete [] vertices;
-    mainFBO.renderDeferred(inBuffersA, sizeof(inBuffersA)/sizeof(unsigned char), outBuffersA, sizeof(outBuffersA)/sizeof(unsigned char));
+    mainFBO.renderDeferred(false, inBuffersA, sizeof(inBuffersA)/sizeof(unsigned char), outBuffersA, sizeof(outBuffersA)/sizeof(unsigned char));
     return true;
 }
 
@@ -151,9 +151,8 @@ void DirectionalLight::deleteShadowmap() {
 
 void DirectionalLight::use() {
     modelMat.setIdentity();
-    modelMat.translate(Vector3(0,0,-1));
-    //modelMat.scale(Vector3(width, height, range));
-    //modelMat *= shadowCam->camMat;
+    modelMat.scale(Vector3(width, height, range));
+    modelMat *= shadowCam->camMat;
     
     if(shadowMap) {
         shaderPrograms[directionalShadowLightSP]->use();
@@ -167,20 +166,10 @@ void DirectionalLight::use() {
     Light::use();
     
     if(drawLightVolume(directionalLightVertices, boxVerticesCount)) {
-        //currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float), 0);
-        //glDrawElements(GL_TRIANGLES, boxTrianglesCount*3, GL_UNSIGNED_INT, 0);
-        
-        glFrontFace(GL_CCW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        float vertices[] = {
-            1.0, -1.0, 1.0,
-            -1.0, -1.0, 1.0,
-            1.0, 1.0, 1.0,
-            -1.0, 1.0, 1.0
-        };
-        currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float), vertices);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightVolumeBuffers[0]);
+        glBindBuffer(GL_ARRAY_BUFFER, lightVolumeBuffers[1]);
+        currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float), 0);
+        glDrawElements(GL_TRIANGLES, boxTrianglesCount*3, GL_UNSIGNED_INT, 0);
     }
 }
 
@@ -210,7 +199,7 @@ bool SpotLight::calculateShadowmap() {
     shadowCam->width = 1.0;
     shadowCam->height = 1.0;
     shadowCam->fov = cutoff*2.0;
-    shadowCam->near = 1.0;
+    shadowCam->near = 0.1;
     shadowCam->far = range;
     shadowCam->calculate();
     shadowCam->use();
@@ -239,10 +228,10 @@ void SpotLight::deleteShadowmap() {
 }
 
 void SpotLight::use() {
-    float radius = 1.0/tan(cutoff);
+    float radius = range*tan(cutoff)*1.05;
     modelMat.setIdentity();
-    modelMat.translate(Vector3(0.0, 0.0, 1.0));
-    modelMat.scale(Vector3(radius, radius, range*-1.0));
+    modelMat.translate(Vector3(0.0, 0.0, -1.0));
+    modelMat.scale(Vector3(radius, radius, range));
     modelMat *= shadowCam->camMat;
     
     if(shadowMap) {
@@ -258,9 +247,11 @@ void SpotLight::use() {
     currentShaderProgram->setUniformVec3("lPosition", position);
     Light::use();
     
-    if(drawLightVolume(spotLightVertices, parabolidVerticesCount(coneAccuracy, 0))) {
-        currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float), (GLfloat*)(boxVerticesCount*3*sizeof(float)));
-        glDrawElements(GL_TRIANGLES, boxTrianglesCount*3, GL_UNSIGNED_INT, (GLuint*)(boxTrianglesCount*3*sizeof(unsigned int)));
+    if(drawLightVolume(spotLightVertices, parabolidVerticesCount(coneAccuracy/2, 0))) {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightVolumeBuffers[2]);
+        glBindBuffer(GL_ARRAY_BUFFER, lightVolumeBuffers[3]);
+        currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float), 0);
+        glDrawElements(GL_TRIANGLES, parabolidTrianglesCount(coneAccuracy, 0)*3, GL_UNSIGNED_INT, 0);
     }
 }
 
@@ -328,7 +319,8 @@ void PositionalLight::deleteShadowmap() {
 
 void PositionalLight::use() {
     modelMat.setIdentity();
-    modelMat.scale(Vector3(range, range, range));
+    modelMat.rotateY(M_PI);
+    modelMat.scale(Vector3(range*1.05, range*1.05, range*1.05));
     modelMat *= shadowCam->camMat;
     
     if(shadowMap) {
@@ -346,17 +338,25 @@ void PositionalLight::use() {
     Light::use();
     
     if(omniDirectional) {
-        if(drawLightVolume(spotLightVertices, sphereVerticesCount(sphereAccuracyX, sphereAccuracyY))) {
-            currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float),
-            (GLfloat*)((boxVerticesCount+parabolidVerticesCount(coneAccuracy, 0)+parabolidVerticesCount(sphereAccuracyX, parabolidAccuracyY))*3*sizeof(float)));
-            glDrawElements(GL_TRIANGLES, sphereTrianglesCount(sphereAccuracyX, sphereAccuracyY)*3, GL_UNSIGNED_INT,
-            (GLuint*)((boxTrianglesCount+parabolidTrianglesCount(coneAccuracy, 0)+parabolidTrianglesCount(sphereAccuracyX, parabolidAccuracyY))*3*sizeof(unsigned int)));
+        Bs3 bs(range, &modelMat);
+        if(!currentCam->frustum.testBsInclusiveHit(&bs)) return;
+        if(currentCam->frustum.front.testBsExclusiveHit(&bs)) {
+            glEnable(GL_DEPTH_TEST);
+            glFrontFace(GL_CCW);
+        }else{
+            glDisable(GL_DEPTH_TEST);
+            glFrontFace(GL_CW);
         }
-    }else if(drawLightVolume(spotLightVertices, parabolidVerticesCount(sphereAccuracyX, parabolidAccuracyY))) {
-        currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float),
-        (GLfloat*)((boxVerticesCount+parabolidVerticesCount(coneAccuracy, 0))*3*sizeof(float)));
-        glDrawElements(GL_TRIANGLES, parabolidTrianglesCount(sphereAccuracyX, parabolidAccuracyY)*3, GL_UNSIGNED_INT,
-        (GLuint*)((boxTrianglesCount+parabolidTrianglesCount(coneAccuracy, 0))*3*sizeof(unsigned int)));
+        mainFBO.renderDeferred(false, inBuffersA, sizeof(inBuffersA)/sizeof(unsigned char), outBuffersA, sizeof(outBuffersA)/sizeof(unsigned char));
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightVolumeBuffers[6]);
+        glBindBuffer(GL_ARRAY_BUFFER, lightVolumeBuffers[7]);
+        currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float), 0);
+        glDrawElements(GL_TRIANGLES, sphereTrianglesCount(sphereAccuracyX, sphereAccuracyY)*3, GL_UNSIGNED_INT, 0);
+    }else if(drawLightVolume(spotLightVertices, parabolidVerticesCount(sphereAccuracyX/2, parabolidAccuracyY/2))) {
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightVolumeBuffers[4]);
+        glBindBuffer(GL_ARRAY_BUFFER, lightVolumeBuffers[5]);
+        currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float), 0);
+        glDrawElements(GL_TRIANGLES, parabolidTrianglesCount(sphereAccuracyX, parabolidAccuracyY)*3, GL_UNSIGNED_INT, 0);
     }
 }
 
@@ -375,45 +375,74 @@ void LightManager::init() {
     Parabolid3 positionalLightVolume(1.0, &modelMat);
     Bs3 positionalDualLightVolume(1.0, &modelMat);
     
-    glGenBuffers(1, &lightVolumesIbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightVolumesIbo);
-    unsigned int index, *indecies = new unsigned int[(boxTrianglesCount+parabolidTrianglesCount(coneAccuracy, 0)+
-                                 parabolidTrianglesCount(sphereAccuracyX, parabolidAccuracyY)+
-                                 sphereTrianglesCount(sphereAccuracyX, sphereAccuracyY))*3],
+    unsigned int index, trianglesCount = (boxTrianglesCount+parabolidTrianglesCount(coneAccuracy, 0)+
+                                parabolidTrianglesCount(sphereAccuracyX, parabolidAccuracyY)+
+                                sphereTrianglesCount(sphereAccuracyX, sphereAccuracyY)),
                 positionsCount = boxVerticesCount+parabolidVerticesCount(coneAccuracy, 0)+
                                  parabolidVerticesCount(sphereAccuracyX, parabolidAccuracyY)+
-                                 sphereVerticesCount(sphereAccuracyX, sphereAccuracyY);
+                                 sphereVerticesCount(sphereAccuracyX, sphereAccuracyY),
+                *indecies = new unsigned int[trianglesCount*3];
+    
     index = directionalLightVolume.getIndecies(indecies);
-    index += spotLightVolume.getIndecies(&indecies[index], coneAccuracy, 0);
-    index += positionalLightVolume.getIndecies(&indecies[index], sphereAccuracyX, parabolidAccuracyY);
-    positionalDualLightVolume.getIndecies(&indecies[index], sphereAccuracyX, sphereAccuracyY);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indecies), indecies, GL_STATIC_DRAW);
+    glGenBuffers(1, &lightVolumeBuffers[0]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightVolumeBuffers[0]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, index*sizeof(unsigned int), indecies, GL_STATIC_DRAW);
+    
+    index = spotLightVolume.getIndecies(indecies, coneAccuracy, 0);
+    glGenBuffers(1, &lightVolumeBuffers[2]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightVolumeBuffers[2]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, index*sizeof(unsigned int), indecies, GL_STATIC_DRAW);
+    
+    index = positionalLightVolume.getIndecies(indecies, sphereAccuracyX, parabolidAccuracyY);
+    glGenBuffers(1, &lightVolumeBuffers[4]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightVolumeBuffers[4]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, index*sizeof(unsigned int), indecies, GL_STATIC_DRAW);
+    
+    index = positionalDualLightVolume.getIndecies(indecies, sphereAccuracyX, sphereAccuracyY);
+    glGenBuffers(1, &lightVolumeBuffers[6]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightVolumeBuffers[6]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, index*sizeof(unsigned int), indecies, GL_STATIC_DRAW);
+    
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     delete [] indecies;
     
-    glGenBuffers(1, &lightVolumesVbo);
-    glBindBuffer(GL_ARRAY_BUFFER, lightVolumesVbo);
     float* vertices = new float[positionsCount*3];
     Vector3* positions = new Vector3[sphereVerticesCount(sphereAccuracyX, sphereAccuracyY)];
     modelMat.setIdentity();
-    index = copyVertices(positions, vertices, directionalLightVolume.getVertices(positions));
-    index += copyVertices(positions, &vertices[index], spotLightVolume.getVertices(positions, coneAccuracy, 0));
-    index += copyVertices(positions, &vertices[index], positionalLightVolume.getVertices(positions, sphereAccuracyX, parabolidAccuracyY));
-    copyVertices(positions, &vertices[index], positionalDualLightVolume.getVertices(positions, sphereAccuracyX, sphereAccuracyY));
+    index = copyVertices(positions, vertices, directionalLightVolume.getVertices(positions))*3;
+    glGenBuffers(1, &lightVolumeBuffers[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, lightVolumeBuffers[1]);
+    glBufferData(GL_ARRAY_BUFFER, index*sizeof(float), vertices, GL_STATIC_DRAW);
+    
+    index = copyVertices(positions, vertices, spotLightVolume.getVertices(positions, coneAccuracy, 0))*3;
+    glGenBuffers(1, &lightVolumeBuffers[3]);
+    glBindBuffer(GL_ARRAY_BUFFER, lightVolumeBuffers[3]);
+    glBufferData(GL_ARRAY_BUFFER, index*sizeof(float), vertices, GL_STATIC_DRAW);
+    
+    index = copyVertices(positions,vertices, positionalLightVolume.getVertices(positions, sphereAccuracyX, parabolidAccuracyY))*3;
+    glGenBuffers(1, &lightVolumeBuffers[5]);
+    glBindBuffer(GL_ARRAY_BUFFER, lightVolumeBuffers[5]);
+    glBufferData(GL_ARRAY_BUFFER, index*sizeof(float), vertices, GL_STATIC_DRAW);
+    
+    index = copyVertices(positions, vertices, positionalDualLightVolume.getVertices(positions, sphereAccuracyX, sphereAccuracyY))*3;
+    glGenBuffers(1, &lightVolumeBuffers[7]);
+    glBindBuffer(GL_ARRAY_BUFFER, lightVolumeBuffers[7]);
+    glBufferData(GL_ARRAY_BUFFER, index*sizeof(float), vertices, GL_STATIC_DRAW);
+    
     delete [] positions;
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, index*sizeof(float), vertices, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     delete [] vertices;
     
     directionalLightVolume.getVertices(directionalLightVertices);
     spotLightVolume.getVertices(spotLightVertices, coneAccuracy/2, 0);
     positionalLightVolume.getVertices(positionalLightVertices, sphereAccuracyX/2, parabolidAccuracyY/2);
-    positionalDualLightVolume.getVertices(positionalDualLightVertices, sphereAccuracyX/2, sphereAccuracyY/2);
+    //positionalDualLightVolume.getVertices(positionalDualLightVertices, sphereAccuracyX/2, sphereAccuracyY/2);
 }
 
 LightManager::~LightManager() {
-    glDeleteBuffers(1, &lightVolumesVbo);
-    glDeleteBuffers(1, &lightVolumesIbo);
+    for(unsigned char i = 0; i < sizeof(lightVolumeBuffers)/sizeof(GLuint); i ++)
+        glDeleteBuffers(1, &lightVolumeBuffers[i]);
     for(unsigned int i = 0; i < lights.size(); i ++)
         delete lights[i];
 }
@@ -438,23 +467,16 @@ void LightManager::useLights() {
     mainFBO.clearDeferredBuffers();
     
     glDepthMask(GL_FALSE);
-    glBindBuffer(GL_ARRAY_BUFFER, lightVolumesVbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightVolumesIbo);
     for(unsigned int i = 0; i < lights.size(); i ++)
         lights[i]->use();
     glDepthMask(GL_TRUE);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     
-    shaderPrograms[deferredCombineSP]->use();
-    mainFBO.renderDeferred(inBuffersB, sizeof(inBuffersB)/sizeof(unsigned char), outBuffersB, sizeof(outBuffersB)/sizeof(unsigned char));
-    float vertices[12] = { -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0 };
-    modelMat.setIdentity();
-    currentShaderProgram->setUniformMatrix4("modelViewMat", &modelMat);
-    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
     glFrontFace(GL_CCW);
     glDisable(GL_DEPTH_TEST);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    shaderPrograms[deferredCombineSP]->use();
+    mainFBO.renderDeferred(true, inBuffersB, sizeof(inBuffersB)/sizeof(unsigned char), outBuffersB, sizeof(outBuffersB)/sizeof(unsigned char));
     glDisableVertexAttribArray(POSITION_ATTRIBUTE);
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);

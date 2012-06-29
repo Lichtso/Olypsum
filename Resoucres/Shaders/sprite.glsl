@@ -27,7 +27,7 @@ varying vec3 vNormal;
 void main() {
 	gl_FragData[0] = texture2D(sampler[0], vTexCoord.st);
     gl_FragData[0].a *= 1.0 - vTexCoord.z;
-    if(gl_FragData[0].a < 0.1) discard;
+    if(0.1 > gl_FragData[0].a) discard;
     if(color.r > -1.0) gl_FragData[0].rgb += color;
     
     gl_FragData[1].xyz = vPosition;

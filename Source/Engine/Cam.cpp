@@ -25,12 +25,11 @@ Ray3 Cam::getRayAt(Vector3 screenPos) {
     Ray3 ray(Vector3(0,0,-screenPos.z), Vector3(0,0,-1));
     
     if(fov > 0.0) {
-        GLint viewport[4];
-        glGetIntegerv(GL_VIEWPORT, viewport);
         float aux = tan(fov*0.5);
-        ray.direction.x = screenPos.x*aux*(float)viewport[2]/(float)viewport[3];
+        ray.direction.x = screenPos.x*aux*(width/height);
         ray.direction.y = -screenPos.y*aux;
         ray.direction.normalize();
+        
     }else{
         ray.origin.x = screenPos.x*width;
         ray.origin.y = -screenPos.y*height;
@@ -40,6 +39,7 @@ Ray3 Cam::getRayAt(Vector3 screenPos) {
     normalMat.setMatrix3(camMat);
     ray.origin *= camMat;
     ray.direction *= normalMat;
+    
     return ray;
 }
 
@@ -52,10 +52,11 @@ Frustum3 Cam::getFrustumOf(Vector3 screenMin, Vector3 screenMax) {
     Frustum3 frustumB;
     frustumB.front.set(front);
     frustumB.back.set(camMat.pos-camMat.z*far, camMat.z*-1.0);
-    frustumB.left.set(front.origin, front.origin+rayLT.direction, front.origin+rayLB.direction);
-    frustumB.right.set(front.origin, front.origin+rayRB.direction, front.origin+rayRT.direction);
-    frustumB.bottom.set(front.origin, front.origin+rayLB.direction, front.origin+rayRB.direction);
-    frustumB.top.set(front.origin, front.origin+rayRT.direction, front.origin+rayLT.direction);
+    frustumB.left.set(rayLT.origin, rayLT.origin+rayLT.direction, rayLT.origin+rayLB.direction);
+    frustumB.right.set(rayRB.origin, rayRB.origin+rayRB.direction, rayRB.origin+rayRT.direction);
+    frustumB.bottom.set(rayLB.origin, rayLB.origin+rayLB.direction, rayLB.origin+rayRB.direction);
+    frustumB.top.set(rayRT.origin, rayRT.origin+rayRT.direction, rayRT.origin+rayLT.direction);
+    
     return frustumB;
 }
 

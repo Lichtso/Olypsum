@@ -16,7 +16,7 @@ uniform float lRange;
 #endif
 
 varying vec2 vTexCoord;
-varying vec2 vPosition;
+varying float vClip;
 
 void main() {
     #if SKELETAL_ANIMATION
@@ -29,20 +29,15 @@ void main() {
     gl_Position = vec4(position, 1.0)*modelViewMat;
     #endif
     
-    #if SKELETAL_ANIMATION && LIGHT_TYPE != 1
     gl_Position.xyz /= gl_Position.w;
     gl_Position.w = 1.0;
-    #endif
     
     #if LIGHT_TYPE == 2
     gl_Position.z *= -1.0;
-    vPosition.x = gl_Position.z+0.05;
+    vClip = gl_Position.z+0.05;
     float len = length(gl_Position.xyz);
-    vPosition.y = length(gl_Position.xyz);
-    gl_Position.xy /= vPosition.y + gl_Position.z;
-    gl_Position.z = vPosition.y = vPosition.y / lRange;
-    #else
-    vPosition = vec2(gl_Position.z, gl_Position.w*2.0);
+    gl_Position.xy /= len + gl_Position.z;
+    gl_Position.z = len / lRange;
     #endif
     
     vTexCoord = texCoord;
@@ -54,7 +49,7 @@ uniform sampler2D sampler[1];
 uniform float paraboloidRange;
 uniform float discardDensity;
 varying vec2 vTexCoord;
-varying vec2 vPosition;
+varying float vClip;
 
 float random(vec2 co) {
     return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
@@ -64,14 +59,11 @@ void main() {
     gl_FragColor = texture2D(sampler[0], vTexCoord);
     
     #if LIGHT_TYPE == 2
-    if(gl_FragColor.a < 0.1 || vPosition.x < 0.0 || random(gl_FragCoord.xy) > discardDensity) discard;
-    gl_FragColor.r = vPosition.y;
-    gl_FragDepth = vPosition.y;
+    if(gl_FragColor.a < 0.1 || vClip < 0.0 || random(gl_FragCoord.xy) > discardDensity) discard;
+    //gl_FragDepth = gl_FragCoord.z;
     #else
     if(gl_FragColor.a < 0.1 || random(gl_FragCoord.xy) > discardDensity) discard;
-    gl_FragColor.r = vPosition.x/vPosition.y+0.5;
-    //gl_FragDepth = vPosition.x/vPosition.y;
     #endif
     
-    gl_FragColor.gba = vec3(0.0, 0.0, 1.0);
+    gl_FragColor = vec4(gl_FragCoord.z, 0.0, 0.0, 1.0);
 }

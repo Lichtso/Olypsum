@@ -22,18 +22,18 @@ Aabb3::Aabb3(Vector3 minB, Vector3 maxB, Matrix4* transformationB) : BoundingVol
 }
 
 unsigned int Aabb3::getIndecies(unsigned int indecies[boxTrianglesCount]) {
-    indecies[0] = 2; indecies[1] = 1; indecies[2] = 0;
-    indecies[3] = 2; indecies[4] = 3; indecies[5] = 1;
-    indecies[6] = 4; indecies[7] = 5; indecies[8] = 6;
-    indecies[9] = 5; indecies[10] = 7; indecies[11] = 6;
-    indecies[12] = 0; indecies[13] = 1; indecies[14] = 4;
-    indecies[15] = 1; indecies[16] = 5; indecies[17] = 4;
-    indecies[18] = 6; indecies[19] = 3; indecies[21] = 2;
-    indecies[21] = 6; indecies[22] = 7; indecies[23] = 3;
-    indecies[24] = 0; indecies[25] = 4; indecies[26] = 6;
-    indecies[27] = 0; indecies[28] = 6; indecies[29] = 2;
-    indecies[30] = 1; indecies[31] = 3; indecies[32] = 7;
-    indecies[33] = 1; indecies[34] = 7; indecies[35] = 5;
+    indecies[0] = 0; indecies[1] = 1; indecies[2] = 2;
+    indecies[3] = 1; indecies[4] = 3; indecies[5] = 2;
+    indecies[6] = 6; indecies[7] = 5; indecies[8] = 4;
+    indecies[9] = 6; indecies[10] = 7; indecies[11] = 5;
+    indecies[12] = 4; indecies[13] = 1; indecies[14] = 0;
+    indecies[15] = 4; indecies[16] = 5; indecies[17] = 1;
+    indecies[18] = 2; indecies[19] = 3; indecies[20] = 6;
+    indecies[21] = 3; indecies[22] = 7; indecies[23] = 6;
+    indecies[24] = 6; indecies[25] = 4; indecies[26] = 0;
+    indecies[27] = 2; indecies[28] = 6; indecies[29] = 0;
+    indecies[30] = 7; indecies[31] = 3; indecies[32] = 1;
+    indecies[33] = 5; indecies[34] = 7; indecies[35] = 1;
     return 36;
 }
 
@@ -130,24 +130,24 @@ unsigned int Bs3::getIndecies(unsigned int indecies[], unsigned char accuracyX, 
     unsigned int referenceVertex, index = 0;
     for(unsigned char x = 0; x < accuracyX; x ++) {
         indecies[index ++] = 0;
-        indecies[index ++] = x+1;
         indecies[index ++] = (x < accuracyX-1) ? x+2 : 1;
+        indecies[index ++] = x+1;
     }
     for(unsigned char y = 0; y < accuracyY-1; y ++) {
-        referenceVertex = accuracyX*(y+1)+1;
+        referenceVertex = accuracyX*y+1;
         for(unsigned char x = 0; x < accuracyX; x ++) {
             indecies[index ++] = referenceVertex+x;
-            indecies[index ++] = referenceVertex+accuracyX+x;
             indecies[index ++] = (x < accuracyX-1) ? referenceVertex+x+1 : referenceVertex;
+            indecies[index ++] = referenceVertex+accuracyX+x;
             indecies[index ++] = indecies[index-2];
-            indecies[index ++] = indecies[index-4];
             indecies[index ++] = (x < accuracyX-1) ? referenceVertex+accuracyX+x+1 : referenceVertex+accuracyX;
+            indecies[index ++] = indecies[index-3];
         }
     }
-    referenceVertex = accuracyX*(accuracyY-1)*2+1;
+    referenceVertex = accuracyX*(accuracyY-1)+1;
     for(unsigned char x = 0; x < accuracyX; x ++) {
-        indecies[index ++] = referenceVertex+x;
         indecies[index ++] = referenceVertex+accuracyX;
+        indecies[index ++] = referenceVertex+x;
         indecies[index ++] = (x < accuracyX-1) ? referenceVertex+x+1 : referenceVertex;
     }
     return index;
@@ -185,21 +185,21 @@ unsigned int Parabolid3::getIndecies(unsigned int indecies[], unsigned char accu
     unsigned int referenceVertex, index = 0;
     for(unsigned char x = 0; x < accuracyX; x ++) {
         indecies[index ++] = 0;
-        indecies[index ++] = x+1;
         indecies[index ++] = (x < accuracyX-1) ? x+2 : 1;
+        indecies[index ++] = x+1;
     }
     for(unsigned char y = 0; y < accuracyY; y ++) {
-        referenceVertex = 1+accuracyX+accuracyX*y*2+1;
+        referenceVertex = 1+accuracyX*y;
         for(unsigned char x = 0; x < accuracyX; x ++) {
             indecies[index ++] = referenceVertex+x;
-            indecies[index ++] = referenceVertex+accuracyX+x;
             indecies[index ++] = (x < accuracyX-1) ? referenceVertex+x+1 : referenceVertex;
+            indecies[index ++] = referenceVertex+accuracyX+x;
             indecies[index ++] = indecies[index-2];
-            indecies[index ++] = indecies[index-4];
             indecies[index ++] = (x < accuracyX-1) ? referenceVertex+accuracyX+x+1 : referenceVertex+accuracyX;
+            indecies[index ++] = indecies[index-3];
         }
     }
-    referenceVertex = 1+accuracyX+accuracyX*accuracyY*2;
+    referenceVertex = 1+accuracyX*accuracyY;
     for(unsigned char x = 0; x < accuracyX-2; x ++) {
         indecies[index ++] = referenceVertex;
         indecies[index ++] = referenceVertex+x+1;

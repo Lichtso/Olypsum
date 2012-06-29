@@ -80,7 +80,7 @@ void FBO::renderInDeferredBuffers() {
     glClearColor(0, 0, 0, 1);
 }
 
-void FBO::renderDeferred(unsigned char* inBuffers, unsigned char inBuffersCount, unsigned char* outBuffers, unsigned char outBuffersCount) {
+void FBO::renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned char inBuffersCount, unsigned char* outBuffers, unsigned char outBuffersCount) {
     if(outBuffersCount == 0) {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }else{
@@ -97,6 +97,13 @@ void FBO::renderDeferred(unsigned char* inBuffers, unsigned char inBuffersCount,
         glActiveTexture(GL_TEXTURE0+i);
         glBindTexture(GL_TEXTURE_RECTANGLE_ARB, dBuffers[inBuffers[i]]);
     }
+    
+    if(!fillScreen) return;
+    modelMat.setIdentity();
+    currentShaderProgram->setUniformMatrix4("modelViewMat", &modelMat);
+    float vertices[12] = { -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0 };
+    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
 ColorBuffer* FBO::addTexture(unsigned int size) {
@@ -151,8 +158,8 @@ GLuint FBO::generateNormalMap(GLuint heightMap, unsigned int width, unsigned int
     glGenTextures(1, &normalMap);
     if(normalMap == 0) return 0;
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, normalMap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, normalMap);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     glBindTexture(GL_TEXTURE_2D, heightMap);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);

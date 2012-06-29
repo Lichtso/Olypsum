@@ -89,6 +89,7 @@ void Matrix4::setMatrix3(const Matrix4& mat) {
     x = Vector3(mat.x.x, mat.x.y, mat.x.z, x.w);
     y = Vector3(mat.y.x, mat.y.y, mat.y.z, y.w);
     z = Vector3(mat.z.x, mat.z.y, mat.z.z, z.w);
+    pos = Vector3(0, 0, 0, 1);
 }
 
 void Matrix4::setIdentity() {

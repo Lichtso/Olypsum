@@ -138,7 +138,7 @@ void ParticleSystemManager::draw() {
     Bs3 bs(5.0, &mat);
     for(unsigned int p = 0; p < particleDrawArrays->size(); p ++) {
         mat.pos = drawArray->position;
-        if(currentCam->frustum.testBsHit(&bs)) continue;
+        if(currentCam->frustum.testBsInclusiveHit(&bs)) continue;
         drawArray = (*particleDrawArrays)[p];
         if(drawArray->texture) drawArray->texture->use(0);
         currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 8*sizeof(float), drawArray->vertices);

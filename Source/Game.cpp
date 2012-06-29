@@ -22,29 +22,29 @@ void initGame() {
     humanModel = fileManager.getPackage(NULL)->getModel("man.dae");
     skeletonPose = new SkeletonPose(humanModel->skeleton);
     
-    if(true) {
+    if(false) {
         DirectionalLight* light = new DirectionalLight();
-        light->position = Vector3(0.0, 1.0, 0.0);
+        light->position = Vector3(0.0, 25.0, 0.0);
         light->direction = Vector3(0.0, -1.0, 0.0).normalize();
-        light->range = 1.0;
-        light->width = light->height = 1.0;
+        light->range = 50.0;
+        light->width = light->height = 3.0;
         lightManager.lights.push_back((Light*)light);
     }
     
     if(false) {
         SpotLight* lightB = new SpotLight();
-        lightB->position = Vector3(-2.0, 3.0, 3.5);
+        lightB->position = Vector3(-1.0, 2.0, 1.5);
         lightB->direction = Vector3(0.5, -0.5, -1.0).normalize();
-        lightB->cutoff = 10.0/180.0*M_PI;
+        lightB->cutoff = 20.0/180.0*M_PI;
         lightB->range = 10.0;
         lightManager.lights.push_back((Light*)lightB);
     }
     
-    if(false) {
+    if(true) {
         PositionalLight* lightC = new PositionalLight();
         lightC->position = Vector3(0.0, 3.0, 1.0);
         lightC->direction = Vector3(1.0, 0.0, 0.0).normalize();
-        lightC->range = 10.0;
+        lightC->range = 5.0;
         lightManager.lights.push_back((Light*)lightC);
     }
     
@@ -187,7 +187,7 @@ void calculateFrame() {
     
     mainCam->camMat.setIdentity();
     //mainCam->camMat.rotateX(0.5);
-    mainCam->camMat.translate(Vector3(0,1,2));
+    mainCam->camMat.translate(Vector3(0,1,3));
     mainCam->calculate();
     mainCam->use();
     modelMat.setIdentity();

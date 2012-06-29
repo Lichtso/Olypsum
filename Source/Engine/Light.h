@@ -75,7 +75,6 @@ class PositionalLight : public Light {
 };
 
 class LightManager {
-    GLuint lightVolumesVbo, lightVolumesIbo;
     public:
     std::vector<Light*> lights;
     Light* currentShadowLight;

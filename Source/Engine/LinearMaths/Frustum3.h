@@ -17,8 +17,8 @@ class Frustum3 {
     Plane3 front, back, left, right, bottom, top;
     Frustum3();
     bool testPointHit(Vector3 pos);
-    bool testBsHit(Bs3* bs);
-    template <class T> bool testBoxHit(T* box);
+    bool testBsInclusiveHit(Bs3* bs);
+    template <class T> bool testBoxInclusiveHit(T* box);
     bool testPolyhedronInclusiveHit(Vector3* vertices, unsigned int verticesCount);
     bool testPolyhedronExclusiveHit(Vector3* vertices, unsigned int verticesCount);
 };

@@ -27,7 +27,8 @@ class Plane3 {
     float getPointDist(Vector3 pos);
     float getRayDist(Ray3 ray);
     bool testPointHit(Vector3 pos);
-    bool testBsHit(Bs3* bs);
+    bool testBsInclusiveHit(Bs3* bs);
+    bool testBsExclusiveHit(Bs3* bs);
     template <class T> bool testBoxHit(T* aabb);
     template <class T> unsigned int testBoxHitCount(T* box);
     bool testPolyhedronInclusiveHit(Vector3* vertices, unsigned int verticesCount);
