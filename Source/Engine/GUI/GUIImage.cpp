@@ -44,7 +44,7 @@ void GUIImage::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     
     if(texture) {
         if(!texture->GLname) {
-            texture->uploadToVRAM();
+            texture->uploadToVRAM(GL_TEXTURE_2D, GL_RGBA);
             texture->unloadFromRAM();
             updateContent();
         }

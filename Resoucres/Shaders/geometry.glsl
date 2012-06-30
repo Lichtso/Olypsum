@@ -81,14 +81,14 @@ void main() {
     
     gl_FragData[1].rgb = vPosition;
     gl_FragData[1].a = 1.0;
-    gl_FragData[3].rgb = texture2D(sampler[1], vTexCoord).rgb;
-    gl_FragData[3].a = 1.0;
     #if BUMP_MAPPING
     vec4 bumpMap = texture2D(sampler[2], vTexCoord).rgba;
     bumpMap.xyz = bumpMap.xyz*2.0-vec3(1.0);
-    gl_FragData[2].xyz = bumpMap*mat3(vTangent, vBitangent, vNormal);
+    gl_FragData[2].xyz = mat3(vTangent, vBitangent, vNormal)*bumpMap.xyz;
     #else
     gl_FragData[2].xyz = vNormal;
     #endif
     gl_FragData[2].a = 1.0;
+    gl_FragData[3].rgb = texture2D(sampler[1], vTexCoord).rgb;
+    gl_FragData[3].a = 1.0;
 }

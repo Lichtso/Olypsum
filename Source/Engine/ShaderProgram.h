@@ -45,27 +45,29 @@ class ShaderProgram {
 };
 
 extern Matrix4 modelMat;
-extern ShaderProgram *shaderPrograms[18], *currentShaderProgram;
+extern ShaderProgram *shaderPrograms[20], *currentShaderProgram;
 
 enum ShaderProgramNames {
     spriteSP = 0,
     solidGeometrySP = 1,
-    solidShadowSP = 2,
-    solidParabolidShadowSP = 3,
-    skeletalGeometrySP = 4,
-    skeletalShadowSP = 5,
-    skeletalParabolidShadowSP = 6,
-    directionalLightSP = 7,
-    directionalShadowLightSP = 8,
-    spotLightSP = 9,
-    spotShadowLightSP = 10,
-    positionalLightSP = 11,
-    positionalShadowLightSP = 12,
-    positionalShadowDualLightSP = 13,
-    normalMapGenSP = 14,
-    blurSP = 15,
-    ssaoSP = 16,
-    deferredCombineSP = 17
+    solidBumpGeometrySP = 2,
+    solidShadowSP = 3,
+    solidParabolidShadowSP = 4,
+    skeletalGeometrySP = 5,
+    skeletalBumpGeometrySP = 6,
+    skeletalShadowSP = 7,
+    skeletalParabolidShadowSP = 8,
+    directionalLightSP = 9,
+    directionalShadowLightSP = 10,
+    spotLightSP = 11,
+    spotShadowLightSP = 12,
+    positionalLightSP = 13,
+    positionalShadowLightSP = 14,
+    positionalShadowDualLightSP = 15,
+    normalMapGenSP = 16,
+    blurSP = 17,
+    ssaoSP = 18,
+    deferredCombineSP = 19
 };
 
 void loadShaderPrograms();

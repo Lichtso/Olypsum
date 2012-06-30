@@ -53,8 +53,8 @@ void Mesh::draw() {
     if(normalMap)
         normalMap->use(2);
     else {
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        //glActiveTexture(GL_TEXTURE2);
+        //glBindTexture(GL_TEXTURE_2D, 0);
     }
     
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -101,7 +101,7 @@ struct VertexReference {
 };
 
 struct Material {
-    std::string diffuseURL, normalMapURL, effectMapURL;
+    std::string diffuseURL, effectMapURL, normalMapURL;
 };
 
 static void readFloatStr(char* dataStr, FloatArray& array) {
@@ -847,7 +847,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             }
             if(material->second.diffuseURL.size() > 0) {
                 mesh->diffuse = filePackage->getTexture(material->second.diffuseURL.c_str());
-                mesh->diffuse->uploadToVRAM();
+                mesh->diffuse->uploadToVRAM(GL_TEXTURE_2D, GL_RGBA);
                 mesh->diffuse->unloadFromRAM();
             }
             #ifdef reExportModelFiles
@@ -1136,7 +1136,7 @@ void Model::draw(float discardDensity, SkeletonPose* skeletonPose) {
     if(lightManager.currentShadowLight)
         lightManager.currentShadowLight->selectShaderProgram(true);
     else
-        shaderPrograms[skeletalGeometrySP]->use();
+        shaderPrograms[skeletalBumpGeometrySP]->use();
     currentShaderProgram->setUniformF("discardDensity", discardDensity);
     
     Matrix4* mats = new Matrix4[skeleton->bones.size()];

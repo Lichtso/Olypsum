@@ -12,6 +12,7 @@ GUILabel* labelFPS;
 GUISlider* soundTrackSlider;
 Model* humanModel;
 SkeletonPose* skeletonPose;
+Texture* heightMap;
 static float animationTime = 0;
 
 static void updateSoundTrackSlider(GUISlider* slider) {
@@ -19,6 +20,9 @@ static void updateSoundTrackSlider(GUISlider* slider) {
 }
 
 void initGame() {
+    heightMap = fileManager.getPackage(NULL)->getTexture("heightMap.jpg");
+    mainFBO.generateNormalMap(heightMap, 4.0);
+    
     humanModel = fileManager.getPackage(NULL)->getModel("man.dae");
     skeletonPose = new SkeletonPose(humanModel->skeleton);
     
@@ -28,7 +32,6 @@ void initGame() {
         light->direction = Vector3(0.0, -1.0, 0.0).normalize();
         light->range = 50.0;
         light->width = light->height = 3.0;
-        lightManager.lights.push_back((Light*)light);
     }
     
     if(false) {
@@ -37,7 +40,6 @@ void initGame() {
         lightB->direction = Vector3(0.5, -0.5, -1.0).normalize();
         lightB->cutoff = 20.0/180.0*M_PI;
         lightB->range = 10.0;
-        lightManager.lights.push_back((Light*)lightB);
     }
     
     if(true) {
@@ -45,7 +47,6 @@ void initGame() {
         lightC->position = Vector3(0.0, 3.0, 1.0);
         lightC->direction = Vector3(1.0, 0.0, 0.0).normalize();
         lightC->range = 5.0;
-        lightManager.lights.push_back((Light*)lightC);
     }
     
     GUIImage* image = new GUIImage();
@@ -121,6 +122,8 @@ static void addVertex(float* vertices, float x, float y) {
 void renderScene() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
+    heightMap->use(2);
+    
     modelMat.setIdentity();
     modelMat.rotateY(0.4);
     modelMat.translate(Vector3(0.0, sin(animationTime)*0.5+0.15, 0.0));
@@ -160,11 +163,12 @@ void renderScene() {
             addVertex(&vertices[index+40], (float)(x+1)/size, (float)y/size);
         }
     
+    fileManager.getPackage(NULL)->getTexture("man.png")->use(0);
     modelMat.setIdentity();
     if(lightManager.currentShadowLight)
         lightManager.currentShadowLight->selectShaderProgram(false);
     else
-        shaderPrograms[solidGeometrySP]->use();
+        shaderPrograms[solidBumpGeometrySP]->use();
     currentShaderProgram->setUniformF("discardDensity", 1.0);
     
     currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 8*sizeof(float), vertices);

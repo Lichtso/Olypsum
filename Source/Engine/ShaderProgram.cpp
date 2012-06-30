@@ -62,6 +62,7 @@ bool ShaderProgram::loadShaderProgram(const char* fileName, bool geometryShader,
     fclose(fp);
     
     if(geometryShader) {
+        data[dataSize] = 0;
         char *parameter, *parameterEnd, *parameterKey, *parameterValue;
         while(true) {
             parameter = strstr(data, parameterString);
@@ -280,6 +281,16 @@ void loadShaderPrograms() {
     shaderPrograms[solidGeometrySP]->link();
     
     shaderProgramMacros.clear();
+    shaderProgramMacros.push_back("SKELETAL_ANIMATION 0");
+    shaderProgramMacros.push_back("BUMP_MAPPING 1");
+    shaderPrograms[solidBumpGeometrySP]->loadShaderProgram("geometry", false, &shaderProgramMacros);
+    shaderPrograms[solidBumpGeometrySP]->loadShaderProgram("geometryTangent", true, &shaderProgramMacros);
+    shaderPrograms[solidBumpGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[solidBumpGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
+    shaderPrograms[solidBumpGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
+    shaderPrograms[solidBumpGeometrySP]->link();
+    
+    shaderProgramMacros.clear();
     shaderProgramMacros.push_back("LIGHT_TYPE 0");
     shaderProgramMacros.push_back("SKELETAL_ANIMATION 0");
     shaderPrograms[solidShadowSP]->loadShaderProgram("shadow", false, &shaderProgramMacros);
@@ -305,6 +316,18 @@ void loadShaderPrograms() {
     shaderPrograms[skeletalGeometrySP]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
     shaderPrograms[skeletalGeometrySP]->addAttribute(JOINT_ATTRIBUTE, "joints");
     shaderPrograms[skeletalGeometrySP]->link();
+    
+    shaderProgramMacros.clear();
+    shaderProgramMacros.push_back("SKELETAL_ANIMATION 1");
+    shaderProgramMacros.push_back("BUMP_MAPPING 1");
+    shaderPrograms[skeletalBumpGeometrySP]->loadShaderProgram("geometry", false, &shaderProgramMacros);
+    shaderPrograms[skeletalBumpGeometrySP]->loadShaderProgram("geometryTangent", true, &shaderProgramMacros);
+    shaderPrograms[skeletalBumpGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[skeletalBumpGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
+    shaderPrograms[skeletalBumpGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
+    shaderPrograms[skeletalBumpGeometrySP]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
+    shaderPrograms[skeletalBumpGeometrySP]->addAttribute(JOINT_ATTRIBUTE, "joints");
+    shaderPrograms[skeletalBumpGeometrySP]->link();
     
     shaderProgramMacros.clear();
     shaderProgramMacros.push_back("LIGHT_TYPE 0");

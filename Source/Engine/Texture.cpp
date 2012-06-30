@@ -57,43 +57,44 @@ void Texture::unloadFromRAM() {
     surface = NULL;
 }
 
-void Texture::uploadToVRAM() {
-    if(!surface) return;
+bool Texture::uploadToVRAM(GLenum textureTarget, GLenum format) {
+    if(!surface) return false;
     
     if(!GLname) glGenTextures(1, &GLname);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, GLname);
+    if(!GLname) return false;
+    glBindTexture(textureTarget, GLname);
     
-    unsigned int formatA, formatB;
+    GLenum readFormat;
     switch(surface->format->BitsPerPixel) {
         case 8:
-            formatA = formatB = GL_LUMINANCE;
+            readFormat = GL_LUMINANCE;
             break;
         case 24:
-            formatA = GL_RGB;
-            formatB = GL_BGR;
+            readFormat = GL_BGR;
             break;
         case 32:
-            formatA = GL_RGBA;
-            formatB = GL_BGRA;
+            readFormat = GL_BGRA;
             break;
         default:
             printf("Couldn't load texture to VRAM.\nERROR: Unsupported bit-depth.%d\n", surface->format->BitsPerPixel);
-            return;
+            return false;
     }
     
     if(surface->format->palette) {
         printf("Couldn't load texture to VRAM.\nERROR: Image uses a color palette.\n");
-        return;
+        return false;
     }
     
     width = surface->w;
     height = surface->h;
     
-    glTexImage2D(GL_TEXTURE_2D, 0, formatA, width, height, 0, formatB, GL_UNSIGNED_BYTE, surface->pixels);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    glTexImage2D(textureTarget, 0, format, width, height, 0, readFormat, GL_UNSIGNED_BYTE, surface->pixels);
+    glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, (textureTarget == GL_TEXTURE_2D) ? minFilter : GL_NEAREST);
+    glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, magFilter);
+    if(textureTarget == GL_TEXTURE_2D)
+        glGenerateMipmap(textureTarget);
+    
+    return true;
 }
 
 void Texture::unloadFromVRAM() {

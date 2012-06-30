@@ -21,7 +21,7 @@ class Texture {
     ~Texture();
     bool loadImageInRAM(const char* filePath);
     void unloadFromRAM();
-    void uploadToVRAM();
+    bool uploadToVRAM(GLenum textureTarget, GLenum format);
     void unloadFromVRAM();
     void use(GLuint targetIndex);
 };

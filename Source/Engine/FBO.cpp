@@ -42,7 +42,7 @@ void FBO::init() {
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
     glGenRenderbuffers(1, &depthBuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, maxFBOSize, maxFBOSize);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, maxFBOSize, maxFBOSize); //TODO: videoInfo->current_w, videoInfo->current_h);
     
     initBuffer(colorDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, videoInfo->current_w, videoInfo->current_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -131,7 +131,7 @@ void FBO::renderInTexture(ColorBuffer* colorBuffer) {
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, colorBuffer->texture, 0);
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    glDrawBuffer(GL_NONE);
     glViewport(0, 0, colorBuffer->size, colorBuffer->size);
 }
 
@@ -153,29 +153,45 @@ void FBO::deleteTexture(ColorBuffer* colorBuffer) {
     delete colorBuffer;
 }
 
-GLuint FBO::generateNormalMap(GLuint heightMap, unsigned int width, unsigned int height, float processingValue) {
-    GLuint normalMap = 0;
+bool FBO::generateNormalMap(Texture* heightMap, float processingValue) {
+    if(!heightMap->uploadToVRAM(GL_TEXTURE_RECTANGLE_ARB, GL_LUMINANCE)) return false;
+    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    heightMap->unloadFromRAM();
+    
+    unsigned char data[heightMap->width*heightMap->height*4];
+    for(unsigned int i = 0; i < heightMap->width*heightMap->height*4; i ++)
+        data[i] = 0xFF;
+    
+    GLuint normalMap;
     glGenTextures(1, &normalMap);
-    if(normalMap == 0) return 0;
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, normalMap);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glBindTexture(GL_TEXTURE_2D, heightMap);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_2D, normalMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, heightMap->width, heightMap->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, heightMap->minFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, heightMap->magFilter);
+    
+    glViewport(0, 0, heightMap->width, heightMap->height);
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, normalMap, 0);
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    glViewport(0, 0, width, height);
-    float vertices[12] = { -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0 };
-    Matrix4 mat;
+    
+    shaderPrograms[normalMapGenSP]->use();
     currentShaderProgram->setUniformF("processingValue", processingValue);
+    float vertices[12] = { -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0 };
     currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
-    glDeleteTextures(1, &heightMap);
-    return normalMap;
+    glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    heightMap->unloadFromVRAM();
+    glBindTexture(GL_TEXTURE_2D, normalMap);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    heightMap->GLname = normalMap;
+    
+    return true;
 }
 
 FBO mainFBO;

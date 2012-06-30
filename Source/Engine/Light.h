@@ -19,9 +19,10 @@ enum LightType {
 
 class Light {
     protected:
-    Cam* shadowCam;
+    Cam shadowCam;
     ColorBuffer* shadowMap;
     public:
+    bool shadowmapActive;
     Vector3 direction, position, upDir;
     float range;
     LightType type;
@@ -63,7 +64,6 @@ class SpotLight : public Light {
 
 class PositionalLight : public Light {
     ColorBuffer* shadowMapB;
-    Matrix4 shadowMatB;
     public:
     bool omniDirectional;
     PositionalLight();

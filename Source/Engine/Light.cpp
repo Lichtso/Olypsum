@@ -53,14 +53,18 @@ static bool drawLightVolume(Vector3* verticesSource, unsigned int verticesCount)
 
 
 Light::Light() {
-    shadowCam = NULL;
+    lightManager.lights.push_back(this);
     shadowMap = NULL;
     color = Vector3(1.0, 1.0, 1.0);
 }
 
 Light::~Light() {
-    if(shadowCam) delete shadowCam;
     if(shadowMap) mainFBO.deleteTexture(shadowMap);
+    for(unsigned int i = 0; i < lightManager.lights.size(); i ++)
+        if(lightManager.lights[i] == this) {
+            lightManager.lights.erase(lightManager.lights.begin()+i);
+            return;
+        }
 }
 
 float Light::getPriority(Vector3 position) {
@@ -78,23 +82,19 @@ float Light::getPriority(Vector3 position) {
 }
 
 bool Light::calculateShadowmap() {
+    if(!shadowmapActive) return false;
     if(!shadowMap) {
         shadowMap = mainFBO.addTexture(1024);
         if(!shadowMap) {
             deleteShadowmap();
             return false;
         }
-        if(!shadowCam) shadowCam = new Cam();
     }
     lightManager.currentShadowLight = this;
     return true;
 }
 
 void Light::deleteShadowmap() {
-    if(shadowCam) {
-        delete shadowCam;
-        shadowCam = NULL;
-    }
     if(!shadowMap) return;
     mainFBO.deleteTexture(shadowMap);
     shadowMap = NULL;
@@ -123,20 +123,20 @@ DirectionalLight::DirectionalLight() {
     upDir = Vector3(0.0, 0.0, 1.0);
     range = 100.0;
     width = height = 10.0;
+    shadowCam.fov = 0.0;
+    shadowCam.near = 1.0;
 }
 
 bool DirectionalLight::calculateShadowmap() {
+    shadowCam.camMat.setIdentity();
+    shadowCam.camMat.setDirection(direction, upDir);
+    shadowCam.camMat.translate(position);
+    shadowCam.width = width;
+    shadowCam.height = height;
+    shadowCam.far = range;
+    shadowCam.calculate();
+    shadowCam.use();
     if(!Light::calculateShadowmap()) return false;
-    shadowCam->camMat.setIdentity();
-    shadowCam->camMat.setDirection(direction, upDir);
-    shadowCam->camMat.translate(position);
-    shadowCam->width = width;
-    shadowCam->height = height;
-    shadowCam->fov = 0.0;
-    shadowCam->near = 1.0;
-    shadowCam->far = range;
-    shadowCam->calculate();
-    shadowCam->use();
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
     mainFBO.renderInTexture(shadowMap);
@@ -152,11 +152,11 @@ void DirectionalLight::deleteShadowmap() {
 void DirectionalLight::use() {
     modelMat.setIdentity();
     modelMat.scale(Vector3(width, height, range));
-    modelMat *= shadowCam->camMat;
+    modelMat *= shadowCam.camMat;
     
     if(shadowMap) {
         shaderPrograms[directionalShadowLightSP]->use();
-        Matrix4 shadowMat = shadowCam->viewMat;
+        Matrix4 shadowMat = shadowCam.viewMat;
         shadowMat.scale(Vector3(0.5, 0.5, 1.0));
         shadowMat.translate(Vector3(0.5, 0.5, 0.0));
         currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowMat);
@@ -189,20 +189,20 @@ SpotLight::SpotLight() {
     upDir = Vector3(0.0, 1.0, 0.0);
     cutoff = 45.0/180.0*M_PI;
     range = 50.0;
+    shadowCam.width = 1.0;
+    shadowCam.height = 1.0;
+    shadowCam.near = 0.1;
 }
 
 bool SpotLight::calculateShadowmap() {
+    shadowCam.camMat.setIdentity();
+    shadowCam.camMat.setDirection(direction, upDir);
+    shadowCam.camMat.translate(position);
+    shadowCam.fov = cutoff*2.0;
+    shadowCam.far = range;
+    shadowCam.calculate();
+    shadowCam.use();
     if(!Light::calculateShadowmap()) return false;
-    shadowCam->camMat.setIdentity();
-    shadowCam->camMat.setDirection(direction, upDir);
-    shadowCam->camMat.translate(position);
-    shadowCam->width = 1.0;
-    shadowCam->height = 1.0;
-    shadowCam->fov = cutoff*2.0;
-    shadowCam->near = 0.1;
-    shadowCam->far = range;
-    shadowCam->calculate();
-    shadowCam->use();
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
     mainFBO.renderInTexture(shadowMap);
@@ -232,11 +232,11 @@ void SpotLight::use() {
     modelMat.setIdentity();
     modelMat.translate(Vector3(0.0, 0.0, -1.0));
     modelMat.scale(Vector3(radius, radius, range));
-    modelMat *= shadowCam->camMat;
+    modelMat *= shadowCam.camMat;
     
     if(shadowMap) {
         shaderPrograms[spotShadowLightSP]->use();
-        Matrix4 shadowMat = shadowCam->viewMat;
+        Matrix4 shadowMat = shadowCam.viewMat;
         shadowMat.scale(Vector3(0.5, 0.5, 1.0));
         shadowMat.translate(Vector3(0.5, 0.5, 0.0));
         currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowMat);
@@ -279,6 +279,12 @@ PositionalLight::~PositionalLight() {
 }
 
 bool PositionalLight::calculateShadowmap() {
+    shadowCam.camMat.setIdentity();
+    shadowCam.camMat.setDirection(direction, upDir);
+    shadowCam.camMat.translate(position);
+    shadowCam.use();
+    shadowCam.frustum.hemisphere = true;
+    
     if(!Light::calculateShadowmap()) return false;
     if(omniDirectional && !shadowMapB)
         shadowMapB = mainFBO.addTexture(1024);
@@ -287,23 +293,19 @@ bool PositionalLight::calculateShadowmap() {
     shaderPrograms[solidParabolidShadowSP]->setUniformF("lRange", range);
     shaderPrograms[skeletalParabolidShadowSP]->use();
     shaderPrograms[skeletalParabolidShadowSP]->setUniformF("lRange", range);
-    shadowCam->camMat.setIdentity();
-    shadowCam->camMat.setDirection(direction, upDir);
-    shadowCam->camMat.translate(position);
-    shadowCam->use();
-    shadowCam->frustum.hemisphere = true;
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
     if(shadowMapB) {
+        Matrix4 shadowMatB;
         shadowMatB.setIdentity();
         shadowMatB.setDirection(direction*-1.0, upDir); //TODO: Optimize with scale -1
         shadowMatB.translate(position);
         shadowMatB = shadowMatB.getInverse();
-        shadowCam->viewMat = shadowMatB;
+        shadowCam.viewMat = shadowMatB;
         mainFBO.renderInTexture(shadowMapB);
         renderScene();
     }
-    shadowCam->viewMat = shadowCam->camMat.getInverse();
+    shadowCam.viewMat = shadowCam.camMat.getInverse();
     mainFBO.renderInTexture(shadowMap);
     renderScene();
     glEnable(GL_BLEND);
@@ -321,7 +323,7 @@ void PositionalLight::use() {
     modelMat.setIdentity();
     modelMat.rotateY(M_PI);
     modelMat.scale(Vector3(range*1.05, range*1.05, range*1.05));
-    modelMat *= shadowCam->camMat;
+    modelMat *= shadowCam.camMat;
     
     if(shadowMap) {
         if(shadowMapB) {
@@ -329,7 +331,7 @@ void PositionalLight::use() {
             mainFBO.useTexture(shadowMapB, 9);
         }else
             shaderPrograms[positionalShadowLightSP]->use();
-        currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowCam->viewMat);
+        currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowCam.viewMat);
         mainFBO.useTexture(shadowMap, 8);
     }else
         shaderPrograms[positionalLightSP]->use();
@@ -437,14 +439,11 @@ void LightManager::init() {
     directionalLightVolume.getVertices(directionalLightVertices);
     spotLightVolume.getVertices(spotLightVertices, coneAccuracy/2, 0);
     positionalLightVolume.getVertices(positionalLightVertices, sphereAccuracyX/2, parabolidAccuracyY/2);
-    //positionalDualLightVolume.getVertices(positionalDualLightVertices, sphereAccuracyX/2, sphereAccuracyY/2);
 }
 
 LightManager::~LightManager() {
     for(unsigned char i = 0; i < sizeof(lightVolumeBuffers)/sizeof(GLuint); i ++)
         glDeleteBuffers(1, &lightVolumeBuffers[i]);
-    for(unsigned int i = 0; i < lights.size(); i ++)
-        delete lights[i];
 }
 
 void LightManager::calculateShadows(unsigned int maxShadows) {
@@ -452,8 +451,10 @@ void LightManager::calculateShadows(unsigned int maxShadows) {
     lightPrioritySorter.position = currentCam->camMat.pos;
     std::sort(lights.begin(), lights.end(), lightPrioritySorter);
     
-    for(unsigned int i = 0; i < fmin(maxShadows, lights.size()); i ++)
+    for(unsigned int i = 0; i < lights.size(); i ++) {
+        lights[i]->shadowmapActive = i < maxShadows;
         lights[i]->calculateShadowmap();
+    }
     
     for(unsigned int i = maxShadows; i < lights.size(); i ++)
         lights[i]->deleteShadowmap();
