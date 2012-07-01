@@ -111,19 +111,15 @@ static void addVertex(float* vertices, float x, float y) {
     vertices[7] = y;
     x -= 0.5;
     y -= 0.5;
-    vertices[0] = x*10.0;
+    vertices[0] = x*3.0;
     vertices[1] = 0.0;
-    vertices[2] = y*10.0;
+    vertices[2] = y*3.0;
     vertices[3] = 0.0;
     vertices[4] = 1.0;
     vertices[5] = 0.0;
 };
 
 void renderScene() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
-    heightMap->use(2);
-    
     modelMat.setIdentity();
     modelMat.rotateY(0.4);
     modelMat.translate(Vector3(0.0, sin(animationTime)*0.5+0.15, 0.0));
@@ -163,6 +159,7 @@ void renderScene() {
             addVertex(&vertices[index+40], (float)(x+1)/size, (float)y/size);
         }
     
+    heightMap->use(2);
     fileManager.getPackage(NULL)->getTexture("man.png")->use(0);
     modelMat.setIdentity();
     if(lightManager.currentShadowLight)

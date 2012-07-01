@@ -140,6 +140,7 @@ bool DirectionalLight::calculateShadowmap() {
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
     mainFBO.renderInTexture(shadowMap);
+    glClear(GL_DEPTH_BUFFER_BIT);
     renderScene();
     glEnable(GL_BLEND);
     return true;
@@ -206,20 +207,15 @@ bool SpotLight::calculateShadowmap() {
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
     mainFBO.renderInTexture(shadowMap);
-    renderScene();
-    //Render circle mask -----> TODO <------
-    /*float vertices[12] = {
-        -1.0, -1.0, 0.0,
-        1.0, -1.0, 0.0,
-        1.0, 1.0, 0.0,
-        -1.0, 1.0, 0.0
-    };
-    
-    shaderPrograms[solidShadowSP]->use();
-    shaderPrograms[solidShadowSP]->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float), vertices);
+    glClear(GL_DEPTH_BUFFER_BIT);
+    //Render circle mask
+    float vertices[12] = { -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0 };
+    shaderPrograms[spotShadowCircleLightSP]->use();
+    shaderPrograms[spotShadowCircleLightSP]->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    glEnable(GL_BLEND);*/
+    renderScene();
+    glEnable(GL_BLEND);
     return true;
 }
 
@@ -303,10 +299,12 @@ bool PositionalLight::calculateShadowmap() {
         shadowMatB = shadowMatB.getInverse();
         shadowCam.viewMat = shadowMatB;
         mainFBO.renderInTexture(shadowMapB);
+        glClear(GL_DEPTH_BUFFER_BIT);
         renderScene();
     }
     shadowCam.viewMat = shadowCam.camMat.getInverse();
     mainFBO.renderInTexture(shadowMap);
+    glClear(GL_DEPTH_BUFFER_BIT);
     renderScene();
     glEnable(GL_BLEND);
     return true;
@@ -463,6 +461,8 @@ void LightManager::calculateShadows(unsigned int maxShadows) {
 }
 
 void LightManager::useLights() {
+    inBuffersA[0] = (positionBufferEnabled) ? positionDBuffer : depthDBuffer;
+    
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
     mainFBO.clearDeferredBuffers();

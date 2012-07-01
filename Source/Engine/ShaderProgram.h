@@ -17,7 +17,6 @@
 #define TEXTURE_COORD_ATTRIBUTE 1
 #define NORMAL_ATTRIBUTE 2
 #define TANGENT_ATTRIBUTE 3
-#define BITANGENT_ATTRIBUTE 4
 #define WEIGHT_ATTRIBUTE 5
 #define JOINT_ATTRIBUTE 6
 
@@ -45,7 +44,7 @@ class ShaderProgram {
 };
 
 extern Matrix4 modelMat;
-extern ShaderProgram *shaderPrograms[20], *currentShaderProgram;
+extern ShaderProgram *shaderPrograms[21], *currentShaderProgram;
 
 enum ShaderProgramNames {
     spriteSP = 0,
@@ -61,13 +60,14 @@ enum ShaderProgramNames {
     directionalShadowLightSP = 10,
     spotLightSP = 11,
     spotShadowLightSP = 12,
-    positionalLightSP = 13,
-    positionalShadowLightSP = 14,
-    positionalShadowDualLightSP = 15,
-    normalMapGenSP = 16,
-    blurSP = 17,
-    ssaoSP = 18,
-    deferredCombineSP = 19
+    spotShadowCircleLightSP = 13,
+    positionalLightSP = 14,
+    positionalShadowLightSP = 15,
+    positionalShadowDualLightSP = 16,
+    normalMapGenSP = 17,
+    blurSP = 18,
+    ssaoSP = 19,
+    deferredCombineSP = 20
 };
 
 void loadShaderPrograms();

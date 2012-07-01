@@ -1,16 +1,14 @@
-Test Bounding Volumes
-Deferred lights volume and frustum culling
-Depth texture to normal map
-Normal mapping
-Spot light shadow map circle
+Depth to position calculations
 Parallax mapping
 Occulusion parallax mapping
-Shadow multi sample
+Soft shadows PCF, PCSS
 SSAO
 Anti aliasing
 Water
 Enviornment maping
+Particle systems thread bug
 Make GUI
+Highmap terrains
 Level File Formats
 Object Editor
 Use Bullet-Engine

@@ -27,11 +27,11 @@ class Mesh {
     public:
     GLuint vbo, ibo;
     unsigned int elementsCount;
-    int postions, texcoords, normals, tangents, bitangents, weightJoints;
-    Texture *diffuse, *effectMap, *normalMap;
+    int postions, texcoords, normals, weightJoints;
+    Texture *diffuse, *effectMap, *heightMap;
     Mesh();
     ~Mesh();
-    void draw();
+    void draw(float discardDensity, Matrix4* mats, unsigned char matCount);
 };
 
 struct BonePose {

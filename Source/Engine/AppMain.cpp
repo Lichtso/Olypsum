@@ -115,9 +115,6 @@ void AppMain(int argc, char *argv[]) {
     
     SDL_Event event;
     SDL_PollEvent(&event);
-    /*glClearColor(0, 0, 0, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    SDL_GL_SwapBuffers();*/
     initGame();
     
     timeval timeThen, timeNow;
@@ -179,6 +176,7 @@ void AppMain(int argc, char *argv[]) {
         lightManager.calculateShadows(1);
         mainCam->use();
         mainFBO.renderInDeferredBuffers();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderScene();
         particleSystemManager.draw();
         lightManager.useLights();

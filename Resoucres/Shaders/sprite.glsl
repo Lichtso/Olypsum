@@ -30,10 +30,12 @@ void main() {
     if(0.1 > gl_FragData[0].a) discard;
     if(color.r > -1.0) gl_FragData[0].rgb += color;
     
-    gl_FragData[1].xyz = vPosition;
+    gl_FragData[1].xyz = vNormal;
     gl_FragData[1].a = 1.0;
-    gl_FragData[2].xyz = vNormal;
+    gl_FragData[2].xyz = vec3(0.0);
     gl_FragData[2].a = 1.0;
-    gl_FragData[3].xyz = vec3(0.0);
+    #if POSITION_BUFFER
+    gl_FragData[3].rgb = vPosition;
     gl_FragData[3].a = 1.0;
+    #endif
 }

@@ -13,10 +13,10 @@ uniform mat4 modelViewMat;
 
 #if LIGHT_TYPE == 2
 uniform float lRange;
-#endif
-
-varying vec2 vTexCoord;
 varying float vClip;
+#endif
+varying vec2 vTexCoord;
+
 
 void main() {
     #if SKELETAL_ANIMATION
@@ -48,8 +48,11 @@ void main() {
 uniform sampler2D sampler[1];
 uniform float paraboloidRange;
 uniform float discardDensity;
-varying vec2 vTexCoord;
+
+#if LIGHT_TYPE == 2
 varying float vClip;
+#endif
+varying vec2 vTexCoord;
 
 float random(vec2 co) {
     return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
@@ -60,10 +63,7 @@ void main() {
     
     #if LIGHT_TYPE == 2
     if(gl_FragColor.a < 0.1 || vClip < 0.0 || random(gl_FragCoord.xy) > discardDensity) discard;
-    //gl_FragDepth = gl_FragCoord.z;
     #else
     if(gl_FragColor.a < 0.1 || random(gl_FragCoord.xy) > discardDensity) discard;
     #endif
-    
-    gl_FragColor = vec4(gl_FragCoord.z, 0.0, 0.0, 1.0);
 }

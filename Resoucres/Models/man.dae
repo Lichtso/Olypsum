@@ -14,6 +14,9 @@
     <image id="human_png" name="human_png">
       <init_from>man.png</init_from>
     </image>
+    <image id="heightMap_jpg" name="heightMap_jpg">
+      <init_from>heightMap.jpg</init_from>
+    </image>
   </library_images>
   <library_effects>
     <effect id="Material-effect">
@@ -26,6 +29,16 @@
         <newparam sid="human_png-sampler">
           <sampler2D>
             <source>human_png-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="heightMap_jpg-surface">
+          <surface type="2D">
+            <init_from>heightMap_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="heightMap_jpg-sampler">
+          <sampler2D>
+            <source>heightMap_jpg-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -49,6 +62,13 @@
               <float sid="index_of_refraction">1</float>
             </index_of_refraction>
           </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="heightMap_jpg-sampler" texcoord="UVTex"/>
+              </bump>
+            </technique>
+          </extra>
         </technique>
       </profile_COMMON>
     </effect>

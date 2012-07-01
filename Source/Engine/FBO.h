@@ -12,7 +12,7 @@
 #define FBO_h
 
 #define maxColorBufferCount 6
-#define dBuffersCount 6
+#define dBuffersCount 7
 
 struct ColorBuffer {
     unsigned int size;
@@ -20,7 +20,7 @@ struct ColorBuffer {
 };
 
 class FBO {
-    GLuint frameBuffer, depthBuffer, dBuffers[dBuffersCount];
+    GLuint frameBuffer, dBuffers[dBuffersCount];
     int getColorBufferIndex(ColorBuffer* colorBuffer);
     void initBuffer(unsigned int index);
     public:
@@ -39,15 +39,17 @@ class FBO {
 };
 
 enum DeferredBufferNames {
-    colorDBuffer = 0,
-    positionDBuffer = 1,
+    depthDBuffer = 0,
+    colorDBuffer = 1,
     normalDBuffer = 2,
     materialDBuffer = 3,
-    diffuseDBuffer = 4,
-    specularDBuffer = 5
+    positionDBuffer = 4,
+    diffuseDBuffer = 5,
+    specularDBuffer = 6
 };
 
 extern FBO mainFBO;
 extern unsigned int maxFBOSize;
+extern bool positionBufferEnabled;
 
 #endif
