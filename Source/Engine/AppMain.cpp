@@ -29,6 +29,14 @@ static int ParticleThreadFunction(void* pointless) {
     return 0;
 }
 
+void updateVideoMode() {
+    screen = SDL_SetVideoMode(videoInfo->current_w, videoInfo->current_h, videoInfo->vfmt->BitsPerPixel, (fullScreenEnabled) ? SDL_OPENGL | SDL_FULLSCREEN : SDL_OPENGL);
+    if(!screen) {
+        printf("Coudn't set video mode, Quit.\n");
+        exit(4);
+    }
+}
+
 void AppMain(int argc, char *argv[]) {
     //Init SDL
     if(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) < 0) {
@@ -55,11 +63,7 @@ void AppMain(int argc, char *argv[]) {
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     //SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     
-    screen = SDL_SetVideoMode(videoInfo->current_w, videoInfo->current_h, videoInfo->vfmt->BitsPerPixel, SDL_OPENGL);//SDL_FULLSCREEN
-    if(!screen) {
-        printf("Coudn't set fullscreen, Quit.\n");
-        exit(4);
-    }
+    updateVideoMode();
     
     //Init OpenGL
     char* glStr = NULL;

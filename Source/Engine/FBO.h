@@ -12,7 +12,7 @@
 #define FBO_h
 
 #define maxColorBufferCount 6
-#define dBuffersCount 7
+#define dBuffersCount 8
 
 struct ColorBuffer {
     unsigned int size;
@@ -25,6 +25,7 @@ class FBO {
     void initBuffer(unsigned int index);
     public:
     std::vector<ColorBuffer*> colorBuffers;
+    FBO();
     ~FBO();
     void init();
     void clearDeferredBuffers();
@@ -45,11 +46,11 @@ enum DeferredBufferNames {
     materialDBuffer = 3,
     positionDBuffer = 4,
     diffuseDBuffer = 5,
-    specularDBuffer = 6
+    specularDBuffer = 6,
+    ssaoDBuffer = 7
 };
 
 extern FBO mainFBO;
 extern unsigned int maxFBOSize;
-extern bool positionBufferEnabled;
 
 #endif

@@ -16,14 +16,15 @@ class Texture {
     unsigned int useCounter, width, height;
     GLuint GLname;
     GLenum minFilter, magFilter;
-    SDL_Surface *surface;
+    SDL_Surface* surface;
     Texture();
     ~Texture();
     bool loadImageInRAM(const char* filePath);
+    void loadRandomInRAM();
     void unloadFromRAM();
     bool uploadToVRAM(GLenum textureTarget, GLenum format);
     void unloadFromVRAM();
-    void use(GLuint targetIndex);
+    void use(GLenum textureTarget, GLuint targetIndex);
 };
 
 #endif

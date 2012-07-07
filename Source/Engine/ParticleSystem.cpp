@@ -140,7 +140,7 @@ void ParticleSystemManager::draw() {
         mat.pos = drawArray->position;
         if(currentCam->frustum.testBsInclusiveHit(&bs)) continue;
         drawArray = (*particleDrawArrays)[p];
-        if(drawArray->texture) drawArray->texture->use(0);
+        if(drawArray->texture) drawArray->texture->use(GL_TEXTURE_2D, 0);
         currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 8*sizeof(float), drawArray->vertices);
         currentShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 3, 8*sizeof(float), &drawArray->vertices[3]);
         currentShaderProgram->setAttribute(TANGENT_ATTRIBUTE, 2, 8*sizeof(float), &drawArray->vertices[6]);

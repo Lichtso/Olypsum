@@ -28,7 +28,9 @@ static unsigned int copyVertices(Vector3* positions, float* vertices, unsigned i
 }
 
 unsigned char inBuffersA[] = { positionDBuffer, normalDBuffer, materialDBuffer, diffuseDBuffer, specularDBuffer }, outBuffersA[] = { diffuseDBuffer, specularDBuffer };
-unsigned char inBuffersB[] = { colorDBuffer, materialDBuffer, diffuseDBuffer, specularDBuffer }, outBuffersB[] = { };
+unsigned char inBuffersB[] = { normalDBuffer, depthDBuffer }, outBuffersB[] = { ssaoDBuffer };
+unsigned char inBuffersC[] = { colorDBuffer, materialDBuffer, diffuseDBuffer, specularDBuffer, depthDBuffer, ssaoDBuffer }, outBuffersC[] = { colorDBuffer };
+unsigned char inBuffersD[] = { depthDBuffer, colorDBuffer }, outBuffersD[] = { colorDBuffer };
 
 static bool drawLightVolume(Vector3* verticesSource, unsigned int verticesCount) {
     Vector3* vertices = new Vector3[verticesCount];
@@ -46,7 +48,7 @@ static bool drawLightVolume(Vector3* verticesSource, unsigned int verticesCount)
         glFrontFace(GL_CW);
     }
     delete [] vertices;
-    mainFBO.renderDeferred(false, inBuffersA, sizeof(inBuffersA)/sizeof(unsigned char), outBuffersA, sizeof(outBuffersA)/sizeof(unsigned char));
+    mainFBO.renderDeferred(false, inBuffersA, 5, outBuffersA, 2);
     return true;
 }
 
@@ -461,8 +463,6 @@ void LightManager::calculateShadows(unsigned int maxShadows) {
 }
 
 void LightManager::useLights() {
-    inBuffersA[0] = (positionBufferEnabled) ? positionDBuffer : depthDBuffer;
-    
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
     mainFBO.clearDeferredBuffers();
@@ -473,11 +473,27 @@ void LightManager::useLights() {
     glDepthMask(GL_TRUE);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    
     glFrontFace(GL_CCW);
     glDisable(GL_DEPTH_TEST);
+    
+    if(ssaoEnabled) {
+        shaderPrograms[ssaoSP]->use();
+        mainFBO.renderDeferred(true, inBuffersB, 2, outBuffersB, 1);
+    }
+    
     shaderPrograms[deferredCombineSP]->use();
-    mainFBO.renderDeferred(true, inBuffersB, sizeof(inBuffersB)/sizeof(unsigned char), outBuffersB, sizeof(outBuffersB)/sizeof(unsigned char));
+    mainFBO.renderDeferred(true, inBuffersC, (ssaoEnabled) ? 6 : 4, outBuffersC, (edgeSmoothEnabled || depthOfFieldEnabled) ? 1 : 0);
+    
+    if(edgeSmoothEnabled) {
+        shaderPrograms[edgeSmoothSP]->use();
+        mainFBO.renderDeferred(true, inBuffersD, 2, outBuffersD, (depthOfFieldEnabled) ? 1 : 0);
+    }
+    
+    if(depthOfFieldEnabled) {
+        shaderPrograms[depthOfFieldSP]->use();
+        mainFBO.renderDeferred(true, inBuffersD, 2, outBuffersD, 0);
+    }
+    
     glDisableVertexAttribArray(POSITION_ATTRIBUTE);
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);

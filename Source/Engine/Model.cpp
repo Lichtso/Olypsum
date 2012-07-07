@@ -41,15 +41,15 @@ void Mesh::draw(float discardDensity, Matrix4* mats, unsigned char matCount) {
     }
     
     if(diffuse)
-        diffuse->use(0);
+        diffuse->use(GL_TEXTURE_2D, 0);
     if(effectMap)
-        effectMap->use(1);
+        effectMap->use(GL_TEXTURE_2D, 1);
     else{
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
     if(heightMap) {
-        heightMap->use(2);
+        heightMap->use(GL_TEXTURE_2D, 2);
         if(!lightManager.currentShadowLight) {
             if(matCount)
                 shaderPrograms[skeletalBumpGeometrySP]->use();
@@ -219,9 +219,11 @@ static std::string readTextureURL(std::map<std::string, std::string> samplerURLs
 
 static Texture* readTexture(FilePackage* filePackage, std::string* textureURL) {
     if(textureURL->size() == 0) return NULL;
-    Texture* texture = filePackage->getTexture(textureURL->c_str());
-    texture->uploadToVRAM(GL_TEXTURE_2D, GL_RGBA);
-    texture->unloadFromRAM();
+    Texture* texture;
+    if(filePackage->getTexture(&texture, textureURL->c_str())) {
+        texture->uploadToVRAM(GL_TEXTURE_2D, GL_RGBA);
+        texture->unloadFromRAM();
+    }
     return texture;
 }
 
@@ -694,7 +696,12 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             }
             mesh->diffuse = readTexture(filePackage, &material->second.diffuseURL);
             mesh->effectMap = readTexture(filePackage, &material->second.effectMapURL);
-            mesh->heightMap = readTexture(filePackage, &material->second.heightMapURL);
+            if(material->second.heightMapURL.size() > 0) {
+                if(filePackage->getTexture(&mesh->heightMap, material->second.heightMapURL.c_str())) {
+                    mainFBO.generateNormalMap(mesh->heightMap, 4.0);
+                    mesh->heightMap->unloadFromRAM();
+                }
+            }
             
             unsigned int dataIndex, valueIndex, indexCount = 0, strideIndex = 0;
             std::map<std::string, VertexReference> vertexReferences;

@@ -1,9 +1,8 @@
-Depth to position calculations
+SSAO
+Soft shadows PCF, PCSS
+Light blur
 Parallax mapping
 Occulusion parallax mapping
-Soft shadows PCF, PCSS
-SSAO
-Anti aliasing
 Water
 Enviornment maping
 Particle systems thread bug

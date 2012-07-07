@@ -34,8 +34,6 @@ void main() {
     gl_FragData[1].a = 1.0;
     gl_FragData[2].xyz = vec3(0.0);
     gl_FragData[2].a = 1.0;
-    #if POSITION_BUFFER
     gl_FragData[3].rgb = vPosition;
     gl_FragData[3].a = 1.0;
-    #endif
 }

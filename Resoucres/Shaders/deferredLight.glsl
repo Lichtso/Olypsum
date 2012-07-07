@@ -21,9 +21,9 @@ uniform vec3 lPosition;
 uniform sampler2DRect sampler[5];
 
 #if SHADOWS_ACTIVE == 1
-uniform sampler2DShadow shadowSampler[1];
+uniform sampler2DShadow extraSampler[1];
 #elif SHADOWS_ACTIVE == 2
-uniform sampler2DShadow shadowSampler[2];
+uniform sampler2DShadow extraSampler[2];
 #endif
 
 #if SHADOWS_ACTIVE > 0
@@ -63,7 +63,7 @@ void main() {
     vec4 shadowCoord = vec4(pos, 1.0) * lShadowMat;
     #if LIGHT_TYPE < 3
     shadowCoord.z = shadowCoord.z*0.5*depthBias+0.5*shadowCoord.w;
-    intensity *= shadow2DProj(shadowSampler[0], shadowCoord).x;
+    intensity *= shadow2DProj(extraSampler[0], shadowCoord).x;
     #else
     #if SHADOWS_ACTIVE == 2
     if(shadowCoord.z < 0.0) {
@@ -71,14 +71,14 @@ void main() {
         shadowCoord.xy /= lightDirLen - shadowCoord.z;
         shadowCoord.xy = shadowCoord.xy * 0.5 + vec2(0.5);
         shadowCoord.z = (1.0-intensity) * depthBias + 0.5;
-        intensity *= shadow2D(shadowSampler[0], shadowCoord.xyz).x;
+        intensity *= shadow2D(extraSampler[0], shadowCoord.xyz).x;
     #if SHADOWS_ACTIVE == 2
     }else{
         shadowCoord.xy /= lightDirLen + shadowCoord.z;
         shadowCoord.x *= -1.0;
         shadowCoord.xy = shadowCoord.xy * 0.5 + vec2(0.5);
         shadowCoord.z = (1.0-intensity) * depthBias + 0.5;
-        intensity *= shadow2D(shadowSampler[1], shadowCoord.xyz).x;
+        intensity *= shadow2D(extraSampler[1], shadowCoord.xyz).x;
     }
     #endif
     #endif

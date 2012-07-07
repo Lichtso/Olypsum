@@ -12,7 +12,8 @@ GUILabel* labelFPS;
 GUISlider* soundTrackSlider;
 Model* humanModel;
 SkeletonPose* skeletonPose;
-Texture* heightMap;
+Model* boxesModel;
+
 static float animationTime = 0;
 
 static void updateSoundTrackSlider(GUISlider* slider) {
@@ -20,10 +21,8 @@ static void updateSoundTrackSlider(GUISlider* slider) {
 }
 
 void initGame() {
-    heightMap = fileManager.getPackage(NULL)->getTexture("heightMap.jpg");
-    mainFBO.generateNormalMap(heightMap, 4.0);
-    
-    humanModel = fileManager.getPackage(NULL)->getModel("man.dae");
+    fileManager.getPackage(NULL)->getModel(&boxesModel, "boxes.dae");
+    fileManager.getPackage(NULL)->getModel(&humanModel, "man.dae");
     skeletonPose = new SkeletonPose(humanModel->skeleton);
     
     if(false) {
@@ -50,7 +49,7 @@ void initGame() {
     }
     
     GUIImage* image = new GUIImage();
-    image->texture = fileManager.getPackage(NULL)->getTexture("logo.png");
+    fileManager.getPackage(NULL)->getTexture(&image->texture, "logo.png");
     image->sizeAlignment = GUISizeAlignment_Height;
     image->width = 400;
     image->posY = -350;
@@ -98,10 +97,12 @@ void initGame() {
     particleSystem->addMax = 30.0;
     particleSystem->dirMin = Vector3(-0.1, 1.4, -0.1);
     particleSystem->dirMax = Vector3(0.1, 1.8, 0.1);
-    particleSystem->texture = fileManager.getPackage(NULL)->getTexture("man.png");
+    fileManager.getPackage(NULL)->getTexture(&particleSystem->texture, "man.png");
     
     SoundSource* testSoundSource = new SoundSource();
-    testSoundSource->setSoundTrack(fileManager.getPackage(NULL)->getSoundTrack("test.ogg"));
+    SoundTrack* testSoundTrack;
+    fileManager.getPackage(NULL)->getSoundTrack(&testSoundTrack, "test.ogg");
+    testSoundSource->setSoundTrack(testSoundTrack);
     testSoundSource->looping = true;
     //testSoundSource->play();
 }
@@ -146,6 +147,11 @@ void renderScene() {
     skeletonPose->calculateBonePose(humanModel->skeleton->rootBone, NULL);
     humanModel->draw(1.0, skeletonPose);
     
+    modelMat.setIdentity();
+    modelMat.rotateY(M_PI_4);
+    modelMat.translate(Vector3(2.0, -0.5, -3.0));
+    boxesModel->draw(1.0);
+    
     unsigned int size = 10, index;
     float vertices[48*size*size];
     for(unsigned int y = 0; y < size; y ++)
@@ -159,13 +165,14 @@ void renderScene() {
             addVertex(&vertices[index+40], (float)(x+1)/size, (float)y/size);
         }
     
-    heightMap->use(2);
-    fileManager.getPackage(NULL)->getTexture("man.png")->use(0);
+    Texture* groundTexture;
+    fileManager.getPackage(NULL)->getTexture(&groundTexture, "man.png");
+    groundTexture->use(GL_TEXTURE_2D, 0);
     modelMat.setIdentity();
     if(lightManager.currentShadowLight)
         lightManager.currentShadowLight->selectShaderProgram(false);
     else
-        shaderPrograms[solidBumpGeometrySP]->use();
+        shaderPrograms[solidGeometrySP]->use();
     currentShaderProgram->setUniformF("discardDensity", 1.0);
     
     currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 8*sizeof(float), vertices);

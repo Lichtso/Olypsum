@@ -36,7 +36,7 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::v
 	char infoLog[infoLogLength];
 	glGetShaderInfoLog(shaderId, infoLogLength, &infoLogLength, (GLchar*) &infoLog);
 	if(infoLogLength > 0) {
-		printf("SHADER:\n%s%s\n\n", soucre, infoLog);
+		printf("SHADER:\n%s\n%s\n\n", soucre, infoLog);
 		return false;
 	}
 	glAttachShader(GLname, shaderId);
@@ -157,7 +157,7 @@ void ShaderProgram::link() {
         glUniform1i(location, samplerIndex);
     }
     for(samplerIndex = 0; samplerIndex < 2; samplerIndex ++) {
-        sprintf(buffer, "shadowSampler[%d]", samplerIndex);
+        sprintf(buffer, "extraSampler[%d]", samplerIndex);
         location = glGetUniformLocation(GLname, buffer);
         if(location < 0) break;
         glUniform1i(location, 8+samplerIndex);
@@ -174,6 +174,7 @@ void ShaderProgram::use () {
     }
     if(currentCam) {
         setUniformVec3("camPos", currentCam->camMat.pos);
+        setUniformMatrix4("camMat", &currentCam->camMat);
         setUniformMatrix4("viewMat", &currentCam->viewMat);
         if(checkUniformExistence("modelViewMat")) {
             Matrix4 projectionMat(modelMat * currentCam->viewMat);
@@ -257,6 +258,8 @@ ShaderProgram& ShaderProgram::operator=(const ShaderProgram &b) {
 
 Matrix4 modelMat;
 ShaderProgram *shaderPrograms[], *currentShaderProgram;
+bool depthOfFieldEnabled = false, edgeSmoothEnabled = false, ssaoEnabled = true, fullScreenEnabled = false;
+unsigned char bumpMappingQuality = 1, shadowQuality = 1;
 
 void loadShaderPrograms() {
     for(unsigned int p = 0; p < sizeof(shaderPrograms)/sizeof(ShaderProgram*); p ++) {
@@ -264,10 +267,11 @@ void loadShaderPrograms() {
         shaderPrograms[p] = new ShaderProgram();
     }
     std::vector<const char*> shaderProgramMacros;
-    char positionBufferMacro[32];
-    sprintf(positionBufferMacro, "POSITION_BUFFER %d", positionBufferEnabled);
+    char ssaoEnabledMacro[32], bumpMappingMacro[32], shadowQualityMacro[32];
+    sprintf(ssaoEnabledMacro, "SSAO_ENABLED %d", ssaoEnabled);
+    sprintf(bumpMappingMacro, "BUMP_MAPPING %d", bumpMappingQuality);
+    sprintf(shadowQualityMacro, "SHADOW_QUALITY %d", shadowQuality);
     
-    shaderProgramMacros.push_back(positionBufferMacro);
     shaderPrograms[spriteSP]->loadShaderProgram("sprite", false, &shaderProgramMacros);
     shaderPrograms[spriteSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[spriteSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
@@ -277,7 +281,6 @@ void loadShaderPrograms() {
     shaderProgramMacros.clear();
     shaderProgramMacros.push_back("SKELETAL_ANIMATION 0");
     shaderProgramMacros.push_back("BUMP_MAPPING 0");
-    shaderProgramMacros.push_back(positionBufferMacro);
     shaderPrograms[solidGeometrySP]->loadShaderProgram("geometry", false, &shaderProgramMacros);
     shaderPrograms[solidGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[solidGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
@@ -286,8 +289,7 @@ void loadShaderPrograms() {
     
     shaderProgramMacros.clear();
     shaderProgramMacros.push_back("SKELETAL_ANIMATION 0");
-    shaderProgramMacros.push_back("BUMP_MAPPING 1");
-    shaderProgramMacros.push_back(positionBufferMacro);
+    shaderProgramMacros.push_back(bumpMappingMacro);
     shaderPrograms[solidBumpGeometrySP]->loadShaderProgram("geometry", false, &shaderProgramMacros);
     shaderPrograms[solidBumpGeometrySP]->loadShaderProgram("geometryTangent", true, &shaderProgramMacros);
     shaderPrograms[solidBumpGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
@@ -314,7 +316,6 @@ void loadShaderPrograms() {
     shaderProgramMacros.clear();
     shaderProgramMacros.push_back("SKELETAL_ANIMATION 1");
     shaderProgramMacros.push_back("BUMP_MAPPING 0");
-    shaderProgramMacros.push_back(positionBufferMacro);
     shaderPrograms[skeletalGeometrySP]->loadShaderProgram("geometry", false, &shaderProgramMacros);
     shaderPrograms[skeletalGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[skeletalGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
@@ -325,8 +326,7 @@ void loadShaderPrograms() {
     
     shaderProgramMacros.clear();
     shaderProgramMacros.push_back("SKELETAL_ANIMATION 1");
-    shaderProgramMacros.push_back("BUMP_MAPPING 1");
-    shaderProgramMacros.push_back(positionBufferMacro);
+    shaderProgramMacros.push_back(bumpMappingMacro);
     shaderPrograms[skeletalBumpGeometrySP]->loadShaderProgram("geometry", false, &shaderProgramMacros);
     shaderPrograms[skeletalBumpGeometrySP]->loadShaderProgram("geometryTangent", true, &shaderProgramMacros);
     shaderPrograms[skeletalBumpGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
@@ -359,7 +359,7 @@ void loadShaderPrograms() {
     shaderProgramMacros.clear();
     shaderProgramMacros.push_back("LIGHT_TYPE 1");
     shaderProgramMacros.push_back("SHADOWS_ACTIVE 0");
-    shaderProgramMacros.push_back(positionBufferMacro);
+    shaderProgramMacros.push_back("SHADOW_QUALITY 0");
     shaderPrograms[directionalLightSP]->loadShaderProgram("deferredLight", false, &shaderProgramMacros);
     shaderPrograms[directionalLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[directionalLightSP]->link();
@@ -367,7 +367,7 @@ void loadShaderPrograms() {
     shaderProgramMacros.clear();
     shaderProgramMacros.push_back("LIGHT_TYPE 1");
     shaderProgramMacros.push_back("SHADOWS_ACTIVE 1");
-    shaderProgramMacros.push_back(positionBufferMacro);
+    shaderProgramMacros.push_back(shadowQualityMacro);
     shaderPrograms[directionalShadowLightSP]->loadShaderProgram("deferredLight", false, &shaderProgramMacros);
     shaderPrograms[directionalShadowLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[directionalShadowLightSP]->link();
@@ -375,7 +375,7 @@ void loadShaderPrograms() {
     shaderProgramMacros.clear();
     shaderProgramMacros.push_back("LIGHT_TYPE 2");
     shaderProgramMacros.push_back("SHADOWS_ACTIVE 0");
-    shaderProgramMacros.push_back(positionBufferMacro);
+    shaderProgramMacros.push_back("SHADOW_QUALITY 0");
     shaderPrograms[spotLightSP]->loadShaderProgram("deferredLight", false, &shaderProgramMacros);
     shaderPrograms[spotLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[spotLightSP]->link();
@@ -383,14 +383,13 @@ void loadShaderPrograms() {
     shaderProgramMacros.clear();
     shaderProgramMacros.push_back("LIGHT_TYPE 2");
     shaderProgramMacros.push_back("SHADOWS_ACTIVE 1");
-    shaderProgramMacros.push_back(positionBufferMacro);
+    shaderProgramMacros.push_back(shadowQualityMacro);
     shaderPrograms[spotShadowLightSP]->loadShaderProgram("deferredLight", false, &shaderProgramMacros);
     shaderPrograms[spotShadowLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[spotShadowLightSP]->link();
     
     shaderProgramMacros.clear();
     shaderProgramMacros.push_back("PROCESSING_TYPE 3");
-    shaderProgramMacros.push_back(positionBufferMacro);
     shaderPrograms[spotShadowCircleLightSP]->loadShaderProgram("preProcessing", false, &shaderProgramMacros);
     shaderPrograms[spotShadowCircleLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[spotShadowCircleLightSP]->link();
@@ -398,7 +397,7 @@ void loadShaderPrograms() {
     shaderProgramMacros.clear();
     shaderProgramMacros.push_back("LIGHT_TYPE 3");
     shaderProgramMacros.push_back("SHADOWS_ACTIVE 0");
-    shaderProgramMacros.push_back(positionBufferMacro);
+    shaderProgramMacros.push_back("SHADOW_QUALITY 0");
     shaderPrograms[positionalLightSP]->loadShaderProgram("deferredLight", false, &shaderProgramMacros);
     shaderPrograms[positionalLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[positionalLightSP]->link();
@@ -406,7 +405,7 @@ void loadShaderPrograms() {
     shaderProgramMacros.clear();
     shaderProgramMacros.push_back("LIGHT_TYPE 3");
     shaderProgramMacros.push_back("SHADOWS_ACTIVE 1");
-    shaderProgramMacros.push_back(positionBufferMacro);
+    shaderProgramMacros.push_back(shadowQualityMacro);
     shaderPrograms[positionalShadowLightSP]->loadShaderProgram("deferredLight", false, &shaderProgramMacros);
     shaderPrograms[positionalShadowLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[positionalShadowLightSP]->link();
@@ -414,7 +413,7 @@ void loadShaderPrograms() {
     shaderProgramMacros.clear();
     shaderProgramMacros.push_back("LIGHT_TYPE 3");
     shaderProgramMacros.push_back("SHADOWS_ACTIVE 2");
-    shaderProgramMacros.push_back(positionBufferMacro);
+    shaderProgramMacros.push_back(shadowQualityMacro);
     shaderPrograms[positionalShadowDualLightSP]->loadShaderProgram("deferredLight", false, &shaderProgramMacros);
     shaderPrograms[positionalShadowDualLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[positionalShadowDualLightSP]->link();
@@ -431,14 +430,47 @@ void loadShaderPrograms() {
     shaderPrograms[blurSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[blurSP]->link();
     
-    /*
-    shaderProgramMacros.clear();
-    shaderPrograms[ssaoSP]->loadShaderProgram("ssao", &shaderProgramMacros);
-    shaderPrograms[ssaoSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[ssaoSP]->link();*/
+    if(ssaoEnabled) {
+        unsigned char samples = 16;
+        float pSphere[samples*3];
+        for(unsigned char i = 0; i < samples*3; i ++)
+            pSphere[i] = frand(-1.0, 1.0);
+        for(unsigned char i = 0; i < samples; i ++) {
+            Vector3 vec(pSphere[i*3], pSphere[i*3+1], pSphere[i*3+2]);
+            vec.normalize();
+            vec *= ((float)i/samples)*0.9+0.1;
+            pSphere[i*3  ] = vec.x;
+            pSphere[i*3+1] = vec.y;
+            pSphere[i*3+2] = vec.z;
+        }
+        
+        shaderProgramMacros.clear();
+        shaderPrograms[ssaoSP]->loadShaderProgram("ssao", false, &shaderProgramMacros);
+        shaderPrograms[ssaoSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+        shaderPrograms[ssaoSP]->link();
+        shaderPrograms[ssaoSP]->use();
+        glUniform3fv(glGetUniformLocation(shaderPrograms[ssaoSP]->GLname, "pSphere"), 12, pSphere);
+    }
     
     shaderProgramMacros.clear();
+    shaderProgramMacros.push_back(ssaoEnabledMacro);
     shaderPrograms[deferredCombineSP]->loadShaderProgram("deferredShader", false, &shaderProgramMacros);
     shaderPrograms[deferredCombineSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[deferredCombineSP]->link();
+    
+    if(edgeSmoothEnabled) {
+        shaderProgramMacros.clear();
+        shaderProgramMacros.push_back("PROCESSING_TYPE 1");
+        shaderPrograms[edgeSmoothSP]->loadShaderProgram("postProcessing", false, &shaderProgramMacros);
+        shaderPrograms[edgeSmoothSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+        shaderPrograms[edgeSmoothSP]->link();
+    }
+    
+    if(depthOfFieldEnabled) {
+        shaderProgramMacros.clear();
+        shaderProgramMacros.push_back("PROCESSING_TYPE 2");
+        shaderPrograms[depthOfFieldSP]->loadShaderProgram("postProcessing", false, &shaderProgramMacros);
+        shaderPrograms[depthOfFieldSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+        shaderPrograms[depthOfFieldSP]->link();
+    }
 }

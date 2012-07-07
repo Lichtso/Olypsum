@@ -51,52 +51,58 @@ std::string FilePackage::getUrlOfFile(const char* groupName, const char* fileNam
     return url;
 }
 
-Texture* FilePackage::getTexture(const char* fileName) {
+bool FilePackage::getTexture(Texture** texture, const char* fileName) {
     std::map<std::string, Texture*>::iterator iterator = textures.find(std::string(fileName));
     if(iterator != textures.end()) {
-        iterator->second->useCounter ++;
-        return iterator->second;
+        *texture = iterator->second;
+        (*texture)->useCounter ++;
+        return false;
     }
-    Texture* texture = new Texture();
+    *texture = new Texture();
     std::string url = getUrlOfFile("Textures", fileName);
-    if(texture->loadImageInRAM(url.c_str())) {
-        textures[std::string(fileName)] = texture;
-        return texture;
+    if((*texture)->loadImageInRAM(url.c_str())) {
+        textures[std::string(fileName)] = *texture;
+        return true;
     }
-    delete texture;
-    return NULL;
+    delete *texture;
+    *texture = NULL;
+    return false;
 }
 
-Model* FilePackage::getModel(const char* fileName) {
+bool FilePackage::getModel(Model** model, const char* fileName) {
     std::map<std::string, Model*>::iterator iterator = models.find(std::string(fileName));
     if(iterator != models.end()) {
-        iterator->second->useCounter ++;
-        return iterator->second;
+        *model = iterator->second;
+        (*model)->useCounter ++;
+        return false;
     }
-    Model* model = new Model();
+    *model = new Model();
     std::string url = getUrlOfFile("Models", fileName);
-    if(model->loadCollada(this, url.c_str())) {
-        models[std::string(fileName)] = model;
-        return model;
+    if((*model)->loadCollada(this, url.c_str())) {
+        models[std::string(fileName)] = *model;
+        return true;
     }
-    delete model;
-    return NULL;
+    delete *model;
+    *model = NULL;
+    return false;
 }
 
-SoundTrack* FilePackage::getSoundTrack(const char* fileName) {
+bool FilePackage::getSoundTrack(SoundTrack** soundTrack, const char* fileName) {
     std::map<std::string, SoundTrack*>::iterator iterator = soundTracks.find(std::string(fileName));
     if(iterator != soundTracks.end()) {
-        iterator->second->useCounter ++;
-        return iterator->second;
+        *soundTrack = iterator->second;
+        (*soundTrack)->useCounter ++;
+        return false;
     }
-    SoundTrack* soundTrack = new SoundTrack();
+    *soundTrack = new SoundTrack();
     std::string url = getUrlOfFile("Sounds", fileName);
-    if(soundTrack->loadOgg(url.c_str())) {
-        soundTracks[std::string(fileName)] = soundTrack;
-        return soundTrack;
+    if((*soundTrack)->loadOgg(url.c_str())) {
+        soundTracks[std::string(fileName)] = *soundTrack;
+        return true;
     }
-    delete soundTrack;
-    return NULL;
+    delete *soundTrack;
+    *soundTrack = NULL;
+    return false;
 }
 
 bool FilePackage::releaseTexture(Texture* texture) {

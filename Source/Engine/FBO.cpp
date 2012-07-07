@@ -8,13 +8,20 @@
 
 #import "ShaderProgram.h"
 
+FBO::FBO() {
+    for(unsigned char i = 0; i < dBuffersCount; i ++)
+        dBuffers[i] = 0;
+    frameBuffer = 0;
+}
+
 FBO::~FBO() {
     for(unsigned int i = 0; i < colorBuffers.size(); i ++) {
         glDeleteTextures(1, &colorBuffers[i]->texture);
         delete colorBuffers[i];
     }
     for(unsigned char i = 0; i < dBuffersCount; i ++)
-        glDeleteTextures(1, &dBuffers[i]);
+        if(dBuffers[i])
+            glDeleteTextures(1, &dBuffers[i]);
     glDeleteFramebuffers(1, &frameBuffer);
 }
 
@@ -37,6 +44,13 @@ void FBO::initBuffer(unsigned int index) {
 void FBO::init() {
     maxFBOSize = max(videoInfo->current_w, videoInfo->current_h);
     maxFBOSize = pow(2, ceil(log(maxFBOSize) / log(2)));
+    
+    for(unsigned char i = 0; i < dBuffersCount; i ++)
+        if(dBuffers[i])
+            glDeleteTextures(1, &dBuffers[i]);
+    if(frameBuffer)
+        glDeleteFramebuffers(1, &frameBuffer);
+    
     glGenFramebuffers(1, &frameBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
@@ -45,10 +59,8 @@ void FBO::init() {
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_DEPTH_COMPONENT16, maxFBOSize, maxFBOSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     initBuffer(colorDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, videoInfo->current_w, videoInfo->current_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    if(positionBufferEnabled) {
-        initBuffer(positionDBuffer);
-        glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB32F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
-    }
+    initBuffer(positionDBuffer);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB32F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(normalDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(materialDBuffer);
@@ -56,7 +68,11 @@ void FBO::init() {
     initBuffer(diffuseDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(specularDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
+    if(ssaoEnabled) {
+        initBuffer(ssaoDBuffer);
+        glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_R16F, videoInfo->current_w, videoInfo->current_h, 0, GL_RED, GL_FLOAT, NULL);
+    }
     
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -130,7 +146,6 @@ ColorBuffer* FBO::addTexture(unsigned int size) {
 
 void FBO::renderInTexture(ColorBuffer* colorBuffer) {
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-    //glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, colorBuffer->texture, 0);
     glDrawBuffer(GL_NONE);
     glViewport(0, 0, colorBuffer->size, colorBuffer->size);
@@ -197,4 +212,3 @@ bool FBO::generateNormalMap(Texture* heightMap, float processingValue) {
 
 FBO mainFBO;
 unsigned int maxFBOSize;
-bool positionBufferEnabled = true;

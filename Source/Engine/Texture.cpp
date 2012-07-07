@@ -25,7 +25,6 @@ bool Texture::loadImageInRAM(const char* filePath) {
     if(surface) return false;
     
     surface = IMG_Load(filePath);
-    
     if(!surface) {
         printf("ERROR: %s\n", IMG_GetError());
         return false;
@@ -50,6 +49,22 @@ bool Texture::loadImageInRAM(const char* filePath) {
     height = surface->h;
     
     return true;
+}
+
+void Texture::loadRandomInRAM() {
+    if(surface) return;
+    
+    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 24, 0, 0, 0, 0);
+    if(!surface) {
+        printf("ERROR: %s\n", IMG_GetError());
+        return;
+    }
+    
+    SDL_LockSurface(surface);
+    unsigned char* pixels = (unsigned char*) surface->pixels;
+    for(unsigned int i = 0; i < 3*width*height; i ++)
+        pixels[i] = rand()%255;
+    SDL_UnlockSurface(surface);
 }
 
 void Texture::unloadFromRAM() {
@@ -102,7 +117,7 @@ void Texture::unloadFromVRAM() {
     GLname = 0;
 }
 
-void Texture::use(GLuint targetIndex) {
+void Texture::use(GLenum textureTarget, GLuint targetIndex) {
     glActiveTexture(GL_TEXTURE0+targetIndex);
-    glBindTexture(GL_TEXTURE_2D, GLname);
+    glBindTexture(textureTarget, GLname);
 }
