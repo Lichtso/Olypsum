@@ -13,6 +13,7 @@
 #define sphereAccuracyY 6
 #define parabolidAccuracyY 3
 
+Texture randomNormalMap;
 GLuint lightVolumeBuffers[8];
 Vector3 directionalLightVertices[boxVerticesCount];
 Vector3 spotLightVertices[parabolidVerticesCount(coneAccuracy, 0)];
@@ -28,8 +29,8 @@ static unsigned int copyVertices(Vector3* positions, float* vertices, unsigned i
 }
 
 unsigned char inBuffersA[] = { positionDBuffer, normalDBuffer, materialDBuffer, diffuseDBuffer, specularDBuffer }, outBuffersA[] = { diffuseDBuffer, specularDBuffer };
-unsigned char inBuffersB[] = { normalDBuffer, depthDBuffer }, outBuffersB[] = { ssaoDBuffer };
-unsigned char inBuffersC[] = { colorDBuffer, materialDBuffer, diffuseDBuffer, specularDBuffer, depthDBuffer, ssaoDBuffer }, outBuffersC[] = { colorDBuffer };
+unsigned char inBuffersB[] = { depthDBuffer }, outBuffersB[] = { ssaoDBuffer };
+unsigned char inBuffersC[] = { colorDBuffer, materialDBuffer, diffuseDBuffer, specularDBuffer, normalDBuffer, ssaoDBuffer }, outBuffersC[] = { colorDBuffer };
 unsigned char inBuffersD[] = { depthDBuffer, colorDBuffer }, outBuffersD[] = { colorDBuffer };
 
 static bool drawLightVolume(Vector3* verticesSource, unsigned int verticesCount) {
@@ -439,6 +440,12 @@ void LightManager::init() {
     directionalLightVolume.getVertices(directionalLightVertices);
     spotLightVolume.getVertices(spotLightVertices, coneAccuracy/2, 0);
     positionalLightVolume.getVertices(positionalLightVertices, sphereAccuracyX/2, parabolidAccuracyY/2);
+    
+    randomNormalMap.width = 128;
+    randomNormalMap.height = 128;
+    randomNormalMap.loadRandomInRAM();
+    randomNormalMap.uploadToVRAM(GL_TEXTURE_2D, GL_RGB);
+    randomNormalMap.unloadFromRAM();
 }
 
 LightManager::~LightManager() {
@@ -476,13 +483,14 @@ void LightManager::useLights() {
     glFrontFace(GL_CCW);
     glDisable(GL_DEPTH_TEST);
     
-    if(ssaoEnabled) {
+    if(ssaoQuality) {
+        randomNormalMap.use(GL_TEXTURE_2D, 8);
         shaderPrograms[ssaoSP]->use();
-        mainFBO.renderDeferred(true, inBuffersB, 2, outBuffersB, 1);
+        mainFBO.renderDeferred(true, inBuffersB, 1, outBuffersB, 1);
     }
     
     shaderPrograms[deferredCombineSP]->use();
-    mainFBO.renderDeferred(true, inBuffersC, (ssaoEnabled) ? 6 : 4, outBuffersC, (edgeSmoothEnabled || depthOfFieldEnabled) ? 1 : 0);
+    mainFBO.renderDeferred(true, inBuffersC, (ssaoQuality) ? 6 : 4, outBuffersC, (edgeSmoothEnabled || depthOfFieldEnabled) ? 1 : 0);
     
     if(edgeSmoothEnabled) {
         shaderPrograms[edgeSmoothSP]->use();

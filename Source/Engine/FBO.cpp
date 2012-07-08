@@ -69,7 +69,7 @@ void FBO::init() {
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(specularDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
-    if(ssaoEnabled) {
+    if(ssaoQuality) {
         initBuffer(ssaoDBuffer);
         glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_R16F, videoInfo->current_w, videoInfo->current_h, 0, GL_RED, GL_FLOAT, NULL);
     }

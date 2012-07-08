@@ -8,7 +8,7 @@ void main() {
 
 #extension GL_ARB_texture_rectangle : enable
 
-#if SSAO_ENABLED
+#if SSAO_QUALITY
 uniform sampler2DRect sampler[6];
 #else
 uniform sampler2DRect sampler[4];
@@ -20,22 +20,26 @@ void main() {
          diffuse = texture2DRect(sampler[2], gl_FragCoord.xy).rgb,
          specular = texture2DRect(sampler[3], gl_FragCoord.xy).rgb;
     
-    #if SSAO_ENABLED
-    float depth = texture2DRect(sampler[4], gl_FragCoord.xy).x*1.02;
+    #if SSAO_QUALITY
+    vec2 uvPos;
+    vec3 normal = texture2DRect(sampler[4], gl_FragCoord.xy).xyz;
 	float ambientOcclusion = 0.0, occlusionSum = 0.0;
-	for(float x = -2.0; x <= 2.0; x ++)
-        for(float y = -2.0; y <= 2.0; y ++) {
-            vec2 uvPos = gl_FragCoord.xy+vec2(x, y);
-            float vOcc = texture2DRect(sampler[5], uvPos).x;
-            float occlusionActive = step(texture2DRect(sampler[4], uvPos).x, depth);
-            occlusionSum += occlusionActive;
-            ambientOcclusion += vOcc*occlusionActive;
+    const float blurWidth = float(SSAO_QUALITY);
+	for(float x = -blurWidth; x <= blurWidth; x ++)
+        for(float y = -blurWidth; y <= blurWidth; y ++) {
+            uvPos = gl_FragCoord.xy+vec2(x, y);
+            if(dot(texture2DRect(sampler[4], uvPos).xyz, normal) > 0.99) {
+                occlusionSum += 1.0;
+                ambientOcclusion += texture2DRect(sampler[5], uvPos).x;
+            }
         }
-    ambientOcclusion *= 1.0 / occlusionSum;
     
-    //float ambientOcclusion = texture2DRect(sampler[5], gl_FragCoord.xy).x;
-    gl_FragData[0].rgb = color*(ambientOcclusion);
-    //gl_FragData[0].rgb = color*(material.b+0.2)+(color*diffuse+specular)*ambientOcclusion;
+    if(occlusionSum > 0.0)
+        ambientOcclusion *= 1.0 / occlusionSum;
+    else
+        ambientOcclusion = texture2DRect(sampler[5], gl_FragCoord.xy).x;
+    
+    gl_FragData[0].rgb = color*(material.b+0.2)+(color*diffuse+specular)*ambientOcclusion;
     #else
     gl_FragData[0].rgb = color*(diffuse+vec3(material.b+0.2))+specular;
     #endif

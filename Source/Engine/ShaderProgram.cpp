@@ -258,8 +258,8 @@ ShaderProgram& ShaderProgram::operator=(const ShaderProgram &b) {
 
 Matrix4 modelMat;
 ShaderProgram *shaderPrograms[], *currentShaderProgram;
-bool depthOfFieldEnabled = false, edgeSmoothEnabled = false, ssaoEnabled = true, fullScreenEnabled = false;
-unsigned char bumpMappingQuality = 1, shadowQuality = 1;
+bool depthOfFieldEnabled = false, edgeSmoothEnabled = false, fullScreenEnabled = false;
+unsigned char bumpMappingQuality = 1, shadowQuality = 1, ssaoQuality = 0;
 
 void loadShaderPrograms() {
     for(unsigned int p = 0; p < sizeof(shaderPrograms)/sizeof(ShaderProgram*); p ++) {
@@ -267,8 +267,8 @@ void loadShaderPrograms() {
         shaderPrograms[p] = new ShaderProgram();
     }
     std::vector<const char*> shaderProgramMacros;
-    char ssaoEnabledMacro[32], bumpMappingMacro[32], shadowQualityMacro[32];
-    sprintf(ssaoEnabledMacro, "SSAO_ENABLED %d", ssaoEnabled);
+    char ssaoQualityMacro[32], bumpMappingMacro[32], shadowQualityMacro[32];
+    sprintf(ssaoQualityMacro, "SSAO_QUALITY %d", ssaoQuality);
     sprintf(bumpMappingMacro, "BUMP_MAPPING %d", bumpMappingQuality);
     sprintf(shadowQualityMacro, "SHADOW_QUALITY %d", shadowQuality);
     
@@ -430,30 +430,30 @@ void loadShaderPrograms() {
     shaderPrograms[blurSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[blurSP]->link();
     
-    if(ssaoEnabled) {
+    if(ssaoQuality) {
         unsigned char samples = 16;
-        float pSphere[samples*3];
-        for(unsigned char i = 0; i < samples*3; i ++)
+        float pSphere[samples*2];
+        for(unsigned char i = 0; i < samples*2; i ++)
             pSphere[i] = frand(-1.0, 1.0);
         for(unsigned char i = 0; i < samples; i ++) {
-            Vector3 vec(pSphere[i*3], pSphere[i*3+1], pSphere[i*3+2]);
+            Vector3 vec(pSphere[i*2], pSphere[i*2+1], 0.0);
             vec.normalize();
-            vec *= ((float)i/samples)*0.9+0.1;
-            pSphere[i*3  ] = vec.x;
-            pSphere[i*3+1] = vec.y;
-            pSphere[i*3+2] = vec.z;
+            vec *= frand(0.1, 1.0);
+            pSphere[i*2  ] = vec.x;
+            pSphere[i*2+1] = vec.y;
         }
         
         shaderProgramMacros.clear();
+        shaderProgramMacros.push_back(ssaoQualityMacro);
         shaderPrograms[ssaoSP]->loadShaderProgram("ssao", false, &shaderProgramMacros);
         shaderPrograms[ssaoSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[ssaoSP]->link();
         shaderPrograms[ssaoSP]->use();
-        glUniform3fv(glGetUniformLocation(shaderPrograms[ssaoSP]->GLname, "pSphere"), 12, pSphere);
+        glUniform2fv(glGetUniformLocation(shaderPrograms[ssaoSP]->GLname, "pSphere"), samples, pSphere);
     }
     
     shaderProgramMacros.clear();
-    shaderProgramMacros.push_back(ssaoEnabledMacro);
+    shaderProgramMacros.push_back(ssaoQualityMacro);
     shaderPrograms[deferredCombineSP]->loadShaderProgram("deferredShader", false, &shaderProgramMacros);
     shaderPrograms[deferredCombineSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[deferredCombineSP]->link();

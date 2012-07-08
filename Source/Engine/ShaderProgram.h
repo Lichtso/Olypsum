@@ -45,8 +45,8 @@ class ShaderProgram {
 
 extern Matrix4 modelMat;
 extern ShaderProgram *shaderPrograms[23], *currentShaderProgram;
-extern bool depthOfFieldEnabled, edgeSmoothEnabled, ssaoEnabled, fullScreenEnabled;
-extern unsigned char bumpMappingQuality, shadowQuality;
+extern bool depthOfFieldEnabled, edgeSmoothEnabled, fullScreenEnabled;
+extern unsigned char bumpMappingQuality, shadowQuality, ssaoQuality;
 
 enum ShaderProgramNames {
     spriteSP = 0,

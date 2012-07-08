@@ -1,4 +1,4 @@
-SSAO
+Cubemap shadows
 Soft shadows PCF, PCSS
 Light blur
 Parallax mapping
