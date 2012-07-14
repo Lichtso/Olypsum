@@ -29,10 +29,9 @@ void main() {
     gl_Position = vec4(position, 1.0)*modelViewMat;
     #endif
     
+    #if LIGHT_TYPE == 2
     gl_Position.xyz /= gl_Position.w;
     gl_Position.w = 1.0;
-    
-    #if LIGHT_TYPE == 2
     gl_Position.z *= -1.0;
     vClip = gl_Position.z+0.05;
     float len = length(gl_Position.xyz);
@@ -45,7 +44,7 @@ void main() {
 
 #separator
 
-uniform sampler2D sampler[1];
+uniform sampler2D sampler0;
 uniform float paraboloidRange;
 uniform float discardDensity;
 
@@ -59,11 +58,11 @@ float random(vec2 co) {
 }
 
 void main() {
-    gl_FragColor = texture2D(sampler[0], vTexCoord);
+    float alpha = texture2D(sampler0, vTexCoord).a;
     
     #if LIGHT_TYPE == 2
-    if(gl_FragColor.a < 0.1 || vClip < 0.0 || random(gl_FragCoord.xy) > discardDensity) discard;
+    if(alpha < 0.1 || vClip < 0.0 || random(gl_FragCoord.xy) > discardDensity) discard;
     #else
-    if(gl_FragColor.a < 0.1 || random(gl_FragCoord.xy) > discardDensity) discard;
+    if(alpha < 0.1 || random(gl_FragCoord.xy) > discardDensity) discard;
     #endif
 }

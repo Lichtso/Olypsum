@@ -71,9 +71,12 @@ void FBO::init() {
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
     if(ssaoQuality) {
         initBuffer(ssaoDBuffer);
-        glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_R16F, videoInfo->current_w, videoInfo->current_h, 0, GL_RED, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_R16F, videoInfo->current_w >> 1, videoInfo->current_h >> 1, 0, GL_RED, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
     
+    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -123,7 +126,7 @@ void FBO::renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned cha
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
-ColorBuffer* FBO::addTexture(unsigned int size) {
+ColorBuffer* FBO::addTexture(unsigned int size, bool shadowMap, bool cubeMap) {
     if(colorBuffers.size() >= maxColorBufferCount) return NULL;
     GLuint texture = 0;
     glGenTextures(1, &texture);
@@ -131,24 +134,49 @@ ColorBuffer* FBO::addTexture(unsigned int size) {
     ColorBuffer* colorBuffer = new ColorBuffer();
     colorBuffer->size = size;
     colorBuffer->texture = texture;
-    glBindTexture(GL_TEXTURE_2D, colorBuffer->texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, colorBuffer->size, colorBuffer->size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    colorBuffer->shadowMap = shadowMap;
+    colorBuffer->cubeMap = cubeMap;
+    GLenum textureTarget = (cubeMap) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
+    glBindTexture(textureTarget, colorBuffer->texture);
+    glTexParameteri(textureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(textureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    if(cubeMap) glTexParameteri(textureTarget, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    if(shadowMap) {
+        glTexParameteri(textureTarget, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
+        glTexParameteri(textureTarget, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+        glTexParameteri(textureTarget, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+        if(cubeMap) {
+            for(GLenum side = GL_TEXTURE_CUBE_MAP_POSITIVE_X; side <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; side ++)
+                glTexImage2D(side, 0, GL_DEPTH_COMPONENT16, colorBuffer->size, colorBuffer->size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        }else
+            glTexImage2D(textureTarget, 0, GL_DEPTH_COMPONENT16, colorBuffer->size, colorBuffer->size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    }else{
+        if(cubeMap) {
+            for(GLenum side = GL_TEXTURE_CUBE_MAP_POSITIVE_X; side <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; side ++)
+                glTexImage2D(side, 0, GL_RGB, colorBuffer->size, colorBuffer->size, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        }else
+            glTexImage2D(textureTarget, 0, GL_RGB, colorBuffer->size, colorBuffer->size, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    }
     colorBuffers.push_back(colorBuffer);
     return colorBuffer;
 }
 
-void FBO::renderInTexture(ColorBuffer* colorBuffer) {
-    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, colorBuffer->texture, 0);
-    glDrawBuffer(GL_NONE);
+void FBO::renderInTexture(ColorBuffer* colorBuffer, GLenum side) {
     glViewport(0, 0, colorBuffer->size, colorBuffer->size);
+    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+    if(colorBuffer->shadowMap) {
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE_ARB, dBuffers[colorDBuffer], 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, (colorBuffer->cubeMap) ? side : GL_TEXTURE_2D, colorBuffer->texture, 0);
+        glDrawBuffer(GL_NONE);
+        glClear(GL_DEPTH_BUFFER_BIT);
+    }else{
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, (colorBuffer->cubeMap) ? side : GL_TEXTURE_2D, colorBuffer->texture, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_RECTANGLE_ARB, dBuffers[depthDBuffer], 0);
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    }
 }
 
 void FBO::mipmapTexture(ColorBuffer* colorBuffer) {
@@ -159,7 +187,7 @@ void FBO::mipmapTexture(ColorBuffer* colorBuffer) {
 
 void FBO::useTexture(ColorBuffer* colorBuffer, GLuint targetIndex) {
     glActiveTexture(GL_TEXTURE0+targetIndex);
-    glBindTexture(GL_TEXTURE_2D, colorBuffer->texture);
+    glBindTexture((colorBuffer->cubeMap) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, colorBuffer->texture);
 }
 
 void FBO::deleteTexture(ColorBuffer* colorBuffer) {

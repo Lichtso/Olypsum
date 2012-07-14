@@ -16,6 +16,7 @@
 
 struct ColorBuffer {
     unsigned int size;
+    bool shadowMap, cubeMap;
     GLuint texture;
 };
 
@@ -31,8 +32,8 @@ class FBO {
     void clearDeferredBuffers();
     void renderInDeferredBuffers();
     void renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned char inBuffersCount, unsigned char* outBuffers, unsigned char outBuffersCount);
-    ColorBuffer* addTexture(unsigned int size);
-    void renderInTexture(ColorBuffer* colorBuffer);
+    ColorBuffer* addTexture(unsigned int size, bool shadowMap, bool cubeMap);
+    void renderInTexture(ColorBuffer* colorBuffer, GLenum side);
     void mipmapTexture(ColorBuffer* colorBuffer);
     void useTexture(ColorBuffer* colorBuffer, GLuint targetIndex);
     void deleteTexture(ColorBuffer* colorBuffer);

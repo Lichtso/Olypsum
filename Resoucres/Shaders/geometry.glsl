@@ -65,10 +65,10 @@ varying vec3 vTangent;
 varying vec3 vBitangent;
 
 uniform vec3 camPos;
-uniform sampler2D sampler[3];
-#else
-uniform sampler2D sampler[2];
+uniform sampler2D sampler2;
 #endif
+uniform sampler2D sampler0;
+uniform sampler2D sampler1;
 uniform float discardDensity;
 
 float random(vec2 co) {
@@ -76,18 +76,18 @@ float random(vec2 co) {
 }
 
 void main() {
-	gl_FragData[0] = texture2D(sampler[0], vTexCoord);
+	gl_FragData[0] = texture2D(sampler0, vTexCoord);
     if(gl_FragData[0].a < 0.1 || random(gl_FragCoord.xy) > discardDensity) discard;
     
     #if BUMP_MAPPING
-    vec4 bumpMap = texture2D(sampler[2], vTexCoord).rgba;
+    vec4 bumpMap = texture2D(sampler2, vTexCoord).rgba;
     bumpMap.xy = bumpMap.xy*2.0-vec2(1.0);
     gl_FragData[1].xyz = mat3(vTangent, vBitangent, vNormal)*bumpMap.xyz;
     #else
     gl_FragData[1].xyz = vNormal;
     #endif
     gl_FragData[1].a = 1.0;
-    gl_FragData[2].rgb = texture2D(sampler[1], vTexCoord).rgb;
+    gl_FragData[2].rgb = texture2D(sampler1, vTexCoord).rgb;
     gl_FragData[2].a = 1.0;
     gl_FragData[3].rgb = vPosition;
     gl_FragData[3].a = 1.0;

@@ -45,7 +45,7 @@ class ShaderProgram {
 
 extern Matrix4 modelMat;
 extern ShaderProgram *shaderPrograms[23], *currentShaderProgram;
-extern bool depthOfFieldEnabled, edgeSmoothEnabled, fullScreenEnabled;
+extern bool depthOfFieldEnabled, edgeSmoothEnabled, fullScreenEnabled, cubeShadowsEnabled;
 extern unsigned char bumpMappingQuality, shadowQuality, ssaoQuality;
 
 enum ShaderProgramNames {

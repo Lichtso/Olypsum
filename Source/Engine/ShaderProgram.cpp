@@ -151,16 +151,10 @@ void ShaderProgram::link() {
     char buffer[64], samplerIndex;
     GLint location;
     for(samplerIndex = 0; samplerIndex < 8; samplerIndex ++) {
-        sprintf(buffer, "sampler[%d]", samplerIndex);
+        sprintf(buffer, "sampler%d", samplerIndex);
         location = glGetUniformLocation(GLname, buffer);
         if(location < 0) break;
         glUniform1i(location, samplerIndex);
-    }
-    for(samplerIndex = 0; samplerIndex < 2; samplerIndex ++) {
-        sprintf(buffer, "extraSampler[%d]", samplerIndex);
-        location = glGetUniformLocation(GLname, buffer);
-        if(location < 0) break;
-        glUniform1i(location, 8+samplerIndex);
     }
 }
 
@@ -258,7 +252,7 @@ ShaderProgram& ShaderProgram::operator=(const ShaderProgram &b) {
 
 Matrix4 modelMat;
 ShaderProgram *shaderPrograms[], *currentShaderProgram;
-bool depthOfFieldEnabled = false, edgeSmoothEnabled = false, fullScreenEnabled = false;
+bool depthOfFieldEnabled = false, edgeSmoothEnabled = false, fullScreenEnabled = false, cubeShadowsEnabled = false;
 unsigned char bumpMappingQuality = 1, shadowQuality = 1, ssaoQuality = 0;
 
 void loadShaderPrograms() {
@@ -402,21 +396,31 @@ void loadShaderPrograms() {
     shaderPrograms[positionalLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[positionalLightSP]->link();
     
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("LIGHT_TYPE 3");
-    shaderProgramMacros.push_back("SHADOWS_ACTIVE 1");
-    shaderProgramMacros.push_back(shadowQualityMacro);
-    shaderPrograms[positionalShadowLightSP]->loadShaderProgram("deferredLight", false, &shaderProgramMacros);
-    shaderPrograms[positionalShadowLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[positionalShadowLightSP]->link();
-    
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("LIGHT_TYPE 3");
-    shaderProgramMacros.push_back("SHADOWS_ACTIVE 2");
-    shaderProgramMacros.push_back(shadowQualityMacro);
-    shaderPrograms[positionalShadowDualLightSP]->loadShaderProgram("deferredLight", false, &shaderProgramMacros);
-    shaderPrograms[positionalShadowDualLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[positionalShadowDualLightSP]->link();
+    if(cubeShadowsEnabled) {
+        shaderProgramMacros.clear();
+        shaderProgramMacros.push_back("LIGHT_TYPE 3");
+        shaderProgramMacros.push_back("SHADOWS_ACTIVE 3");
+        shaderProgramMacros.push_back(shadowQualityMacro);
+        shaderPrograms[positionalShadowLightSP]->loadShaderProgram("deferredLight", false, &shaderProgramMacros);
+        shaderPrograms[positionalShadowLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+        shaderPrograms[positionalShadowLightSP]->link();
+    }else{
+        shaderProgramMacros.clear();
+        shaderProgramMacros.push_back("LIGHT_TYPE 3");
+        shaderProgramMacros.push_back("SHADOWS_ACTIVE 1");
+        shaderProgramMacros.push_back(shadowQualityMacro);
+        shaderPrograms[positionalShadowLightSP]->loadShaderProgram("deferredLight", false, &shaderProgramMacros);
+        shaderPrograms[positionalShadowLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+        shaderPrograms[positionalShadowLightSP]->link();
+        
+        shaderProgramMacros.clear();
+        shaderProgramMacros.push_back("LIGHT_TYPE 3");
+        shaderProgramMacros.push_back("SHADOWS_ACTIVE 2");
+        shaderProgramMacros.push_back(shadowQualityMacro);
+        shaderPrograms[positionalShadowDualLightSP]->loadShaderProgram("deferredLight", false, &shaderProgramMacros);
+        shaderPrograms[positionalShadowDualLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+        shaderPrograms[positionalShadowDualLightSP]->link();
+    }
     
     shaderProgramMacros.clear();
     shaderProgramMacros.push_back("PROCESSING_TYPE 1");
@@ -431,7 +435,7 @@ void loadShaderPrograms() {
     shaderPrograms[blurSP]->link();
     
     if(ssaoQuality) {
-        unsigned char samples = 16;
+        unsigned char samples = 32;
         float pSphere[samples*2];
         for(unsigned char i = 0; i < samples*2; i ++)
             pSphere[i] = frand(-1.0, 1.0);

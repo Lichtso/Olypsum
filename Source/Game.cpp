@@ -44,7 +44,7 @@ void initGame() {
     if(true) {
         PositionalLight* lightC = new PositionalLight();
         lightC->position = Vector3(0.0, 3.0, 1.0);
-        lightC->direction = Vector3(1.0, 0.0, 0.0).normalize();
+        lightC->direction = Vector3(0.0, 0.0, -1.0).normalize();
         lightC->range = 5.0;
     }
     

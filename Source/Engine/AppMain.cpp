@@ -115,7 +115,7 @@ void AppMain(int argc, char *argv[]) {
     currentScreenView = new GUIScreenView();
     mainFBO.init();
     lightManager.init();
-    particleThread = SDL_CreateThread(ParticleThreadFunction, NULL);
+    //particleThread = SDL_CreateThread(ParticleThreadFunction, NULL);
     
     SDL_Event event;
     SDL_PollEvent(&event);
@@ -182,7 +182,7 @@ void AppMain(int argc, char *argv[]) {
         mainFBO.renderInDeferredBuffers();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderScene();
-        particleSystemManager.draw();
+        //particleSystemManager.draw();
         lightManager.useLights();
         if(currentScreenView) currentScreenView->draw();
         SDL_GL_SwapBuffers();

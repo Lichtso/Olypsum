@@ -85,9 +85,8 @@ float Light::getPriority(Vector3 position) {
 }
 
 bool Light::calculateShadowmap() {
-    if(!shadowmapActive) return false;
     if(!shadowMap) {
-        shadowMap = mainFBO.addTexture(1024);
+        shadowMap = mainFBO.addTexture(1024, true, false);
         if(!shadowMap) {
             deleteShadowmap();
             return false;
@@ -131,6 +130,7 @@ DirectionalLight::DirectionalLight() {
 }
 
 bool DirectionalLight::calculateShadowmap() {
+    if(!shadowmapActive) return false;
     shadowCam.camMat.setIdentity();
     shadowCam.camMat.setDirection(direction, upDir);
     shadowCam.camMat.translate(position);
@@ -142,8 +142,7 @@ bool DirectionalLight::calculateShadowmap() {
     if(!Light::calculateShadowmap()) return false;
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
-    mainFBO.renderInTexture(shadowMap);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    mainFBO.renderInTexture(shadowMap, 0);
     renderScene();
     glEnable(GL_BLEND);
     return true;
@@ -164,7 +163,7 @@ void DirectionalLight::use() {
         shadowMat.scale(Vector3(0.5, 0.5, 1.0));
         shadowMat.translate(Vector3(0.5, 0.5, 0.0));
         currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowMat);
-        mainFBO.useTexture(shadowMap, 8);
+        mainFBO.useTexture(shadowMap, 5);
     }else
         shaderPrograms[directionalLightSP]->use();
     Light::use();
@@ -199,6 +198,7 @@ SpotLight::SpotLight() {
 }
 
 bool SpotLight::calculateShadowmap() {
+    if(!shadowmapActive) return false;
     shadowCam.camMat.setIdentity();
     shadowCam.camMat.setDirection(direction, upDir);
     shadowCam.camMat.translate(position);
@@ -209,8 +209,7 @@ bool SpotLight::calculateShadowmap() {
     if(!Light::calculateShadowmap()) return false;
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
-    mainFBO.renderInTexture(shadowMap);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    mainFBO.renderInTexture(shadowMap, 0);
     //Render circle mask
     float vertices[12] = { -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0 };
     shaderPrograms[spotShadowCircleLightSP]->use();
@@ -239,7 +238,7 @@ void SpotLight::use() {
         shadowMat.scale(Vector3(0.5, 0.5, 1.0));
         shadowMat.translate(Vector3(0.5, 0.5, 0.0));
         currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowMat);
-        mainFBO.useTexture(shadowMap, 8);
+        mainFBO.useTexture(shadowMap, 5);
     }else
         shaderPrograms[spotLightSP]->use();
     currentShaderProgram->setUniformF("lCutoff", cos(cutoff));
@@ -271,6 +270,10 @@ PositionalLight::PositionalLight() {
     upDir = Vector3(0.0, 1.0, 0.0);
     range = 10.0;
     omniDirectional = true;
+    shadowCam.fov = M_PI_2;
+    shadowCam.width = 1.0;
+    shadowCam.height = 1.0;
+    shadowCam.near = 0.1;
 }
 
 PositionalLight::~PositionalLight() {
@@ -278,37 +281,84 @@ PositionalLight::~PositionalLight() {
 }
 
 bool PositionalLight::calculateShadowmap() {
-    shadowCam.camMat.setIdentity();
-    shadowCam.camMat.setDirection(direction, upDir);
-    shadowCam.camMat.translate(position);
-    shadowCam.use();
-    shadowCam.frustum.hemisphere = true;
+    if(!shadowmapActive) return false;
     
-    if(!Light::calculateShadowmap()) return false;
-    if(omniDirectional && !shadowMapB)
-        shadowMapB = mainFBO.addTexture(1024);
+    if(cubeShadowsEnabled) {
+        if(!shadowMap) {
+            shadowMap = mainFBO.addTexture(1024, true, true);
+            if(!shadowMap) {
+                deleteShadowmap();
+                return false;
+            }
+        }
+        lightManager.currentShadowLight = this;
+    }else{
+        shadowCam.camMat.setIdentity();
+        shadowCam.camMat.setDirection(direction, upDir);
+        shadowCam.camMat.translate(position);
+        shadowCam.use();
+        shadowCam.frustum.hemisphere = true;
+        if(!Light::calculateShadowmap()) return false;
+        if(omniDirectional && !shadowMapB)
+            shadowMapB = mainFBO.addTexture(1024, true, false);
+    }
     
-    shaderPrograms[solidParabolidShadowSP]->use();
-    shaderPrograms[solidParabolidShadowSP]->setUniformF("lRange", range);
-    shaderPrograms[skeletalParabolidShadowSP]->use();
-    shaderPrograms[skeletalParabolidShadowSP]->setUniformF("lRange", range);
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
-    if(shadowMapB) {
-        Matrix4 shadowMatB;
-        shadowMatB.setIdentity();
-        shadowMatB.setDirection(direction*-1.0, upDir); //TODO: Optimize with scale -1
-        shadowMatB.translate(position);
-        shadowMatB = shadowMatB.getInverse();
-        shadowCam.viewMat = shadowMatB;
-        mainFBO.renderInTexture(shadowMapB);
-        glClear(GL_DEPTH_BUFFER_BIT);
+    Matrix4 viewMat;
+    if(cubeShadowsEnabled) {
+        for(GLenum side = GL_TEXTURE_CUBE_MAP_POSITIVE_X; side <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; side ++) {
+            shadowCam.camMat.setIdentity();
+            switch(side) {
+                case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+                    shadowCam.camMat.rotateZ(M_PI);
+                    shadowCam.camMat.rotateY(M_PI_2);
+                break;
+                case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+                    shadowCam.camMat.rotateZ(M_PI);
+                    shadowCam.camMat.rotateY(-M_PI_2);
+                break;
+                case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+                    shadowCam.camMat.rotateX(-M_PI_2);
+                break;
+                case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+                    shadowCam.camMat.rotateX(M_PI_2);
+                break;
+                case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+                    shadowCam.camMat.rotateZ(M_PI);
+                    shadowCam.camMat.rotateY(M_PI);
+                break;
+                case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+                    shadowCam.camMat.rotateZ(M_PI);
+                break;
+            }
+            shadowCam.camMat.setDirection(direction, upDir);
+            shadowCam.camMat.translate(position);
+            shadowCam.far = range;
+            shadowCam.calculate();
+            shadowCam.use();
+            mainFBO.renderInTexture(shadowMap, side);
+            renderScene();
+        }
+        shadowCam.camMat.setIdentity();
+        shadowCam.camMat.setDirection(direction, upDir);
+        shadowCam.camMat.translate(position);
+    }else{
+        shaderPrograms[solidParabolidShadowSP]->use();
+        shaderPrograms[solidParabolidShadowSP]->setUniformF("lRange", range);
+        shaderPrograms[skeletalParabolidShadowSP]->use();
+        shaderPrograms[skeletalParabolidShadowSP]->setUniformF("lRange", range);
+        viewMat = shadowCam.camMat.getInverse();
+        if(shadowMapB) {
+            shadowCam.viewMat = viewMat;
+            shadowCam.viewMat.scale(Vector3(-1.0, 1.0, -1.0));
+            mainFBO.renderInTexture(shadowMapB, 0);
+            renderScene();
+        }
+        shadowCam.viewMat = viewMat;
+        mainFBO.renderInTexture(shadowMap, 0);
         renderScene();
     }
-    shadowCam.viewMat = shadowCam.camMat.getInverse();
-    mainFBO.renderInTexture(shadowMap);
-    glClear(GL_DEPTH_BUFFER_BIT);
-    renderScene();
     glEnable(GL_BLEND);
     return true;
 }
@@ -327,47 +377,65 @@ void PositionalLight::use() {
     modelMat *= shadowCam.camMat;
     
     if(shadowMap) {
+        mainFBO.useTexture(shadowMap, 5);
         if(shadowMapB) {
+            mainFBO.useTexture(shadowMapB, 6);
             shaderPrograms[positionalShadowDualLightSP]->use();
-            mainFBO.useTexture(shadowMapB, 9);
         }else
             shaderPrograms[positionalShadowLightSP]->use();
-        currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowCam.viewMat);
-        mainFBO.useTexture(shadowMap, 8);
     }else
         shaderPrograms[positionalLightSP]->use();
+    
+    if(cubeShadowsEnabled) {
+        Matrix4 viewMat;
+        viewMat.setIdentity();
+        viewMat.setDirection(direction, upDir);
+        viewMat = viewMat.getInverse();
+        currentShaderProgram->setUniformMatrix3("lShadowMat", &viewMat);
+    }else
+        currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowCam.viewMat);
     currentShaderProgram->setUniformF("lCutoff", (omniDirectional) ? -1.0 : 0.0);
     currentShaderProgram->setUniformVec3("lPosition", position);
     Light::use();
     
-    if(omniDirectional) {
-        Bs3 bs(range, &modelMat);
-        if(!currentCam->frustum.testBsInclusiveHit(&bs)) return;
-        if(currentCam->frustum.front.testBsExclusiveHit(&bs)) {
-            glEnable(GL_DEPTH_TEST);
-            glFrontFace(GL_CCW);
-        }else{
-            glDisable(GL_DEPTH_TEST);
-            glFrontFace(GL_CW);
+    if(!cubeShadowsEnabled && !omniDirectional) {
+        if(drawLightVolume(spotLightVertices, parabolidVerticesCount(sphereAccuracyX/2, parabolidAccuracyY/2))) {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightVolumeBuffers[4]);
+            glBindBuffer(GL_ARRAY_BUFFER, lightVolumeBuffers[5]);
+            currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float), 0);
+            glDrawElements(GL_TRIANGLES, parabolidTrianglesCount(sphereAccuracyX, parabolidAccuracyY)*3, GL_UNSIGNED_INT, 0);
         }
-        mainFBO.renderDeferred(false, inBuffersA, sizeof(inBuffersA)/sizeof(unsigned char), outBuffersA, sizeof(outBuffersA)/sizeof(unsigned char));
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightVolumeBuffers[6]);
-        glBindBuffer(GL_ARRAY_BUFFER, lightVolumeBuffers[7]);
-        currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float), 0);
-        glDrawElements(GL_TRIANGLES, sphereTrianglesCount(sphereAccuracyX, sphereAccuracyY)*3, GL_UNSIGNED_INT, 0);
-    }else if(drawLightVolume(spotLightVertices, parabolidVerticesCount(sphereAccuracyX/2, parabolidAccuracyY/2))) {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightVolumeBuffers[4]);
-        glBindBuffer(GL_ARRAY_BUFFER, lightVolumeBuffers[5]);
-        currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float), 0);
-        glDrawElements(GL_TRIANGLES, parabolidTrianglesCount(sphereAccuracyX, parabolidAccuracyY)*3, GL_UNSIGNED_INT, 0);
+        return;
     }
+    
+    Bs3 bs(range, &modelMat);
+    if(!currentCam->frustum.testBsInclusiveHit(&bs)) return;
+    if(currentCam->frustum.front.testBsExclusiveHit(&bs)) {
+        glEnable(GL_DEPTH_TEST);
+        glFrontFace(GL_CCW);
+    }else{
+        glDisable(GL_DEPTH_TEST);
+        glFrontFace(GL_CW);
+    }
+    mainFBO.renderDeferred(false, inBuffersA, sizeof(inBuffersA)/sizeof(unsigned char), outBuffersA, sizeof(outBuffersA)/sizeof(unsigned char));
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightVolumeBuffers[6]);
+    glBindBuffer(GL_ARRAY_BUFFER, lightVolumeBuffers[7]);
+    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float), 0);
+    glDrawElements(GL_TRIANGLES, sphereTrianglesCount(sphereAccuracyX, sphereAccuracyY)*3, GL_UNSIGNED_INT, 0);
 }
 
 void PositionalLight::selectShaderProgram(bool skeletal) {
-    if(skeletal)
-        shaderPrograms[skeletalParabolidShadowSP]->use();
-    else
-        shaderPrograms[solidParabolidShadowSP]->use();
+    if(cubeShadowsEnabled) {
+        if(skeletal)
+            shaderPrograms[skeletalShadowSP]->use();
+        else
+            shaderPrograms[solidShadowSP]->use();
+    }else{
+        if(skeletal)
+            shaderPrograms[skeletalParabolidShadowSP]->use();
+        else
+            shaderPrograms[solidParabolidShadowSP]->use();
+    }
 }
 
 
@@ -484,9 +552,11 @@ void LightManager::useLights() {
     glDisable(GL_DEPTH_TEST);
     
     if(ssaoQuality) {
-        randomNormalMap.use(GL_TEXTURE_2D, 8);
+        glViewport(0, 0, videoInfo->current_w >> 1, videoInfo->current_h >> 1);
+        randomNormalMap.use(GL_TEXTURE_2D, 1);
         shaderPrograms[ssaoSP]->use();
         mainFBO.renderDeferred(true, inBuffersB, 1, outBuffersB, 1);
+        glViewport(0, 0, videoInfo->current_w, videoInfo->current_h);
     }
     
     shaderPrograms[deferredCombineSP]->use();

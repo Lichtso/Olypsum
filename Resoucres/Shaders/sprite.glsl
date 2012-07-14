@@ -18,14 +18,14 @@ void main() {
 
 #separator
 
-uniform sampler2D sampler[1];
+uniform sampler2D sampler0;
 uniform vec3 color;
 varying vec3 vPosition;
 varying vec3 vTexCoord;
 varying vec3 vNormal;
 
 void main() {
-	gl_FragData[0] = texture2D(sampler[0], vTexCoord.st);
+	gl_FragData[0] = texture2D(sampler0, vTexCoord.st);
     gl_FragData[0].a *= 1.0 - vTexCoord.z;
     if(0.1 > gl_FragData[0].a) discard;
     if(color.r > -1.0) gl_FragData[0].rgb += color;

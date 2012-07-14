@@ -859,9 +859,9 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
                 glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->elementsCount*sizeof(unsigned int), indecies, GL_STATIC_DRAW);
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-                if(combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int) > mesh->elementsCount*strideIndex*sizeof(float)) {
-                    printf("Loading COLLADA, Index-Mode is contra-productive: Used %lu bytes, but %lu would be necessary.", combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int), mesh->elementsCount*strideIndex*sizeof(float));
-                }
+                /*if(combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int) > mesh->elementsCount*strideIndex*sizeof(float)) {
+                    printf("Loading COLLADA, Index-Mode is contra-productive: Used %lu bytes, but %lu would be necessary.\n", combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int), mesh->elementsCount*strideIndex*sizeof(float));
+                }*/
             }else{ //Don't use IndexBuffer
                 dataIndex = 0;
                 for(unsigned int i = 0; i < mesh->elementsCount; i ++)
