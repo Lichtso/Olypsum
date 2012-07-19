@@ -217,11 +217,11 @@ static std::string readTextureURL(std::map<std::string, std::string> samplerURLs
     return std::string();
 }
 
-static Texture* readTexture(FilePackage* filePackage, std::string* textureURL) {
+static Texture* readTexture(FilePackage* filePackage, std::string* textureURL, GLenum format) {
     if(textureURL->size() == 0) return NULL;
     Texture* texture;
     if(filePackage->getTexture(&texture, textureURL->c_str())) {
-        texture->uploadToVRAM(GL_TEXTURE_2D, GL_RGBA);
+        texture->uploadToVRAM(GL_TEXTURE_2D, format);
         texture->unloadFromRAM();
     }
     return texture;
@@ -694,8 +694,8 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 printf("ERROR: No material by id %s found.\n", dataAttribute->value());
                 goto endParsingXML;
             }
-            mesh->diffuse = readTexture(filePackage, &material->second.diffuseURL);
-            mesh->effectMap = readTexture(filePackage, &material->second.effectMapURL);
+            mesh->diffuse = readTexture(filePackage, &material->second.diffuseURL, GL_RGBA);
+            mesh->effectMap = readTexture(filePackage, &material->second.effectMapURL, GL_RGB);
             if(material->second.heightMapURL.size() > 0) {
                 if(filePackage->getTexture(&mesh->heightMap, material->second.heightMapURL.c_str())) {
                     mainFBO.generateNormalMap(mesh->heightMap, 4.0);

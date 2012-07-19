@@ -17,6 +17,7 @@ GUISlider::GUISlider() {
     mouseDragPos = -1;
     highlighted = false;
     value = 0.5;
+    steps = 0;
     orientation = GUIOrientation_Horizontal;
     onChange = NULL;
     enabled = true;
@@ -196,17 +197,19 @@ void GUISlider::handleMouseMove(int mouseX, int mouseY) {
     
     if(value < 0.0) value = 0.0;
     else if(value > 1.0) value = 1.0;
+    if(steps) value = roundf(value*(float)steps)/(float)steps;
     
-    if(onChange)
-        onChange(this);
+    if(onChange) onChange(this);
 }
 
 bool GUISlider::handleMouseWheel(int mouseX, int mouseY, float delta) {
     if(!visible || !enabled || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
     
-    value -= delta*0.05;
+    value -= (steps) ? delta/(float)steps : delta*0.05;
     if(value < 0.0) value = 0.0;
     else if(value > 1.0) value = 1.0;
+    if(steps) value = roundf(value*(float)steps)/(float)steps;
     
+    if(onChange) onChange(this);
     return true;
 }

@@ -25,16 +25,17 @@ varying vec2 vPosition;
 
 void main() {
     #if PROCESSING_TYPE == 1
+    gl_FragColor.a = texture2DRect(sampler0, gl_FragCoord.xy).r;
     vec3 pos = vec3(0.0), posL = vec3(-1.0, 0.0, 0.0), posR = vec3(1.0, 0.0, 0.0),
          posB = vec3(0.0, -1.0, 0.0), posT = vec3(0.0, 1.0, 0.0);
-    pos.z = texture2DRect(sampler0, gl_FragCoord.xy).r*processingValue;
+    pos.z = gl_FragColor.a*processingValue;
     posL.z = texture2DRect(sampler0, gl_FragCoord.xy+posL.xy).r*processingValue;
     posR.z = texture2DRect(sampler0, gl_FragCoord.xy+posR.xy).r*processingValue;
     posB.z = texture2DRect(sampler0, gl_FragCoord.xy+posB.xy).r*processingValue;
     posT.z = texture2DRect(sampler0, gl_FragCoord.xy+posT.xy).r*processingValue;
     posL -= pos; posR -= pos; posB -= pos; posT -= pos;
     vec3 normal = normalize(cross(posT, posL)+cross(posR, posT)+cross(posL, posB)+cross(posB, posR));
-    gl_FragColor = vec4(normal.xy*0.5+vec2(0.5), normal.z, pos.z);
+    gl_FragColor.rgb = vec3(vec2(0.5)-normal.xy*0.5, normal.z);
     #elif PROCESSING_TYPE == 2
     gl_FragColor = vec4(0.0);
 	const float blurSize = 2.0;

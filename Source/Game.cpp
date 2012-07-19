@@ -14,7 +14,7 @@ Model* humanModel;
 SkeletonPose* skeletonPose;
 Model* boxesModel;
 
-static float animationTime = 0;
+static float animationTime = 0.0;
 
 static void updateSoundTrackSlider(GUISlider* slider) {
     soundSourcesManager.soundSources[0]->setTimeOffset(slider->value * soundSourcesManager.soundSources[0]->soundTrack->getLength());
@@ -43,7 +43,7 @@ void initGame() {
     
     if(true) {
         PositionalLight* lightC = new PositionalLight();
-        lightC->position = Vector3(0.0, 3.0, 1.0);
+        lightC->position = Vector3(0.5, 3.0, 1.0);
         lightC->direction = Vector3(0.0, 0.0, -1.0).normalize();
         lightC->range = 5.0;
     }
@@ -166,13 +166,24 @@ void renderScene() {
         }
     
     Texture* groundTexture;
-    fileManager.getPackage(NULL)->getTexture(&groundTexture, "man.png");
+    if(fileManager.getPackage(NULL)->getTexture(&groundTexture, "cobble.png")) {
+        groundTexture->uploadToVRAM(GL_TEXTURE_2D, GL_RGBA);
+        groundTexture->unloadFromRAM();
+    }
     groundTexture->use(GL_TEXTURE_2D, 0);
+    
+    Texture* reliefTexture;
+    if(fileManager.getPackage(NULL)->getTexture(&reliefTexture, "cobbleHeight.png")) {
+        mainFBO.generateNormalMap(reliefTexture, 4.0);
+        reliefTexture->unloadFromRAM();
+    }
+    reliefTexture->use(GL_TEXTURE_2D, 2);
+    
     modelMat.setIdentity();
     if(lightManager.currentShadowLight)
         lightManager.currentShadowLight->selectShaderProgram(false);
     else
-        shaderPrograms[solidGeometrySP]->use();
+        shaderPrograms[solidBumpGeometrySP]->use();
     currentShaderProgram->setUniformF("discardDensity", 1.0);
     
     currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 8*sizeof(float), vertices);
@@ -194,8 +205,8 @@ void calculateFrame() {
     animationTime += animationFactor;
     
     mainCam->camMat.setIdentity();
-    //mainCam->camMat.rotateX(0.5);
-    mainCam->camMat.translate(Vector3(0,1,3));
+    mainCam->camMat.rotateX(0.3);
+    mainCam->camMat.translate(Vector3(0,1.2,2.8));
     mainCam->calculate();
     mainCam->use();
     modelMat.setIdentity();

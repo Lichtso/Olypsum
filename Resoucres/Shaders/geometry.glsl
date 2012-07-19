@@ -14,7 +14,7 @@ uniform mat4 modelMat;
 uniform mat3 normalMat;
 #endif
 
-#if BUMP_MAPPING
+#if BUMP_MAPPING > 0
 varying vec3 gPosition;
 varying vec2 gTexCoord;
 varying vec3 gNormal;
@@ -60,7 +60,7 @@ void main() {
 varying vec3 vPosition;
 varying vec2 vTexCoord;
 varying vec3 vNormal;
-#if BUMP_MAPPING
+#if BUMP_MAPPING > 0
 varying vec3 vTangent;
 varying vec3 vBitangent;
 
@@ -75,20 +75,66 @@ float random(vec2 co) {
     return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
+#if BUMP_MAPPING == 3
+void LinearParallax(inout vec3 texCoord, vec3 viewVec, float steps) {
+	for(float i = 0.0; i < steps; i ++) {
+		if(texCoord.z >= texture2D(sampler2, texCoord.xy).a)
+            return;
+        texCoord += viewVec;
+    }
+}
+
+void BinaryParallax(inout vec3 texCoord, vec3 viewVec) {
+	for(int i = 0; i < 6; i ++) {
+		if(texCoord.z < texture2D(sampler2, texCoord.xy).a)
+            texCoord += viewVec;
+		viewVec *= 0.5;
+		texCoord -= viewVec;
+	}
+}
+#endif
+
 void main() {
+    #if BUMP_MAPPING <= 1
 	gl_FragData[0] = texture2D(sampler0, vTexCoord);
     if(gl_FragData[0].a < 0.1 || random(gl_FragCoord.xy) > discardDensity) discard;
-    
-    #if BUMP_MAPPING
-    vec4 bumpMap = texture2D(sampler2, vTexCoord).rgba;
-    bumpMap.xy = bumpMap.xy*2.0-vec2(1.0);
-    gl_FragData[1].xyz = mat3(vTangent, vBitangent, vNormal)*bumpMap.xyz;
-    #else
-    gl_FragData[1].xyz = vNormal;
-    #endif
-    gl_FragData[1].a = 1.0;
     gl_FragData[2].rgb = texture2D(sampler1, vTexCoord).rgb;
-    gl_FragData[2].a = 1.0;
+    #endif
+    
+    vec3 normal = normalize(vNormal);
+    #if BUMP_MAPPING == 0
+    gl_FragData[1].xyz = normal;
+    #elif BUMP_MAPPING == 1
+    vec3 bumpMap = texture2D(sampler2, vTexCoord).xyz;
+    bumpMap.xy = bumpMap.xy*2.0-vec2(1.0);
+    gl_FragData[1].xyz = mat3(vTangent, vBitangent, normal)*bumpMap;
+    #elif BUMP_MAPPING > 1
+    if(random(gl_FragCoord.xy) > discardDensity) discard;
+    vec3 viewVec = normalize(camPos-vPosition);
+    #if BUMP_MAPPING == 2
+    viewVec.xy = vec2(dot(viewVec, vTangent), dot(viewVec, vBitangent));
+    vec2 texCoord = vTexCoord-viewVec.xy*texture2D(sampler2, vTexCoord).a*0.04;
+    #elif BUMP_MAPPING == 3
+    viewVec = vec3(dot(viewVec, vTangent), dot(viewVec, vBitangent), dot(viewVec, normal));
+    float steps = floor((1.0 - viewVec.z) * 18.0) + 2.0;
+    viewVec.xy *= -0.04/viewVec.z;
+    viewVec.z = 1.0;
+    viewVec /= steps;
+    vec3 texCoord = vec3(vTexCoord, 0.0);
+    LinearParallax(texCoord, viewVec, steps);
+	BinaryParallax(texCoord, viewVec);
+    #endif
+    gl_FragData[0] = texture2D(sampler0, texCoord.xy);
+    if(abs(texCoord.x-0.5) > 0.5 || abs(texCoord.y-0.5) > 0.5 || gl_FragData[0].a < 0.1 || random(gl_FragCoord.xy) > discardDensity) discard;
+    gl_FragDepth = gl_FragCoord.z+length(texCoord.xy-vTexCoord)*0.2;
+    vec3 bumpMap = texture2D(sampler2, texCoord.xy).xyz;
+    bumpMap.xy = bumpMap.xy*2.0-vec2(1.0);
+    gl_FragData[1].xyz = mat3(vTangent, vBitangent, normal)*bumpMap;
+    gl_FragData[2].rgb = texture2D(sampler1, texCoord.xy).rgb;
+    #endif
+    
     gl_FragData[3].rgb = vPosition;
+    gl_FragData[1].a = 1.0;
+    gl_FragData[2].a = 1.0;
     gl_FragData[3].a = 1.0;
 }

@@ -11,21 +11,21 @@
     <up_axis>Z_UP</up_axis>
   </asset>
   <library_images>
-    <image id="heightMap_jpg" name="heightMap_jpg">
-      <init_from>man.png</init_from>
+    <image id="concrete_png" name="concrete_png">
+      <init_from>concrete.png</init_from>
     </image>
   </library_images>
   <library_effects>
     <effect id="Brick_Antique_-effect">
       <profile_COMMON>
-        <newparam sid="heightMap_jpg-surface">
+        <newparam sid="concrete_png-surface">
           <surface type="2D">
-            <init_from>heightMap_jpg</init_from>
+            <init_from>concrete_png</init_from>
           </surface>
         </newparam>
-        <newparam sid="heightMap_jpg-sampler">
+        <newparam sid="concrete_png-sampler">
           <sampler2D>
-            <source>heightMap_jpg-surface</source>
+            <source>concrete_png-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -37,7 +37,7 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <texture texture="heightMap_jpg-sampler" texcoord="UVTex"/>
+              <texture texture="concrete_png-sampler" texcoord="UVTex"/>
             </diffuse>
             <specular>
               <color sid="specular">0.5 0.5 0.5 1</color>

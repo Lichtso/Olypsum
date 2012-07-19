@@ -19,6 +19,7 @@ class GUISlider : public GUIRect {
     void drawBar(GUIClipRect& clipRect, unsigned int barLength, bool filled);
     public:
     float value;
+    unsigned int steps;
     bool enabled;
     GUIOrientation orientation;
     void (*onChange)(GUISlider*);

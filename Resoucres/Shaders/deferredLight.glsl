@@ -40,16 +40,34 @@ uniform mat3 lShadowMat;
 #endif
 
 #if LIGHT_TYPE == 1
-const float depthBias = 1.001;
+#define depthBias 1.001
+#define blurBias 0.001
 #elif LIGHT_TYPE == 2
-const float depthBias = 0.999;
+#define depthBias 0.999
+#define blurBias 0.003
 #elif LIGHT_TYPE == 3
-const float depthBias = 0.99*0.5;
+#define depthBias 0.99*0.5
+#define blurBias 0.001
 #endif
 
 float random(vec2 co) {
     return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
+
+#if SHADOW_QUALITY == 1
+float shadowLookup2D(sampler2DShadow sampler, vec3 coord) {
+    return shadow2D(sampler, coord).x;
+}
+#elif SHADOW_QUALITY > 1
+float shadowLookup2D(sampler2DShadow sampler, vec3 coord) {
+    float intensity = 0.0;
+	const float blurSize = float(SHADOW_QUALITY)-1.0, blurSum = (blurSize*2.0+1.0)*(blurSize*2.0+1.0);
+	for(float y = -blurSize; y <= blurSize; y += 1.0)
+		for(float x = -blurSize; x <= blurSize; x += 1.0)
+			intensity += shadow2D(sampler, vec3(coord.xy+vec2(x, y)*blurBias, coord.z)).x;
+    return intensity / blurSum;
+}
+#endif
 
 void main() {
     vec3 pos = texture2DRect(sampler0, gl_FragCoord.xy).xyz,
@@ -68,35 +86,36 @@ void main() {
     intensity = 1.0-clamp(lightDirLen / lRange, step(dot(lDirection, lightDir), lCutoff), 1.0);
     #endif
     
-    #if SHADOWS_ACTIVE
+    #if SHADOW_QUALITY > 0
     #if LIGHT_TYPE < 3 || SHADOWS_ACTIVE < 3
     vec4 shadowCoord = vec4(pos, 1.0) * lShadowMat;
     #endif
     #if LIGHT_TYPE < 3
     shadowCoord.z = shadowCoord.z*depthBias*0.5+0.5*shadowCoord.w;
-    intensity *= shadow2DProj(sampler5, shadowCoord).x;
+    intensity *= shadowLookup2D(sampler5, shadowCoord.xyz/shadowCoord.w);
     #else
-    #if SHADOWS_ACTIVE == 1
-    shadowCoord.xy /= lightDirLen - shadowCoord.z;
-    shadowCoord.xy = shadowCoord.xy * 0.5 + vec2(0.5);
-    shadowCoord.z = (1.0-intensity) * depthBias + 0.5;
-    intensity *= shadow2D(sampler5, shadowCoord.xyz).x;
-    #elif SHADOWS_ACTIVE == 2
+    
+    #if SHADOWS_ACTIVE < 3
+    #if SHADOWS_ACTIVE == 2
     if(shadowCoord.z < 0.0) {
-        shadowCoord.xy /= lightDirLen - shadowCoord.z;
-        shadowCoord.xy = shadowCoord.xy * 0.5 + vec2(0.5);
-        shadowCoord.z = (1.0-intensity) * depthBias + 0.5;
-        intensity *= shadow2D(sampler5, shadowCoord.xyz).x;
+    #endif
+        shadowCoord.xy /= (lightDirLen - shadowCoord.z) * 2.0;
+        shadowCoord.z = (1.0 - intensity) * depthBias;
+        shadowCoord.xyz += vec3(0.5);
+        intensity *= shadowLookup2D(sampler5, shadowCoord.xyz);
+    #if SHADOWS_ACTIVE == 2
     }else{
-        shadowCoord.xy /= lightDirLen + shadowCoord.z;
         shadowCoord.x *= -1.0;
-        shadowCoord.xy = shadowCoord.xy * 0.5 + vec2(0.5);
-        shadowCoord.z = (1.0-intensity) * depthBias + 0.5;
-        intensity *= shadow2D(sampler6, shadowCoord.xyz).x;
+        shadowCoord.xy /= (lightDirLen + shadowCoord.z) * 2.0;
+        shadowCoord.z = (1.0 - intensity) * depthBias;
+        shadowCoord.xyz += vec3(0.5);
+        intensity *= shadowLookup2D(sampler6, shadowCoord.xyz);
     }
-    #elif SHADOWS_ACTIVE == 3
+    #endif
+    #else
     vec3 shadowCoord = (pos-lPosition)*lShadowMat;
     intensity *= shadowCube(sampler5, shadowCoord).x;
+    //TODO SHADOW_QUALITY > 1
     #endif
     #endif
     #endif

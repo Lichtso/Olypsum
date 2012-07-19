@@ -17,7 +17,7 @@ void main() {
 	vec2 texBA = gTexCoord[1]-gTexCoord[0], texCA = gTexCoord[2]-gTexCoord[0];
 	vec3 tangent = normalize((texCA.t*posBA-texBA.t*posCA) / (texBA.s*texCA.t-texBA.t*texCA.s)),
 		 bitangent = normalize((texCA.s*posBA-texBA.s*posCA) / (texBA.t*texCA.s-texBA.s*texCA.t));
-	
+    
     for(int i = 0; i < 3; i ++) {
 		gl_Position = gl_PositionIn[i];
 		vPosition = gPosition[i];

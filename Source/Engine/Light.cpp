@@ -560,14 +560,14 @@ void LightManager::useLights() {
     }
     
     shaderPrograms[deferredCombineSP]->use();
-    mainFBO.renderDeferred(true, inBuffersC, (ssaoQuality) ? 6 : 4, outBuffersC, (edgeSmoothEnabled || depthOfFieldEnabled) ? 1 : 0);
+    mainFBO.renderDeferred(true, inBuffersC, (ssaoQuality) ? 6 : 4, outBuffersC, (edgeSmoothEnabled || depthOfFieldQuality) ? 1 : 0);
     
     if(edgeSmoothEnabled) {
         shaderPrograms[edgeSmoothSP]->use();
-        mainFBO.renderDeferred(true, inBuffersD, 2, outBuffersD, (depthOfFieldEnabled) ? 1 : 0);
+        mainFBO.renderDeferred(true, inBuffersD, 2, outBuffersD, (depthOfFieldQuality) ? 1 : 0);
     }
     
-    if(depthOfFieldEnabled) {
+    if(depthOfFieldQuality) {
         shaderPrograms[depthOfFieldSP]->use();
         mainFBO.renderDeferred(true, inBuffersD, 2, outBuffersD, 0);
     }

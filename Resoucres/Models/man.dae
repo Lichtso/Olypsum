@@ -14,8 +14,8 @@
     <image id="human_png" name="human_png">
       <init_from>man.png</init_from>
     </image>
-    <image id="heightMap_jpg" name="heightMap_jpg">
-      <init_from>heightMap.jpg</init_from>
+    <image id="heightMap_png" name="heightMap_png">
+      <init_from>heightMap.png</init_from>
     </image>
   </library_images>
   <library_effects>
@@ -31,14 +31,14 @@
             <source>human_png-surface</source>
           </sampler2D>
         </newparam>
-        <newparam sid="heightMap_jpg-surface">
+        <newparam sid="heightMap_png-surface">
           <surface type="2D">
-            <init_from>heightMap_jpg</init_from>
+            <init_from>heightMap_png</init_from>
           </surface>
         </newparam>
-        <newparam sid="heightMap_jpg-sampler">
+        <newparam sid="heightMap_png-sampler">
           <sampler2D>
-            <source>heightMap_jpg-surface</source>
+            <source>heightMap_png-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -65,7 +65,7 @@
           <extra>
             <technique profile="FCOLLADA">
               <bump>
-                <texture texture="heightMap_jpg-sampler" texcoord="UVTex"/>
+                <texture texture="heightMap_png-sampler" texcoord="UVTex"/>
               </bump>
             </technique>
           </extra>

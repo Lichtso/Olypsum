@@ -252,8 +252,8 @@ ShaderProgram& ShaderProgram::operator=(const ShaderProgram &b) {
 
 Matrix4 modelMat;
 ShaderProgram *shaderPrograms[], *currentShaderProgram;
-bool depthOfFieldEnabled = false, edgeSmoothEnabled = false, fullScreenEnabled = false, cubeShadowsEnabled = false;
-unsigned char bumpMappingQuality = 1, shadowQuality = 1, ssaoQuality = 0;
+bool edgeSmoothEnabled = false, fullScreenEnabled = false, cubeShadowsEnabled = false;
+unsigned char depthOfFieldQuality = 0, bumpMappingQuality = 1, shadowQuality = 1, ssaoQuality = 0;
 
 void loadShaderPrograms() {
     for(unsigned int p = 0; p < sizeof(shaderPrograms)/sizeof(ShaderProgram*); p ++) {
@@ -261,7 +261,8 @@ void loadShaderPrograms() {
         shaderPrograms[p] = new ShaderProgram();
     }
     std::vector<const char*> shaderProgramMacros;
-    char ssaoQualityMacro[32], bumpMappingMacro[32], shadowQualityMacro[32];
+    char depthOfFieldMacro[32], ssaoQualityMacro[32], bumpMappingMacro[32], shadowQualityMacro[32];
+    sprintf(depthOfFieldMacro, "DOF_QUALITY %d", depthOfFieldQuality);
     sprintf(ssaoQualityMacro, "SSAO_QUALITY %d", ssaoQuality);
     sprintf(bumpMappingMacro, "BUMP_MAPPING %d", bumpMappingQuality);
     sprintf(shadowQualityMacro, "SHADOW_QUALITY %d", shadowQuality);
@@ -285,7 +286,7 @@ void loadShaderPrograms() {
     shaderProgramMacros.push_back("SKELETAL_ANIMATION 0");
     shaderProgramMacros.push_back(bumpMappingMacro);
     shaderPrograms[solidBumpGeometrySP]->loadShaderProgram("geometry", false, &shaderProgramMacros);
-    shaderPrograms[solidBumpGeometrySP]->loadShaderProgram("geometryTangent", true, &shaderProgramMacros);
+    if(bumpMappingQuality) shaderPrograms[solidBumpGeometrySP]->loadShaderProgram("geometryTangent", true, &shaderProgramMacros);
     shaderPrograms[solidBumpGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[solidBumpGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[solidBumpGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
@@ -322,7 +323,7 @@ void loadShaderPrograms() {
     shaderProgramMacros.push_back("SKELETAL_ANIMATION 1");
     shaderProgramMacros.push_back(bumpMappingMacro);
     shaderPrograms[skeletalBumpGeometrySP]->loadShaderProgram("geometry", false, &shaderProgramMacros);
-    shaderPrograms[skeletalBumpGeometrySP]->loadShaderProgram("geometryTangent", true, &shaderProgramMacros);
+    if(bumpMappingQuality) shaderPrograms[skeletalBumpGeometrySP]->loadShaderProgram("geometryTangent", true, &shaderProgramMacros);
     shaderPrograms[skeletalBumpGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[skeletalBumpGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[skeletalBumpGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
@@ -470,9 +471,10 @@ void loadShaderPrograms() {
         shaderPrograms[edgeSmoothSP]->link();
     }
     
-    if(depthOfFieldEnabled) {
+    if(depthOfFieldQuality) {
         shaderProgramMacros.clear();
         shaderProgramMacros.push_back("PROCESSING_TYPE 2");
+        shaderProgramMacros.push_back(depthOfFieldMacro);
         shaderPrograms[depthOfFieldSP]->loadShaderProgram("postProcessing", false, &shaderProgramMacros);
         shaderPrograms[depthOfFieldSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[depthOfFieldSP]->link();
