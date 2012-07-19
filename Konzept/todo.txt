@@ -1,11 +1,7 @@
-Cubemap shadows
-Soft shadows PCF, PCSS
-Light blur
-Parallax mapping
-Occulusion parallax mapping
+Relief Mapping / Normal Mapping
 Water
-Enviornment maping
 Particle systems thread bug
+GPU particle systems
 Make GUI
 Highmap terrains
 Level File Formats
@@ -13,3 +9,5 @@ Object Editor
 Use Bullet-Engine
 OpenAL Sound Engine: Add track queue
 GUITextField Copy & Paste
+PCSS
+Enviornment maping
