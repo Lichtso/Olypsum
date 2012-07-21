@@ -166,7 +166,7 @@ void GUIScreenView::draw() {
     glDisable(GL_DEPTH_TEST);
     guiCam->use();
     shaderPrograms[spriteSP]->use();
-    shaderPrograms[spriteSP]->setUniformVec3("color", Vector3(0, 0, 0));
+    shaderPrograms[spriteSP]->setUniformF("alpha", 1.0);
     
     Matrix4 transform;
     transform.setIdentity();
@@ -178,16 +178,16 @@ void GUIScreenView::draw() {
     if(modalView) {
         modelMat = transform;
         shaderPrograms[spriteSP]->use();
-        shaderPrograms[spriteSP]->setUniformVec3("color", Vector3(0.2, 0.2, 0.2));
+        shaderPrograms[spriteSP]->setUniformF("alpha", 0.8);
         
         float vertices[] = {
-            width, -height,
+            (float)width, (float)-height,
             1.0, 0.0, 0.2,
-            width, height,
+            (float)width, (float)height,
             1.0, 1.0, 0.2,
-            -width, height,
+            (float)-width, (float)height,
             0.0, 1.0, 0.2,
-            -width, -height,
+            (float)-width, (float)-height,
             0.0, 0.0, 0.2
         };
         
@@ -197,7 +197,7 @@ void GUIScreenView::draw() {
         glBindTexture(GL_TEXTURE_2D, 0);
         glDrawArrays(GL_QUADS, 0, 4);
         
-        shaderPrograms[spriteSP]->setUniformVec3("color", Vector3(0, 0, 0));
+        shaderPrograms[spriteSP]->setUniformF("alpha", 1.0);
         modalView->draw(transform, clipRect);
     }
     

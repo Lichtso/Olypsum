@@ -99,13 +99,13 @@ void GUILabel::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
         maxFactorY = 0.5-0.5*(line->clipRect.minPosY-line->posY)/line->height;
         
         float vertices[] = {
-            line->clipRect.maxPosX, line->clipRect.minPosY,
+            (float)line->clipRect.maxPosX, (float)line->clipRect.minPosY,
             maxFactorX, maxFactorY,
-            line->clipRect.maxPosX, line->clipRect.maxPosY,
+            (float)line->clipRect.maxPosX, (float)line->clipRect.maxPosY,
             maxFactorX, minFactorY,
-            line->clipRect.minPosX, line->clipRect.maxPosY,
+            (float)line->clipRect.minPosX, (float)line->clipRect.maxPosY,
             minFactorX, minFactorY,
-            line->clipRect.minPosX, line->clipRect.minPosY,
+            (float)line->clipRect.minPosX, (float)line->clipRect.minPosY,
             minFactorX, maxFactorY
         };
         

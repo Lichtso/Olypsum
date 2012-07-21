@@ -185,10 +185,10 @@ void GUIRoundedRect::drawOnScreen(bool transposed, int posX, int posY, GUIClipRe
     }
     
     float vertices[] = {
-        clipRect.maxPosX, clipRect.minPosY,
-        clipRect.maxPosX, clipRect.maxPosY,
-        clipRect.minPosX, clipRect.maxPosY,
-        clipRect.minPosX, clipRect.minPosY
+        (float)clipRect.maxPosX, (float)clipRect.minPosY,
+        (float)clipRect.maxPosX, (float)clipRect.maxPosY,
+        (float)clipRect.minPosX, (float)clipRect.maxPosY,
+        (float)clipRect.minPosX, (float)clipRect.minPosY
     };
     shaderPrograms[spriteSP]->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
     glActiveTexture(GL_TEXTURE0);

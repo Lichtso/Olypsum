@@ -85,12 +85,10 @@ void initGame() {
     soundTrackSlider->onChange = updateSoundTrackSlider;
     view->addChild(soundTrackSlider);
     
-    ParticleSystem* particleSystem = new ParticleSystem();
-    particleSystem->position = Vector3(3, 1, -3);
+    ParticleSystem* particleSystem = new ParticleSystem(50);
+    particleSystem->position = Vector3(-1, 1, -3);
     particleSystem->posMin = Vector3(-0.1, 0, -0.1);
     particleSystem->posMax = Vector3(0.1, 0, 0.1);
-    particleSystem->sizeMin = 0.05;
-    particleSystem->sizeMax = 0.1;
     particleSystem->lifeMin = 3.0;
     particleSystem->lifeMax = 4.0;
     particleSystem->addMin = 20.0;
@@ -205,7 +203,7 @@ void calculateFrame() {
     animationTime += animationFactor;
     
     mainCam->camMat.setIdentity();
-    mainCam->camMat.rotateX(0.3);
+    //mainCam->camMat.rotateX(0.3);
     mainCam->camMat.translate(Vector3(0,1.2,2.8));
     mainCam->calculate();
     mainCam->use();

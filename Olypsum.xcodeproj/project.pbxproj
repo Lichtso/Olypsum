@@ -7,16 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1111013014F292FD0088422F /* LinearMath.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1111012F14F292FD0088422F /* LinearMath.framework */; };
-		1111013214F293030088422F /* BulletCollision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1111013114F293030088422F /* BulletCollision.framework */; };
-		1111013414F293090088422F /* BulletDynamics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1111013314F293090088422F /* BulletDynamics.framework */; };
 		1118251B14F2553A00F198A7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118251A14F2553A00F198A7 /* Cocoa.framework */; };
 		1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254114F2559600F198A7 /* OpenGL.framework */; };
 		1118254414F2559B00F198A7 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254314F2559B00F198A7 /* OpenAL.framework */; };
-		1118254614F255A100F198A7 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254514F255A100F198A7 /* SDL.framework */; };
-		112DC3C914F2D35F00C7F7F7 /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 112DC3C814F2D35F00C7F7F7 /* SDL_image.framework */; };
-		112DC3CC14F2D36900C7F7F7 /* SDL_net.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 112DC3CB14F2D36900C7F7F7 /* SDL_net.framework */; };
-		112DC3CE14F2D37400C7F7F7 /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 112DC3CD14F2D37400C7F7F7 /* SDL_ttf.framework */; };
 		11648F6E153DEE63004CA74D /* FBO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11648F6D153DEE63004CA74D /* FBO.cpp */; };
 		118B60621573E2E8004C132E /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118B60611573E2E8004C132E /* Audio.cpp */; };
 		11A5C2C915752306002991E5 /* Vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11A5C2C815752306002991E5 /* Vorbis.framework */; };
@@ -61,13 +54,20 @@
 		11BD39AD15414AA6007846B8 /* Light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11BD39AC15414AA6007846B8 /* Light.cpp */; };
 		11BD39B01541725F007846B8 /* Game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11BD39AF1541725F007846B8 /* Game.cpp */; };
 		11F1EEB8156FE49400F7275D /* ParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11F1EEB7156FE49400F7275D /* ParticleSystem.cpp */; };
+		11FA6D0215B9B3490041F590 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D0115B9B3490041F590 /* SDL.framework */; };
+		11FA6D0615B9B3670041F590 /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D0315B9B3670041F590 /* SDL_image.framework */; };
+		11FA6D0715B9B3670041F590 /* SDL_net.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D0415B9B3670041F590 /* SDL_net.framework */; };
+		11FA6D0815B9B3670041F590 /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D0515B9B3670041F590 /* SDL_ttf.framework */; };
+		11FA6D0E15B9B3710041F590 /* BulletCollision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D0915B9B3710041F590 /* BulletCollision.framework */; };
+		11FA6D0F15B9B3710041F590 /* BulletDynamics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D0A15B9B3710041F590 /* BulletDynamics.framework */; };
+		11FA6D1015B9B3710041F590 /* BulletMultiThreaded.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D0B15B9B3710041F590 /* BulletMultiThreaded.framework */; };
+		11FA6D1115B9B3710041F590 /* BulletSoftBody.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D0C15B9B3710041F590 /* BulletSoftBody.framework */; };
+		11FA6D1215B9B3710041F590 /* BulletSoftBodySolvers_OpenCL_Mini.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D0D15B9B3710041F590 /* BulletSoftBodySolvers_OpenCL_Mini.framework */; };
+		11FA6D1415B9B66C0041F590 /* LinearMath.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D1315B9B66C0041F590 /* LinearMath.framework */; };
 		11FB30A3154453FC00D2B7EE /* InputController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11FB30A1154453CA00D2B7EE /* InputController.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1111012F14F292FD0088422F /* LinearMath.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LinearMath.framework; path = Library/Frameworks/LinearMath.framework; sourceTree = SDKROOT; };
-		1111013114F293030088422F /* BulletCollision.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletCollision.framework; path = Library/Frameworks/BulletCollision.framework; sourceTree = SDKROOT; };
-		1111013314F293090088422F /* BulletDynamics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletDynamics.framework; path = Library/Frameworks/BulletDynamics.framework; sourceTree = SDKROOT; };
 		1118251614F2553A00F198A7 /* Olypsum.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Olypsum.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1118251A14F2553A00F198A7 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		1118251D14F2553A00F198A7 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -75,10 +75,6 @@
 		1118251F14F2553A00F198A7 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1118254114F2559600F198A7 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		1118254314F2559B00F198A7 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
-		1118254514F255A100F198A7 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = Library/Frameworks/SDL.framework; sourceTree = SDKROOT; };
-		112DC3C814F2D35F00C7F7F7 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = Library/Frameworks/SDL_image.framework; sourceTree = SDKROOT; };
-		112DC3CB14F2D36900C7F7F7 /* SDL_net.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_net.framework; path = Library/Frameworks/SDL_net.framework; sourceTree = SDKROOT; };
-		112DC3CD14F2D37400C7F7F7 /* SDL_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_ttf.framework; path = Library/Frameworks/SDL_ttf.framework; sourceTree = SDKROOT; };
 		11648F6B153DEE0F004CA74D /* FBO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FBO.h; sourceTree = "<group>"; };
 		11648F6D153DEE63004CA74D /* FBO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FBO.cpp; sourceTree = "<group>"; };
 		118B60601573E2DF004C132E /* Audio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Audio.h; sourceTree = "<group>"; };
@@ -163,6 +159,16 @@
 		11BD39AF1541725F007846B8 /* Game.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Game.cpp; sourceTree = "<group>"; };
 		11F1EEB5156FE48B00F7275D /* ParticleSystem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParticleSystem.h; sourceTree = "<group>"; };
 		11F1EEB7156FE49400F7275D /* ParticleSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParticleSystem.cpp; sourceTree = "<group>"; };
+		11FA6D0115B9B3490041F590 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = ../../../../Library/Frameworks/SDL.framework; sourceTree = "<group>"; };
+		11FA6D0315B9B3670041F590 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = /Library/Frameworks/SDL_image.framework; sourceTree = "<absolute>"; };
+		11FA6D0415B9B3670041F590 /* SDL_net.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_net.framework; path = /Library/Frameworks/SDL_net.framework; sourceTree = "<absolute>"; };
+		11FA6D0515B9B3670041F590 /* SDL_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_ttf.framework; path = /Library/Frameworks/SDL_ttf.framework; sourceTree = "<absolute>"; };
+		11FA6D0915B9B3710041F590 /* BulletCollision.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletCollision.framework; path = /Library/Frameworks/BulletCollision.framework; sourceTree = "<absolute>"; };
+		11FA6D0A15B9B3710041F590 /* BulletDynamics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletDynamics.framework; path = /Library/Frameworks/BulletDynamics.framework; sourceTree = "<absolute>"; };
+		11FA6D0B15B9B3710041F590 /* BulletMultiThreaded.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletMultiThreaded.framework; path = /Library/Frameworks/BulletMultiThreaded.framework; sourceTree = "<absolute>"; };
+		11FA6D0C15B9B3710041F590 /* BulletSoftBody.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletSoftBody.framework; path = /Library/Frameworks/BulletSoftBody.framework; sourceTree = "<absolute>"; };
+		11FA6D0D15B9B3710041F590 /* BulletSoftBodySolvers_OpenCL_Mini.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletSoftBodySolvers_OpenCL_Mini.framework; path = /Library/Frameworks/BulletSoftBodySolvers_OpenCL_Mini.framework; sourceTree = "<absolute>"; };
+		11FA6D1315B9B66C0041F590 /* LinearMath.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LinearMath.framework; path = ../../../../Library/Frameworks/LinearMath.framework; sourceTree = "<group>"; };
 		11FB30A1154453CA00D2B7EE /* InputController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = InputController.cpp; sourceTree = "<group>"; };
 		11FB30A2154453CA00D2B7EE /* InputController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InputController.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -172,17 +178,20 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				112DC3CE14F2D37400C7F7F7 /* SDL_ttf.framework in Frameworks */,
-				112DC3CC14F2D36900C7F7F7 /* SDL_net.framework in Frameworks */,
-				112DC3C914F2D35F00C7F7F7 /* SDL_image.framework in Frameworks */,
-				1111013414F293090088422F /* BulletDynamics.framework in Frameworks */,
-				1111013214F293030088422F /* BulletCollision.framework in Frameworks */,
-				1111013014F292FD0088422F /* LinearMath.framework in Frameworks */,
-				1118254614F255A100F198A7 /* SDL.framework in Frameworks */,
 				1118254414F2559B00F198A7 /* OpenAL.framework in Frameworks */,
 				1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */,
 				1118251B14F2553A00F198A7 /* Cocoa.framework in Frameworks */,
 				11A5C2C915752306002991E5 /* Vorbis.framework in Frameworks */,
+				11FA6D0215B9B3490041F590 /* SDL.framework in Frameworks */,
+				11FA6D0615B9B3670041F590 /* SDL_image.framework in Frameworks */,
+				11FA6D0715B9B3670041F590 /* SDL_net.framework in Frameworks */,
+				11FA6D0815B9B3670041F590 /* SDL_ttf.framework in Frameworks */,
+				11FA6D0E15B9B3710041F590 /* BulletCollision.framework in Frameworks */,
+				11FA6D0F15B9B3710041F590 /* BulletDynamics.framework in Frameworks */,
+				11FA6D1015B9B3710041F590 /* BulletMultiThreaded.framework in Frameworks */,
+				11FA6D1115B9B3710041F590 /* BulletSoftBody.framework in Frameworks */,
+				11FA6D1215B9B3710041F590 /* BulletSoftBodySolvers_OpenCL_Mini.framework in Frameworks */,
+				11FA6D1415B9B66C0041F590 /* LinearMath.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -210,14 +219,17 @@
 		1118251914F2553A00F198A7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				11FA6D1315B9B66C0041F590 /* LinearMath.framework */,
+				11FA6D0915B9B3710041F590 /* BulletCollision.framework */,
+				11FA6D0A15B9B3710041F590 /* BulletDynamics.framework */,
+				11FA6D0B15B9B3710041F590 /* BulletMultiThreaded.framework */,
+				11FA6D0C15B9B3710041F590 /* BulletSoftBody.framework */,
+				11FA6D0D15B9B3710041F590 /* BulletSoftBodySolvers_OpenCL_Mini.framework */,
+				11FA6D0315B9B3670041F590 /* SDL_image.framework */,
+				11FA6D0415B9B3670041F590 /* SDL_net.framework */,
+				11FA6D0515B9B3670041F590 /* SDL_ttf.framework */,
+				11FA6D0115B9B3490041F590 /* SDL.framework */,
 				11A5C2C815752306002991E5 /* Vorbis.framework */,
-				1111013314F293090088422F /* BulletDynamics.framework */,
-				1111013114F293030088422F /* BulletCollision.framework */,
-				1111012F14F292FD0088422F /* LinearMath.framework */,
-				1118254514F255A100F198A7 /* SDL.framework */,
-				112DC3CD14F2D37400C7F7F7 /* SDL_ttf.framework */,
-				112DC3CB14F2D36900C7F7F7 /* SDL_net.framework */,
-				112DC3C814F2D35F00C7F7F7 /* SDL_image.framework */,
 				1118254314F2559B00F198A7 /* OpenAL.framework */,
 				1118254114F2559600F198A7 /* OpenGL.framework */,
 				1118251A14F2553A00F198A7 /* Cocoa.framework */,
@@ -499,11 +511,14 @@
 		1118253214F2553A00F198A7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALTERNATE_PERMISSIONS_FILES = macosx;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = NO;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -511,15 +526,17 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "$(OTHER_CFLAGS)";
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_VERSION = "";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
@@ -528,20 +545,25 @@
 		1118253314F2553A00F198A7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALTERNATE_PERMISSIONS_FILES = macosx;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "$(OTHER_CFLAGS)";
+				GCC_VERSION = "";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = NO;
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "";
 			};
@@ -551,6 +573,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				FRAMEWORK_SEARCH_PATHS = "/Library/Frameworks/**";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				HEADER_SEARCH_PATHS = /usr/local/include;
@@ -568,6 +593,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				FRAMEWORK_SEARCH_PATHS = "/Library/Frameworks/**";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				HEADER_SEARCH_PATHS = /usr/local/include;

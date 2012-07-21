@@ -22,7 +22,6 @@ class Light {
     Cam shadowCam;
     ColorBuffer* shadowMap;
     public:
-    bool shadowmapActive;
     Vector3 direction, position, upDir;
     float range;
     LightType type;

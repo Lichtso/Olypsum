@@ -1,17 +1,31 @@
 attribute vec3 position;
+#if PROCESSING_TYPE == 3
+attribute vec2 texCoord;
+varying vec2 vTexCoord;
+#elif PROCESSING_TYPE == 4
+attribute vec3 color;
+varying vec3 vColor;
+#endif
 
 uniform mat4 modelViewMat;
 
 void main() {
     gl_Position = vec4(position, 1.0)*modelViewMat;
+    #if PROCESSING_TYPE == 3
+    vTexCoord = texCoord;
+    #elif PROCESSING_TYPE == 4
+    vColor = color;
+    #endif
 }
 
 #separator
 
 #extension GL_ARB_texture_rectangle : enable
 
+#if PROCESSING_TYPE < 3
 uniform sampler2DRect sampler0;
 uniform sampler2DRect sampler1;
+#endif
 
 #if PROCESSING_TYPE == 1
 
@@ -46,6 +60,24 @@ void main() {
     const float blurSum = 1.0 / ((blurWidth*2.0+1.0)*(blurWidth*2.0+1.0));
     gl_FragData[0].rgb *= blurSum;
     gl_FragData[0].a = 1.0;
+}
+
+#elif PROCESSING_TYPE == 3
+varying vec2 vTexCoord;
+uniform float alpha;
+uniform sampler2D sampler0;
+
+void main() {
+	gl_FragData[0] = texture2D(sampler0, vTexCoord.st);
+    gl_FragData[0].a *= alpha;
+    if(gl_FragData[0].a < 0.0039) discard;
+}
+
+#elif PROCESSING_TYPE == 4
+varying vec3 vColor;
+
+void main() {
+	gl_FragData[0].rgb = vColor;
 }
 
 #endif

@@ -15,10 +15,11 @@
 
 #define POSITION_ATTRIBUTE 0
 #define TEXTURE_COORD_ATTRIBUTE 1
+#define COLOR_ATTRIBUTE 1
 #define NORMAL_ATTRIBUTE 2
-#define TANGENT_ATTRIBUTE 3
-#define WEIGHT_ATTRIBUTE 5
-#define JOINT_ATTRIBUTE 6
+#define WEIGHT_ATTRIBUTE 3
+#define JOINT_ATTRIBUTE 4
+#define VELOCITY_ATTRIBUTE 5
 
 class ShaderProgram {
     public:
@@ -26,11 +27,12 @@ class ShaderProgram {
 	ShaderProgram();
 	~ShaderProgram();
 	bool loadShader(GLuint shaderType, const char* soucreCode, std::vector<const char*>* macros);
-    bool loadShaderProgram(const char* fileName, bool geometryShader, std::vector<const char*>* macros);
+    bool loadShaderProgram(const char* fileName, std::vector<GLenum> shaderTypes, std::vector<const char*>* macros);
     void addAttribute(unsigned int index, const char* attributeName);
 	void link();
 	void use();
     void setAttribute(unsigned int index, unsigned int size, GLsizei stride, GLfloat* data);
+    void setTransformFeedbackVaryings(unsigned int count, const char** varyings);
     bool checkUniformExistence(const char* name);
     void setUniformI(const char* name, int value);
     void setUniformF(const char* name, float value);
@@ -44,9 +46,9 @@ class ShaderProgram {
 };
 
 extern Matrix4 modelMat;
-extern ShaderProgram *shaderPrograms[23], *currentShaderProgram;
+extern ShaderProgram *shaderPrograms[26], *currentShaderProgram;
 extern bool edgeSmoothEnabled, fullScreenEnabled, cubeShadowsEnabled;
-extern unsigned char depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality;
+extern unsigned char depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, particleQuality;
 
 enum ShaderProgramNames {
     spriteSP = 0,
@@ -71,7 +73,10 @@ enum ShaderProgramNames {
     ssaoSP = 19,
     deferredCombineSP = 20,
     edgeSmoothSP = 21,
-    depthOfFieldSP = 22
+    depthOfFieldSP = 22,
+    colorSP = 23,
+    particleDrawSP = 24,
+    particleCalculateSP = 25
 };
 
 void loadShaderPrograms();

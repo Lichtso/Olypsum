@@ -40,11 +40,10 @@ static BOOL   gCalledAppMainline = FALSE;
 
 static NSString *getApplicationName(void)
 {
-    const NSDictionary *dict;
     NSString *appName = 0;
 
     /* Determine the application name */
-    dict = (__bridge const NSDictionary *)CFBundleGetInfoDictionary(CFBundleGetMainBundle());
+    NSDictionary *dict = (__bridge NSDictionary *)CFBundleGetInfoDictionary(CFBundleGetMainBundle());
     if (dict)
         appName = [dict objectForKey: @"CFBundleName"];
     

@@ -30,7 +30,7 @@ static unsigned int copyVertices(Vector3* positions, float* vertices, unsigned i
 
 unsigned char inBuffersA[] = { positionDBuffer, normalDBuffer, materialDBuffer, diffuseDBuffer, specularDBuffer }, outBuffersA[] = { diffuseDBuffer, specularDBuffer };
 unsigned char inBuffersB[] = { depthDBuffer }, outBuffersB[] = { ssaoDBuffer };
-unsigned char inBuffersC[] = { colorDBuffer, materialDBuffer, diffuseDBuffer, specularDBuffer, normalDBuffer, ssaoDBuffer }, outBuffersC[] = { colorDBuffer };
+unsigned char inBuffersC[] = { colorDBuffer, diffuseDBuffer, specularDBuffer, materialDBuffer, normalDBuffer, ssaoDBuffer }, outBuffersC[] = { colorDBuffer };
 unsigned char inBuffersD[] = { depthDBuffer, colorDBuffer }, outBuffersD[] = { colorDBuffer };
 
 static bool drawLightVolume(Vector3* verticesSource, unsigned int verticesCount) {
@@ -130,7 +130,6 @@ DirectionalLight::DirectionalLight() {
 }
 
 bool DirectionalLight::calculateShadowmap() {
-    if(!shadowmapActive) return false;
     shadowCam.camMat.setIdentity();
     shadowCam.camMat.setDirection(direction, upDir);
     shadowCam.camMat.translate(position);
@@ -198,7 +197,6 @@ SpotLight::SpotLight() {
 }
 
 bool SpotLight::calculateShadowmap() {
-    if(!shadowmapActive) return false;
     shadowCam.camMat.setIdentity();
     shadowCam.camMat.setDirection(direction, upDir);
     shadowCam.camMat.translate(position);
@@ -281,8 +279,6 @@ PositionalLight::~PositionalLight() {
 }
 
 bool PositionalLight::calculateShadowmap() {
-    if(!shadowmapActive) return false;
-    
     if(cubeShadowsEnabled) {
         if(!shadowMap) {
             shadowMap = mainFBO.addTexture(1024, true, true);
@@ -527,12 +523,11 @@ void LightManager::calculateShadows(unsigned int maxShadows) {
     std::sort(lights.begin(), lights.end(), lightPrioritySorter);
     
     for(unsigned int i = 0; i < lights.size(); i ++) {
-        lights[i]->shadowmapActive = i < maxShadows;
-        lights[i]->calculateShadowmap();
+        if(i < maxShadows)
+            lights[i]->calculateShadowmap();
+        else
+            lights[i]->deleteShadowmap();
     }
-    
-    for(unsigned int i = maxShadows; i < lights.size(); i ++)
-        lights[i]->deleteShadowmap();
     
     currentShadowLight = NULL;
 }

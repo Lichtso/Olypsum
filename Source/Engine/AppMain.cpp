@@ -15,7 +15,7 @@ SDL_Thread* particleThread;
 float timeInLastSec = 0.0;
 unsigned int currentFPS = 0, newFPS = 0;
 
-static int ParticleThreadFunction(void* pointless) {
+/*static int ParticleThreadFunction(void* pointless) {
     timeval timeThen, timeNow;
     gettimeofday(&timeThen, 0);
     while(true) {
@@ -23,11 +23,11 @@ static int ParticleThreadFunction(void* pointless) {
         float time = timeNow.tv_sec - timeThen.tv_sec;
         time += (timeNow.tv_usec - timeThen.tv_usec) / 1000000.0;
         gettimeofday(&timeThen, 0);
-        particleSystemManager.calculate(time);
+        particleSystemManager.calculate();
         SDL_Delay(30);
     }
     return 0;
-}
+}*/
 
 void updateVideoMode() {
     screen = SDL_SetVideoMode(videoInfo->current_w, videoInfo->current_h, videoInfo->vfmt->BitsPerPixel, (fullScreenEnabled) ? SDL_OPENGL | SDL_FULLSCREEN : SDL_OPENGL);
@@ -80,6 +80,7 @@ void AppMain(int argc, char *argv[]) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
+    glEnable(GL_POINT_SPRITE);
     glFrontFace(GL_CCW);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
@@ -178,11 +179,12 @@ void AppMain(int argc, char *argv[]) {
         
         calculateFrame();
         lightManager.calculateShadows(1);
+        particleSystemManager.calculate();
         mainCam->use();
         mainFBO.renderInDeferredBuffers();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         renderScene();
-        //particleSystemManager.draw();
+        particleSystemManager.draw();
         lightManager.useLights();
         if(currentScreenView) currentScreenView->draw();
         SDL_GL_SwapBuffers();

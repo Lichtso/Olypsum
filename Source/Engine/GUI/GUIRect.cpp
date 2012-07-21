@@ -58,10 +58,10 @@ void GUIRect::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     if(!getLimSize(clipRect, parentClipRect)) return;
     
     float vertices[] = {
-        clipRect.maxPosX, clipRect.minPosY,
-        clipRect.maxPosX, clipRect.maxPosY,
-        clipRect.minPosX, clipRect.maxPosY,
-        clipRect.minPosX, clipRect.minPosY
+        (float)clipRect.maxPosX, (float)clipRect.minPosY,
+        (float)clipRect.maxPosX, (float)clipRect.maxPosY,
+        (float)clipRect.minPosX, (float)clipRect.maxPosY,
+        (float)clipRect.minPosX, (float)clipRect.minPosY
     };
     
     modelMat = parentTransform;

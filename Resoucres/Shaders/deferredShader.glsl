@@ -19,9 +19,9 @@ uniform sampler2DRect sampler5;
 
 void main() {
     vec3 color = texture2DRect(sampler0, gl_FragCoord.xy).rgb,
-         diffuse = texture2DRect(sampler2, gl_FragCoord.xy).rgb+vec3(0.2),
-         specular = texture2DRect(sampler3, gl_FragCoord.xy).rgb;
-    float emission = texture2DRect(sampler1, gl_FragCoord.xy).b;
+         diffuse = texture2DRect(sampler1, gl_FragCoord.xy).rgb+vec3(0.2),
+         specular = texture2DRect(sampler2, gl_FragCoord.xy).rgb;
+    float emission = texture2DRect(sampler3, gl_FragCoord.xy).b;
         
     #if SSAO_QUALITY
     vec2 uvPos;
