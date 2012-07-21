@@ -1,9 +1,7 @@
-Relief Mapping / Normal Mapping
 Water
-Particle systems thread bug
-GPU particle systems
 Make GUI
 Highmap terrains
+Use C++11 Multithreading
 Level File Formats
 Object Editor
 Use Bullet-Engine
