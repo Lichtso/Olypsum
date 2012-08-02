@@ -15,12 +15,12 @@ class GUITabs : public GUIButtonList {
     public:
     int selectedIndex;
     bool deactivatable;
-    void (*onChange)(GUITabs*);
+    std::function<void(GUITabs*)> onChange;
     GUITabs();
     void addChild(GUIButton* child);
     void updateContent();
     bool handleMouseDown(int mouseX, int mouseY);
-    void handleMouseUp(int mouseX, int mouseY);
+    bool handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
 };
 

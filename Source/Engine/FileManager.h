@@ -6,18 +6,18 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "Model.h"
+#import "Localization.h"
 
 #ifndef FileManager_h
 #define FileManager_h
 
 class FilePackage {
     public:
-    std::string name;
+    std::string path, name;
     std::map<std::string, Texture*> textures;
     std::map<std::string, Model*> models;
     std::map<std::string, SoundTrack*> soundTracks;
-    FilePackage(const char* name);
+    FilePackage(std::string name);
     ~FilePackage();
     bool load();
     std::string getUrlOfFile(const char* groupName, const char* fileName);
@@ -34,6 +34,8 @@ class FileManager {
     public:
     FileManager();
     ~FileManager();
+    void loadOptions();
+    void saveOptions();
     bool loadPackage(const char* name);
     FilePackage* getPackage(const char* name);
     void unloadPackage(const char* name);

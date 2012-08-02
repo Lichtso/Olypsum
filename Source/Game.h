@@ -11,10 +11,6 @@
 #ifndef Game_h
 #define Game_h
 
-//TODO: Skeleton-Test
-extern SkeletonPose* skeletonPose;
-
-void initGame();
 void renderScene();
 void calculateFrame();
 

@@ -26,10 +26,6 @@ enum GUIElementType {
     GUIType_TextField = 11
 };
 
-struct GUIColor {
-    unsigned char r, g, b, a;
-};
-
 class GUIRect {
     public:
     GUIElementType type;
@@ -45,7 +41,7 @@ class GUIRect {
     virtual void updateContent();
     virtual void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
     virtual bool handleMouseDown(int mouseX, int mouseY);
-    virtual void handleMouseUp(int mouseX, int mouseY);
+    virtual bool handleMouseUp(int mouseX, int mouseY);
     virtual void handleMouseMove(int mouseX, int mouseY);
     virtual bool handleMouseWheel(int mouseX, int mouseY, float delta);
     virtual bool handleKeyDown(SDL_keysym* key);

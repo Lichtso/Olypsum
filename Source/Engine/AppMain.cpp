@@ -11,23 +11,8 @@
 
 Uint8* keyState;
 SDLMod modKeyState;
-SDL_Thread* particleThread;
 float timeInLastSec = 0.0;
 unsigned int currentFPS = 0, newFPS = 0;
-
-/*static int ParticleThreadFunction(void* pointless) {
-    timeval timeThen, timeNow;
-    gettimeofday(&timeThen, 0);
-    while(true) {
-        gettimeofday(&timeNow, 0);
-        float time = timeNow.tv_sec - timeThen.tv_sec;
-        time += (timeNow.tv_usec - timeThen.tv_usec) / 1000000.0;
-        gettimeofday(&timeThen, 0);
-        particleSystemManager.calculate();
-        SDL_Delay(30);
-    }
-    return 0;
-}*/
 
 void updateVideoMode() {
     screen = SDL_SetVideoMode(videoInfo->current_w, videoInfo->current_h, videoInfo->vfmt->BitsPerPixel, (fullScreenEnabled) ? SDL_OPENGL | SDL_FULLSCREEN : SDL_OPENGL);
@@ -38,6 +23,8 @@ void updateVideoMode() {
 }
 
 void AppMain(int argc, char *argv[]) {
+    fileManager.loadOptions();
+    
     //Init SDL
     if(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) < 0) {
         printf("Couldn't init SDL, Quit.\n");
@@ -62,7 +49,6 @@ void AppMain(int argc, char *argv[]) {
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     //SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
-    
     updateVideoMode();
     
     //Init OpenGL
@@ -97,30 +83,23 @@ void AppMain(int argc, char *argv[]) {
     guiCam->calculate();
     
     //Init Resources
-    fileManager.loadPackage(NULL);
     mainFont = new TextFont();
-    mainFont->size = 20;
+    mainFont->size = videoInfo->current_h*0.03;
     mainFont->loadTTF("font");
     titleFont = new TextFont();
-    titleFont->size = 30;
+    titleFont->size = videoInfo->current_h*0.05;
     titleFont->loadTTF("font");
-    
-    //Load Shader Programs
-    for(unsigned int p = 0; p < sizeof(shaderPrograms)/sizeof(ShaderProgram*); p ++) {
-        if(shaderPrograms[p]) delete shaderPrograms[p];
-        shaderPrograms[p] = new ShaderProgram();
-    }
-    loadShaderPrograms();
-    
-    //Init all other stuff
-    currentScreenView = new GUIScreenView();
     mainFBO.init();
     lightManager.init();
-    //particleThread = SDL_CreateThread(ParticleThreadFunction, NULL);
+    
+    //Load Shader Programs
+    loadStaticShaderPrograms();
+    setMenu(loadingMenu);
+    loadDynamicShaderPrograms();
     
     SDL_Event event;
     SDL_PollEvent(&event);
-    initGame();
+    setMenu(mainMenu);
     
     timeval timeThen, timeNow;
     gettimeofday(&timeThen, 0);
@@ -175,17 +154,32 @@ void AppMain(int argc, char *argv[]) {
         }
         keyState = SDL_GetKeyState(NULL);
         modKeyState = SDL_GetModState();
-        soundSourcesManager.calculate();
         
-        calculateFrame();
-        lightManager.calculateShadows(1);
-        particleSystemManager.calculate();
-        mainCam->use();
-        mainFBO.renderInDeferredBuffers();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        renderScene();
-        particleSystemManager.draw();
-        lightManager.useLights();
+        if(currentMenu == inGameMenu) {
+            char str[64];
+            sprintf(str, "FPS: %d", currentFPS);
+            GUILabel* labelFPS = (GUILabel*)currentScreenView->children[0];
+            labelFPS->text = str;
+            labelFPS->updateContent();
+        }
+        
+        if(currentMenu == inGameMenu || currentMenu == gameEscMenu) {
+            calculateFrame();
+            soundSourcesManager.calculate();
+            lightManager.calculateShadows(1);
+            particleSystemManager.calculate();
+            mainCam->use();
+            mainFBO.renderInDeferredBuffers();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            renderScene();
+            particleSystemManager.draw();
+            lightManager.useLights();
+        }else{
+            glClearColor(1, 1, 1, 1);
+            glViewport(0, 0, videoInfo->current_w, videoInfo->current_h);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glClear(GL_COLOR_BUFFER_BIT);
+        }
         if(currentScreenView) currentScreenView->draw();
         SDL_GL_SwapBuffers();
         

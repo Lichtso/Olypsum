@@ -97,7 +97,7 @@ void BinaryParallax(inout vec3 texCoord, vec3 viewVec) {
 void main() {
     #if BUMP_MAPPING <= 1
 	gl_FragData[0] = texture2D(sampler0, vTexCoord); //Color
-    if(gl_FragData[0].a < 0.1 || random(gl_FragCoord.xy) > discardDensity) discard;
+    if(gl_FragData[0].a < 1.0 || random(gl_FragCoord.xy) > discardDensity) discard;
     gl_FragData[1] = vec4(texture2D(sampler1, vTexCoord).rgb, 1.0); //Material
     #endif
     

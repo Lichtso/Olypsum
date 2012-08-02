@@ -58,8 +58,7 @@ static NSString *getApplicationName(void)
 
 @implementation NSApplication (SDLApplication)
 /* Invoked from the Quit menu item */
-- (void)terminate:(id)sender
-{
+- (void)terminate:(id)sender {
     /* Post a SDL_QUIT event */
     SDL_Event event;
     event.type = SDL_QUIT;
@@ -72,6 +71,22 @@ static NSString *getApplicationName(void)
 
 /* Set the working directory to the .app's parent directory */
 - (void)setupWorkingDirectory {
+    NSString* applicationSupportFolder;
+    FSRef foundRef;
+    OSErr err = FSFindFolder(kUserDomain, kApplicationSupportFolderType, kDontCreateFolder, &foundRef);
+    if(err == noErr) {
+        unsigned char path[PATH_MAX];
+        OSStatus validPath = FSRefMakePath(&foundRef, path, sizeof(path));
+        if(validPath == noErr)
+            applicationSupportFolder = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:(const char*)path length:(NSUInteger)strlen((char*)path)];
+    }
+    
+    std::string companyDir = std::string([applicationSupportFolder cStringUsingEncoding:1])+"/Gamefortec/";
+    gameDataDir = companyDir+"Olypsum/";
+    
+    createDir(companyDir);
+    createDir(gameDataDir);
+    
     NSURL* parentURL = [[NSBundle mainBundle] resourceURL];
     for(unsigned int i = 0; i < 3; i ++)
         parentURL = [parentURL URLByDeletingLastPathComponent];
@@ -81,12 +96,9 @@ static NSString *getApplicationName(void)
     char buffer[length];
     [[parentURL path] getCString:buffer maxLength:length encoding:NSASCIIStringEncoding];
     parentDir = std::string(buffer);
-    
     [resourceURL getCString:buffer maxLength:length encoding:NSASCIIStringEncoding];
-    resourcesDir = std::string(buffer);
+    resourcesDir = std::string(buffer)+'/';
     chdir(resourcesDir.c_str());
-    
-    //TODO: gameDataDir
 }
 
 static void setApplicationMenu(void) {

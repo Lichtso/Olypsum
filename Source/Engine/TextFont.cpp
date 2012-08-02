@@ -9,6 +9,24 @@
 #import "TextFont.h"
 #import "AppMain.h"
 
+GUIColor& GUIColor::operator=(const GUIColor& B) {
+    r = B.r;
+    g = B.g;
+    b = B.b;
+    a = B.a;
+    return *this;
+}
+
+SDL_Color GUIColor::getSDL() {
+    SDL_Color B;
+    B.r = r;
+    B.g = g;
+    B.b = b;
+    B.unused = a;
+    return B;
+}
+
+
 TextFont::TextFont() {
     ttf = NULL;
     size = 12;
@@ -35,7 +53,7 @@ bool TextFont::loadTTF(const char* fileName) {
     return true;
 }
 
-GLuint TextFont::renderStringToTexture(const char* str, SDL_Color colorB, bool antialiasing, int& width, int& height) {
+GLuint TextFont::renderStringToTexture(const char* str, GUIColor colorB, bool antialiasing, int& width, int& height) {
     SDL_Surface *surfaceB;
     GLuint texture;
     glGenTextures(1, &texture);
@@ -43,7 +61,7 @@ GLuint TextFont::renderStringToTexture(const char* str, SDL_Color colorB, bool a
     glBindTexture(GL_TEXTURE_2D, texture);
     
     if(antialiasing) {
-        surfaceB = TTF_RenderText_Blended(ttf, str, colorB);
+        surfaceB = TTF_RenderText_Blended(ttf, str, colorB.getSDL());
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surfaceB->w, surfaceB->h, 0, GL_BGRA, GL_UNSIGNED_BYTE, surfaceB->pixels);
     }else{
         SDL_Color color = {255, 255, 255, 255};
@@ -59,7 +77,7 @@ GLuint TextFont::renderStringToTexture(const char* str, SDL_Color colorB, bool a
                 pixelsB[index  ] = colorB.r;
                 pixelsB[index+1] = colorB.g;
                 pixelsB[index+2] = colorB.b;
-                pixelsB[index+3] = colorB.unused;
+                pixelsB[index+3] = colorB.a;
             }
         SDL_FreeSurface(surfaceA);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surfaceB->w, surfaceB->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, surfaceB->pixels);
@@ -76,11 +94,11 @@ GLuint TextFont::renderStringToTexture(const char* str, SDL_Color colorB, bool a
     return texture;
 }
 
-void TextFont::renderStringToSurface(const char* str, SDL_Surface* surfaceB, int xPosB, int yPosB, SDL_Color colorB, bool antialiasing) {
+void TextFont::renderStringToSurface(const char* str, SDL_Surface* surfaceB, int xPosB, int yPosB, GUIColor colorB, bool antialiasing) {
     SDL_Surface *surfaceA;
     
     if(antialiasing) {
-        surfaceA = TTF_RenderText_Blended(ttf, str, colorB);
+        surfaceA = TTF_RenderText_Blended(ttf, str, colorB.getSDL());
     }else{
         SDL_Color color = {255, 255, 255, 255};
         surfaceA = TTF_RenderText_Solid(ttf, str, color);
@@ -127,16 +145,16 @@ void TextFont::renderStringToSurface(const char* str, SDL_Surface* surfaceB, int
                 pixelsB[indexB  ] = colorB.b;
                 pixelsB[indexB+1] = colorB.g;
                 pixelsB[indexB+2] = colorB.r;
-                pixelsB[indexB+3] = colorB.unused;
+                pixelsB[indexB+3] = colorB.a;
             }
     }
     
     SDL_FreeSurface(surfaceA);
 }
 
-void TextFont::renderStringToScreen(const char* str, Vector3 pos, float scale, SDL_Color colorB, bool antialiasing) {
+void TextFont::renderStringToScreen(const char* str, Vector3 pos, float scale, GUIColor color, bool antialiasing) {
     int width, height;
-    GLuint texture = renderStringToTexture(str, colorB, antialiasing, width, height);
+    GLuint texture = renderStringToTexture(str, color, antialiasing, width, height);
     
     Vector3 size = Vector3(width*scale, height*scale, 0.0);
     float vertices[] = {

@@ -40,23 +40,28 @@ void GUIButtonList::updateContent() {
     }
     
     if(orientation & GUIOrientation_Vertical)
-        heightAux -= ceil(children.size() / 2.0) - 1;
-    else
         widthAux -= ceil(children.size() / 2.0) - 1;
+    else
+        heightAux -= ceil(children.size() / 2.0) - 1;
+    
+    if(sizeAlignment & GUISizeAlignment_Width) width = widthAux;
+    if(sizeAlignment & GUISizeAlignment_Height) height = heightAux;
     
     int posCounter = 0;
     for(unsigned int i = 0; i < children.size(); i ++) {
         button = (GUIButton*)children[i];
         if(orientation & GUIOrientation_Vertical) {
-            button->width = widthAux;
+            button->width = width;
+            if(!(sizeAlignment & GUISizeAlignment_Height)) button->height = ceil(height/(float)children.size());
             button->posX = 0;
-            button->posY = heightAux-posCounter-button->height;
+            button->posY = height-posCounter-button->height;
             button->roundedCorners = (GUICorners) ((i == 0) ? GUITopLeftCorner | GUITopRightCorner : 0);
             if(i == children.size()-1) button->roundedCorners = (GUICorners) (button->roundedCorners | GUIBottomLeftCorner | GUIBottomRightCorner);
             posCounter += button->height*2-1;
         }else{
-            button->height = heightAux;
-            button->posX = -widthAux+posCounter+button->width;
+            if(!(sizeAlignment & GUISizeAlignment_Width)) button->width = ceil(width/(float)children.size());
+            button->height = height;
+            button->posX = -width+posCounter+button->width;
             button->posY = 0;
             button->roundedCorners = (GUICorners) ((i == 0) ? GUITopLeftCorner | GUIBottomLeftCorner : 0);
             if(i == children.size()-1) button->roundedCorners = (GUICorners) (button->roundedCorners | GUITopRightCorner | GUIBottomRightCorner);
@@ -65,10 +70,4 @@ void GUIButtonList::updateContent() {
         button->sizeAlignment = GUISizeAlignment_None;
         button->updateContent();
     }
-    
-    if(sizeAlignment & GUISizeAlignment_Width)
-        width = widthAux;
-    
-    if(sizeAlignment & GUISizeAlignment_Height)
-        height = heightAux;
 }

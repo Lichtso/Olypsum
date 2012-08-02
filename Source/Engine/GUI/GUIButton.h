@@ -35,13 +35,13 @@ class GUIButton : public GUIView {
     GUIButtonType buttonType;
     GUICorners roundedCorners;
     GUIButtonState state;
-    void (*onClick)(GUIButton*);
+    std::function<void(GUIButton*)> onClick;
     GUIButton();
     ~GUIButton();
     void updateContent();
     void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);
-    void handleMouseUp(int mouseX, int mouseY);
+    bool handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
 };
 

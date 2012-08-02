@@ -13,11 +13,12 @@
 
 class GUICheckBox : public GUIButton {
     public:
+    std::function<void(GUICheckBox*)> onClick;
     GUICheckBox();
     void addChild(GUIRect* child);
     void updateContent();
     bool handleMouseDown(int mouseX, int mouseY);
-    void handleMouseUp(int mouseX, int mouseY);
+    bool handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
 };
 

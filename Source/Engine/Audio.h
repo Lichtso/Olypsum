@@ -6,11 +6,11 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "ShaderProgram.h"
-#import <Vorbis/vorbisfile.h>
+#import "Cam.h"
 
 #ifndef Audio_h
 #define Audio_h
+#import <Vorbis/vorbisfile.h>
 
 class FilePackage;
 

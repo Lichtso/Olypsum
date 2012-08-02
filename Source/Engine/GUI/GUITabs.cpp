@@ -18,7 +18,7 @@ GUITabs::GUITabs() {
 void GUITabs::addChild(GUIButton* child) {
     children.push_back(child);
     child->parent = this;
-    if(!deactivatable) selectedIndex = 0;
+    if(!deactivatable && selectedIndex < 0) selectedIndex = 0;
     updateContent();
 }
 
@@ -43,9 +43,12 @@ void GUITabs::updateContent() {
     }
     
     if(orientation & GUIOrientation_Vertical)
-        heightAux -= ceil(children.size() / 2.0) - 1;
-    else
         widthAux -= ceil(children.size() / 2.0) - 1;
+    else
+        heightAux -= ceil(children.size() / 2.0) - 1;
+    
+    if(sizeAlignment & GUISizeAlignment_Width) width = widthAux;
+    if(sizeAlignment & GUISizeAlignment_Height) height = heightAux;
     
     int posCounter = 0;
     for(unsigned int i = 0; i < children.size(); i ++) {
@@ -55,9 +58,10 @@ void GUITabs::updateContent() {
         button->roundedCorners = (GUICorners) 0;
         
         if(orientation & GUIOrientation_Vertical) {
-            button->width = widthAux;
+            button->width = width;
+            if(!(sizeAlignment & GUISizeAlignment_Height)) button->height = ceil(height/(float)children.size());
             button->posX = 0;
-            button->posY = heightAux-posCounter-button->height;
+            button->posY = height-posCounter-button->height;
             
             switch((int)orientation) {
                 case GUIOrientation_Left:
@@ -82,8 +86,9 @@ void GUITabs::updateContent() {
             
             posCounter += button->height*2-1;
         }else{
-            button->height = heightAux;
-            button->posX = -widthAux+posCounter+button->width;
+            if(!(sizeAlignment & GUISizeAlignment_Width)) button->width = ceil(width/(float)children.size());
+            button->height = height;
+            button->posX = posCounter+button->width-width;
             button->posY = 0;
             
             switch((int)orientation) {
@@ -112,12 +117,6 @@ void GUITabs::updateContent() {
         button->sizeAlignment = GUISizeAlignment_None;
         button->updateContent();
     }
-    
-    if(sizeAlignment & GUISizeAlignment_Width)
-        width = widthAux;
-    
-    if(sizeAlignment & GUISizeAlignment_Height)
-        height = heightAux;
 }
 
 bool GUITabs::handleMouseDown(int mouseXo, int mouseYo) {
@@ -125,7 +124,7 @@ bool GUITabs::handleMouseDown(int mouseXo, int mouseYo) {
     
     GUIButton* button;
     int mouseX, mouseY;
-    for(int i = (int)children.size()-1; i >= 0; i --) {
+    for(int i = children.size()-1; i >= 0; i --) {
         button = (GUIButton*)children[i];
         mouseX = mouseXo-button->posX;
         mouseY = mouseYo-button->posY;
@@ -143,7 +142,7 @@ bool GUITabs::handleMouseDown(int mouseXo, int mouseYo) {
             selectedIndex = -1;
         }else return false;
         
-        for(int j = 0; j < children.size(); j ++) {
+        for(unsigned int j = 0; j < children.size(); j ++) {
             button = (GUIButton*)children[j];
             if(i != j && button->state != GUIButtonStateDisabled)
                 button->state = GUIButtonStateNormal;
@@ -154,8 +153,8 @@ bool GUITabs::handleMouseDown(int mouseXo, int mouseYo) {
     return false;
 }
 
-void GUITabs::handleMouseUp(int mouseXo, int mouseYo) {
-    
+bool GUITabs::handleMouseUp(int mouseX, int mouseY) {
+    return false;
 }
 
 void GUITabs::handleMouseMove(int mouseXo, int mouseYo) {

@@ -6,9 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "ParticleSystem.h"
-#import "FileManager.h"
-
+#import "Menu.h"
 
 ParticleSystem::ParticleSystem(unsigned int maxParticlesB) {
     texture = NULL;
@@ -18,10 +16,10 @@ ParticleSystem::ParticleSystem(unsigned int maxParticlesB) {
     addParticles = 0.0;
     systemLife = -1.0;
     force = Vector3(0, -0.981, 0);
-    if(particleQuality == 1) {
+    if(particleCalcTarget == 1) {
         particles = new Particle[maxParticles];
         particlesCount = 0;
-    }else if(particleQuality == 2) {
+    }else if(particleCalcTarget == 2) {
         particlesCount = maxParticles;
         glGenBuffers(1, &particlesVBO[0]);
         glBindBuffer(GL_ARRAY_BUFFER, particlesVBO[0]);
@@ -29,12 +27,13 @@ ParticleSystem::ParticleSystem(unsigned int maxParticlesB) {
         glGenBuffers(1, &particlesVBO[1]);
         glBindBuffer(GL_ARRAY_BUFFER, particlesVBO[1]);
         glBufferData(GL_ARRAY_BUFFER, 7*sizeof(float)*maxParticles, 0, GL_STATIC_DRAW);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
     particleSystemManager.particleSystems.push_back(this);
 }
 
 ParticleSystem::~ParticleSystem() {
-    if(particleQuality == 1)
+    if(particleCalcTarget == 1)
         delete [] (Particle*)particles;
     if(texture) fileManager.releaseTexture(texture);
     if(lightSource) delete lightSource;
@@ -50,7 +49,7 @@ ParticleSystem::~ParticleSystem() {
 }
 
 bool ParticleSystem::calculate() {
-    if(particleQuality == 0) systemLife = 0.0;
+    if(particleCalcTarget == 0) systemLife = 0.0;
     if(systemLife > -1.0) {
         systemLife -= animationFactor;
         if(systemLife <= 0.0) {
@@ -59,21 +58,15 @@ bool ParticleSystem::calculate() {
         }
     }
     
-    if(particleQuality == 1 && (systemLife == -1.0 || systemLife > lifeMax)) {
-        addParticles += animationFactor*frand(addMin, addMax);
-        for(; addParticles >= 1.0; addParticles --) {
-            if(particlesCount >= maxParticles) {
-                addParticles = 0.0;
-                break;
-            }
-            Particle* particle = &particles[particlesCount ++];
+    if(particleCalcTarget == 1 && (systemLife == -1.0 || systemLife > lifeMax))
+        for(; particlesCount < maxParticles; particlesCount ++) {
+            Particle* particle = &particles[particlesCount];
             particle->pos = vec3rand(posMin, posMax)+position;
             particle->dir = vec3rand(dirMin, dirMax);
             particle->life = frand(lifeMin, lifeMax);
         }
-    }
     
-    if(particleQuality == 1) {
+    if(particleCalcTarget == 1) {
         Vector3 forceAux = force*animationFactor;
         for(unsigned int p = 0; p < particlesCount; p ++) {
             particles[p].life -= animationFactor;
@@ -86,15 +79,16 @@ bool ParticleSystem::calculate() {
             particles[p].pos += particles[p].dir*animationFactor;
             particles[p].dir += forceAux;
         }
-    }else if(particleQuality == 2) {
+    }else if(particleCalcTarget == 2) {
         shaderPrograms[particleCalculateSP]->use();
+        currentShaderProgram->setUniformF("respawnParticles", (systemLife == -1.0 || systemLife > lifeMax) ? 1.0 : 0.0);
         currentShaderProgram->setUniformF("animationFactor", animationFactor);
         currentShaderProgram->setUniformF("lifeMin", lifeMin);
         currentShaderProgram->setUniformF("lifeRange", lifeMax-lifeMin);
         currentShaderProgram->setUniformVec3("posMin", posMin+position);
         currentShaderProgram->setUniformVec3("posRange", posMax-posMin);
         currentShaderProgram->setUniformVec3("dirMin", dirMin);
-        currentShaderProgram->setUniformVec3("systemPosition", position);
+        currentShaderProgram->setUniformVec3("dirRange", dirMax-dirMin);
         currentShaderProgram->setUniformVec3("velocityAdd", force*animationFactor);
         
         glBindBuffer(GL_ARRAY_BUFFER, particlesVBO[activeVBO]);
@@ -131,7 +125,7 @@ void ParticleSystem::draw() {
         currentShaderProgram->setUniformF("lightEmission", 0.0);
     currentShaderProgram->setUniformF("lifeMin", lifeMin);
     
-    if(particleQuality == 1) {
+    if(particleCalcTarget == 1) {
         unsigned int index;
         float* vertices = new float[4*particlesCount];
         for(unsigned int p = 0; p < particlesCount; p ++) {
@@ -142,7 +136,7 @@ void ParticleSystem::draw() {
             vertices[index+3] = particles[p].life;
         }
         currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 4, 4*sizeof(float), vertices);
-    }else if(particleQuality == 2) {
+    }else if(particleCalcTarget == 2) {
         glBindBuffer(GL_ARRAY_BUFFER, particlesVBO[activeVBO]);
         currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 4, 7*sizeof(float), 0);
     }
@@ -160,15 +154,15 @@ ParticleSystemManager::~ParticleSystemManager() {
 }
 
 void ParticleSystemManager::calculate() {
-    if(particleQuality == 2) glEnable(GL_RASTERIZER_DISCARD_EXT);
+    if(particleCalcTarget == 2) glEnable(GL_RASTERIZER_DISCARD_EXT);
     for(unsigned int p = 0; p < particleSystems.size(); p ++)
         if(particleSystems[p]->calculate())
             p --;
-    if(particleQuality == 2) glDisable(GL_RASTERIZER_DISCARD_EXT);
+    if(particleCalcTarget == 2) glDisable(GL_RASTERIZER_DISCARD_EXT);
 }
 
 void ParticleSystemManager::draw() {
-    if(lightManager.currentShadowLight || particleQuality == 0) return;
+    if(lightManager.currentShadowLight || particleCalcTarget == 0) return;
     modelMat.setIdentity();
     shaderPrograms[particleDrawSP]->use();
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);

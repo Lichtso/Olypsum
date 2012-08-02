@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "FileManager.h"
+#import "Menu.h"
 
 GUIImage::GUIImage() {
     texture = NULL;

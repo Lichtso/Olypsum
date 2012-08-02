@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "Light.h"
+#import "ParticleSystem.h"
 
 #ifndef Localization_h
 #define Localization_h
@@ -14,9 +14,9 @@
 class Localization {
     public:
     std::map<std::string, std::string> strings;
-    std::string title;
-    std::vector<std::string> getLocalizableLanguages();
-    bool loadLocalization(const char* filePath);
+    std::string selected, title;
+    bool getLocalizableLanguages(std::vector<std::string>& languages);
+    bool loadLocalization(std::string filePath);
     const char* localizeString(const char* key);
 };
 

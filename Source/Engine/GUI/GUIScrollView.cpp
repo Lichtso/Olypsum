@@ -149,11 +149,11 @@ bool GUIScrollView::handleMouseDown(int mouseX, int mouseY) {
     return false;
 }
 
-void GUIScrollView::handleMouseUp(int mouseX, int mouseY) {
+bool GUIScrollView::handleMouseUp(int mouseX, int mouseY) {
     mouseDragPosX = (scrollWidth > width && (!hideSliderX || (mouseX >= -width && mouseX <= width && mouseY >= -height && mouseY <= 18-height))) ? -1 : -2;
     mouseDragPosY = (scrollHeight > height && (!hideSliderY || (mouseX >= width-18 && mouseX <= width && mouseY >= -height && mouseY <= height))) ? -1 : -2;
     
-    GUIView::handleMouseUp(mouseX+scrollPosX, mouseY-scrollPosY);
+    return GUIView::handleMouseUp(mouseX+scrollPosX, mouseY-scrollPosY);
 }
 
 void GUIScrollView::handleMouseMove(int mouseX, int mouseY) {

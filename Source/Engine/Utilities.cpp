@@ -8,10 +8,19 @@
 
 #import "Utilities.h"
 
-char* parseXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const char* filePath, unsigned int& fileSize) {
-    FILE* fp = fopen(filePath, "r");
+void createDir(std::string path) {
+    DIR* dir = opendir(path.c_str());
+    if(dir)
+        closedir(dir);
+    else
+        mkdir(path.c_str(), S_IRWXU | S_IRWXG);
+}
+
+char* readXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string filePath, unsigned int& fileSize, bool logs) {
+    FILE* fp = fopen(filePath.c_str(), "r");
     if(!fp) {
-        printf("The file %s couldn't be found.", filePath);
+        if(!logs) return NULL;
+        printf("The file %s couldn't be found.", filePath.c_str());
         return NULL;
     }
     
@@ -22,9 +31,18 @@ char* parseXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const char* fil
 	fread(data, 1, fileSize, fp);
     fclose(fp);
     data[fileSize] = 0;
-    
     doc.parse<0>(data);
+    
     return data;
+}
+
+bool writeXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string filePath) {
+    std::ofstream outfile;
+    outfile.open(filePath.c_str(), std::ios_base::trunc);
+    outfile << doc;
+    outfile.close();
+    doc.clear();
+    return true;
 }
 
 void msleep(unsigned long microsec) {

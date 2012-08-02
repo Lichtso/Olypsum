@@ -100,7 +100,7 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::v
     return true;
 }
 
-bool ShaderProgram::loadShaderProgram(const char* fileName, std::vector<GLenum> shaderTypes, std::vector<const char*>* macros) {
+bool ShaderProgram::loadShaderProgram(const char* fileName, std::vector<GLenum> shaderTypes, std::vector<const char*> macros) {
     std::string url("Shaders/");
     url += fileName;
     url += ".glsl";
@@ -123,10 +123,10 @@ bool ShaderProgram::loadShaderProgram(const char* fileName, std::vector<GLenum> 
         char* seperator = strstr(dataPos, seperatorString);
         if(seperator) {
             *seperator = 0;
-            loadShader(shaderType, dataPos, macros);
+            loadShader(shaderType, dataPos, &macros);
             dataPos = seperator+strlen(seperatorString);
         }else
-            loadShader(shaderType, dataPos, macros);
+            loadShader(shaderType, dataPos, &macros);
     }
     
     return true;
@@ -259,26 +259,48 @@ ShaderProgram& ShaderProgram::operator=(const ShaderProgram &b) {
 
 Matrix4 modelMat;
 ShaderProgram *shaderPrograms[], *currentShaderProgram;
-bool edgeSmoothEnabled = false, fullScreenEnabled = false, cubeShadowsEnabled = false;
-unsigned char depthOfFieldQuality = 0, bumpMappingQuality = 1, shadowQuality = 1, ssaoQuality = 0, particleQuality = 2;
+float screenBlurFactor = -1.0;
+bool edgeSmoothEnabled = false, fullScreenEnabled = false, cubemapsEnabled = false;
+unsigned char depthOfFieldQuality = 0, bumpMappingQuality = 1, shadowQuality = 1, ssaoQuality = 0, particleCalcTarget = 2;
 
-void loadShaderPrograms() {
-    for(unsigned int p = 0; p < sizeof(shaderPrograms)/sizeof(ShaderProgram*); p ++) {
+void loadStaticShaderPrograms() {
+    std::vector<GLenum> shaderTypeVertexFragment = { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER };
+    
+    for(unsigned int p = 0; p < sizeof(shaderPrograms)/sizeof(ShaderProgram*); p ++)
+        shaderPrograms[p] = (p <= colorSP) ? new ShaderProgram() : NULL;
+    
+    shaderPrograms[normalMapGenSP]->loadShaderProgram("preProcessing", shaderTypeVertexFragment, { "PROCESSING_TYPE 1" });
+    shaderPrograms[normalMapGenSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[normalMapGenSP]->link();
+    
+    shaderPrograms[blurSP]->loadShaderProgram("preProcessing", shaderTypeVertexFragment, { "PROCESSING_TYPE 2" });
+    shaderPrograms[blurSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[blurSP]->link();
+    
+    shaderPrograms[spotShadowCircleLightSP]->loadShaderProgram("preProcessing", shaderTypeVertexFragment, { "PROCESSING_TYPE 3" });
+    shaderPrograms[spotShadowCircleLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[spotShadowCircleLightSP]->link();
+    
+    shaderPrograms[spriteSP]->loadShaderProgram("postProcessing", shaderTypeVertexFragment, { "PROCESSING_TYPE 3" });
+    shaderPrograms[spriteSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[spriteSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
+    shaderPrograms[spriteSP]->link();
+    
+    shaderPrograms[colorSP]->loadShaderProgram("postProcessing", shaderTypeVertexFragment, { "PROCESSING_TYPE 4" });
+    shaderPrograms[colorSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[colorSP]->addAttribute(COLOR_ATTRIBUTE, "color");
+    shaderPrograms[colorSP]->link();
+}
+
+void loadDynamicShaderPrograms() {
+    for(unsigned int p = colorSP; p < sizeof(shaderPrograms)/sizeof(ShaderProgram*); p ++) {
         if(shaderPrograms[p]) delete shaderPrograms[p];
         shaderPrograms[p] = new ShaderProgram();
     }
     
-    std::vector<GLenum> shaderTypeVertex;
-    shaderTypeVertex.push_back(GL_VERTEX_SHADER);
-    
-    std::vector<GLenum> shaderTypeVertexFragment;
-    shaderTypeVertexFragment.push_back(GL_VERTEX_SHADER);
-    shaderTypeVertexFragment.push_back(GL_FRAGMENT_SHADER);
-    
-    std::vector<GLenum> shaderTypeVertexFragmentGeometry;
-    shaderTypeVertexFragmentGeometry.push_back(GL_VERTEX_SHADER);
-    shaderTypeVertexFragmentGeometry.push_back(GL_FRAGMENT_SHADER);
-    shaderTypeVertexFragmentGeometry.push_back(GL_GEOMETRY_SHADER_EXT);
+    std::vector<GLenum> shaderTypeVertex = { GL_VERTEX_SHADER };
+    std::vector<GLenum> shaderTypeVertexFragment = { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER };
+    std::vector<GLenum> shaderTypeVertexFragmentGeometry = { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER_EXT };
     
     std::vector<const char*> shaderProgramMacros;
     char depthOfFieldMacro[32], ssaoQualityMacro[32], bumpMappingMacro[32], shadowQualityMacro[32];
@@ -287,48 +309,30 @@ void loadShaderPrograms() {
     sprintf(bumpMappingMacro, "BUMP_MAPPING %d", min(bumpMappingQuality, (unsigned char) 2));
     sprintf(shadowQualityMacro, "SHADOW_QUALITY %d", shadowQuality);
     
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("SKELETAL_ANIMATION 0");
-    shaderProgramMacros.push_back("BUMP_MAPPING 0");
-    
-    shaderPrograms[solidGeometrySP]->loadShaderProgram("gBuffer", shaderTypeVertexFragment, &shaderProgramMacros);
+    shaderPrograms[solidGeometrySP]->loadShaderProgram("gBuffer", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 0", "BUMP_MAPPING 0" });
     shaderPrograms[solidGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[solidGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[solidGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
     shaderPrograms[solidGeometrySP]->link();
     
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("SKELETAL_ANIMATION 0");
-    if(bumpMappingQuality == 3)
-        shaderProgramMacros.push_back("BUMP_MAPPING 3");
-    else
-        shaderProgramMacros.push_back(bumpMappingMacro);
-    shaderPrograms[solidBumpGeometrySP]->loadShaderProgram("gBuffer", (bumpMappingQuality) ? shaderTypeVertexFragmentGeometry : shaderTypeVertexFragment, &shaderProgramMacros);
+    shaderPrograms[solidBumpGeometrySP]->loadShaderProgram("gBuffer", (bumpMappingQuality) ? shaderTypeVertexFragmentGeometry : shaderTypeVertexFragment,
+                                                           { "SKELETAL_ANIMATION 0", bumpMappingMacro });
     shaderPrograms[solidBumpGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[solidBumpGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[solidBumpGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
     shaderPrograms[solidBumpGeometrySP]->link();
     
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("LIGHT_TYPE 0");
-    shaderProgramMacros.push_back("SKELETAL_ANIMATION 0");
-    shaderPrograms[solidShadowSP]->loadShaderProgram("shadow", shaderTypeVertexFragment, &shaderProgramMacros);
+    shaderPrograms[solidShadowSP]->loadShaderProgram("shadow", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 0", "LIGHT_TYPE 0" });
     shaderPrograms[solidShadowSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[solidShadowSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[solidShadowSP]->link();
     
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("LIGHT_TYPE 2");
-    shaderProgramMacros.push_back("SKELETAL_ANIMATION 0");
-    shaderPrograms[solidParabolidShadowSP]->loadShaderProgram("shadow", shaderTypeVertexFragment, &shaderProgramMacros);
+    shaderPrograms[solidParabolidShadowSP]->loadShaderProgram("shadow", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 0", "LIGHT_TYPE 2" });
     shaderPrograms[solidParabolidShadowSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[solidParabolidShadowSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[solidParabolidShadowSP]->link();
     
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("SKELETAL_ANIMATION 1");
-    shaderProgramMacros.push_back("BUMP_MAPPING 0");
-    shaderPrograms[skeletalGeometrySP]->loadShaderProgram("gBuffer", shaderTypeVertexFragment, &shaderProgramMacros);
+    shaderPrograms[skeletalGeometrySP]->loadShaderProgram("gBuffer", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 1", "BUMP_MAPPING 0" });
     shaderPrograms[skeletalGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[skeletalGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[skeletalGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
@@ -336,10 +340,8 @@ void loadShaderPrograms() {
     shaderPrograms[skeletalGeometrySP]->addAttribute(JOINT_ATTRIBUTE, "joints");
     shaderPrograms[skeletalGeometrySP]->link();
     
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("SKELETAL_ANIMATION 1");
-    shaderProgramMacros.push_back(bumpMappingMacro);
-    shaderPrograms[skeletalBumpGeometrySP]->loadShaderProgram("gBuffer", (bumpMappingQuality) ? shaderTypeVertexFragmentGeometry : shaderTypeVertexFragment, &shaderProgramMacros);
+    shaderPrograms[skeletalBumpGeometrySP]->loadShaderProgram("gBuffer", (bumpMappingQuality) ? shaderTypeVertexFragmentGeometry : shaderTypeVertexFragment,
+                                                           { "SKELETAL_ANIMATION 1", (bumpMappingQuality > 2) ? "BUMP_MAPPING 2" : bumpMappingMacro });
     shaderPrograms[skeletalBumpGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[skeletalBumpGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[skeletalBumpGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
@@ -347,109 +349,53 @@ void loadShaderPrograms() {
     shaderPrograms[skeletalBumpGeometrySP]->addAttribute(JOINT_ATTRIBUTE, "joints");
     shaderPrograms[skeletalBumpGeometrySP]->link();
     
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("LIGHT_TYPE 0");
-    shaderProgramMacros.push_back("SKELETAL_ANIMATION 1");
-    shaderPrograms[skeletalShadowSP]->loadShaderProgram("shadow", shaderTypeVertexFragment, &shaderProgramMacros);
+    shaderPrograms[skeletalShadowSP]->loadShaderProgram("shadow", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 1", "LIGHT_TYPE 0" });
     shaderPrograms[skeletalShadowSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[skeletalShadowSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[skeletalShadowSP]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
     shaderPrograms[skeletalShadowSP]->addAttribute(JOINT_ATTRIBUTE, "joints");
     shaderPrograms[skeletalShadowSP]->link();
     
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("LIGHT_TYPE 2");
-    shaderProgramMacros.push_back("SKELETAL_ANIMATION 1");
-    shaderPrograms[skeletalParabolidShadowSP]->loadShaderProgram("shadow", shaderTypeVertexFragment, &shaderProgramMacros);
+    shaderPrograms[skeletalParabolidShadowSP]->loadShaderProgram("shadow", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 1", "LIGHT_TYPE 2" });
     shaderPrograms[skeletalParabolidShadowSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[skeletalParabolidShadowSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[skeletalParabolidShadowSP]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
     shaderPrograms[skeletalParabolidShadowSP]->addAttribute(JOINT_ATTRIBUTE, "joints");
     shaderPrograms[skeletalParabolidShadowSP]->link();
     
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("LIGHT_TYPE 1");
-    shaderProgramMacros.push_back("SHADOWS_ACTIVE 0");
-    shaderProgramMacros.push_back("SHADOW_QUALITY 0");
-    shaderPrograms[directionalLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, &shaderProgramMacros);
+    shaderPrograms[directionalLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, { "LIGHT_TYPE 1", "SHADOWS_ACTIVE 0", "SHADOW_QUALITY 0" });
     shaderPrograms[directionalLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[directionalLightSP]->link();
     
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("LIGHT_TYPE 1");
-    shaderProgramMacros.push_back("SHADOWS_ACTIVE 1");
-    shaderProgramMacros.push_back(shadowQualityMacro);
-    shaderPrograms[directionalShadowLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, &shaderProgramMacros);
+    shaderPrograms[directionalShadowLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, { "LIGHT_TYPE 1", "SHADOWS_ACTIVE 1", shadowQualityMacro });
     shaderPrograms[directionalShadowLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[directionalShadowLightSP]->link();
     
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("LIGHT_TYPE 2");
-    shaderProgramMacros.push_back("SHADOWS_ACTIVE 0");
-    shaderProgramMacros.push_back("SHADOW_QUALITY 0");
-    shaderPrograms[spotLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, &shaderProgramMacros);
+    shaderPrograms[spotLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, { "LIGHT_TYPE 2", "SHADOWS_ACTIVE 0", "SHADOW_QUALITY 0" });
     shaderPrograms[spotLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[spotLightSP]->link();
     
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("LIGHT_TYPE 2");
-    shaderProgramMacros.push_back("SHADOWS_ACTIVE 1");
-    shaderProgramMacros.push_back(shadowQualityMacro);
-    shaderPrograms[spotShadowLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, &shaderProgramMacros);
+    shaderPrograms[spotShadowLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, { "LIGHT_TYPE 2", "SHADOWS_ACTIVE 1", shadowQualityMacro });
     shaderPrograms[spotShadowLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[spotShadowLightSP]->link();
     
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("PROCESSING_TYPE 3");
-    shaderPrograms[spotShadowCircleLightSP]->loadShaderProgram("preProcessing", shaderTypeVertexFragment, &shaderProgramMacros);
-    shaderPrograms[spotShadowCircleLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[spotShadowCircleLightSP]->link();
-    
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("LIGHT_TYPE 3");
-    shaderProgramMacros.push_back("SHADOWS_ACTIVE 0");
-    shaderProgramMacros.push_back("SHADOW_QUALITY 0");
-    shaderPrograms[positionalLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, &shaderProgramMacros);
+    shaderPrograms[positionalLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, { "LIGHT_TYPE 3", "SHADOWS_ACTIVE 0", "SHADOW_QUALITY 0" });
     shaderPrograms[positionalLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[positionalLightSP]->link();
     
-    if(cubeShadowsEnabled) {
-        shaderProgramMacros.clear();
-        shaderProgramMacros.push_back("LIGHT_TYPE 3");
-        shaderProgramMacros.push_back("SHADOWS_ACTIVE 3");
-        shaderProgramMacros.push_back(shadowQualityMacro);
-        shaderPrograms[positionalShadowLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, &shaderProgramMacros);
+    if(cubemapsEnabled) {
+        shaderPrograms[positionalShadowLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, { "LIGHT_TYPE 3", "SHADOWS_ACTIVE 3", shadowQualityMacro });
         shaderPrograms[positionalShadowLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[positionalShadowLightSP]->link();
     }else{
-        shaderProgramMacros.clear();
-        shaderProgramMacros.push_back("LIGHT_TYPE 3");
-        shaderProgramMacros.push_back("SHADOWS_ACTIVE 1");
-        shaderProgramMacros.push_back(shadowQualityMacro);
-        shaderPrograms[positionalShadowLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, &shaderProgramMacros);
+        shaderPrograms[positionalShadowLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, { "LIGHT_TYPE 3", "SHADOWS_ACTIVE 1", shadowQualityMacro });
         shaderPrograms[positionalShadowLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[positionalShadowLightSP]->link();
         
-        shaderProgramMacros.clear();
-        shaderProgramMacros.push_back("LIGHT_TYPE 3");
-        shaderProgramMacros.push_back("SHADOWS_ACTIVE 2");
-        shaderProgramMacros.push_back(shadowQualityMacro);
-        shaderPrograms[positionalShadowDualLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, &shaderProgramMacros);
+        shaderPrograms[positionalShadowDualLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, { "LIGHT_TYPE 3", "SHADOWS_ACTIVE 2", shadowQualityMacro });
         shaderPrograms[positionalShadowDualLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[positionalShadowDualLightSP]->link();
     }
-    
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("PROCESSING_TYPE 1");
-    shaderPrograms[normalMapGenSP]->loadShaderProgram("preProcessing", shaderTypeVertexFragment, &shaderProgramMacros);
-    shaderPrograms[normalMapGenSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[normalMapGenSP]->link();
-    
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("PROCESSING_TYPE 2");
-    shaderPrograms[blurSP]->loadShaderProgram("preProcessing", shaderTypeVertexFragment, &shaderProgramMacros);
-    shaderPrograms[blurSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[blurSP]->link();
     
     if(ssaoQuality) {
         unsigned char samples = 32;
@@ -464,66 +410,59 @@ void loadShaderPrograms() {
             pSphere[i*2+1] = vec.y;
         }
         
-        shaderProgramMacros.clear();
-        shaderProgramMacros.push_back(ssaoQualityMacro);
-        shaderPrograms[ssaoSP]->loadShaderProgram("ssao", shaderTypeVertexFragment, &shaderProgramMacros);
+        shaderPrograms[ssaoSP]->loadShaderProgram("ssao", shaderTypeVertexFragment, { ssaoQualityMacro });
         shaderPrograms[ssaoSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[ssaoSP]->link();
         shaderPrograms[ssaoSP]->use();
         glUniform2fv(glGetUniformLocation(shaderPrograms[ssaoSP]->GLname, "pSphere"), samples, pSphere);
     }
     
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back(ssaoQualityMacro);
-    shaderPrograms[deferredCombineSP]->loadShaderProgram("deferredShader", shaderTypeVertexFragment, &shaderProgramMacros);
+    shaderPrograms[deferredCombineSP]->loadShaderProgram("deferredShader", shaderTypeVertexFragment, { ssaoQualityMacro });
     shaderPrograms[deferredCombineSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[deferredCombineSP]->link();
     
     if(edgeSmoothEnabled) {
-        shaderProgramMacros.clear();
-        shaderProgramMacros.push_back("PROCESSING_TYPE 1");
-        shaderPrograms[edgeSmoothSP]->loadShaderProgram("postProcessing", shaderTypeVertexFragment, &shaderProgramMacros);
+        shaderPrograms[edgeSmoothSP]->loadShaderProgram("postProcessing", shaderTypeVertexFragment, { "PROCESSING_TYPE 1" });
         shaderPrograms[edgeSmoothSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[edgeSmoothSP]->link();
     }
     
     if(depthOfFieldQuality) {
-        shaderProgramMacros.clear();
-        shaderProgramMacros.push_back("PROCESSING_TYPE 2");
-        shaderProgramMacros.push_back(depthOfFieldMacro);
-        shaderPrograms[depthOfFieldSP]->loadShaderProgram("postProcessing", shaderTypeVertexFragment, &shaderProgramMacros);
+        shaderPrograms[depthOfFieldSP]->loadShaderProgram("postProcessing", shaderTypeVertexFragment, { "PROCESSING_TYPE 2" });
         shaderPrograms[depthOfFieldSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[depthOfFieldSP]->link();
     }
     
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("PROCESSING_TYPE 3");
-    shaderPrograms[spriteSP]->loadShaderProgram("postProcessing", shaderTypeVertexFragment, &shaderProgramMacros);
-    shaderPrograms[spriteSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[spriteSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shaderPrograms[spriteSP]->link();
-    
-    shaderProgramMacros.clear();
-    shaderProgramMacros.push_back("PROCESSING_TYPE 4");
-    shaderPrograms[colorSP]->loadShaderProgram("postProcessing", shaderTypeVertexFragment, &shaderProgramMacros);
-    shaderPrograms[colorSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[colorSP]->addAttribute(COLOR_ATTRIBUTE, "color");
-    shaderPrograms[colorSP]->link();
-    
-    if(particleQuality > 0) {
-        shaderProgramMacros.clear();
-        shaderPrograms[particleDrawSP]->loadShaderProgram("particle", shaderTypeVertexFragment, &shaderProgramMacros);
+    if(particleCalcTarget > 0) {
+        shaderPrograms[particleDrawSP]->loadShaderProgram("particle", shaderTypeVertexFragment, { });
         shaderPrograms[particleDrawSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[particleDrawSP]->link();
         
-        if(particleQuality == 2) {
+        if(particleCalcTarget == 2) {
             const char* varyings[] = { "vPosition", "vVelocity" };
-            shaderProgramMacros.clear();
-            shaderPrograms[particleCalculateSP]->loadShaderProgram("particleCalc", shaderTypeVertex, &shaderProgramMacros);
+            shaderPrograms[particleCalculateSP]->loadShaderProgram("particleCalc", shaderTypeVertex, { });
             shaderPrograms[particleCalculateSP]->addAttribute(POSITION_ATTRIBUTE, "position");
             shaderPrograms[particleCalculateSP]->addAttribute(VELOCITY_ATTRIBUTE, "velocity");
             shaderPrograms[particleCalculateSP]->setTransformFeedbackVaryings(2, varyings);
             shaderPrograms[particleCalculateSP]->link();
         }
     }
+    
+    shaderPrograms[glassGeometrySP]->loadShaderProgram("transparent", shaderTypeVertexFragment, { "BUMP_MAPPING 0" });
+    shaderPrograms[glassGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[glassGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
+    shaderPrograms[glassGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
+    shaderPrograms[glassGeometrySP]->link();
+    
+    shaderPrograms[glassBumpGeometrySP]->loadShaderProgram("transparent", (bumpMappingQuality) ? shaderTypeVertexFragmentGeometry : shaderTypeVertexFragment, { bumpMappingMacro });
+    shaderPrograms[glassBumpGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[glassBumpGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
+    shaderPrograms[glassBumpGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
+    shaderPrograms[glassBumpGeometrySP]->link();
+    
+    shaderPrograms[waterSP]->loadShaderProgram("transparent", shaderTypeVertexFragmentGeometry, { "BUMP_MAPPING 2" });
+    shaderPrograms[waterSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[waterSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
+    shaderPrograms[waterSP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
+    shaderPrograms[waterSP]->link();
 }

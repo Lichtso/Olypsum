@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "Cam.h"
+#import "FileManager.h"
 
 #ifndef Light_h
 #define Light_h

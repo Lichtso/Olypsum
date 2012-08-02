@@ -42,12 +42,13 @@ bool GUICheckBox::handleMouseDown(int mouseX, int mouseY) {
     return true;
 }
 
-void GUICheckBox::handleMouseUp(int mouseX, int mouseY) {
-    if(!visible || state == GUIButtonStateDisabled || state == GUIButtonStatePressed) return;
-    if(mouseX < -width || mouseX > width || mouseY < -height || mouseY > height)
+bool GUICheckBox::handleMouseUp(int mouseX, int mouseY) {
+    if(!visible || state == GUIButtonStateDisabled || state == GUIButtonStatePressed) return false;
+    if(mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) {
         state = GUIButtonStateNormal;
-    else return;
-    updateContent();
+        updateContent();
+    }
+    return false;
 }
 
 void GUICheckBox::handleMouseMove(int mouseX, int mouseY) {

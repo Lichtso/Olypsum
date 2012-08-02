@@ -10,6 +10,7 @@
 		1118251B14F2553A00F198A7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118251A14F2553A00F198A7 /* Cocoa.framework */; };
 		1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254114F2559600F198A7 /* OpenGL.framework */; };
 		1118254414F2559B00F198A7 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254314F2559B00F198A7 /* OpenAL.framework */; };
+		1130ECBB15BC1CA600203C2E /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1130ECBA15BC1CA600203C2E /* Menu.cpp */; };
 		11648F6E153DEE63004CA74D /* FBO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11648F6D153DEE63004CA74D /* FBO.cpp */; };
 		118B60621573E2E8004C132E /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118B60611573E2E8004C132E /* Audio.cpp */; };
 		11A5C2C915752306002991E5 /* Vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11A5C2C815752306002991E5 /* Vorbis.framework */; };
@@ -46,11 +47,8 @@
 		11A79B8A153C2FE9002B9F0A /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B66153C2FE9002B9F0A /* Texture.cpp */; };
 		11A79B8B153C2FE9002B9F0A /* Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B68153C2FE9002B9F0A /* Utilities.cpp */; };
 		11A79BC9153C35CE002B9F0A /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = 11A79BC3153C35CA002B9F0A /* Fonts */; };
-		11A79BCA153C35CE002B9F0A /* Languages in Resources */ = {isa = PBXBuildFile; fileRef = 11A79BC4153C35CB002B9F0A /* Languages */; };
-		11A79BCB153C35CE002B9F0A /* Models in Resources */ = {isa = PBXBuildFile; fileRef = 11A79BC5153C35CB002B9F0A /* Models */; };
 		11A79BCC153C35CE002B9F0A /* Shaders in Resources */ = {isa = PBXBuildFile; fileRef = 11A79BC6153C35CC002B9F0A /* Shaders */; };
-		11A79BCD153C35CE002B9F0A /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = 11A79BC7153C35CD002B9F0A /* Sounds */; };
-		11A79BCE153C35CE002B9F0A /* Textures in Resources */ = {isa = PBXBuildFile; fileRef = 11A79BC8153C35CD002B9F0A /* Textures */; };
+		11B9A9F115C4491D005A1766 /* Packages in Resources */ = {isa = PBXBuildFile; fileRef = 11B9A9F015C4491D005A1766 /* Packages */; };
 		11BD39AD15414AA6007846B8 /* Light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11BD39AC15414AA6007846B8 /* Light.cpp */; };
 		11BD39B01541725F007846B8 /* Game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11BD39AF1541725F007846B8 /* Game.cpp */; };
 		11F1EEB8156FE49400F7275D /* ParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11F1EEB7156FE49400F7275D /* ParticleSystem.cpp */; };
@@ -75,6 +73,7 @@
 		1118251F14F2553A00F198A7 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1118254114F2559600F198A7 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		1118254314F2559B00F198A7 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
+		1130ECBA15BC1CA600203C2E /* Menu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Menu.cpp; sourceTree = "<group>"; };
 		11648F6B153DEE0F004CA74D /* FBO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FBO.h; sourceTree = "<group>"; };
 		11648F6D153DEE63004CA74D /* FBO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FBO.cpp; sourceTree = "<group>"; };
 		118B60601573E2DF004C132E /* Audio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Audio.h; sourceTree = "<group>"; };
@@ -148,11 +147,9 @@
 		11A79B68153C2FE9002B9F0A /* Utilities.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utilities.cpp; sourceTree = "<group>"; };
 		11A79B69153C2FE9002B9F0A /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
 		11A79BC3153C35CA002B9F0A /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fonts; sourceTree = "<group>"; };
-		11A79BC4153C35CB002B9F0A /* Languages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Languages; sourceTree = "<group>"; };
-		11A79BC5153C35CB002B9F0A /* Models */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Models; sourceTree = "<group>"; };
 		11A79BC6153C35CC002B9F0A /* Shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Shaders; sourceTree = "<group>"; };
-		11A79BC7153C35CD002B9F0A /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sounds; sourceTree = "<group>"; };
-		11A79BC8153C35CD002B9F0A /* Textures */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Textures; sourceTree = "<group>"; };
+		11B9A9F015C4491D005A1766 /* Packages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Packages; sourceTree = "<group>"; };
+		11BB4D1E15BC818E0094A73B /* Menu.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Menu.h; sourceTree = "<group>"; };
 		11BD39AA15414A81007846B8 /* Light.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Light.h; sourceTree = "<group>"; };
 		11BD39AC15414AA6007846B8 /* Light.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Light.cpp; sourceTree = "<group>"; };
 		11BD39AE1541724A007846B8 /* Game.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Game.h; sourceTree = "<group>"; };
@@ -273,23 +270,25 @@
 				11648F6D153DEE63004CA74D /* FBO.cpp */,
 				11A79B23153C2FE9002B9F0A /* Cam.h */,
 				11A79B22153C2FE9002B9F0A /* Cam.cpp */,
-				11BD39AA15414A81007846B8 /* Light.h */,
-				11BD39AC15414AA6007846B8 /* Light.cpp */,
-				11A79B53153C2FE9002B9F0A /* Localization.h */,
-				11A79B52153C2FE9002B9F0A /* Localization.cpp */,
-				11A79B63153C2FE9002B9F0A /* ShaderProgram.h */,
-				11A79B62153C2FE9002B9F0A /* ShaderProgram.cpp */,
 				118B60601573E2DF004C132E /* Audio.h */,
 				118B60611573E2E8004C132E /* Audio.cpp */,
+				11A79B5C153C2FE9002B9F0A /* Model.h */,
+				11A79B5B153C2FE9002B9F0A /* Model.cpp */,
 				11F1EEB5156FE48B00F7275D /* ParticleSystem.h */,
 				11F1EEB7156FE49400F7275D /* ParticleSystem.cpp */,
+				11A79B53153C2FE9002B9F0A /* Localization.h */,
+				11A79B52153C2FE9002B9F0A /* Localization.cpp */,
+				11A79B25153C2FE9002B9F0A /* FileManager.h */,
+				11A79B24153C2FE9002B9F0A /* FileManager.cpp */,
+				11BD39AA15414A81007846B8 /* Light.h */,
+				11BD39AC15414AA6007846B8 /* Light.cpp */,
+				11A79B63153C2FE9002B9F0A /* ShaderProgram.h */,
+				11A79B62153C2FE9002B9F0A /* ShaderProgram.cpp */,
 				11A79B65153C2FE9002B9F0A /* TextFont.h */,
 				11A79B64153C2FE9002B9F0A /* TextFont.cpp */,
 				11A79B26153C2FE9002B9F0A /* GUI */,
-				11A79B5C153C2FE9002B9F0A /* Model.h */,
-				11A79B5B153C2FE9002B9F0A /* Model.cpp */,
-				11A79B25153C2FE9002B9F0A /* FileManager.h */,
-				11A79B24153C2FE9002B9F0A /* FileManager.cpp */,
+				11BB4D1E15BC818E0094A73B /* Menu.h */,
+				1130ECBA15BC1CA600203C2E /* Menu.cpp */,
 				11A79B21153C2FE9002B9F0A /* AppMain.h */,
 				11A79B20153C2FE9002B9F0A /* AppMain.cpp */,
 				11A79B54153C2FE9002B9F0A /* macCompCode */,
@@ -377,12 +376,9 @@
 		11A79BA4153C35BB002B9F0A /* Resoucres */ = {
 			isa = PBXGroup;
 			children = (
+				11B9A9F015C4491D005A1766 /* Packages */,
 				11A79BC3153C35CA002B9F0A /* Fonts */,
-				11A79BC4153C35CB002B9F0A /* Languages */,
-				11A79BC5153C35CB002B9F0A /* Models */,
 				11A79BC6153C35CC002B9F0A /* Shaders */,
-				11A79BC7153C35CD002B9F0A /* Sounds */,
-				11A79BC8153C35CD002B9F0A /* Textures */,
 			);
 			path = Resoucres;
 			sourceTree = "<group>";
@@ -413,7 +409,7 @@
 		1118250D14F2553900F198A7 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0430;
+				LastUpgradeCheck = 0450;
 			};
 			buildConfigurationList = 1118251014F2553900F198A7 /* Build configuration list for PBXProject "Olypsum" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -439,11 +435,8 @@
 			files = (
 				11A79B83153C2FE9002B9F0A /* MainMenu.xib in Resources */,
 				11A79BC9153C35CE002B9F0A /* Fonts in Resources */,
-				11A79BCA153C35CE002B9F0A /* Languages in Resources */,
-				11A79BCB153C35CE002B9F0A /* Models in Resources */,
 				11A79BCC153C35CE002B9F0A /* Shaders in Resources */,
-				11A79BCD153C35CE002B9F0A /* Sounds in Resources */,
-				11A79BCE153C35CE002B9F0A /* Textures in Resources */,
+				11B9A9F115C4491D005A1766 /* Packages in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -491,6 +484,7 @@
 				11FB30A3154453FC00D2B7EE /* InputController.cpp in Sources */,
 				11F1EEB8156FE49400F7275D /* ParticleSystem.cpp in Sources */,
 				118B60621573E2E8004C132E /* Audio.cpp in Sources */,
+				1130ECBB15BC1CA600203C2E /* Menu.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -575,6 +569,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
+				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = "/Library/Frameworks/**";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
@@ -595,6 +590,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
+				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = "/Library/Frameworks/**";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";

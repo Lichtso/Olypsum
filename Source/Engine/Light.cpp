@@ -279,7 +279,7 @@ PositionalLight::~PositionalLight() {
 }
 
 bool PositionalLight::calculateShadowmap() {
-    if(cubeShadowsEnabled) {
+    if(cubemapsEnabled) {
         if(!shadowMap) {
             shadowMap = mainFBO.addTexture(1024, true, true);
             if(!shadowMap) {
@@ -302,7 +302,7 @@ bool PositionalLight::calculateShadowmap() {
     glDisable(GL_BLEND);
     glClearColor(1, 1, 1, 1);
     Matrix4 viewMat;
-    if(cubeShadowsEnabled) {
+    if(cubemapsEnabled) {
         for(GLenum side = GL_TEXTURE_CUBE_MAP_POSITIVE_X; side <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; side ++) {
             shadowCam.camMat.setIdentity();
             switch(side) {
@@ -382,7 +382,7 @@ void PositionalLight::use() {
     }else
         shaderPrograms[positionalLightSP]->use();
     
-    if(cubeShadowsEnabled) {
+    if(cubemapsEnabled) {
         Matrix4 viewMat;
         viewMat.setIdentity();
         viewMat.setDirection(direction, upDir);
@@ -394,7 +394,7 @@ void PositionalLight::use() {
     currentShaderProgram->setUniformVec3("lPosition", position);
     Light::use();
     
-    if(!cubeShadowsEnabled && !omniDirectional) {
+    if(!cubemapsEnabled && !omniDirectional) {
         if(drawLightVolume(spotLightVertices, parabolidVerticesCount(sphereAccuracyX/2, parabolidAccuracyY/2))) {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightVolumeBuffers[4]);
             glBindBuffer(GL_ARRAY_BUFFER, lightVolumeBuffers[5]);
@@ -421,7 +421,7 @@ void PositionalLight::use() {
 }
 
 void PositionalLight::selectShaderProgram(bool skeletal) {
-    if(cubeShadowsEnabled) {
+    if(cubemapsEnabled) {
         if(skeletal)
             shaderPrograms[skeletalShadowSP]->use();
         else
@@ -555,16 +555,22 @@ void LightManager::useLights() {
     }
     
     shaderPrograms[deferredCombineSP]->use();
-    mainFBO.renderDeferred(true, inBuffersC, (ssaoQuality) ? 6 : 4, outBuffersC, (edgeSmoothEnabled || depthOfFieldQuality) ? 1 : 0);
+    mainFBO.renderDeferred(true, inBuffersC, (ssaoQuality) ? 6 : 4, outBuffersC, (edgeSmoothEnabled || depthOfFieldQuality || screenBlurFactor > 0.0) ? 1 : 0);
     
-    if(edgeSmoothEnabled) {
-        shaderPrograms[edgeSmoothSP]->use();
-        mainFBO.renderDeferred(true, inBuffersD, 2, outBuffersD, (depthOfFieldQuality) ? 1 : 0);
-    }
-    
-    if(depthOfFieldQuality) {
-        shaderPrograms[depthOfFieldSP]->use();
-        mainFBO.renderDeferred(true, inBuffersD, 2, outBuffersD, 0);
+    if(screenBlurFactor > 0.0) {
+        shaderPrograms[blurSP]->use();
+        currentShaderProgram->setUniformF("processingValue", screenBlurFactor);
+        mainFBO.renderDeferred(true, inBuffersC, 1, outBuffersC, 0);
+    }else{
+        if(edgeSmoothEnabled) {
+            shaderPrograms[edgeSmoothSP]->use();
+            mainFBO.renderDeferred(true, inBuffersD, 2, outBuffersD, (depthOfFieldQuality) ? 1 : 0);
+        }
+        
+        if(depthOfFieldQuality) {
+            shaderPrograms[depthOfFieldSP]->use();
+            mainFBO.renderDeferred(true, inBuffersD, 2, outBuffersD, 0);
+        }
     }
     
     glDisableVertexAttribArray(POSITION_ATTRIBUTE);

@@ -168,10 +168,6 @@ bool GUITextField::handleMouseDown(int mouseX, int mouseY) {
     return true;
 }
 
-void GUITextField::handleMouseUp(int mouseX, int mouseY) {
-    
-}
-
 void GUITextField::handleMouseMove(int mouseX, int mouseY) {
     if(!visible || !enabled) return;
     

@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "Audio.h"
+#import "Model.h"
 
 #ifndef ParticleSystem_h
 #define ParticleSystem_h
@@ -15,6 +15,8 @@ struct Particle {
     Vector3 pos, dir;
     float life;
 };
+
+class PositionalLight;
 
 class ParticleSystem {
     Particle* particles;
@@ -25,7 +27,7 @@ class ParticleSystem {
     public:
     PositionalLight* lightSource;
     Vector3 position, posMin, posMax, force, dirMin, dirMax;
-    float lifeMin, lifeMax, addMin, addMax, systemLife;
+    float lifeMin, lifeMax, systemLife;
     unsigned int maxParticles;
     Texture* texture;
     ParticleSystem(unsigned int maxParticles);

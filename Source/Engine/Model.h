@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "GUIImage.h"
+#import "Audio.h"
 
 #ifndef Model_h
 #define Model_h
@@ -27,6 +27,7 @@ class Mesh {
     public:
     GLuint vbo, ibo;
     unsigned int elementsCount;
+    bool transparent;
     int postions, texcoords, normals, weightJoints;
     Texture *diffuse, *effectMap, *heightMap;
     Mesh();

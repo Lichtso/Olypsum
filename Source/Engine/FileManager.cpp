@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "FileManager.h"
+#import "ShaderProgram.h"
 
-FilePackage::FilePackage(const char* nameB) {
-    if(nameB) name = nameB;
+FilePackage::FilePackage(std::string nameB) {
+    name = nameB;
 }
 
 FilePackage::~FilePackage() {
@@ -22,33 +22,32 @@ FilePackage::~FilePackage() {
     for(textureIterator = textures.begin(); textureIterator != textures.end(); textureIterator ++)
         delete textureIterator->second;
     textures.clear();
-    /*
+    
     std::map<std::string, SoundTrack*>::iterator soundTrackIterator;
     for(soundTrackIterator = soundTracks.begin(); soundTrackIterator != soundTracks.end(); soundTrackIterator ++)
         delete soundTrackIterator->second;
-    soundTracks.clear();*/
+    soundTracks.clear();
 }
 
 bool FilePackage::load() {
-    if(name.size() == 0) {
-        localization.loadLocalization("Languages/English.xml");
-        return true;
+    path = resourcesDir+"Packages/"+name+'/';
+    DIR* dir = opendir(path.c_str());
+    if(dir == 0) {
+        path = gameDataDir+"Packages/"+name+'/';
+        dir = opendir(path.c_str());
+        if(dir == 0) return false;
+        closedir(dir);
     }
+    closedir(dir);
     
-    std::string auxUrl, url = gameDataDir + "Packages/";
-    
-    //TODO: Load package info
-    auxUrl = url + "Languages/English.xml";
-    localization.loadLocalization(auxUrl.c_str());
-    
+    localization.strings.clear();
+    localization.loadLocalization(resourcesDir+"Packages/Default/Languages/"+localization.selected+".xml");
+    if(name != "Default") localization.loadLocalization(path+"Languages/"+localization.selected+".xml");
     return true;
 }
 
 std::string FilePackage::getUrlOfFile(const char* groupName, const char* fileName) {
-    std::string url;
-    if(name.size() > 0) url = gameDataDir + "Packages/";
-    url += std::string(groupName)+'/'+std::string(fileName);
-    return url;
+    return path+std::string(groupName)+'/'+std::string(fileName);
 }
 
 bool FilePackage::getTexture(Texture** texture, const char* fileName) {
@@ -156,14 +155,96 @@ FileManager::~FileManager() {
         delete iterator->second;
 }
 
-bool FileManager::loadPackage(const char* nameStr) {
-    FilePackage* package = new FilePackage(nameStr);
+static bool readOptionBool(rapidxml::xml_node<xmlUsedCharType>* option) {
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = option->first_attribute("value");
+    return strcmp(attribute->value(), "true") == 0;
+}
+
+static unsigned int readOptionUInt(rapidxml::xml_node<xmlUsedCharType>* option) {
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = option->first_attribute("value");
+    unsigned int value;
+    sscanf(attribute->value(), "%d", &value);
+    return value;
+}
+
+void FileManager::loadOptions() {
+    createDir(gameDataDir+"Saves/");
+    createDir(gameDataDir+"Packages/");
+    localization.selected = "English";
+    
+    rapidxml::xml_document<xmlUsedCharType> doc;
+    unsigned int fileSize;
+    char* fileData = readXmlFile(doc, gameDataDir+"Options.xml", fileSize, false);
+    if(fileData) {
+        rapidxml::xml_node<xmlUsedCharType>* options = doc.first_node("options");
+        if(strcmp(options->first_node("version")->first_attribute("value")->value(), VERSION) != 0) {
+            delete [] fileData;
+            saveOptions();
+            return;
+        }
+        localization.selected = options->first_node("language")->first_attribute("value")->value();
+        rapidxml::xml_node<xmlUsedCharType>* graphics = options->first_node("graphics");
+        screenBlurFactor = (readOptionBool(graphics->first_node("screenBlurEnabled"))) ? 0.0 : -1.0;
+        edgeSmoothEnabled = readOptionBool(graphics->first_node("edgeSmoothEnabled"));
+        fullScreenEnabled = readOptionBool(graphics->first_node("fullScreenEnabled"));
+        cubemapsEnabled = readOptionBool(graphics->first_node("cubemapsEnabled"));
+        depthOfFieldQuality = readOptionUInt(graphics->first_node("depthOfFieldQuality"));
+        bumpMappingQuality = readOptionUInt(graphics->first_node("bumpMappingQuality"));
+        shadowQuality = readOptionUInt(graphics->first_node("shadowQuality"));
+        ssaoQuality = readOptionUInt(graphics->first_node("ssaoQuality"));
+        particleCalcTarget = readOptionUInt(graphics->first_node("particleCalcTarget"));
+        delete [] fileData;
+    }else saveOptions();
+    
+    loadPackage("Default");
+}
+
+static void addOption(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* options, const char* name, const char* value) {
+    rapidxml::xml_node<xmlUsedCharType>* option = doc.allocate_node(rapidxml::node_element);
+    option->name(name);
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    attribute->name("value");
+    attribute->value(value);
+    option->append_attribute(attribute);
+    options->append_node(option);
+}
+
+void FileManager::saveOptions() {
+    rapidxml::xml_document<xmlUsedCharType> doc;
+    rapidxml::xml_node<xmlUsedCharType>* options = doc.allocate_node(rapidxml::node_element);
+    options->name("options");
+    doc.append_node(options);
+    addOption(doc, options, "version", VERSION);
+    addOption(doc, options, "language", localization.selected.c_str());
+    rapidxml::xml_node<xmlUsedCharType>* graphics = doc.allocate_node(rapidxml::node_element);
+    graphics->name("graphics");
+    options->append_node(graphics);
+    
+    char str[20];
+    addOption(doc, graphics, "screenBlurEnabled", (screenBlurFactor > -1.0) ? "true" : "false");
+    addOption(doc, graphics, "edgeSmoothEnabled", (edgeSmoothEnabled) ? "true" : "false");
+    addOption(doc, graphics, "fullScreenEnabled", (fullScreenEnabled) ? "true" : "false");
+    addOption(doc, graphics, "cubemapsEnabled", (cubemapsEnabled) ? "true" : "false");
+    sprintf(&str[0], "%d", depthOfFieldQuality);
+    addOption(doc, graphics, "depthOfFieldQuality", &str[0]);
+    sprintf(&str[4], "%d", bumpMappingQuality);
+    addOption(doc, graphics, "bumpMappingQuality", &str[4]);
+    sprintf(&str[8], "%d", shadowQuality);
+    addOption(doc, graphics, "shadowQuality", &str[8]);
+    sprintf(&str[12], "%d", ssaoQuality);
+    addOption(doc, graphics, "ssaoQuality", &str[12]);
+    sprintf(&str[16], "%d", particleCalcTarget);
+    addOption(doc, graphics, "particleCalcTarget", &str[16]);
+    
+    writeXmlFile(doc, gameDataDir+"Options.xml");
+}
+
+bool FileManager::loadPackage(const char* name) {
+    FilePackage* package = new FilePackage(name);
     if(!package->load()) {
         delete package;
         return false;
     }
-    std::string name;
-    if(nameStr) name = nameStr;
     filePackages[name] = package;
     return true;
 }

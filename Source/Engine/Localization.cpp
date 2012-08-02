@@ -8,15 +8,13 @@
 
 #include "Localization.h"
 
-std::string LanguagesDir("Languages/"), LanguagesExtension(".xml");
+std::string LanguagesDir("Packages/Default/Languages/"), LanguagesExtension(".xml");
 
-std::vector<std::string> Localization::getLocalizableLanguages() {
-    std::vector<std::string> languages;
-    
+bool Localization::getLocalizableLanguages(std::vector<std::string>& languages) {
     DIR* dp = opendir(LanguagesDir.c_str());
     if(dp == NULL) {
         printf("Error: Languages directory not found.\n");
-        return languages;
+        return false;
     }
     
     dirent* ep;
@@ -29,32 +27,22 @@ std::vector<std::string> Localization::getLocalizableLanguages() {
     }
     
     closedir(dp);
-    return languages;
+    return true;
 }
 
-bool Localization::loadLocalization(const char* filePath) {
+bool Localization::loadLocalization(std::string filePath) {
     rapidxml::xml_document<xmlUsedCharType> doc;
     unsigned int fileSize;
-    char* fileData = parseXmlFile(doc, filePath, fileSize);
+    char* fileData = readXmlFile(doc, filePath.c_str(), fileSize, false);
     if(!fileData) return false;
     
-    rapidxml::xml_node<xmlUsedCharType> *rootNode, *titleNode, *localizationNode, *entryNode;
+    rapidxml::xml_node<xmlUsedCharType> *titleNode, *localizationNode, *entryNode;
     rapidxml::xml_attribute<xmlUsedCharType> *entryKeyAttribute;
     
-    rootNode = doc.first_node("language");
-    if(!rootNode) goto endParsingXML;
+    titleNode = doc.first_node("title");
+    if(titleNode) title = titleNode->value();
     
-    titleNode = rootNode->first_node("title");
-    if(!titleNode) goto endParsingXML;
-    else {
-        std::string name(titleNode->value());
-        if(title.compare(name) > 0) {
-            strings.clear();
-            title = name;
-        }
-    }
-    
-    localizationNode = rootNode->first_node("localization");
+    localizationNode = doc.first_node("localization");
     if(!localizationNode) goto endParsingXML;
     
     entryNode = localizationNode->first_node("entry");

@@ -11,8 +11,7 @@
 GUILabel::GUILabel() {
     type = GUIType_Label;
     font = mainFont;
-    color.r = color.g = color.b = 0;
-    color.unused = 255;
+    color = GUIColor(0, 255);
     textAlign = GUITextAlign_Middle;
     sizeAlignment = GUISizeAlignment_All;
     fontHeight = 30;

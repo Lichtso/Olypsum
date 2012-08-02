@@ -22,9 +22,7 @@ class GUITextField : public GUIRect {
     int cursorIndexX;
     GUILabel* label;
     bool enabled;
-    void (*onFocus)(GUITextField*);
-    void (*onChange)(GUITextField*);
-    void (*onBlur)(GUITextField*);
+    std::function<void(GUITextField*)> onFocus, onChange, onBlur;
     GUITextField();
     ~GUITextField();
     void setFirstResponderStatus();
@@ -32,7 +30,6 @@ class GUITextField : public GUIRect {
     void updateContent();
     void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);
-    void handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
     bool handleKeyDown(SDL_keysym* key);
 };

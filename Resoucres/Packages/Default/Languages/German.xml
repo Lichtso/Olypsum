@@ -1,0 +1,29 @@
+<title>Deutsch</title>
+<localization>
+	<entry key="olypsum">Olypsum</entry>
+	<entry key="loading">Lade ...</entry>
+	<entry key="newGame">Neues Spiel</entry>
+	<entry key="loadGame">Lade Spiel</entry>
+	<entry key="options">Optionen</entry>
+	<entry key="credits">Kredite</entry>
+	<entry key="quitGame">Beenden</entry>
+	<entry key="back">Zurück</entry>
+	<entry key="graphics">Grafik</entry>
+	<entry key="language">Sprache</entry>
+	<entry key="selectedLanguage">Ausgewählt</entry>
+	<entry key="selectLanguage">Sprachen</entry>
+	<entry key="sound">Ton</entry>
+	<entry key="fullScreenEnabled">Vollbild</entry>
+	<entry key="edgeSmoothEnabled">Antialiasing</entry>
+	<entry key="cubemapsEnabled">Cubemaps</entry>
+	<entry key="screenBlurEnabled">Screen Blur</entry>
+	<entry key="depthOfFieldQuality">Tiefenunschärfe</entry>
+	<entry key="bumpMappingQuality">Oberflächen Qualität</entry>
+	<entry key="shadowQuality">Schatten Qualität</entry>
+	<entry key="ssaoQuality">SSAO Qualität</entry>
+	<entry key="particleCalcTarget">Partikel Systeme</entry>
+	<entry key="on">An</entry>
+	<entry key="off">Aus</entry>
+	<entry key="cpu">CPU</entry>
+	<entry key="gpu">GPU</entry>
+</localization>

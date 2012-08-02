@@ -234,6 +234,7 @@ bool FBO::generateNormalMap(Texture* heightMap, float processingValue) {
     glBindTexture(GL_TEXTURE_2D, normalMap);
     glGenerateMipmap(GL_TEXTURE_2D);
     heightMap->GLname = normalMap;
+    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
     
     return true;
 }

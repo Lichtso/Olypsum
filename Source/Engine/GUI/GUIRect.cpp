@@ -78,8 +78,8 @@ bool GUIRect::handleMouseDown(int mouseX, int mouseY) {
     return true;
 }
 
-void GUIRect::handleMouseUp(int mouseX, int mouseY) {
-    
+bool GUIRect::handleMouseUp(int mouseX, int mouseY) {
+    return false;
 }
 
 void GUIRect::handleMouseMove(int mouseX, int mouseY) {

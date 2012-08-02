@@ -219,8 +219,8 @@ bool GUIButton::handleMouseDown(int mouseX, int mouseY) {
     return true;
 }
 
-void GUIButton::handleMouseUp(int mouseX, int mouseY) {
-    if(!visible || state == GUIButtonStateDisabled) return;
+bool GUIButton::handleMouseUp(int mouseX, int mouseY) {
+    if(!visible || state == GUIButtonStateDisabled) return false;
     bool triggerEvent = false;
     if(mouseX < -width || mouseX > width || mouseY < -height || mouseY > height)
         state = GUIButtonStateNormal;
@@ -230,8 +230,11 @@ void GUIButton::handleMouseUp(int mouseX, int mouseY) {
         state = GUIButtonStateHighlighted;
     }
     updateContent();
-    if(triggerEvent && onClick)
+    if(triggerEvent && onClick) {
         onClick(this);
+        return true;
+    }
+    return false;
 }
 
 void GUIButton::handleMouseMove(int mouseX, int mouseY) {

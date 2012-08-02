@@ -171,8 +171,9 @@ bool GUISlider::handleMouseDown(int mouseX, int mouseY) {
     return true;
 }
 
-void GUISlider::handleMouseUp(int mouseX, int mouseY) {
+bool GUISlider::handleMouseUp(int mouseX, int mouseY) {
     mouseDragPos = -1;
+    return false;
 }
 
 void GUISlider::handleMouseMove(int mouseX, int mouseY) {

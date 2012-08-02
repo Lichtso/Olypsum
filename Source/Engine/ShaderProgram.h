@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Localization.h"
+#import "Light.h"
 #import <string.h>
 #import <stdio.h>
 
@@ -27,7 +27,7 @@ class ShaderProgram {
 	ShaderProgram();
 	~ShaderProgram();
 	bool loadShader(GLuint shaderType, const char* soucreCode, std::vector<const char*>* macros);
-    bool loadShaderProgram(const char* fileName, std::vector<GLenum> shaderTypes, std::vector<const char*>* macros);
+    bool loadShaderProgram(const char* fileName, std::vector<GLenum> shaderTypes, std::vector<const char*> macros);
     void addAttribute(unsigned int index, const char* attributeName);
 	void link();
 	void use();
@@ -46,39 +46,44 @@ class ShaderProgram {
 };
 
 extern Matrix4 modelMat;
-extern ShaderProgram *shaderPrograms[26], *currentShaderProgram;
-extern bool edgeSmoothEnabled, fullScreenEnabled, cubeShadowsEnabled;
-extern unsigned char depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, particleQuality;
+extern ShaderProgram *shaderPrograms[29], *currentShaderProgram;
+extern float screenBlurFactor;
+extern bool edgeSmoothEnabled, fullScreenEnabled, cubemapsEnabled;
+extern unsigned char depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, particleCalcTarget;
 
 enum ShaderProgramNames {
-    spriteSP = 0,
-    solidGeometrySP = 1,
-    solidBumpGeometrySP = 2,
-    solidShadowSP = 3,
-    solidParabolidShadowSP = 4,
-    skeletalGeometrySP = 5,
-    skeletalBumpGeometrySP = 6,
-    skeletalShadowSP = 7,
-    skeletalParabolidShadowSP = 8,
-    directionalLightSP = 9,
-    directionalShadowLightSP = 10,
-    spotLightSP = 11,
-    spotShadowLightSP = 12,
-    spotShadowCircleLightSP = 13,
-    positionalLightSP = 14,
-    positionalShadowLightSP = 15,
-    positionalShadowDualLightSP = 16,
-    normalMapGenSP = 17,
-    blurSP = 18,
-    ssaoSP = 19,
-    deferredCombineSP = 20,
-    edgeSmoothSP = 21,
-    depthOfFieldSP = 22,
-    colorSP = 23,
+    normalMapGenSP = 0,
+    blurSP = 1,
+    spotShadowCircleLightSP = 2,
+    spriteSP = 3,
+    colorSP = 4,
+    solidGeometrySP = 5,
+    solidBumpGeometrySP = 6,
+    solidShadowSP = 7,
+    solidParabolidShadowSP = 8,
+    skeletalGeometrySP = 9,
+    skeletalBumpGeometrySP = 10,
+    skeletalShadowSP = 11,
+    skeletalParabolidShadowSP = 12,
+    directionalLightSP = 13,
+    directionalShadowLightSP = 14,
+    spotLightSP = 15,
+    spotShadowLightSP = 16,
+    positionalLightSP = 17,
+    positionalShadowLightSP = 18,
+    positionalShadowDualLightSP = 19,
+    ssaoSP = 20,
+    deferredCombineSP = 21,
+    edgeSmoothSP = 22,
+    depthOfFieldSP = 23,
     particleDrawSP = 24,
-    particleCalculateSP = 25
+    particleCalculateSP = 25,
+    glassGeometrySP = 26,
+    glassBumpGeometrySP = 27,
+    waterSP = 28
 };
 
-void loadShaderPrograms();
+void loadStaticShaderPrograms();
+void loadDynamicShaderPrograms();
 
 #endif

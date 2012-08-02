@@ -14,21 +14,28 @@
 #import <SDL/SDL_thread.h>
 #import <SDL/SDL_mutex.h>
 #import <BulletDynamics/btBulletDynamicsCommon.h>
-#import <math.h>
-#import <time.h>
 #import <string>
-#import "rapidxml.hpp"
 #import <map>
 #import <vector>
+#import <iostream>
+#import <fstream>
+#import <math.h>
+#import <time.h>
 #import <dirent.h>
+#import <sys/stat.h>
+#import <sys/types.h>
+#import "rapidxml.hpp"
+#import "rapidxml_print.hpp"
 
 #ifndef Utilities_h
 #define Utilities_h
 
 #define xmlUsedCharType char
-#define ENGINE_NAME "Olypsum-Engine 0.0.1"
+#define VERSION "0.0.1"
 
-char* parseXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const char* filePath, unsigned int& fileSize);
+void createDir(std::string path);
+char* readXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string filePath, unsigned int& fileSize, bool logs);
+bool writeXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string filePath);
 void msleep(unsigned long milisec);
 
 template <class T> inline const T max(T a, T b) {

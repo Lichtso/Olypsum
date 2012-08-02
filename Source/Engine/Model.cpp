@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "FileManager.h"
+#import "Menu.h"
 #import "rapidxml_print.hpp"
 
 #define AXIS_X 0
@@ -18,6 +18,7 @@
 Mesh::Mesh() {
     elementsCount = 0;
     vbo = ibo = 0;
+    transparent = false;
     postions = texcoords = normals = weightJoints = -1;
     diffuse = effectMap = heightMap = NULL;
 }
@@ -53,6 +54,8 @@ void Mesh::draw(float discardDensity, Matrix4* mats, unsigned char matCount) {
         if(!lightManager.currentShadowLight) {
             if(matCount)
                 shaderPrograms[skeletalBumpGeometrySP]->use();
+            else if(transparent)
+                shaderPrograms[glassBumpGeometrySP]->use();
             else
                 shaderPrograms[solidBumpGeometrySP]->use();
         }
@@ -62,6 +65,8 @@ void Mesh::draw(float discardDensity, Matrix4* mats, unsigned char matCount) {
         if(!lightManager.currentShadowLight) {
             if(matCount)
                 shaderPrograms[skeletalGeometrySP]->use();
+            else if(transparent)
+                shaderPrograms[glassGeometrySP]->use();
             else
                 shaderPrograms[solidGeometrySP]->use();
         }
@@ -112,6 +117,7 @@ struct VertexReference {
 };
 
 struct Material {
+    bool transparent;
     std::string diffuseURL, effectMapURL, heightMapURL;
 };
 
@@ -184,7 +190,7 @@ static Matrix4 readTransform(rapidxml::xml_node<xmlUsedCharType>* dataNode) {
     return result;
 }
 
-static Bone* readBone(rapidxml::xml_document<xmlUsedCharType>* exportDoc, Skeleton& skeleton, Matrix4& deTransform, Matrix4& parentMat, rapidxml::xml_node<xmlUsedCharType>* dataNode) {
+static Bone* readBone(Skeleton& skeleton, Matrix4& deTransform, Matrix4& parentMat, rapidxml::xml_node<xmlUsedCharType>* dataNode) {
     rapidxml::xml_attribute<xmlUsedCharType> *typeAttribute, *sidAttribute = dataNode->first_attribute("sid");
     Bone *bone = new Bone;
     bone->name = sidAttribute->value();
@@ -195,7 +201,7 @@ static Bone* readBone(rapidxml::xml_document<xmlUsedCharType>* exportDoc, Skelet
         typeAttribute = childNode->first_attribute("type");
         sidAttribute = childNode->first_attribute("sid");
         if(!typeAttribute || !sidAttribute || strcmp(typeAttribute->value(), "JOINT") != 0) continue;
-        bone->children.push_back(readBone(exportDoc, skeleton, deTransform, bone->staticMat, childNode));
+        bone->children.push_back(readBone(skeleton, deTransform, bone->staticMat, childNode));
         childNode = childNode->next_sibling("node");
     }
     skeleton.bones[bone->name] = bone;
@@ -247,9 +253,9 @@ Model::~Model() {
 bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
     if(meshes.size() > 0) return false;
     
-    rapidxml::xml_document<xmlUsedCharType> doc, exportDoc;
+    rapidxml::xml_document<xmlUsedCharType> doc;
     unsigned int fileSize;
-    char* fileData = parseXmlFile(doc, filePath, fileSize);
+    char* fileData = readXmlFile(doc, filePath, fileSize, true);
     if(!fileData) return false;
     
     rapidxml::xml_node<xmlUsedCharType> *collada, *library, *geometry, *meshNode, *source, *dataNode;
@@ -307,6 +313,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             if(!dataAttribute) goto endParsingXML;
             id = dataAttribute->value();
             Material material;
+            material.transparent = false;
             meshNode = geometry->first_node("profile_COMMON");
             if(!meshNode) goto endParsingXML;
             std::map<std::string, std::string> surfaceURLs, samplerURLs;
@@ -364,6 +371,8 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                     material.effectMapURL = readTextureURL(samplerURLs, dataNode);
                 }else if((dataNode = source->first_node("bump"))) {
                     material.heightMapURL = readTextureURL(samplerURLs, dataNode);
+                }else if((dataNode = source->first_node("transparent"))) {
+                    material.transparent = true;
                 }
                 source = source->next_sibling();
             }
@@ -434,7 +443,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                             goto endParsingXML;
                         }
                         skeleton = new Skeleton();
-                        skeleton->rootBone = readBone(&exportDoc, *skeleton, modelTransformMat, modelTransformMat, source);
+                        skeleton->rootBone = readBone(*skeleton, modelTransformMat, modelTransformMat, source);
                         if(skeleton->bones.size() > maxJointsCount) {
                             printf("ERROR: More joints (%lu) found than supported (%d).\n", skeleton->bones.size(), maxJointsCount);
                             goto endParsingXML;
@@ -694,6 +703,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 printf("ERROR: No material by id %s found.\n", dataAttribute->value());
                 goto endParsingXML;
             }
+            mesh->transparent = material->second.transparent;
             mesh->diffuse = readTexture(filePackage, &material->second.diffuseURL, GL_RGBA);
             mesh->effectMap = readTexture(filePackage, &material->second.effectMapURL, GL_RGB);
             if(material->second.heightMapURL.size() > 0) {
@@ -858,7 +868,6 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 glGenBuffers(1, &mesh->ibo);
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
                 glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->elementsCount*sizeof(unsigned int), indecies, GL_STATIC_DRAW);
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
                 /*if(combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int) > mesh->elementsCount*strideIndex*sizeof(float)) {
                     printf("Loading COLLADA, Index-Mode is contra-productive: Used %lu bytes, but %lu would be necessary.\n", combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int), mesh->elementsCount*strideIndex*sizeof(float));
                 }*/
@@ -873,7 +882,6 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 glBufferData(GL_ARRAY_BUFFER, mesh->elementsCount*strideIndex*sizeof(float), dataBuffer, GL_STATIC_DRAW);
             }
             
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
             delete [] indexBuffer.data;
             rapidxml::xml_node<xmlUsedCharType>* sourceB = source->next_sibling("triangles");
             if(!sourceB) sourceB = source->next_sibling("polylist");
@@ -895,9 +903,10 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
     }
     
     endParsingXML:
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     if(skinData.data) delete skinData.data;
     doc.clear();
-    exportDoc.clear();
     delete [] fileData;
     return true;
 }

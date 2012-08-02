@@ -27,7 +27,7 @@ struct GUILabelLine {
 class GUILabel : public GUIRect {
     public:
     std::vector<GUILabelLine> lines;
-    SDL_Color color;
+    GUIColor color;
     TextFont* font;
     GUISizeAlignment sizeAlignment;
     unsigned int fontHeight;

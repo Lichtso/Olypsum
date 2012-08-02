@@ -52,10 +52,12 @@ bool GUIView::handleMouseDown(int mouseX, int mouseY) {
     return false;
 }
 
-void GUIView::handleMouseUp(int mouseX, int mouseY) {
-    if(!visible) return;
+bool GUIView::handleMouseUp(int mouseX, int mouseY) {
+    if(!visible) return false;
     for(int i = (int)children.size()-1; i >= 0; i --)
-        children[i]->handleMouseUp(mouseX-children[i]->posX, mouseY-children[i]->posY);
+        if(children[i]->handleMouseUp(mouseX-children[i]->posX, mouseY-children[i]->posY))
+            return true;
+    return false;
 }
 
 void GUIView::handleMouseMove(int mouseX, int mouseY) {
@@ -220,8 +222,8 @@ bool GUIScreenView::handleMouseDown(int mouseX, int mouseY) {
     return false;
 }
 
-void GUIScreenView::handleMouseUp(int mouseX, int mouseY) {
-    if(!visible) return;
+bool GUIScreenView::handleMouseUp(int mouseX, int mouseY) {
+    if(!visible) return false;
     mouseX -= width;
     mouseY = height-mouseY;
     
@@ -229,7 +231,9 @@ void GUIScreenView::handleMouseUp(int mouseX, int mouseY) {
         return modalView->handleMouseUp(mouseX-modalView->posX, mouseY-modalView->posY);
     else
         for(int i = (int)children.size()-1; i >= 0; i --)
-            children[i]->handleMouseUp(mouseX-children[i]->posX, mouseY-children[i]->posY);
+            if(children[i]->handleMouseUp(mouseX-children[i]->posX, mouseY-children[i]->posY))
+                return true;
+    return false;
 }
 
 void GUIScreenView::handleMouseMove(int mouseX, int mouseY) {
@@ -277,5 +281,4 @@ void GUIScreenView::setModalView(GUIRect* modalViewB) {
     if(modalView) modalView->parent = this;
 }
 
-
-GUIScreenView* currentScreenView;
+GUIScreenView* currentScreenView = NULL;

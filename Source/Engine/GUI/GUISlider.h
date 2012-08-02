@@ -22,13 +22,13 @@ class GUISlider : public GUIRect {
     unsigned int steps;
     bool enabled;
     GUIOrientation orientation;
-    void (*onChange)(GUISlider*);
+    std::function<void(GUISlider*)> onChange;
     GUISlider();
     ~GUISlider();
     void updateContent();
     void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);
-    void handleMouseUp(int mouseX, int mouseY);
+    bool handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
     bool handleMouseWheel(int mouseX, int mouseY, float delta);
 };

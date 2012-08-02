@@ -12,9 +12,8 @@
 #define GUIView_h
 
 class GUIView : public GUIRect {
-    protected:
-    std::vector<GUIRect*> children;
     public:
+    std::vector<GUIRect*> children;
     GUIView();
     ~GUIView();
     virtual void addChild(GUIRect* child);
@@ -22,7 +21,7 @@ class GUIView : public GUIRect {
     void updateContent();
     void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);
-    void handleMouseUp(int mouseX, int mouseY);
+    bool handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
     bool handleMouseWheel(int mouseX, int mouseY, float delta);
 };
@@ -46,7 +45,7 @@ class GUIScreenView : public GUIView {
     void updateContent();
     void draw();
     bool handleMouseDown(int mouseX, int mouseY);
-    void handleMouseUp(int mouseX, int mouseY);
+    bool handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
     bool handleMouseWheel(int mouseX, int mouseY, float delta);
     bool handleKeyDown(SDL_keysym* key);
