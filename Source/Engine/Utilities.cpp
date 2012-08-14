@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 08.04.12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #import "Utilities.h"
@@ -52,5 +52,24 @@ void msleep(unsigned long microsec) {
     while(nanosleep(&time, &time) == -1) continue;
 }
 
-float animationFactor;
+GUIColor& GUIColor::operator=(const GUIColor& B) {
+    r = B.r;
+    g = B.g;
+    b = B.b;
+    a = B.a;
+    return *this;
+}
+
+SDL_Color GUIColor::getSDL() {
+    SDL_Color B;
+    B.r = r;
+    B.g = g;
+    B.b = b;
+    B.unused = a;
+    return B;
+}
+
+SDL_Surface* screen;
+const SDL_VideoInfo* videoInfo;
 std::string resourcesDir, gameDataDir, parentDir;
+float animationFactor, mouseTranslation[4] = { 1.0, 1.0, 0.0, 0.0 };

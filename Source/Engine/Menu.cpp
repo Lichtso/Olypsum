@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 22.07.12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #import "AppMain.h"
@@ -99,6 +99,10 @@ void setMenu(MenuName menu) {
             view->posX = videoInfo->current_w*-0.26;
             view->innerShadow = -8;
             currentScreenView->addChild(view);
+            
+            GUITextField* textField = new GUITextField();
+            textField->posY = videoInfo->current_h*-0.4;
+            currentScreenView->addChild(textField);
             
             std::function<void(GUICheckBox*)> onClick[] = {
                 [](GUICheckBox* checkBox) {

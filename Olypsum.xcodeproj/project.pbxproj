@@ -14,7 +14,7 @@
 		11648F6E153DEE63004CA74D /* FBO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11648F6D153DEE63004CA74D /* FBO.cpp */; };
 		118B60621573E2E8004C132E /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118B60611573E2E8004C132E /* Audio.cpp */; };
 		11A5C2C915752306002991E5 /* Vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11A5C2C815752306002991E5 /* Vorbis.framework */; };
-		11A79B6A153C2FE9002B9F0A /* AppMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B20153C2FE9002B9F0A /* AppMain.cpp */; };
+		11A79B6A153C2FE9002B9F0A /* AppMain.mm in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B20153C2FE9002B9F0A /* AppMain.mm */; };
 		11A79B6B153C2FE9002B9F0A /* Cam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B22153C2FE9002B9F0A /* Cam.cpp */; };
 		11A79B6C153C2FE9002B9F0A /* FileManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B24153C2FE9002B9F0A /* FileManager.cpp */; };
 		11A79B6D153C2FE9002B9F0A /* GUIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B27153C2FE9002B9F0A /* GUIButton.cpp */; };
@@ -48,6 +48,7 @@
 		11A79B8B153C2FE9002B9F0A /* Utilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B68153C2FE9002B9F0A /* Utilities.cpp */; };
 		11A79BC9153C35CE002B9F0A /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = 11A79BC3153C35CA002B9F0A /* Fonts */; };
 		11A79BCC153C35CE002B9F0A /* Shaders in Resources */ = {isa = PBXBuildFile; fileRef = 11A79BC6153C35CC002B9F0A /* Shaders */; };
+		11B199B415D6CBD000A8A164 /* Decals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11B199B215D6CBCF00A8A164 /* Decals.cpp */; };
 		11B9A9F115C4491D005A1766 /* Packages in Resources */ = {isa = PBXBuildFile; fileRef = 11B9A9F015C4491D005A1766 /* Packages */; };
 		11BD39AD15414AA6007846B8 /* Light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11BD39AC15414AA6007846B8 /* Light.cpp */; };
 		11BD39B01541725F007846B8 /* Game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11BD39AF1541725F007846B8 /* Game.cpp */; };
@@ -79,7 +80,7 @@
 		118B60601573E2DF004C132E /* Audio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Audio.h; sourceTree = "<group>"; };
 		118B60611573E2E8004C132E /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Audio.cpp; sourceTree = "<group>"; };
 		11A5C2C815752306002991E5 /* Vorbis.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vorbis.framework; path = ../../../../Library/Frameworks/Vorbis.framework; sourceTree = "<group>"; };
-		11A79B20153C2FE9002B9F0A /* AppMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppMain.cpp; sourceTree = "<group>"; };
+		11A79B20153C2FE9002B9F0A /* AppMain.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AppMain.mm; sourceTree = "<group>"; };
 		11A79B21153C2FE9002B9F0A /* AppMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppMain.h; sourceTree = "<group>"; };
 		11A79B22153C2FE9002B9F0A /* Cam.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Cam.cpp; sourceTree = "<group>"; };
 		11A79B23153C2FE9002B9F0A /* Cam.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cam.h; sourceTree = "<group>"; };
@@ -148,6 +149,8 @@
 		11A79B69153C2FE9002B9F0A /* Utilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utilities.h; sourceTree = "<group>"; };
 		11A79BC3153C35CA002B9F0A /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fonts; sourceTree = "<group>"; };
 		11A79BC6153C35CC002B9F0A /* Shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Shaders; sourceTree = "<group>"; };
+		11B199B215D6CBCF00A8A164 /* Decals.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Decals.cpp; sourceTree = "<group>"; };
+		11B199B315D6CBCF00A8A164 /* Decals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Decals.h; sourceTree = "<group>"; };
 		11B9A9F015C4491D005A1766 /* Packages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Packages; sourceTree = "<group>"; };
 		11BB4D1E15BC818E0094A73B /* Menu.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Menu.h; sourceTree = "<group>"; };
 		11BD39AA15414A81007846B8 /* Light.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Light.h; sourceTree = "<group>"; };
@@ -276,6 +279,8 @@
 				11A79B5B153C2FE9002B9F0A /* Model.cpp */,
 				11F1EEB5156FE48B00F7275D /* ParticleSystem.h */,
 				11F1EEB7156FE49400F7275D /* ParticleSystem.cpp */,
+				11B199B315D6CBCF00A8A164 /* Decals.h */,
+				11B199B215D6CBCF00A8A164 /* Decals.cpp */,
 				11A79B53153C2FE9002B9F0A /* Localization.h */,
 				11A79B52153C2FE9002B9F0A /* Localization.cpp */,
 				11A79B25153C2FE9002B9F0A /* FileManager.h */,
@@ -290,7 +295,7 @@
 				11BB4D1E15BC818E0094A73B /* Menu.h */,
 				1130ECBA15BC1CA600203C2E /* Menu.cpp */,
 				11A79B21153C2FE9002B9F0A /* AppMain.h */,
-				11A79B20153C2FE9002B9F0A /* AppMain.cpp */,
+				11A79B20153C2FE9002B9F0A /* AppMain.mm */,
 				11A79B54153C2FE9002B9F0A /* macCompCode */,
 			);
 			path = Engine;
@@ -447,7 +452,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				11A79B6A153C2FE9002B9F0A /* AppMain.cpp in Sources */,
+				11A79B6A153C2FE9002B9F0A /* AppMain.mm in Sources */,
 				11A79B6B153C2FE9002B9F0A /* Cam.cpp in Sources */,
 				11A79B6C153C2FE9002B9F0A /* FileManager.cpp in Sources */,
 				11A79B6D153C2FE9002B9F0A /* GUIButton.cpp in Sources */,
@@ -485,6 +490,7 @@
 				11F1EEB8156FE49400F7275D /* ParticleSystem.cpp in Sources */,
 				118B60621573E2E8004C132E /* Audio.cpp in Sources */,
 				1130ECBB15BC1CA600203C2E /* Menu.cpp in Sources */,
+				11B199B415D6CBD000A8A164 /* Decals.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -573,6 +579,10 @@
 				FRAMEWORK_SEARCH_PATHS = "/Library/Frameworks/**";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (
+					"$(OTHER_CFLAGS)",
+					__MAC_OS__,
+				);
 				HEADER_SEARCH_PATHS = /usr/local/include;
 				INFOPLIST_FILE = Source/Engine/macCompCode/Info.plist;
 				LIBRARY_SEARCH_PATHS = "";
@@ -594,6 +604,10 @@
 				FRAMEWORK_SEARCH_PATHS = "/Library/Frameworks/**";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (
+					"$(OTHER_CFLAGS)",
+					__MAC_OS__,
+				);
 				HEADER_SEARCH_PATHS = /usr/local/include;
 				INFOPLIST_FILE = Source/Engine/macCompCode/Info.plist;
 				LIBRARY_SEARCH_PATHS = "";

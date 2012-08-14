@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 05.03.12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #import "GUISlider.h"
@@ -19,7 +19,6 @@ GUISlider::GUISlider() {
     value = 0.5;
     steps = 0;
     orientation = GUIOrientation_Horizontal;
-    onChange = NULL;
     enabled = true;
 }
 

@@ -54,7 +54,21 @@ template <class T> inline const T frand(T min, T max) {
     return ((max-min)*((float)rand()/RAND_MAX))+min;
 }
 
+class GUIColor {
+    public:
+    unsigned char r, g, b, a;
+    GUIColor() : r(0), g(0), b(0), a(255) {};
+    GUIColor(unsigned char gray) : r(gray), g(gray), b(gray), a(255) {};
+    GUIColor(unsigned char gray, unsigned char aB) : r(gray), g(gray), b(gray), a(aB) {};
+    GUIColor(unsigned char rB, unsigned char gB, unsigned char bB) : r(rB), g(gB), b(bB), a(255) {};
+    GUIColor(unsigned char rB, unsigned char gB, unsigned char bB, unsigned char aB) : r(rB), g(gB), b(bB), a(aB) {};
+    GUIColor& operator=(const GUIColor& B);
+    SDL_Color getSDL();
+};
+
+extern SDL_Surface* screen;
+extern const SDL_VideoInfo* videoInfo;
 extern std::string resourcesDir, gameDataDir, parentDir;
-extern float animationFactor;
+extern float animationFactor, mouseTranslation[4];
 
 #endif

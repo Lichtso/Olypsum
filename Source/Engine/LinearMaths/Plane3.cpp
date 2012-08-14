@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 23.02.12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #import "Plane3.h"
@@ -65,11 +65,11 @@ bool Plane3::testPointHit(Vector3 pos) {
 }
 
 bool Plane3::testBsInclusiveHit(Bs3* bs) {
-    return (bs->transformation->pos*normal+distance <= bs->radius);
+    return (bs->getPosition()*normal+distance <= bs->radius);
 }
 
 bool Plane3::testBsExclusiveHit(Bs3* bs) {
-    return (bs->transformation->pos*normal+distance <= -bs->radius);
+    return (bs->getPosition()*normal+distance <= -bs->radius);
 }
 
 template <class T> bool Plane3::testBoxHit(T* box) {

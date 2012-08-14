@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 03.03.12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #import "GUITabs.h"
@@ -59,7 +59,7 @@ void GUITabs::updateContent() {
         
         if(orientation & GUIOrientation_Vertical) {
             button->width = width;
-            if(!(sizeAlignment & GUISizeAlignment_Height)) button->height = ceil(height/(float)children.size());
+            if(!(sizeAlignment & GUISizeAlignment_Height)) button->height = round(height/(float)children.size());
             button->posX = 0;
             button->posY = height-posCounter-button->height;
             
@@ -86,7 +86,7 @@ void GUITabs::updateContent() {
             
             posCounter += button->height*2-1;
         }else{
-            if(!(sizeAlignment & GUISizeAlignment_Width)) button->width = ceil(width/(float)children.size());
+            if(!(sizeAlignment & GUISizeAlignment_Width)) button->width = round(width/(float)children.size());
             button->height = height;
             button->posX = posCounter+button->width-width;
             button->posY = 0;

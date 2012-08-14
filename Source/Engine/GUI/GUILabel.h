@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 28.02.12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #import "GUIScrollView.h"
@@ -37,6 +37,7 @@ class GUILabel : public GUIRect {
     ~GUILabel();
     void updateContent();
     void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
+    unsigned char getUTF8Length(unsigned int pos);
     void getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int& posX, int& posY);
 };
 

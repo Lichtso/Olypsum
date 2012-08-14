@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 25.05.12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #import "Menu.h"
@@ -41,7 +41,7 @@ ParticleSystem::~ParticleSystem() {
         glDeleteBuffers(1, &particlesVBO[0]);
         glDeleteBuffers(1, &particlesVBO[1]);
     }
-    for(unsigned int p = 0; p < particleSystemManager.particleSystems.size(); p ++)
+    for(int p = 0; p < particleSystemManager.particleSystems.size(); p ++)
         if(particleSystemManager.particleSystems[p] == this) {
             particleSystemManager.particleSystems.erase(particleSystemManager.particleSystems.begin()+p);
             return;
@@ -113,9 +113,9 @@ bool ParticleSystem::calculate() {
 
 void ParticleSystem::draw() {
     Matrix4 mat;
-    Bs3 bs(3.0, &mat);
     mat.setIdentity();
-    mat.pos = position;
+    mat.translate(position);
+    Bs3 bs(mat, 3.0);
     if(!currentCam->frustum.testBsInclusiveHit(&bs)) return;
     
     if(texture) texture->use(GL_TEXTURE_2D, 0);

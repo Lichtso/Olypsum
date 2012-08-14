@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 28.02.12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #import "GUILabel.h"
@@ -117,6 +117,14 @@ void GUILabel::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     }
 }
 
+unsigned char GUILabel::getUTF8Length(unsigned int pos) {
+    unsigned char len = 1;
+    if((text[pos ++] & 0xC0) == 0xC0)
+        while((text[pos ++] & 0xC0) == 0x80)
+            len ++;
+    return len;
+}
+
 void GUILabel::getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int& posX, int& posY) {
     if(lineIndex >= lines.size()) {
         posY = 0;
@@ -136,7 +144,7 @@ void GUILabel::getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int&
     posY = line->posY;
     std::string str = line->text.substr(0, charIndex);
     int height;
-    TTF_SizeText(font->ttf, str.c_str(), &posX, &height);
+    TTF_SizeUTF8(font->ttf, str.c_str(), &posX, &height);
     posX = (float)fontHeight/height*posX+line->posX-line->width;
     return;
 }

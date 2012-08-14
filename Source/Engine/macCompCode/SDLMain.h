@@ -8,6 +8,8 @@
 #ifndef _SDLMain_h_
 #define _SDLMain_h_
 #import <Cocoa/Cocoa.h>
+#import <AppKit/AppKit.h>
+#import <Foundation/Foundation.h>
 #import <string.h>
 
 @interface SDLMain : NSObject <NSApplicationDelegate>
@@ -15,5 +17,6 @@
 @end
 
 int sdlMacMain(int argc, char **argv);
+void updateVideoMode();
 
 #endif /* _SDLMain_h_ */

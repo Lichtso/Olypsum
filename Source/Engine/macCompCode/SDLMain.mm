@@ -284,3 +284,25 @@ int sdlMacMain(int argc, char **argv) {
     NSApplicationMain(argc, (const char**) argv);
     return 0;
 }
+
+void updateVideoMode() {
+    screen = SDL_SetVideoMode(videoInfo->current_w, videoInfo->current_h, videoInfo->vfmt->BitsPerPixel, SDL_OPENGL);
+    if(fullScreenEnabled) {
+        NSWindow* window = [[NSApp windows] objectAtIndex:0];
+        NSView* view = [window contentView];
+        NSDictionary* opts = @{ @"NSFullScreenModeApplicationPresentationOptions": @(0) };
+        [view enterFullScreenMode:[NSScreen mainScreen] withOptions:opts];
+        [NSApp setPresentationOptions:NSApplicationPresentationHideDock | NSApplicationPresentationAutoHideMenuBar];
+        NSRect rect = [window convertRectToScreen:NSMakeRect(0, 0, 1, 1)];
+        mouseTranslation[0] = rect.size.width;
+        mouseTranslation[1] = rect.size.height;
+        /*rect = [window convertRectToBacking:NSMakeRect(0, 0, 1, 1)];
+        mouseTranslation[0] = rect.size.width;
+        mouseTranslation[1] = rect.size.height;*/
+        mouseTranslation[2] = -rect.origin.x;
+        mouseTranslation[3] = -rect.origin.y;
+        //printf("mouseTranslation: %f %f %f %f\n", mouseTranslation[0], mouseTranslation[1], mouseTranslation[2], mouseTranslation[3]);
+    }
+    
+    printf("Video mode: %d x %d\n", videoInfo->current_w, videoInfo->current_h);
+}

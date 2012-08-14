@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 13.03.12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #import "InputController.h"
@@ -15,7 +15,6 @@ GUITextField::GUITextField() {
     enabled = true;
     cursorDrawTick = 0.0;
     cursorIndexX = -1;
-    onFocus = onChange = onBlur = NULL;
     label = new GUILabel();
     label->width = 0;
     height = 5 + (label->fontHeight >> 1);
@@ -29,21 +28,25 @@ GUITextField::~GUITextField() {
 
 void GUITextField::removeChar() {
     if(cursorIndexX == 0) return;
-    label->text = label->text.substr(0, cursorIndexX-1)+label->text.substr(cursorIndexX);
-    cursorIndexX --;
+    moveCursorLeft();
+    unsigned char len = label->getUTF8Length(cursorIndexX);
+    label->text = label->text.substr(0, cursorIndexX)+label->text.substr(cursorIndexX+len);
     cursorDrawTick = 0.0;
     label->updateContent();
+    if(onChange) onChange(this);
 }
 
 void GUITextField::moveCursorLeft() {
     if(cursorIndexX == 0) return;
-    cursorIndexX --;
+    while(label->text[-- cursorIndexX] >> 7)
+        if((label->text[cursorIndexX] & 0xC0) == 0xC0)
+            break;
     cursorDrawTick = 0.0;
 }
 
 void GUITextField::moveCursorRight() {
     if(cursorIndexX == label->text.size()) return;
-    cursorIndexX ++;
+    cursorIndexX += label->getUTF8Length(cursorIndexX);
     cursorDrawTick = 0.0;
 }
 
@@ -52,12 +55,14 @@ void GUITextField::setFirstResponderStatus() {
     cursorDrawTick = 0.0;
     cursorIndexX = 0;
     updateContent();
+    if(onFocus) onFocus(this);
 }
 
 void GUITextField::removeFirstResponderStatus() {
     GUIRect::removeFirstResponderStatus();
     cursorIndexX = -1;
     updateContent();
+    if(onBlur) onBlur(this);
 }
 
 void GUITextField::updateContent() {
@@ -143,27 +148,21 @@ bool GUITextField::handleMouseDown(int mouseX, int mouseY) {
     if(screenView->firstResponder != this)
         setFirstResponderStatus();
     
-    unsigned int minIndex = 0, maxIndex = (unsigned int)label->text.size();
-    int cursorPosX, cursorPosY;
     mouseX -= label->posX;
-    while(true) {
-        if(maxIndex-minIndex <= 1) {
-            int diffMin, diffMax;
-            label->getPosOfChar(minIndex, 0, cursorPosX, cursorPosY);
-            diffMin = mouseX-cursorPosX;
-            label->getPosOfChar(maxIndex, 0, cursorPosX, cursorPosY);
-            diffMax = cursorPosX-mouseX;
-            cursorIndexX = (diffMin < diffMax) ? minIndex : maxIndex;
+    
+    int cursorPosXa, cursorPosXb, cursorPosY;
+    label->getPosOfChar(0, 0, cursorPosXa, cursorPosY);
+    for(cursorIndexX = 0; cursorIndexX < label->text.size(); cursorPosXa = cursorPosXb) {
+        unsigned int len = label->getUTF8Length(cursorIndexX);
+        label->getPosOfChar(cursorIndexX+len, 0, cursorPosXb, cursorPosY);
+        if(cursorPosXa-mouseX <= 0 && cursorPosXb-mouseX >= 0) {
+            if(mouseX-cursorPosXa > cursorPosXb-mouseX)
+                cursorIndexX += len;
             break;
         }
-        cursorIndexX = minIndex+((maxIndex-minIndex)>>1);
-        label->getPosOfChar(cursorIndexX, 0, cursorPosX, cursorPosY);
-        if(mouseX >= cursorPosX) {
-            minIndex = cursorIndexX;
-        }else{
-            maxIndex = cursorIndexX;
-        }
+        cursorIndexX += len;
     }
+    
     updateContent();
     return true;
 }
@@ -201,12 +200,21 @@ bool GUITextField::handleKeyDown(SDL_keysym* key) {
             moveCursorRight();
         break;
         default: {
-            if((key->unicode & 0xFF00) != 0 || (key->unicode & 0x00FF) == 0) return false;
-            char str[] = { (char)(key->unicode & 0xFF), 0 };
+            char str[] = { (char)(key->unicode & 0xFF), 0, 0, 0 };
+            if(key->unicode > 0x07FF) {
+                str[0] = 0xE0 | ((key->unicode >> 12) & 0x0F);
+                str[1] = 0x80 | ((key->unicode >> 6) & 0x3F);
+                str[2] = 0x80 | (key->unicode & 0x3F);
+            }else if(key->unicode > 0x007F) {
+                str[0] = 0xC0 | ((key->unicode >> 6) & 0x1F);
+                str[1] = 0x80 | (key->unicode & 0x3F);
+            }
+            
             label->text = label->text.substr(0, cursorIndexX)+str+label->text.substr(cursorIndexX);
-            cursorIndexX ++;
+            cursorIndexX += label->getUTF8Length(cursorIndexX);
             cursorDrawTick = 0.0;
             label->updateContent();
+            if(onChange) onChange(this);
         } break;
     }
     return true;

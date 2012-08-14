@@ -9,24 +9,6 @@
 #import "TextFont.h"
 #import "AppMain.h"
 
-GUIColor& GUIColor::operator=(const GUIColor& B) {
-    r = B.r;
-    g = B.g;
-    b = B.b;
-    a = B.a;
-    return *this;
-}
-
-SDL_Color GUIColor::getSDL() {
-    SDL_Color B;
-    B.r = r;
-    B.g = g;
-    B.b = b;
-    B.unused = a;
-    return B;
-}
-
-
 TextFont::TextFont() {
     ttf = NULL;
     size = 12;
@@ -61,11 +43,11 @@ GLuint TextFont::renderStringToTexture(const char* str, GUIColor colorB, bool an
     glBindTexture(GL_TEXTURE_2D, texture);
     
     if(antialiasing) {
-        surfaceB = TTF_RenderText_Blended(ttf, str, colorB.getSDL());
+        surfaceB = TTF_RenderUTF8_Blended(ttf, str, colorB.getSDL());
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surfaceB->w, surfaceB->h, 0, GL_BGRA, GL_UNSIGNED_BYTE, surfaceB->pixels);
     }else{
         SDL_Color color = {255, 255, 255, 255};
-        SDL_Surface *surfaceA = TTF_RenderText_Solid(ttf, str, color);
+        SDL_Surface *surfaceA = TTF_RenderUTF8_Solid(ttf, str, color);
         surfaceB = SDL_CreateRGBSurface(surfaceA->flags, surfaceA->w, surfaceA->h, 32, 255, 255 << 8, 255 << 16, 255 << 24);
         unsigned char *pixelsA = (unsigned char*)surfaceA->pixels,
         *pixelsB = (unsigned char*)surfaceB->pixels;
@@ -98,10 +80,10 @@ void TextFont::renderStringToSurface(const char* str, SDL_Surface* surfaceB, int
     SDL_Surface *surfaceA;
     
     if(antialiasing) {
-        surfaceA = TTF_RenderText_Blended(ttf, str, colorB.getSDL());
+        surfaceA = TTF_RenderUTF8_Blended(ttf, str, colorB.getSDL());
     }else{
         SDL_Color color = {255, 255, 255, 255};
-        surfaceA = TTF_RenderText_Solid(ttf, str, color);
+        surfaceA = TTF_RenderUTF8_Solid(ttf, str, color);
     }
     
     unsigned char *pixelsA = (unsigned char*)surfaceA->pixels,

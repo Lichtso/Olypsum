@@ -25,7 +25,5 @@ class Cam {
 };
 
 extern Cam *mainCam, *guiCam, *currentCam;
-extern SDL_Surface* screen;
-extern const SDL_VideoInfo* videoInfo;
 
 #endif

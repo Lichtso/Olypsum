@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 20.04.12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #import "Game.h"
@@ -59,11 +59,12 @@ Light::Light() {
     lightManager.lights.push_back(this);
     shadowMap = NULL;
     color = Vector3(1.0, 1.0, 1.0);
+    life = -1.0;
 }
 
 Light::~Light() {
     if(shadowMap) mainFBO.deleteTexture(shadowMap);
-    for(unsigned int i = 0; i < lightManager.lights.size(); i ++)
+    for(int i = 0; i < lightManager.lights.size(); i ++)
         if(lightManager.lights[i] == this) {
             lightManager.lights.erase(lightManager.lights.begin()+i);
             return;
@@ -404,7 +405,7 @@ void PositionalLight::use() {
         return;
     }
     
-    Bs3 bs(range, &modelMat);
+    Bs3 bs(modelMat, range);
     if(!currentCam->frustum.testBsInclusiveHit(&bs)) return;
     if(currentCam->frustum.front.testBsExclusiveHit(&bs)) {
         glEnable(GL_DEPTH_TEST);
@@ -437,12 +438,13 @@ void PositionalLight::selectShaderProgram(bool skeletal) {
 
 
 void LightManager::init() {
-    Box3 directionalLightVolume(Vector3(-1.0, -1.0, -1.0), Vector3(1.0, 1.0, 0.0), &modelMat);
-    Parabolid3 spotLightVolume(1.0, &modelMat);
-    Parabolid3 positionalLightVolume(1.0, &modelMat);
-    Bs3 positionalDualLightVolume(1.0, &modelMat);
+    modelMat.setIdentity();
+    Box3 directionalLightVolume(modelMat, Vector3(-1.0, -1.0, -1.0), Vector3(1.0, 1.0, 0.0));
+    Parabolid3 spotLightVolume(modelMat, 1.0);
+    Parabolid3 positionalLightVolume(modelMat, 1.0);
+    Bs3 positionalDualLightVolume(modelMat, 1.0);
     
-    unsigned int index, trianglesCount = (boxTrianglesCount+parabolidTrianglesCount(coneAccuracy, 0)+
+    unsigned int index, trianglesCount = (parabolidTrianglesCount(coneAccuracy, 0)+
                                 parabolidTrianglesCount(sphereAccuracyX, parabolidAccuracyY)+
                                 sphereTrianglesCount(sphereAccuracyX, sphereAccuracyY)),
                 positionsCount = boxVerticesCount+parabolidVerticesCount(coneAccuracy, 0)+
@@ -450,10 +452,9 @@ void LightManager::init() {
                                  sphereVerticesCount(sphereAccuracyX, sphereAccuracyY),
                 *indecies = new unsigned int[trianglesCount*3];
     
-    index = directionalLightVolume.getIndecies(indecies);
     glGenBuffers(1, &lightVolumeBuffers[0]);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, lightVolumeBuffers[0]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, index*sizeof(unsigned int), indecies, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(boxIndecies), boxIndecies, GL_STATIC_DRAW);
     
     index = spotLightVolume.getIndecies(indecies, coneAccuracy, 0);
     glGenBuffers(1, &lightVolumeBuffers[2]);
@@ -475,7 +476,6 @@ void LightManager::init() {
     
     float* vertices = new float[positionsCount*3];
     Vector3* positions = new Vector3[sphereVerticesCount(sphereAccuracyX, sphereAccuracyY)];
-    modelMat.setIdentity();
     index = copyVertices(positions, vertices, directionalLightVolume.getVertices(positions))*3;
     glGenBuffers(1, &lightVolumeBuffers[1]);
     glBindBuffer(GL_ARRAY_BUFFER, lightVolumeBuffers[1]);
@@ -523,6 +523,13 @@ void LightManager::calculateShadows(unsigned int maxShadows) {
     std::sort(lights.begin(), lights.end(), lightPrioritySorter);
     
     for(unsigned int i = 0; i < lights.size(); i ++) {
+        if(lights[i]->life > -1.0) {
+            lights[i]->life -= animationFactor;
+            if(lights[i]->life <= 0.0) {
+                delete lights[i --];
+                continue;
+            }
+        }
         if(i < maxShadows)
             lights[i]->calculateShadowmap();
         else

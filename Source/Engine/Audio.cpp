@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 28.05.12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #import "FileManager.h"
@@ -80,7 +80,7 @@ SoundSource::SoundSource() {
 SoundSource::~SoundSource() {
     if(soundTrack) fileManager.releaseSoundTrack(soundTrack);
     alDeleteSources(1, &ALname);
-    for(unsigned int s = 0; s < soundSourcesManager.soundSources.size(); s ++)
+    for(int s = 0; s < soundSourcesManager.soundSources.size(); s ++)
         if(soundSourcesManager.soundSources[s] == this) {
             soundSourcesManager.soundSources.erase(soundSourcesManager.soundSources.begin()+s);
             return;

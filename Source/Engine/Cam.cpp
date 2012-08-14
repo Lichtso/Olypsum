@@ -80,5 +80,3 @@ void Cam::use() {
 }
 
 Cam *mainCam, *guiCam, *currentCam;
-SDL_Surface* screen;
-const SDL_VideoInfo* videoInfo;

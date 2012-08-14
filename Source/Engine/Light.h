@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 20.04.12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #import "FileManager.h"
@@ -23,7 +23,7 @@ class Light {
     ColorBuffer* shadowMap;
     public:
     Vector3 direction, position, upDir;
-    float range;
+    float range, life;
     LightType type;
     Vector3 color;
     Light();
