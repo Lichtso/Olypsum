@@ -1,4 +1,7 @@
+Glass
 Water
+Decals
+GUIButtonList, GUITabs size error
 Make GUI
 Highmap terrains
 Use C++11 Multithreading
@@ -7,5 +10,9 @@ Object Editor
 Use Bullet-Engine
 OpenAL Sound Engine: Add track queue
 GUITextField Copy & Paste
+Retina Display Support
+
+Not sure:
 PCSS
+Fog
 Enviornment maping
