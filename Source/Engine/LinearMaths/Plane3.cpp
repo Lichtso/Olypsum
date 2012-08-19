@@ -65,11 +65,11 @@ bool Plane3::testPointHit(Vector3 pos) {
 }
 
 bool Plane3::testBsInclusiveHit(Bs3* bs) {
-    return (bs->getPosition()*normal+distance <= bs->radius);
+    return (bs->transformation->pos*normal+distance <= bs->radius);
 }
 
 bool Plane3::testBsExclusiveHit(Bs3* bs) {
-    return (bs->getPosition()*normal+distance <= -bs->radius);
+    return (bs->transformation->pos*normal+distance <= -bs->radius);
 }
 
 template <class T> bool Plane3::testBoxHit(T* box) {

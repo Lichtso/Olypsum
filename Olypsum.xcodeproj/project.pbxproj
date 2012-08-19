@@ -63,7 +63,6 @@
 		11FA6D1115B9B3710041F590 /* BulletSoftBody.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D0C15B9B3710041F590 /* BulletSoftBody.framework */; };
 		11FA6D1215B9B3710041F590 /* BulletSoftBodySolvers_OpenCL_Mini.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D0D15B9B3710041F590 /* BulletSoftBodySolvers_OpenCL_Mini.framework */; };
 		11FA6D1415B9B66C0041F590 /* LinearMath.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D1315B9B66C0041F590 /* LinearMath.framework */; };
-		11FB30A3154453FC00D2B7EE /* InputController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11FB30A1154453CA00D2B7EE /* InputController.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -169,8 +168,6 @@
 		11FA6D0C15B9B3710041F590 /* BulletSoftBody.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletSoftBody.framework; path = /Library/Frameworks/BulletSoftBody.framework; sourceTree = "<absolute>"; };
 		11FA6D0D15B9B3710041F590 /* BulletSoftBodySolvers_OpenCL_Mini.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletSoftBodySolvers_OpenCL_Mini.framework; path = /Library/Frameworks/BulletSoftBodySolvers_OpenCL_Mini.framework; sourceTree = "<absolute>"; };
 		11FA6D1315B9B66C0041F590 /* LinearMath.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LinearMath.framework; path = ../../../../Library/Frameworks/LinearMath.framework; sourceTree = "<group>"; };
-		11FB30A1154453CA00D2B7EE /* InputController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = InputController.cpp; sourceTree = "<group>"; };
-		11FB30A2154453CA00D2B7EE /* InputController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InputController.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -254,8 +251,6 @@
 				11A79B1F153C2FE9002B9F0A /* Engine */,
 				11BD39AE1541724A007846B8 /* Game.h */,
 				11BD39AF1541725F007846B8 /* Game.cpp */,
-				11FB30A2154453CA00D2B7EE /* InputController.h */,
-				11FB30A1154453CA00D2B7EE /* InputController.cpp */,
 			);
 			path = Source;
 			sourceTree = "<group>";
@@ -486,7 +481,6 @@
 				11648F6E153DEE63004CA74D /* FBO.cpp in Sources */,
 				11BD39AD15414AA6007846B8 /* Light.cpp in Sources */,
 				11BD39B01541725F007846B8 /* Game.cpp in Sources */,
-				11FB30A3154453FC00D2B7EE /* InputController.cpp in Sources */,
 				11F1EEB8156FE49400F7275D /* ParticleSystem.cpp in Sources */,
 				118B60621573E2E8004C132E /* Audio.cpp in Sources */,
 				1130ECBB15BC1CA600203C2E /* Menu.cpp in Sources */,

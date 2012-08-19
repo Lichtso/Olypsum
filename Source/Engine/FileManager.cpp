@@ -50,58 +50,66 @@ std::string FilePackage::getUrlOfFile(const char* groupName, const char* fileNam
     return path+std::string(groupName)+'/'+std::string(fileName);
 }
 
-bool FilePackage::getTexture(Texture** texture, const char* fileName) {
+Texture* FilePackage::getTexture(const char* fileName, GLenum format) {
+    Texture* texture;
     std::map<std::string, Texture*>::iterator iterator = textures.find(std::string(fileName));
     if(iterator != textures.end()) {
-        *texture = iterator->second;
-        (*texture)->useCounter ++;
-        return false;
+        texture = iterator->second;
+        texture->useCounter ++;
+        return texture;
     }
-    *texture = new Texture();
+    texture = new Texture();
     std::string url = getUrlOfFile("Textures", fileName);
-    if((*texture)->loadImageInRAM(url.c_str())) {
-        textures[std::string(fileName)] = *texture;
-        return true;
+    if(texture->loadImageInRAM(url.c_str())) {
+        if(format == 0)
+            return texture;
+        else if(format == GL_NORMAL_MAP)
+            mainFBO.generateNormalMap(texture, 4.0);
+        else
+            texture->uploadToVRAM(GL_TEXTURE_2D, format);
+        
+        texture->unloadFromRAM();
+        textures[std::string(fileName)] = texture;
+        return texture;
     }
-    delete *texture;
-    *texture = NULL;
-    return false;
+    delete texture;
+    return NULL;
 }
 
-bool FilePackage::getModel(Model** model, const char* fileName) {
+Model* FilePackage::getModel(const char* fileName) {
+    Model* model;
     std::map<std::string, Model*>::iterator iterator = models.find(std::string(fileName));
     if(iterator != models.end()) {
-        *model = iterator->second;
-        (*model)->useCounter ++;
-        return false;
+        model = iterator->second;
+        model->useCounter ++;
+        return model;
     }
-    *model = new Model();
+    model = new Model();
     std::string url = getUrlOfFile("Models", fileName);
-    if((*model)->loadCollada(this, url.c_str())) {
-        models[std::string(fileName)] = *model;
-        return true;
+    if(model->loadCollada(this, url.c_str())) {
+        models[std::string(fileName)] = model;
+        return model;
     }
-    delete *model;
-    *model = NULL;
-    return false;
+    delete model;
+    return NULL;
 }
 
-bool FilePackage::getSoundTrack(SoundTrack** soundTrack, const char* fileName) {
+SoundTrack* FilePackage::getSoundTrack(const char* fileName) {
+    SoundTrack* soundTrack;
     std::map<std::string, SoundTrack*>::iterator iterator = soundTracks.find(std::string(fileName));
     if(iterator != soundTracks.end()) {
-        *soundTrack = iterator->second;
-        (*soundTrack)->useCounter ++;
+        soundTrack = iterator->second;
+        soundTrack->useCounter ++;
         return false;
     }
-    *soundTrack = new SoundTrack();
+    soundTrack = new SoundTrack();
     std::string url = getUrlOfFile("Sounds", fileName);
-    if((*soundTrack)->loadOgg(url.c_str())) {
-        soundTracks[std::string(fileName)] = *soundTrack;
-        return true;
+    if(soundTrack->loadOgg(url.c_str())) {
+        soundTracks[std::string(fileName)] = soundTrack;
+        return soundTrack;
     }
-    delete *soundTrack;
-    *soundTrack = NULL;
-    return false;
+    delete soundTrack;
+    return NULL;
 }
 
 bool FilePackage::releaseTexture(Texture* texture) {
@@ -150,9 +158,13 @@ FileManager::FileManager() {
 }
 
 FileManager::~FileManager() {
-    std::map<std::string, FilePackage*>::iterator iterator;
-    for(iterator = filePackages.begin(); iterator != filePackages.end(); iterator ++)
-        delete iterator->second;
+    clear();
+}
+
+void FileManager::clear() {
+    for(auto iterator : filePackages)
+        delete iterator.second;
+    filePackages.clear();
 }
 
 static bool readOptionBool(rapidxml::xml_node<xmlUsedCharType>* option) {

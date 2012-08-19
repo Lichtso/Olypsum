@@ -21,8 +21,16 @@ enum MenuName {
     gameEscMenu = 6
 };
 
+enum GameStatusName {
+    noGame = 0,
+    localGame = 1,
+    networkGame = 2
+};
+
+void handleMenuKeyUp(SDL_keysym* key);
 void setMenu(MenuName menu);
 
 extern MenuName currentMenu;
+extern GameStatusName gameStatus;
 
 #endif

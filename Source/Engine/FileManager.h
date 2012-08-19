@@ -21,9 +21,9 @@ class FilePackage {
     ~FilePackage();
     bool load();
     std::string getUrlOfFile(const char* groupName, const char* fileName);
-    bool getTexture(Texture**, const char* fileName);
-    bool getModel(Model**, const char* fileName);
-    bool getSoundTrack(SoundTrack**, const char* fileName);
+    Texture* getTexture(const char* fileName, GLenum format);
+    Model* getModel(const char* fileName);
+    SoundTrack* getSoundTrack(const char* fileName);
     bool releaseTexture(Texture* texture);
     bool releaseModel(Model* model);
     bool releaseSoundTrack(SoundTrack* soundTrack);
@@ -34,6 +34,7 @@ class FileManager {
     public:
     FileManager();
     ~FileManager();
+    void clear();
     void loadOptions();
     void saveOptions();
     bool loadPackage(const char* name);

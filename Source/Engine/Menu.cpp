@@ -8,6 +8,25 @@
 
 #import "AppMain.h"
 
+void handleMenuKeyUp(SDL_keysym* key) {
+    if(key->sym == SDLK_ESCAPE) {
+        switch(currentMenu) {
+            case mainMenu:
+                AppTerminate();
+                break;
+            case optionsMenu:
+                setMenu((gameStatus == noGame) ? mainMenu : gameEscMenu);
+                break;
+            case inGameMenu:
+                setMenu(gameEscMenu);
+                break;
+            case gameEscMenu:
+                setMenu(inGameMenu);
+                break;
+        }
+    }
+}
+
 void setMenu(MenuName menu) {
     currentMenu = menu;
     if(currentScreenView) delete currentScreenView;
@@ -16,7 +35,7 @@ void setMenu(MenuName menu) {
     switch(menu) {
         case loadingMenu: {
             GUIImage* image = new GUIImage();
-            fileManager.getPackage("Default")->getTexture(&image->texture, "logo.png");
+            image->texture = fileManager.getPackage("Default")->getTexture("logo.png", GL_RGBA);
             image->sizeAlignment = GUISizeAlignment_Height;
             image->width = videoInfo->current_w*0.4;
             image->posY = videoInfo->current_h*0.1;
@@ -41,8 +60,10 @@ void setMenu(MenuName menu) {
             
             std::function<void(GUIButton*)> onClick[] = {
                 [](GUIButton* button) {
+                    gameStatus = localGame;
                     setMenu(inGameMenu);
                 }, [](GUIButton* button) {
+                    gameStatus = localGame;
                     setMenu(inGameMenu);
                 }, [](GUIButton* button) {
                     setMenu(optionsMenu);
@@ -78,7 +99,7 @@ void setMenu(MenuName menu) {
             button->onClick = [](GUIButton* button) {
                 fileManager.saveOptions();
                 loadDynamicShaderPrograms();
-                setMenu(mainMenu);
+                setMenu((gameStatus == noGame) ? mainMenu : gameEscMenu);
             };
             currentScreenView->addChild(button);
             label = new GUILabel();
@@ -99,10 +120,6 @@ void setMenu(MenuName menu) {
             view->posX = videoInfo->current_w*-0.26;
             view->innerShadow = -8;
             currentScreenView->addChild(view);
-            
-            GUITextField* textField = new GUITextField();
-            textField->posY = videoInfo->current_h*-0.4;
-            currentScreenView->addChild(textField);
             
             std::function<void(GUICheckBox*)> onClick[] = {
                 [](GUICheckBox* checkBox) {
@@ -289,10 +306,37 @@ void setMenu(MenuName menu) {
             label->sizeAlignment = GUISizeAlignment_Height;
             currentScreenView->addChild(label);
         } break;
-        case gameEscMenu:
-            
-        break;
+        case gameEscMenu: {
+            std::function<void(GUIButton*)> onClick[] = {
+                [](GUIButton* button) {
+                    setMenu(inGameMenu);
+                }, [](GUIButton* button) {
+                    setMenu(optionsMenu);
+                }, [](GUIButton* button) {
+                    gameStatus = noGame;
+                    clearCurrentWorld();
+                    setMenu(mainMenu);
+                }, [](GUIButton* button) {
+                    AppTerminate();
+                }
+            };
+            const char* buttonLabels[] = { "back", "options", "mainMenu", "quitGame" };
+            for(unsigned char i = 0; i < 4; i ++) {
+                GUIButton* button = new GUIButton();
+                button->posY = videoInfo->current_h*(0.16-0.08*i);
+                currentScreenView->addChild(button);
+                GUILabel* label = new GUILabel();
+                label->text = localization.localizeString(buttonLabels[i]);
+                label->textAlign = GUITextAlign_Left;
+                label->fontHeight = videoInfo->current_h*0.05;
+                label->width = videoInfo->current_w*0.07;
+                label->sizeAlignment = GUISizeAlignment_Height;
+                button->addChild(label);
+                button->onClick = onClick[i];
+            }
+        } break;
     }
 }
 
 MenuName currentMenu;
+GameStatusName gameStatus = noGame;

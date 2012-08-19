@@ -293,7 +293,7 @@ void loadStaticShaderPrograms() {
 }
 
 void loadDynamicShaderPrograms() {
-    for(unsigned int p = colorSP; p < sizeof(shaderPrograms)/sizeof(ShaderProgram*); p ++) {
+    for(unsigned int p = solidGeometrySP; p < sizeof(shaderPrograms)/sizeof(ShaderProgram*); p ++) {
         if(shaderPrograms[p]) delete shaderPrograms[p];
         shaderPrograms[p] = new ShaderProgram();
     }

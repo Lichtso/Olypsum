@@ -31,7 +31,7 @@ Mesh::~Mesh() {
     if(heightMap) fileManager.releaseTexture(heightMap);
 }
 
-void Mesh::draw(float discardDensity, Matrix4* mats, unsigned char matCount) {
+void Mesh::draw(float discardDensity, SkeletonPose* skeletonPose) {
     if(!vbo || elementsCount == 0) {
         printf("ERROR: No vertex data to draw in mesh.\n");
         return;
@@ -52,7 +52,7 @@ void Mesh::draw(float discardDensity, Matrix4* mats, unsigned char matCount) {
     if(heightMap) {
         heightMap->use(GL_TEXTURE_2D, 2);
         if(!lightManager.currentShadowLight) {
-            if(matCount)
+            if(skeletonPose)
                 shaderPrograms[skeletalBumpGeometrySP]->use();
             else if(transparent)
                 shaderPrograms[glassBumpGeometrySP]->use();
@@ -63,7 +63,7 @@ void Mesh::draw(float discardDensity, Matrix4* mats, unsigned char matCount) {
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, 0);
         if(!lightManager.currentShadowLight) {
-            if(matCount)
+            if(skeletonPose)
                 shaderPrograms[skeletalGeometrySP]->use();
             else if(transparent)
                 shaderPrograms[glassGeometrySP]->use();
@@ -73,8 +73,8 @@ void Mesh::draw(float discardDensity, Matrix4* mats, unsigned char matCount) {
     }
     if(!lightManager.currentShadowLight) {
         currentShaderProgram->setUniformF("discardDensity", discardDensity);
-        if(matCount)
-            currentShaderProgram->setUniformMatrix4("jointMats", mats, matCount);
+        if(skeletonPose)
+            currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose->mats, skeletonPose->skeleton->bones.size());
     }
     
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -221,16 +221,6 @@ static std::string readTextureURL(std::map<std::string, std::string> samplerURLs
         return iterator->second;
     }
     return std::string();
-}
-
-static Texture* readTexture(FilePackage* filePackage, std::string* textureURL, GLenum format) {
-    if(textureURL->size() == 0) return NULL;
-    Texture* texture;
-    if(filePackage->getTexture(&texture, textureURL->c_str())) {
-        texture->uploadToVRAM(GL_TEXTURE_2D, format);
-        texture->unloadFromRAM();
-    }
-    return texture;
 }
 
 Model::Model() {
@@ -704,14 +694,9 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 goto endParsingXML;
             }
             mesh->transparent = material->second.transparent;
-            mesh->diffuse = readTexture(filePackage, &material->second.diffuseURL, GL_RGBA);
-            mesh->effectMap = readTexture(filePackage, &material->second.effectMapURL, GL_RGB);
-            if(material->second.heightMapURL.size() > 0) {
-                if(filePackage->getTexture(&mesh->heightMap, material->second.heightMapURL.c_str())) {
-                    mainFBO.generateNormalMap(mesh->heightMap, 4.0);
-                    mesh->heightMap->unloadFromRAM();
-                }
-            }
+            mesh->diffuse = (material->second.diffuseURL.size()) ? filePackage->getTexture(material->second.diffuseURL.c_str(), GL_RGBA) : NULL;
+            mesh->effectMap = (material->second.effectMapURL.size()) ? filePackage->getTexture(material->second.effectMapURL.c_str(), GL_RGB) : NULL;
+            mesh->heightMap = (material->second.heightMapURL.size()) ? filePackage->getTexture(material->second.heightMapURL.c_str(), GL_NORMAL_MAP) : NULL;
             
             unsigned int dataIndex, valueIndex, indexCount = 0, strideIndex = 0;
             std::map<std::string, VertexReference> vertexReferences;
@@ -923,7 +908,7 @@ void Model::draw(float discardDensity) {
     }
     
     for(unsigned int i = 0; i < meshes.size(); i ++)
-        meshes[i]->draw(discardDensity, NULL, 0);
+        meshes[i]->draw(discardDensity, NULL);
     
     glDisableVertexAttribArray(POSITION_ATTRIBUTE);
     glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
@@ -937,16 +922,13 @@ void Model::draw(float discardDensity, SkeletonPose* skeletonPose) {
         return;
     }
     
-    Matrix4* mats = new Matrix4[skeleton->bones.size()];
-    skeletonPose->calculateDisplayMatrix(skeleton->rootBone, NULL, mats);
     if(lightManager.currentShadowLight) {
         lightManager.currentShadowLight->selectShaderProgram(true);
         currentShaderProgram->setUniformF("discardDensity", discardDensity);
-        currentShaderProgram->setUniformMatrix4("jointMats", mats, skeleton->bones.size());
+        currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose->mats, skeleton->bones.size());
     }
     for(unsigned int i = 0; i < meshes.size(); i ++)
-        meshes[i]->draw(discardDensity, mats, skeleton->bones.size());
-    delete [] mats;
+        meshes[i]->draw(discardDensity, skeletonPose);
     
     glDisableVertexAttribArray(POSITION_ATTRIBUTE);
     glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
@@ -956,42 +938,38 @@ void Model::draw(float discardDensity, SkeletonPose* skeletonPose) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-SkeletonPose::SkeletonPose(Skeleton* skeleton) {
+SkeletonPose::SkeletonPose(Skeleton* skeletonB) {
+    skeleton = skeletonB;
+    mats = new Matrix4[skeleton->bones.size()];
     std::map<std::string, Bone*>::iterator boneIterator;
     for(boneIterator = skeleton->bones.begin(); boneIterator != skeleton->bones.end(); boneIterator ++) {
-        BonePose* bonePose = new BonePose;
-        bonePose->poseMat.setIdentity();
-        bonePose->dynamicMat.setIdentity();
-        bonePoses[boneIterator->second->name] = bonePose;
+        bonePoses[boneIterator->second->name] = Matrix4();
+        bonePoses[boneIterator->second->name].setIdentity();
     }
 }
 
 SkeletonPose::~SkeletonPose() {
-    std::map<std::string, BonePose*>::iterator bonePoseIterator;
+    delete [] mats;
+    /*std::map<std::string, Matrix4>::iterator bonePoseIterator;
     for(bonePoseIterator = bonePoses.begin(); bonePoseIterator != bonePoses.end(); bonePoseIterator ++)
-        delete bonePoseIterator->second;
+        delete bonePoseIterator->second;*/
 }
 
 void SkeletonPose::calculateBonePose(Bone* bone, Bone* parentBone) {
-    BonePose* bonePose = bonePoses[bone->name];
-    bonePose->dynamicMat.setIdentity();
+    mats[bone->jointIndex] = bonePoses[bone->name];
     if(parentBone) {
-        bonePose->dynamicMat = bonePose->poseMat;
-        bonePose->dynamicMat.translate(bone->staticMat.pos-parentBone->staticMat.pos);
-        bonePose->dynamicMat *= bonePoses[parentBone->name]->dynamicMat;
-    }else{
-        bonePose->dynamicMat = bonePose->poseMat;
-        bonePose->dynamicMat.translate(bone->staticMat.pos);
-    }
+        mats[bone->jointIndex].translate(bone->staticMat.pos-parentBone->staticMat.pos);
+        mats[bone->jointIndex] *= mats[parentBone->jointIndex];
+    }else
+        mats[bone->jointIndex].translate(bone->staticMat.pos);
     for(unsigned int i = 0; i < bone->children.size(); i ++)
         calculateBonePose(bone->children[i], bone);
-}
-
-void SkeletonPose::calculateDisplayMatrix(Bone* bone, Bone* parentBone, Matrix4* mats) {
     Matrix4 mat;
     mat.setIdentity();
     mat.translate(bone->staticMat.pos*-1);
-    mats[bone->jointIndex] = mat * bonePoses[bone->name]->dynamicMat;
-    for(unsigned int i = 0; i < bone->children.size(); i ++)
-        calculateDisplayMatrix(bone->children[i], bone, mats);
+    mats[bone->jointIndex] = mat * mats[bone->jointIndex];
+}
+
+void SkeletonPose::calculate() {
+    calculateBonePose(skeleton->rootBone, NULL);
 }

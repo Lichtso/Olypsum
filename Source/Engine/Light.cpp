@@ -59,7 +59,6 @@ Light::Light() {
     lightManager.lights.push_back(this);
     shadowMap = NULL;
     color = Vector3(1.0, 1.0, 1.0);
-    life = -1.0;
 }
 
 Light::~Light() {
@@ -405,7 +404,7 @@ void PositionalLight::use() {
         return;
     }
     
-    Bs3 bs(modelMat, range);
+    Bs3 bs(&modelMat, range);
     if(!currentCam->frustum.testBsInclusiveHit(&bs)) return;
     if(currentCam->frustum.front.testBsExclusiveHit(&bs)) {
         glEnable(GL_DEPTH_TEST);
@@ -437,12 +436,22 @@ void PositionalLight::selectShaderProgram(bool skeletal) {
 
 
 
+LightManager::LightManager() {
+    currentShadowLight = NULL;
+}
+
+LightManager::~LightManager() {
+    clear();
+    for(unsigned char i = 0; i < sizeof(lightVolumeBuffers)/sizeof(GLuint); i ++)
+        glDeleteBuffers(1, &lightVolumeBuffers[i]);
+}
+
 void LightManager::init() {
     modelMat.setIdentity();
-    Box3 directionalLightVolume(modelMat, Vector3(-1.0, -1.0, -1.0), Vector3(1.0, 1.0, 0.0));
-    Parabolid3 spotLightVolume(modelMat, 1.0);
-    Parabolid3 positionalLightVolume(modelMat, 1.0);
-    Bs3 positionalDualLightVolume(modelMat, 1.0);
+    Box3 directionalLightVolume(&modelMat, Vector3(-1.0, -1.0, -1.0), Vector3(1.0, 1.0, 0.0));
+    Parabolid3 spotLightVolume(&modelMat, 1.0);
+    Parabolid3 positionalLightVolume(&modelMat, 1.0);
+    Bs3 positionalDualLightVolume(&modelMat, 1.0);
     
     unsigned int index, trianglesCount = (parabolidTrianglesCount(coneAccuracy, 0)+
                                 parabolidTrianglesCount(sphereAccuracyX, parabolidAccuracyY)+
@@ -512,9 +521,11 @@ void LightManager::init() {
     randomNormalMap.unloadFromRAM();
 }
 
-LightManager::~LightManager() {
-    for(unsigned char i = 0; i < sizeof(lightVolumeBuffers)/sizeof(GLuint); i ++)
-        glDeleteBuffers(1, &lightVolumeBuffers[i]);
+void LightManager::clear() {
+    for(unsigned int i = 0; i < lights.size(); i ++)
+        delete lights[i];
+    lights.clear();
+    currentShadowLight = NULL;
 }
 
 void LightManager::calculateShadows(unsigned int maxShadows) {
@@ -523,13 +534,6 @@ void LightManager::calculateShadows(unsigned int maxShadows) {
     std::sort(lights.begin(), lights.end(), lightPrioritySorter);
     
     for(unsigned int i = 0; i < lights.size(); i ++) {
-        if(lights[i]->life > -1.0) {
-            lights[i]->life -= animationFactor;
-            if(lights[i]->life <= 0.0) {
-                delete lights[i --];
-                continue;
-            }
-        }
         if(i < maxShadows)
             lights[i]->calculateShadowmap();
         else

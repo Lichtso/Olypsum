@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "InputController.h"
+#import "AppMain.h"
 
 GUITextField::GUITextField() {
     type = GUIType_TextField;

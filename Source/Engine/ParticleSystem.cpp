@@ -115,7 +115,7 @@ void ParticleSystem::draw() {
     Matrix4 mat;
     mat.setIdentity();
     mat.translate(position);
-    Bs3 bs(mat, 3.0);
+    Bs3 bs(&mat, 3.0);
     if(!currentCam->frustum.testBsInclusiveHit(&bs)) return;
     
     if(texture) texture->use(GL_TEXTURE_2D, 0);
@@ -144,13 +144,14 @@ void ParticleSystem::draw() {
     glDrawArrays(GL_POINTS, 0, particlesCount);
 }
 
-ParticleSystemManager::ParticleSystemManager() {
-    
+ParticleSystemManager::~ParticleSystemManager() {
+    clear();
 }
 
-ParticleSystemManager::~ParticleSystemManager() {
-    for(unsigned int p = 0; p < particleSystems.size(); p ++)
-        delete particleSystems[p];
+void ParticleSystemManager::clear() {
+    for(unsigned int i = 0; i < particleSystems.size(); i ++)
+        delete particleSystems[i];
+    particleSystems.clear();
 }
 
 void ParticleSystemManager::calculate() {

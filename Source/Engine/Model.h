@@ -23,6 +23,17 @@ struct Skeleton {
     std::map<std::string, Bone*> bones;
 };
 
+class SkeletonPose {
+    void calculateBonePose(Bone* bone, Bone* parentBone);
+    public:
+    Skeleton* skeleton;
+    Matrix4* mats;
+    std::map<std::string, Matrix4> bonePoses;
+    SkeletonPose(Skeleton* skeleton);
+    ~SkeletonPose();
+    void calculate();
+};
+
 class Mesh {
     public:
     GLuint vbo, ibo;
@@ -32,20 +43,7 @@ class Mesh {
     Texture *diffuse, *effectMap, *heightMap;
     Mesh();
     ~Mesh();
-    void draw(float discardDensity, Matrix4* mats, unsigned char matCount);
-};
-
-struct BonePose {
-    Matrix4 poseMat, dynamicMat;
-};
-
-class SkeletonPose {
-    public:
-    std::map<std::string, BonePose*> bonePoses;
-    SkeletonPose(Skeleton* skeleton);
-    ~SkeletonPose();
-    void calculateBonePose(Bone* bone, Bone* parentBone);
-    void calculateDisplayMatrix(Bone* bone, Bone* parentBone, Matrix4* mats);
+    void draw(float discardDensity, SkeletonPose* skeletonPose);
 };
 
 class Model {

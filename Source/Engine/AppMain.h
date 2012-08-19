@@ -16,6 +16,7 @@ extern SDLMod modKeyState;
 extern unsigned int currentFPS;
 
 void updateVideoMode();
+void clearCurrentWorld();
 void AppMain(int argc, char *argv[]);
 void AppTerminate();
 

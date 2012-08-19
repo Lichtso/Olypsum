@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "InputController.h"
+#import "Game.h"
 #import <sys/time.h>
 #import <Cocoa/Cocoa.h>
 
@@ -15,7 +15,9 @@ SDLMod modKeyState;
 float timeInLastSec = 0.0;
 unsigned int currentFPS = 0, newFPS = 0;
 
-#ifndef __MAC_OS__
+#ifdef __MAC_OS__
+#import "macCompCode/SDLMain.h"
+#else
 void updateVideoMode() {
     screen = SDL_SetVideoMode(videoInfo->current_w, videoInfo->current_h, videoInfo->vfmt->BitsPerPixel, (fullScreenEnabled) ? SDL_OPENGL | SDL_FULLSCREEN : SDL_OPENGL);
     if(!screen) {
@@ -24,9 +26,15 @@ void updateVideoMode() {
     }
     printf("Video mode: %d x %d\n", videoInfo->current_w, videoInfo->current_h);
 }
-#else
-#import "macCompCode/SDLMain.h"
 #endif
+
+void clearCurrentWorld() {
+    soundSourcesManager.clear();
+    particleSystemManager.clear();
+    decalManager.clear();
+    fileManager.clear();
+    lightManager.clear();
+}
 
 void AppMain(int argc, char *argv[]) {
     fileManager.loadOptions();
@@ -90,11 +98,8 @@ void AppMain(int argc, char *argv[]) {
     
     //Init Resources
     mainFont = new TextFont();
-    mainFont->size = videoInfo->current_h*0.03;
+    mainFont->size = videoInfo->current_h*0.05;
     mainFont->loadTTF("font");
-    titleFont = new TextFont();
-    titleFont->size = videoInfo->current_h*0.05;
-    titleFont->loadTTF("font");
     mainFBO.init();
     lightManager.init();
     decalManager.init();
@@ -116,12 +121,11 @@ void AppMain(int argc, char *argv[]) {
                 case SDL_KEYDOWN:
                     if(currentScreenView && currentScreenView->handleKeyDown(&event.key.keysym))
                         break;
-                    handleKeyDown(&event.key.keysym);
                 break;
                 case SDL_KEYUP:
                     if(currentScreenView && currentScreenView->handleKeyUp(&event.key.keysym))
                         break;
-                    handleKeyUp(&event.key.keysym);
+                    handleMenuKeyUp(&event.key.keysym);
                 break;
                 case SDL_MOUSEBUTTONDOWN:
                     event.button.x = event.button.x*mouseTranslation[0]+mouseTranslation[2];
@@ -139,24 +143,18 @@ void AppMain(int argc, char *argv[]) {
                             break;
                         }
                     }
-                    if(!currentScreenView || !currentScreenView->modalView)
-                        handleMouseDown(&event.button);
                 break;
                 case SDL_MOUSEBUTTONUP:
                     event.button.x = event.button.x*mouseTranslation[0]+mouseTranslation[2];
                     event.button.y = event.button.y*mouseTranslation[1]+mouseTranslation[3];
                     if(currentScreenView)
                         currentScreenView->handleMouseUp(event.button.x, event.button.y);
-                    if(!currentScreenView || !currentScreenView->modalView)
-                        handleMouseUp(&event.button);
                 break;
                 case SDL_MOUSEMOTION:
                     event.button.x = event.button.x*mouseTranslation[0]+mouseTranslation[2];
                     event.button.y = event.button.y*mouseTranslation[1]+mouseTranslation[3];
                     if(currentScreenView)
                         currentScreenView->handleMouseMove(event.button.x, event.button.y);
-                    if(!currentScreenView || !currentScreenView->modalView)
-                        handleMouseMove(&event.motion);
                 break;
                 case SDL_QUIT:
                     AppTerminate();
@@ -176,7 +174,12 @@ void AppMain(int argc, char *argv[]) {
             labelFPS->updateContent();
         }
         
-        if(currentMenu == inGameMenu || currentMenu == gameEscMenu) {
+        if(gameStatus == noGame) {
+            glClearColor(1, 1, 1, 1);
+            glViewport(0, 0, videoInfo->current_w, videoInfo->current_h);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glClear(GL_COLOR_BUFFER_BIT);
+        }else{
             calculateFrame();
             soundSourcesManager.calculate();
             lightManager.calculateShadows(1);
@@ -189,11 +192,6 @@ void AppMain(int argc, char *argv[]) {
             decalManager.draw();
             particleSystemManager.draw();
             lightManager.useLights();
-        }else{
-            glClearColor(1, 1, 1, 1);
-            glViewport(0, 0, videoInfo->current_w, videoInfo->current_h);
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glClear(GL_COLOR_BUFFER_BIT);
         }
         if(currentScreenView) currentScreenView->draw();
         SDL_GL_SwapBuffers();

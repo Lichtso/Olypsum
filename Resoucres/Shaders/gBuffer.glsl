@@ -97,7 +97,7 @@ void BinaryParallax(inout vec3 texCoord, vec3 viewVec) {
 void main() {
     #if BUMP_MAPPING <= 1
 	gl_FragData[0] = texture2D(sampler0, vTexCoord); //Color
-    if(gl_FragData[0].a < 1.0 || random(gl_FragCoord.xy) > discardDensity) discard;
+    if(gl_FragData[0].a < 0.0039 || random(gl_FragCoord.xy) > discardDensity) discard;
     gl_FragData[1] = vec4(texture2D(sampler1, vTexCoord).rgb, 1.0); //Material
     #endif
     
@@ -123,7 +123,8 @@ void main() {
 	BinaryParallax(texCoord, viewVec);
     #endif
     gl_FragData[0] = texture2D(sampler0, texCoord.xy); //Color
-    if(abs(texCoord.x-0.5) > 0.5 || abs(texCoord.y-0.5) > 0.5 || gl_FragData[0].a < 0.1 || random(gl_FragCoord.xy) > discardDensity) discard;
+    //if(abs(texCoord.x-0.5) > 0.5 || abs(texCoord.y-0.5) > 0.5) discard;
+    if(gl_FragData[0].a < 0.0039 || random(gl_FragCoord.xy) > discardDensity) discard;
     gl_FragDepth = gl_FragCoord.z+length(texCoord.xy-vTexCoord)*0.2; //Depth
     vec3 bumpMap = texture2D(sampler2, texCoord.xy).xyz;
     bumpMap.xy = bumpMap.xy*2.0-vec2(1.0);

@@ -78,6 +78,7 @@ varying vec3 vColor;
 
 void main() {
 	gl_FragData[0].rgb = vColor;
+    gl_FragData[0].a = 1.0;
 }
 
 #endif

@@ -23,7 +23,7 @@ class Light {
     ColorBuffer* shadowMap;
     public:
     Vector3 direction, position, upDir;
-    float range, life;
+    float range;
     LightType type;
     Vector3 color;
     Light();
@@ -77,8 +77,10 @@ class LightManager {
     public:
     std::vector<Light*> lights;
     Light* currentShadowLight;
+    LightManager();
     ~LightManager();
     void init();
+    void clear();
     void calculateShadows(unsigned int maxShadows);
     void useLights();
 };

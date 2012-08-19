@@ -49,6 +49,7 @@ class SoundSourcesManager {
     std::vector<SoundSource*> soundSources;
     SoundSourcesManager();
     ~SoundSourcesManager();
+    void clear();
     void calculate();
 };
 

@@ -25,6 +25,6 @@ class TextFont {
     void renderStringToScreen(const char* str, Vector3 pos, float scale, GUIColor color, bool antialiasing);
 };
 
-extern TextFont *mainFont, *titleFont;
+extern TextFont* mainFont;
 
 #endif

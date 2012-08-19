@@ -140,8 +140,15 @@ SoundSourcesManager::SoundSourcesManager() {
 }
 
 SoundSourcesManager::~SoundSourcesManager() {
+    clear();
     alcDestroyContext(soundContext);
     alcCloseDevice(soundDevice);
+}
+
+void SoundSourcesManager::clear() {
+    for(unsigned int i = 0; i < soundSources.size(); i ++)
+        delete soundSources[i];
+    soundSources.clear();
 }
 
 void SoundSourcesManager::calculate() {

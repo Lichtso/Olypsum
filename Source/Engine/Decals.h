@@ -26,6 +26,7 @@ class DecalManager {
     std::vector<Decal*> decals;
     ~DecalManager();
     void init();
+    void clear();
     void calculate();
     void draw();
 };

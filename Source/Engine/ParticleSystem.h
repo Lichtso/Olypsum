@@ -39,8 +39,8 @@ class ParticleSystem {
 class ParticleSystemManager {
     public:
     std::vector<ParticleSystem*> particleSystems;
-    ParticleSystemManager();
     ~ParticleSystemManager();
+    void clear();
     void calculate();
     void draw();
 };

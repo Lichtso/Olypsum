@@ -163,4 +163,4 @@ void TextFont::renderStringToScreen(const char* str, Vector3 pos, float scale, G
     glDeleteTextures(1, &texture);
 }
 
-TextFont *mainFont, *titleFont;
+TextFont* mainFont;
