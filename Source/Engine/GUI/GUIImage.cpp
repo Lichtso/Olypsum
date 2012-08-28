@@ -41,21 +41,11 @@ void GUIImage::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     GUIClipRect clipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
     GUIRoundedRect roundedRect;
-    
-    if(texture) {
-        if(!texture->GLname) {
-            texture->uploadToVRAM(GL_TEXTURE_2D, GL_RGBA);
-            texture->unloadFromRAM();
-            updateContent();
-        }
-        roundedRect.texture = &texture->GLname;
-    }else{
-        GLuint textureP = 0;
-        roundedRect.texture = &textureP;
-    }
+    GLuint textureP = 0;
     
     modelMat = parentTransform;
     modelMat.translate(Vector3(posX, posY, 0.0));
+    roundedRect.texture = (texture) ? &texture->GLname : &textureP;
     roundedRect.width = width;
     roundedRect.height = height;
     roundedRect.drawOnScreen(false, 0, 0, clipRect);

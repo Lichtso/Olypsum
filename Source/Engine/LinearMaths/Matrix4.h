@@ -18,7 +18,7 @@ class Matrix4 {
     Matrix4(Matrix4 const &mat);
     Matrix4(btTransform const &mat);
     Matrix4(float matData[16]);
-    void print();
+    std::string getString();
     btTransform getMatrix();
     void getOpenGLMatrix3(float matData[9]);
     void getOpenGLMatrix4(float matData[16]);

@@ -28,7 +28,7 @@ bool TextFont::loadTTF(const char* fileName) {
     
     ttf = TTF_OpenFont(url.c_str(), size);
     if(ttf == NULL) {
-        printf("Unable to load font %s:\nERROR: %s\n", url.c_str(), TTF_GetError());
+        log(error_log, std::string("Unable to load font ")+url.c_str()+".\n"+TTF_GetError());
         return false;
     }
     

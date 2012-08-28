@@ -28,13 +28,13 @@ bool SoundTrack::loadOgg(const char* filePath) {
     
     FILE* fp = fopen(filePath, "r");
     if(!fp) {
-        printf("The file %s couldn't be found.", filePath);
+        log(error_log, std::string("The file ")+filePath+" couldn't be found.");
         return false;
     }
     
     OggVorbis_File vf;
     if(ov_open_callbacks(fp, &vf, NULL, 0, OV_CALLBACKS_DEFAULT) < 0) {
-        printf("The file %s is not a valid ogg file.", filePath);
+        log(error_log, std::string("The file ")+filePath+" is not a valid ogg file.");
         ov_clear(&vf);
         fclose(fp);
         return false;
@@ -136,7 +136,7 @@ SoundSourcesManager::SoundSourcesManager() {
     soundDevice = alcOpenDevice(NULL);
     soundContext = alcCreateContext(soundDevice, NULL);
     alcMakeContextCurrent(soundContext);
-    printf("OpenAL, sound output: %s\n", alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
+    log(info_log, std::string("OpenAL, sound output ")+alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
 }
 
 SoundSourcesManager::~SoundSourcesManager() {

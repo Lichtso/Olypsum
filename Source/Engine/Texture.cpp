@@ -26,7 +26,7 @@ bool Texture::loadImageInRAM(const char* filePath) {
     
     surface = IMG_Load(filePath);
     if(!surface) {
-        printf("ERROR: %s\n", IMG_GetError());
+        log(error_log, std::string("Unable to load texture ")+filePath+".\n"+IMG_GetError());
         return false;
     }
     
@@ -36,12 +36,12 @@ bool Texture::loadImageInRAM(const char* filePath) {
         case 32:
             break;
         default:
-            printf("Couldn't load image %s.\nERROR: Unsupported bit-depth %d.\n", filePath, surface->format->BitsPerPixel);
+            log(error_log, std::string("Unable to load texture ")+filePath+".\nUnsupported bit-depth.");
             return false;
     }
     
     if(surface->format->palette) {
-        printf("Couldn't load image %s:\nERROR: Image uses a color palette.\n", filePath);
+        log(error_log, std::string("Unable to load texture ")+filePath+".\nTexture uses a color palette.");
         return false;
     }
     
@@ -56,7 +56,7 @@ void Texture::loadRandomInRAM() {
     
     surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 24, 0, 0, 0, 0);
     if(!surface) {
-        printf("ERROR: %s\n", IMG_GetError());
+        log(error_log, std::string("Unable to create texture\n")+IMG_GetError());
         return;
     }
     
@@ -91,12 +91,12 @@ bool Texture::uploadToVRAM(GLenum textureTarget, GLenum format) {
             readFormat = GL_BGRA;
             break;
         default:
-            printf("Couldn't load texture to VRAM.\nERROR: Unsupported bit-depth.%d\n", surface->format->BitsPerPixel);
+            log(error_log, "Couldn't load texture to VRAM.\nUnsupported bit-depth.");
             return false;
     }
     
     if(surface->format->palette) {
-        printf("Couldn't load texture to VRAM.\nERROR: Image uses a color palette.\n");
+        log(error_log, "Couldn't load texture to VRAM.\nTexture uses a color palette.");
         return false;
     }
     

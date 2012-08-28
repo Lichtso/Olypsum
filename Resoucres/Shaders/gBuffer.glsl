@@ -5,7 +5,6 @@ attribute vec3 normal;
 attribute vec3 weights;
 attribute vec3 joints;
 
-
 uniform mat4 jointMats[64];
 uniform mat4 viewMat;
 #else

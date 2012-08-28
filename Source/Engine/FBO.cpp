@@ -58,7 +58,7 @@ void FBO::init() {
     initBuffer(depthDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_DEPTH_COMPONENT16, maxFBOSize, maxFBOSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     initBuffer(colorDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, videoInfo->current_w, videoInfo->current_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     initBuffer(materialDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     initBuffer(normalDBuffer);
@@ -69,6 +69,8 @@ void FBO::init() {
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(specularDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
+    initBuffer(transparentDBuffer);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, videoInfo->current_w, videoInfo->current_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     if(ssaoQuality) {
         initBuffer(ssaoDBuffer);
         glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_R16F, videoInfo->current_w >> 1, videoInfo->current_h >> 1, 0, GL_RED, GL_FLOAT, NULL);
@@ -78,6 +80,28 @@ void FBO::init() {
     
     glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void FBO::copyColorBuffer(unsigned char source, unsigned char destination) {
+    if(source == 0)
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    else{
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, frameBuffer);
+        glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE_ARB, gBuffers[source], 0);
+    }
+    if(destination == 0)
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    else {
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer);
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_RECTANGLE_ARB, gBuffers[destination], 0);
+    }
+    glReadBuffer((source == 0) ? GL_BACK : GL_COLOR_ATTACHMENT0);
+    glDrawBuffer((destination == 0) ? GL_BACK : GL_COLOR_ATTACHMENT1);
+    glBlitFramebuffer(0, 0, videoInfo->current_w, videoInfo->current_h,
+                      0, 0, videoInfo->current_w, videoInfo->current_h,
+                      GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
 void FBO::clearDeferredBuffers() {
@@ -98,6 +122,55 @@ void FBO::renderInDeferredBuffers() {
     GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
     glDrawBuffers(4, drawBuffers);
     glClearColor(0, 0, 0, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void FBO::renderTransparentInDeferredBuffers() {
+    Vector3 camMatPos = currentCam->camMat.pos;
+    std::sort(objectManager.transparentAccumulator.begin(), objectManager.transparentAccumulator.end(), [&camMatPos](TransparentMesh* a, TransparentMesh* b){
+        return (a->transformation.pos-camMatPos).getLength() > (b->transformation.pos-camMatPos).getLength();
+    });
+    
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_RECTANGLE_ARB, gBuffers[depthDBuffer], 0);
+    copyColorBuffer(colorDBuffer, materialDBuffer);
+    
+    unsigned int i;
+    for(i = 0; i < objectManager.transparentAccumulator.size(); i ++) {
+        if(i > 0) copyColorBuffer(materialDBuffer, colorDBuffer);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_RECTANGLE_ARB, gBuffers[colorDBuffer]);
+        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE_ARB, gBuffers[materialDBuffer], 0);
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        
+        TransparentMesh* tMesh = objectManager.transparentAccumulator[i];
+        modelMat = tMesh->transformation;
+        
+        
+        switch(tMesh->type) {
+            case ObjectType_Normal:
+                tMesh->mesh->draw(tMesh->discardDensity, NULL);
+                break;
+            case ObjectType_Animated:
+                tMesh->mesh->draw(tMesh->discardDensity, tMesh->skeletonPose);
+                break;
+            case ObjectType_Water:
+                tMesh->mesh->draw(tMesh->discardDensity, NULL); //TODO
+                break;
+        }
+        delete tMesh;
+    }
+    objectManager.transparentAccumulator.clear();
+    
+    glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+    glDepthMask(GL_FALSE);
+    if(!edgeSmoothEnabled && !depthOfFieldQuality && screenBlurFactor <= 0.0)
+        copyColorBuffer(materialDBuffer, 0);
 }
 
 void FBO::renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned char inBuffersCount, unsigned char* outBuffers, unsigned char outBuffersCount) {

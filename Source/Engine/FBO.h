@@ -12,7 +12,7 @@
 #define FBO_h
 
 #define maxColorBufferCount 6
-#define gBuffersCount 8
+#define gBuffersCount 9
 
 struct ColorBuffer {
     unsigned int size;
@@ -29,8 +29,10 @@ class FBO {
     FBO();
     ~FBO();
     void init();
+    void copyColorBuffer(unsigned char source, unsigned char destination);
     void clearDeferredBuffers();
     void renderInDeferredBuffers();
+    void renderTransparentInDeferredBuffers();
     void renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned char inBuffersCount, unsigned char* outBuffers, unsigned char outBuffersCount);
     ColorBuffer* addTexture(unsigned int size, bool shadowMap, bool cubeMap);
     void renderInTexture(ColorBuffer* colorBuffer, GLenum side);
@@ -48,7 +50,8 @@ enum DeferredBufferNames {
     positionDBuffer = 4,
     diffuseDBuffer = 5,
     specularDBuffer = 6,
-    ssaoDBuffer = 7
+    transparentDBuffer = 7,
+    ssaoDBuffer = 8
 };
 
 extern FBO mainFBO;

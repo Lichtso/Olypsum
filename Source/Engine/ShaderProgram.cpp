@@ -54,7 +54,7 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::v
                 }else if(strcmp(parameterValue, "GL_POINTS") == 0) {
                     glProgramParameteriEXT(GLname, GL_GEOMETRY_INPUT_TYPE_EXT, GL_POINTS);
                 }else{
-                    printf("SHADER:\n%s\nThe shader does contain a illegal parameter value for key GL_GEOMETRY_INPUT_TYPE: %s.\n", soucreCode, parameterValue);
+                    log(shader_log, std::string(soucreCode)+"\nThe shader does contain a illegal parameter value for key GL_GEOMETRY_INPUT_TYPE: "+parameterValue);
                     return false;
                 }
             }else if(strcmp(parameterKey, "GL_GEOMETRY_OUTPUT_TYPE") == 0) {
@@ -65,11 +65,11 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::v
                 }else if(strcmp(parameterValue, "GL_POINTS") == 0) {
                     glProgramParameteriEXT(GLname, GL_GEOMETRY_OUTPUT_TYPE_EXT, GL_POINTS);
                 }else{
-                    printf("SHADER:\n%s\nThe shader does contain a illegal parameter value for key GL_GEOMETRY_OUTPUT_TYPE: %s.\n", soucreCode, parameterValue);
+                    log(shader_log, std::string(soucreCode)+"\nThe shader does contain a illegal parameter value for key GL_GEOMETRY_OUTPUT_TYPE: "+parameterValue);
                     return false;
                 }
             }else{
-                printf("SHADER:\n%s\nThe shader does contain a unknown parameter: %s.\n", soucreCode, parameterKey);
+                log(shader_log, std::string(soucreCode)+"\nThe shader does contain a unknown parameter: "+parameterKey);
                 return false;
             }
             
@@ -92,7 +92,7 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::v
 	char infoLog[infoLogLength];
 	glGetShaderInfoLog(shaderId, infoLogLength, &infoLogLength, (GLchar*) &infoLog);
 	if(infoLogLength > 0) {
-		printf("SHADER:\n%s\n%s\n\n", soucre, infoLog);
+        log(shader_log, std::string(soucre)+"\n"+infoLog);
 		return false;
 	}
 	glAttachShader(GLname, shaderId);
@@ -107,7 +107,7 @@ bool ShaderProgram::loadShaderProgram(const char* fileName, std::vector<GLenum> 
     
     FILE *fp = fopen(url.c_str(), "rb");
 	if(!fp) {
-		printf("SHADER:\nThe file %s couldn't be found.\n", url.c_str());
+        log(shader_log, std::string("The file ")+"\n"+url.c_str()+" couldn't be found.");
 		return false;
 	}
 	fseek(fp, 0, SEEK_END);
@@ -147,7 +147,7 @@ void ShaderProgram::link() {
 	char infoLog[infoLogLength];
     glGetProgramInfoLog(GLname, infoLogLength, &infoLogLength, (GLchar*) &infoLog);
 	if(infoLogLength > 0) {
-		printf("SHADER PROGRAM:\n%s", infoLog);
+        log(shader_log, infoLog);
 		return;
 	}
     
@@ -448,19 +448,35 @@ void loadDynamicShaderPrograms() {
         }
     }
     
-    shaderPrograms[glassGeometrySP]->loadShaderProgram("transparent", shaderTypeVertexFragment, { "BUMP_MAPPING 0" });
+    shaderPrograms[glassGeometrySP]->loadShaderProgram("transparent", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 0", "BUMP_MAPPING 0" });
     shaderPrograms[glassGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[glassGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[glassGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
     shaderPrograms[glassGeometrySP]->link();
     
-    shaderPrograms[glassBumpGeometrySP]->loadShaderProgram("transparent", (bumpMappingQuality) ? shaderTypeVertexFragmentGeometry : shaderTypeVertexFragment, { bumpMappingMacro });
+    shaderPrograms[glassBumpGeometrySP]->loadShaderProgram("transparent", (bumpMappingQuality) ? shaderTypeVertexFragmentGeometry : shaderTypeVertexFragment, { "SKELETAL_ANIMATION 0", bumpMappingMacro });
     shaderPrograms[glassBumpGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[glassBumpGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[glassBumpGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
     shaderPrograms[glassBumpGeometrySP]->link();
     
-    shaderPrograms[waterSP]->loadShaderProgram("transparent", shaderTypeVertexFragmentGeometry, { "BUMP_MAPPING 2" });
+    shaderPrograms[glassSkeletalGeometrySP]->loadShaderProgram("transparent", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 1", "BUMP_MAPPING 0" });
+    shaderPrograms[glassSkeletalGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[glassSkeletalGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
+    shaderPrograms[glassSkeletalGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
+    shaderPrograms[glassSkeletalGeometrySP]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
+    shaderPrograms[glassSkeletalGeometrySP]->addAttribute(JOINT_ATTRIBUTE, "joints");
+    shaderPrograms[glassSkeletalGeometrySP]->link();
+    
+    shaderPrograms[glassSkeletalBumpGeometrySP]->loadShaderProgram("transparent", (bumpMappingQuality) ? shaderTypeVertexFragmentGeometry : shaderTypeVertexFragment, { "SKELETAL_ANIMATION 1", bumpMappingMacro });
+    shaderPrograms[glassSkeletalBumpGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[glassSkeletalBumpGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
+    shaderPrograms[glassSkeletalBumpGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
+    shaderPrograms[glassSkeletalBumpGeometrySP]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
+    shaderPrograms[glassSkeletalBumpGeometrySP]->addAttribute(JOINT_ATTRIBUTE, "joints");
+    shaderPrograms[glassSkeletalBumpGeometrySP]->link();
+    
+    shaderPrograms[waterSP]->loadShaderProgram("transparent", shaderTypeVertexFragmentGeometry, { "SKELETAL_ANIMATION 0", "BUMP_MAPPING 2" });
     shaderPrograms[waterSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[waterSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[waterSP]->addAttribute(NORMAL_ATTRIBUTE, "normal");

@@ -109,7 +109,7 @@ void Light::use() {
 }
 
 void Light::selectShaderProgram(bool skeletal) {
-    printf("ERROR: Unreachable function called!\n");
+    log(error_log, "Unreachable function called!");
 }
 
 bool LightPrioritySorter::operator()(Light* a, Light* b) {
@@ -544,18 +544,16 @@ void LightManager::calculateShadows(unsigned int maxShadows) {
 }
 
 void LightManager::useLights() {
-    glDisable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
     mainFBO.clearDeferredBuffers();
     
     glDepthMask(GL_FALSE);
+    glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
     for(unsigned int i = 0; i < lights.size(); i ++)
         lights[i]->use();
-    glDepthMask(GL_TRUE);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glFrontFace(GL_CCW);
-    glDisable(GL_DEPTH_TEST);
     
     if(ssaoQuality) {
         glViewport(0, 0, videoInfo->current_w >> 1, videoInfo->current_h >> 1);
@@ -566,7 +564,9 @@ void LightManager::useLights() {
     }
     
     shaderPrograms[deferredCombineSP]->use();
-    mainFBO.renderDeferred(true, inBuffersC, (ssaoQuality) ? 6 : 4, outBuffersC, (edgeSmoothEnabled || depthOfFieldQuality || screenBlurFactor > 0.0) ? 1 : 0);
+    mainFBO.renderDeferred(true, inBuffersC, (ssaoQuality) ? 6 : 4, outBuffersC, 1);
+    
+    mainFBO.renderTransparentInDeferredBuffers();
     
     if(screenBlurFactor > 0.0) {
         shaderPrograms[blurSP]->use();
@@ -585,6 +585,7 @@ void LightManager::useLights() {
     }
     
     glDisableVertexAttribArray(POSITION_ATTRIBUTE);
+    glDepthMask(GL_TRUE);
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
 }

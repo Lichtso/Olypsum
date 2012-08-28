@@ -21,15 +21,15 @@ unsigned int currentFPS = 0, newFPS = 0;
 void updateVideoMode() {
     screen = SDL_SetVideoMode(videoInfo->current_w, videoInfo->current_h, videoInfo->vfmt->BitsPerPixel, (fullScreenEnabled) ? SDL_OPENGL | SDL_FULLSCREEN : SDL_OPENGL);
     if(!screen) {
-        printf("Coudn't set video mode, Quit.\n");
+        log(error_log, "Coudn't set video mode, Quit.");
         exit(4);
     }
-    printf("Video mode: %d x %d\n", videoInfo->current_w, videoInfo->current_h);
 }
 #endif
 
 void clearCurrentWorld() {
     soundSourcesManager.clear();
+    objectManager.clear();
     particleSystemManager.clear();
     decalManager.clear();
     fileManager.clear();
@@ -41,18 +41,18 @@ void AppMain(int argc, char *argv[]) {
     
     //Init SDL
     if(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) < 0) {
-        printf("Couldn't init SDL, Quit.\n");
+        log(error_log, "Couldn't init SDL, Quit.");
         exit(1);
     }
     
     videoInfo = SDL_GetVideoInfo();
     if(!videoInfo) {
-        printf("Coudn't get video information, Quit.\n");
+        log(error_log, "Coudn't get video information, Quit.");
         exit(2);
     }
     
     if(TTF_Init() == -1) {
-        printf("Coudn't init TTF lib, Quit.\n");
+        log(error_log, "Coudn't init TTF lib, Quit.");
         exit(3);
     }
     
@@ -68,13 +68,13 @@ void AppMain(int argc, char *argv[]) {
     //Init OpenGL
     char* glStr = NULL;
     glStr = (char*)glGetString(GL_VENDOR);
-    printf("OpenGL, vendor: %s\n", glStr);
+    log(info_log, std::string("OpenGL, vendor: ")+glStr);
     glStr = (char*)glGetString(GL_RENDERER);
-    printf("OpenGL, renderer: %s\n", glStr);
+    log(info_log, std::string("OpenGL, renderer: ")+glStr);
     glStr = (char*)glGetString(GL_VERSION);
-    printf("OpenGL, version: %s\n", glStr);
+    log(info_log, std::string("OpenGL, version: ")+glStr);
     glStr = (char*)glGetString(GL_EXTENSIONS);
-    //printf("OpenGL, extensions: %s\n\n", glStr);
+    //log(info_log, std::string("OpenGL, extensions: ")+glStr);
     
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_DEPTH_TEST);
@@ -155,6 +155,11 @@ void AppMain(int argc, char *argv[]) {
                     event.button.y = event.button.y*mouseTranslation[1]+mouseTranslation[3];
                     if(currentScreenView)
                         currentScreenView->handleMouseMove(event.button.x, event.button.y);
+                    
+                    //TODO: CAM Test
+                    mainCam->camMat.setIdentity();
+                    //mainCam->camMat.rotateX(0.5);
+                    mainCam->camMat.translate(Vector3(1.5-3.0*event.button.x/screen->w, 3.0*event.button.y/screen->h+1.5, 3));
                 break;
                 case SDL_QUIT:
                     AppTerminate();
@@ -187,8 +192,8 @@ void AppMain(int argc, char *argv[]) {
             decalManager.calculate();
             mainCam->use();
             mainFBO.renderInDeferredBuffers();
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             renderScene();
+            objectManager.draw();
             decalManager.draw();
             particleSystemManager.draw();
             lightManager.useLights();

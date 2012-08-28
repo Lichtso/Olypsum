@@ -13,7 +13,7 @@ std::string LanguagesDir("Packages/Default/Languages/"), LanguagesExtension(".xm
 bool Localization::getLocalizableLanguages(std::vector<std::string>& languages) {
     DIR* dp = opendir(LanguagesDir.c_str());
     if(dp == NULL) {
-        printf("Error: Languages directory not found.\n");
+        log(error_log, "Languages directory not found.");
         return false;
     }
     
@@ -63,7 +63,7 @@ bool Localization::loadLocalization(std::string filePath) {
 const char* Localization::localizeString(const char* key) {
     std::map<std::string, std::string>::iterator iterator = strings.find(std::string(key));
     if(iterator == strings.end()) {
-        printf("Error: No localization found for key: %s.\n", key);
+        log(error_log, std::string("No localization found for key: ")+key);
         return key;
     }
     return iterator->second.c_str();

@@ -8,6 +8,23 @@
 
 #import "Utilities.h"
 
+void log(logMessageType type, std::string message) {
+    switch(type) {
+        case info_log:
+            printf("INFO: %s\n", message.c_str());
+            break;
+        case warning_log:
+            printf("WARNING: %s\n", message.c_str());
+            break;
+        case error_log:
+            printf("ERROR: %s\n", message.c_str());
+            break;
+        case shader_log:
+            printf("SHADER: %s\n", message.c_str());
+            break;
+    }
+}
+
 void createDir(std::string path) {
     DIR* dir = opendir(path.c_str());
     if(dir)
@@ -20,7 +37,7 @@ char* readXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string file
     FILE* fp = fopen(filePath.c_str(), "r");
     if(!fp) {
         if(!logs) return NULL;
-        printf("The file %s couldn't be found.", filePath.c_str());
+        log(error_log, std::string("The file ")+filePath.c_str()+" couldn't be found.");
         return NULL;
     }
     
@@ -43,13 +60,6 @@ bool writeXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string file
     outfile.close();
     doc.clear();
     return true;
-}
-
-void msleep(unsigned long microsec) {
-    struct timespec time;
-    time.tv_sec = 0;
-    time.tv_nsec = microsec * 1000;
-    while(nanosleep(&time, &time) == -1) continue;
 }
 
 GUIColor& GUIColor::operator=(const GUIColor& B) {

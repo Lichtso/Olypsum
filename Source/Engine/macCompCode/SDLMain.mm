@@ -303,6 +303,4 @@ void updateVideoMode() {
         mouseTranslation[3] = -rect.origin.y;
         //printf("mouseTranslation: %f %f %f %f\n", mouseTranslation[0], mouseTranslation[1], mouseTranslation[2], mouseTranslation[3]);
     }
-    
-    printf("Video mode: %d x %d\n", videoInfo->current_w, videoInfo->current_h);
 }

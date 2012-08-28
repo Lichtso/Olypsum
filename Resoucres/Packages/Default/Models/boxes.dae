@@ -11,21 +11,34 @@
     <up_axis>Z_UP</up_axis>
   </asset>
   <library_images>
-    <image id="concrete_png" name="concrete_png">
+    <image id="glass_texture" name="glass_texture">
       <init_from>glass.jpg</init_from>
+    </image>
+    <image id="bump_map" name="bump_map">
+      <init_from>heightMap.png</init_from>
     </image>
   </library_images>
   <library_effects>
     <effect id="Brick_Antique_-effect">
       <profile_COMMON>
-        <newparam sid="concrete_png-surface">
+        <newparam sid="glass_texture-surface">
           <surface type="2D">
-            <init_from>concrete_png</init_from>
+            <init_from>glass_texture</init_from>
           </surface>
         </newparam>
-        <newparam sid="concrete_png-sampler">
+        <newparam sid="glass_texture-sampler">
           <sampler2D>
-            <source>concrete_png-surface</source>
+            <source>glass_texture-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="bump_map-surface">
+          <surface type="2D">
+            <init_from>bump_map</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="bump_map-sampler">
+          <sampler2D>
+            <source>bump_map-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -37,8 +50,11 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <texture texture="concrete_png-sampler" texcoord="UVTex"/>
+              <texture texture="glass_texture-sampler" texcoord="UVTex"/>
             </diffuse>
+            <bump>
+              <texture texture="bump_map-sampler" texcoord="UVTex"/>
+            </bump>
             <specular>
               <color sid="specular">0.5 0.5 0.5 1</color>
             </specular>
@@ -46,10 +62,9 @@
               <float sid="shininess">50</float>
             </shininess>
             <index_of_refraction>
-              <float sid="index_of_refraction">1</float>
+              <float sid="index_of_refraction">2.0</float>
             </index_of_refraction>
           </phong>
-		  <extra><transparent /></extra>
         </technique>
       </profile_COMMON>
     </effect>

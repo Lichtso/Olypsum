@@ -41,8 +41,10 @@ Vector3::Vector3(float xB, float yB, float zB, float wB) {
     w = wB;
 }
 
-void Vector3::print() {
-	printf("Vector3: %f, %f, %f\n", x, y, z);
+std::string Vector3::getString() {
+    char buffer[64];
+    sprintf(buffer, "(%f, %f, %f)", x, y, z);
+    return std::string(buffer);
 }
 
 btVector3 Vector3::getVector() {

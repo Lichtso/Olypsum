@@ -33,11 +33,11 @@ Mesh::~Mesh() {
 
 void Mesh::draw(float discardDensity, SkeletonPose* skeletonPose) {
     if(!vbo || elementsCount == 0) {
-        printf("ERROR: No vertex data to draw in mesh.\n");
+        log(error_log, "No vertex data to draw in mesh.");
         return;
     }
     if(postions == -1) {
-        printf("ERROR: No postions data to draw in mesh.\n");
+        log(error_log, "No postions data to draw in mesh.");
         return;
     }
     
@@ -50,26 +50,36 @@ void Mesh::draw(float discardDensity, SkeletonPose* skeletonPose) {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
     if(heightMap) {
-        heightMap->use(GL_TEXTURE_2D, 2);
         if(!lightManager.currentShadowLight) {
-            if(skeletonPose)
-                shaderPrograms[skeletalBumpGeometrySP]->use();
-            else if(transparent)
-                shaderPrograms[glassBumpGeometrySP]->use();
-            else
-                shaderPrograms[solidBumpGeometrySP]->use();
+            if(skeletonPose) {
+                if(transparent)
+                    shaderPrograms[glassSkeletalBumpGeometrySP]->use();
+                else
+                    shaderPrograms[skeletalBumpGeometrySP]->use();
+            }else{
+                if(transparent)
+                    shaderPrograms[glassBumpGeometrySP]->use();
+                else
+                    shaderPrograms[solidBumpGeometrySP]->use();
+            }
         }
+        heightMap->use(GL_TEXTURE_2D, 2);
     }else{
+        if(!lightManager.currentShadowLight) {
+            if(skeletonPose) {
+                if(transparent)
+                    shaderPrograms[glassSkeletalGeometrySP]->use();
+                else
+                    shaderPrograms[skeletalGeometrySP]->use();
+            }else{
+                if(transparent)
+                    shaderPrograms[glassGeometrySP]->use();
+                else
+                    shaderPrograms[solidGeometrySP]->use();
+            }
+        }
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, 0);
-        if(!lightManager.currentShadowLight) {
-            if(skeletonPose)
-                shaderPrograms[skeletalGeometrySP]->use();
-            else if(transparent)
-                shaderPrograms[glassGeometrySP]->use();
-            else
-                shaderPrograms[solidGeometrySP]->use();
-        }
     }
     if(!lightManager.currentShadowLight) {
         currentShaderProgram->setUniformF("discardDensity", discardDensity);
@@ -98,6 +108,13 @@ void Mesh::draw(float discardDensity, SkeletonPose* skeletonPose) {
     }else{
         glDrawArrays(GL_TRIANGLES, 0, elementsCount);
     }
+    
+    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
+    glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
+    glDisableVertexAttribArray(NORMAL_ATTRIBUTE);
+    glDisableVertexAttribArray(WEIGHT_ATTRIBUTE);
+    glDisableVertexAttribArray(JOINT_ATTRIBUTE);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 struct FloatArray {
@@ -215,7 +232,7 @@ static std::string readTextureURL(std::map<std::string, std::string> samplerURLs
         if(!dataAttribute) return std::string();
         std::map<std::string, std::string>::iterator iterator = samplerURLs.find(dataAttribute->value());
         if(iterator == samplerURLs.end()) {
-            printf("ERROR: No sampler by id %s found.\n", dataAttribute->value());
+            log(error_log, std::string("No sampler by id ")+dataAttribute->value()+" found.");
             return std::string();
         }
         return iterator->second;
@@ -320,7 +337,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                     if(!dataNode || !dataAttribute) break;
                     std::map<std::string, std::string>::iterator iterator = textureURLs.find(dataNode->value());
                     if(iterator == textureURLs.end()) {
-                        printf("ERROR: No texture by id %s found.\n", dataNode->value());
+                        log(error_log, std::string("No texture by id ")+dataNode->value()+" found.");
                         goto endParsingXML;
                     }
                     surfaceURLs[dataAttribute->value()] = iterator->second;
@@ -338,7 +355,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                     if(!dataNode || !dataAttribute) break;
                     std::map<std::string, std::string>::iterator iterator = surfaceURLs.find(dataNode->value());
                     if(iterator == surfaceURLs.end()) {
-                        printf("ERROR: No surface by id %s found.\n", dataNode->value());
+                        log(error_log, std::string("No surface by id ")+dataNode->value()+" found.");
                         goto endParsingXML;
                     }
                     samplerURLs[dataAttribute->value()] = iterator->second;
@@ -355,14 +372,19 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 while(source->first_node("technique"))
                     source = source->first_node("technique");
                 
-                if((dataNode = source->first_node("diffuse"))) {
+                if((dataNode = source->first_node("diffuse")))
                     material.diffuseURL = readTextureURL(samplerURLs, dataNode);
-                }else if((dataNode = source->first_node("specular"))) {
+                if((dataNode = source->first_node("specular")))
                     material.effectMapURL = readTextureURL(samplerURLs, dataNode);
-                }else if((dataNode = source->first_node("bump"))) {
+                if((dataNode = source->first_node("bump")))
                     material.heightMapURL = readTextureURL(samplerURLs, dataNode);
-                }else if((dataNode = source->first_node("transparent"))) {
-                    material.transparent = true;
+                if((dataNode = source->first_node("index_of_refraction"))) {
+                    dataNode = dataNode->first_node();
+                    if(dataNode) {
+                        float value;
+                        sscanf(dataNode->value(), "%f", &value);
+                        if(value > 1.0) material.transparent = true;
+                    }
                 }
                 source = source->next_sibling();
             }
@@ -384,7 +406,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             if(!dataAttribute) goto endParsingXML;
             std::map<std::string, Material>::iterator iterator = materials.find(dataAttribute->value()+1);
             if(iterator == materials.end()) {
-                printf("ERROR: No material by id %s found.\n", dataAttribute->value()+1);
+                log(error_log, std::string("No material by id ")+(dataAttribute->value()+1)+" found.");
                 goto endParsingXML;
             }
             materials[id] = iterator->second;
@@ -416,7 +438,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                         if(!dataAttribute) goto endParsingXML;
                         std::map<std::string, Material>::iterator iterator = materials.find(dataAttribute->value()+1);
                         if(iterator == materials.end()) {
-                            printf("ERROR: No material by id %s found.\n", dataAttribute->value()+1);
+                            log(error_log, std::string("No material by id ")+(dataAttribute->value()+1)+" found.");
                             goto endParsingXML;
                         }
                         materials[id] = iterator->second;
@@ -429,13 +451,15 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                     dataAttribute = source->first_attribute("type");
                     if(dataAttribute && strcmp(dataAttribute->value(), "JOINT") == 0) {
                         if(skeleton) {
-                            printf("ERROR: More than one skeleton found.\n");
+                            log(error_log, "More than one skeleton found.");
                             goto endParsingXML;
                         }
                         skeleton = new Skeleton();
                         skeleton->rootBone = readBone(*skeleton, modelTransformMat, modelTransformMat, source);
                         if(skeleton->bones.size() > maxJointsCount) {
-                            printf("ERROR: More joints (%lu) found than supported (%d).\n", skeleton->bones.size(), maxJointsCount);
+                            char buffer[128];
+                            sprintf(buffer, "More joints (%lu) found than supported (%d).\n", skeleton->bones.size(), maxJointsCount);
+                            log(error_log, buffer);
                             goto endParsingXML;
                         }
                     }
@@ -452,7 +476,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
     if(library) {
         geometry = library->first_node("controller");
         if(!skeleton || !geometry) {
-            printf("ERROR: Controller found but no skeleton loaded.\n");
+            log(error_log, "Controller found but no skeleton loaded.");
             goto endParsingXML;
         }
         meshNode = geometry->first_node("skin");
@@ -486,7 +510,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 unsigned int count;
                 sscanf(dataAttribute->value(), "%d", &count);
                 if(count != skeleton->bones.size()) {
-                    printf("ERROR: Controller found but bone count does not match the bone count of skeleton.\n");
+                    log(error_log, "Controller found but bone count does not match the bone count of skeleton.");
                     goto endParsingXML;
                 }
                 char *dataStr = dataNode->value(), *lastPos = dataStr;
@@ -495,7 +519,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                     if(dataStr) *dataStr = 0;
                     std::map<std::string, Bone*>::iterator boneIterator = skeleton->bones.find(lastPos);
                     if(boneIterator == skeleton->bones.end()) {
-                        printf("ERROR: No bone by name %s found.\n", lastPos);
+                        log(error_log, std::string("No bone by name ")+lastPos+" found.");
                         goto endParsingXML;
                     }
                     boneIndexMap[i] = boneIterator->second;
@@ -513,7 +537,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             source = source->next_sibling("source");
         }
         if(!weightData.data) {
-            printf("ERROR: No vertex weights found.\n");
+            log(error_log, "No vertex weights found.");
             goto endParsingXML;
         }
         
@@ -534,14 +558,14 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 if(!dataAttribute) goto endParsingXML;
                 sscanf(dataAttribute->value(), "%d", &weightOffset);
             }else{
-                printf("ERROR: Unknown input semantic %s found.\n", dataAttribute->value());
+                log(error_log, std::string("Unknown input semantic ")+dataAttribute->value()+" found.");
                 goto endParsingXML;
             }
             dataNode = dataNode->next_sibling("input");
         }
         
         if(jointOffset < 0 || weightOffset < 0) {
-            printf("ERROR: Joint- or weight-offset missing in vertex_weights.\n");
+            log(error_log, "Joint- or weight-offset missing in vertex_weights.");
             goto endParsingXML;
         }
         
@@ -557,7 +581,9 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
         skinIndecies.count = 0;
         for(unsigned int i = 0; i < vcount.count; i ++) {
             if(vcount.data[i] > jointsPerVertex) {
-                printf("ERROR: More joints per vertex (%d) found than supported (%d).\n", vcount.data[i], jointsPerVertex);
+                char buffer[128];
+                sprintf(buffer, "More joints per vertex (%d) found than supported (%d).\n", vcount.data[i], jointsPerVertex);
+                log(error_log, buffer);
                 goto endParsingXML;
             }
             skinIndecies.count += vcount.data[i]*2;
@@ -588,12 +614,12 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
         
         geometry = geometry->next_sibling("controllers");
         if(!skeleton) {
-            printf("ERROR: More than one controller found.\n");
+            log(error_log, "More than one controller found.");
             goto endParsingXML;
         }
     }
     if(skeleton && !skinData.data) {
-        printf("ERROR: No skin for skeleton found.\n");
+        log(error_log, "No skin for skeleton found.");
         goto endParsingXML;
     }
     
@@ -690,7 +716,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             if(!dataAttribute) goto endParsingXML;
             std::map<std::string, Material>::iterator material = materials.find(dataAttribute->value());
             if(material == materials.end()) {
-                printf("ERROR: No material by id %s found.\n", dataAttribute->value());
+                log(error_log, std::string("No material by id ")+dataAttribute->value()+" found.");
                 goto endParsingXML;
             }
             mesh->transparent = material->second.transparent;
@@ -730,7 +756,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             }
             
             if(indexCount == 0) {
-                printf("ERROR: No indecies found.\n");
+                log(error_log, "No indecies found.");
                 goto endParsingXML;
             }
             
@@ -755,7 +781,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 }else if(strcmp(iterator->second.name, "WEIGHTJOINT") == 0) {
                     mesh->weightJoints = strideIndex;
                 }else{
-                    printf("ERROR: Unknown vertex type: %s\n", iterator->second.name);
+                    log(error_log, std::string("Unknown vertex type: ")+iterator->second.name);
                     goto endParsingXML;
                 }
                 strideIndex += iterator->second.source->stride;
@@ -854,7 +880,9 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
                 glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->elementsCount*sizeof(unsigned int), indecies, GL_STATIC_DRAW);
                 /*if(combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int) > mesh->elementsCount*strideIndex*sizeof(float)) {
-                    printf("Loading COLLADA, Index-Mode is contra-productive: Used %lu bytes, but %lu would be necessary.\n", combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int), mesh->elementsCount*strideIndex*sizeof(float));
+                    char buffer[128];
+                    sprintf(buffer, "Loading COLLADA, Index-Mode is contra-productive: Used %lu bytes, but %lu would be necessary.", combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int), mesh->elementsCount*strideIndex*sizeof(float));
+                    log(warning_log, buffer);
                 }*/
             }else{ //Don't use IndexBuffer
                 dataIndex = 0;
@@ -882,7 +910,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
         
         geometry = geometry->next_sibling("geometry");
         if(skeleton && geometry) {
-            printf("ERROR: More than one geometry but only one controller found.\n");
+            log(error_log, "More than one geometry but only one controller found.");
             goto endParsingXML;
         }
     }
@@ -898,27 +926,33 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
 
 void Model::draw(float discardDensity) {
     if(skeleton) {
-        printf("ERROR: Model draw function without pose of Skeleton called.\n");
+        log(error_log, "Model draw function without pose of Skeleton called.");
         return;
     }
     
     if(lightManager.currentShadowLight) {
         lightManager.currentShadowLight->selectShaderProgram(false);
         currentShaderProgram->setUniformF("discardDensity", discardDensity);
-    }
-    
-    for(unsigned int i = 0; i < meshes.size(); i ++)
+        for(unsigned int i = 0; i < meshes.size(); i ++)
+            meshes[i]->draw(discardDensity, NULL);
+    }else for(unsigned int i = 0; i < meshes.size(); i ++) {
+        if(meshes[i]->transparent) {
+            TransparentMesh* tMesh = new TransparentMesh();
+            tMesh->type = ObjectType_Normal;
+            tMesh->skeletonPose = NULL;
+            tMesh->transformation = modelMat;
+            tMesh->mesh = meshes[i];
+            tMesh->discardDensity = discardDensity;
+            objectManager.transparentAccumulator.push_back(tMesh);
+            continue;
+        }
         meshes[i]->draw(discardDensity, NULL);
-    
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
-    glDisableVertexAttribArray(NORMAL_ATTRIBUTE);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
 }
 
 void Model::draw(float discardDensity, SkeletonPose* skeletonPose) {
     if(!skeleton) {
-        printf("ERROR: No Skeleton for pose found.\n");
+        log(error_log, "No Skeleton for pose found.");
         return;
     }
     
@@ -926,16 +960,21 @@ void Model::draw(float discardDensity, SkeletonPose* skeletonPose) {
         lightManager.currentShadowLight->selectShaderProgram(true);
         currentShaderProgram->setUniformF("discardDensity", discardDensity);
         currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose->mats, skeleton->bones.size());
-    }
-    for(unsigned int i = 0; i < meshes.size(); i ++)
+        for(unsigned int i = 0; i < meshes.size(); i ++)
+            meshes[i]->draw(discardDensity, skeletonPose);
+    }else for(unsigned int i = 0; i < meshes.size(); i ++) {
+        if(meshes[i]->transparent) {
+            TransparentMesh* tMesh = new TransparentMesh();
+            tMesh->type = ObjectType_Animated;
+            tMesh->skeletonPose = skeletonPose;
+            tMesh->transformation = skeletonPose->mats[skeleton->rootBone->jointIndex];
+            tMesh->mesh = meshes[i];
+            tMesh->discardDensity = discardDensity;
+            objectManager.transparentAccumulator.push_back(tMesh);
+            continue;
+        }
         meshes[i]->draw(discardDensity, skeletonPose);
-    
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
-    glDisableVertexAttribArray(NORMAL_ATTRIBUTE);
-    glDisableVertexAttribArray(WEIGHT_ATTRIBUTE);
-    glDisableVertexAttribArray(JOINT_ATTRIBUTE);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
 }
 
 SkeletonPose::SkeletonPose(Skeleton* skeletonB) {
@@ -950,9 +989,6 @@ SkeletonPose::SkeletonPose(Skeleton* skeletonB) {
 
 SkeletonPose::~SkeletonPose() {
     delete [] mats;
-    /*std::map<std::string, Matrix4>::iterator bonePoseIterator;
-    for(bonePoseIterator = bonePoses.begin(); bonePoseIterator != bonePoses.end(); bonePoseIterator ++)
-        delete bonePoseIterator->second;*/
 }
 
 void SkeletonPose::calculateBonePose(Bone* bone, Bone* parentBone) {

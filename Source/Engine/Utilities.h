@@ -33,10 +33,17 @@
 #define xmlUsedCharType char
 #define VERSION "0.0.1"
 
+enum logMessageType {
+    info_log = 0,
+    warning_log = 1,
+    error_log = 2,
+    shader_log = 3
+};
+
+void log(logMessageType type, std::string message);
 void createDir(std::string path);
 char* readXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string filePath, unsigned int& fileSize, bool logs);
 bool writeXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string filePath);
-void msleep(unsigned long milisec);
 
 template <class T> inline const T max(T a, T b) {
 	return (b<a)?a:b;

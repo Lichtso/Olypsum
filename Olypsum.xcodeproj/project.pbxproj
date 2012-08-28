@@ -49,6 +49,7 @@
 		11A79BC9153C35CE002B9F0A /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = 11A79BC3153C35CA002B9F0A /* Fonts */; };
 		11A79BCC153C35CE002B9F0A /* Shaders in Resources */ = {isa = PBXBuildFile; fileRef = 11A79BC6153C35CC002B9F0A /* Shaders */; };
 		11B199B415D6CBD000A8A164 /* Decals.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11B199B215D6CBCF00A8A164 /* Decals.cpp */; };
+		11B2626F15E28DF7002C638D /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11B2626D15E28DF6002C638D /* Object.cpp */; };
 		11B9A9F115C4491D005A1766 /* Packages in Resources */ = {isa = PBXBuildFile; fileRef = 11B9A9F015C4491D005A1766 /* Packages */; };
 		11BD39AD15414AA6007846B8 /* Light.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11BD39AC15414AA6007846B8 /* Light.cpp */; };
 		11BD39B01541725F007846B8 /* Game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11BD39AF1541725F007846B8 /* Game.cpp */; };
@@ -150,6 +151,8 @@
 		11A79BC6153C35CC002B9F0A /* Shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Shaders; sourceTree = "<group>"; };
 		11B199B215D6CBCF00A8A164 /* Decals.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Decals.cpp; sourceTree = "<group>"; };
 		11B199B315D6CBCF00A8A164 /* Decals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Decals.h; sourceTree = "<group>"; };
+		11B2626D15E28DF6002C638D /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Object.cpp; sourceTree = "<group>"; };
+		11B2626E15E28DF6002C638D /* Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Object.h; sourceTree = "<group>"; };
 		11B9A9F015C4491D005A1766 /* Packages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Packages; sourceTree = "<group>"; };
 		11BB4D1E15BC818E0094A73B /* Menu.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Menu.h; sourceTree = "<group>"; };
 		11BD39AA15414A81007846B8 /* Light.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Light.h; sourceTree = "<group>"; };
@@ -272,6 +275,8 @@
 				118B60611573E2E8004C132E /* Audio.cpp */,
 				11A79B5C153C2FE9002B9F0A /* Model.h */,
 				11A79B5B153C2FE9002B9F0A /* Model.cpp */,
+				11B2626E15E28DF6002C638D /* Object.h */,
+				11B2626D15E28DF6002C638D /* Object.cpp */,
 				11F1EEB5156FE48B00F7275D /* ParticleSystem.h */,
 				11F1EEB7156FE49400F7275D /* ParticleSystem.cpp */,
 				11B199B315D6CBCF00A8A164 /* Decals.h */,
@@ -485,6 +490,7 @@
 				118B60621573E2E8004C132E /* Audio.cpp in Sources */,
 				1130ECBB15BC1CA600203C2E /* Menu.cpp in Sources */,
 				11B199B415D6CBD000A8A164 /* Decals.cpp in Sources */,
+				11B2626F15E28DF7002C638D /* Object.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -167,10 +167,10 @@ void ParticleSystemManager::draw() {
     modelMat.setIdentity();
     shaderPrograms[particleDrawSP]->use();
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-    glDepthMask(0);
+    glDepthMask(GL_FALSE);
     for(unsigned int p = 0; p < particleSystems.size(); p ++)
         particleSystems[p]->draw();
-    glDepthMask(1);
+    glDepthMask(GL_TRUE);
     glDisableVertexAttribArray(POSITION_ATTRIBUTE);
     glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

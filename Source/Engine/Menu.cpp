@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "AppMain.h"
+#import "Game.h"
 
 void handleMenuKeyUp(SDL_keysym* key) {
     if(key->sym == SDLK_ESCAPE) {
@@ -16,6 +16,9 @@ void handleMenuKeyUp(SDL_keysym* key) {
                 break;
             case optionsMenu:
                 setMenu((gameStatus == noGame) ? mainMenu : gameEscMenu);
+                break;
+            case creditsMenu:
+                setMenu(mainMenu);
                 break;
             case inGameMenu:
                 setMenu(gameEscMenu);
@@ -31,6 +34,15 @@ void setMenu(MenuName menu) {
     currentMenu = menu;
     if(currentScreenView) delete currentScreenView;
     currentScreenView = new GUIScreenView();
+    
+    if(gameStatus == noGame) {
+        GUIImage* image = new GUIImage();
+        image->texture = fileManager.getPackage("Default")->getTexture("background.png", GL_RGB);
+        image->sizeAlignment = GUISizeAlignment_Height;
+        image->width = videoInfo->current_w*0.5;
+        image->updateContent();
+        currentScreenView->addChild(image);
+    }
     
     switch(menu) {
         case loadingMenu: {
@@ -52,18 +64,20 @@ void setMenu(MenuName menu) {
         } break;
         case mainMenu: {
             GUIFramedView* view = new GUIFramedView();
-            view->width = videoInfo->current_w*0.09;
+            view->width = videoInfo->current_w*0.1;
             view->height = videoInfo->current_w*0.135;
-            view->posX = videoInfo->current_w*-0.38;
+            view->posX = videoInfo->current_w*-0.36;
             view->innerShadow = -8;
             currentScreenView->addChild(view);
             
             std::function<void(GUIButton*)> onClick[] = {
                 [](GUIButton* button) {
                     gameStatus = localGame;
+                    initScene();
                     setMenu(inGameMenu);
                 }, [](GUIButton* button) {
                     gameStatus = localGame;
+                    initScene();
                     setMenu(inGameMenu);
                 }, [](GUIButton* button) {
                     setMenu(optionsMenu);
@@ -82,7 +96,7 @@ void setMenu(MenuName menu) {
                 label->text = localization.localizeString(buttonLabels[i]);
                 label->textAlign = GUITextAlign_Left;
                 label->fontHeight = videoInfo->current_h*0.05;
-                label->width = videoInfo->current_w*0.07;
+                label->width = videoInfo->current_w*0.08;
                 label->sizeAlignment = GUISizeAlignment_Height;
                 button->addChild(label);
                 button->onClick = onClick[i];

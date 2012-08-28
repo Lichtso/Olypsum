@@ -23,8 +23,9 @@ enum MenuName {
 
 enum GameStatusName {
     noGame = 0,
-    localGame = 1,
-    networkGame = 2
+    editorMode = 1,
+    localGame = 2,
+    networkGame = 3
 };
 
 void handleMenuKeyUp(SDL_keysym* key);

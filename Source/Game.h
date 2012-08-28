@@ -11,6 +11,7 @@
 #ifndef Game_h
 #define Game_h
 
+void initScene();
 void renderScene();
 void calculateFrame();
 

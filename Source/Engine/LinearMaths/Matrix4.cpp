@@ -35,12 +35,16 @@ Matrix4::Matrix4(float matData[16]) {
     pos = Vector3(matData[12], matData[13], matData[14], matData[15]);
 }
 
-void Matrix4::print() {
-    printf("Matrix4:\n");
-    printf("x: %f, %f, %f, %f\n", x.x, x.y, x.z, x.w);
-    printf("y: %f, %f, %f, %f\n", y.x, y.y, y.z, y.w);
-    printf("z: %f, %f, %f, %f\n", z.x, z.y, z.z, z.w);
-    printf("pos: %f, %f, %f, %f\n", pos.x, pos.y, pos.z, pos.w);
+std::string Matrix4::getString() {
+    char buffer[64];
+    sprintf(buffer, "(%f, %f, %f, %f,\n", x.x, x.y, x.z, x.w);
+    std::string str = buffer;
+    sprintf(buffer, "%f, %f, %f, %f,\n", y.x, y.y, y.z, y.w);
+    str += buffer;
+    sprintf(buffer, "%f, %f, %f, %f,\n", z.x, z.y, z.z, z.w);
+    str += buffer;
+    sprintf(buffer, "%f, %f, %f, %f)", pos.x, pos.y, pos.z, pos.w);
+    return str+buffer;
 }
 
 btTransform Matrix4::getMatrix() {

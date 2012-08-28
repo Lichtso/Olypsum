@@ -21,7 +21,7 @@ class Vector3 {
     Vector3(btVector3 const &vec);
     Vector3(float x, float y, float z);
     Vector3(float x, float y, float z, float w);
-    void print();
+    std::string getString();
     btVector3 getVector();
     float getLength();
     Vector3 getNormalized();

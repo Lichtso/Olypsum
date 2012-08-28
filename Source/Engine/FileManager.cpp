@@ -290,21 +290,27 @@ void FileManager::releaseTexture(Texture* texture) {
     std::map<std::string, FilePackage*>::iterator iterator;
     for(iterator = filePackages.begin(); iterator != filePackages.end(); iterator ++)
         if(iterator->second->releaseTexture(texture)) return;
-    printf("Texture allready released: %p\n", texture);
+    char buffer[64];
+    sprintf(buffer, "Texture allready released: %p\n", texture);
+    log(error_log, buffer);
 }
 
 void FileManager::releaseModel(Model* model) {
     std::map<std::string, FilePackage*>::iterator iterator;
     for(iterator = filePackages.begin(); iterator != filePackages.end(); iterator ++)
         if(iterator->second->releaseModel(model)) return;
-    printf("Model allready released: %p\n", model);
+    char buffer[64];
+    sprintf(buffer, "Model allready released: %p\n", model);
+    log(error_log, buffer);
 }
 
 void FileManager::releaseSoundTrack(SoundTrack* soundTrack) {
     std::map<std::string, FilePackage*>::iterator iterator;
     for(iterator = filePackages.begin(); iterator != filePackages.end(); iterator ++)
         if(iterator->second->releaseSoundTrack(soundTrack)) return;
-    printf("SoundTrack allready released: %p\n", soundTrack);
+    char buffer[64];
+    sprintf(buffer, "SoundTrack allready released: %p\n", soundTrack);
+    log(error_log, buffer);
 }
 
 FileManager fileManager;
