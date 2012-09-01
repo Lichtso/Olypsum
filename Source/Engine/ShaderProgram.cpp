@@ -261,7 +261,7 @@ Matrix4 modelMat;
 ShaderProgram *shaderPrograms[], *currentShaderProgram;
 float screenBlurFactor = -1.0;
 bool edgeSmoothEnabled = false, fullScreenEnabled = false, cubemapsEnabled = false;
-unsigned char depthOfFieldQuality = 0, bumpMappingQuality = 1, shadowQuality = 1, ssaoQuality = 0, particleCalcTarget = 2;
+unsigned char depthOfFieldQuality = 0, bumpMappingQuality = 1, shadowQuality = 1, ssaoQuality = 0, blendingQuality = 2, particleCalcTarget = 2;
 
 void loadStaticShaderPrograms() {
     std::vector<GLenum> shaderTypeVertexFragment = { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER };
@@ -303,9 +303,10 @@ void loadDynamicShaderPrograms() {
     std::vector<GLenum> shaderTypeVertexFragmentGeometry = { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_GEOMETRY_SHADER_EXT };
     
     std::vector<const char*> shaderProgramMacros;
-    char depthOfFieldMacro[32], ssaoQualityMacro[32], bumpMappingMacro[32], shadowQualityMacro[32];
+    char depthOfFieldMacro[32], ssaoQualityMacro[32], blendingQualityMacro[32], bumpMappingMacro[32], shadowQualityMacro[32];
     sprintf(depthOfFieldMacro, "DOF_QUALITY %d", depthOfFieldQuality);
     sprintf(ssaoQualityMacro, "SSAO_QUALITY %d", ssaoQuality);
+    sprintf(blendingQualityMacro, "BLENDING_QUALITY %d", blendingQuality);
     sprintf(bumpMappingMacro, "BUMP_MAPPING %d", min(bumpMappingQuality, (unsigned char) 2));
     sprintf(shadowQualityMacro, "SHADOW_QUALITY %d", shadowQuality);
     
@@ -417,9 +418,15 @@ void loadDynamicShaderPrograms() {
         glUniform2fv(glGetUniformLocation(shaderPrograms[ssaoSP]->GLname, "pSphere"), samples, pSphere);
     }
     
-    shaderPrograms[deferredCombineSP]->loadShaderProgram("deferredShader", shaderTypeVertexFragment, { ssaoQualityMacro });
+    shaderPrograms[deferredCombineSP]->loadShaderProgram("deferredShader", shaderTypeVertexFragment, { "BLENDING_QUALITY 0", ssaoQualityMacro });
     shaderPrograms[deferredCombineSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[deferredCombineSP]->link();
+    
+    if(blendingQuality > 0) {
+        shaderPrograms[deferredCombineTransparentSP]->loadShaderProgram("deferredShader", shaderTypeVertexFragment, { blendingQualityMacro, "SSAO_QUALITY 0" });
+        shaderPrograms[deferredCombineTransparentSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+        shaderPrograms[deferredCombineTransparentSP]->link();
+    }
     
     if(edgeSmoothEnabled) {
         shaderPrograms[edgeSmoothSP]->loadShaderProgram("postProcessing", shaderTypeVertexFragment, { "PROCESSING_TYPE 1" });
@@ -428,7 +435,7 @@ void loadDynamicShaderPrograms() {
     }
     
     if(depthOfFieldQuality) {
-        shaderPrograms[depthOfFieldSP]->loadShaderProgram("postProcessing", shaderTypeVertexFragment, { "PROCESSING_TYPE 2" });
+        shaderPrograms[depthOfFieldSP]->loadShaderProgram("postProcessing", shaderTypeVertexFragment, { "PROCESSING_TYPE 2", depthOfFieldMacro });
         shaderPrograms[depthOfFieldSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[depthOfFieldSP]->link();
     }
@@ -448,19 +455,19 @@ void loadDynamicShaderPrograms() {
         }
     }
     
-    shaderPrograms[glassGeometrySP]->loadShaderProgram("transparent", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 0", "BUMP_MAPPING 0" });
+    shaderPrograms[glassGeometrySP]->loadShaderProgram("transparent", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 0", blendingQualityMacro, "BUMP_MAPPING 0" });
     shaderPrograms[glassGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[glassGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[glassGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
     shaderPrograms[glassGeometrySP]->link();
     
-    shaderPrograms[glassBumpGeometrySP]->loadShaderProgram("transparent", (bumpMappingQuality) ? shaderTypeVertexFragmentGeometry : shaderTypeVertexFragment, { "SKELETAL_ANIMATION 0", bumpMappingMacro });
+    shaderPrograms[glassBumpGeometrySP]->loadShaderProgram("transparent", (bumpMappingQuality) ? shaderTypeVertexFragmentGeometry : shaderTypeVertexFragment, { "SKELETAL_ANIMATION 0", blendingQualityMacro, bumpMappingMacro });
     shaderPrograms[glassBumpGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[glassBumpGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[glassBumpGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
     shaderPrograms[glassBumpGeometrySP]->link();
     
-    shaderPrograms[glassSkeletalGeometrySP]->loadShaderProgram("transparent", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 1", "BUMP_MAPPING 0" });
+    shaderPrograms[glassSkeletalGeometrySP]->loadShaderProgram("transparent", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 1", blendingQualityMacro, "BUMP_MAPPING 0" });
     shaderPrograms[glassSkeletalGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[glassSkeletalGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[glassSkeletalGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
@@ -468,7 +475,7 @@ void loadDynamicShaderPrograms() {
     shaderPrograms[glassSkeletalGeometrySP]->addAttribute(JOINT_ATTRIBUTE, "joints");
     shaderPrograms[glassSkeletalGeometrySP]->link();
     
-    shaderPrograms[glassSkeletalBumpGeometrySP]->loadShaderProgram("transparent", (bumpMappingQuality) ? shaderTypeVertexFragmentGeometry : shaderTypeVertexFragment, { "SKELETAL_ANIMATION 1", bumpMappingMacro });
+    shaderPrograms[glassSkeletalBumpGeometrySP]->loadShaderProgram("transparent", (bumpMappingQuality) ? shaderTypeVertexFragmentGeometry : shaderTypeVertexFragment, { "SKELETAL_ANIMATION 1", blendingQualityMacro, bumpMappingMacro });
     shaderPrograms[glassSkeletalBumpGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[glassSkeletalBumpGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[glassSkeletalBumpGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
@@ -476,9 +483,11 @@ void loadDynamicShaderPrograms() {
     shaderPrograms[glassSkeletalBumpGeometrySP]->addAttribute(JOINT_ATTRIBUTE, "joints");
     shaderPrograms[glassSkeletalBumpGeometrySP]->link();
     
-    shaderPrograms[waterSP]->loadShaderProgram("transparent", shaderTypeVertexFragmentGeometry, { "SKELETAL_ANIMATION 0", "BUMP_MAPPING 2" });
+    shaderPrograms[waterSP]->loadShaderProgram("transparent", shaderTypeVertexFragmentGeometry, { "SKELETAL_ANIMATION 0", blendingQualityMacro, "BUMP_MAPPING 2" });
     shaderPrograms[waterSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[waterSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
     shaderPrograms[waterSP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
     shaderPrograms[waterSP]->link();
+    
+    mainFBO.init();
 }

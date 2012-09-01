@@ -100,7 +100,6 @@ void AppMain(int argc, char *argv[]) {
     mainFont = new TextFont();
     mainFont->size = videoInfo->current_h*0.05;
     mainFont->loadTTF("font");
-    mainFBO.init();
     lightManager.init();
     decalManager.init();
     
@@ -159,7 +158,9 @@ void AppMain(int argc, char *argv[]) {
                     //TODO: CAM Test
                     mainCam->camMat.setIdentity();
                     //mainCam->camMat.rotateX(0.5);
-                    mainCam->camMat.translate(Vector3(1.5-3.0*event.button.x/screen->w, 3.0*event.button.y/screen->h+1.5, 3));
+                    //mainCam->camMat.translate(Vector3(1.5-3.0*event.button.x/screen->w, 3.0*event.button.y/screen->h+1.5, 3));
+                    mainCam->camMat.translate(Vector3(0.0, 1.5, 3));
+                    if(lightManager.lights.size() > 0) lightManager.lights[0]->position = Vector3(0.5-3.0*event.button.x/screen->w, 3.0*event.button.y/screen->h+1.5, 1.5);
                 break;
                 case SDL_QUIT:
                     AppTerminate();
@@ -191,12 +192,11 @@ void AppMain(int argc, char *argv[]) {
             particleSystemManager.calculate();
             decalManager.calculate();
             mainCam->use();
-            mainFBO.renderInDeferredBuffers();
-            renderScene();
+            mainFBO.renderInDeferredBuffers(false);
             objectManager.draw();
             decalManager.draw();
             particleSystemManager.draw();
-            lightManager.useLights();
+            lightManager.drawDeferred();
         }
         if(currentScreenView) currentScreenView->draw();
         SDL_GL_SwapBuffers();

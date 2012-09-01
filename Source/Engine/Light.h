@@ -28,7 +28,7 @@ class Light {
     Vector3 color;
     Light();
     ~Light();
-    virtual bool calculateShadowmap();
+    virtual bool calculate(bool shadowActive);
     virtual void deleteShadowmap();
     virtual void use();
     virtual void selectShaderProgram(bool skeletal);
@@ -45,7 +45,7 @@ class DirectionalLight : public Light {
     public:
     float width, height;
     DirectionalLight();
-    bool calculateShadowmap();
+    bool calculate(bool shadowActive);
     void deleteShadowmap();
     void use();
     void selectShaderProgram(bool skeletal);
@@ -55,7 +55,7 @@ class SpotLight : public Light {
     public:
     float cutoff;
     SpotLight();
-    bool calculateShadowmap();
+    bool calculate(bool shadowActive);
     void deleteShadowmap();
     void use();
     void selectShaderProgram(bool skeletal);
@@ -67,7 +67,7 @@ class PositionalLight : public Light {
     bool omniDirectional;
     PositionalLight();
     ~PositionalLight();
-    bool calculateShadowmap();
+    bool calculate(bool shadowActive);
     void deleteShadowmap();
     void use();
     void selectShaderProgram(bool skeletal);
@@ -82,7 +82,8 @@ class LightManager {
     void init();
     void clear();
     void calculateShadows(unsigned int maxShadows);
-    void useLights();
+    void illuminate();
+    void drawDeferred();
 };
 
 extern LightManager lightManager;

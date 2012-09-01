@@ -15,6 +15,8 @@ void handleMenuKeyUp(SDL_keysym* key) {
                 AppTerminate();
                 break;
             case optionsMenu:
+                fileManager.saveOptions();
+                loadDynamicShaderPrograms();
                 setMenu((gameStatus == noGame) ? mainMenu : gameEscMenu);
                 break;
             case creditsMenu:
@@ -37,7 +39,7 @@ void setMenu(MenuName menu) {
     
     if(gameStatus == noGame) {
         GUIImage* image = new GUIImage();
-        image->texture = fileManager.getPackage("Default")->getTexture("background.png", GL_RGB);
+        image->texture = fileManager.getPackage("Default")->getTexture("background.png", GL_COMPRESSED_RGB);
         image->sizeAlignment = GUISizeAlignment_Height;
         image->width = videoInfo->current_w*0.5;
         image->updateContent();
@@ -47,7 +49,7 @@ void setMenu(MenuName menu) {
     switch(menu) {
         case loadingMenu: {
             GUIImage* image = new GUIImage();
-            image->texture = fileManager.getPackage("Default")->getTexture("logo.png", GL_RGBA);
+            image->texture = fileManager.getPackage("Default")->getTexture("logo.png", GL_COMPRESSED_RGBA);
             image->sizeAlignment = GUISizeAlignment_Height;
             image->width = videoInfo->current_w*0.4;
             image->posY = videoInfo->current_h*0.1;
@@ -140,10 +142,13 @@ void setMenu(MenuName menu) {
                     fullScreenEnabled = (checkBox->state == GUIButtonStatePressed);
                 }, [](GUICheckBox* checkBox) {
                     edgeSmoothEnabled = (checkBox->state == GUIButtonStatePressed);
+                    if(gameStatus != noGame) loadDynamicShaderPrograms();
                 }, [](GUICheckBox* checkBox) {
                     cubemapsEnabled = (checkBox->state == GUIButtonStatePressed);
+                    if(gameStatus != noGame) loadDynamicShaderPrograms();
                 }, [](GUICheckBox* checkBox) {
                     screenBlurFactor = (checkBox->state == GUIButtonStatePressed) ? 0.0 : -1.0;
+                    if(gameStatus != noGame) loadDynamicShaderPrograms();
                 }
             };
             bool checkBoxActive[] = { fullScreenEnabled, edgeSmoothEnabled, cubemapsEnabled, (screenBlurFactor > -1.0) };
@@ -166,21 +171,28 @@ void setMenu(MenuName menu) {
                 view->addChild(checkBox);
             }
             
-            unsigned int sliderSteps[] = { 3, 3, 4, 5 };
+            unsigned int sliderSteps[] = { 3, 3, 4, 5, 3 };
             std::function<void(GUISlider*)> onChange[] = {
                 [](GUISlider* slider) {
                     depthOfFieldQuality = slider->value*3.0;
+                    if(gameStatus != noGame) loadDynamicShaderPrograms();
                 }, [](GUISlider* slider) {
                     bumpMappingQuality = slider->value*3.0;
+                    if(gameStatus != noGame) loadDynamicShaderPrograms();
                 }, [](GUISlider* slider) {
                     shadowQuality = slider->value*4.0;
+                    if(gameStatus != noGame) loadDynamicShaderPrograms();
                 }, [](GUISlider* slider) {
                     ssaoQuality = slider->value*5.0;
+                    if(gameStatus != noGame) loadDynamicShaderPrograms();
+                }, [](GUISlider* slider) {
+                    blendingQuality = slider->value*3.0;
+                    if(gameStatus != noGame) loadDynamicShaderPrograms();
                 }
             };
-            unsigned char sliderValues[] = { depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality };
-            const char* sliderLabels[] = { "depthOfFieldQuality", "bumpMappingQuality", "shadowQuality", "ssaoQuality", "particleCalcTarget" };
-            for(unsigned char i = 0; i < 5; i ++) {
+            unsigned char sliderValues[] = { depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, blendingQuality };
+            const char* sliderLabels[] = { "depthOfFieldQuality", "bumpMappingQuality", "shadowQuality", "ssaoQuality", "blendingQuality", "particleCalcTarget" };
+            for(unsigned char i = 0; i < 6; i ++) {
                 label = new GUILabel();
                 label->posX = videoInfo->current_w*0.12;
                 label->posY = videoInfo->current_h*(0.03-0.06*i);
@@ -190,7 +202,7 @@ void setMenu(MenuName menu) {
                 label->textAlign = GUITextAlign_Left;
                 label->sizeAlignment = GUISizeAlignment_Height;
                 view->addChild(label);
-                if(i == 4) break;
+                if(i == 5) break;
                 GUISlider* slider = new GUISlider();
                 slider->posX = videoInfo->current_w*-0.12;
                 slider->posY = label->posY;
@@ -204,7 +216,7 @@ void setMenu(MenuName menu) {
             GUITabs* tabs = new GUITabs();
             tabs->deactivatable = false;
             tabs->posX = videoInfo->current_w*-0.12;
-            tabs->posY = videoInfo->current_h*-0.21;
+            tabs->posY = videoInfo->current_h*-0.27;
             tabs->width = videoInfo->current_w*0.08;
             tabs->sizeAlignment = GUISizeAlignment_Height;
             tabs->selectedIndex = particleCalcTarget;

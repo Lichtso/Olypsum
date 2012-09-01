@@ -46,10 +46,10 @@ class ShaderProgram {
 };
 
 extern Matrix4 modelMat;
-extern ShaderProgram *shaderPrograms[31], *currentShaderProgram;
+extern ShaderProgram *shaderPrograms[32], *currentShaderProgram;
 extern float screenBlurFactor;
 extern bool edgeSmoothEnabled, fullScreenEnabled, cubemapsEnabled;
-extern unsigned char depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, particleCalcTarget;
+extern unsigned char depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, blendingQuality, particleCalcTarget;
 
 enum ShaderProgramNames {
     normalMapGenSP = 0,
@@ -74,15 +74,16 @@ enum ShaderProgramNames {
     positionalShadowDualLightSP = 19,
     ssaoSP = 20,
     deferredCombineSP = 21,
-    edgeSmoothSP = 22,
-    depthOfFieldSP = 23,
-    particleDrawSP = 24,
-    particleCalculateSP = 25,
-    glassGeometrySP = 26,
-    glassBumpGeometrySP = 27,
-    glassSkeletalGeometrySP = 28,
-    glassSkeletalBumpGeometrySP = 29,
-    waterSP = 30
+    deferredCombineTransparentSP = 22,
+    edgeSmoothSP = 23,
+    depthOfFieldSP = 24,
+    particleDrawSP = 25,
+    particleCalculateSP = 26,
+    glassGeometrySP = 27,
+    glassBumpGeometrySP = 28,
+    glassSkeletalGeometrySP = 29,
+    glassSkeletalBumpGeometrySP = 30,
+    waterSP = 31
 };
 
 void loadStaticShaderPrograms();

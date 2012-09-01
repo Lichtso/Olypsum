@@ -121,7 +121,7 @@ void main() {
     #endif
     
     diffuseLight += lColor*intensity*max(dot(lightDir, normal), 0.0);
-    specularLight += lColor*intensity*pow(max(dot(reflect(lightDir, normal), normalize(pos-camPos)), 0.0), material.r*10.0+1.0)*material.g;
+    specularLight += lColor*intensity*pow(max(dot(reflect(lightDir, normal), normalize(pos-camPos)), 0.0), material.r*19.0+1.0)*material.g;
     
     gl_FragData[0].rgb = min(diffuseLight, 1.0);
     gl_FragData[0].a = 1.0;

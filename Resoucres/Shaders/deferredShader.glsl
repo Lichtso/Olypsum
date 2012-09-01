@@ -15,14 +15,25 @@ uniform sampler2DRect sampler3;
 #if SSAO_QUALITY
 uniform sampler2DRect sampler4;
 uniform sampler2DRect sampler5;
+#elif BLENDING_QUALITY == 1
+uniform sampler2DRect sampler4;
 #endif
 
 void main() {
-    vec3 color = texture2DRect(sampler0, gl_FragCoord.xy).rgb,
-         diffuse = texture2DRect(sampler1, gl_FragCoord.xy).rgb+vec3(0.2),
+    #if BLENDING_QUALITY
+    vec4 color = texture2DRect(sampler0, gl_FragCoord.xy);
+    if(color.a == 0.0) discard;
+    #if BLENDING_QUALITY == 1
+    color.rgb *= color.a;
+    color.rgb += texture2DRect(sampler4, gl_FragCoord.xy).rgb*(1.0-color.a);
+    #endif
+    #else
+    vec3 color = texture2DRect(sampler0, gl_FragCoord.xy).rgb;
+    #endif
+    vec3 diffuse = texture2DRect(sampler1, gl_FragCoord.xy).rgb+vec3(0.2),
          specular = texture2DRect(sampler2, gl_FragCoord.xy).rgb;
     float emission = texture2DRect(sampler3, gl_FragCoord.xy).b;
-        
+    
     #if SSAO_QUALITY
     vec2 uvPos;
     vec3 normal = texture2DRect(sampler4, gl_FragCoord.xy).xyz;
@@ -42,9 +53,9 @@ void main() {
     else
         ambientOcclusion = texture2DRect(sampler5, gl_FragCoord.xy*0.5).x;
     
-    gl_FragData[0].rgb = color*diffuse*ambientOcclusion+color*emission+specular;
+    gl_FragData[0].rgb = color.rgb*diffuse*ambientOcclusion+color.rgb*emission+specular;
     #else
-    gl_FragData[0].rgb = color*(diffuse+vec3(emission))+specular;
+    gl_FragData[0].rgb = color.rgb*(diffuse+vec3(emission))+specular;
     #endif
     gl_FragData[0].a = 1.0;
 }

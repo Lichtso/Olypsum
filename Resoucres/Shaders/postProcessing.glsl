@@ -51,7 +51,7 @@ void main() {
 #elif PROCESSING_TYPE == 2
 
 void main() {
-	float factor = max(0.0, texture2DRect(sampler0, gl_FragCoord.xy).x-0.85)*10.0;
+	float factor = max(0.0, texture2DRect(sampler0, gl_FragCoord.xy).x-0.75)*10.0;
     gl_FragData[0].rgb = vec3(0.0);
     const float blurWidth = float(DOF_QUALITY);
 	for(float x = -blurWidth; x <= blurWidth; x ++)

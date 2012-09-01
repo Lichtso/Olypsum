@@ -22,6 +22,7 @@
 	<entry key="bumpMappingQuality">Surface Quality</entry>
 	<entry key="shadowQuality">Shadow Quality</entry>
 	<entry key="ssaoQuality">SSAO Quality</entry>
+	<entry key="blendingQuality">Blending Quality</entry>
 	<entry key="particleCalcTarget">Particle Systems</entry>
 	<entry key="on">On</entry>
 	<entry key="off">Off</entry>

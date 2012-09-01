@@ -109,6 +109,11 @@ bool Texture::uploadToVRAM(GLenum textureTarget, GLenum format) {
     if(textureTarget == GL_TEXTURE_2D)
         glGenerateMipmap(textureTarget);
     
+    GLint compressed;
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_COMPRESSED, &compressed);
+    if(!compressed)
+        log(info_log, "Texture has not been compressed.");
+    
     return true;
 }
 

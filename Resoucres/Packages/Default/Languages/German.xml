@@ -22,6 +22,7 @@
 	<entry key="bumpMappingQuality">Oberflächenqualität</entry>
 	<entry key="shadowQuality">Schattenqualität</entry>
 	<entry key="ssaoQuality">SSAO-Qualität</entry>
+	<entry key="blendingQuality">Mischungsqualität</entry>
 	<entry key="particleCalcTarget">Partikel-Systeme</entry>
 	<entry key="on">An</entry>
 	<entry key="off">Aus</entry>

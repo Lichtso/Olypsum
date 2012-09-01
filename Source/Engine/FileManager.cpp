@@ -204,6 +204,7 @@ void FileManager::loadOptions() {
         bumpMappingQuality = readOptionUInt(graphics->first_node("bumpMappingQuality"));
         shadowQuality = readOptionUInt(graphics->first_node("shadowQuality"));
         ssaoQuality = readOptionUInt(graphics->first_node("ssaoQuality"));
+        blendingQuality = readOptionUInt(graphics->first_node("blendingQuality"));
         particleCalcTarget = readOptionUInt(graphics->first_node("particleCalcTarget"));
         delete [] fileData;
     }else saveOptions();
@@ -232,7 +233,7 @@ void FileManager::saveOptions() {
     graphics->name("graphics");
     options->append_node(graphics);
     
-    char str[20];
+    char str[24];
     addOption(doc, graphics, "screenBlurEnabled", (screenBlurFactor > -1.0) ? "true" : "false");
     addOption(doc, graphics, "edgeSmoothEnabled", (edgeSmoothEnabled) ? "true" : "false");
     addOption(doc, graphics, "fullScreenEnabled", (fullScreenEnabled) ? "true" : "false");
@@ -245,8 +246,10 @@ void FileManager::saveOptions() {
     addOption(doc, graphics, "shadowQuality", &str[8]);
     sprintf(&str[12], "%d", ssaoQuality);
     addOption(doc, graphics, "ssaoQuality", &str[12]);
-    sprintf(&str[16], "%d", particleCalcTarget);
-    addOption(doc, graphics, "particleCalcTarget", &str[16]);
+    sprintf(&str[16], "%d", blendingQuality);
+    addOption(doc, graphics, "blendingQuality", &str[16]);
+    sprintf(&str[20], "%d", particleCalcTarget);
+    addOption(doc, graphics, "particleCalcTarget", &str[20]);
     
     writeXmlFile(doc, gameDataDir+"Options.xml");
 }

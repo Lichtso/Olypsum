@@ -84,9 +84,13 @@ float Light::getPriority(Vector3 position) {
     }
 }
 
-bool Light::calculateShadowmap() {
+bool Light::calculate(bool shadowActive) {
+    if(!shadowActive) {
+        deleteShadowmap();
+        return false;
+    }
     if(!shadowMap) {
-        shadowMap = mainFBO.addTexture(1024, true, false);
+        shadowMap = mainFBO.addTexture(min(1024U, mainFBO.maxSize), true, false);
         if(!shadowMap) {
             deleteShadowmap();
             return false;
@@ -129,7 +133,7 @@ DirectionalLight::DirectionalLight() {
     shadowCam.near = 1.0;
 }
 
-bool DirectionalLight::calculateShadowmap() {
+bool DirectionalLight::calculate(bool shadowActive) {
     shadowCam.camMat.setIdentity();
     shadowCam.camMat.setDirection(direction, upDir);
     shadowCam.camMat.translate(position);
@@ -138,11 +142,10 @@ bool DirectionalLight::calculateShadowmap() {
     shadowCam.far = range;
     shadowCam.calculate();
     shadowCam.use();
-    if(!Light::calculateShadowmap()) return false;
+    if(!Light::calculate(shadowActive)) return false;
     glDisable(GL_BLEND);
-    glClearColor(1, 1, 1, 1);
     mainFBO.renderInTexture(shadowMap, 0);
-    renderScene();
+    objectManager.draw();
     glEnable(GL_BLEND);
     return true;
 }
@@ -196,7 +199,7 @@ SpotLight::SpotLight() {
     shadowCam.near = 0.1;
 }
 
-bool SpotLight::calculateShadowmap() {
+bool SpotLight::calculate(bool shadowActive) {
     shadowCam.camMat.setIdentity();
     shadowCam.camMat.setDirection(direction, upDir);
     shadowCam.camMat.translate(position);
@@ -204,9 +207,8 @@ bool SpotLight::calculateShadowmap() {
     shadowCam.far = range;
     shadowCam.calculate();
     shadowCam.use();
-    if(!Light::calculateShadowmap()) return false;
+    if(!Light::calculate(shadowActive)) return false;
     glDisable(GL_BLEND);
-    glClearColor(1, 1, 1, 1);
     mainFBO.renderInTexture(shadowMap, 0);
     //Render circle mask
     float vertices[12] = { -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0 };
@@ -214,8 +216,9 @@ bool SpotLight::calculateShadowmap() {
     shaderPrograms[spotShadowCircleLightSP]->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
     glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    renderScene();
+    objectManager.draw();
     glEnable(GL_BLEND);
+    
     return true;
 }
 
@@ -278,8 +281,16 @@ PositionalLight::~PositionalLight() {
     if(shadowMapB) mainFBO.deleteTexture(shadowMapB);
 }
 
-bool PositionalLight::calculateShadowmap() {
+bool PositionalLight::calculate(bool shadowActive) {
+    shadowCam.camMat.setIdentity();
+    shadowCam.camMat.setDirection(direction, upDir);
+    shadowCam.camMat.translate(position);
+    shadowCam.use();
     if(cubemapsEnabled) {
+        if(!shadowActive) {
+            deleteShadowmap();
+            return false;
+        }
         if(!shadowMap) {
             shadowMap = mainFBO.addTexture(1024, true, true);
             if(!shadowMap) {
@@ -289,18 +300,13 @@ bool PositionalLight::calculateShadowmap() {
         }
         lightManager.currentShadowLight = this;
     }else{
-        shadowCam.camMat.setIdentity();
-        shadowCam.camMat.setDirection(direction, upDir);
-        shadowCam.camMat.translate(position);
-        shadowCam.use();
         shadowCam.frustum.hemisphere = true;
-        if(!Light::calculateShadowmap()) return false;
+        if(!Light::calculate(shadowActive)) return false;
         if(omniDirectional && !shadowMapB)
             shadowMapB = mainFBO.addTexture(1024, true, false);
     }
     
     glDisable(GL_BLEND);
-    glClearColor(1, 1, 1, 1);
     Matrix4 viewMat;
     if(cubemapsEnabled) {
         for(GLenum side = GL_TEXTURE_CUBE_MAP_POSITIVE_X; side <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; side ++) {
@@ -334,7 +340,7 @@ bool PositionalLight::calculateShadowmap() {
             shadowCam.calculate();
             shadowCam.use();
             mainFBO.renderInTexture(shadowMap, side);
-            renderScene();
+            objectManager.draw();
         }
         shadowCam.camMat.setIdentity();
         shadowCam.camMat.setDirection(direction, upDir);
@@ -349,11 +355,11 @@ bool PositionalLight::calculateShadowmap() {
             shadowCam.viewMat = viewMat;
             shadowCam.viewMat.scale(Vector3(-1.0, 1.0, -1.0));
             mainFBO.renderInTexture(shadowMapB, 0);
-            renderScene();
+            objectManager.draw();
         }
         shadowCam.viewMat = viewMat;
         mainFBO.renderInTexture(shadowMap, 0);
-        renderScene();
+        objectManager.draw();
     }
     glEnable(GL_BLEND);
     return true;
@@ -517,7 +523,7 @@ void LightManager::init() {
     randomNormalMap.width = 128;
     randomNormalMap.height = 128;
     randomNormalMap.loadRandomInRAM();
-    randomNormalMap.uploadToVRAM(GL_TEXTURE_2D, GL_RGB);
+    randomNormalMap.uploadToVRAM(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
     randomNormalMap.unloadFromRAM();
 }
 
@@ -533,27 +539,26 @@ void LightManager::calculateShadows(unsigned int maxShadows) {
     lightPrioritySorter.position = currentCam->camMat.pos;
     std::sort(lights.begin(), lights.end(), lightPrioritySorter);
     
-    for(unsigned int i = 0; i < lights.size(); i ++) {
-        if(i < maxShadows)
-            lights[i]->calculateShadowmap();
-        else
-            lights[i]->deleteShadowmap();
-    }
+    for(unsigned int i = 0; i < lights.size(); i ++)
+        lights[i]->calculate(i < maxShadows);
     
     currentShadowLight = NULL;
 }
 
-void LightManager::useLights() {
-    mainFBO.clearDeferredBuffers();
-    
-    glDepthMask(GL_FALSE);
-    glDisable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
+void LightManager::illuminate() {
     for(unsigned int i = 0; i < lights.size(); i ++)
         lights[i]->use();
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glFrontFace(GL_CCW);
+    glDisable(GL_DEPTH_TEST);
+}
+
+void LightManager::drawDeferred() {
+    glDisable(GL_BLEND);
+    glDepthMask(GL_FALSE);
+    glDisable(GL_DEPTH_TEST);
+    illuminate();
     
     if(ssaoQuality) {
         glViewport(0, 0, videoInfo->current_w >> 1, videoInfo->current_h >> 1);
@@ -564,8 +569,7 @@ void LightManager::useLights() {
     }
     
     shaderPrograms[deferredCombineSP]->use();
-    mainFBO.renderDeferred(true, inBuffersC, (ssaoQuality) ? 6 : 4, outBuffersC, 1);
-    
+    mainFBO.renderDeferred(true, inBuffersC, (ssaoQuality) ? 6 : 4, outBuffersC, (objectManager.transparentAccumulator.size() > 0) ? 1 : 0);
     mainFBO.renderTransparentInDeferredBuffers();
     
     if(screenBlurFactor > 0.0) {

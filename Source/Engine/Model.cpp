@@ -52,12 +52,12 @@ void Mesh::draw(float discardDensity, SkeletonPose* skeletonPose) {
     if(heightMap) {
         if(!lightManager.currentShadowLight) {
             if(skeletonPose) {
-                if(transparent)
+                if(transparent && blendingQuality > 0)
                     shaderPrograms[glassSkeletalBumpGeometrySP]->use();
                 else
                     shaderPrograms[skeletalBumpGeometrySP]->use();
             }else{
-                if(transparent)
+                if(transparent && blendingQuality > 0)
                     shaderPrograms[glassBumpGeometrySP]->use();
                 else
                     shaderPrograms[solidBumpGeometrySP]->use();
@@ -67,12 +67,12 @@ void Mesh::draw(float discardDensity, SkeletonPose* skeletonPose) {
     }else{
         if(!lightManager.currentShadowLight) {
             if(skeletonPose) {
-                if(transparent)
+                if(transparent && blendingQuality > 0)
                     shaderPrograms[glassSkeletalGeometrySP]->use();
                 else
                     shaderPrograms[skeletalGeometrySP]->use();
             }else{
-                if(transparent)
+                if(transparent && blendingQuality > 0)
                     shaderPrograms[glassGeometrySP]->use();
                 else
                     shaderPrograms[solidGeometrySP]->use();
@@ -720,8 +720,8 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 goto endParsingXML;
             }
             mesh->transparent = material->second.transparent;
-            mesh->diffuse = (material->second.diffuseURL.size()) ? filePackage->getTexture(material->second.diffuseURL.c_str(), GL_RGBA) : NULL;
-            mesh->effectMap = (material->second.effectMapURL.size()) ? filePackage->getTexture(material->second.effectMapURL.c_str(), GL_RGB) : NULL;
+            mesh->diffuse = (material->second.diffuseURL.size()) ? filePackage->getTexture(material->second.diffuseURL.c_str(), GL_COMPRESSED_RGBA) : NULL;
+            mesh->effectMap = (material->second.effectMapURL.size()) ? filePackage->getTexture(material->second.effectMapURL.c_str(), GL_COMPRESSED_RGB) : NULL;
             mesh->heightMap = (material->second.heightMapURL.size()) ? filePackage->getTexture(material->second.heightMapURL.c_str(), GL_NORMAL_MAP) : NULL;
             
             unsigned int dataIndex, valueIndex, indexCount = 0, strideIndex = 0;
@@ -936,7 +936,7 @@ void Model::draw(float discardDensity) {
         for(unsigned int i = 0; i < meshes.size(); i ++)
             meshes[i]->draw(discardDensity, NULL);
     }else for(unsigned int i = 0; i < meshes.size(); i ++) {
-        if(meshes[i]->transparent) {
+        if(meshes[i]->transparent && blendingQuality > 0) {
             TransparentMesh* tMesh = new TransparentMesh();
             tMesh->type = ObjectType_Normal;
             tMesh->skeletonPose = NULL;
@@ -963,7 +963,7 @@ void Model::draw(float discardDensity, SkeletonPose* skeletonPose) {
         for(unsigned int i = 0; i < meshes.size(); i ++)
             meshes[i]->draw(discardDensity, skeletonPose);
     }else for(unsigned int i = 0; i < meshes.size(); i ++) {
-        if(meshes[i]->transparent) {
+        if(meshes[i]->transparent && blendingQuality > 0) {
             TransparentMesh* tMesh = new TransparentMesh();
             tMesh->type = ObjectType_Animated;
             tMesh->skeletonPose = skeletonPose;

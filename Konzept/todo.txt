@@ -1,6 +1,4 @@
-Glass
 Water
-Animations
 Make GUI
 Highmap terrains
 Use C++11 Multithreading
@@ -9,6 +7,7 @@ Object Editor
 Use Bullet-Engine
 GUITextField Copy & Paste
 Retina Display Support
+Anisotropic filtering
 
 Not sure:
 PCSS

@@ -25,13 +25,13 @@ class FBO {
     int getColorBufferIndex(ColorBuffer* colorBuffer);
     void initBuffer(unsigned int index);
     public:
+    unsigned int maxSize;
     std::vector<ColorBuffer*> colorBuffers;
     FBO();
     ~FBO();
     void init();
     void copyColorBuffer(unsigned char source, unsigned char destination);
-    void clearDeferredBuffers();
-    void renderInDeferredBuffers();
+    void renderInDeferredBuffers(bool transparent);
     void renderTransparentInDeferredBuffers();
     void renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned char inBuffersCount, unsigned char* outBuffers, unsigned char outBuffersCount);
     ColorBuffer* addTexture(unsigned int size, bool shadowMap, bool cubeMap);
@@ -48,13 +48,12 @@ enum DeferredBufferNames {
     materialDBuffer = 2,
     normalDBuffer = 3,
     positionDBuffer = 4,
-    diffuseDBuffer = 5,
-    specularDBuffer = 6,
+    specularDBuffer = 5,
+    diffuseDBuffer = 6,
     transparentDBuffer = 7,
     ssaoDBuffer = 8
 };
 
 extern FBO mainFBO;
-extern unsigned int maxFBOSize;
 
 #endif

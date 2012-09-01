@@ -66,7 +66,6 @@ varying vec3 vTangent;
 varying vec3 vBitangent;
 #endif
 
-uniform vec3 camPos;
 uniform mat3 viewNormalMat;
 uniform sampler2D sampler0;
 uniform sampler2D sampler1;
@@ -90,10 +89,11 @@ void main() {
     #if BUMP_MAPPING < 2
     gl_FragData[0] = texture2D(sampler0, vTexCoord); //Color
     if(gl_FragData[0].a < 0.0039 || random(gl_FragCoord.xy) > discardDensity) discard;
-    vec4 material = vec4(texture2D(sampler1, vTexCoord).rgb, 1.0); //Material
+    gl_FragData[1] = vec4(texture2D(sampler1, vTexCoord).rgb, 1.0); //Material
     #else
-    vec4 material = vec4(0.2, 0.8, 0.0, 1.0); //Material
+    gl_FragData[1] = vec4(0.2, 0.8, 0.0, 1.0); //Material
     #endif
+    gl_FragData[1] = vec4(0.8, 0.8, 0.0, 1.0); //Material
     gl_FragData[0].a = 0.5;
     
     vec3 normal = normalize(vNormal);
@@ -114,21 +114,15 @@ void main() {
     normal = mat3(vTangent, vBitangent, normal)*normalize(bumpMap);
     #endif
     
-    vec3 pos = vPosition;
-    
-    //TODO: Illumination
-    /*vec3 light = vec3(0.2);
-    
-    gl_FragData[0].rgb *= light;
-    light = vec3(0.0);
-    
-    gl_FragData[0].rgb += light;*/
-    
-    #if BUMP_MAPPING
-	vec2 displaced = gl_FragCoord.xy+(viewNormalMat*normal).xy*10.0;
+    gl_FragData[2] = vec4(normal, 1.0); //Normal
+	gl_FragData[3] = vec4(vPosition, 1.0); //Position
+    #if BLENDING_QUALITY == 2
     gl_FragData[0].rgb *= gl_FragData[0].a;
-    gl_FragData[0].rgb += (1.0-gl_FragData[0].a)*texture2DRect(sampler3, displaced).rgb;
+    gl_FragData[0].rgb += (1.0-gl_FragData[0].a)*texture2DRect(sampler3, gl_FragCoord.xy+(viewNormalMat*normal).xy*10.0).rgb; //Color
     gl_FragData[0].a = 1.0;
+    #elif BLENDING_QUALITY == 3
+    gl_FragData[4].rgb = (1.0-gl_FragData[0].a)*texture2DRect(sampler3, gl_FragCoord.xy+(viewNormalMat*normal).xy*10.0).rgb; //Specular
+    gl_FragData[4].a = 1.0;
     #endif
 }
 

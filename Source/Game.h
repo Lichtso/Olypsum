@@ -12,7 +12,6 @@
 #define Game_h
 
 void initScene();
-void renderScene();
 void calculateFrame();
 
 #endif
