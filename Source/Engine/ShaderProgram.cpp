@@ -201,6 +201,10 @@ void ShaderProgram::setUniformF(const char* name, float value) {
     glUniform1f(glGetUniformLocation(GLname, name), value);
 }
 
+void ShaderProgram::setUniformVec2(const char* name, float x, float y) {
+    glUniform2f(glGetUniformLocation(GLname, name), x, y);
+}
+
 void ShaderProgram::setUniformVec3(const char* name, Vector3 value) {
     glUniform3f(glGetUniformLocation(GLname, name), value.x, value.y, value.z);
 }

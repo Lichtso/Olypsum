@@ -71,9 +71,8 @@ uniform sampler2D sampler0;
 uniform sampler2D sampler1;
 uniform sampler2D sampler2;
 uniform sampler2DRect sampler3;
-#if BUMP_MAPPING < 2
 uniform float discardDensity;
-#else
+#if BUMP_MAPPING == 2
 const int maxWaves = 4;
 uniform float waveLen[maxWaves];
 uniform float waveAge[maxWaves];
@@ -86,13 +85,9 @@ float random(vec2 co) {
 }
 
 void main() {
-    #if BUMP_MAPPING < 2
     gl_FragData[0] = texture2D(sampler0, vTexCoord); //Color
     if(gl_FragData[0].a < 0.0039 || random(gl_FragCoord.xy) > discardDensity) discard;
     gl_FragData[1] = vec4(texture2D(sampler1, vTexCoord).rgb, 1.0); //Material
-    #else
-    gl_FragData[1] = vec4(0.2, 0.8, 0.0, 1.0); //Material
-    #endif
     gl_FragData[1] = vec4(0.8, 0.8, 0.0, 1.0); //Material
     gl_FragData[0].a = 0.5;
     
@@ -102,20 +97,21 @@ void main() {
     bumpMap.xy = bumpMap.xy*2.0-vec2(1.0);
     normal = mat3(vTangent, vBitangent, normal)*bumpMap;
     #elif BUMP_MAPPING == 2
+    sampler2;
     vec3 bumpMap = vec3(0.0);
     for(int i = 0; i < maxWaves; i ++) {
+        //if(waveAmp[i] <= 0.0) continue; //UNKNOWN PERFORMANCE USE
         vec2 diff = waveOri[i]-vTexCoord;
         float len = length(diff);
         diff /= len;
-        len = sin(clamp(len*waveLen[i]-waveAge[i], 0.0, M_PI))*waveAmp[i];
-        bumpMap.xy += diff*len;
+        len = sin(clamp(len*waveLen[i]-waveAge[i], 0.0, M_PI*2.0))*0.5+0.5;
+        bumpMap.xy += diff*len*waveAmp[i];
+        bumpMap.xy -= diff*(1.0-len)*waveAmp[i];
     }
     bumpMap.z = 1.0;
     normal = mat3(vTangent, vBitangent, normal)*normalize(bumpMap);
     #endif
     
-    gl_FragData[2] = vec4(normal, 1.0); //Normal
-	gl_FragData[3] = vec4(vPosition, 1.0); //Position
     #if BLENDING_QUALITY == 2
     gl_FragData[0].rgb *= gl_FragData[0].a;
     gl_FragData[0].rgb += (1.0-gl_FragData[0].a)*texture2DRect(sampler3, gl_FragCoord.xy+(viewNormalMat*normal).xy*10.0).rgb; //Color
@@ -124,6 +120,9 @@ void main() {
     gl_FragData[4].rgb = (1.0-gl_FragData[0].a)*texture2DRect(sampler3, gl_FragCoord.xy+(viewNormalMat*normal).xy*10.0).rgb; //Specular
     gl_FragData[4].a = 1.0;
     #endif
+    
+    gl_FragData[2] = vec4(normal, 1.0); //Normal
+	gl_FragData[3] = vec4(vPosition, 1.0); //Position
 }
 
 #separator

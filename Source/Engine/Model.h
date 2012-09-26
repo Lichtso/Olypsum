@@ -11,6 +11,25 @@
 #ifndef Model_h
 #define Model_h
 
+enum ObjectInstanceType {
+    ObjectInstance_Base = 0,
+    ObjectInstance_Normal = 1,
+    ObjectInstance_Animated = 2,
+    ObjectInstance_NPC = 3,
+    ObjectInstance_Zone = 4,
+    ObjectInstance_Water = 5,
+    ObjectInstance_ModelOnly = 6
+};
+
+class ObjectBase {
+    public:
+    ObjectInstanceType type;
+    virtual void calculate();
+    virtual float getDiscardDensity();
+    virtual Matrix4 getTransformation();
+    virtual void draw();
+};
+
 struct Bone {
     Matrix4 staticMat;
     unsigned int jointIndex;
@@ -43,7 +62,7 @@ class Mesh {
     Texture *diffuse, *effectMap, *heightMap;
     Mesh();
     ~Mesh();
-    void draw(float discardDensity, SkeletonPose* skeletonPose);
+    void draw(ObjectBase* object);
 };
 
 class Model {
@@ -54,8 +73,7 @@ class Model {
     Model();
     ~Model();
     bool loadCollada(FilePackage* filePackage, const char* filePath);
-    void draw(float discardDensity);
-    void draw(float discardDensity, SkeletonPose* skeletonPose);
+    void draw(ObjectBase* object);
 };
 
 #endif

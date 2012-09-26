@@ -129,6 +129,13 @@ void AppMain(int argc, char *argv[]) {
                 case SDL_MOUSEBUTTONDOWN:
                     event.button.x = event.button.x*mouseTranslation[0]+mouseTranslation[2];
                     event.button.y = event.button.y*mouseTranslation[1]+mouseTranslation[3];
+                    
+                    //TODO: Water test
+                    if(objectManager.objects.size() > 0) {
+                        WaterObject* object = (WaterObject*)objectManager.objects[0];
+                        object->addWave(3.0, frand(0.2, 2.0), frand(0.002, 0.005), (float)event.button.x/screen->w, (float)event.button.y/screen->h);
+                    }
+                    
                     if(currentScreenView) {
                         switch(event.button.button) {
                             case SDL_BUTTON_LEFT:
@@ -158,9 +165,9 @@ void AppMain(int argc, char *argv[]) {
                     //TODO: CAM Test
                     mainCam->camMat.setIdentity();
                     //mainCam->camMat.rotateX(0.5);
-                    //mainCam->camMat.translate(Vector3(1.5-3.0*event.button.x/screen->w, 3.0*event.button.y/screen->h+1.5, 3));
-                    mainCam->camMat.translate(Vector3(0.0, 1.5, 3));
-                    if(lightManager.lights.size() > 0) lightManager.lights[0]->position = Vector3(0.5-3.0*event.button.x/screen->w, 3.0*event.button.y/screen->h+1.5, 1.5);
+                    mainCam->camMat.translate(Vector3(1.5-3.0*event.button.x/screen->w, 3.0*event.button.y/screen->h+1.5, 3));
+                    //mainCam->camMat.translate(Vector3(0.0, 1.5, 3));
+                    //if(lightManager.lights.size() > 0) lightManager.lights[0]->position = Vector3(0.5-3.0*event.button.x/screen->w, 3.0*event.button.y/screen->h+1.5, 1.5);
                 break;
                 case SDL_QUIT:
                     AppTerminate();
@@ -187,6 +194,7 @@ void AppMain(int argc, char *argv[]) {
             glClear(GL_COLOR_BUFFER_BIT);
         }else{
             calculateFrame();
+            objectManager.calculate();
             soundSourcesManager.calculate();
             lightManager.calculateShadows(1);
             particleSystemManager.calculate();

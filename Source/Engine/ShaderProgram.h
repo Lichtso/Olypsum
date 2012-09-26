@@ -36,6 +36,7 @@ class ShaderProgram {
     bool checkUniformExistence(const char* name);
     void setUniformI(const char* name, int value);
     void setUniformF(const char* name, float value);
+    void setUniformVec2(const char* name, float x, float y);
     void setUniformVec3(const char* name, Vector3 value);
     void setUniformMatrix3(const char* name, btMatrix3x3* mat);
     void setUniformMatrix3(const char* name, Matrix4* mat);

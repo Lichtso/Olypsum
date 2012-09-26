@@ -11,47 +11,67 @@
 #ifndef Object_h
 #define Object_h
 
-enum ObjectType {
-    ObjectType_ModelOnly = 1,
-    ObjectType_Normal = 2,
-    ObjectType_Animated = 3,
-    ObjectType_Water = 4,
-    ObjectType_NPC = 5
-};
-
 struct TransparentMesh {
-    ObjectType type;
-    SkeletonPose* skeletonPose;
-    Matrix4 transformation;
+    ObjectBase* object;
     Mesh* mesh;
-    float discardDensity;
-};
-
-class Object {
-    public:
-    ObjectType type;
-    Model* model;
-    virtual void draw();
 };
 
 class ObjectManager {
     public:
     std::vector<TransparentMesh*> transparentAccumulator;
-    std::vector<Object*> objects;
+    std::vector<ObjectBase*> objects;
     ObjectManager();
     ~ObjectManager();
     void clear();
-    void draw();
-};
-
-class ModelOnlyObject : public Object {
-    public:
-    Matrix4 transformation;
-    ModelOnlyObject(Model* model);
-    ~ModelOnlyObject();
+    void calculate();
     void draw();
 };
 
 extern ObjectManager objectManager;
+
+class ModelOnlyObject : public ObjectBase {
+    public:
+    Matrix4 transformation;
+    Model* model;
+    ModelOnlyObject(Model* model);
+    ~ModelOnlyObject();
+    void calculate();
+    float getDiscardDensity();
+    Matrix4 getTransformation();
+    void draw();
+};
+
+class AnimatedObject : public ObjectBase {
+    public:
+    Matrix4 transformation;
+    Model* model;
+    SkeletonPose* skeletonPose;
+    AnimatedObject(Model* model);
+    ~AnimatedObject();
+    void calculate();
+    float getDiscardDensity();
+    Matrix4 getTransformation();
+    void draw();
+};
+
+#define MAX_WAVES 4
+
+class WaterObject : public ObjectBase {
+    public:
+    Matrix4 transformation;
+    Model* model;
+    float waveSpeed;
+    struct WaterObjectWave {
+        float length, age, maxAge, ampitude, originX, originY;
+    };
+    std::vector<WaterObjectWave> waves;
+    WaterObject(Model* model);
+    ~WaterObject();
+    void addWave(float maxAge, float ampitude, float length, float originX, float originY);
+    void calculate();
+    float getDiscardDensity();
+    Matrix4 getTransformation();
+    void draw();
+};
 
 #endif

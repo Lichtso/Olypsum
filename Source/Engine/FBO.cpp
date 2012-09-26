@@ -136,7 +136,7 @@ void FBO::renderTransparentInDeferredBuffers() {
     
     Vector3 camMatPos = currentCam->camMat.pos;
     std::sort(objectManager.transparentAccumulator.begin(), objectManager.transparentAccumulator.end(), [&camMatPos](TransparentMesh* a, TransparentMesh* b){
-        return (a->transformation.pos-camMatPos).getLength() > (b->transformation.pos-camMatPos).getLength();
+        return (a->object->getTransformation().pos-camMatPos).getLength() > (b->object->getTransformation().pos-camMatPos).getLength();
     });
     
     unsigned int i;
@@ -149,18 +149,8 @@ void FBO::renderTransparentInDeferredBuffers() {
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
         TransparentMesh* tMesh = objectManager.transparentAccumulator[i];
-        modelMat = tMesh->transformation;
-        switch(tMesh->type) {
-            case ObjectType_Normal:
-                tMesh->mesh->draw(tMesh->discardDensity, NULL);
-                break;
-            case ObjectType_Animated:
-                tMesh->mesh->draw(tMesh->discardDensity, tMesh->skeletonPose);
-                break;
-            case ObjectType_Water:
-                tMesh->mesh->draw(tMesh->discardDensity, NULL); //TODO
-                break;
-        }
+        modelMat = tMesh->object->getTransformation();
+        tMesh->mesh->draw(tMesh->object);
         delete tMesh;
         glDisable(GL_BLEND);
         glDisable(GL_DEPTH_TEST);

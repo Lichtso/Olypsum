@@ -10,13 +10,13 @@
 
 void initScene() {
     //SkeletonPose* skeletonPose = new SkeletonPose(humanModel->skeleton);
-    ModelOnlyObject* object = new ModelOnlyObject(fileManager.getPackage("Default")->getModel("boxes.dae"));
+    WaterObject* object = new WaterObject(fileManager.getPackage("Default")->getModel("boxes.dae"));
     object->transformation.setIdentity();
     objectManager.objects.push_back(object);
-    object = new ModelOnlyObject(fileManager.getPackage("Default")->getModel("boxes.dae"));
-    object->transformation.setIdentity();
-    object->transformation.translate(Vector3(0,0,-3));
-    objectManager.objects.push_back(object);
+    ModelOnlyObject* objectB = new ModelOnlyObject(fileManager.getPackage("Default")->getModel("boxes.dae"));
+    objectB->transformation.setIdentity();
+    objectB->transformation.translate(Vector3(0,0,-3));
+    objectManager.objects.push_back(objectB);
     mainCam->camMat.setIdentity();
     //mainCam->camMat.rotateX(0.5);
     mainCam->camMat.translate(Vector3(0,2,3));
@@ -29,7 +29,7 @@ void initScene() {
         light->range = 10.0;
     }else{
         PositionalLight* lightC = new PositionalLight();
-        lightC->position = Vector3(2.0, 3.0, 0.0);
+        lightC->position = Vector3(1.0, 2.0, 1.5);
         lightC->direction = Vector3(0.0, 0.0, 1.0).normalize();
         lightC->range = 5.0;
     }

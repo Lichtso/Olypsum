@@ -31,7 +31,7 @@ Mesh::~Mesh() {
     if(heightMap) fileManager.releaseTexture(heightMap);
 }
 
-void Mesh::draw(float discardDensity, SkeletonPose* skeletonPose) {
+void Mesh::draw(ObjectBase* object) {
     if(!vbo || elementsCount == 0) {
         log(error_log, "No vertex data to draw in mesh.");
         return;
@@ -41,6 +41,8 @@ void Mesh::draw(float discardDensity, SkeletonPose* skeletonPose) {
         return;
     }
     
+    AnimatedObject* animatedObject = (object->type != ObjectInstance_Animated && object->type != ObjectInstance_NPC) ? NULL : (AnimatedObject*) object;
+    
     if(diffuse)
         diffuse->use(GL_TEXTURE_2D, 0);
     if(effectMap)
@@ -49,43 +51,63 @@ void Mesh::draw(float discardDensity, SkeletonPose* skeletonPose) {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-    if(heightMap) {
-        if(!lightManager.currentShadowLight) {
-            if(skeletonPose) {
-                if(transparent && blendingQuality > 0)
-                    shaderPrograms[glassSkeletalBumpGeometrySP]->use();
-                else
-                    shaderPrograms[skeletalBumpGeometrySP]->use();
-            }else{
-                if(transparent && blendingQuality > 0)
-                    shaderPrograms[glassBumpGeometrySP]->use();
-                else
-                    shaderPrograms[solidBumpGeometrySP]->use();
-            }
-        }
+    if(heightMap)
         heightMap->use(GL_TEXTURE_2D, 2);
-    }else{
-        if(!lightManager.currentShadowLight) {
-            if(skeletonPose) {
-                if(transparent && blendingQuality > 0)
-                    shaderPrograms[glassSkeletalGeometrySP]->use();
-                else
-                    shaderPrograms[skeletalGeometrySP]->use();
-            }else{
-                if(transparent && blendingQuality > 0)
-                    shaderPrograms[glassGeometrySP]->use();
-                else
-                    shaderPrograms[solidGeometrySP]->use();
-            }
-        }
+    else{
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+    
     if(!lightManager.currentShadowLight) {
-        currentShaderProgram->setUniformF("discardDensity", discardDensity);
-        if(skeletonPose)
-            currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose->mats, skeletonPose->skeleton->bones.size());
+        if(!transparent || object->type != ObjectInstance_Water) {
+            if(heightMap) {
+                if(animatedObject) {
+                    if(transparent && blendingQuality > 0)
+                        shaderPrograms[glassSkeletalBumpGeometrySP]->use();
+                    else
+                        shaderPrograms[skeletalBumpGeometrySP]->use();
+                }else{
+                    if(transparent && blendingQuality > 0)
+                        shaderPrograms[glassBumpGeometrySP]->use();
+                    else
+                        shaderPrograms[solidBumpGeometrySP]->use();
+                }
+            }else{
+                if(animatedObject) {
+                    if(transparent && blendingQuality > 0)
+                        shaderPrograms[glassSkeletalGeometrySP]->use();
+                    else
+                        shaderPrograms[skeletalGeometrySP]->use();
+                }else{
+                    if(transparent && blendingQuality > 0)
+                        shaderPrograms[glassGeometrySP]->use();
+                    else
+                        shaderPrograms[solidGeometrySP]->use();
+                }
+            }
+        }else{
+            WaterObject* waterObject = (WaterObject*) object;
+            shaderPrograms[waterSP]->use();
+            char str[64];
+            for(unsigned int i = 0; i < MAX_WAVES; i ++) {
+                bool active = (i < waterObject->waves.size());
+                sprintf(str, "waveLen[%d]", i);
+                currentShaderProgram->setUniformF(str, active ? (1.0/waterObject->waves[i].length) : 0.0);
+                sprintf(str, "waveAge[%d]", i);
+                currentShaderProgram->setUniformF(str, active ? waterObject->waves[i].age/waterObject->waves[i].length*waterObject->waveSpeed-M_PI*2.0 : 0.0);
+                sprintf(str, "waveAmp[%d]", i);
+                currentShaderProgram->setUniformF(str, active ? waterObject->waves[i].ampitude*(1.0-waterObject->waves[i].age/waterObject->waves[i].maxAge) : 0.0);
+                sprintf(str, "waveOri[%d]", i);
+                if(active)
+                    currentShaderProgram->setUniformVec2(str, waterObject->waves[i].originX, waterObject->waves[i].originY);
+                else
+                    currentShaderProgram->setUniformVec2(str, 0.0, 0.0);
+            }
+        }
     }
+    currentShaderProgram->setUniformF("discardDensity", object->getDiscardDensity());
+    if(animatedObject)
+        currentShaderProgram->setUniformMatrix4("jointMats", animatedObject->skeletonPose->mats, animatedObject->skeletonPose->skeleton->bones.size());
     
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     unsigned int byteStride = 3;
@@ -924,56 +946,20 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
     return true;
 }
 
-void Model::draw(float discardDensity) {
-    if(skeleton) {
-        log(error_log, "Model draw function without pose of Skeleton called.");
-        return;
-    }
-    
+void Model::draw(ObjectBase* object) {
     if(lightManager.currentShadowLight) {
-        lightManager.currentShadowLight->selectShaderProgram(false);
-        currentShaderProgram->setUniformF("discardDensity", discardDensity);
+        lightManager.currentShadowLight->selectShaderProgram(skeleton);
         for(unsigned int i = 0; i < meshes.size(); i ++)
-            meshes[i]->draw(discardDensity, NULL);
+            meshes[i]->draw(object);
     }else for(unsigned int i = 0; i < meshes.size(); i ++) {
         if(meshes[i]->transparent && blendingQuality > 0) {
             TransparentMesh* tMesh = new TransparentMesh();
-            tMesh->type = ObjectType_Normal;
-            tMesh->skeletonPose = NULL;
-            tMesh->transformation = modelMat;
+            tMesh->object = object;
             tMesh->mesh = meshes[i];
-            tMesh->discardDensity = discardDensity;
             objectManager.transparentAccumulator.push_back(tMesh);
             continue;
         }
-        meshes[i]->draw(discardDensity, NULL);
-    }
-}
-
-void Model::draw(float discardDensity, SkeletonPose* skeletonPose) {
-    if(!skeleton) {
-        log(error_log, "No Skeleton for pose found.");
-        return;
-    }
-    
-    if(lightManager.currentShadowLight) {
-        lightManager.currentShadowLight->selectShaderProgram(true);
-        currentShaderProgram->setUniformF("discardDensity", discardDensity);
-        currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose->mats, skeleton->bones.size());
-        for(unsigned int i = 0; i < meshes.size(); i ++)
-            meshes[i]->draw(discardDensity, skeletonPose);
-    }else for(unsigned int i = 0; i < meshes.size(); i ++) {
-        if(meshes[i]->transparent && blendingQuality > 0) {
-            TransparentMesh* tMesh = new TransparentMesh();
-            tMesh->type = ObjectType_Animated;
-            tMesh->skeletonPose = skeletonPose;
-            tMesh->transformation = skeletonPose->mats[skeleton->rootBone->jointIndex];
-            tMesh->mesh = meshes[i];
-            tMesh->discardDensity = discardDensity;
-            objectManager.transparentAccumulator.push_back(tMesh);
-            continue;
-        }
-        meshes[i]->draw(discardDensity, skeletonPose);
+        meshes[i]->draw(object);
     }
 }
 
