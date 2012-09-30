@@ -88,8 +88,6 @@ void main() {
     gl_FragData[0] = texture2D(sampler0, vTexCoord); //Color
     if(gl_FragData[0].a < 0.0039 || random(gl_FragCoord.xy) > discardDensity) discard;
     gl_FragData[1] = vec4(texture2D(sampler1, vTexCoord).rgb, 1.0); //Material
-    gl_FragData[1] = vec4(0.8, 0.8, 0.0, 1.0); //Material
-    gl_FragData[0].a = 0.5;
     
     vec3 normal = normalize(vNormal);
     #if BUMP_MAPPING == 1

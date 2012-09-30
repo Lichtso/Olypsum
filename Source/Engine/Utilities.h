@@ -37,12 +37,17 @@ enum logMessageType {
     info_log = 0,
     warning_log = 1,
     error_log = 2,
-    shader_log = 3
+    shader_log = 3,
+    script_log = 4
 };
 
 void log(logMessageType type, std::string message);
-void createDir(std::string path);
+bool checkDir(std::string path);
+bool createDir(std::string path);
+bool scanDir(std::string path, std::vector<std::string>& files);
+bool removeDir(std::string path);
 char* readXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string filePath, unsigned int& fileSize, bool logs);
+void addXMLNode(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* nodes, const char* name, const char* value);
 bool writeXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string filePath);
 
 template <class T> inline const T max(T a, T b) {

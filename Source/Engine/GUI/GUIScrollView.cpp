@@ -43,6 +43,7 @@ GUIScrollView::GUIScrollView() {
     scrollPosX = scrollPosY = 0;
     scrollWidth = width;
     scrollHeight = height;
+    innerShadow = 0;
     textureV = textureH = 0;
     mouseDragPosX = mouseDragPosY = -2;
     hideSliderX = hideSliderY = true;
@@ -60,6 +61,19 @@ void GUIScrollView::updateContent() {
     roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 220;
     roundedRect.topColor.r = roundedRect.topColor.g = roundedRect.topColor.b = 140;
     roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 140;
+    
+    if(innerShadow != 0) {
+        GUIRoundedRect roundedRect;
+        roundedRect.texture = &texture;
+        roundedRect.width = width;
+        roundedRect.height = height;
+        roundedRect.innerShadow = innerShadow;
+        roundedRect.cornerRadius = abs(innerShadow);
+        roundedRect.topColor.r = roundedRect.topColor.g = roundedRect.topColor.b = 200;
+        roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 200;
+        roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 200;
+        roundedRect.drawInTexture();
+    }
     
     if(scrollWidth > width) {
         roundedRect.texture = &textureH;
@@ -97,21 +111,23 @@ void GUIScrollView::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) 
     if(innerShadow != 0) {
         if(!texture) updateContent();
         modelMat = transform;
+        GUIRoundedRect roundedRect;
         roundedRect.texture = &texture;
         roundedRect.width = width;
         roundedRect.height = height;
-        roundedRect.drawOnScreen(false, 0, 0, fixedClipRect);
-        clipRect.minPosX += 8;
-        clipRect.maxPosX -= 8;
-        clipRect.minPosY += 8;
-        clipRect.maxPosY -= 8;
+        roundedRect.drawOnScreen(false, 0, 0, clipRect);
+        clipRect.minPosX += abs(innerShadow);
+        clipRect.maxPosX -= abs(innerShadow);
+        clipRect.minPosY += abs(innerShadow);
+        clipRect.maxPosY -= abs(innerShadow);
     }
     
-    modelMat.translate(Vector3(-scrollPosX, scrollPosY, 0.0));
+    transform.translate(Vector3(-scrollPosX, scrollPosY, 0.0));
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->draw(transform, clipRect);
     
-    modelMat = transform;
+    modelMat = parentTransform;
+    modelMat.translate(Vector3(posX, posY, 0.0));
     
     if(scrollWidth > width && mouseDragPosX > -2) {
         roundedRect.texture = &textureH;
@@ -188,7 +204,7 @@ bool GUIScrollView::handleMouseWheel(int mouseX, int mouseY, float delta) {
     
     if(scrollHeight < height) return false;
     
-    scrollPosY -= delta*20.0;
+    scrollPosY -= delta*10.0;
     if(scrollPosY < 0) scrollPosY = 0;
     else if(scrollPosY > scrollHeight-height) scrollPosY = scrollHeight-height;
     

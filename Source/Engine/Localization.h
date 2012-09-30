@@ -17,7 +17,7 @@ class Localization {
     std::string selected, title;
     bool getLocalizableLanguages(std::vector<std::string>& languages);
     bool loadLocalization(std::string filePath);
-    const char* localizeString(const char* key);
+    std::string localizeString(const char* key);
 };
 
 extern Localization localization;

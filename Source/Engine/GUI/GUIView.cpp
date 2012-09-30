@@ -94,7 +94,7 @@ void GUIFramedView::updateContent() {
         roundedRect.width = width;
         roundedRect.height = height;
         roundedRect.innerShadow = innerShadow;
-        roundedRect.cornerRadius = 8;
+        roundedRect.cornerRadius = abs(innerShadow);
         roundedRect.topColor.r = roundedRect.topColor.g = roundedRect.topColor.b = 200;
         roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 200;
         roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 200;
@@ -122,10 +122,10 @@ void GUIFramedView::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) 
         roundedRect.width = width;
         roundedRect.height = height;
         roundedRect.drawOnScreen(false, 0, 0, clipRect);
-        clipRect.minPosX += 8;
-        clipRect.maxPosX -= 8;
-        clipRect.minPosY += 8;
-        clipRect.maxPosY -= 8;
+        clipRect.minPosX += abs(innerShadow);
+        clipRect.maxPosX -= abs(innerShadow);
+        clipRect.minPosY += abs(innerShadow);
+        clipRect.maxPosY -= abs(innerShadow);
     }
     
     for(unsigned int i = 0; i < children.size(); i ++)

@@ -22,15 +22,62 @@ void log(logMessageType type, std::string message) {
         case shader_log:
             printf("SHADER: %s\n", message.c_str());
             break;
+        case script_log:
+            printf("SCRIPT: %s\n", message.c_str());
+            break;
     }
 }
 
-void createDir(std::string path) {
+bool checkDir(std::string path) {
     DIR* dir = opendir(path.c_str());
-    if(dir)
+    if(dir) {
         closedir(dir);
-    else
+        return true;
+    }else
+        return false;
+}
+
+bool createDir(std::string path) {
+    if(checkDir(path))
+        return false;
+    else{
         mkdir(path.c_str(), S_IRWXU | S_IRWXG);
+        return true;
+    }
+}
+
+bool scanDir(std::string path, std::vector<std::string>& files) {
+    DIR* dir = opendir(path.c_str());
+    if(dir) {
+        dirent* file;
+        while((file = readdir(dir))) {
+            if(file->d_namlen < 3 && strncmp(file->d_name, "..", file->d_namlen) == 0) continue;
+            std::string name(file->d_name, file->d_namlen);
+            if(file->d_type == DT_DIR) name += '/';
+            files.push_back(name);
+        }
+        closedir(dir);
+        return true;
+    }else
+        return false;
+}
+
+bool removeDir(std::string path) {
+    DIR* dir = opendir(path.c_str());
+    if(dir) {
+        dirent* file;
+        while((file = readdir(dir))) {
+            if(file->d_namlen < 3 && strncmp(file->d_name, "..", file->d_namlen) == 0) continue;
+            std::string filePath = path+std::string(file->d_name, file->d_namlen);
+            if(file->d_type == DT_DIR)
+                removeDir(filePath);
+            else
+                remove(filePath.c_str());
+        }
+        closedir(dir);
+        return remove(path.c_str()) == 0;
+    }else
+        return false;
 }
 
 char* readXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string filePath, unsigned int& fileSize, bool logs) {
@@ -51,6 +98,16 @@ char* readXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string file
     doc.parse<0>(data);
     
     return data;
+}
+
+void addXMLNode(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* nodes, const char* name, const char* value) {
+    rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    node->name(name);
+    attribute->name("value");
+    attribute->value(value);
+    node->append_attribute(attribute);
+    nodes->append_node(node);
 }
 
 bool writeXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string filePath) {

@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Menu.h"
+#import "WorldManager.h"
 
 #ifndef AppMain_h
 #define AppMain_h
@@ -16,7 +16,6 @@ extern SDLMod modKeyState;
 extern unsigned int currentFPS;
 
 void updateVideoMode();
-void clearCurrentWorld();
 void AppMain(int argc, char *argv[]);
 void AppTerminate();
 

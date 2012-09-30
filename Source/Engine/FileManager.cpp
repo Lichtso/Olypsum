@@ -32,17 +32,15 @@ FilePackage::~FilePackage() {
 bool FilePackage::load() {
     path = resourcesDir+"Packages/"+name+'/';
     DIR* dir = opendir(path.c_str());
-    if(dir == 0) {
+    if(dir == NULL) {
         path = gameDataDir+"Packages/"+name+'/';
-        dir = opendir(path.c_str());
-        if(dir == 0) return false;
-        closedir(dir);
-    }
-    closedir(dir);
+        DIR* dirB = opendir(path.c_str());
+        if(dirB == NULL) return false;
+        closedir(dirB);
+    }else closedir(dir);
     
-    localization.strings.clear();
-    localization.loadLocalization(resourcesDir+"Packages/Default/Languages/"+localization.selected+".xml");
-    if(name != "Default") localization.loadLocalization(path+"Languages/"+localization.selected+".xml");
+    if(name == "Default") localization.strings.clear();
+    localization.loadLocalization(path+"Languages/"+localization.selected+".xml");
     return true;
 }
 
@@ -153,18 +151,11 @@ bool FilePackage::releaseSoundTrack(SoundTrack* soundTrack) {
 
 
 
-FileManager::FileManager() {
-    
-}
-
-FileManager::~FileManager() {
-    clear();
-}
-
 void FileManager::clear() {
     for(auto iterator : filePackages)
         delete iterator.second;
     filePackages.clear();
+    loadPackage("Default");
 }
 
 static bool readOptionBool(rapidxml::xml_node<xmlUsedCharType>* option) {
@@ -188,14 +179,13 @@ void FileManager::loadOptions() {
     unsigned int fileSize;
     char* fileData = readXmlFile(doc, gameDataDir+"Options.xml", fileSize, false);
     if(fileData) {
-        rapidxml::xml_node<xmlUsedCharType>* options = doc.first_node("options");
-        if(strcmp(options->first_node("version")->first_attribute("value")->value(), VERSION) != 0) {
+        if(strcmp(doc.first_node("version")->first_attribute("value")->value(), VERSION) != 0) {
             delete [] fileData;
             saveOptions();
             return;
         }
-        localization.selected = options->first_node("language")->first_attribute("value")->value();
-        rapidxml::xml_node<xmlUsedCharType>* graphics = options->first_node("graphics");
+        localization.selected = doc.first_node("language")->first_attribute("value")->value();
+        rapidxml::xml_node<xmlUsedCharType>* graphics = doc.first_node("graphics");
         screenBlurFactor = (readOptionBool(graphics->first_node("screenBlurEnabled"))) ? 0.0 : -1.0;
         edgeSmoothEnabled = readOptionBool(graphics->first_node("edgeSmoothEnabled"));
         fullScreenEnabled = readOptionBool(graphics->first_node("fullScreenEnabled"));
@@ -209,47 +199,34 @@ void FileManager::loadOptions() {
         delete [] fileData;
     }else saveOptions();
     
-    loadPackage("Default");
-}
-
-static void addOption(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* options, const char* name, const char* value) {
-    rapidxml::xml_node<xmlUsedCharType>* option = doc.allocate_node(rapidxml::node_element);
-    option->name(name);
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
-    attribute->name("value");
-    attribute->value(value);
-    option->append_attribute(attribute);
-    options->append_node(option);
+    clear();
 }
 
 void FileManager::saveOptions() {
     rapidxml::xml_document<xmlUsedCharType> doc;
-    rapidxml::xml_node<xmlUsedCharType>* options = doc.allocate_node(rapidxml::node_element);
-    options->name("options");
-    doc.append_node(options);
-    addOption(doc, options, "version", VERSION);
-    addOption(doc, options, "language", localization.selected.c_str());
+    addXMLNode(doc, &doc, "version", VERSION);
+    addXMLNode(doc, &doc, "language", localization.selected.c_str());
     rapidxml::xml_node<xmlUsedCharType>* graphics = doc.allocate_node(rapidxml::node_element);
     graphics->name("graphics");
-    options->append_node(graphics);
+    doc.append_node(graphics);
     
     char str[24];
-    addOption(doc, graphics, "screenBlurEnabled", (screenBlurFactor > -1.0) ? "true" : "false");
-    addOption(doc, graphics, "edgeSmoothEnabled", (edgeSmoothEnabled) ? "true" : "false");
-    addOption(doc, graphics, "fullScreenEnabled", (fullScreenEnabled) ? "true" : "false");
-    addOption(doc, graphics, "cubemapsEnabled", (cubemapsEnabled) ? "true" : "false");
+    addXMLNode(doc, graphics, "screenBlurEnabled", (screenBlurFactor > -1.0) ? "true" : "false");
+    addXMLNode(doc, graphics, "edgeSmoothEnabled", (edgeSmoothEnabled) ? "true" : "false");
+    addXMLNode(doc, graphics, "fullScreenEnabled", (fullScreenEnabled) ? "true" : "false");
+    addXMLNode(doc, graphics, "cubemapsEnabled", (cubemapsEnabled) ? "true" : "false");
     sprintf(&str[0], "%d", depthOfFieldQuality);
-    addOption(doc, graphics, "depthOfFieldQuality", &str[0]);
+    addXMLNode(doc, graphics, "depthOfFieldQuality", &str[0]);
     sprintf(&str[4], "%d", bumpMappingQuality);
-    addOption(doc, graphics, "bumpMappingQuality", &str[4]);
+    addXMLNode(doc, graphics, "bumpMappingQuality", &str[4]);
     sprintf(&str[8], "%d", shadowQuality);
-    addOption(doc, graphics, "shadowQuality", &str[8]);
+    addXMLNode(doc, graphics, "shadowQuality", &str[8]);
     sprintf(&str[12], "%d", ssaoQuality);
-    addOption(doc, graphics, "ssaoQuality", &str[12]);
+    addXMLNode(doc, graphics, "ssaoQuality", &str[12]);
     sprintf(&str[16], "%d", blendingQuality);
-    addOption(doc, graphics, "blendingQuality", &str[16]);
+    addXMLNode(doc, graphics, "blendingQuality", &str[16]);
     sprintf(&str[20], "%d", particleCalcTarget);
-    addOption(doc, graphics, "particleCalcTarget", &str[20]);
+    addXMLNode(doc, graphics, "particleCalcTarget", &str[20]);
     
     writeXmlFile(doc, gameDataDir+"Options.xml");
 }

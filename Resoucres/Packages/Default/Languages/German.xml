@@ -2,8 +2,8 @@
 <localization>
 	<entry key="olypsum">Olypsum</entry>
 	<entry key="loading">Lade ...</entry>
-	<entry key="newGame">Neues Spiel</entry>
-	<entry key="loadGame">Lade Spiel</entry>
+	<entry key="saveGames">Spielstände</entry>
+	<entry key="multiplayer">Mehrspieler</entry>
 	<entry key="options">Optionen</entry>
 	<entry key="credits">Danksagung</entry>
 	<entry key="quitGame">Beenden</entry>
@@ -28,4 +28,10 @@
 	<entry key="off">Aus</entry>
 	<entry key="cpu">CPU</entry>
 	<entry key="gpu">GPU</entry>
+	<entry key="cancel">Abbrechen</entry>
+	<entry key="ok">Ok</entry>
+	<entry key="name">Name</entry>
+	<entry key="package">Packet</entry>
+	<entry key="newGame">Neues Spiel</entry>
+	<entry key="removeGame">Spiel löschen</entry>
 </localization>

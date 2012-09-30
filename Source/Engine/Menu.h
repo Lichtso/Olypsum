@@ -18,20 +18,15 @@ enum MenuName {
     languagesMenu = 3,
     creditsMenu = 4,
     inGameMenu = 5,
-    gameEscMenu = 6
-};
-
-enum GameStatusName {
-    noGame = 0,
-    editorMode = 1,
-    localGame = 2,
-    networkGame = 3
+    gameEscMenu = 6,
+    saveGamesMenu = 7,
+    newGameMenu = 8,
+    removeGameMenu = 9
 };
 
 void handleMenuKeyUp(SDL_keysym* key);
 void setMenu(MenuName menu);
 
 extern MenuName currentMenu;
-extern GameStatusName gameStatus;
 
 #endif

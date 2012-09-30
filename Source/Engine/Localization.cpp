@@ -60,13 +60,13 @@ bool Localization::loadLocalization(std::string filePath) {
     return true;
 }
 
-const char* Localization::localizeString(const char* key) {
+std::string Localization::localizeString(const char* key) {
     std::map<std::string, std::string>::iterator iterator = strings.find(std::string(key));
     if(iterator == strings.end()) {
         log(error_log, std::string("No localization found for key: ")+key);
         return key;
     }
-    return iterator->second.c_str();
+    return iterator->second;
 }
 
 Localization localization;
