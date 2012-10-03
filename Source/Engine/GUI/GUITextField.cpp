@@ -118,7 +118,7 @@ void GUITextField::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
         label->getPosOfChar(cursorIndexX, 0, cursorPosX, cursorPosY);
         label->posX = -max(width-label->width-8, cursorPosX-width+8);
         
-        cursorDrawTick += animationFactor;
+        cursorDrawTick += worldManager.animationFactor;
         if(cursorDrawTick > 0.5) cursorDrawTick = 0.0;
     }else
         label->posX = label->width-width+8;

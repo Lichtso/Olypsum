@@ -171,6 +171,7 @@ void AppMain(int argc, char *argv[]) {
             glClear(GL_COLOR_BUFFER_BIT);
         }else{
             objectManager.calculate();
+            worldManager.calculate();
             soundSourcesManager.calculate();
             lightManager.calculateShadows(1);
             particleSystemManager.calculate();
@@ -186,12 +187,12 @@ void AppMain(int argc, char *argv[]) {
         SDL_GL_SwapBuffers();
         
         gettimeofday(&timeNow, 0);
-        animationFactor = timeNow.tv_sec - timeThen.tv_sec;
-        animationFactor += (timeNow.tv_usec - timeThen.tv_usec) / 1000000.0;
+        worldManager.animationFactor = timeNow.tv_sec - timeThen.tv_sec;
+        worldManager.animationFactor += (timeNow.tv_usec - timeThen.tv_usec) / 1000000.0;
         gettimeofday(&timeThen, 0);
         
         newFPS ++;
-        timeInLastSec += animationFactor;
+        timeInLastSec += worldManager.animationFactor;
         if(timeInLastSec >= 1.0) {
             timeInLastSec -= 1.0;
             currentFPS = newFPS;

@@ -19,13 +19,26 @@ enum GameStatusName {
 };
 
 class WorldManager {
-    void clear();
+    btBroadphaseInterface* broadphase;
+    btDefaultCollisionConfiguration* collisionConfiguration;
+    btCollisionDispatcher* dispatcher;
+    btSequentialImpulseConstraintSolver* solver;
+    btDiscreteDynamicsWorld* dynamicsWorld;
+    btCollisionShape* worldWallShape;
+    btRigidBody* worldWallBodys[6];
+    
+    void clearAll();
+    void clearPhysics();
     public:
+    WorldManager();
+    ~WorldManager();
+    float animationFactor;
     std::string gameName;
     int levelId = -1;
     GameStatusName gameStatus = noGame;
     void loadLevel();
     void saveLevel();
+    void calculate();
     void leaveGame();
     bool loadGame(std::string name);
     bool newGame(std::string packageName, std::string name);

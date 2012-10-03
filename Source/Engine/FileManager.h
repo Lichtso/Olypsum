@@ -32,6 +32,7 @@ class FilePackage {
 class FileManager {
     std::map<std::string, FilePackage*> filePackages;
     public:
+    ~FileManager();
     void clear();
     void loadOptions();
     void saveOptions();

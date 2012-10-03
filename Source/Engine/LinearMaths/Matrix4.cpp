@@ -47,7 +47,7 @@ std::string Matrix4::getString() {
     return str+buffer;
 }
 
-btTransform Matrix4::getMatrix() {
+btTransform Matrix4::getBTMatrix() {
     float matDataA[16];
     getOpenGLMatrix4(matDataA);
     btTransform mat;
@@ -255,7 +255,7 @@ Matrix4& Matrix4::rotateZ(float value) {
     return (*this *= b);
 }
 
-Matrix4&  Matrix4::rotateV(Vector3 vec, float value) {
+Matrix4& Matrix4::rotateQ(Vector3& vec, float value) {
     float sinValue = sin(value), cosValue = cos(value), cosInv = 1.0 - cosValue;
     Matrix4 b;
     b.setIdentity();
@@ -269,6 +269,11 @@ Matrix4&  Matrix4::rotateV(Vector3 vec, float value) {
     z.y = vec.y*vec.z*cosInv+vec.x*sinValue;
     z.z = cosValue+vec.z*vec.z*cosInv;
     return (*this *= b);
+}
+
+Matrix4& Matrix4::rotateQ(btQuaternion& quaternion) {
+    Vector3 vec(quaternion.getAxis());
+    return rotateQ(vec, (float)quaternion.getAngle());
 }
 
 Matrix4& Matrix4::setDirection(Vector3 dir, Vector3 up) {

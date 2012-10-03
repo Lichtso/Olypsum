@@ -8,15 +8,66 @@
 
 #include "WorldManager.h"
 
-void WorldManager::clear() {
+WorldManager::WorldManager() {
+    dynamicsWorld = NULL;
+}
+
+WorldManager::~WorldManager() {
+    clearAll();
+}
+
+void WorldManager::clearAll() {
     soundSourcesManager.clear();
     objectManager.clear();
     particleSystemManager.clear();
     decalManager.clear();
     lightManager.clear();
+    clearPhysics();
+}
+
+static void calculatePhysicsTick(btDynamicsWorld* world, btScalar timeStep) {
+    
+}
+
+void WorldManager::clearPhysics() {
+    if(dynamicsWorld == NULL) return;
+    for(unsigned char i = 0; i < 6; i ++) {
+        delete worldWallBodys[i]->getMotionState();
+        delete worldWallBodys[i];
+    }
+    delete worldWallShape;
+    delete dynamicsWorld;
+    delete solver;
+    delete dispatcher;
+    delete collisionConfiguration;
+    delete broadphase;
+    dynamicsWorld = NULL;
 }
 
 void WorldManager::loadLevel() {
+    Vector3 worldSize = Vector3(500, 500, 500);
+    broadphase = new btAxisSweep3(worldSize.getBTVector(), (worldSize*-1.0).getBTVector());
+    collisionConfiguration = new btDefaultCollisionConfiguration();
+    dispatcher = new btCollisionDispatcher(collisionConfiguration);
+    solver = new btSequentialImpulseConstraintSolver();
+    dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+    dynamicsWorld->setGravity(btVector3(0, -98.1, 0));
+    dynamicsWorld->setInternalTickCallback(calculatePhysicsTick);
+    
+    worldWallShape = new btStaticPlaneShape(btVector3(1, 0, 0), 0);
+    Matrix4 transform;
+    btDefaultMotionState* wallMotionState[6];
+    wallMotionState[0] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0), btVector3(-worldSize.x, 0, 0)));
+    wallMotionState[1] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, M_PI), btVector3( worldSize.x, 0, 0)));
+    wallMotionState[2] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, -M_PI_2), btVector3(0, -worldSize.y, 0)));
+    wallMotionState[3] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, M_PI_2), btVector3(0,  worldSize.y, 0)));
+    wallMotionState[4] = new btDefaultMotionState(btTransform(btQuaternion(-M_PI_2, 0, 0), btVector3(0, 0, -worldSize.z)));
+    wallMotionState[5] = new btDefaultMotionState(btTransform(btQuaternion(M_PI_2, 0, 0), btVector3(0, 0,  worldSize.z)));
+    for(unsigned char i = 0; i < 6; i ++) {
+        worldWallBodys[i] = new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(0, wallMotionState[i], worldWallShape, btVector3(0, 0, 0)));
+        dynamicsWorld->addRigidBody(worldWallBodys[i]);
+    }
+    
     gameStatus = localGame;
     setMenu(inGameMenu);
 }
@@ -32,12 +83,17 @@ void WorldManager::saveLevel() {
     delete [] fileData;
 }
 
+void WorldManager::calculate() {
+    dynamicsWorld->stepSimulation(animationFactor, 4, 1.0/60.0);
+}
+
 void WorldManager::leaveGame() {
     levelId = -1;
     gameName = "";
     gameStatus = noGame;
-    clear();
+    clearAll();
     fileManager.clear();
+    fileManager.loadPackage("Default");
     setMenu(mainMenu);
 }
 
@@ -56,7 +112,6 @@ bool WorldManager::loadGame(std::string name) {
         delete [] fileData;
         return false;
     }
-    fileManager.clear();
     fileManager.loadPackage(doc.first_node("package")->first_attribute("value")->value());
     sscanf(doc.first_node("level")->first_attribute("value")->value(), "%d", &levelId);
     delete [] fileData;

@@ -19,7 +19,7 @@ class Matrix4 {
     Matrix4(btTransform const &mat);
     Matrix4(float matData[16]);
     std::string getString();
-    btTransform getMatrix();
+    btTransform getBTMatrix();
     void getOpenGLMatrix3(float matData[9]);
     void getOpenGLMatrix4(float matData[16]);
     void setMatrix3(const Matrix4&);
@@ -37,7 +37,8 @@ class Matrix4 {
     Matrix4& rotateX(float x);
     Matrix4& rotateY(float y);
     Matrix4& rotateZ(float z);
-    Matrix4& rotateV(Vector3 axis, float value);
+    Matrix4& rotateQ(Vector3& axis, float value);
+    Matrix4& rotateQ(btQuaternion& quaternion);
     Matrix4& setDirection(Vector3 dir, Vector3 up);
     Matrix4& perspective(float fovy, float aspect, float near, float far);
     Matrix4& frustum(float width, float height, float near, float far);

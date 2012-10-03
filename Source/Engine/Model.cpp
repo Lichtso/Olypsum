@@ -211,8 +211,9 @@ static Matrix4 readTransform(rapidxml::xml_node<xmlUsedCharType>* dataNode) {
             FloatArray vectorData;
             vectorData.count = 4;
             readFloatStr(transformNode->value(), vectorData);
+            Vector3 vec(vectorData.data[0], vectorData.data[1], vectorData.data[2]);
             mat.setIdentity();
-            mat.rotateV(Vector3(vectorData.data[0], vectorData.data[1], vectorData.data[2]), vectorData.data[3]/180.0*M_PI);
+            mat.rotateQ(vec, vectorData.data[3]/180.0*M_PI);
             result = mat * result;
             delete [] vectorData.data;
         }else if(strcmp(transformNode->name(), "scale") == 0) {

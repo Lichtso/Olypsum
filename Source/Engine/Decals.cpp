@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "ShaderProgram.h"
+#import "WorldManager.h"
 
 Decal::Decal() {
     diffuse = heightMap = NULL;
@@ -43,7 +43,7 @@ void DecalManager::clear() {
 
 void DecalManager::calculate() {
     for(int i = 0; i < decals.size(); i ++) {
-        decals[i]->life -= animationFactor;
+        decals[i]->life -= worldManager.animationFactor;
         if(decals[i]->life > 0.0) continue;
         delete decals[i];
         decals.erase(decals.begin()+i);

@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "ShaderProgram.h"
+#include "WorldManager.h"
 
 void ObjectBase::calculate() {
     
@@ -104,7 +104,7 @@ void WaterObject::addWave(float maxAge, float ampitude, float length, float orig
 
 void WaterObject::calculate() {
     for(unsigned int i = 0; i < waves.size(); i ++) {
-        waves[i].age += animationFactor;
+        waves[i].age += worldManager.animationFactor;
         if(waves[i].age >= waves[i].maxAge) {
             waves.erase(waves.begin()+i);
             i --;

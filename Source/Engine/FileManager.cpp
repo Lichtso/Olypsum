@@ -151,11 +151,14 @@ bool FilePackage::releaseSoundTrack(SoundTrack* soundTrack) {
 
 
 
+FileManager::~FileManager() {
+    clear();
+}
+
 void FileManager::clear() {
     for(auto iterator : filePackages)
         delete iterator.second;
     filePackages.clear();
-    loadPackage("Default");
 }
 
 static bool readOptionBool(rapidxml::xml_node<xmlUsedCharType>* option) {
@@ -199,7 +202,7 @@ void FileManager::loadOptions() {
         delete [] fileData;
     }else saveOptions();
     
-    clear();
+    loadPackage("Default");
 }
 
 void FileManager::saveOptions() {

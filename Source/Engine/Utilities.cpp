@@ -139,4 +139,4 @@ SDL_Color GUIColor::getSDL() {
 SDL_Surface* screen;
 const SDL_VideoInfo* videoInfo;
 std::string resourcesDir, gameDataDir, parentDir;
-float animationFactor, mouseTranslation[4] = { 1.0, 1.0, 0.0, 0.0 };
+float mouseTranslation[4] = { 1.0, 1.0, 0.0, 0.0 };

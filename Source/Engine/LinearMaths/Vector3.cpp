@@ -47,8 +47,12 @@ std::string Vector3::getString() {
     return std::string(buffer);
 }
 
-btVector3 Vector3::getVector() {
+btVector3 Vector3::getBTVector() {
 	return btVector3(btScalar(x), btScalar(y), btScalar(z));
+}
+
+btQuaternion Vector3::getBTQuaternion(float angle) {
+	return btQuaternion(btVector3(btScalar(x), btScalar(y), btScalar(z)), btScalar(angle));
 }
 
 float Vector3::getLength() {

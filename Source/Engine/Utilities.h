@@ -81,6 +81,6 @@ class GUIColor {
 extern SDL_Surface* screen;
 extern const SDL_VideoInfo* videoInfo;
 extern std::string resourcesDir, gameDataDir, parentDir;
-extern float animationFactor, mouseTranslation[4];
+extern float mouseTranslation[4];
 
 #endif

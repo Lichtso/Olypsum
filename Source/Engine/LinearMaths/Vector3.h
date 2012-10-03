@@ -22,7 +22,8 @@ class Vector3 {
     Vector3(float x, float y, float z);
     Vector3(float x, float y, float z, float w);
     std::string getString();
-    btVector3 getVector();
+    btVector3 getBTVector();
+    btQuaternion getBTQuaternion(float angle);
     float getLength();
     Vector3 getNormalized();
     Vector3& normalize();
