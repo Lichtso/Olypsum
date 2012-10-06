@@ -20,6 +20,9 @@ enum GUICorners {
 
 class GUIRoundedRect {
     unsigned char* pixels;
+    float getInnerShadowValue(unsigned int x, unsigned int y);
+    void setBorderPixel(unsigned int x, unsigned int y);
+    void setInnerShadowPixel(unsigned int x, unsigned int y, float value);
     public:
     GLuint* texture;
     GUICorners roundedCorners;
@@ -27,8 +30,6 @@ class GUIRoundedRect {
     GUIColor topColor, bottomColor, borderColor;
     int width, height, innerShadow;
     GUIRoundedRect();
-    void setBorderPixel(unsigned int x, unsigned int y);
-    void setInnerShadowRect(unsigned int minX, unsigned int maxX, unsigned int minY, unsigned int maxY);
     void drawInTexture();
     void drawOnScreen(bool transposed, int posX, int posY, GUIClipRect& parentClipRect);
 };

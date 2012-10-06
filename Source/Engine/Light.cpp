@@ -561,11 +561,11 @@ void LightManager::drawDeferred() {
     illuminate();
     
     if(ssaoQuality) {
-        glViewport(0, 0, videoInfo->current_w >> 1, videoInfo->current_h >> 1);
+        glViewport(0, 0, screenSize[0] >> 1, screenSize[1] >> 1);
         randomNormalMap.use(GL_TEXTURE_2D, 1);
         shaderPrograms[ssaoSP]->use();
         mainFBO.renderDeferred(true, inBuffersB, 1, outBuffersB, 1);
-        glViewport(0, 0, videoInfo->current_w, videoInfo->current_h);
+        glViewport(0, 0, screenSize[0], screenSize[1]);
     }
     
     shaderPrograms[deferredCombineSP]->use();

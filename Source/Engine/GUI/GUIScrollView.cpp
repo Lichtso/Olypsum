@@ -67,8 +67,8 @@ void GUIScrollView::updateContent() {
         roundedRect.texture = &texture;
         roundedRect.width = width;
         roundedRect.height = height;
-        roundedRect.innerShadow = innerShadow;
-        roundedRect.cornerRadius = abs(innerShadow);
+        roundedRect.innerShadow = innerShadow*screenSize[2];
+        roundedRect.cornerRadius = abs(innerShadow)*screenSize[2];
         roundedRect.topColor.r = roundedRect.topColor.g = roundedRect.topColor.b = 200;
         roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 200;
         roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 200;
@@ -116,10 +116,11 @@ void GUIScrollView::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) 
         roundedRect.width = width;
         roundedRect.height = height;
         roundedRect.drawOnScreen(false, 0, 0, clipRect);
-        clipRect.minPosX += abs(innerShadow);
-        clipRect.maxPosX -= abs(innerShadow);
-        clipRect.minPosY += abs(innerShadow);
-        clipRect.maxPosY -= abs(innerShadow);
+        float inset = abs(innerShadow)*screenSize[2];
+        clipRect.minPosX += inset;
+        clipRect.maxPosX -= inset;
+        clipRect.minPosY += inset;
+        clipRect.maxPosY -= inset;
     }
     
     transform.translate(Vector3(-scrollPosX, scrollPosY, 0.0));

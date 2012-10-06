@@ -8,8 +8,8 @@
 
 #import "GUISlider.h"
 
-#define barHeight 6
-#define sliderRadius 12
+#define barHeight (6*screenSize[2])
+#define sliderRadius (12*screenSize[2])
 
 GUISlider::GUISlider() {
     type = GUIType_Silder;

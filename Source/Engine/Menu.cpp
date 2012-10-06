@@ -42,7 +42,7 @@ void setMenu(MenuName menu) {
         GUIImage* image = new GUIImage();
         image->texture = fileManager.getPackage("Default")->getTexture("background.png", GL_COMPRESSED_RGB);
         image->sizeAlignment = GUISizeAlignment_Height;
-        image->width = videoInfo->current_w*0.5;
+        image->width = screenSize[0]*0.5;
         image->updateContent();
         currentScreenView->addChild(image);
     }
@@ -52,13 +52,13 @@ void setMenu(MenuName menu) {
             GUIImage* image = new GUIImage();
             image->texture = fileManager.getPackage("Default")->getTexture("logo.png", GL_COMPRESSED_RGBA);
             image->sizeAlignment = GUISizeAlignment_Height;
-            image->width = videoInfo->current_w*0.4;
-            image->posY = videoInfo->current_h*0.1;
+            image->width = screenSize[0]*0.4;
+            image->posY = screenSize[1]*0.1;
             currentScreenView->addChild(image);
             GUILabel* label = new GUILabel();
             label->text = localization.localizeString("loading");
-            label->posY = videoInfo->current_h*-0.1;
-            label->fontHeight = videoInfo->current_h*0.08;
+            label->posY = screenSize[1]*-0.1;
+            label->fontHeight = screenSize[1]*0.08;
             label->color = GUIColor(255, 255);
             currentScreenView->addChild(label);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -67,9 +67,9 @@ void setMenu(MenuName menu) {
         } break;
         case mainMenu: {
             GUIFramedView* view = new GUIFramedView();
-            view->width = videoInfo->current_w*0.1;
-            view->height = videoInfo->current_w*0.135;
-            view->posX = videoInfo->current_w*-0.36;
+            view->width = screenSize[0]*0.1;
+            view->height = screenSize[0]*0.135;
+            view->posX = screenSize[0]*-0.36;
             view->innerShadow = -8;
             currentScreenView->addChild(view);
             
@@ -89,13 +89,13 @@ void setMenu(MenuName menu) {
             const char* buttonLabels[] = { "saveGames", "multiplayer", "options", "credits", "quitGame" };
             for(unsigned char i = 0; i < 5; i ++) {
                 GUIButton* button = new GUIButton();
-                button->posY = videoInfo->current_h*(0.16-0.08*i);
+                button->posY = screenSize[1]*(0.16-0.08*i);
                 view->addChild(button);
                 GUILabel* label = new GUILabel();
                 label->text = localization.localizeString(buttonLabels[i]);
                 label->textAlign = GUITextAlign_Left;
-                label->fontHeight = videoInfo->current_h*0.05;
-                label->width = videoInfo->current_w*0.08;
+                label->fontHeight = screenSize[1]*0.05;
+                label->width = screenSize[0]*0.08;
                 label->sizeAlignment = GUISizeAlignment_Height;
                 button->addChild(label);
                 button->onClick = onClick[i];
@@ -103,12 +103,12 @@ void setMenu(MenuName menu) {
         } break;
         case optionsMenu: {
             GUILabel* label = new GUILabel();
-            label->posY = videoInfo->current_h*0.44;
+            label->posY = screenSize[1]*0.44;
             label->text = localization.localizeString("options");
-            label->fontHeight = videoInfo->current_h*0.1;
+            label->fontHeight = screenSize[1]*0.1;
             currentScreenView->addChild(label);
             GUIButton* button = new GUIButton();
-            button->posY = videoInfo->current_h*-0.37;
+            button->posY = screenSize[1]*-0.37;
             button->onClick = [](GUIButton* button) {
                 fileManager.saveOptions();
                 loadDynamicShaderPrograms();
@@ -117,20 +117,20 @@ void setMenu(MenuName menu) {
             currentScreenView->addChild(button);
             label = new GUILabel();
             label->text = localization.localizeString("back");
-            label->fontHeight = videoInfo->current_h*0.05;
-            label->width = videoInfo->current_w*0.07;
+            label->fontHeight = screenSize[1]*0.05;
+            label->width = screenSize[0]*0.07;
             label->sizeAlignment = GUISizeAlignment_Height;
             button->addChild(label);
             label = new GUILabel();
-            label->posX = videoInfo->current_w*-0.26;
-            label->posY = videoInfo->current_h*0.36;
+            label->posX = screenSize[0]*-0.26;
+            label->posY = screenSize[1]*0.36;
             label->text = localization.localizeString("graphics");
-            label->fontHeight = videoInfo->current_h*0.07;
+            label->fontHeight = screenSize[1]*0.07;
             currentScreenView->addChild(label);
             GUIFramedView* view = new GUIFramedView();
-            view->width = videoInfo->current_w*0.21;
-            view->height = videoInfo->current_h*0.31;
-            view->posX = videoInfo->current_w*-0.26;
+            view->width = screenSize[0]*0.21;
+            view->height = screenSize[1]*0.31;
+            view->posX = screenSize[0]*-0.26;
             view->innerShadow = -8;
             currentScreenView->addChild(view);
             
@@ -152,16 +152,16 @@ void setMenu(MenuName menu) {
             const char* checkBoxLabels[] = { "fullScreenEnabled", "edgeSmoothEnabled", "cubemapsEnabled", "screenBlurEnabled" };
             for(unsigned char i = 0; i < 4; i ++) {
                 label = new GUILabel();
-                label->posX = videoInfo->current_w*0.12;
-                label->posY = videoInfo->current_h*(0.27-0.06*i);
-                label->width = videoInfo->current_w*0.15;
-                label->fontHeight = videoInfo->current_h*0.05;
+                label->posX = screenSize[0]*0.12;
+                label->posY = screenSize[1]*(0.27-0.06*i);
+                label->width = screenSize[0]*0.15;
+                label->fontHeight = screenSize[1]*0.05;
                 label->text = localization.localizeString(checkBoxLabels[i]);
                 label->textAlign = GUITextAlign_Left;
                 label->sizeAlignment = GUISizeAlignment_Height;
                 view->addChild(label);
                 GUICheckBox* checkBox = new GUICheckBox();
-                checkBox->posX = videoInfo->current_w*-0.12;
+                checkBox->posX = screenSize[0]*-0.12;
                 checkBox->posY = label->posY;
                 checkBox->onClick = onClick[i];
                 if(checkBoxActive[i]) checkBox->state = GUIButtonStatePressed;
@@ -191,19 +191,19 @@ void setMenu(MenuName menu) {
             const char* sliderLabels[] = { "depthOfFieldQuality", "bumpMappingQuality", "shadowQuality", "ssaoQuality", "blendingQuality", "particleCalcTarget" };
             for(unsigned char i = 0; i < 6; i ++) {
                 label = new GUILabel();
-                label->posX = videoInfo->current_w*0.12;
-                label->posY = videoInfo->current_h*(0.03-0.06*i);
-                label->width = videoInfo->current_w*0.15;
-                label->fontHeight = videoInfo->current_h*0.05;
+                label->posX = screenSize[0]*0.12;
+                label->posY = screenSize[1]*(0.03-0.06*i);
+                label->width = screenSize[0]*0.15;
+                label->fontHeight = screenSize[1]*0.05;
                 label->text = localization.localizeString(sliderLabels[i]);
                 label->textAlign = GUITextAlign_Left;
                 label->sizeAlignment = GUISizeAlignment_Height;
                 view->addChild(label);
                 if(i == 5) break;
                 GUISlider* slider = new GUISlider();
-                slider->posX = videoInfo->current_w*-0.12;
+                slider->posX = screenSize[0]*-0.12;
                 slider->posY = label->posY;
-                slider->width = videoInfo->current_w*0.08;
+                slider->width = screenSize[0]*0.08;
                 slider->value = (float)sliderValues[i]/(float)sliderSteps[i];
                 slider->steps = sliderSteps[i];
                 slider->onChange = onChange[i];
@@ -212,9 +212,9 @@ void setMenu(MenuName menu) {
             
             GUITabs* tabs = new GUITabs();
             tabs->deactivatable = false;
-            tabs->posX = videoInfo->current_w*-0.12;
-            tabs->posY = videoInfo->current_h*-0.27;
-            tabs->width = videoInfo->current_w*0.08;
+            tabs->posX = screenSize[0]*-0.12;
+            tabs->posY = screenSize[1]*-0.27;
+            tabs->width = screenSize[0]*0.08;
             tabs->sizeAlignment = GUISizeAlignment_Height;
             tabs->selectedIndex = particleCalcTarget;
             tabs->orientation = GUIOrientation_Horizontal;
@@ -228,34 +228,34 @@ void setMenu(MenuName menu) {
                 GUIButton* button = new GUIButton();
                 label = new GUILabel();
                 label->text = localization.localizeString(buttonLabels[i]);
-                label->fontHeight = videoInfo->current_h*0.03;
+                label->fontHeight = screenSize[1]*0.03;
                 button->addChild(label);
                 tabs->addChild(button);
             }
             
             label = new GUILabel();
-            label->posX = videoInfo->current_w*0.26;
-            label->posY = videoInfo->current_h*0.36;
+            label->posX = screenSize[0]*0.26;
+            label->posY = screenSize[1]*0.36;
             label->text = localization.localizeString("language");
-            label->fontHeight = videoInfo->current_h*0.07;
+            label->fontHeight = screenSize[1]*0.07;
             currentScreenView->addChild(label);
             view = new GUIFramedView();
-            view->width = videoInfo->current_w*0.21;
-            view->height = videoInfo->current_h*0.08;
-            view->posX = videoInfo->current_w*0.26;
-            view->posY = videoInfo->current_h*0.23;
+            view->width = screenSize[0]*0.21;
+            view->height = screenSize[1]*0.08;
+            view->posX = screenSize[0]*0.26;
+            view->posY = screenSize[1]*0.23;
             view->innerShadow = -8;
             currentScreenView->addChild(view);
             label = new GUILabel();
-            label->posY = videoInfo->current_h*0.04;
-            label->width = videoInfo->current_w*0.15;
-            label->fontHeight = videoInfo->current_h*0.05;
+            label->posY = screenSize[1]*0.04;
+            label->width = screenSize[0]*0.15;
+            label->fontHeight = screenSize[1]*0.05;
             label->text = std::string(localization.localizeString("selectedLanguage"))+": "+localization.title;
             label->textAlign = GUITextAlign_Left;
             label->sizeAlignment = GUISizeAlignment_Height;
             view->addChild(label);
             button = new GUIButton();
-            button->posY = videoInfo->current_h*-0.03;
+            button->posY = screenSize[1]*-0.03;
             button->onClick = [](GUIButton* button) {
                 fileManager.saveOptions();
                 setMenu(languagesMenu);
@@ -263,19 +263,19 @@ void setMenu(MenuName menu) {
             view->addChild(button);
             label = new GUILabel();
             label->text = localization.localizeString("selectLanguage");
-            label->fontHeight = videoInfo->current_h*0.05;
-            label->width = videoInfo->current_w*0.1;
+            label->fontHeight = screenSize[1]*0.05;
+            label->width = screenSize[0]*0.1;
             label->sizeAlignment = GUISizeAlignment_Height;
             button->addChild(label);
         } break;
         case languagesMenu: {
             GUILabel* label = new GUILabel();
-            label->posY = videoInfo->current_h*0.44;
+            label->posY = screenSize[1]*0.44;
             label->text = localization.localizeString("selectLanguage");
-            label->fontHeight = videoInfo->current_h*0.1;
+            label->fontHeight = screenSize[1]*0.1;
             currentScreenView->addChild(label);
             GUIButton* button = new GUIButton();
-            button->posY = videoInfo->current_h*-0.37;
+            button->posY = screenSize[1]*-0.37;
             button->onClick = [](GUIButton* button) {
                 fileManager.saveOptions();
                 setMenu(optionsMenu);
@@ -283,8 +283,8 @@ void setMenu(MenuName menu) {
             currentScreenView->addChild(button);
             label = new GUILabel();
             label->text = localization.localizeString("back");
-            label->fontHeight = videoInfo->current_h*0.05;
-            label->width = videoInfo->current_w*0.07;
+            label->fontHeight = screenSize[1]*0.05;
+            label->width = screenSize[0]*0.07;
             label->sizeAlignment = GUISizeAlignment_Height;
             button->addChild(label);
             
@@ -292,7 +292,7 @@ void setMenu(MenuName menu) {
             localization.getLocalizableLanguages(languages);
             GUITabs* tabs = new GUITabs();
             tabs->deactivatable = false;
-            tabs->width = videoInfo->current_w*0.1;
+            tabs->width = screenSize[0]*0.1;
             tabs->sizeAlignment = GUISizeAlignment_Height;
             tabs->orientation = GUIOrientation_Vertical;
             tabs->onChange = [](GUITabs* tabs) {
@@ -307,7 +307,7 @@ void setMenu(MenuName menu) {
                 GUIButton* button = new GUIButton();
                 label = new GUILabel();
                 label->text = languages[i].c_str();
-                label->fontHeight = videoInfo->current_h*0.03;
+                label->fontHeight = screenSize[1]*0.03;
                 button->addChild(label);
                 tabs->addChild(button);
                 if(languages[i] == localization.selected) {
@@ -322,9 +322,9 @@ void setMenu(MenuName menu) {
         case inGameMenu: {
             GUILabel* label = new GUILabel();
             label->text = std::string("FPS: --");
-            label->posX = -videoInfo->current_w*0.9;
-            label->posY = videoInfo->current_h*0.9;
-            label->width = videoInfo->current_w*0.15;
+            label->posX = -screenSize[0]*0.9;
+            label->posY = screenSize[1]*0.9;
+            label->width = screenSize[0]*0.15;
             label->textAlign = GUITextAlign_Left;
             label->sizeAlignment = GUISizeAlignment_Height;
             currentScreenView->addChild(label);
@@ -344,13 +344,13 @@ void setMenu(MenuName menu) {
             const char* buttonLabels[] = { "back", "options", "mainMenu", "quitGame" };
             for(unsigned char i = 0; i < 4; i ++) {
                 GUIButton* button = new GUIButton();
-                button->posY = videoInfo->current_h*(0.16-0.08*i);
+                button->posY = screenSize[1]*(0.16-0.08*i);
                 currentScreenView->addChild(button);
                 GUILabel* label = new GUILabel();
                 label->text = localization.localizeString(buttonLabels[i]);
                 label->textAlign = GUITextAlign_Left;
-                label->fontHeight = videoInfo->current_h*0.05;
-                label->width = videoInfo->current_w*0.07;
+                label->fontHeight = screenSize[1]*0.05;
+                label->width = screenSize[0]*0.07;
                 label->sizeAlignment = GUISizeAlignment_Height;
                 button->addChild(label);
                 button->onClick = onClick[i];
@@ -358,14 +358,14 @@ void setMenu(MenuName menu) {
         } break;
         case saveGamesMenu: {
             GUILabel* label = new GUILabel();
-            label->posY = videoInfo->current_h*0.44;
+            label->posY = screenSize[1]*0.44;
             label->text = localization.localizeString("saveGames");
-            label->fontHeight = videoInfo->current_h*0.1;
+            label->fontHeight = screenSize[1]*0.1;
             currentScreenView->addChild(label);
             GUIScrollView* scrollView = new GUIScrollView();
-            scrollView->width = videoInfo->current_w*0.475;
-            scrollView->height = videoInfo->current_h*0.35;
-            scrollView->posY = videoInfo->current_h*0.01;
+            scrollView->width = screenSize[0]*0.475;
+            scrollView->height = screenSize[1]*0.35;
+            scrollView->posY = screenSize[1]*0.01;
             currentScreenView->addChild(scrollView);
             std::vector<std::string> files;
             scanDir(gameDataDir+"Saves/", files);
@@ -384,7 +384,7 @@ void setMenu(MenuName menu) {
                 scrollView->addChild(button);
                 GUILabel* label = new GUILabel();
                 label->text = name;
-                label->fontHeight = videoInfo->current_h*0.05;
+                label->fontHeight = screenSize[1]*0.05;
                 label->width = scrollView->width*0.6;
                 label->textAlign = GUITextAlign_Left;
                 label->sizeAlignment = GUISizeAlignment_Height;
@@ -394,41 +394,42 @@ void setMenu(MenuName menu) {
                 };
                 
                 button = new GUIButton();
-                button->posX = scrollView->width*0.8;
+                button->posX = scrollView->width*0.75;
                 button->posY = scrollView->height*(0.9-i*0.25);
+                button->width = scrollView->width*0.2;
+                button->sizeAlignment = GUISizeAlignment_Height;
                 scrollView->addChild(button);
                 label = new GUILabel();
                 label->text = localization.localizeString("removeGame");
-                label->fontHeight = videoInfo->current_h*0.05;
+                label->fontHeight = screenSize[1]*0.05;
                 button->addChild(label);
                 button->onClick = [&menu, name](GUIButton* button) {
                     menu = newGameMenu;
                     GUIFramedView* modalView = new GUIFramedView();
                     modalView->innerShadow = -8;
-                    modalView->width = videoInfo->current_w*0.2;
-                    modalView->height = videoInfo->current_h*0.2;
+                    modalView->width = screenSize[0]*0.2;
+                    modalView->height = screenSize[1]*0.2;
                     GUILabel* label = new GUILabel();
                     label->posY = modalView->height*0.75;
                     label->text = localization.localizeString("removeGame");
-                    label->fontHeight = videoInfo->current_h*0.07;
+                    label->fontHeight = screenSize[1]*0.07;
                     modalView->addChild(label);
                     label = new GUILabel();
                     label->width = modalView->width*0.9;
                     label->textAlign = GUITextAlign_Left;
                     label->sizeAlignment = GUISizeAlignment_Height;
                     label->text = localization.localizeString("name")+": "+name;
-                    label->fontHeight = videoInfo->current_h*0.07;
+                    label->fontHeight = screenSize[1]*0.07;
                     modalView->addChild(label);
                     button = new GUIButton();
                     button->posX = modalView->width*-0.55;
                     button->posY = modalView->height*-0.75;
+                    button->width = screenSize[0]*0.07;
+                    button->sizeAlignment = GUISizeAlignment_Height;
                     modalView->addChild(button);
                     label = new GUILabel();
                     label->text = localization.localizeString("cancel");
-                    label->textAlign = GUITextAlign_Left;
-                    label->fontHeight = videoInfo->current_h*0.05;
-                    label->width = videoInfo->current_w*0.07;
-                    label->sizeAlignment = GUISizeAlignment_Height;
+                    label->fontHeight = screenSize[1]*0.05;
                     button->addChild(label);
                     button->onClick = [&menu](GUIButton* button) {
                         currentScreenView->setModalView(NULL);
@@ -437,13 +438,12 @@ void setMenu(MenuName menu) {
                     button = new GUIButton();
                     button->posX = modalView->width*0.55;
                     button->posY = modalView->height*-0.75;
+                    button->width = screenSize[0]*0.07;
+                    button->sizeAlignment = GUISizeAlignment_Height;
                     modalView->addChild(button);
                     label = new GUILabel();
                     label->text = localization.localizeString("ok");
-                    label->textAlign = GUITextAlign_Left;
-                    label->fontHeight = videoInfo->current_h*0.05;
-                    label->width = videoInfo->current_w*0.07;
-                    label->sizeAlignment = GUISizeAlignment_Height;
+                    label->fontHeight = screenSize[1]*0.05;
                     button->addChild(label);
                     button->onClick = [&menu, name](GUIButton* button) {
                         worldManager.removeGame(name);
@@ -461,12 +461,12 @@ void setMenu(MenuName menu) {
                     menu = newGameMenu;
                     GUIFramedView* modalView = new GUIFramedView();
                     modalView->innerShadow = -8;
-                    modalView->width = videoInfo->current_w*0.2;
-                    modalView->height = videoInfo->current_h*0.2;
+                    modalView->width = screenSize[0]*0.2;
+                    modalView->height = screenSize[1]*0.2;
                     GUILabel* label = new GUILabel();
                     label->posY = modalView->height*0.75;
                     label->text = localization.localizeString("newGame");
-                    label->fontHeight = videoInfo->current_h*0.07;
+                    label->fontHeight = screenSize[1]*0.07;
                     modalView->addChild(label);
                     label = new GUILabel();
                     label->posX = modalView->width*-0.5;
@@ -475,7 +475,7 @@ void setMenu(MenuName menu) {
                     label->textAlign = GUITextAlign_Left;
                     label->sizeAlignment = GUISizeAlignment_Height;
                     label->text = localization.localizeString("name");
-                    label->fontHeight = videoInfo->current_h*0.07;
+                    label->fontHeight = screenSize[1]*0.07;
                     modalView->addChild(label);
                     label = new GUILabel();
                     label->posX = modalView->width*-0.5;
@@ -484,7 +484,7 @@ void setMenu(MenuName menu) {
                     label->textAlign = GUITextAlign_Left;
                     label->sizeAlignment = GUISizeAlignment_Height;
                     label->text = localization.localizeString("package");
-                    label->fontHeight = videoInfo->current_h*0.07;
+                    label->fontHeight = screenSize[1]*0.07;
                     modalView->addChild(label);
                     GUIScrollView* scrollView = new GUIScrollView();
                     scrollView->posX = modalView->width*0.4;
@@ -509,7 +509,7 @@ void setMenu(MenuName menu) {
                         button = new GUIButton();
                         label = new GUILabel();
                         label->text = name;
-                        label->fontHeight = videoInfo->current_h*0.05;
+                        label->fontHeight = screenSize[1]*0.05;
                         button->addChild(label);
                         buttonList->addChild(button);
                     }
@@ -522,18 +522,17 @@ void setMenu(MenuName menu) {
                     textField->posY = modalView->height*0.1;
                     textField->width = modalView->width*0.5;
                     textField->height = modalView->height*0.15;
-                    textField->label->fontHeight = videoInfo->current_h*0.05;
+                    textField->label->fontHeight = screenSize[1]*0.05;
                     modalView->addChild(textField);
                     button = new GUIButton();
                     button->posX = modalView->width*-0.55;
                     button->posY = modalView->height*-0.75;
+                    button->width = screenSize[0]*0.07;
+                    button->sizeAlignment = GUISizeAlignment_Height;
                     modalView->addChild(button);
                     label = new GUILabel();
                     label->text = localization.localizeString("cancel");
-                    label->textAlign = GUITextAlign_Left;
-                    label->fontHeight = videoInfo->current_h*0.05;
-                    label->width = videoInfo->current_w*0.07;
-                    label->sizeAlignment = GUISizeAlignment_Height;
+                    label->fontHeight = screenSize[1]*0.05;
                     button->addChild(label);
                     button->onClick = [&menu](GUIButton* button) {
                         currentScreenView->setModalView(NULL);
@@ -543,6 +542,8 @@ void setMenu(MenuName menu) {
                     button->posX = modalView->width*0.55;
                     button->posY = modalView->height*-0.75;
                     button->state = GUIButtonStateDisabled;
+                    button->width = screenSize[0]*0.07;
+                    button->sizeAlignment = GUISizeAlignment_Height;
                     modalView->addChild(button);
                     if(files.size() > 0)
                         textField->onChange = [button](GUITextField* textField) {
@@ -551,10 +552,7 @@ void setMenu(MenuName menu) {
                         };
                     label = new GUILabel();
                     label->text = localization.localizeString("ok");
-                    label->textAlign = GUITextAlign_Left;
-                    label->fontHeight = videoInfo->current_h*0.05;
-                    label->width = videoInfo->current_w*0.07;
-                    label->sizeAlignment = GUISizeAlignment_Height;
+                    label->fontHeight = screenSize[1]*0.05;
                     button->addChild(label);
                     button->onClick = [&menu, files, buttonList, textField](GUIButton* button) {
                         worldManager.newGame(files[buttonList->selectedIndex], textField->label->text);
@@ -565,15 +563,14 @@ void setMenu(MenuName menu) {
             const char* buttonLabels[] = { "back", "newGame" };
             for(unsigned char i = 0; i < 2; i ++) {
                 GUIButton* button = new GUIButton();
-                button->posX = videoInfo->current_w*(-0.4+i*0.8);
-                button->posY = videoInfo->current_h*-0.4;
+                button->posX = screenSize[0]*(-0.4+i*0.8);
+                button->posY = screenSize[1]*-0.4;
+                button->width = screenSize[0]*0.07;
+                button->sizeAlignment = GUISizeAlignment_Height;
                 currentScreenView->addChild(button);
                 GUILabel* label = new GUILabel();
                 label->text = localization.localizeString(buttonLabels[i]);
-                label->textAlign = GUITextAlign_Left;
-                label->fontHeight = videoInfo->current_h*0.05;
-                label->width = videoInfo->current_w*0.07;
-                label->sizeAlignment = GUISizeAlignment_Height;
+                label->fontHeight = screenSize[1]*0.05;
                 button->addChild(label);
                 button->onClick = onClick[i];
             }

@@ -93,8 +93,8 @@ void GUIFramedView::updateContent() {
         roundedRect.texture = &texture;
         roundedRect.width = width;
         roundedRect.height = height;
-        roundedRect.innerShadow = innerShadow;
-        roundedRect.cornerRadius = abs(innerShadow);
+        roundedRect.innerShadow = innerShadow*screenSize[2];
+        roundedRect.cornerRadius = abs(innerShadow)*screenSize[2];
         roundedRect.topColor.r = roundedRect.topColor.g = roundedRect.topColor.b = 200;
         roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 200;
         roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 200;
@@ -122,10 +122,11 @@ void GUIFramedView::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) 
         roundedRect.width = width;
         roundedRect.height = height;
         roundedRect.drawOnScreen(false, 0, 0, clipRect);
-        clipRect.minPosX += abs(innerShadow);
-        clipRect.maxPosX -= abs(innerShadow);
-        clipRect.minPosY += abs(innerShadow);
-        clipRect.maxPosY -= abs(innerShadow);
+        float inset = abs(innerShadow)*screenSize[2];
+        clipRect.minPosX += inset;
+        clipRect.maxPosX -= inset;
+        clipRect.minPosY += inset;
+        clipRect.maxPosY -= inset;
     }
     
     for(unsigned int i = 0; i < children.size(); i ++)
@@ -138,13 +139,13 @@ GUIScreenView::GUIScreenView() {
     type = GUIType_ScreenView;
     modalView = NULL;
     firstResponder = NULL;
-    width = videoInfo->current_w >> 1;
-    height = videoInfo->current_h >> 1;
+    width = screenSize[0] >> 1;
+    height = screenSize[1] >> 1;
 }
 
 bool GUIScreenView::getLimSize(GUIClipRect& clipRect) {
-    width = videoInfo->current_w >> 1;
-    height = videoInfo->current_h >> 1;
+    width = screenSize[0] >> 1;
+    height = screenSize[1] >> 1;
     clipRect.minPosX = -width;
     clipRect.minPosY = -height;
     clipRect.maxPosX = width;
@@ -153,8 +154,8 @@ bool GUIScreenView::getLimSize(GUIClipRect& clipRect) {
 }
 
 void GUIScreenView::updateContent() {
-    width = videoInfo->current_w >> 1;
-    height = videoInfo->current_h >> 1;
+    width = screenSize[0] >> 1;
+    height = screenSize[1] >> 1;
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->updateContent();
 }

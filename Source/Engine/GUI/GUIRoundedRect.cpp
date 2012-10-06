@@ -28,35 +28,31 @@ void GUIRoundedRect::setBorderPixel(unsigned int x, unsigned int y) {
     pixel[3] = borderColor.a;
 }
 
-void GUIRoundedRect::setInnerShadowRect(unsigned int minX, unsigned int maxX, unsigned int minY, unsigned int maxY) {
-    float value;
-    int x0, x1, y0, y1;
+float GUIRoundedRect::getInnerShadowValue(unsigned int x, unsigned int y) {
+    float value = 0.0;
     unsigned int border = abs(innerShadow);
-    unsigned char* pixel;
-    for(unsigned int y = minY; y < maxY; y ++)
-        for(unsigned int x = minX; x < maxX; x ++) {
-            value = 0.0;
-            x0 = max(0, (int)(x-border));
-            y0 = max(0, (int)(y-border));
-            x1 = min(width*2-1, (int)(x+border));
-            y1 = min(height*2-1, (int)(y+border));
-            for(unsigned int y2 = y0; y2 <= y1; y2 ++)
-                for(unsigned int x2 = x0; x2 <= x1; x2 ++)
-                    value += (float)pixels[(y2*width*8)+x2*4+3]/255.0;
-            pixel = pixels+(y*width*8)+x*4;
-            value /= 4.0*border*border+4.0*border+1.0;
-            if(innerShadow > 0.0) {
-                value = value*0.8+0.2;
-                pixel[0] *= value;
-                pixel[1] *= value;
-                pixel[2] *= value;
-            }else{
-                value = (1.0-value)*80.0;
-                pixel[0] += value;
-                pixel[1] += value;
-                pixel[2] += value;
-            }
-        }
+    int x0 = max(0, (int)(x-border)),
+        y0 = max(0, (int)(y-border)),
+        x1 = min(width*2-1, (int)(x+border)),
+        y1 = min(height*2-1, (int)(y+border));
+    for(unsigned int y2 = y0; y2 <= y1; y2 ++)
+        for(unsigned int x2 = x0; x2 <= x1; x2 ++)
+            value += (float)pixels[(y2*width*8)+x2*4+3]/255.0;
+    value /= 4.0*border*border+4.0*border+1.0;
+    return (innerShadow > 0.0) ? value*0.8+0.2 : (1.0-value)*80.0;
+}
+
+void GUIRoundedRect::setInnerShadowPixel(unsigned int x, unsigned int y, float value) {
+    unsigned char* pixel = pixels+(y*width*8)+x*4;
+    if(innerShadow > 0.0) {
+        pixel[0] *= value;
+        pixel[1] *= value;
+        pixel[2] *= value;
+    }else{
+        pixel[0] += value;
+        pixel[1] += value;
+        pixel[2] += value;
+    }
 }
 
 void GUIRoundedRect::drawInTexture() {
@@ -89,10 +85,30 @@ void GUIRoundedRect::drawInTexture() {
         }
     
     if(innerShadow != 0) {
-        setInnerShadowRect(cornerRadius, width*2-cornerRadius, 0, cornerRadius);
-        setInnerShadowRect(cornerRadius, width*2-cornerRadius, height*2-cornerRadius, height*2);
-        setInnerShadowRect(0, cornerRadius, 0, height*2);
-        setInnerShadowRect(width*2-cornerRadius, width*2, 0, height*2);
+        for(unsigned int y = 0; y < cornerRadius; y ++)
+            for(unsigned int x = 0; x < cornerRadius; x ++) {
+                unsigned int mirX = width*2-1-x, mirY = height*2-1-y;
+                setInnerShadowPixel(x, y, getInnerShadowValue(x, y));
+                setInnerShadowPixel(mirX, y, getInnerShadowValue(mirX, y));
+                setInnerShadowPixel(x, mirY, getInnerShadowValue(x, mirY));
+                setInnerShadowPixel(mirX, mirY, getInnerShadowValue(mirX, mirY));
+            }
+        
+        for(unsigned int y = 0; y < cornerRadius; y ++) {
+            float value = getInnerShadowValue(cornerRadius, y);
+            for(unsigned int x = 0; x < width*2-cornerRadius*2; x ++) {
+                setInnerShadowPixel(cornerRadius+x, y, value);
+                setInnerShadowPixel(cornerRadius+x, height*2-1-y, value);
+            }
+        }
+        
+        for(unsigned int x = 0; x < cornerRadius; x ++) {
+            float value = getInnerShadowValue(x, cornerRadius);
+            for(unsigned int y = 0; y < height*2-cornerRadius*2; y ++) {
+                setInnerShadowPixel(x, cornerRadius+y, value);
+                setInnerShadowPixel(width*2-1-x, cornerRadius+y, value);
+            }
+        }
     }
     
     int xMinA = (roundedCorners&GUITopLeftCorner)?cornerRadius:0,

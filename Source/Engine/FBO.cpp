@@ -42,7 +42,7 @@ void FBO::initBuffer(unsigned int index) {
 }
 
 void FBO::init() {
-    maxSize = max(videoInfo->current_w, videoInfo->current_h);
+    maxSize = max(screenSize[0], screenSize[1]);
     maxSize = pow(2, ceil(log(maxSize) / log(2)));
     
     for(unsigned char i = 0; i < gBuffersCount; i ++)
@@ -60,20 +60,20 @@ void FBO::init() {
     initBuffer(colorDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, maxSize, maxSize, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     initBuffer(materialDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, screenSize[0], screenSize[1], 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     initBuffer(normalDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, screenSize[0], screenSize[1], 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(positionDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB32F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB32F_ARB, screenSize[0], screenSize[1], 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(specularDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, screenSize[0], screenSize[1], 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(diffuseDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, videoInfo->current_w, videoInfo->current_h, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, screenSize[0], screenSize[1], 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(transparentDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, videoInfo->current_w, videoInfo->current_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, screenSize[0], screenSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     if(ssaoQuality) {
         initBuffer(ssaoDBuffer);
-        glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_R16F, videoInfo->current_w >> 1, videoInfo->current_h >> 1, 0, GL_RED, GL_FLOAT, NULL);
+        glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_R16F, screenSize[0] >> 1, screenSize[1] >> 1, 0, GL_RED, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
@@ -97,8 +97,8 @@ void FBO::copyColorBuffer(unsigned char source, unsigned char destination) {
     }
     glReadBuffer((source == 0) ? GL_BACK : GL_COLOR_ATTACHMENT0);
     glDrawBuffer((destination == 0) ? GL_BACK : GL_COLOR_ATTACHMENT1);
-    glBlitFramebuffer(0, 0, videoInfo->current_w, videoInfo->current_h,
-                      0, 0, videoInfo->current_w, videoInfo->current_h,
+    glBlitFramebuffer(0, 0, screenSize[0], screenSize[1],
+                      0, 0, screenSize[0], screenSize[1],
                       GL_COLOR_BUFFER_BIT, GL_NEAREST);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -106,7 +106,7 @@ void FBO::copyColorBuffer(unsigned char source, unsigned char destination) {
 
 void FBO::renderInDeferredBuffers(bool transparent) {
     glClearColor(0, 0, 0, 0);
-    glViewport(0, 0, videoInfo->current_w, videoInfo->current_h);
+    glViewport(0, 0, screenSize[0], screenSize[1]);
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
     GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
     

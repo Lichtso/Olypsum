@@ -12,8 +12,8 @@ GUIButton::GUIButton() {
     type = GUIType_Button;
     texture = 0;
     onClick = NULL;
-    paddingX = 10;
-    paddingY = 5;
+    paddingX = 10*screenSize[2];
+    paddingY = 5*screenSize[2];
     sizeAlignment = GUISizeAlignment_All;
     buttonType = GUIButtonTypeNormal;
     state = GUIButtonStateNormal;
@@ -92,8 +92,8 @@ void GUIButton::updateContent() {
     roundedRect.width = width;
     roundedRect.height = height;
     roundedRect.roundedCorners = roundedCorners;
-    roundedRect.cornerRadius = 12;
-    if(state >= GUIButtonStatePressed) roundedRect.innerShadow = 6;
+    roundedRect.cornerRadius = 10*screenSize[2];
+    if(state >= GUIButtonStatePressed) roundedRect.innerShadow = 6*screenSize[2];
     
     switch(state) {
         case GUIButtonStateDisabled:

@@ -286,21 +286,31 @@ int sdlMacMain(int argc, char **argv) {
 }
 
 void updateVideoMode() {
-    screen = SDL_SetVideoMode(videoInfo->current_w, videoInfo->current_h, videoInfo->vfmt->BitsPerPixel, SDL_OPENGL);
+    const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
+    if(!videoInfo) {
+        log(error_log, "Coudn't get video information, Quit.");
+        exit(3);
+    }
+    
+    screenSize[2] = (fullScreenEnabled) ? [[NSScreen mainScreen] backingScaleFactor] : 1;
+    SDL_Surface* screen = SDL_SetVideoMode(videoInfo->current_w, videoInfo->current_h, videoInfo->vfmt->BitsPerPixel, SDL_OPENGL);
+    if(!screen) {
+        log(error_log, "Coudn't set video mode, Quit.");
+        exit(4);
+    }
+    screenSize[0] = videoInfo->current_w*screenSize[2];
+    screenSize[1] = videoInfo->current_h*screenSize[2];
+    
     if(fullScreenEnabled) {
         NSWindow* window = [[NSApp windows] objectAtIndex:0];
         NSView* view = [window contentView];
+        
+        [[[view subviews] objectAtIndex:0] setWantsBestResolutionOpenGLSurface:true];
         NSDictionary* opts = @{ @"NSFullScreenModeApplicationPresentationOptions": @(0) };
         [view enterFullScreenMode:[NSScreen mainScreen] withOptions:opts];
         [NSApp setPresentationOptions:NSApplicationPresentationHideDock | NSApplicationPresentationAutoHideMenuBar];
         NSRect rect = [window convertRectToScreen:NSMakeRect(0, 0, 1, 1)];
-        mouseTranslation[0] = rect.size.width;
-        mouseTranslation[1] = rect.size.height;
-        /*rect = [window convertRectToBacking:NSMakeRect(0, 0, 1, 1)];
-        mouseTranslation[0] = rect.size.width;
-        mouseTranslation[1] = rect.size.height;*/
-        mouseTranslation[2] = -rect.origin.x;
-        mouseTranslation[3] = -rect.origin.y;
-        //printf("mouseTranslation: %f %f %f %f\n", mouseTranslation[0], mouseTranslation[1], mouseTranslation[2], mouseTranslation[3]);
+        mouseTranslation[0] = -rect.origin.x;
+        mouseTranslation[1] = -rect.origin.y;
     }
 }

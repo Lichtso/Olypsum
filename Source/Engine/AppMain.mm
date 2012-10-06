@@ -19,7 +19,14 @@ unsigned int currentFPS = 0, newFPS = 0;
 #import "macCompCode/SDLMain.h"
 #else
 void updateVideoMode() {
-    screen = SDL_SetVideoMode(videoInfo->current_w, videoInfo->current_h, videoInfo->vfmt->BitsPerPixel, (fullScreenEnabled) ? SDL_OPENGL | SDL_FULLSCREEN : SDL_OPENGL);
+    const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
+    if(!videoInfo) {
+        log(error_log, "Coudn't get video information, Quit.");
+        exit(3);
+    }
+    screenSize[0] = videoInfo->current_w;
+    screenSize[1] = videoInfo->current_h;
+    SDL_Surface* screen = SDL_SetVideoMode(screenSize[0], screenSize[1], videoInfo->vfmt->BitsPerPixel, (fullScreenEnabled) ? SDL_OPENGL | SDL_FULLSCREEN : SDL_OPENGL);
     if(!screen) {
         log(error_log, "Coudn't set video mode, Quit.");
         exit(4);
@@ -36,15 +43,9 @@ void AppMain(int argc, char *argv[]) {
         exit(1);
     }
     
-    videoInfo = SDL_GetVideoInfo();
-    if(!videoInfo) {
-        log(error_log, "Coudn't get video information, Quit.");
-        exit(2);
-    }
-    
     if(TTF_Init() == -1) {
         log(error_log, "Coudn't init TTF lib, Quit.");
-        exit(3);
+        exit(2);
     }
     
     SDL_EnableUNICODE(1);
@@ -77,19 +78,19 @@ void AppMain(int argc, char *argv[]) {
     
     //Init Cams
     mainCam = new Cam();
-    mainCam->width = videoInfo->current_w/2;
-    mainCam->height = videoInfo->current_h/2;
+    mainCam->width = screenSize[0]/2;
+    mainCam->height = screenSize[1]/2;
     mainCam->calculate();
     mainCam->use();
     guiCam = new Cam();
     guiCam->fov = 0.0;
-    guiCam->width = videoInfo->current_w/2;
-    guiCam->height = videoInfo->current_h/2;
+    guiCam->width = screenSize[0]/2;
+    guiCam->height = screenSize[1]/2;
     guiCam->calculate();
     
     //Init Resources
     mainFont = new TextFont();
-    mainFont->size = videoInfo->current_h*0.05;
+    mainFont->size = screenSize[1]*0.05;
     mainFont->loadTTF("font");
     lightManager.init();
     decalManager.init();
@@ -118,8 +119,8 @@ void AppMain(int argc, char *argv[]) {
                     handleMenuKeyUp(&event.key.keysym);
                 break;
                 case SDL_MOUSEBUTTONDOWN:
-                    event.button.x = event.button.x*mouseTranslation[0]+mouseTranslation[2];
-                    event.button.y = event.button.y*mouseTranslation[1]+mouseTranslation[3];
+                    event.button.x = (event.button.x+mouseTranslation[0])*screenSize[2];
+                    event.button.y = (event.button.y+mouseTranslation[1])*screenSize[2];
                     if(currentScreenView) {
                         switch(event.button.button) {
                             case SDL_BUTTON_LEFT:
@@ -135,14 +136,14 @@ void AppMain(int argc, char *argv[]) {
                     }
                 break;
                 case SDL_MOUSEBUTTONUP:
-                    event.button.x = event.button.x*mouseTranslation[0]+mouseTranslation[2];
-                    event.button.y = event.button.y*mouseTranslation[1]+mouseTranslation[3];
+                    event.button.x = (event.button.x+mouseTranslation[0])*screenSize[2];
+                    event.button.y = (event.button.y+mouseTranslation[1])*screenSize[2];
                     if(currentScreenView)
                         currentScreenView->handleMouseUp(event.button.x, event.button.y);
                 break;
                 case SDL_MOUSEMOTION:
-                    event.button.x = event.button.x*mouseTranslation[0]+mouseTranslation[2];
-                    event.button.y = event.button.y*mouseTranslation[1]+mouseTranslation[3];
+                    event.button.x = (event.button.x+mouseTranslation[0])*screenSize[2];
+                    event.button.y = (event.button.y+mouseTranslation[1])*screenSize[2];
                     if(currentScreenView)
                         currentScreenView->handleMouseMove(event.button.x, event.button.y);
                 break;
@@ -166,7 +167,7 @@ void AppMain(int argc, char *argv[]) {
         
         if(worldManager.gameStatus == noGame) {
             glClearColor(1, 1, 1, 1);
-            glViewport(0, 0, videoInfo->current_w, videoInfo->current_h);
+            glViewport(0, 0, screenSize[0], screenSize[1]);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT);
         }else{

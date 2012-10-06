@@ -31,7 +31,7 @@
 	<entry key="cancel">Abbrechen</entry>
 	<entry key="ok">Ok</entry>
 	<entry key="name">Name</entry>
-	<entry key="package">Packet</entry>
+	<entry key="package">Paket</entry>
 	<entry key="newGame">Neues Spiel</entry>
 	<entry key="removeGame">Spiel löschen</entry>
 </localization>
