@@ -6,7 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Game.h"
+#import "Menu.h"
+#import "AppMain.h"
 
 void handleMenuKeyUp(SDL_keysym* key) {
     if(key->sym == SDLK_ESCAPE) {

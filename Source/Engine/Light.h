@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "FileManager.h"
+#import "Cam.h"
 
 #ifndef Light_h
 #define Light_h

@@ -6,7 +6,6 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Vector3.h"
 #import "Matrix4.h"
 
 Vector3::Vector3() {

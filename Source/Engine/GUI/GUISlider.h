@@ -6,7 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUIProgressBar.h"
+#import "GUIRoundedRect.h"
+#import "GUIRect.h"
 
 #ifndef GUISlider_h
 #define GUISlider_h

@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Audio.h"
+#import "ShaderProgram.h"
 
 #ifndef Model_h
 #define Model_h
@@ -64,6 +64,8 @@ class Mesh {
     ~Mesh();
     void draw(ObjectBase* object);
 };
+
+class FilePackage;
 
 class Model {
     public:

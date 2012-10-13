@@ -7,6 +7,8 @@
 //
 
 #import "GUILabel.h"
+#import "GUIView.h"
+#import "GUIRoundedRect.h"
 
 #ifndef GUIButton_h
 #define GUIButton_h

@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#import <BulletDynamics/btBulletDynamicsCommon.h>
 #import "Utilities.h"
 
 #ifndef Vector3_h

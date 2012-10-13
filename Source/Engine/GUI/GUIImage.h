@@ -6,7 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUITextField.h"
+#import "GUIRoundedRect.h"
+#import "GUIRect.h"
 
 #ifndef GUIImage_h
 #define GUIImage_h

@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#import "XMLUtilities.h"
 #import "Vector3.h"
 
 #ifndef Matrix4_h
@@ -18,6 +19,7 @@ class Matrix4 {
     Matrix4(Matrix4 const &mat);
     Matrix4(btTransform const &mat);
     Matrix4(float matData[16]);
+    Matrix4& readTransform(rapidxml::xml_node<xmlUsedCharType>* node);
     std::string getString();
     btTransform getBTMatrix();
     void getOpenGLMatrix3(float matData[9]);

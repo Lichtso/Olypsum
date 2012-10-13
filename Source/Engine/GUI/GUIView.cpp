@@ -6,7 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUIView.h"
+#import "Cam.h"
+#import "GUIView.h"
 
 GUIView::GUIView() {
     type = GUIType_View;

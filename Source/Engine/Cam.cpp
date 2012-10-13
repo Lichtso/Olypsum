@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#import <OpenAL/al.h>
 #import "Cam.h"
 
 Cam::Cam() {

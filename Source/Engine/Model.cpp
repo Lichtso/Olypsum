@@ -6,8 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Menu.h"
-#import "rapidxml_print.hpp"
+#import "WorldManager.h"
 
 #define AXIS_X 0
 #define AXIS_Y 1
@@ -41,7 +40,8 @@ void Mesh::draw(ObjectBase* object) {
         return;
     }
     
-    AnimatedObject* animatedObject = (object->type != ObjectInstance_Animated && object->type != ObjectInstance_NPC) ? NULL : (AnimatedObject*) object;
+    //AnimatedObject* animatedObject = (object->type != ObjectInstance_Animated && object->type != ObjectInstance_NPC) ? NULL : (AnimatedObject*) object;
+    AnimatedObject* animatedObject = (weightJoints == 0) ? NULL : (AnimatedObject*) object;
     
     if(diffuse)
         diffuse->use(GL_TEXTURE_2D, 0);
@@ -85,7 +85,7 @@ void Mesh::draw(ObjectBase* object) {
                         shaderPrograms[solidGeometrySP]->use();
                 }
             }
-        }else{
+        }else if(object->type == ObjectInstance_Water) {
             WaterObject* waterObject = (WaterObject*) object;
             shaderPrograms[waterSP]->use();
             char str[64];
@@ -139,18 +139,8 @@ void Mesh::draw(ObjectBase* object) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-struct FloatArray {
-    float* data;
-    unsigned int count, stride;
-};
-
-struct IntArray {
-    int* data;
-    unsigned int count;
-};
-
 struct VertexReference {
-    FloatArray* source;
+    XMLValueArray<float>* source;
     unsigned int offset;
     char* name;
 };
@@ -160,81 +150,11 @@ struct Material {
     std::string diffuseURL, effectMapURL, heightMapURL;
 };
 
-static void readFloatStr(char* dataStr, FloatArray& array) {
-    array.data = new float[array.count];
-    
-    char *lastPos = dataStr;
-    for(unsigned int i = 0; i < array.count; i ++) {
-        dataStr = strchr(lastPos, ' ');
-        if(dataStr) *dataStr = 0;
-        sscanf(lastPos, "%f", &array.data[i]);
-        lastPos = dataStr+1;
-    }
-    
-    return;
-}
-
-static void readIntStr(char* dataStr, IntArray& array) {
-    if(!array.data) array.data = new int[array.count];
-    
-    char *lastPos = dataStr;
-    for(unsigned int i = 0; i < array.count; i ++) {
-        dataStr = strchr(lastPos, ' ');
-        if(dataStr) *dataStr = 0;
-        sscanf(lastPos, "%d", &array.data[i]);
-        lastPos = dataStr+1;
-    }
-    
-    return;
-}
-
-static Matrix4 readTransform(rapidxml::xml_node<xmlUsedCharType>* dataNode) {
-    Matrix4 result, mat;
-    result.setIdentity();
-    rapidxml::xml_node<xmlUsedCharType>* transformNode = dataNode->first_node();
-    while(transformNode) {
-        if(strcmp(transformNode->name(), "matrix") == 0) {
-            FloatArray matrixData;
-            matrixData.count = 16;
-            readFloatStr(transformNode->value(), matrixData);
-            result = Matrix4(matrixData.data).getTransposed();
-            delete [] matrixData.data;
-        }else if(strcmp(transformNode->name(), "translate") == 0) {
-            FloatArray vectorData;
-            vectorData.count = 3;
-            readFloatStr(transformNode->value(), vectorData);
-            mat.setIdentity();
-            mat.translate(Vector3(vectorData.data[0], vectorData.data[1], vectorData.data[2]));
-            result = mat * result;
-            delete [] vectorData.data;
-        }else if(strcmp(transformNode->name(), "rotate") == 0) {
-            FloatArray vectorData;
-            vectorData.count = 4;
-            readFloatStr(transformNode->value(), vectorData);
-            Vector3 vec(vectorData.data[0], vectorData.data[1], vectorData.data[2]);
-            mat.setIdentity();
-            mat.rotateQ(vec, vectorData.data[3]/180.0*M_PI);
-            result = mat * result;
-            delete [] vectorData.data;
-        }else if(strcmp(transformNode->name(), "scale") == 0) {
-            FloatArray vectorData;
-            vectorData.count = 3;
-            readFloatStr(transformNode->value(), vectorData);
-            mat.setIdentity();
-            mat.scale(Vector3(vectorData.data[0], vectorData.data[1], vectorData.data[2]));
-            result = mat * result;
-            delete [] vectorData.data;
-        }
-        transformNode = transformNode->next_sibling();
-    }
-    return result;
-}
-
 static Bone* readBone(Skeleton& skeleton, Matrix4& deTransform, Matrix4& parentMat, rapidxml::xml_node<xmlUsedCharType>* dataNode) {
     rapidxml::xml_attribute<xmlUsedCharType> *typeAttribute, *sidAttribute = dataNode->first_attribute("sid");
     Bone *bone = new Bone;
     bone->name = sidAttribute->value();
-    bone->staticMat = readTransform(dataNode);
+    bone->staticMat.readTransform(dataNode);
     bone->staticMat *= parentMat;
     rapidxml::xml_node<xmlUsedCharType> *childNode = dataNode->first_node("node");
     while(childNode) {
@@ -284,16 +204,14 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
     if(meshes.size() > 0) return false;
     
     rapidxml::xml_document<xmlUsedCharType> doc;
-    unsigned int fileSize;
-    char* fileData = readXmlFile(doc, filePath, fileSize, true);
+    std::unique_ptr<char[]> fileData = readXmlFile(doc, filePath, true);
     if(!fileData) return false;
     
     rapidxml::xml_node<xmlUsedCharType> *collada, *library, *geometry, *meshNode, *source, *dataNode;
     rapidxml::xml_attribute<xmlUsedCharType> *dataAttribute;
     std::map<std::string, std::string> textureURLs;
     std::map<std::string, Material> materials;
-    FloatArray skinData;
-    skinData.data = NULL;
+    XMLValueArray<float> skinData;
     char upAxis = AXIS_Y, *id;
     Matrix4 modelTransformMat;
     Mesh* mesh;
@@ -506,8 +424,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
         if(!meshNode) goto endParsingXML;
         
         std::vector<Bone*> boneIndexMap(skeleton->bones.size());
-        FloatArray weightData;
-        weightData.data = NULL;
+        XMLValueArray<float> weightData;
         source = meshNode->first_node("source");
         while(source) {
             dataNode = source->first_node("technique_common");
@@ -550,12 +467,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                     lastPos = dataStr+1;
                 }
             }else if(strcmp(id, "WEIGHT") == 0) {
-                dataNode = source->first_node("float_array");
-                if(!dataNode) goto endParsingXML;
-                dataAttribute = dataNode->first_attribute("count");
-                if(!dataAttribute) goto endParsingXML;
-                sscanf(dataAttribute->value(), "%d", &weightData.count);
-                readFloatStr(dataNode->value(), weightData);
+                weightData.readString(source->first_node("float_array"), "%f");
             }
             source = source->next_sibling("source");
         }
@@ -592,15 +504,12 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             goto endParsingXML;
         }
         
-        IntArray vcount, skinIndecies;
-        vcount.data = NULL;
-        skinIndecies.data = NULL;
+        XMLValueArray<int> vcount, skinIndecies;
         dataAttribute = source->first_attribute("count");
         if(!dataAttribute) goto endParsingXML;
         sscanf(dataAttribute->value(), "%d", &vcount.count);
-        dataNode = source->first_node("vcount");
-        if(!dataNode) goto endParsingXML;
-        readIntStr(dataNode->value(), vcount);
+        if(!vcount.readString(source->first_node("vcount"), vcount.count, "%d"))
+            goto endParsingXML;
         skinIndecies.count = 0;
         for(unsigned int i = 0; i < vcount.count; i ++) {
             if(vcount.data[i] > jointsPerVertex) {
@@ -611,9 +520,8 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             }
             skinIndecies.count += vcount.data[i]*2;
         }
-        dataNode = source->first_node("v");
-        if(!dataNode) goto endParsingXML;
-        readIntStr(dataNode->value(), skinIndecies);
+        if(!skinIndecies.readString(source->first_node("v"), skinIndecies.count, "%d"))
+            goto endParsingXML;
         skinData.count = vcount.count*jointsPerVertex*2;
         skinData.stride = jointsPerVertex*2;
         skinData.data = new float[vcount.count*jointsPerVertex*2];
@@ -630,10 +538,6 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             }
             skinIndecies.count += vcount.data[i]*2;
         }
-        
-        delete [] vcount.data;
-        delete [] skinIndecies.data;
-        delete [] weightData.data;
         
         geometry = geometry->next_sibling("controllers");
         if(!skeleton) {
@@ -656,53 +560,46 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
         if(!meshNode) goto endParsingXML;
         
         //Load Sources
-        std::map<std::string, FloatArray> floatArrays;
+        std::map<std::string, XMLValueArray<float>*> floatArrays;
         source = meshNode->first_node("source");
         while(source) {
-            dataNode = source->first_node("float_array");
-            if(!dataNode) goto endParsingXML;
-            dataAttribute = dataNode->first_attribute("count");
-            if(!dataAttribute) goto endParsingXML;
-            FloatArray floatArray;
-            sscanf(dataAttribute->value(), "%d", &floatArray.count);
-            if(!floatArray.count) goto endParsingXML;
-            readFloatStr(dataNode->value(), floatArray);
+            XMLValueArray<float>* floatArray = new XMLValueArray<float>();
+            if(!floatArray->readString(source->first_node("float_array"), "%f"))
+                goto endParsingXML;
             dataNode = source->first_node("technique_common");
             if(!dataNode) goto endParsingXML;
             dataNode = dataNode->first_node("accessor");
             if(!dataNode) goto endParsingXML;
             dataAttribute = source->first_attribute("id");
             if(!dataAttribute) goto endParsingXML;
-            id = dataAttribute->value();
+            floatArrays[dataAttribute->value()] = floatArray;
             dataAttribute = dataNode->first_attribute("stride");
             if(!dataAttribute) goto endParsingXML;
-            sscanf(dataAttribute->value(), "%d", &floatArray.stride);
+            sscanf(dataAttribute->value(), "%d", &floatArray->stride);
             
-            floatArrays[id] = floatArray;
-            if(floatArray.stride == 3 && upAxis != AXIS_Y) {
-                for(unsigned int i = 0; i < floatArray.count/floatArray.stride; i ++) {
-                    Vector3 vec = Vector3(floatArray.data[i*3], floatArray.data[i*3+1], floatArray.data[i*3+2]) * modelTransformMat;
-                    floatArray.data[i*3  ] = vec.x;
-                    floatArray.data[i*3+1] = vec.y;
-                    floatArray.data[i*3+2] = vec.z;
+            if(floatArray->stride == 3 && upAxis != AXIS_Y) {
+                for(unsigned int i = 0; i < floatArray->count/floatArray->stride; i ++) {
+                    Vector3 vec = Vector3(floatArray->data[i*3], floatArray->data[i*3+1], floatArray->data[i*3+2]) * modelTransformMat;
+                    floatArray->data[i*3  ] = vec.x;
+                    floatArray->data[i*3+1] = vec.y;
+                    floatArray->data[i*3+2] = vec.z;
                 }
             }
-            char floatArrayData[16*floatArray.count], *floatArrayPos = floatArrayData;
-            for(unsigned int i = 0; i < floatArray.count; i ++) {
+            char floatArrayData[16*floatArray->count], *floatArrayPos = floatArrayData;
+            for(unsigned int i = 0; i < floatArray->count; i ++) {
                 if(i > 0) *(floatArrayPos ++) = ' ';
-                floatArrayPos += sprintf(floatArrayPos, "%4.8f", floatArray.data[i]);
+                floatArrayPos += sprintf(floatArrayPos, "%4.8f", floatArray->data[i]);
             }
             
-            floatArray.count /= floatArray.stride;
-            if(floatArray.stride == 2)
-                for(unsigned int i = 0; i < floatArray.count; i ++)
-                    floatArray.data[i*2+1] = 1.0-floatArray.data[i*2+1];
+            floatArray->count /= floatArray->stride;
+            if(floatArray->stride == 2)
+                for(unsigned int i = 0; i < floatArray->count; i ++)
+                    floatArray->data[i*2+1] = 1.0-floatArray->data[i*2+1];
             source = source->next_sibling("source");
         }
         
         //Load Vertices
-        std::map<std::string, std::vector<VertexReference>* > vertexReferenceArrays;
-        std::map<std::string, std::vector<VertexReference>* >::iterator iteratorB;
+        std::map<std::string, std::vector<VertexReference>*> vertexReferenceArrays;
         source = meshNode->first_node("vertices");
         while(source) {
             dataAttribute = source->first_attribute("id");
@@ -717,7 +614,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 vertexReference.name = dataAttribute->value();
                 dataAttribute = dataNode->first_attribute("source");
                 if(!dataAttribute) goto endParsingXML;
-                vertexReference.source = &floatArrays[dataAttribute->value()+1];
+                vertexReference.source = floatArrays[dataAttribute->value()+1];
                 vertexReferenceArrays[id]->push_back(vertexReference);
                 dataNode = dataNode->next_sibling("input");
             }
@@ -749,7 +646,6 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             
             unsigned int dataIndex, valueIndex, indexCount = 0, strideIndex = 0;
             std::map<std::string, VertexReference> vertexReferences;
-            
             dataNode = source->first_node("input");
             while(dataNode) {
                 unsigned int offset;
@@ -758,17 +654,17 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 sscanf(dataAttribute->value(), "%d", &offset);
                 dataAttribute = dataNode->first_attribute("source");
                 if(!dataAttribute) goto endParsingXML;
-                iteratorB = vertexReferenceArrays.find(dataAttribute->value()+1);
-                if(iteratorB == vertexReferenceArrays.end()) {
+                decltype(vertexReferenceArrays)::iterator iterator = vertexReferenceArrays.find(dataAttribute->value()+1);
+                if(iterator == vertexReferenceArrays.end()) {
                     VertexReference vertexReference;
-                    vertexReference.source = &floatArrays[dataAttribute->value()+1];
+                    vertexReference.source = floatArrays[dataAttribute->value()+1];
                     vertexReference.offset = offset;
                     dataAttribute = dataNode->first_attribute("semantic");
                     if(!dataAttribute) goto endParsingXML;
                     vertexReference.name = dataAttribute->value();
                     vertexReferences[vertexReference.name] = vertexReference;
                 }else{
-                    std::vector<VertexReference>* vertexReferenceArray = iteratorB->second;
+                    std::vector<VertexReference>* vertexReferenceArray = iterator->second;
                     for(unsigned int i = 0; i < vertexReferenceArray->size(); i ++) {
                         (*vertexReferenceArray)[i].offset = offset;
                         vertexReferences[(*vertexReferenceArray)[i].name] = (*vertexReferenceArray)[i];
@@ -811,35 +707,28 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
             }
             
             //Triangulator
-            IntArray indexBuffer, indexCountBuffer;
-            indexBuffer.data = NULL;
-            indexCountBuffer.data = NULL;
+            XMLValueArray<int> indexBuffer, indexCountBuffer;
             dataNode = source->first_node("vcount");
             if(dataNode) {
-                indexCountBuffer.data = NULL;
-                indexCountBuffer.count = mesh->elementsCount;
-                readIntStr(dataNode->value(), indexCountBuffer);
+                indexCountBuffer.readString(dataNode, mesh->elementsCount, "%d");
                 mesh->elementsCount = 0;
-                
                 for(unsigned int i = 0; i < indexCountBuffer.count; i ++)
                     mesh->elementsCount += indexCountBuffer.data[i]-2;
                 indexBuffer.count = (mesh->elementsCount+2*indexCountBuffer.count)*indexCount;
                 mesh->elementsCount *= 3;
                 
-                if(mesh->elementsCount == indexCountBuffer.count*3) { //All Elements are Triangles
-                    delete [] indexCountBuffer.data;
-                    indexCountBuffer.data = NULL;
-                }else{ //Triangulation needed
+                if(mesh->elementsCount == indexCountBuffer.count*3) //All Elements are Triangles
+                    indexCountBuffer.clear();
+                else //Triangulation needed
                     indexBuffer.data = new int[mesh->elementsCount*indexCount];
-                }
+                
             }else{
                 mesh->elementsCount *= 3;
                 indexBuffer.count = indexCount*mesh->elementsCount;
             }
             
-            dataNode = source->first_node("p");
-            if(!dataNode) goto endParsingXML;
-            readIntStr(dataNode->value(), indexBuffer);
+            if(!indexBuffer.readString(source->first_node("p"), indexBuffer.count, "%d"))
+                goto endParsingXML;
             
             if(indexCountBuffer.data) {
                 unsigned int finishedElements = 0, indexBufferSize = indexBuffer.count;
@@ -847,8 +736,8 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 mesh->elementsCount = 0;
                 for(int i = indexCountBuffer.count-1; i >= 0; i --) {
                     unsigned int copyCount = indexCountBuffer.data[i]*indexCount,
-                                 expandCount = (indexCountBuffer.data[i]-2)*3*indexCount,
-                                 indexAuxBuffer[copyCount], index;
+                    expandCount = (indexCountBuffer.data[i]-2)*3*indexCount,
+                    indexAuxBuffer[copyCount], index;
                     
                     index = indexBufferSize-finishedElements-copyCount;
                     for(unsigned int j = 0; j < copyCount; j ++)
@@ -865,6 +754,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                     finishedElements += indexCountBuffer.data[i]*indexCount;
                     mesh->elementsCount += (indexCountBuffer.data[i]-2)*3;
                 }
+                indexCountBuffer.clear();
             }
             
             //Indecizer
@@ -903,10 +793,10 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
                 glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->elementsCount*sizeof(unsigned int), indecies, GL_STATIC_DRAW);
                 /*if(combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int) > mesh->elementsCount*strideIndex*sizeof(float)) {
-                    char buffer[128];
-                    sprintf(buffer, "Loading COLLADA, Index-Mode is contra-productive: Used %lu bytes, but %lu would be necessary.", combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int), mesh->elementsCount*strideIndex*sizeof(float));
-                    log(warning_log, buffer);
-                }*/
+                 char buffer[128];
+                 sprintf(buffer, "Loading COLLADA, Index-Mode is contra-productive: Used %lu bytes, but %lu would be necessary.", combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int), mesh->elementsCount*strideIndex*sizeof(float));
+                 log(warning_log, buffer);
+                 }*/
             }else{ //Don't use IndexBuffer
                 dataIndex = 0;
                 for(unsigned int i = 0; i < mesh->elementsCount; i ++)
@@ -918,18 +808,16 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 glBufferData(GL_ARRAY_BUFFER, mesh->elementsCount*strideIndex*sizeof(float), dataBuffer, GL_STATIC_DRAW);
             }
             
-            delete [] indexBuffer.data;
             rapidxml::xml_node<xmlUsedCharType>* sourceB = source->next_sibling("triangles");
             if(!sourceB) sourceB = source->next_sibling("polylist");
             source = sourceB;
         }
         
         //Clean up
-        std::map<std::string, FloatArray>::iterator iterator;
-        for(iterator = floatArrays.begin(); iterator != floatArrays.end(); iterator ++)
-            delete [] iterator->second.data;
-        for(iteratorB = vertexReferenceArrays.begin(); iteratorB != vertexReferenceArrays.end(); iteratorB ++)
-            delete iteratorB->second;
+        for(auto iterator = vertexReferenceArrays.begin(); iterator != vertexReferenceArrays.end(); iterator ++)
+            delete iterator->second;
+        for(auto iterator = floatArrays.begin(); iterator != floatArrays.end(); iterator ++)
+            delete iterator->second;
         
         geometry = geometry->next_sibling("geometry");
         if(skeleton && geometry) {
@@ -941,9 +829,6 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
     endParsingXML:
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    if(skinData.data) delete skinData.data;
-    doc.clear();
-    delete [] fileData;
     return true;
 }
 

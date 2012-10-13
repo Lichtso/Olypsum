@@ -6,7 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUIRect.h"
+#import "TextFont.h"
+#import "GUIClipRect.h"
 
 #ifndef GUIRoundedRect_h
 #define GUIRoundedRect_h

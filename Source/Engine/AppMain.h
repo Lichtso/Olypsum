@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "WorldManager.h"
+#import "Menu.h"
 
 #ifndef AppMain_h
 #define AppMain_h

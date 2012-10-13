@@ -7,6 +7,7 @@
 //
 
 #import "ShaderProgram.h"
+#import "Cam.h"
 
 unsigned int boxIndecies[36] = {
     0, 1, 2, 1, 3, 2,

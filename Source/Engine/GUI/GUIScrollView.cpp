@@ -7,6 +7,7 @@
 //
 
 #import "GUIScrollView.h"
+
 #define scrollBarWidth 6
 
 int GUIScrollView::getBarWidth() {

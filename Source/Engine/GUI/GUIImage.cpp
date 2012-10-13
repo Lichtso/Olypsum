@@ -6,7 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Menu.h"
+#import "FileManager.h"
+#import "GUIImage.h"
 
 GUIImage::GUIImage() {
     texture = NULL;

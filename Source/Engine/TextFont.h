@@ -6,12 +6,23 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "ShaderProgram.h"
-#import <SDL/SDL.h>
 #import <SDL_ttf/SDL_ttf.h>
+#import "ShaderProgram.h"
 
 #ifndef TextFont_h
 #define TextFont_h
+
+class GUIColor {
+    public:
+    unsigned char r, g, b, a;
+    GUIColor() : r(0), g(0), b(0), a(255) {};
+    GUIColor(unsigned char gray) : r(gray), g(gray), b(gray), a(255) {};
+    GUIColor(unsigned char gray, unsigned char aB) : r(gray), g(gray), b(gray), a(aB) {};
+    GUIColor(unsigned char rB, unsigned char gB, unsigned char bB) : r(rB), g(gB), b(bB), a(255) {};
+    GUIColor(unsigned char rB, unsigned char gB, unsigned char bB, unsigned char aB) : r(rB), g(gB), b(bB), a(aB) {};
+    GUIColor& operator=(const GUIColor& B);
+    SDL_Color getSDL();
+};
 
 class TextFont {
     public:

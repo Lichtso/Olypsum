@@ -6,6 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#import "GUITextField.h"
+#import "WorldManager.h"
 #import "AppMain.h"
 
 GUITextField::GUITextField() {

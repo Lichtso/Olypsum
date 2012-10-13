@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "WorldManager.h"
+#import "WorldManager.h"
 
 void ObjectBase::calculate() {
     
@@ -50,6 +50,8 @@ void ObjectManager::draw() {
 
 ObjectManager objectManager;
 
+
+
 ModelOnlyObject::ModelOnlyObject(Model* modelB) {
     type = ObjectInstance_ModelOnly;
     model = modelB;
@@ -73,6 +75,42 @@ Matrix4 ModelOnlyObject::getTransformation() {
 }
 
 void ModelOnlyObject::draw() {
+    modelMat = transformation;
+    model->draw(this);
+}
+
+
+
+AnimatedObject::AnimatedObject(Model* modelB) {
+    type = ObjectInstance_Animated;
+    model = modelB;
+    skeletonPose = new SkeletonPose(model->skeleton);
+    skeletonPose->calculate();
+    transformation.setIdentity();
+}
+
+AnimatedObject::~AnimatedObject() {
+    fileManager.releaseModel(model);
+    delete skeletonPose;
+}
+
+void AnimatedObject::calculate() {
+    skeletonPose->bonePoses["Hand_Right"].setIdentity();
+    skeletonPose->bonePoses["Hand_Right"].rotateX(frand(-0.2, 0.2));
+    skeletonPose->bonePoses["Forearm_Right"].setIdentity();
+    skeletonPose->bonePoses["Forearm_Right"].rotateZ(frand(-0.5, 0.5));
+    skeletonPose->calculate();
+}
+
+float AnimatedObject::getDiscardDensity() {
+    return 1.0;
+}
+
+Matrix4 AnimatedObject::getTransformation() {
+    return transformation;
+}
+
+void AnimatedObject::draw() {
     modelMat = transformation;
     model->draw(this);
 }

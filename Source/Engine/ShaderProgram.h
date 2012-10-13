@@ -6,9 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Light.h"
-#import <string.h>
-#import <stdio.h>
+#import "FBO.h"
+#import "Cam.h"
 
 #ifndef ShaderProgram_h
 #define ShaderProgram_h

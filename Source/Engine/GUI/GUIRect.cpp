@@ -6,7 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUIView.h"
+#import "ShaderProgram.h"
+#import "GUIView.h"
 
 GUIRect::GUIRect() {
     type = GUIType_Rect;

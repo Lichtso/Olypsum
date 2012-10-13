@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#import <Vorbis/vorbisfile.h>
 #import "FileManager.h"
 
 #ifdef LITTLE_ENDIAN

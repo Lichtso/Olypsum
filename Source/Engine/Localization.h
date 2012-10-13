@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Decals.h"
+#import "XMLUtilities.h"
 
 #ifndef Localization_h
 #define Localization_h

@@ -6,7 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUIScrollView.h"
+#import "TextFont.h"
+#import "GUIRect.h"
 
 #ifndef GUILabel_h
 #define GUILabel_h

@@ -6,6 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#import "Texture.h"
+#import "GUIRect.h"
 #import "GUIRoundedRect.h"
 
 #ifndef GUIView_h

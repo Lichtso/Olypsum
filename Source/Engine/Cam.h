@@ -7,6 +7,7 @@
 //
 
 #import "FBO.h"
+#import "Frustum3.h"
 
 #ifndef Cam_h
 #define Cam_h

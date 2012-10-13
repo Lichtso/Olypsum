@@ -6,6 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#import <SDL/SDL.h>
+#import "Matrix4.h"
 #import "GUIClipRect.h"
 
 #ifndef GUIRect_h
@@ -24,6 +26,15 @@ enum GUIElementType {
     GUIType_ProgressBar = 9,
     GUIType_Silder = 10,
     GUIType_TextField = 11
+};
+
+enum GUIOrientation {
+    GUIOrientation_Left = 1,
+    GUIOrientation_Right = 2,
+    GUIOrientation_Top = 4,
+    GUIOrientation_Bottom = 8,
+    GUIOrientation_Vertical = 3,
+    GUIOrientation_Horizontal = 12
 };
 
 class GUIRect {

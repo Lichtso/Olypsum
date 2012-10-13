@@ -6,6 +6,13 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#import <SDL/SDL.h>
+#import "WorldManager.h"
+#import "GUIScrollView.h"
+#import "GUICheckBox.h"
+#import "GUITabs.h"
+#import "GUISlider.h"
+#import "GUITextField.h"
 #import "GUIImage.h"
 
 #ifndef Menu_h

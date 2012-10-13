@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "ParticleSystem.h"
+#import "ShaderProgram.h"
 
 #ifndef Decals_h
 #define Decals_h

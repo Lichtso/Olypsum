@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Object.h"
+#import "Texture.h"
 
 #ifndef ParticleSystem_h
 #define ParticleSystem_h

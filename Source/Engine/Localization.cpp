@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Localization.h"
+#import "Localization.h"
 
 std::string LanguagesDir("Packages/Default/Languages/"), LanguagesExtension(".xml");
 
@@ -32,8 +32,7 @@ bool Localization::getLocalizableLanguages(std::vector<std::string>& languages) 
 
 bool Localization::loadLocalization(std::string filePath) {
     rapidxml::xml_document<xmlUsedCharType> doc;
-    unsigned int fileSize;
-    char* fileData = readXmlFile(doc, filePath.c_str(), fileSize, false);
+    std::unique_ptr<char[]> fileData = readXmlFile(doc, filePath.c_str(), false);
     if(!fileData) return false;
     
     rapidxml::xml_node<xmlUsedCharType> *titleNode, *localizationNode, *entryNode;
@@ -43,20 +42,17 @@ bool Localization::loadLocalization(std::string filePath) {
     if(titleNode) title = titleNode->value();
     
     localizationNode = doc.first_node("localization");
-    if(!localizationNode) goto endParsingXML;
+    if(!localizationNode) return false;
     
     entryNode = localizationNode->first_node("entry");
     while(entryNode) {
         entryKeyAttribute = entryNode->first_attribute("key");
-        if(!entryKeyAttribute) goto endParsingXML;
+        if(!entryKeyAttribute) return false;
         
         strings[std::string(entryKeyAttribute->value())] = std::string(entryNode->value());
         entryNode = entryNode->next_sibling("entry");
     }
     
-    endParsingXML:
-    doc.clear();
-    delete [] fileData;
     return true;
 }
 

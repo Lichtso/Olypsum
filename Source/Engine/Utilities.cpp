@@ -80,62 +80,6 @@ bool removeDir(std::string path) {
         return false;
 }
 
-char* readXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string filePath, unsigned int& fileSize, bool logs) {
-    FILE* fp = fopen(filePath.c_str(), "r");
-    if(!fp) {
-        if(!logs) return NULL;
-        log(error_log, std::string("The file ")+filePath.c_str()+" couldn't be found.");
-        return NULL;
-    }
-    
-    fseek(fp, 0, SEEK_END);
-	fileSize = ftell(fp);
-	rewind(fp);
-    char* data = new char[fileSize+1];
-	fread(data, 1, fileSize, fp);
-    fclose(fp);
-    data[fileSize] = 0;
-    doc.parse<0>(data);
-    
-    return data;
-}
-
-void addXMLNode(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* nodes, const char* name, const char* value) {
-    rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
-    node->name(name);
-    attribute->name("value");
-    attribute->value(value);
-    node->append_attribute(attribute);
-    nodes->append_node(node);
-}
-
-bool writeXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string filePath) {
-    std::ofstream outfile;
-    outfile.open(filePath.c_str(), std::ios_base::trunc);
-    outfile << doc;
-    outfile.close();
-    doc.clear();
-    return true;
-}
-
-GUIColor& GUIColor::operator=(const GUIColor& B) {
-    r = B.r;
-    g = B.g;
-    b = B.b;
-    a = B.a;
-    return *this;
-}
-
-SDL_Color GUIColor::getSDL() {
-    SDL_Color B;
-    B.r = r;
-    B.g = g;
-    B.b = b;
-    B.unused = a;
-    return B;
-}
-
 int screenSize[3];
 std::string resourcesDir, gameDataDir, parentDir;
 float mouseTranslation[2] = { 0.0, 0.0 };

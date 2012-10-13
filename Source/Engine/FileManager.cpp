@@ -6,26 +6,23 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "ShaderProgram.h"
+#import "FileManager.h"
 
 FilePackage::FilePackage(std::string nameB) {
     name = nameB;
 }
 
 FilePackage::~FilePackage() {
-    std::map<std::string, Model*>::iterator modelIterator;
-    for(modelIterator = models.begin(); modelIterator != models.end(); modelIterator ++)
-        delete modelIterator->second;
+    for(auto iterator: models)
+        delete iterator.second;
     models.clear();
     
-    std::map<std::string, Texture*>::iterator textureIterator;
-    for(textureIterator = textures.begin(); textureIterator != textures.end(); textureIterator ++)
-        delete textureIterator->second;
+    for(auto iterator: textures)
+        delete iterator.second;
     textures.clear();
     
-    std::map<std::string, SoundTrack*>::iterator soundTrackIterator;
-    for(soundTrackIterator = soundTracks.begin(); soundTrackIterator != soundTracks.end(); soundTrackIterator ++)
-        delete soundTrackIterator->second;
+    for(auto iterator: soundTracks)
+        delete iterator.second;
     soundTracks.clear();
 }
 
@@ -111,7 +108,7 @@ SoundTrack* FilePackage::getSoundTrack(const char* fileName) {
 }
 
 bool FilePackage::releaseTexture(Texture* texture) {
-    std::map<std::string, Texture*>::iterator iterator;
+    decltype(textures)::iterator iterator;
     for(iterator = textures.begin(); iterator != textures.end(); iterator ++)
         if(iterator->second == texture) {
             iterator->second->useCounter --;
@@ -124,7 +121,7 @@ bool FilePackage::releaseTexture(Texture* texture) {
 }
 
 bool FilePackage::releaseModel(Model* model) {
-    std::map<std::string, Model*>::iterator iterator;
+    decltype(models)::iterator iterator;
     for(iterator = models.begin(); iterator != models.end(); iterator ++)
         if(iterator->second == model) {
             iterator->second->useCounter --;
@@ -137,7 +134,7 @@ bool FilePackage::releaseModel(Model* model) {
 }
 
 bool FilePackage::releaseSoundTrack(SoundTrack* soundTrack) {
-    std::map<std::string, SoundTrack*>::iterator iterator;
+    decltype(soundTracks)::iterator iterator;
     for(iterator = soundTracks.begin(); iterator != soundTracks.end(); iterator ++)
         if(iterator->second == soundTrack) {
             iterator->second->useCounter --;
@@ -179,11 +176,9 @@ void FileManager::loadOptions() {
     localization.selected = "English";
     
     rapidxml::xml_document<xmlUsedCharType> doc;
-    unsigned int fileSize;
-    char* fileData = readXmlFile(doc, gameDataDir+"Options.xml", fileSize, false);
+    std::unique_ptr<char[]> fileData = readXmlFile(doc, gameDataDir+"Options.xml", false);
     if(fileData) {
         if(strcmp(doc.first_node("version")->first_attribute("value")->value(), VERSION) != 0) {
-            delete [] fileData;
             saveOptions();
             return;
         }
@@ -199,7 +194,6 @@ void FileManager::loadOptions() {
         ssaoQuality = readOptionUInt(graphics->first_node("ssaoQuality"));
         blendingQuality = readOptionUInt(graphics->first_node("blendingQuality"));
         particleCalcTarget = readOptionUInt(graphics->first_node("particleCalcTarget"));
-        delete [] fileData;
     }else saveOptions();
     
     loadPackage("Default");
@@ -231,32 +225,23 @@ void FileManager::saveOptions() {
     sprintf(&str[20], "%d", particleCalcTarget);
     addXMLNode(doc, graphics, "particleCalcTarget", &str[20]);
     
-    writeXmlFile(doc, gameDataDir+"Options.xml");
+    writeXmlFile(doc, gameDataDir+"Options.xml", true);
 }
 
-bool FileManager::loadPackage(const char* name) {
+FilePackage* FileManager::loadPackage(const char* name) {
     FilePackage* package = new FilePackage(name);
     if(!package->load()) {
         delete package;
-        return false;
+        return NULL;
     }
     filePackages[name] = package;
-    return true;
+    return package;
 }
 
-FilePackage* FileManager::getPackage(const char* nameStr) {
-    std::string name;
-    if(nameStr) name = nameStr;
+FilePackage* FileManager::getPackage(const char* name) {
     std::map<std::string, FilePackage*>::iterator iterator = filePackages.find(name);
-    if(iterator == filePackages.end()) {
-        FilePackage* package = new FilePackage(nameStr);
-        if(!package->load()) {
-            delete package;
-            return NULL;
-        }
-        filePackages[name] = package;
-        return package;
-    }
+    if(iterator == filePackages.end())
+        return loadPackage(name);
     return iterator->second;
 }
 

@@ -6,7 +6,7 @@
 //
 //
 
-#import "Menu.h"
+#import "LevelLoader.h"
 
 #ifndef WorldManager_h
 #define WorldManager_h
@@ -23,8 +23,7 @@ class WorldManager {
     btDefaultCollisionConfiguration* collisionConfiguration;
     btCollisionDispatcher* dispatcher;
     btSequentialImpulseConstraintSolver* solver;
-    btDiscreteDynamicsWorld* dynamicsWorld;
-    btCollisionShape* worldWallShape;
+    btDiscreteDynamicsWorld* physicsWorld;
     btRigidBody* worldWallBodys[6];
     
     void clearAll();
@@ -32,7 +31,9 @@ class WorldManager {
     public:
     WorldManager();
     ~WorldManager();
+    std::map<std::string, btCollisionShape*> sharedCollisionShapes;
     float animationFactor;
+    FilePackage* gamePackage;
     std::string gameName;
     int levelId = -1;
     GameStatusName gameStatus = noGame;

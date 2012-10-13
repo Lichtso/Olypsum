@@ -35,6 +35,41 @@ Matrix4::Matrix4(float matData[16]) {
     pos = Vector3(matData[12], matData[13], matData[14], matData[15]);
 }
 
+Matrix4& Matrix4::readTransform(rapidxml::xml_node<xmlUsedCharType>* node) {
+    setIdentity();
+    Matrix4 mat;
+    node = node->first_node();
+    while(node) {
+        if(strcmp(node->name(), "matrix") == 0) {
+            XMLValueArray<float> matrixData;
+            matrixData.readString(node->value(), "%f");
+            *this *= Matrix4(matrixData.data).getTransposed();
+        }else if(strcmp(node->name(), "translate") == 0) {
+            XMLValueArray<float> vectorData;
+            vectorData.readString(node->value(), "%f");
+            mat.setIdentity();
+            mat.translate(Vector3(vectorData.data[0], vectorData.data[1], vectorData.data[2]));
+            *this = mat * *this;
+        }else if(strcmp(node->name(), "rotate") == 0) {
+            XMLValueArray<float> vectorData;
+            vectorData.readString(node->value(), "%f");
+            mat.setIdentity();
+            Vector3 vec(vectorData.data[0], vectorData.data[1], vectorData.data[2]);
+            mat.setIdentity();
+            mat.rotateQ(vec, vectorData.data[3]/180.0*M_PI);
+            *this = mat * *this;
+        }else if(strcmp(node->name(), "scale") == 0) {
+            XMLValueArray<float> vectorData;
+            vectorData.readString(node->value(), "%f");
+            mat.setIdentity();
+            mat.scale(Vector3(vectorData.data[0], vectorData.data[1], vectorData.data[2]));
+            *this = mat * *this;
+        }
+        node = node->next_sibling();
+    }
+    return *this;
+}
+
 std::string Matrix4::getString() {
     char buffer[64];
     sprintf(buffer, "(%f, %f, %f, %f,\n", x.x, x.y, x.z, x.w);

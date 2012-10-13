@@ -6,14 +6,21 @@
 //
 //
 
-#include "WorldManager.h"
+#import "Menu.h"
+#import "WorldManager.h"
 
 WorldManager::WorldManager() {
-    dynamicsWorld = NULL;
+    physicsWorld = NULL;
+    collisionConfiguration = new btDefaultCollisionConfiguration();
+    dispatcher = new btCollisionDispatcher(collisionConfiguration);
+    solver = new btSequentialImpulseConstraintSolver();
 }
 
 WorldManager::~WorldManager() {
     clearAll();
+    delete solver;
+    delete dispatcher;
+    delete collisionConfiguration;
 }
 
 void WorldManager::clearAll() {
@@ -30,31 +37,32 @@ static void calculatePhysicsTick(btDynamicsWorld* world, btScalar timeStep) {
 }
 
 void WorldManager::clearPhysics() {
-    if(dynamicsWorld == NULL) return;
+    if(physicsWorld == NULL) return;
     for(unsigned char i = 0; i < 6; i ++) {
         delete worldWallBodys[i]->getMotionState();
         delete worldWallBodys[i];
     }
-    delete worldWallShape;
-    delete dynamicsWorld;
-    delete solver;
-    delete dispatcher;
-    delete collisionConfiguration;
+    for(auto iterator: sharedCollisionShapes)
+        delete iterator.second;
+    sharedCollisionShapes.clear();
+    delete physicsWorld;
     delete broadphase;
-    dynamicsWorld = NULL;
+    physicsWorld = NULL;
 }
 
 void WorldManager::loadLevel() {
-    Vector3 worldSize = Vector3(500, 500, 500);
+    Vector3 worldSize = Vector3(50, 50, 50);
+    if(physicsWorld != NULL) {
+        delete physicsWorld;
+        delete broadphase;
+    }
     broadphase = new btAxisSweep3(worldSize.getBTVector(), (worldSize*-1.0).getBTVector());
-    collisionConfiguration = new btDefaultCollisionConfiguration();
-    dispatcher = new btCollisionDispatcher(collisionConfiguration);
-    solver = new btSequentialImpulseConstraintSolver();
-    dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
-    dynamicsWorld->setGravity(btVector3(0, -98.1, 0));
-    dynamicsWorld->setInternalTickCallback(calculatePhysicsTick);
+    physicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
+    physicsWorld->setGravity(btVector3(0, -9.81, 0));
+    physicsWorld->setInternalTickCallback(calculatePhysicsTick);
     
-    worldWallShape = new btStaticPlaneShape(btVector3(1, 0, 0), 0);
+    if(!sharedCollisionShapes["worldWall"])
+        sharedCollisionShapes["worldWall"] = new btStaticPlaneShape(btVector3(1, 0, 0), 0);
     Matrix4 transform;
     btDefaultMotionState* wallMotionState[6];
     wallMotionState[0] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0), btVector3(-worldSize.x, 0, 0)));
@@ -64,27 +72,34 @@ void WorldManager::loadLevel() {
     wallMotionState[4] = new btDefaultMotionState(btTransform(btQuaternion(-M_PI_2, 0, 0), btVector3(0, 0, -worldSize.z)));
     wallMotionState[5] = new btDefaultMotionState(btTransform(btQuaternion(M_PI_2, 0, 0), btVector3(0, 0,  worldSize.z)));
     for(unsigned char i = 0; i < 6; i ++) {
-        worldWallBodys[i] = new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(0, wallMotionState[i], worldWallShape, btVector3(0, 0, 0)));
-        dynamicsWorld->addRigidBody(worldWallBodys[i]);
+        worldWallBodys[i] = new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(0, wallMotionState[i], sharedCollisionShapes["worldWall"], btVector3(0, 0, 0)));
+        physicsWorld->addRigidBody(worldWallBodys[i]);
     }
+    
+    AnimatedObject* object = new AnimatedObject(fileManager.getPackage("Default")->getModel("man.dae"));
+    object->transformation.setIdentity();
+    objectManager.objects.push_back(object);
+    mainCam->camMat.setIdentity();
+    //mainCam->camMat.rotateX(0.5);
+    mainCam->camMat.translate(Vector3(0,1,2));
+    mainCam->calculate();
     
     gameStatus = localGame;
     setMenu(inGameMenu);
 }
 
 void WorldManager::saveLevel() {
-    unsigned int fileSize;
     rapidxml::xml_document<xmlUsedCharType> doc;
-    char* fileData = readXmlFile(doc, gameDataDir+"Saves/"+gameName+'/'+"Status.xml", fileSize, false);
+    std::unique_ptr<char[]> fileData = readXmlFile(doc, gameDataDir+"Saves/"+gameName+'/'+"Status.xml", false);
     char mapStr[8];
     sprintf(mapStr, "%d", levelId);
     doc.first_node("level")->first_attribute("value")->value(mapStr);
-    writeXmlFile(doc, gameDataDir+"Saves/"+gameName+'/'+"Status.xml");
-    delete [] fileData;
+    writeXmlFile(doc, gameDataDir+"Saves/"+gameName+'/'+"Status.xml", true);
 }
 
 void WorldManager::calculate() {
-    dynamicsWorld->stepSimulation(animationFactor, 4, 1.0/60.0);
+    physicsWorld->stepSimulation(animationFactor, 4, 1.0/60.0);
+    printf("%d\n", physicsWorld->getDispatcher()->getNumManifolds());
 }
 
 void WorldManager::leaveGame() {
@@ -103,22 +118,20 @@ bool WorldManager::loadGame(std::string name) {
         log(error_log, "Could not find a saved game by this name.");
         return false;
     }
-    
-    unsigned int fileSize;
     rapidxml::xml_document<xmlUsedCharType> doc;
-    char* fileData = readXmlFile(doc, gameDataDir+"Saves/"+name+'/'+"Status.xml", fileSize, false);
-    if(!fileData || strcmp(doc.first_node("version")->first_attribute("value")->value(), VERSION) != 0) {
-        log(error_log, "Could not load saved game, because its version is outdated.");
-        delete [] fileData;
+    std::unique_ptr<char[]> fileData = readXmlFile(doc, gameDataDir+"Saves/"+name+'/'+"Status.xml", false);
+    if(!fileData) {
+        log(error_log, "Could not load saved game, because Status.xml is missing.");
         return false;
     }
-    fileManager.loadPackage(doc.first_node("package")->first_attribute("value")->value());
+    if(strcmp(doc.first_node("version")->first_attribute("value")->value(), VERSION) != 0) {
+        log(error_log, "Could not load saved game, because its version is outdated.");
+        return false;
+    }
+    gamePackage = fileManager.loadPackage(doc.first_node("package")->first_attribute("value")->value());
     sscanf(doc.first_node("level")->first_attribute("value")->value(), "%d", &levelId);
-    delete [] fileData;
-    
     gameName = name;
     loadLevel();
-    
     return true;
 }
 
@@ -132,7 +145,7 @@ bool WorldManager::newGame(std::string packageName, std::string name) {
     addXMLNode(doc, &doc, "version", VERSION);
     addXMLNode(doc, &doc, "package", packageName.c_str());
     addXMLNode(doc, &doc, "level", "0");
-    writeXmlFile(doc, gameDataDir+"Saves/"+name+'/'+"Status.xml");
+    writeXmlFile(doc, gameDataDir+"Saves/"+name+'/'+"Status.xml", true);
     return loadGame(name);
 }
 

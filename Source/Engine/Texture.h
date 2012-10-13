@@ -6,7 +6,9 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Frustum3.h"
+#import <OpenGL/gl.h>
+#import <SDL/SDL.h>
+#import "Utilities.h"
 
 #ifndef Texture_h
 #define Texture_h

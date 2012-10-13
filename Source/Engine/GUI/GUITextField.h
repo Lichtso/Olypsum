@@ -6,7 +6,9 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUISlider.h"
+#import "GUIButton.h"
+#import "GUIRoundedRect.h"
+#import "GUILabel.h"
 
 #ifndef GUITextField_h
 #define GUITextField_h

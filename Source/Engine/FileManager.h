@@ -6,6 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#import "Model.h"
+#import "Audio.h"
 #import "Localization.h"
 
 #ifndef FileManager_h
@@ -36,7 +38,7 @@ class FileManager {
     void clear();
     void loadOptions();
     void saveOptions();
-    bool loadPackage(const char* name);
+    FilePackage* loadPackage(const char* name);
     FilePackage* getPackage(const char* name);
     void unloadPackage(const char* name);
     void releaseTexture(Texture* texture);

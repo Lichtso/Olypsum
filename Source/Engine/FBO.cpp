@@ -6,7 +6,9 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "ShaderProgram.h"
+#import "Utilities.h"
+#import "Object.h"
+#import "Light.h"
 
 FBO::FBO() {
     for(unsigned char i = 0; i < gBuffersCount; i ++)

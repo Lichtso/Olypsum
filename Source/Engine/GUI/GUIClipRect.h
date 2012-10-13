@@ -6,8 +6,6 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "TextFont.h"
-
 #ifndef GUIClipRect_h
 #define GUIClipRect_h
 

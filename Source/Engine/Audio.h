@@ -6,11 +6,12 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Cam.h"
+#import <OpenAL/al.h>
+#import <OpenAL/alc.h>
+#import "Vector3.h"
 
 #ifndef Audio_h
 #define Audio_h
-#import <Vorbis/vorbisfile.h>
 
 class FilePackage;
 

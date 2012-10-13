@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#import <SDL_image/SDL_image.h>
 #import "Texture.h"
 
 Texture::Texture() {

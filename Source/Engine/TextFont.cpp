@@ -7,7 +7,23 @@
 //
 
 #import "TextFont.h"
-#import "AppMain.h"
+
+GUIColor& GUIColor::operator=(const GUIColor& B) {
+    r = B.r;
+    g = B.g;
+    b = B.b;
+    a = B.a;
+    return *this;
+}
+
+SDL_Color GUIColor::getSDL() {
+    SDL_Color B;
+    B.r = r;
+    B.g = g;
+    B.b = b;
+    B.unused = a;
+    return B;
+}
 
 TextFont::TextFont() {
     ttf = NULL;
