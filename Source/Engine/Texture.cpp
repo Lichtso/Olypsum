@@ -7,14 +7,10 @@
 //
 
 #import <SDL_image/SDL_image.h>
-#import "Texture.h"
+#import "FileManager.h"
 
-Texture::Texture() {
-    useCounter = 1;
-    GLname = 0;
-    minFilter = GL_LINEAR_MIPMAP_LINEAR;
-    magFilter = GL_LINEAR;
-    surface = NULL;
+Texture::Texture() :GLname(0), surface(NULL), minFilter(GL_LINEAR_MIPMAP_LINEAR), magFilter(GL_LINEAR) {
+        
 }
 
 Texture::~Texture() {
@@ -22,13 +18,15 @@ Texture::~Texture() {
     if(GLname) glDeleteTextures(1, &GLname);
 }
 
-bool Texture::loadImageInRAM(const char* filePath) {
-    if(surface) return false;
+std::shared_ptr<FilePackageResource> Texture::load(FilePackage* filePackageB, const std::string& name) {
+    auto pointer = FilePackageResource::load(filePackageB, name);
+    if(surface) return NULL;
     
-    surface = IMG_Load(filePath);
+    std::string filePath = filePackage->getUrlOfFile("Textures", poolIndex->first);
+    surface = IMG_Load(filePath.c_str());
     if(!surface) {
         log(error_log, std::string("Unable to load texture ")+filePath+".\n"+IMG_GetError());
-        return false;
+        return NULL;
     }
     
     switch(surface->format->BitsPerPixel) {
@@ -38,21 +36,21 @@ bool Texture::loadImageInRAM(const char* filePath) {
             break;
         default:
             log(error_log, std::string("Unable to load texture ")+filePath+".\nUnsupported bit-depth.");
-            return false;
+            return NULL;
     }
     
     if(surface->format->palette) {
         log(error_log, std::string("Unable to load texture ")+filePath+".\nTexture uses a color palette.");
-        return false;
+        return NULL;
     }
     
     width = surface->w;
     height = surface->h;
     
-    return true;
+    return pointer;
 }
 
-void Texture::loadRandomInRAM() {
+void Texture::loadRandom() {
     if(surface) return;
     
     surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 24, 0, 0, 0, 0);
@@ -68,12 +66,13 @@ void Texture::loadRandomInRAM() {
     SDL_UnlockSurface(surface);
 }
 
-void Texture::unloadFromRAM() {
-    if(surface) SDL_FreeSurface(surface);
+void Texture::unloadImage() {
+    if(!surface) return;
+    SDL_FreeSurface(surface);
     surface = NULL;
 }
 
-bool Texture::uploadToVRAM(GLenum textureTarget, GLenum format) {
+bool Texture::uploadTexture(GLenum textureTarget, GLenum format) {
     if(!surface) return false;
     
     if(!GLname) glGenTextures(1, &GLname);
@@ -115,10 +114,48 @@ bool Texture::uploadToVRAM(GLenum textureTarget, GLenum format) {
     if(!compressed)
         log(info_log, "Texture has not been compressed.");
     
+    unloadImage();
     return true;
 }
 
-void Texture::unloadFromVRAM() {
+bool Texture::uploadNormalMap(float processingValue) {
+    if(!uploadTexture(GL_TEXTURE_RECTANGLE_ARB, GL_LUMINANCE)) return false;
+    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    
+    GLuint normalMap;
+    glGenTextures(1, &normalMap);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, normalMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+    
+    glViewport(0, 0, width, height);
+    glBindFramebuffer(GL_FRAMEBUFFER, mainFBO.frameBuffer);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, normalMap, 0);
+    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    
+    shaderPrograms[normalMapGenSP]->use();
+    currentShaderProgram->setUniformF("processingValue", processingValue);
+    float vertices[12] = { -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0 };
+    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
+    glDisable(GL_BLEND);
+    glDisable(GL_DEPTH_TEST);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    unloadTexture();
+    glBindTexture(GL_TEXTURE_2D, normalMap);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    GLname = normalMap;
+    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
+    
+    return true;
+}
+
+void Texture::unloadTexture() {
     if(GLname) glDeleteTextures(1, &GLname);
     GLname = 0;
 }

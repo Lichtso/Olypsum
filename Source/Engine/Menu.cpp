@@ -41,7 +41,9 @@ void setMenu(MenuName menu) {
     
     if(worldManager.gameStatus == noGame) {
         GUIImage* image = new GUIImage();
-        image->texture = fileManager.getPackage("Default")->getTexture("background.png", GL_COMPRESSED_RGB);
+        image->texture = fileManager.getPackage("Default")->getResource<Texture>("background.png");
+        image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
+        
         image->sizeAlignment = GUISizeAlignment_Height;
         image->width = screenSize[0]*0.5;
         image->updateContent();
@@ -51,7 +53,9 @@ void setMenu(MenuName menu) {
     switch(menu) {
         case loadingMenu: {
             GUIImage* image = new GUIImage();
-            image->texture = fileManager.getPackage("Default")->getTexture("logo.png", GL_COMPRESSED_RGBA);
+            image->texture = fileManager.getPackage("Default")->getResource<Texture>("logo.png");
+            image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGBA);
+            
             image->sizeAlignment = GUISizeAlignment_Height;
             image->width = screenSize[0]*0.4;
             image->posY = screenSize[1]*0.1;

@@ -18,11 +18,11 @@
 class LevelLoader {
     std::unique_ptr<char[]> collisionShapesData;
     std::map<std::string, rapidxml::xml_node<xmlUsedCharType>*> collisionShapeNodes;
-    btCollisionShape* getCollisionShape(std::string name);
-    
+    void deleteCollisionShapeNode(std::string name);
     public:
     LevelLoader();
     ~LevelLoader();
+    btCollisionShape* getCollisionShape(std::string name);
     bool loadLevel();
 };
 

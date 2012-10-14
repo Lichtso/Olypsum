@@ -112,7 +112,7 @@ void Light::use() {
     currentShaderProgram->setUniformVec3("lDirection", direction*-1.0);
 }
 
-void Light::selectShaderProgram(bool skeletal) {
+void Light::prepareShaderProgram(bool skeletal) {
     log(error_log, "Unreachable function called!");
 }
 
@@ -178,7 +178,7 @@ void DirectionalLight::use() {
     }
 }
 
-void DirectionalLight::selectShaderProgram(bool skeletal) {
+void DirectionalLight::prepareShaderProgram(bool skeletal) {
     if(skeletal)
         shaderPrograms[skeletalShadowSP]->use();
     else
@@ -254,7 +254,7 @@ void SpotLight::use() {
     }
 }
 
-void SpotLight::selectShaderProgram(bool skeletal) {
+void SpotLight::prepareShaderProgram(bool skeletal) {
     if(skeletal)
         shaderPrograms[skeletalShadowSP]->use();
     else
@@ -426,7 +426,7 @@ void PositionalLight::use() {
     glDrawElements(GL_TRIANGLES, sphereTrianglesCount(sphereAccuracyX, sphereAccuracyY)*3, GL_UNSIGNED_INT, 0);
 }
 
-void PositionalLight::selectShaderProgram(bool skeletal) {
+void PositionalLight::prepareShaderProgram(bool skeletal) {
     if(cubemapsEnabled) {
         if(skeletal)
             shaderPrograms[skeletalShadowSP]->use();
@@ -522,9 +522,8 @@ void LightManager::init() {
     
     randomNormalMap.width = 128;
     randomNormalMap.height = 128;
-    randomNormalMap.loadRandomInRAM();
-    randomNormalMap.uploadToVRAM(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
-    randomNormalMap.unloadFromRAM();
+    randomNormalMap.loadRandom();
+    randomNormalMap.uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
 }
 
 void LightManager::clear() {

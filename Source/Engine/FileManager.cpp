@@ -8,22 +8,27 @@
 
 #import "FileManager.h"
 
-FilePackage::FilePackage(std::string nameB) {
-    name = nameB;
+std::shared_ptr<FilePackageResource> FilePackageResource::load(FilePackage* filePackageB, const std::string& name) {
+    filePackage = filePackageB;
+    std::shared_ptr<FilePackageResource> pointer = std::make_shared<FilePackageResource>(this);
+    std::pair<decltype(poolIndex), bool> inserted = filePackage->resources.insert(decltype(FilePackage::resources)::value_type(name, pointer));
+    poolIndex = inserted.first;
+    return pointer;
+}
+
+FilePackageResource::~FilePackageResource() {
+    if(filePackage)
+        filePackage->resources.erase(poolIndex);
+}
+
+
+
+FilePackage::FilePackage(std::string nameB) :name(nameB) {
+    
 }
 
 FilePackage::~FilePackage() {
-    for(auto iterator: models)
-        delete iterator.second;
-    models.clear();
     
-    for(auto iterator: textures)
-        delete iterator.second;
-    textures.clear();
-    
-    for(auto iterator: soundTracks)
-        delete iterator.second;
-    soundTracks.clear();
 }
 
 bool FilePackage::load() {
@@ -41,109 +46,22 @@ bool FilePackage::load() {
     return true;
 }
 
-std::string FilePackage::getUrlOfFile(const char* groupName, const char* fileName) {
-    return path+std::string(groupName)+'/'+std::string(fileName);
+std::string FilePackage::getUrlOfFile(const char* groupName, const std::string& fileName) {
+    return path+groupName+'/'+fileName;
 }
 
-Texture* FilePackage::getTexture(const char* fileName, GLenum format) {
-    Texture* texture;
-    std::map<std::string, Texture*>::iterator iterator = textures.find(std::string(fileName));
-    if(iterator != textures.end()) {
-        texture = iterator->second;
-        texture->useCounter ++;
-        return texture;
-    }
-    texture = new Texture();
-    std::string url = getUrlOfFile("Textures", fileName);
-    if(texture->loadImageInRAM(url.c_str())) {
-        if(format == 0)
-            return texture;
-        else if(format == GL_NORMAL_MAP)
-            mainFBO.generateNormalMap(texture, 4.0);
-        else
-            texture->uploadToVRAM(GL_TEXTURE_2D, format);
-        
-        texture->unloadFromRAM();
-        textures[std::string(fileName)] = texture;
-        return texture;
-    }
-    delete texture;
-    return NULL;
-}
-
-Model* FilePackage::getModel(const char* fileName) {
-    Model* model;
-    std::map<std::string, Model*>::iterator iterator = models.find(std::string(fileName));
-    if(iterator != models.end()) {
-        model = iterator->second;
-        model->useCounter ++;
-        return model;
-    }
-    model = new Model();
-    std::string url = getUrlOfFile("Models", fileName);
-    if(model->loadCollada(this, url.c_str())) {
-        models[std::string(fileName)] = model;
-        return model;
-    }
-    delete model;
-    return NULL;
-}
-
-SoundTrack* FilePackage::getSoundTrack(const char* fileName) {
-    SoundTrack* soundTrack;
-    std::map<std::string, SoundTrack*>::iterator iterator = soundTracks.find(std::string(fileName));
-    if(iterator != soundTracks.end()) {
-        soundTrack = iterator->second;
-        soundTrack->useCounter ++;
-        return false;
-    }
-    soundTrack = new SoundTrack();
-    std::string url = getUrlOfFile("Sounds", fileName);
-    if(soundTrack->loadOgg(url.c_str())) {
-        soundTracks[std::string(fileName)] = soundTrack;
-        return soundTrack;
-    }
-    delete soundTrack;
-    return NULL;
-}
-
-bool FilePackage::releaseTexture(Texture* texture) {
-    decltype(textures)::iterator iterator;
-    for(iterator = textures.begin(); iterator != textures.end(); iterator ++)
-        if(iterator->second == texture) {
-            iterator->second->useCounter --;
-            if(iterator->second->useCounter > 0) return true;
-            delete iterator->second;
-            textures.erase(iterator);
-            return true;
+template <class T> std::shared_ptr<T> FilePackage::getResource(const std::string& fileName) {
+    std::shared_ptr<FilePackageResource> pointer;
+    auto iterator = resources.find(fileName);
+    if(iterator != resources.end()) {
+        pointer = iterator->second.lock();
+        if(!dynamic_cast<T*>(pointer.get())) {
+            log(error_log, std::string("The resource ")+fileName+" in "+name+" is also used by another resource type.");
+            return NULL;
         }
-    return false;
-}
-
-bool FilePackage::releaseModel(Model* model) {
-    decltype(models)::iterator iterator;
-    for(iterator = models.begin(); iterator != models.end(); iterator ++)
-        if(iterator->second == model) {
-            iterator->second->useCounter --;
-            if(iterator->second->useCounter > 0) return true;
-            delete iterator->second;
-            models.erase(iterator);
-            return true;
-        }
-    return false;
-}
-
-bool FilePackage::releaseSoundTrack(SoundTrack* soundTrack) {
-    decltype(soundTracks)::iterator iterator;
-    for(iterator = soundTracks.begin(); iterator != soundTracks.end(); iterator ++)
-        if(iterator->second == soundTrack) {
-            iterator->second->useCounter --;
-            if(iterator->second->useCounter > 0) return true;
-            delete iterator->second;
-            soundTracks.erase(iterator);
-            return true;
-        }
-    return false;
+        return std::static_pointer_cast<T>(pointer);
+    }
+    return std::static_pointer_cast<T>((new T())->load(this, fileName));
 }
 
 
@@ -178,22 +96,23 @@ void FileManager::loadOptions() {
     rapidxml::xml_document<xmlUsedCharType> doc;
     std::unique_ptr<char[]> fileData = readXmlFile(doc, gameDataDir+"Options.xml", false);
     if(fileData) {
-        if(strcmp(doc.first_node("version")->first_attribute("value")->value(), VERSION) != 0) {
+        rapidxml::xml_node<xmlUsedCharType>* options = doc.first_node("Options");
+        if(strcmp(options->first_node("Version")->first_attribute("value")->value(), VERSION) != 0) {
             saveOptions();
             return;
         }
-        localization.selected = doc.first_node("language")->first_attribute("value")->value();
-        rapidxml::xml_node<xmlUsedCharType>* graphics = doc.first_node("graphics");
-        screenBlurFactor = (readOptionBool(graphics->first_node("screenBlurEnabled"))) ? 0.0 : -1.0;
-        edgeSmoothEnabled = readOptionBool(graphics->first_node("edgeSmoothEnabled"));
-        fullScreenEnabled = readOptionBool(graphics->first_node("fullScreenEnabled"));
-        cubemapsEnabled = readOptionBool(graphics->first_node("cubemapsEnabled"));
-        depthOfFieldQuality = readOptionUInt(graphics->first_node("depthOfFieldQuality"));
-        bumpMappingQuality = readOptionUInt(graphics->first_node("bumpMappingQuality"));
-        shadowQuality = readOptionUInt(graphics->first_node("shadowQuality"));
-        ssaoQuality = readOptionUInt(graphics->first_node("ssaoQuality"));
-        blendingQuality = readOptionUInt(graphics->first_node("blendingQuality"));
-        particleCalcTarget = readOptionUInt(graphics->first_node("particleCalcTarget"));
+        localization.selected = options->first_node("Language")->first_attribute("value")->value();
+        rapidxml::xml_node<xmlUsedCharType>* graphics = options->first_node("Graphics");
+        screenBlurFactor = (readOptionBool(graphics->first_node("ScreenBlurEnabled"))) ? 0.0 : -1.0;
+        edgeSmoothEnabled = readOptionBool(graphics->first_node("EdgeSmoothEnabled"));
+        fullScreenEnabled = readOptionBool(graphics->first_node("FullScreenEnabled"));
+        cubemapsEnabled = readOptionBool(graphics->first_node("CubemapsEnabled"));
+        depthOfFieldQuality = readOptionUInt(graphics->first_node("DepthOfFieldQuality"));
+        bumpMappingQuality = readOptionUInt(graphics->first_node("BumpMappingQuality"));
+        shadowQuality = readOptionUInt(graphics->first_node("ShadowQuality"));
+        ssaoQuality = readOptionUInt(graphics->first_node("SsaoQuality"));
+        blendingQuality = readOptionUInt(graphics->first_node("BlendingQuality"));
+        particleCalcTarget = readOptionUInt(graphics->first_node("ParticleCalcTarget"));
     }else saveOptions();
     
     loadPackage("Default");
@@ -201,29 +120,32 @@ void FileManager::loadOptions() {
 
 void FileManager::saveOptions() {
     rapidxml::xml_document<xmlUsedCharType> doc;
-    addXMLNode(doc, &doc, "version", VERSION);
-    addXMLNode(doc, &doc, "language", localization.selected.c_str());
+    rapidxml::xml_node<xmlUsedCharType>* options = doc.allocate_node(rapidxml::node_element);
+    options->name("Options");
+    doc.append_node(options);
+    addXMLNode(doc, options, "Version", VERSION);
+    addXMLNode(doc, options, "Language", localization.selected.c_str());
     rapidxml::xml_node<xmlUsedCharType>* graphics = doc.allocate_node(rapidxml::node_element);
-    graphics->name("graphics");
-    doc.append_node(graphics);
+    graphics->name("Graphics");
+    options->append_node(graphics);
     
     char str[24];
-    addXMLNode(doc, graphics, "screenBlurEnabled", (screenBlurFactor > -1.0) ? "true" : "false");
-    addXMLNode(doc, graphics, "edgeSmoothEnabled", (edgeSmoothEnabled) ? "true" : "false");
-    addXMLNode(doc, graphics, "fullScreenEnabled", (fullScreenEnabled) ? "true" : "false");
-    addXMLNode(doc, graphics, "cubemapsEnabled", (cubemapsEnabled) ? "true" : "false");
+    addXMLNode(doc, graphics, "ScreenBlurEnabled", (screenBlurFactor > -1.0) ? "true" : "false");
+    addXMLNode(doc, graphics, "EdgeSmoothEnabled", (edgeSmoothEnabled) ? "true" : "false");
+    addXMLNode(doc, graphics, "FullScreenEnabled", (fullScreenEnabled) ? "true" : "false");
+    addXMLNode(doc, graphics, "CubemapsEnabled", (cubemapsEnabled) ? "true" : "false");
     sprintf(&str[0], "%d", depthOfFieldQuality);
-    addXMLNode(doc, graphics, "depthOfFieldQuality", &str[0]);
+    addXMLNode(doc, graphics, "DepthOfFieldQuality", &str[0]);
     sprintf(&str[4], "%d", bumpMappingQuality);
-    addXMLNode(doc, graphics, "bumpMappingQuality", &str[4]);
+    addXMLNode(doc, graphics, "BumpMappingQuality", &str[4]);
     sprintf(&str[8], "%d", shadowQuality);
-    addXMLNode(doc, graphics, "shadowQuality", &str[8]);
+    addXMLNode(doc, graphics, "ShadowQuality", &str[8]);
     sprintf(&str[12], "%d", ssaoQuality);
-    addXMLNode(doc, graphics, "ssaoQuality", &str[12]);
+    addXMLNode(doc, graphics, "SsaoQuality", &str[12]);
     sprintf(&str[16], "%d", blendingQuality);
-    addXMLNode(doc, graphics, "blendingQuality", &str[16]);
+    addXMLNode(doc, graphics, "BlendingQuality", &str[16]);
     sprintf(&str[20], "%d", particleCalcTarget);
-    addXMLNode(doc, graphics, "particleCalcTarget", &str[20]);
+    addXMLNode(doc, graphics, "ParticleCalcTarget", &str[20]);
     
     writeXmlFile(doc, gameDataDir+"Options.xml", true);
 }
@@ -252,33 +174,6 @@ void FileManager::unloadPackage(const char* nameStr) {
     if(iterator == filePackages.end()) return;
     delete iterator->second;
     filePackages.erase(iterator);
-}
-
-void FileManager::releaseTexture(Texture* texture) {
-    std::map<std::string, FilePackage*>::iterator iterator;
-    for(iterator = filePackages.begin(); iterator != filePackages.end(); iterator ++)
-        if(iterator->second->releaseTexture(texture)) return;
-    char buffer[64];
-    sprintf(buffer, "Texture allready released: %p\n", texture);
-    log(error_log, buffer);
-}
-
-void FileManager::releaseModel(Model* model) {
-    std::map<std::string, FilePackage*>::iterator iterator;
-    for(iterator = filePackages.begin(); iterator != filePackages.end(); iterator ++)
-        if(iterator->second->releaseModel(model)) return;
-    char buffer[64];
-    sprintf(buffer, "Model allready released: %p\n", model);
-    log(error_log, buffer);
-}
-
-void FileManager::releaseSoundTrack(SoundTrack* soundTrack) {
-    std::map<std::string, FilePackage*>::iterator iterator;
-    for(iterator = filePackages.begin(); iterator != filePackages.end(); iterator ++)
-        if(iterator->second->releaseSoundTrack(soundTrack)) return;
-    char buffer[64];
-    sprintf(buffer, "SoundTrack allready released: %p\n", soundTrack);
-    log(error_log, buffer);
 }
 
 FileManager fileManager;

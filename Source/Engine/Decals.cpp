@@ -8,15 +8,6 @@
 
 #import "WorldManager.h"
 
-Decal::Decal() {
-    diffuse = heightMap = NULL;
-}
-
-Decal::~Decal() {
-    if(diffuse) fileManager.releaseTexture(diffuse);
-    if(heightMap) fileManager.releaseTexture(heightMap);
-}
-
 DecalManager::~DecalManager() {
     clear();
     glDeleteBuffers(1, &vbo);

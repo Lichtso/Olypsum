@@ -15,22 +15,23 @@
 #define ENDIAN 1
 #endif
 
-SoundTrack::SoundTrack() {
-    useCounter = 1;
-    ALname = 0;
+SoundTrack::SoundTrack() :ALname(0) {
+    
 }
 
 SoundTrack::~SoundTrack() {
     if(ALname) alDeleteBuffers(1, &ALname);
 }
 
-bool SoundTrack::loadOgg(const char* filePath) {
-    if(ALname) return false;
+std::shared_ptr<FilePackageResource> SoundTrack::load(FilePackage* filePackageB, const std::string& name) {
+    auto pointer = FilePackageResource::load(filePackageB, name);
+    if(ALname) return NULL;
     
-    FILE* fp = fopen(filePath, "r");
+    std::string filePath = filePackageB->getUrlOfFile("Sounds", poolIndex->first);
+    FILE* fp = fopen(filePath.c_str(), "r");
     if(!fp) {
         log(error_log, std::string("The file ")+filePath+" couldn't be found.");
-        return false;
+        return NULL;
     }
     
     OggVorbis_File vf;
@@ -38,7 +39,7 @@ bool SoundTrack::loadOgg(const char* filePath) {
         log(error_log, std::string("The file ")+filePath+" is not a valid ogg file.");
         ov_clear(&vf);
         fclose(fp);
-        return false;
+        return NULL;
     }
     
     int section = 0, bytesRead, bufferSize = ov_pcm_total(&vf, 0)*2*ov_info(&vf, 0)->channels;
@@ -53,7 +54,7 @@ bool SoundTrack::loadOgg(const char* filePath) {
     alBufferData(ALname, (ov_info(&vf, 0)->channels == 1) ? AL_FORMAT_MONO16 : AL_FORMAT_STEREO16, buffer, bufferSize, ov_info(&vf, 0)->rate);
     delete [] buffer;
     ov_clear(&vf);
-    return true;
+    return pointer;
 }
 
 float SoundTrack::getLength() {
@@ -79,7 +80,6 @@ SoundSource::SoundSource() {
 }
 
 SoundSource::~SoundSource() {
-    if(soundTrack) fileManager.releaseSoundTrack(soundTrack);
     alDeleteSources(1, &ALname);
     for(int s = 0; s < soundSourcesManager.soundSources.size(); s ++)
         if(soundSourcesManager.soundSources[s] == this) {
@@ -88,8 +88,7 @@ SoundSource::~SoundSource() {
         }
 }
 
-void SoundSource::setSoundTrack(SoundTrack* soundTrackB) {
-    if(soundTrack) fileManager.releaseSoundTrack(soundTrack);
+void SoundSource::setSoundTrack(std::shared_ptr<SoundTrack> soundTrackB) {
     soundTrack = soundTrackB;
     alSourcei(ALname, AL_BUFFER, soundTrack->ALname);
 }

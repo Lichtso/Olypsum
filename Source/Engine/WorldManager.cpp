@@ -76,9 +76,10 @@ void WorldManager::loadLevel() {
         physicsWorld->addRigidBody(worldWallBodys[i]);
     }
     
+    /*
     AnimatedObject* object = new AnimatedObject(fileManager.getPackage("Default")->getModel("man.dae"));
     object->transformation.setIdentity();
-    objectManager.objects.push_back(object);
+    objectManager.objects.push_back(object);*/
     mainCam->camMat.setIdentity();
     //mainCam->camMat.rotateX(0.5);
     mainCam->camMat.translate(Vector3(0,1,2));
@@ -93,7 +94,7 @@ void WorldManager::saveLevel() {
     std::unique_ptr<char[]> fileData = readXmlFile(doc, gameDataDir+"Saves/"+gameName+'/'+"Status.xml", false);
     char mapStr[8];
     sprintf(mapStr, "%d", levelId);
-    doc.first_node("level")->first_attribute("value")->value(mapStr);
+    doc.first_node("Status")->first_node("Level")->first_attribute("value")->value(mapStr);
     writeXmlFile(doc, gameDataDir+"Saves/"+gameName+'/'+"Status.xml", true);
 }
 
@@ -124,12 +125,13 @@ bool WorldManager::loadGame(std::string name) {
         log(error_log, "Could not load saved game, because Status.xml is missing.");
         return false;
     }
-    if(strcmp(doc.first_node("version")->first_attribute("value")->value(), VERSION) != 0) {
+    rapidxml::xml_node<xmlUsedCharType>* statusNode = doc.first_node("Status");
+    if(strcmp(statusNode->first_node("Version")->first_attribute("value")->value(), VERSION) != 0) {
         log(error_log, "Could not load saved game, because its version is outdated.");
         return false;
     }
-    gamePackage = fileManager.loadPackage(doc.first_node("package")->first_attribute("value")->value());
-    sscanf(doc.first_node("level")->first_attribute("value")->value(), "%d", &levelId);
+    gamePackage = fileManager.loadPackage(statusNode->first_node("Package")->first_attribute("value")->value());
+    sscanf(statusNode->first_node("Level")->first_attribute("value")->value(), "%d", &levelId);
     gameName = name;
     loadLevel();
     return true;
@@ -142,9 +144,12 @@ bool WorldManager::newGame(std::string packageName, std::string name) {
     }
     
     rapidxml::xml_document<xmlUsedCharType> doc;
-    addXMLNode(doc, &doc, "version", VERSION);
-    addXMLNode(doc, &doc, "package", packageName.c_str());
-    addXMLNode(doc, &doc, "level", "0");
+    rapidxml::xml_node<xmlUsedCharType>* statusNode = doc.allocate_node(rapidxml::node_element);
+    statusNode->name("Status");
+    doc.append_node(statusNode);
+    addXMLNode(doc, statusNode, "Version", VERSION);
+    addXMLNode(doc, statusNode, "Package", packageName.c_str());
+    addXMLNode(doc, statusNode, "Level", "0");
     writeXmlFile(doc, gameDataDir+"Saves/"+name+'/'+"Status.xml", true);
     return loadGame(name);
 }

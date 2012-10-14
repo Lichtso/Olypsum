@@ -31,7 +31,7 @@ class Light {
     virtual bool calculate(bool shadowActive);
     virtual void deleteShadowmap();
     virtual void use();
-    virtual void selectShaderProgram(bool skeletal);
+    virtual void prepareShaderProgram(bool skeletal);
     float getPriority(Vector3 position);
 };
 
@@ -48,7 +48,7 @@ class DirectionalLight : public Light {
     bool calculate(bool shadowActive);
     void deleteShadowmap();
     void use();
-    void selectShaderProgram(bool skeletal);
+    void prepareShaderProgram(bool skeletal);
 };
 
 class SpotLight : public Light {
@@ -58,7 +58,7 @@ class SpotLight : public Light {
     bool calculate(bool shadowActive);
     void deleteShadowmap();
     void use();
-    void selectShaderProgram(bool skeletal);
+    void prepareShaderProgram(bool skeletal);
 };
 
 class PositionalLight : public Light {
@@ -70,7 +70,7 @@ class PositionalLight : public Light {
     bool calculate(bool shadowActive);
     void deleteShadowmap();
     void use();
-    void selectShaderProgram(bool skeletal);
+    void prepareShaderProgram(bool skeletal);
 };
 
 class LightManager {

@@ -21,10 +21,10 @@ struct ColorBuffer {
 };
 
 class FBO {
-    GLuint frameBuffer, gBuffers[gBuffersCount];
     int getColorBufferIndex(ColorBuffer* colorBuffer);
     void initBuffer(unsigned int index);
     public:
+    GLuint frameBuffer, gBuffers[gBuffersCount];
     unsigned int maxSize;
     std::vector<ColorBuffer*> colorBuffers;
     FBO();
@@ -39,7 +39,6 @@ class FBO {
     void mipmapTexture(ColorBuffer* colorBuffer);
     void useTexture(ColorBuffer* colorBuffer, GLuint targetIndex);
     void deleteTexture(ColorBuffer* colorBuffer);
-    bool generateNormalMap(Texture* heightMap, float processingValue);
 };
 
 enum DeferredBufferNames {

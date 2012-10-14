@@ -1,37 +1,37 @@
-<title>English</title>
-<localization>
-	<entry key="olypsum">Olypsum</entry>
-	<entry key="loading">Loading ...</entry>
-	<entry key="saveGames">Savegames</entry>
-	<entry key="multiplayer">Multiplayer</entry>
-	<entry key="options">Options</entry>
-	<entry key="credits">Credits</entry>
-	<entry key="quitGame">Quit Game</entry>
-	<entry key="back">Back</entry>
-	<entry key="mainMenu">Main Menu</entry>
-	<entry key="graphics">Graphics</entry>
-	<entry key="language">Language</entry>
-	<entry key="selectedLanguage">Selected</entry>
-	<entry key="selectLanguage">Languages</entry>
-	<entry key="sound">Sound</entry>
-	<entry key="fullScreenEnabled">Full Screen</entry>
-	<entry key="edgeSmoothEnabled">Antialiasing</entry>
-	<entry key="cubemapsEnabled">Cubemaps</entry>
-	<entry key="screenBlurEnabled">Screen Blur</entry>
-	<entry key="depthOfFieldQuality">Depth Of Field</entry>
-	<entry key="bumpMappingQuality">Surface Quality</entry>
-	<entry key="shadowQuality">Shadow Quality</entry>
-	<entry key="ssaoQuality">SSAO Quality</entry>
-	<entry key="blendingQuality">Blending Quality</entry>
-	<entry key="particleCalcTarget">Particle Systems</entry>
-	<entry key="on">On</entry>
-	<entry key="off">Off</entry>
-	<entry key="cpu">CPU</entry>
-	<entry key="gpu">GPU</entry>
-	<entry key="cancel">Cancel</entry>
-	<entry key="ok">Ok</entry>
-	<entry key="name">Name</entry>
-	<entry key="package">Package</entry>
-	<entry key="newGame">New Game</entry>
-	<entry key="removeGame">Remove Game</entry>
-</localization>
+<Localization>
+	<Title>English</Title>
+	<Entry key="olypsum">Olypsum</Entry>
+	<Entry key="loading">Loading ...</Entry>
+	<Entry key="saveGames">Savegames</Entry>
+	<Entry key="multiplayer">Multiplayer</Entry>
+	<Entry key="options">Options</Entry>
+	<Entry key="credits">Credits</Entry>
+	<Entry key="quitGame">Quit Game</Entry>
+	<Entry key="back">Back</Entry>
+	<Entry key="mainMenu">Main Menu</Entry>
+	<Entry key="graphics">Graphics</Entry>
+	<Entry key="language">Language</Entry>
+	<Entry key="selectedLanguage">Selected</Entry>
+	<Entry key="selectLanguage">Languages</Entry>
+	<Entry key="sound">Sound</Entry>
+	<Entry key="fullScreenEnabled">Full Screen</Entry>
+	<Entry key="edgeSmoothEnabled">Antialiasing</Entry>
+	<Entry key="cubemapsEnabled">Cubemaps</Entry>
+	<Entry key="screenBlurEnabled">Screen Blur</Entry>
+	<Entry key="depthOfFieldQuality">Depth Of Field</Entry>
+	<Entry key="bumpMappingQuality">Surface Quality</Entry>
+	<Entry key="shadowQuality">Shadow Quality</Entry>
+	<Entry key="ssaoQuality">SSAO Quality</Entry>
+	<Entry key="blendingQuality">Blending Quality</Entry>
+	<Entry key="particleCalcTarget">Particle Systems</Entry>
+	<Entry key="on">On</Entry>
+	<Entry key="off">Off</Entry>
+	<Entry key="cpu">CPU</Entry>
+	<Entry key="gpu">GPU</Entry>
+	<Entry key="cancel">Cancel</Entry>
+	<Entry key="ok">Ok</Entry>
+	<Entry key="name">Name</Entry>
+	<Entry key="package">Package</Entry>
+	<Entry key="newGame">New Game</Entry>
+	<Entry key="removeGame">Remove Game</Entry>
+</Localization>

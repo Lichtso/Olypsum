@@ -35,22 +35,22 @@ bool Localization::loadLocalization(std::string filePath) {
     std::unique_ptr<char[]> fileData = readXmlFile(doc, filePath.c_str(), false);
     if(!fileData) return false;
     
-    rapidxml::xml_node<xmlUsedCharType> *titleNode, *localizationNode, *entryNode;
+    rapidxml::xml_node<xmlUsedCharType> *localizationNode, *titleNode, *entryNode;
     rapidxml::xml_attribute<xmlUsedCharType> *entryKeyAttribute;
     
-    titleNode = doc.first_node("title");
-    if(titleNode) title = titleNode->value();
-    
-    localizationNode = doc.first_node("localization");
+    localizationNode = doc.first_node("Localization");
     if(!localizationNode) return false;
     
-    entryNode = localizationNode->first_node("entry");
+    titleNode = localizationNode->first_node("Title");
+    if(titleNode) title = titleNode->value();
+    
+    entryNode = localizationNode->first_node("Entry");
     while(entryNode) {
         entryKeyAttribute = entryNode->first_attribute("key");
         if(!entryKeyAttribute) return false;
         
         strings[std::string(entryKeyAttribute->value())] = std::string(entryNode->value());
-        entryNode = entryNode->next_sibling("entry");
+        entryNode = entryNode->next_sibling("Entry");
     }
     
     return true;

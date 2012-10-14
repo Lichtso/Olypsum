@@ -17,37 +17,50 @@ LevelLoader::~LevelLoader() {
     decltype(collisionShapeNodes)::iterator iterator;
     for(iterator = collisionShapeNodes.begin(); iterator != collisionShapeNodes.end(); iterator ++) {
         auto sharedCollisionShape = worldManager.sharedCollisionShapes.find(iterator->first);
+        if(sharedCollisionShape == worldManager.sharedCollisionShapes.end()) continue;
         delete sharedCollisionShape->second;
         worldManager.sharedCollisionShapes.erase(sharedCollisionShape);
     }
 }
 
+void LevelLoader::deleteCollisionShapeNode(std::string name) {
+    auto iterator = collisionShapeNodes.find(name);
+    if(iterator != collisionShapeNodes.end()) return;
+    rapidxml::xml_node<xmlUsedCharType>* childNode = iterator->second->first_node("Child");
+    while(childNode) {
+        deleteCollisionShapeNode(childNode->first_attribute("collisionShape")->value());
+        childNode = childNode->next_sibling("Child");
+    }
+    collisionShapeNodes.erase(iterator);
+}
+
 btCollisionShape* LevelLoader::getCollisionShape(std::string name) {
     btCollisionShape* shape = worldManager.sharedCollisionShapes[name];
     if(shape) {
-        auto iterator = collisionShapeNodes.find(name);
-        if(iterator == collisionShapeNodes.end())
-            collisionShapeNodes.erase(iterator);
+        deleteCollisionShapeNode(name);
         return shape;
     }
-    rapidxml::xml_node<xmlUsedCharType>* node = collisionShapeNodes[name];
-    if(!node) return NULL;
-    char* type = node->first_attribute("type")->value();
-    if(strcmp(type, "Cylinder") == 0 || strcmp(type, "Box") == 0) {
+    auto nodeIterator = collisionShapeNodes.find(name);
+    if(nodeIterator == collisionShapeNodes.end()) {
+        log(error_log, std::string("Couldn't find collision shape with id ")+name+'.');
+        return NULL;
+    }
+    rapidxml::xml_node<xmlUsedCharType>* node = nodeIterator->second;
+    if(strcmp(node->name(), "Cylinder") == 0 || strcmp(node->name(), "Box") == 0) {
         Vector3 size;
         sscanf(node->first_attribute("width")->value(), "%f", &size.x);
         sscanf(node->first_attribute("height")->value(), "%f", &size.y);
         sscanf(node->first_attribute("length")->value(), "%f", &size.z);
-        if(strcmp(type, "Cylinder") == 0)
+        if(strcmp(node->name(), "Cylinder") == 0)
             shape = new btCylinderShape(size.getBTVector());
         else
             shape = new btBoxShape(size.getBTVector());
-    }else if(strcmp(type, "Sphere") == 0) {
+    }else if(strcmp(node->name(), "Sphere") == 0) {
         float radius;
         sscanf(node->first_attribute("radius")->value(), "%f", &radius);
         shape = new btSphereShape(radius);
-    }else if(strcmp(type, "Capsule") == 0 || strcmp(type, "Cone") == 0) {
-        bool isCapsule = (strcmp(type, "Capsule") == 0);
+    }else if(strcmp(node->name(), "Capsule") == 0 || strcmp(node->name(), "Cone") == 0) {
+        bool isCapsule = (strcmp(node->name(), "Capsule") == 0);
         float radius, length;
         sscanf(node->first_attribute("radius")->value(), "%f", &radius);
         sscanf(node->first_attribute("length")->value(), "%f", &length);
@@ -68,20 +81,20 @@ btCollisionShape* LevelLoader::getCollisionShape(std::string name) {
             else
                 shape = new btConeShapeZ(radius, length);
         }else{
-            log(error_log, "Found collision shape with an unknown direction.");
+            log(error_log, std::string("Found collision shape (")+name+") with an unknown direction: "+direction+'.');
             return NULL;
         }
-    }else if(strcmp(type, "SphereCompound") == 0) {
+    }else if(strcmp(node->name(), "SphereCompound") == 0) {
         unsigned int count = 0;
-        rapidxml::xml_node<xmlUsedCharType>* childNode = node->first_node("sphere");
+        rapidxml::xml_node<xmlUsedCharType>* childNode = node->first_node("Sphere");
         while(childNode) {
             count ++;
-            childNode = childNode->next_sibling("sphere");
+            childNode = childNode->next_sibling("Sphere");
         }
         std::unique_ptr<btVector3[]> positions(new btVector3[count]);
         std::unique_ptr<btScalar[]> radi(new btScalar[count]);
         count = 0;
-        childNode = node->first_node("sphere");
+        childNode = node->first_node("Sphere");
         while(childNode) {
             float aux;
             sscanf(childNode->first_attribute("x")->value(), "%f", &aux);
@@ -92,43 +105,38 @@ btCollisionShape* LevelLoader::getCollisionShape(std::string name) {
             positions[count].setZ(aux);
             sscanf(childNode->first_attribute("radius")->value(), "%f", &radi[count]);
             count ++;
-            childNode = childNode->next_sibling("sphere");
+            childNode = childNode->next_sibling("Sphere");
         }
         shape = new btMultiSphereShape(positions.get(), radi.get(), count);
-    }else if(strcmp(type, "Compound") == 0) {
+    }else if(strcmp(node->name(), "Compound") == 0) {
         btCompoundShape* compoundShape = new btCompoundShape();
-        rapidxml::xml_node<xmlUsedCharType>* childNode = node->first_node("child");
+        rapidxml::xml_node<xmlUsedCharType>* childNode = node->first_node("Child");
         while(childNode) {
-            btCollisionShape* childShape = getCollisionShape(childNode->first_attribute("id")->value());
+            btCollisionShape* childShape = getCollisionShape(childNode->first_attribute("collisionShape")->value());
             if(!childShape) {
-                log(error_log, "Found compound collision shape with an invalid child.");
-                return NULL;
-            }
-            rapidxml::xml_node<xmlUsedCharType>* transformationNode = node->first_node("transformation");
-            if(!transformationNode) {
-                log(error_log, "Found compound collision shape child with no transformation node.");
+                log(error_log, std::string("Found compound collision shape (")+name+") with an invalid child.");
                 return NULL;
             }
             Matrix4 transformation;
-            transformation.readTransform(transformationNode);
+            transformation.readTransform(childNode);
             compoundShape->addChildShape(transformation.getBTMatrix(), childShape);
-            childNode = childNode->next_sibling("child");
+            childNode = childNode->next_sibling("Child");
         }
         shape = compoundShape;
-    }else if(strcmp(type, "VertexCloud") == 0) {
+    }else if(strcmp(node->name(), "VertexCloud") == 0) {
         XMLValueArray<float> vertices;
-        sscanf(node->first_attribute("vertex")->value(), "%d", &vertices.count);
+        sscanf(node->first_attribute("vertexCount")->value(), "%d", &vertices.count);
         vertices.readString(node, vertices.count*3, "%f");
         vertices.count /= 3;
         shape = new btConvexHullShape(vertices.data, vertices.count, sizeof(float)*3);
         if(vertices.count > 100)
-            log(warning_log, "Found vertex cloud shape with more than 100 vertices.");
+            log(warning_log, std::string("Found vertex cloud shape (")+name+") with more than 100 vertices.");
     }else{
-        log(error_log, "Found collision shape with an unknown type.");
+        log(error_log, std::string("Found collision shape (")+name+") shape with an unknown type: "+node->name()+'.');
         return NULL;
     }
     worldManager.sharedCollisionShapes[name] = shape;
-    collisionShapeNodes.erase(name);
+    collisionShapeNodes.erase(nodeIterator);
     return shape;
 }
 
@@ -140,10 +148,10 @@ bool LevelLoader::loadLevel() {
         log(error_log, "Could not load package, because CollisionShapes.xml is missing.");
         return false;
     }
-    rapidxml::xml_node<xmlUsedCharType>* node = doc.first_node("CollisionShape");
+    rapidxml::xml_node<xmlUsedCharType>* node = doc.first_node("CollisionShapes")->first_node();
     while(node) {
         collisionShapeNodes[node->first_attribute("id")->value()] = node;
-        node = node->next_sibling("CollisionShape");
+        node = node->next_sibling();
     }
     
     //

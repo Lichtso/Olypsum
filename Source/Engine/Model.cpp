@@ -25,12 +25,9 @@ Mesh::Mesh() {
 Mesh::~Mesh() {
     if(vbo) glDeleteBuffers(1, &vbo);
     if(ibo) glDeleteBuffers(1, &ibo);
-    if(diffuse) fileManager.releaseTexture(diffuse);
-    if(effectMap) fileManager.releaseTexture(effectMap);
-    if(heightMap) fileManager.releaseTexture(heightMap);
 }
 
-void Mesh::draw(ObjectBase* object) {
+void Mesh::draw(GraphicObject* object) {
     if(!vbo || elementsCount == 0) {
         log(error_log, "No vertex data to draw in mesh.");
         return;
@@ -39,9 +36,6 @@ void Mesh::draw(ObjectBase* object) {
         log(error_log, "No postions data to draw in mesh.");
         return;
     }
-    
-    //AnimatedObject* animatedObject = (object->type != ObjectInstance_Animated && object->type != ObjectInstance_NPC) ? NULL : (AnimatedObject*) object;
-    AnimatedObject* animatedObject = (weightJoints == 0) ? NULL : (AnimatedObject*) object;
     
     if(diffuse)
         diffuse->use(GL_TEXTURE_2D, 0);
@@ -57,9 +51,28 @@ void Mesh::draw(ObjectBase* object) {
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-    
+    /*
+    AnimatedObject* animatedObject = dynamic_cast<AnimatedObject*>(object);
     if(!lightManager.currentShadowLight) {
-        if(!transparent || object->type != ObjectInstance_Water) {
+        WaterObject* waterObject = dynamic_cast<WaterObject*>(object);
+        if(waterObject != NULL) {
+            shaderPrograms[waterSP]->use();
+            char str[64];
+            for(unsigned int i = 0; i < MAX_WAVES; i ++) {
+                bool active = (i < waterObject->waves.size());
+                sprintf(str, "waveLen[%d]", i);
+                currentShaderProgram->setUniformF(str, active ? (1.0/waterObject->waves[i].length) : 0.0);
+                sprintf(str, "waveAge[%d]", i);
+                currentShaderProgram->setUniformF(str, active ? waterObject->waves[i].age/waterObject->waves[i].length*waterObject->waveSpeed-M_PI*2.0 : 0.0);
+                sprintf(str, "waveAmp[%d]", i);
+                currentShaderProgram->setUniformF(str, active ? waterObject->waves[i].ampitude*(1.0-waterObject->waves[i].age/waterObject->waves[i].maxAge) : 0.0);
+                sprintf(str, "waveOri[%d]", i);
+                if(active)
+                    currentShaderProgram->setUniformVec2(str, waterObject->waves[i].originX, waterObject->waves[i].originY);
+                else
+                    currentShaderProgram->setUniformVec2(str, 0.0, 0.0);
+            }
+        }else{
             if(heightMap) {
                 if(animatedObject) {
                     if(transparent && blendingQuality > 0)
@@ -85,29 +98,11 @@ void Mesh::draw(ObjectBase* object) {
                         shaderPrograms[solidGeometrySP]->use();
                 }
             }
-        }else if(object->type == ObjectInstance_Water) {
-            WaterObject* waterObject = (WaterObject*) object;
-            shaderPrograms[waterSP]->use();
-            char str[64];
-            for(unsigned int i = 0; i < MAX_WAVES; i ++) {
-                bool active = (i < waterObject->waves.size());
-                sprintf(str, "waveLen[%d]", i);
-                currentShaderProgram->setUniformF(str, active ? (1.0/waterObject->waves[i].length) : 0.0);
-                sprintf(str, "waveAge[%d]", i);
-                currentShaderProgram->setUniformF(str, active ? waterObject->waves[i].age/waterObject->waves[i].length*waterObject->waveSpeed-M_PI*2.0 : 0.0);
-                sprintf(str, "waveAmp[%d]", i);
-                currentShaderProgram->setUniformF(str, active ? waterObject->waves[i].ampitude*(1.0-waterObject->waves[i].age/waterObject->waves[i].maxAge) : 0.0);
-                sprintf(str, "waveOri[%d]", i);
-                if(active)
-                    currentShaderProgram->setUniformVec2(str, waterObject->waves[i].originX, waterObject->waves[i].originY);
-                else
-                    currentShaderProgram->setUniformVec2(str, 0.0, 0.0);
-            }
         }
     }
     currentShaderProgram->setUniformF("discardDensity", object->getDiscardDensity());
     if(animatedObject)
-        currentShaderProgram->setUniformMatrix4("jointMats", animatedObject->skeletonPose->mats, animatedObject->skeletonPose->skeleton->bones.size());
+        currentShaderProgram->setUniformMatrix4("jointMats", animatedObject->skeletonPose->mats, animatedObject->skeletonPose->skeleton->bones.size());*/
     
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     unsigned int byteStride = 3;
@@ -150,20 +145,25 @@ struct Material {
     std::string diffuseURL, effectMapURL, heightMapURL;
 };
 
-static Bone* readBone(Skeleton& skeleton, Matrix4& deTransform, Matrix4& parentMat, rapidxml::xml_node<xmlUsedCharType>* dataNode) {
-    rapidxml::xml_attribute<xmlUsedCharType> *typeAttribute, *sidAttribute = dataNode->first_attribute("sid");
-    Bone *bone = new Bone;
-    bone->name = sidAttribute->value();
+static Bone* readBone(Skeleton& skeleton, Matrix4& parentMat, rapidxml::xml_node<xmlUsedCharType>* dataNode) {
+    rapidxml::xml_attribute<xmlUsedCharType> *typeAttribute, *idAttribute;
+    if(!(typeAttribute = dataNode->first_attribute("type")) ||
+       strcmp(typeAttribute->value(), "JOINT") != 0 ||
+       !(idAttribute = dataNode->first_attribute("id"))) return NULL;
+    
+    Bone* bone = new Bone();
+    bone->name = idAttribute->value();
     bone->staticMat.readTransform(dataNode);
     bone->staticMat *= parentMat;
-    rapidxml::xml_node<xmlUsedCharType> *childNode = dataNode->first_node("node");
+    
+    rapidxml::xml_node<xmlUsedCharType>* childNode = dataNode->first_node("node");
     while(childNode) {
-        typeAttribute = childNode->first_attribute("type");
-        sidAttribute = childNode->first_attribute("sid");
-        if(!typeAttribute || !sidAttribute || strcmp(typeAttribute->value(), "JOINT") != 0) continue;
-        bone->children.push_back(readBone(skeleton, deTransform, bone->staticMat, childNode));
+        Bone* childBone = readBone(skeleton, bone->staticMat, childNode);
+        if(childBone)
+            bone->children.push_back(childBone);
         childNode = childNode->next_sibling("node");
     }
+    
     skeleton.bones[bone->name] = bone;
     return bone;
 }
@@ -183,9 +183,8 @@ static std::string readTextureURL(std::map<std::string, std::string> samplerURLs
     return std::string();
 }
 
-Model::Model() {
-    useCounter = 1;
-    skeleton = NULL;
+Model::Model() :skeleton(NULL) {
+    
 }
 
 Model::~Model() {
@@ -200,12 +199,13 @@ Model::~Model() {
     }
 }
 
-bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
-    if(meshes.size() > 0) return false;
+std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, const std::string& name) {
+    auto pointer = FilePackageResource::load(filePackageB, name);
+    if(meshes.size() > 0) return NULL;
     
     rapidxml::xml_document<xmlUsedCharType> doc;
-    std::unique_ptr<char[]> fileData = readXmlFile(doc, filePath, true);
-    if(!fileData) return false;
+    std::unique_ptr<char[]> fileData = readXmlFile(doc, filePackage->getUrlOfFile("Models", poolIndex->first), true);
+    if(!fileData) return NULL;
     
     rapidxml::xml_node<xmlUsedCharType> *collada, *library, *geometry, *meshNode, *source, *dataNode;
     rapidxml::xml_attribute<xmlUsedCharType> *dataAttribute;
@@ -396,7 +396,7 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                             goto endParsingXML;
                         }
                         skeleton = new Skeleton();
-                        skeleton->rootBone = readBone(*skeleton, modelTransformMat, modelTransformMat, source);
+                        skeleton->rootBone = readBone(*skeleton, modelTransformMat, source);
                         if(skeleton->bones.size() > maxJointsCount) {
                             char buffer[128];
                             sprintf(buffer, "More joints (%lu) found than supported (%d).\n", skeleton->bones.size(), maxJointsCount);
@@ -640,9 +640,18 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
                 goto endParsingXML;
             }
             mesh->transparent = material->second.transparent;
-            mesh->diffuse = (material->second.diffuseURL.size()) ? filePackage->getTexture(material->second.diffuseURL.c_str(), GL_COMPRESSED_RGBA) : NULL;
-            mesh->effectMap = (material->second.effectMapURL.size()) ? filePackage->getTexture(material->second.effectMapURL.c_str(), GL_COMPRESSED_RGB) : NULL;
-            mesh->heightMap = (material->second.heightMapURL.size()) ? filePackage->getTexture(material->second.heightMapURL.c_str(), GL_NORMAL_MAP) : NULL;
+            if(material->second.diffuseURL.size()) {
+                mesh->diffuse = filePackage->getResource<Texture>(material->second.diffuseURL);
+                mesh->diffuse->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGBA);
+            }
+            if(material->second.effectMapURL.size()) {
+                mesh->effectMap = filePackage->getResource<Texture>(material->second.effectMapURL);
+                mesh->effectMap->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
+            }
+            if(material->second.heightMapURL.size()) {
+                mesh->heightMap = filePackage->getResource<Texture>(material->second.heightMapURL);
+                mesh->effectMap->uploadNormalMap(4.0);
+            }
             
             unsigned int dataIndex, valueIndex, indexCount = 0, strideIndex = 0;
             std::map<std::string, VertexReference> vertexReferences;
@@ -829,12 +838,12 @@ bool Model::loadCollada(FilePackage* filePackage, const char* filePath) {
     endParsingXML:
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    return true;
+    return pointer;
 }
 
-void Model::draw(ObjectBase* object) {
+void Model::draw(GraphicObject* object) {
     if(lightManager.currentShadowLight) {
-        lightManager.currentShadowLight->selectShaderProgram(skeleton);
+        lightManager.currentShadowLight->prepareShaderProgram(skeleton);
         for(unsigned int i = 0; i < meshes.size(); i ++)
             meshes[i]->draw(object);
     }else for(unsigned int i = 0; i < meshes.size(); i ++) {

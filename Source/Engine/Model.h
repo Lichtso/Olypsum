@@ -6,29 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "ShaderProgram.h"
+#import "BasicObjects.h"
 
 #ifndef Model_h
 #define Model_h
-
-enum ObjectInstanceType {
-    ObjectInstance_Base = 0,
-    ObjectInstance_Normal = 1,
-    ObjectInstance_Animated = 2,
-    ObjectInstance_NPC = 3,
-    ObjectInstance_Zone = 4,
-    ObjectInstance_Water = 5,
-    ObjectInstance_ModelOnly = 6
-};
-
-class ObjectBase {
-    public:
-    ObjectInstanceType type;
-    virtual void calculate();
-    virtual float getDiscardDensity();
-    virtual Matrix4 getTransformation();
-    virtual void draw();
-};
 
 struct Bone {
     Matrix4 staticMat;
@@ -59,23 +40,25 @@ class Mesh {
     unsigned int elementsCount;
     bool transparent;
     int postions, texcoords, normals, weightJoints;
-    Texture *diffuse, *effectMap, *heightMap;
+    std::shared_ptr<Texture> diffuse, effectMap, heightMap;
     Mesh();
     ~Mesh();
-    void draw(ObjectBase* object);
+    void draw(GraphicObject* object);
 };
 
-class FilePackage;
+struct TransparentMesh {
+    GraphicObject* object;
+    Mesh* mesh;
+};
 
-class Model {
+class Model : public FilePackageResource {
     public:
-    unsigned int useCounter;
     std::vector<Mesh*> meshes;
     Skeleton* skeleton;
     Model();
     ~Model();
-    bool loadCollada(FilePackage* filePackage, const char* filePath);
-    void draw(ObjectBase* object);
+    std::shared_ptr<FilePackageResource> load(FilePackage* filePackageB, const std::string& name);
+    void draw(GraphicObject* object);
 };
 
 #endif

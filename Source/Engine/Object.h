@@ -11,11 +11,6 @@
 #ifndef Object_h
 #define Object_h
 
-struct TransparentMesh {
-    ObjectBase* object;
-    Mesh* mesh;
-};
-
 class ObjectManager {
     public:
     std::vector<TransparentMesh*> transparentAccumulator;
@@ -23,32 +18,29 @@ class ObjectManager {
     ObjectManager();
     ~ObjectManager();
     void clear();
-    void calculate();
+    void gameTick();
+    void physicsTick();
     void draw();
 };
 
 extern ObjectManager objectManager;
 
-class ModelOnlyObject : public ObjectBase {
+
+class ModelObject : public GraphicObject {
     public:
     Matrix4 transformation;
-    Model* model;
-    ModelOnlyObject(Model* model);
-    ~ModelOnlyObject();
-    void calculate();
+    ModelObject(Model* model);
+    ~ModelObject();
     float getDiscardDensity();
     Matrix4 getTransformation();
     void draw();
 };
 
-class AnimatedObject : public ObjectBase {
+class NormalObject : public GraphicObject, RigidObject {
     public:
-    Matrix4 transformation;
-    Model* model;
-    SkeletonPose* skeletonPose;
-    AnimatedObject(Model* model);
-    ~AnimatedObject();
-    void calculate();
+    NormalObject(Model* model);
+    ~NormalObject();
+    void gameTick();
     float getDiscardDensity();
     Matrix4 getTransformation();
     void draw();
@@ -56,7 +48,7 @@ class AnimatedObject : public ObjectBase {
 
 #define MAX_WAVES 4
 
-class WaterObject : public ObjectBase {
+class WaterObject : public ModelObject, RigidObject {
     public:
     Matrix4 transformation;
     Model* model;

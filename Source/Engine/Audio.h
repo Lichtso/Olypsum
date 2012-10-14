@@ -13,27 +13,24 @@
 #ifndef Audio_h
 #define Audio_h
 
-class FilePackage;
-
-class SoundTrack {
+class SoundTrack : public FilePackageResource {
     public:
-    unsigned int useCounter;
     ALuint ALname;
     SoundTrack();
     ~SoundTrack();
-    bool loadOgg(const char* filePath);
+    std::shared_ptr<FilePackageResource> load(FilePackage* filePackageB, const std::string& name);
     float getLength();
 };
 
 class SoundSource {
     public:
     ALuint ALname;
-    SoundTrack* soundTrack;
+    std::shared_ptr<SoundTrack> soundTrack;
     bool looping, autoDelete;
     Vector3 direction, position, velocity;
     SoundSource();
     ~SoundSource();
-    void setSoundTrack(SoundTrack* soundTrack);
+    void setSoundTrack(std::shared_ptr<SoundTrack> soundTrack);
     void play();
     void pause();
     void stop();

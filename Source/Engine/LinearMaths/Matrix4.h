@@ -24,9 +24,9 @@ class Matrix4 {
     btTransform getBTMatrix();
     void getOpenGLMatrix3(float matData[9]);
     void getOpenGLMatrix4(float matData[16]);
-    void setMatrix3(const Matrix4&);
-    void setIdentity();
-    void setZero();
+    Matrix4& setMatrix3(const Matrix4&);
+    Matrix4& setIdentity();
+    Matrix4& setZero();
     Matrix4 getTransposed();
     Matrix4 getInverse();
     Matrix4& normalize();

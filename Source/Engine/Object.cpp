@@ -8,22 +8,6 @@
 
 #import "WorldManager.h"
 
-void ObjectBase::calculate() {
-    
-}
-
-float ObjectBase::getDiscardDensity() {
-    return 0.0;
-}
-
-Matrix4 ObjectBase::getTransformation() {
-    return Matrix4();
-}
-
-void ObjectBase::draw() {
-    log(error_log, "draw() called in unspecified Object.");
-}
-
 ObjectManager::ObjectManager() {
     
 }
@@ -38,94 +22,39 @@ void ObjectManager::clear() {
     objects.clear();
 }
 
-void ObjectManager::calculate() {
+void ObjectManager::gameTick() {
     for(unsigned int i = 0; i < objects.size(); i ++)
-        objects[i]->calculate();
+        objects[i]->gameTick();
+}
+
+void ObjectManager::physicsTick() {
+    for(unsigned int i = 0; i < objects.size(); i ++) {
+        PhysicObject* object = dynamic_cast<PhysicObject*>(objects[i]);
+        if(!object) continue;
+        object->physicsTick();
+    }
 }
 
 void ObjectManager::draw() {
-    for(unsigned int i = 0; i < objects.size(); i ++)
-        objects[i]->draw();
+    for(unsigned int i = 0; i < objects.size(); i ++) {
+        GraphicObject* object = dynamic_cast<GraphicObject*>(objects[i]);
+        if(!object) continue;
+        object->draw();
+    }
 }
 
 ObjectManager objectManager;
 
 
 
-ModelOnlyObject::ModelOnlyObject(Model* modelB) {
-    type = ObjectInstance_ModelOnly;
-    model = modelB;
-    transformation.setIdentity();
-}
-
-ModelOnlyObject::~ModelOnlyObject() {
-    fileManager.releaseModel(model);
-}
-
-void ModelOnlyObject::calculate() {
-    
-}
-
-float ModelOnlyObject::getDiscardDensity() {
-    return 1.0;
-}
-
-Matrix4 ModelOnlyObject::getTransformation() {
-    return transformation;
-}
-
-void ModelOnlyObject::draw() {
-    modelMat = transformation;
-    model->draw(this);
-}
-
-
-
-AnimatedObject::AnimatedObject(Model* modelB) {
-    type = ObjectInstance_Animated;
-    model = modelB;
-    skeletonPose = new SkeletonPose(model->skeleton);
-    skeletonPose->calculate();
-    transformation.setIdentity();
-}
-
-AnimatedObject::~AnimatedObject() {
-    fileManager.releaseModel(model);
-    delete skeletonPose;
-}
-
-void AnimatedObject::calculate() {
-    skeletonPose->bonePoses["Hand_Right"].setIdentity();
-    skeletonPose->bonePoses["Hand_Right"].rotateX(frand(-0.2, 0.2));
-    skeletonPose->bonePoses["Forearm_Right"].setIdentity();
-    skeletonPose->bonePoses["Forearm_Right"].rotateZ(frand(-0.5, 0.5));
-    skeletonPose->calculate();
-}
-
-float AnimatedObject::getDiscardDensity() {
-    return 1.0;
-}
-
-Matrix4 AnimatedObject::getTransformation() {
-    return transformation;
-}
-
-void AnimatedObject::draw() {
-    modelMat = transformation;
-    model->draw(this);
-}
-
-
-
 WaterObject::WaterObject(Model* modelB) {
-    type = ObjectInstance_Water;
     waveSpeed = 0.05;
     model = modelB;
     transformation.setIdentity();
 }
 
 WaterObject::~WaterObject() {
-    fileManager.releaseModel(model);
+    
 }
 
 void WaterObject::addWave(float maxAge, float ampitude, float length, float originX, float originY) {

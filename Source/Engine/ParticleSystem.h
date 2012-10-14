@@ -29,7 +29,7 @@ class ParticleSystem {
     Vector3 position, posMin, posMax, force, dirMin, dirMax;
     float lifeMin, lifeMax, systemLife;
     unsigned int maxParticles;
-    Texture* texture;
+    std::shared_ptr<Texture> texture;
     ParticleSystem(unsigned int maxParticles);
     ~ParticleSystem();
     bool calculate();

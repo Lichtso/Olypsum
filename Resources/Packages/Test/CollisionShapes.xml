@@ -1,0 +1,25 @@
+<CollisionShapes>
+	<Cylinder id="cylinder0" width="0.5" height="0.5" length="0.5"/>
+	<Box id="box0" width="0.5" height="0.5" length="0.5"/>
+	<Sphere id="sphere0" radius="0.5"/>
+	<Capsule id="capsule0" radius="0.5" length="0.5" direction="y"/>
+	<Cone id="cone0" radius="0.5" length="0.5" direction="y"/>
+	<SphereCompound id="sphereCompound0">
+		<Sphere x="-0.5" y="-0.5" z="-0.5" radius="0.5"/>
+		<Sphere x="0.5" y="-0.5" z="-0.5" radius="0.5"/>
+		<Sphere x="0.0" y="-0.5" z="0.5" radius="0.5"/>
+		<Sphere x="0.0" y="0.5" z="0.0" radius="0.5"/>
+	</SphereCompound>
+	<Compound id="compound0">
+		<Child collisionShape="cylinder0">
+			<translate>0.0 0.0 0.0</translate>
+		</Child>
+		<Child collisionShape="box0">
+			<translate>0.0 -1.0 0.0</translate>
+		</Child>
+		<Child collisionShape="sphere0">
+			<translate>0.0 1.0 0.0</translate>
+		</Child>
+	</Compound>
+	<VertexCloud id="vertexCloud0" vertexCount="4">-0.5 -0.5 -0.5 0.5 -0.5 -0.5 0.0 -0.5 0.5 0.0 0.5 0.0</VertexCloud>
+</CollisionShapes>

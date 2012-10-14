@@ -87,7 +87,6 @@ class XMLValueArray {
             log(error_log, "XMLValueArray readString(): Count attribute doesn't match the elements count.");
             return false;
         }
-        printf("%d %d\n", count, expectedCount);
         return true;
     }
 };

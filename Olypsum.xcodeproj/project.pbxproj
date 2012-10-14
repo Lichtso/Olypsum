@@ -10,6 +10,7 @@
 		1118251B14F2553A00F198A7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118251A14F2553A00F198A7 /* Cocoa.framework */; };
 		1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254114F2559600F198A7 /* OpenGL.framework */; };
 		1118254414F2559B00F198A7 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254314F2559B00F198A7 /* OpenAL.framework */; };
+		112BF180162AFE8100CF0C0D /* BasicObjects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112BF17E162AFE8100CF0C0D /* BasicObjects.cpp */; };
 		1130ECBB15BC1CA600203C2E /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1130ECBA15BC1CA600203C2E /* Menu.cpp */; };
 		11648F6E153DEE63004CA74D /* FBO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11648F6D153DEE63004CA74D /* FBO.cpp */; };
 		118B60621573E2E8004C132E /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118B60611573E2E8004C132E /* Audio.cpp */; };
@@ -77,6 +78,8 @@
 		1118251F14F2553A00F198A7 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1118254114F2559600F198A7 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		1118254314F2559B00F198A7 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
+		112BF17E162AFE8100CF0C0D /* BasicObjects.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BasicObjects.cpp; sourceTree = "<group>"; };
+		112BF17F162AFE8100CF0C0D /* BasicObjects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BasicObjects.h; sourceTree = "<group>"; };
 		1130ECBA15BC1CA600203C2E /* Menu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Menu.cpp; sourceTree = "<group>"; };
 		11648F6B153DEE0F004CA74D /* FBO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FBO.h; sourceTree = "<group>"; };
 		11648F6D153DEE63004CA74D /* FBO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FBO.cpp; sourceTree = "<group>"; };
@@ -286,6 +289,8 @@
 				11A79B62153C2FE9002B9F0A /* ShaderProgram.cpp */,
 				118B60601573E2DF004C132E /* Audio.h */,
 				118B60611573E2E8004C132E /* Audio.cpp */,
+				112BF17F162AFE8100CF0C0D /* BasicObjects.h */,
+				112BF17E162AFE8100CF0C0D /* BasicObjects.cpp */,
 				11A79B5C153C2FE9002B9F0A /* Model.h */,
 				11A79B5B153C2FE9002B9F0A /* Model.cpp */,
 				11B2626E15E28DF6002C638D /* Object.h */,
@@ -509,6 +514,7 @@
 				11C238D91613164C009D6F9C /* WorldManager.cpp in Sources */,
 				11D74B4F16296735000EEB50 /* LevelLoader.cpp in Sources */,
 				11A907621629B27A00B16607 /* XMLUtilities.cpp in Sources */,
+				112BF180162AFE8100CF0C0D /* BasicObjects.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

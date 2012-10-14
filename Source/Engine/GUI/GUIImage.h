@@ -15,9 +15,8 @@
 class GUIImage : public GUIRect {
     public:
     GUISizeAlignment sizeAlignment;
-    Texture* texture;
+    std::shared_ptr<Texture> texture;
     GUIImage();
-    ~GUIImage();
     void updateContent();
     void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
 };

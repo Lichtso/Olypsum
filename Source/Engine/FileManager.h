@@ -16,19 +16,12 @@
 class FilePackage {
     public:
     std::string path, name;
-    std::map<std::string, Texture*> textures;
-    std::map<std::string, Model*> models;
-    std::map<std::string, SoundTrack*> soundTracks;
+    std::map<std::string, std::weak_ptr<FilePackageResource>> resources;
     FilePackage(std::string name);
     ~FilePackage();
     bool load();
-    std::string getUrlOfFile(const char* groupName, const char* fileName);
-    Texture* getTexture(const char* fileName, GLenum format);
-    Model* getModel(const char* fileName);
-    SoundTrack* getSoundTrack(const char* fileName);
-    bool releaseTexture(Texture* texture);
-    bool releaseModel(Model* model);
-    bool releaseSoundTrack(SoundTrack* soundTrack);
+    std::string getUrlOfFile(const char* groupName, const std::string& fileName);
+    template <class T> std::shared_ptr<T> getResource(const std::string& name);
 };
 
 class FileManager {
@@ -41,9 +34,6 @@ class FileManager {
     FilePackage* loadPackage(const char* name);
     FilePackage* getPackage(const char* name);
     void unloadPackage(const char* name);
-    void releaseTexture(Texture* texture);
-    void releaseModel(Model* model);
-    void releaseSoundTrack(SoundTrack* soundTrack);
 };
 
 extern FileManager fileManager;

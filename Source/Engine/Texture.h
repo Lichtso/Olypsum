@@ -13,19 +13,31 @@
 #ifndef Texture_h
 #define Texture_h
 
-class Texture {
+class FilePackage;
+
+class FilePackageResource {
     public:
-    unsigned int useCounter, width, height;
+    FilePackage* filePackage;
+    std::map<std::string, std::weak_ptr<FilePackageResource>>::iterator poolIndex;
+    FilePackageResource() :filePackage(NULL) { }
+    ~FilePackageResource();
+    virtual std::shared_ptr<FilePackageResource> load(FilePackage* filePackageB, const std::string& name);
+};
+
+class Texture : public FilePackageResource {
+    public:
+    unsigned int width, height;
     GLuint GLname;
     GLenum minFilter, magFilter;
     SDL_Surface* surface;
     Texture();
     ~Texture();
-    bool loadImageInRAM(const char* filePath);
-    void loadRandomInRAM();
-    void unloadFromRAM();
-    bool uploadToVRAM(GLenum textureTarget, GLenum format);
-    void unloadFromVRAM();
+    std::shared_ptr<FilePackageResource> load(FilePackage* filePackageB, const std::string& name);
+    void loadRandom();
+    void unloadImage();
+    bool uploadTexture(GLenum textureTarget, GLenum format);
+    bool uploadNormalMap(float processingValue);
+    void unloadTexture();
     void use(GLenum textureTarget, GLuint targetIndex);
 };
 

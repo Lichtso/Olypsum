@@ -35,7 +35,6 @@ ParticleSystem::ParticleSystem(unsigned int maxParticlesB) {
 ParticleSystem::~ParticleSystem() {
     if(particleCalcTarget == 1)
         delete [] (Particle*)particles;
-    if(texture) fileManager.releaseTexture(texture);
     if(lightSource) delete lightSource;
     if(particlesVBO[0]) {
         glDeleteBuffers(1, &particlesVBO[0]);

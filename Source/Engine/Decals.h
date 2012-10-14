@@ -14,10 +14,8 @@
 class Decal {
     public:
     Matrix4 transformation;
-    Texture *diffuse, *heightMap;
+    std::shared_ptr<Texture> diffuse, heightMap;
     float life;
-    Decal();
-    ~Decal();
 };
 
 class DecalManager {

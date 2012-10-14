@@ -23,12 +23,12 @@ class WorldManager {
     btDefaultCollisionConfiguration* collisionConfiguration;
     btCollisionDispatcher* dispatcher;
     btSequentialImpulseConstraintSolver* solver;
-    btDiscreteDynamicsWorld* physicsWorld;
     btRigidBody* worldWallBodys[6];
     
     void clearAll();
     void clearPhysics();
     public:
+    btDiscreteDynamicsWorld* physicsWorld;
     WorldManager();
     ~WorldManager();
     std::map<std::string, btCollisionShape*> sharedCollisionShapes;

@@ -9,13 +9,8 @@
 #import "FileManager.h"
 #import "GUIImage.h"
 
-GUIImage::GUIImage() {
-    texture = NULL;
-    sizeAlignment = GUISizeAlignment_All;
-}
-
-GUIImage::~GUIImage() {
-    if(texture) fileManager.releaseTexture(texture);
+GUIImage::GUIImage() :sizeAlignment(GUISizeAlignment_All) {
+    
 }
 
 void GUIImage::updateContent() {

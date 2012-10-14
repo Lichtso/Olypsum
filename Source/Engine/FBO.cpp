@@ -267,46 +267,4 @@ void FBO::deleteTexture(ColorBuffer* colorBuffer) {
     delete colorBuffer;
 }
 
-bool FBO::generateNormalMap(Texture* heightMap, float processingValue) {
-    if(!heightMap->uploadToVRAM(GL_TEXTURE_RECTANGLE_ARB, GL_LUMINANCE)) return false;
-    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    heightMap->unloadFromRAM();
-    
-    unsigned char data[heightMap->width*heightMap->height*4];
-    for(unsigned int i = 0; i < heightMap->width*heightMap->height*4; i ++)
-        data[i] = 0xFF;
-    
-    GLuint normalMap;
-    glGenTextures(1, &normalMap);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, normalMap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, heightMap->width, heightMap->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, heightMap->minFilter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, heightMap->magFilter);
-    
-    glViewport(0, 0, heightMap->width, heightMap->height);
-    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, normalMap, 0);
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
-    
-    shaderPrograms[normalMapGenSP]->use();
-    currentShaderProgram->setUniformF("processingValue", processingValue);
-    float vertices[12] = { -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0 };
-    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
-    glDisable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    heightMap->unloadFromVRAM();
-    glBindTexture(GL_TEXTURE_2D, normalMap);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    heightMap->GLname = normalMap;
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    
-    return true;
-}
-
 FBO mainFBO;

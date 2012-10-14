@@ -43,13 +43,13 @@ Matrix4& Matrix4::readTransform(rapidxml::xml_node<xmlUsedCharType>* node) {
         if(strcmp(node->name(), "matrix") == 0) {
             XMLValueArray<float> matrixData;
             matrixData.readString(node->value(), "%f");
-            *this *= Matrix4(matrixData.data).getTransposed();
+            *this = Matrix4(matrixData.data).getTransposed() * (*this);
         }else if(strcmp(node->name(), "translate") == 0) {
             XMLValueArray<float> vectorData;
             vectorData.readString(node->value(), "%f");
             mat.setIdentity();
             mat.translate(Vector3(vectorData.data[0], vectorData.data[1], vectorData.data[2]));
-            *this = mat * *this;
+            *this = mat * (*this);
         }else if(strcmp(node->name(), "rotate") == 0) {
             XMLValueArray<float> vectorData;
             vectorData.readString(node->value(), "%f");
@@ -57,13 +57,13 @@ Matrix4& Matrix4::readTransform(rapidxml::xml_node<xmlUsedCharType>* node) {
             Vector3 vec(vectorData.data[0], vectorData.data[1], vectorData.data[2]);
             mat.setIdentity();
             mat.rotateQ(vec, vectorData.data[3]/180.0*M_PI);
-            *this = mat * *this;
+            *this = mat * (*this);
         }else if(strcmp(node->name(), "scale") == 0) {
             XMLValueArray<float> vectorData;
             vectorData.readString(node->value(), "%f");
             mat.setIdentity();
             mat.scale(Vector3(vectorData.data[0], vectorData.data[1], vectorData.data[2]));
-            *this = mat * *this;
+            *this = mat * (*this);
         }
         node = node->next_sibling();
     }
@@ -124,25 +124,28 @@ void Matrix4::getOpenGLMatrix4(float matData[16]) {
     matData[15] = pos.w;
 }
 
-void Matrix4::setMatrix3(const Matrix4& mat) {
+Matrix4& Matrix4::setMatrix3(const Matrix4& mat) {
     x = Vector3(mat.x.x, mat.x.y, mat.x.z, x.w);
     y = Vector3(mat.y.x, mat.y.y, mat.y.z, y.w);
     z = Vector3(mat.z.x, mat.z.y, mat.z.z, z.w);
     pos = Vector3(0, 0, 0, 1);
+    return *this;
 }
 
-void Matrix4::setIdentity() {
+Matrix4& Matrix4::setIdentity() {
     x = Vector3(1, 0, 0, 0);
     y = Vector3(0, 1, 0, 0);
     z = Vector3(0, 0, 1, 0);
     pos = Vector3(0, 0, 0, 1);
+    return *this;
 }
 
-void Matrix4::setZero() {
+Matrix4& Matrix4::setZero() {
     x = Vector3(0, 0, 0, 0);
     y = Vector3(0, 0, 0, 0);
     z = Vector3(0, 0, 0, 0);
     pos = Vector3(0, 0, 0, 0);
+    return *this;
 }
 
 Matrix4 Matrix4::getTransposed() {
