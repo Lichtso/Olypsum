@@ -171,12 +171,12 @@ void AppMain(int argc, char *argv[]) {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT);
         }else{
-            objectManager.calculate();
-            worldManager.calculate();
-            soundSourcesManager.calculate();
+            objectManager.gameTick();
+            worldManager.gameTick();
+            soundSourcesManager.gameTick();
             lightManager.calculateShadows(1);
-            particleSystemManager.calculate();
-            decalManager.calculate();
+            particleSystemManager.gameTick();
+            decalManager.gameTick();
             mainCam->use();
             mainFBO.renderInDeferredBuffers(false);
             objectManager.draw();

@@ -39,7 +39,7 @@ class WorldManager {
     GameStatusName gameStatus = noGame;
     void loadLevel();
     void saveLevel();
-    void calculate();
+    void gameTick();
     void leaveGame();
     bool loadGame(std::string name);
     bool newGame(std::string packageName, std::string name);

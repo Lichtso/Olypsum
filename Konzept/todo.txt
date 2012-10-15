@@ -1,5 +1,4 @@
-Water
-Make GUI
+Make options GUI
 Highmap terrains
 Use C++11 Multithreading
 Level File Formats

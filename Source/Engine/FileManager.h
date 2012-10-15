@@ -24,6 +24,19 @@ class FilePackage {
     template <class T> std::shared_ptr<T> getResource(const std::string& name);
 };
 
+template <class T> std::shared_ptr<T> FilePackage::getResource(const std::string& fileName) {
+    auto iterator = resources.find(fileName);
+    if(iterator != resources.end()) {
+        std::shared_ptr<FilePackageResource> pointer = iterator->second.lock();
+        if(!dynamic_cast<T*>(pointer.get())) {
+            log(error_log, std::string("The resource ")+fileName+" in "+name+" is also used by another resource type.");
+            return NULL;
+        }
+        return std::static_pointer_cast<T>(pointer);
+    }
+    return std::static_pointer_cast<T>((new T())->load(this, fileName));
+}
+
 class FileManager {
     std::map<std::string, FilePackage*> filePackages;
     public:

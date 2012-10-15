@@ -51,58 +51,8 @@ void Mesh::draw(GraphicObject* object) {
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-    /*
-    AnimatedObject* animatedObject = dynamic_cast<AnimatedObject*>(object);
-    if(!lightManager.currentShadowLight) {
-        WaterObject* waterObject = dynamic_cast<WaterObject*>(object);
-        if(waterObject != NULL) {
-            shaderPrograms[waterSP]->use();
-            char str[64];
-            for(unsigned int i = 0; i < MAX_WAVES; i ++) {
-                bool active = (i < waterObject->waves.size());
-                sprintf(str, "waveLen[%d]", i);
-                currentShaderProgram->setUniformF(str, active ? (1.0/waterObject->waves[i].length) : 0.0);
-                sprintf(str, "waveAge[%d]", i);
-                currentShaderProgram->setUniformF(str, active ? waterObject->waves[i].age/waterObject->waves[i].length*waterObject->waveSpeed-M_PI*2.0 : 0.0);
-                sprintf(str, "waveAmp[%d]", i);
-                currentShaderProgram->setUniformF(str, active ? waterObject->waves[i].ampitude*(1.0-waterObject->waves[i].age/waterObject->waves[i].maxAge) : 0.0);
-                sprintf(str, "waveOri[%d]", i);
-                if(active)
-                    currentShaderProgram->setUniformVec2(str, waterObject->waves[i].originX, waterObject->waves[i].originY);
-                else
-                    currentShaderProgram->setUniformVec2(str, 0.0, 0.0);
-            }
-        }else{
-            if(heightMap) {
-                if(animatedObject) {
-                    if(transparent && blendingQuality > 0)
-                        shaderPrograms[glassSkeletalBumpGeometrySP]->use();
-                    else
-                        shaderPrograms[skeletalBumpGeometrySP]->use();
-                }else{
-                    if(transparent && blendingQuality > 0)
-                        shaderPrograms[glassBumpGeometrySP]->use();
-                    else
-                        shaderPrograms[solidBumpGeometrySP]->use();
-                }
-            }else{
-                if(animatedObject) {
-                    if(transparent && blendingQuality > 0)
-                        shaderPrograms[glassSkeletalGeometrySP]->use();
-                    else
-                        shaderPrograms[skeletalGeometrySP]->use();
-                }else{
-                    if(transparent && blendingQuality > 0)
-                        shaderPrograms[glassGeometrySP]->use();
-                    else
-                        shaderPrograms[solidGeometrySP]->use();
-                }
-            }
-        }
-    }
-    currentShaderProgram->setUniformF("discardDensity", object->getDiscardDensity());
-    if(animatedObject)
-        currentShaderProgram->setUniformMatrix4("jointMats", animatedObject->skeletonPose->mats, animatedObject->skeletonPose->skeleton->bones.size());*/
+    
+    object->prepareShaderProgram(this);
     
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     unsigned int byteStride = 3;
@@ -204,7 +154,7 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
     if(meshes.size() > 0) return NULL;
     
     rapidxml::xml_document<xmlUsedCharType> doc;
-    std::unique_ptr<char[]> fileData = readXmlFile(doc, filePackage->getUrlOfFile("Models", poolIndex->first), true);
+    std::unique_ptr<char[]> fileData = readXmlFile(doc, filePackage->getUrlOfFile("Models", name), true);
     if(!fileData) return NULL;
     
     rapidxml::xml_node<xmlUsedCharType> *collada, *library, *geometry, *meshNode, *source, *dataNode;
@@ -650,7 +600,7 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
             }
             if(material->second.heightMapURL.size()) {
                 mesh->heightMap = filePackage->getResource<Texture>(material->second.heightMapURL);
-                mesh->effectMap->uploadNormalMap(4.0);
+                mesh->heightMap->uploadNormalMap(4.0);
             }
             
             unsigned int dataIndex, valueIndex, indexCount = 0, strideIndex = 0;

@@ -47,7 +47,7 @@ ParticleSystem::~ParticleSystem() {
         }
 }
 
-bool ParticleSystem::calculate() {
+bool ParticleSystem::gameTick() {
     if(particleCalcTarget == 0) systemLife = 0.0;
     if(systemLife > -1.0) {
         systemLife -= worldManager.animationFactor;
@@ -153,10 +153,10 @@ void ParticleSystemManager::clear() {
     particleSystems.clear();
 }
 
-void ParticleSystemManager::calculate() {
+void ParticleSystemManager::gameTick() {
     if(particleCalcTarget == 2) glEnable(GL_RASTERIZER_DISCARD_EXT);
     for(unsigned int p = 0; p < particleSystems.size(); p ++)
-        if(particleSystems[p]->calculate())
+        if(particleSystems[p]->gameTick())
             p --;
     if(particleCalcTarget == 2) glDisable(GL_RASTERIZER_DISCARD_EXT);
 }

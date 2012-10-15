@@ -32,7 +32,7 @@ class ParticleSystem {
     std::shared_ptr<Texture> texture;
     ParticleSystem(unsigned int maxParticles);
     ~ParticleSystem();
-    bool calculate();
+    bool gameTick();
     void draw();
 };
 
@@ -41,7 +41,7 @@ class ParticleSystemManager {
     std::vector<ParticleSystem*> particleSystems;
     ~ParticleSystemManager();
     void clear();
-    void calculate();
+    void gameTick();
     void draw();
 };
 

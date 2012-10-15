@@ -58,6 +58,7 @@ class Model : public FilePackageResource {
     Model();
     ~Model();
     std::shared_ptr<FilePackageResource> load(FilePackage* filePackageB, const std::string& name);
+    void prepareShaderProgram(Mesh* mesh);
     void draw(GraphicObject* object);
 };
 

@@ -18,10 +18,10 @@ class FilePackage;
 class FilePackageResource {
     public:
     FilePackage* filePackage;
-    std::map<std::string, std::weak_ptr<FilePackageResource>>::iterator poolIndex;
+    std::string name;
     FilePackageResource() :filePackage(NULL) { }
     ~FilePackageResource();
-    virtual std::shared_ptr<FilePackageResource> load(FilePackage* filePackageB, const std::string& name);
+    virtual std::shared_ptr<FilePackageResource> load(FilePackage* filePackage, const std::string& name);
 };
 
 class Texture : public FilePackageResource {

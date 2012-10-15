@@ -8,10 +8,6 @@
 
 #import "WorldManager.h"
 
-ObjectManager::ObjectManager() {
-    
-}
-
 ObjectManager::~ObjectManager() {
     clear();
 }
@@ -31,15 +27,30 @@ void ObjectManager::physicsTick() {
     for(unsigned int i = 0; i < objects.size(); i ++) {
         PhysicObject* object = dynamic_cast<PhysicObject*>(objects[i]);
         if(!object) continue;
-        object->physicsTick();
+        //object->physicsTick();
     }
+    
+    btDispatcher* dispatcher = worldManager.physicsWorld->getDispatcher();
+    unsigned int numManifolds = dispatcher->getNumManifolds();
+	for(unsigned int i = 0; i < numManifolds; i ++) {
+		btPersistentManifold* contactManifold =  dispatcher->getManifoldByIndexInternal(i);
+		void *objectA = static_cast<const btCollisionObject*>(contactManifold->getBody0())->getUserPointer(),
+             *objectB = static_cast<const btCollisionObject*>(contactManifold->getBody1())->getUserPointer();
+        
+        PhysicObject *userObjectA = static_cast<PhysicObject*>(objectA),
+                     *userObjectB = static_cast<PhysicObject*>(objectB);
+        
+        if(userObjectA) userObjectA->handleCollision(contactManifold, userObjectB);
+        if(userObjectB) userObjectB->handleCollision(contactManifold, userObjectA);
+	}
 }
 
 void ObjectManager::draw() {
     for(unsigned int i = 0; i < objects.size(); i ++) {
         GraphicObject* object = dynamic_cast<GraphicObject*>(objects[i]);
         if(!object) continue;
-        object->draw();
+        if(object->prepareDraw())
+            object->model->draw(object);
     }
 }
 
@@ -47,10 +58,46 @@ ObjectManager objectManager;
 
 
 
-WaterObject::WaterObject(Model* modelB) {
-    waveSpeed = 0.05;
-    model = modelB;
-    transformation.setIdentity();
+ModelObject::ModelObject(std::shared_ptr<Model> modelB) :GraphicObject(modelB) {
+    
+}
+
+Matrix4 ModelObject::getTransformation() {
+    return transformation;
+}
+
+
+
+RigidObject::RigidObject(std::shared_ptr<Model> modelB, btRigidBody::btRigidBodyConstructionInfo* rBCI) :GraphicObject(modelB) {
+    rBCI->m_collisionShape->calculateLocalInertia(rBCI->m_mass, rBCI->m_localInertia);
+    body = new btRigidBody(*rBCI);
+    body->setUserPointer(this);
+    worldManager.physicsWorld->addRigidBody(body);
+}
+
+RigidObject::~RigidObject() {
+    if(body) {
+        while(body->getNumConstraintRefs() > 0) {
+            btTypedConstraint* constraint = body->getConstraintRef(0);
+            worldManager.physicsWorld->removeConstraint(constraint);
+            delete constraint;
+        }
+        delete body->getMotionState();
+        worldManager.physicsWorld->removeRigidBody(body);
+        delete body;
+    }
+}
+
+Matrix4 RigidObject::getTransformation() {
+    btTransform transform;
+    body->getMotionState()->getWorldTransform(transform);
+    return Matrix4(transform);
+}
+
+
+
+WaterObject::WaterObject(std::shared_ptr<Model> modelB, btCollisionShape* shapeB, const btTransform& transformB) :GraphicObject(modelB), ZoneObject(shapeB, transformB), waveSpeed(0.05) {
+    
 }
 
 WaterObject::~WaterObject() {
@@ -69,7 +116,7 @@ void WaterObject::addWave(float maxAge, float ampitude, float length, float orig
     waves.push_back(wave);
 }
 
-void WaterObject::calculate() {
+void WaterObject::gameTick() {
     for(unsigned int i = 0; i < waves.size(); i ++) {
         waves[i].age += worldManager.animationFactor;
         if(waves[i].age >= waves[i].maxAge) {
@@ -79,16 +126,28 @@ void WaterObject::calculate() {
     }
 }
 
-float WaterObject::getDiscardDensity() {
-    return 1.0;
+void WaterObject::prepareShaderProgram(Mesh* mesh) {
+    shaderPrograms[waterSP]->use();
+    char str[64];
+    for(unsigned int i = 0; i < MAX_WAVES; i ++) {
+        bool active = (i < waves.size());
+        sprintf(str, "waveLen[%d]", i);
+        currentShaderProgram->setUniformF(str, active ? (1.0/waves[i].length) : 0.0);
+        sprintf(str, "waveAge[%d]", i);
+        currentShaderProgram->setUniformF(str, active ? waves[i].age/waves[i].length*waveSpeed-M_PI*2.0 : 0.0);
+        sprintf(str, "waveAmp[%d]", i);
+        currentShaderProgram->setUniformF(str, active ? waves[i].ampitude*(1.0-waves[i].age/waves[i].maxAge) : 0.0);
+        sprintf(str, "waveOri[%d]", i);
+        if(active)
+            currentShaderProgram->setUniformVec2(str, waves[i].originX, waves[i].originY);
+        else
+            currentShaderProgram->setUniformVec2(str, 0.0, 0.0);
+    }
+    currentShaderProgram->setUniformF("discardDensity", 1.0);
 }
 
-Matrix4 WaterObject::getTransformation() {
-    return transformation;
-}
-
-void WaterObject::draw() {
-    if(lightManager.currentShadowLight) return;
-    modelMat = transformation;
-    model->draw(this);
+bool WaterObject::prepareDraw() {
+    if(lightManager.currentShadowLight)
+        return false;
+    return GraphicObject::prepareDraw();
 }

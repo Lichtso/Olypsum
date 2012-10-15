@@ -37,7 +37,7 @@ class SoundSource {
     bool isPlaying();
     void setTimeOffset(float timeOffset);
     float getTimeOffset();
-    bool calculate();
+    bool gameTick();
 };
 
 class SoundSourcesManager {
@@ -48,7 +48,7 @@ class SoundSourcesManager {
     SoundSourcesManager();
     ~SoundSourcesManager();
     void clear();
-    void calculate();
+    void gameTick();
 };
 
 extern SoundSourcesManager soundSourcesManager;

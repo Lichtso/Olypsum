@@ -33,7 +33,8 @@ void WorldManager::clearAll() {
 }
 
 static void calculatePhysicsTick(btDynamicsWorld* world, btScalar timeStep) {
-    
+    printf("%d\n", worldManager.physicsWorld->getDispatcher()->getNumManifolds());
+    objectManager.physicsTick();
 }
 
 void WorldManager::clearPhysics() {
@@ -76,10 +77,8 @@ void WorldManager::loadLevel() {
         physicsWorld->addRigidBody(worldWallBodys[i]);
     }
     
-    /*
-    AnimatedObject* object = new AnimatedObject(fileManager.getPackage("Default")->getModel("man.dae"));
+    ModelObject* object = new ModelObject(fileManager.getPackage("Default")->getResource<Model>("man.dae"));
     object->transformation.setIdentity();
-    objectManager.objects.push_back(object);*/
     mainCam->camMat.setIdentity();
     //mainCam->camMat.rotateX(0.5);
     mainCam->camMat.translate(Vector3(0,1,2));
@@ -98,9 +97,8 @@ void WorldManager::saveLevel() {
     writeXmlFile(doc, gameDataDir+"Saves/"+gameName+'/'+"Status.xml", true);
 }
 
-void WorldManager::calculate() {
+void WorldManager::gameTick() {
     physicsWorld->stepSimulation(animationFactor, 4, 1.0/60.0);
-    printf("%d\n", physicsWorld->getDispatcher()->getNumManifolds());
 }
 
 void WorldManager::leaveGame() {

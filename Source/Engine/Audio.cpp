@@ -27,7 +27,7 @@ std::shared_ptr<FilePackageResource> SoundTrack::load(FilePackage* filePackageB,
     auto pointer = FilePackageResource::load(filePackageB, name);
     if(ALname) return NULL;
     
-    std::string filePath = filePackageB->getUrlOfFile("Sounds", poolIndex->first);
+    std::string filePath = filePackageB->getUrlOfFile("Sounds", name);
     FILE* fp = fopen(filePath.c_str(), "r");
     if(!fp) {
         log(error_log, std::string("The file ")+filePath+" couldn't be found.");
@@ -126,7 +126,7 @@ float SoundSource::getTimeOffset() {
     return timeOffset;
 }
 
-bool SoundSource::calculate() {
+bool SoundSource::gameTick() {
     if(!autoDelete || !soundTrack || looping || isPlaying()) return false;
     delete this;
     return true;
@@ -151,9 +151,9 @@ void SoundSourcesManager::clear() {
     soundSources.clear();
 }
 
-void SoundSourcesManager::calculate() {
+void SoundSourcesManager::gameTick() {
     for(unsigned int s = 0; s < soundSources.size(); s ++)
-        if(soundSources[s]->calculate())
+        if(soundSources[s]->gameTick())
             s --;
 }
 

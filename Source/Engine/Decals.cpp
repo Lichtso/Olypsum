@@ -32,7 +32,7 @@ void DecalManager::clear() {
     decals.clear();
 }
 
-void DecalManager::calculate() {
+void DecalManager::gameTick() {
     for(int i = 0; i < decals.size(); i ++) {
         decals[i]->life -= worldManager.animationFactor;
         if(decals[i]->life > 0.0) continue;

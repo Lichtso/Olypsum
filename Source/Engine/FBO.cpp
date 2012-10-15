@@ -151,8 +151,8 @@ void FBO::renderTransparentInDeferredBuffers() {
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
         TransparentMesh* tMesh = objectManager.transparentAccumulator[i];
-        modelMat = tMesh->object->getTransformation();
-        tMesh->mesh->draw(tMesh->object);
+        if(tMesh->object->prepareDraw())
+            tMesh->mesh->draw(tMesh->object);
         delete tMesh;
         glDisable(GL_BLEND);
         glDisable(GL_DEPTH_TEST);

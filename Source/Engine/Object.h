@@ -15,7 +15,6 @@ class ObjectManager {
     public:
     std::vector<TransparentMesh*> transparentAccumulator;
     std::vector<ObjectBase*> objects;
-    ObjectManager();
     ~ObjectManager();
     void clear();
     void gameTick();
@@ -25,45 +24,36 @@ class ObjectManager {
 
 extern ObjectManager objectManager;
 
-
 class ModelObject : public GraphicObject {
     public:
     Matrix4 transformation;
-    ModelObject(Model* model);
-    ~ModelObject();
-    float getDiscardDensity();
+    ModelObject(std::shared_ptr<Model> model);
     Matrix4 getTransformation();
-    void draw();
 };
 
-class NormalObject : public GraphicObject, RigidObject {
+class RigidObject : public GraphicObject, PhysicObject {
     public:
-    NormalObject(Model* model);
-    ~NormalObject();
-    void gameTick();
-    float getDiscardDensity();
+    btRigidBody* body;
+    RigidObject(std::shared_ptr<Model> model, btRigidBody::btRigidBodyConstructionInfo* rBCI);
+    ~RigidObject();
     Matrix4 getTransformation();
-    void draw();
 };
 
 #define MAX_WAVES 4
 
-class WaterObject : public ModelObject, RigidObject {
+class WaterObject : public GraphicObject, ZoneObject {
     public:
-    Matrix4 transformation;
-    Model* model;
     float waveSpeed;
     struct WaterObjectWave {
         float length, age, maxAge, ampitude, originX, originY;
     };
     std::vector<WaterObjectWave> waves;
-    WaterObject(Model* model);
+    WaterObject(std::shared_ptr<Model> model, btCollisionShape* shape, const btTransform& transform);
     ~WaterObject();
     void addWave(float maxAge, float ampitude, float length, float originX, float originY);
-    void calculate();
-    float getDiscardDensity();
-    Matrix4 getTransformation();
-    void draw();
+    void gameTick();
+    void prepareShaderProgram(Mesh* mesh);
+    bool prepareDraw();
 };
 
 #endif

@@ -21,33 +21,30 @@ class ObjectBase {
 
 class PhysicObject : public ObjectBase {
     public:
-    virtual void physicsTick();
+    //virtual void physicsTick();
+    virtual void handleCollision(btPersistentManifold* contactManifold, PhysicObject* b);
 };
 
-class RigidObject : public PhysicObject {
-    btRigidBody* body;
+class ZoneObject : public PhysicObject {
     public:
-    RigidObject(btRigidBody::btRigidBodyConstructionInfo* rBCI);
-    ~RigidObject();
+    btCollisionObject* body;
+    ZoneObject(btCollisionShape* shape, const btTransform& transform);
+    ~ZoneObject();
     Matrix4 getTransformation();
 };
 
-class ZoneObject : public RigidObject {
-    public:
-    
-};
-
 class SkeletonPose;
+class Mesh;
 class Model;
 
 class GraphicObject : public ObjectBase {
     public:
     SkeletonPose* skeletonPose;
     std::shared_ptr<Model> model;
-    GraphicObject(Model* model);
+    GraphicObject(std::shared_ptr<Model> model);
     ~GraphicObject();
-    virtual void prepareShaderProgram();
-    virtual void draw();
+    virtual void prepareShaderProgram(Mesh* mesh);
+    virtual bool prepareDraw();
 };
 
 #endif

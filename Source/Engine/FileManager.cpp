@@ -8,17 +8,17 @@
 
 #import "FileManager.h"
 
-std::shared_ptr<FilePackageResource> FilePackageResource::load(FilePackage* filePackageB, const std::string& name) {
+std::shared_ptr<FilePackageResource> FilePackageResource::load(FilePackage* filePackageB, const std::string& nameB) {
     filePackage = filePackageB;
-    std::shared_ptr<FilePackageResource> pointer = std::make_shared<FilePackageResource>(this);
-    std::pair<decltype(poolIndex), bool> inserted = filePackage->resources.insert(decltype(FilePackage::resources)::value_type(name, pointer));
-    poolIndex = inserted.first;
+    name = nameB;
+    std::shared_ptr<FilePackageResource> pointer(this);
+    filePackage->resources[name] = pointer;
     return pointer;
 }
 
 FilePackageResource::~FilePackageResource() {
     if(filePackage)
-        filePackage->resources.erase(poolIndex);
+        filePackage->resources.erase(name);
 }
 
 
@@ -48,20 +48,6 @@ bool FilePackage::load() {
 
 std::string FilePackage::getUrlOfFile(const char* groupName, const std::string& fileName) {
     return path+groupName+'/'+fileName;
-}
-
-template <class T> std::shared_ptr<T> FilePackage::getResource(const std::string& fileName) {
-    std::shared_ptr<FilePackageResource> pointer;
-    auto iterator = resources.find(fileName);
-    if(iterator != resources.end()) {
-        pointer = iterator->second.lock();
-        if(!dynamic_cast<T*>(pointer.get())) {
-            log(error_log, std::string("The resource ")+fileName+" in "+name+" is also used by another resource type.");
-            return NULL;
-        }
-        return std::static_pointer_cast<T>(pointer);
-    }
-    return std::static_pointer_cast<T>((new T())->load(this, fileName));
 }
 
 

@@ -25,7 +25,7 @@ class DecalManager {
     ~DecalManager();
     void init();
     void clear();
-    void calculate();
+    void gameTick();
     void draw();
 };
 
