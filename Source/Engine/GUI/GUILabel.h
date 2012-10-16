@@ -28,7 +28,7 @@ struct GUILabelLine {
 class GUILabel : public GUIRect {
     public:
     std::vector<GUILabelLine> lines;
-    GUIColor color;
+    Color4 color;
     TextFont* font;
     GUISizeAlignment sizeAlignment;
     unsigned int fontHeight;
@@ -37,7 +37,7 @@ class GUILabel : public GUIRect {
     GUILabel();
     ~GUILabel();
     void updateContent();
-    void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
+    void draw(btVector3 transform, GUIClipRect& parentClipRect);
     unsigned char getUTF8Length(unsigned int pos);
     void getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int& posX, int& posY);
 };

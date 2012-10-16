@@ -18,7 +18,7 @@ class GUIImage : public GUIRect {
     std::shared_ptr<Texture> texture;
     GUIImage();
     void updateContent();
-    void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
+    void draw(btVector3 transform, GUIClipRect& parentClipRect);
 };
 
 #endif

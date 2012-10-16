@@ -32,12 +32,6 @@
 		11A79B78153C2FE9002B9F0A /* GUITabs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B3D153C2FE9002B9F0A /* GUITabs.cpp */; };
 		11A79B79153C2FE9002B9F0A /* GUITextField.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B3F153C2FE9002B9F0A /* GUITextField.cpp */; };
 		11A79B7A153C2FE9002B9F0A /* GUIView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B41153C2FE9002B9F0A /* GUIView.cpp */; };
-		11A79B7C153C2FE9002B9F0A /* BoundingVolumes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B46153C2FE9002B9F0A /* BoundingVolumes.cpp */; };
-		11A79B7D153C2FE9002B9F0A /* Frustum3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B48153C2FE9002B9F0A /* Frustum3.cpp */; };
-		11A79B7E153C2FE9002B9F0A /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B4A153C2FE9002B9F0A /* Matrix4.cpp */; };
-		11A79B7F153C2FE9002B9F0A /* Plane3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B4C153C2FE9002B9F0A /* Plane3.cpp */; };
-		11A79B80153C2FE9002B9F0A /* Ray3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B4E153C2FE9002B9F0A /* Ray3.cpp */; };
-		11A79B81153C2FE9002B9F0A /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B50153C2FE9002B9F0A /* Vector3.cpp */; };
 		11A79B82153C2FE9002B9F0A /* Localization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B52153C2FE9002B9F0A /* Localization.cpp */; };
 		11A79B83153C2FE9002B9F0A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 11A79B55153C2FE9002B9F0A /* MainMenu.xib */; };
 		11A79B85153C2FE9002B9F0A /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B58153C2FE9002B9F0A /* main.mm */; };
@@ -63,6 +57,9 @@
 		11D74B4716270A65000EEB50 /* Packages in Resources */ = {isa = PBXBuildFile; fileRef = 11D74B4416270A65000EEB50 /* Packages */; };
 		11D74B4816270A65000EEB50 /* Shaders in Resources */ = {isa = PBXBuildFile; fileRef = 11D74B4516270A65000EEB50 /* Shaders */; };
 		11D74B4F16296735000EEB50 /* LevelLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11D74B4D16296735000EEB50 /* LevelLoader.cpp */; };
+		11DA1F11162DEA03007D7E6C /* LinearMaths.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11DA1F0D162DEA03007D7E6C /* LinearMaths.cpp */; };
+		11DA1F12162DEA03007D7E6C /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11DA1F0F162DEA03007D7E6C /* Matrix4.cpp */; };
+		11DA1F16162DEA18007D7E6C /* LightVolume.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11DA1F14162DEA18007D7E6C /* LightVolume.cpp */; };
 		11F1EEB8156FE49400F7275D /* ParticleSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11F1EEB7156FE49400F7275D /* ParticleSystem.cpp */; };
 		11FA6D0215B9B3490041F590 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D0115B9B3490041F590 /* SDL.framework */; };
 		11FA6D0615B9B3670041F590 /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D0315B9B3670041F590 /* SDL_image.framework */; };
@@ -120,18 +117,6 @@
 		11A79B40153C2FE9002B9F0A /* GUITextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUITextField.h; sourceTree = "<group>"; };
 		11A79B41153C2FE9002B9F0A /* GUIView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIView.cpp; sourceTree = "<group>"; };
 		11A79B42153C2FE9002B9F0A /* GUIView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIView.h; sourceTree = "<group>"; };
-		11A79B46153C2FE9002B9F0A /* BoundingVolumes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BoundingVolumes.cpp; sourceTree = "<group>"; };
-		11A79B47153C2FE9002B9F0A /* BoundingVolumes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BoundingVolumes.h; sourceTree = "<group>"; };
-		11A79B48153C2FE9002B9F0A /* Frustum3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Frustum3.cpp; sourceTree = "<group>"; };
-		11A79B49153C2FE9002B9F0A /* Frustum3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Frustum3.h; sourceTree = "<group>"; };
-		11A79B4A153C2FE9002B9F0A /* Matrix4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Matrix4.cpp; sourceTree = "<group>"; };
-		11A79B4B153C2FE9002B9F0A /* Matrix4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Matrix4.h; sourceTree = "<group>"; };
-		11A79B4C153C2FE9002B9F0A /* Plane3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Plane3.cpp; sourceTree = "<group>"; };
-		11A79B4D153C2FE9002B9F0A /* Plane3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Plane3.h; sourceTree = "<group>"; };
-		11A79B4E153C2FE9002B9F0A /* Ray3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Ray3.cpp; sourceTree = "<group>"; };
-		11A79B4F153C2FE9002B9F0A /* Ray3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ray3.h; sourceTree = "<group>"; };
-		11A79B50153C2FE9002B9F0A /* Vector3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Vector3.cpp; sourceTree = "<group>"; };
-		11A79B51153C2FE9002B9F0A /* Vector3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Vector3.h; sourceTree = "<group>"; };
 		11A79B52153C2FE9002B9F0A /* Localization.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Localization.cpp; sourceTree = "<group>"; };
 		11A79B53153C2FE9002B9F0A /* Localization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Localization.h; sourceTree = "<group>"; };
 		11A79B56153C2FE9002B9F0A /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
@@ -177,6 +162,12 @@
 		11D74B4516270A65000EEB50 /* Shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Shaders; sourceTree = "<group>"; };
 		11D74B4D16296735000EEB50 /* LevelLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelLoader.cpp; sourceTree = "<group>"; };
 		11D74B4E16296735000EEB50 /* LevelLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LevelLoader.h; sourceTree = "<group>"; };
+		11DA1F0D162DEA03007D7E6C /* LinearMaths.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LinearMaths.cpp; sourceTree = "<group>"; };
+		11DA1F0E162DEA03007D7E6C /* LinearMaths.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LinearMaths.h; sourceTree = "<group>"; };
+		11DA1F0F162DEA03007D7E6C /* Matrix4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Matrix4.cpp; sourceTree = "<group>"; };
+		11DA1F10162DEA03007D7E6C /* Matrix4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Matrix4.h; sourceTree = "<group>"; };
+		11DA1F14162DEA18007D7E6C /* LightVolume.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LightVolume.cpp; sourceTree = "<group>"; };
+		11DA1F15162DEA18007D7E6C /* LightVolume.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LightVolume.h; sourceTree = "<group>"; };
 		11F1EEB5156FE48B00F7275D /* ParticleSystem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParticleSystem.h; sourceTree = "<group>"; };
 		11F1EEB7156FE49400F7275D /* ParticleSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParticleSystem.cpp; sourceTree = "<group>"; };
 		11FA6D0115B9B3490041F590 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = ../../../../Library/Frameworks/SDL.framework; sourceTree = "<group>"; };
@@ -278,7 +269,10 @@
 				11A79B5D153C2FE9002B9F0A /* rapidxml-1.13 */,
 				11A907611629B27A00B16607 /* XMLUtilities.h */,
 				11A907601629B27A00B16607 /* XMLUtilities.cpp */,
-				11A79B45153C2FE9002B9F0A /* LinearMaths */,
+				11DA1F0E162DEA03007D7E6C /* LinearMaths.h */,
+				11DA1F0D162DEA03007D7E6C /* LinearMaths.cpp */,
+				11DA1F10162DEA03007D7E6C /* Matrix4.h */,
+				11DA1F0F162DEA03007D7E6C /* Matrix4.cpp */,
 				11A79B67153C2FE9002B9F0A /* Texture.h */,
 				11A79B66153C2FE9002B9F0A /* Texture.cpp */,
 				11648F6B153DEE0F004CA74D /* FBO.h */,
@@ -303,10 +297,12 @@
 				11A79B52153C2FE9002B9F0A /* Localization.cpp */,
 				11A79B25153C2FE9002B9F0A /* FileManager.h */,
 				11A79B24153C2FE9002B9F0A /* FileManager.cpp */,
-				11BD39AA15414A81007846B8 /* Light.h */,
-				11BD39AC15414AA6007846B8 /* Light.cpp */,
 				11A79B65153C2FE9002B9F0A /* TextFont.h */,
 				11A79B64153C2FE9002B9F0A /* TextFont.cpp */,
+				11DA1F15162DEA18007D7E6C /* LightVolume.h */,
+				11DA1F14162DEA18007D7E6C /* LightVolume.cpp */,
+				11BD39AA15414A81007846B8 /* Light.h */,
+				11BD39AC15414AA6007846B8 /* Light.cpp */,
 				11A79B26153C2FE9002B9F0A /* GUI */,
 				11D74B4E16296735000EEB50 /* LevelLoader.h */,
 				11D74B4D16296735000EEB50 /* LevelLoader.cpp */,
@@ -354,25 +350,6 @@
 				11A79B2F153C2FE9002B9F0A /* GUIImage.cpp */,
 			);
 			path = GUI;
-			sourceTree = "<group>";
-		};
-		11A79B45153C2FE9002B9F0A /* LinearMaths */ = {
-			isa = PBXGroup;
-			children = (
-				11A79B51153C2FE9002B9F0A /* Vector3.h */,
-				11A79B50153C2FE9002B9F0A /* Vector3.cpp */,
-				11A79B4B153C2FE9002B9F0A /* Matrix4.h */,
-				11A79B4A153C2FE9002B9F0A /* Matrix4.cpp */,
-				11A79B47153C2FE9002B9F0A /* BoundingVolumes.h */,
-				11A79B46153C2FE9002B9F0A /* BoundingVolumes.cpp */,
-				11A79B4F153C2FE9002B9F0A /* Ray3.h */,
-				11A79B4E153C2FE9002B9F0A /* Ray3.cpp */,
-				11A79B4D153C2FE9002B9F0A /* Plane3.h */,
-				11A79B4C153C2FE9002B9F0A /* Plane3.cpp */,
-				11A79B49153C2FE9002B9F0A /* Frustum3.h */,
-				11A79B48153C2FE9002B9F0A /* Frustum3.cpp */,
-			);
-			path = LinearMaths;
 			sourceTree = "<group>";
 		};
 		11A79B54153C2FE9002B9F0A /* macCompCode */ = {
@@ -490,12 +467,6 @@
 				11A79B78153C2FE9002B9F0A /* GUITabs.cpp in Sources */,
 				11A79B79153C2FE9002B9F0A /* GUITextField.cpp in Sources */,
 				11A79B7A153C2FE9002B9F0A /* GUIView.cpp in Sources */,
-				11A79B7C153C2FE9002B9F0A /* BoundingVolumes.cpp in Sources */,
-				11A79B7D153C2FE9002B9F0A /* Frustum3.cpp in Sources */,
-				11A79B7E153C2FE9002B9F0A /* Matrix4.cpp in Sources */,
-				11A79B7F153C2FE9002B9F0A /* Plane3.cpp in Sources */,
-				11A79B80153C2FE9002B9F0A /* Ray3.cpp in Sources */,
-				11A79B81153C2FE9002B9F0A /* Vector3.cpp in Sources */,
 				11A79B82153C2FE9002B9F0A /* Localization.cpp in Sources */,
 				11A79B85153C2FE9002B9F0A /* main.mm in Sources */,
 				11A79B86153C2FE9002B9F0A /* SDLMain.mm in Sources */,
@@ -515,6 +486,9 @@
 				11D74B4F16296735000EEB50 /* LevelLoader.cpp in Sources */,
 				11A907621629B27A00B16607 /* XMLUtilities.cpp in Sources */,
 				112BF180162AFE8100CF0C0D /* BasicObjects.cpp in Sources */,
+				11DA1F11162DEA03007D7E6C /* LinearMaths.cpp in Sources */,
+				11DA1F12162DEA03007D7E6C /* Matrix4.cpp in Sources */,
+				11DA1F16162DEA18007D7E6C /* LightVolume.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -27,7 +27,7 @@ class GUISlider : public GUIRect {
     GUISlider();
     ~GUISlider();
     void updateContent();
-    void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
+    void draw(btVector3 transform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);
     bool handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);

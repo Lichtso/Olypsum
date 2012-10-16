@@ -15,40 +15,24 @@
 
 Texture randomNormalMap;
 GLuint lightVolumeBuffers[8];
-Vector3 directionalLightVertices[boxVerticesCount];
-Vector3 spotLightVertices[parabolidVerticesCount(coneAccuracy, 0)];
-Vector3 positionalLightVertices[parabolidVerticesCount(sphereAccuracyX, parabolidAccuracyY)];
-
-static unsigned int copyVertices(Vector3* positions, float* vertices, unsigned int count) {
-    for(unsigned int i = 0; i < count; i ++) {
-        vertices[i*3  ] = positions[i].x;
-        vertices[i*3+1] = positions[i].y;
-        vertices[i*3+2] = positions[i].z;
-    }
-    return count;
-}
 
 unsigned char inBuffersA[] = { positionDBuffer, normalDBuffer, materialDBuffer, diffuseDBuffer, specularDBuffer }, outBuffersA[] = { diffuseDBuffer, specularDBuffer };
 unsigned char inBuffersB[] = { depthDBuffer }, outBuffersB[] = { ssaoDBuffer };
 unsigned char inBuffersC[] = { colorDBuffer, diffuseDBuffer, specularDBuffer, materialDBuffer, normalDBuffer, ssaoDBuffer }, outBuffersC[] = { colorDBuffer };
 unsigned char inBuffersD[] = { depthDBuffer, colorDBuffer }, outBuffersD[] = { colorDBuffer };
-
-static bool drawLightVolume(Vector3* verticesSource, unsigned int verticesCount) {
-    Vector3* vertices = new Vector3[verticesCount];
-    for(unsigned int i = 0; i < verticesCount; i ++)
-        vertices[i] = verticesSource[i] * modelMat;
-    if(!currentCam->frustum.testPolyhedronInclusiveHit(vertices, verticesCount)) {
-        delete [] vertices;
+/*
+static bool drawLightVolume() {
+    //TODO: Reimplement
+    if(!) { //NOT IN FRUSTUM
         return false;
     }
-    if(currentCam->frustum.front.testPolyhedronExclusiveHit(vertices, verticesCount)) {
+    if() { //ALL IN FRUSTUM
         glEnable(GL_DEPTH_TEST);
         glFrontFace(GL_CCW);
-    }else{
+    }else{ //PART IN FRUSTUM
         glDisable(GL_DEPTH_TEST);
         glFrontFace(GL_CW);
     }
-    delete [] vertices;
     mainFBO.renderDeferred(false, inBuffersA, 5, outBuffersA, 2);
     return true;
 }
@@ -58,7 +42,7 @@ static bool drawLightVolume(Vector3* verticesSource, unsigned int verticesCount)
 Light::Light() {
     lightManager.lights.push_back(this);
     shadowMap = NULL;
-    color = Vector3(1.0, 1.0, 1.0);
+    color = Color4(1.0);
 }
 
 Light::~Light() {
@@ -70,7 +54,7 @@ Light::~Light() {
         }
 }
 
-float Light::getPriority(Vector3 position) {
+float Light::getPriority(btVector3 position) {
     if(range <= 0.0) return 1.0;
     switch(type) {
         case LightType_Directional:
@@ -79,7 +63,7 @@ float Light::getPriority(Vector3 position) {
             return 0.0;
         case LightType_Positional: {
             PositionalLight* light = (PositionalLight*)this;
-            return fmin(1.0, (position-light->position).getLength()/range);
+            return fmin(1.0, (position-light->transform.getOrigin()).length()/range);
         }
     }
 }
@@ -108,8 +92,8 @@ void Light::deleteShadowmap() {
 
 void Light::use() {
     currentShaderProgram->setUniformF("lRange", range);
-    currentShaderProgram->setUniformVec3("lColor", color);
-    currentShaderProgram->setUniformVec3("lDirection", direction*-1.0);
+    currentShaderProgram->setUniformVec3("lColor", color.getVector());
+    currentShaderProgram->setUniformVec3("lDirection", transform.getBasis().getRow(2)*-1.0);
 }
 
 void Light::prepareShaderProgram(bool skeletal) {
@@ -124,9 +108,9 @@ bool LightPrioritySorter::operator()(Light* a, Light* b) {
 
 DirectionalLight::DirectionalLight() {
     type = LightType_Directional;
-    position = Vector3(0.0, 50.0, 0.0);
-    direction = Vector3(0.0, -1.0, 0.0);
-    upDir = Vector3(0.0, 0.0, 1.0);
+    transform.setIdentity();
+    transform.setRotation(btQuaternion(btVector3(1, 0, 0), M_PI));
+    transform.setOrigin(btVector3(0, 50, 0));
     range = 100.0;
     width = height = 10.0;
     shadowCam.fov = 0.0;
@@ -134,9 +118,7 @@ DirectionalLight::DirectionalLight() {
 }
 
 bool DirectionalLight::calculate(bool shadowActive) {
-    shadowCam.camMat.setIdentity();
-    shadowCam.camMat.setDirection(direction, upDir);
-    shadowCam.camMat.translate(position);
+    shadowCam.camMat = transform;
     shadowCam.width = width;
     shadowCam.height = height;
     shadowCam.far = range;
@@ -161,7 +143,7 @@ void DirectionalLight::use() {
     
     if(shadowMap) {
         shaderPrograms[directionalShadowLightSP]->use();
-        Matrix4 shadowMat = shadowCam.viewMat;
+        btTransform shadowMat = shadowCam.viewMat;
         shadowMat.scale(Vector3(0.5, 0.5, 1.0));
         shadowMat.translate(Vector3(0.5, 0.5, 0.0));
         currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowMat);
@@ -189,9 +171,7 @@ void DirectionalLight::prepareShaderProgram(bool skeletal) {
 
 SpotLight::SpotLight() {
     type = LightType_Spot;
-    position = Vector3(0.0, 0.0, 0.0);
-    direction = Vector3(0.0, 0.0, 1.0);
-    upDir = Vector3(0.0, 1.0, 0.0);
+    transform.setIdentity();
     cutoff = 45.0/180.0*M_PI;
     range = 50.0;
     shadowCam.width = 1.0;
@@ -235,7 +215,7 @@ void SpotLight::use() {
     
     if(shadowMap) {
         shaderPrograms[spotShadowLightSP]->use();
-        Matrix4 shadowMat = shadowCam.viewMat;
+        btTransform shadowMat = shadowCam.viewMat;
         shadowMat.scale(Vector3(0.5, 0.5, 1.0));
         shadowMat.translate(Vector3(0.5, 0.5, 0.0));
         currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowMat);
@@ -266,9 +246,7 @@ void SpotLight::prepareShaderProgram(bool skeletal) {
 PositionalLight::PositionalLight() {
     type = LightType_Positional;
     shadowMapB = NULL;
-    position = Vector3(0.0, 0.0, 0.0);
-    direction = Vector3(0.0, 0.0, 1.0);
-    upDir = Vector3(0.0, 1.0, 0.0);
+    transform.setIdentity();
     range = 10.0;
     omniDirectional = true;
     shadowCam.fov = M_PI_2;
@@ -307,7 +285,7 @@ bool PositionalLight::calculate(bool shadowActive) {
     }
     
     glDisable(GL_BLEND);
-    Matrix4 viewMat;
+    btTransform viewMat;
     if(cubemapsEnabled) {
         for(GLenum side = GL_TEXTURE_CUBE_MAP_POSITIVE_X; side <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; side ++) {
             shadowCam.camMat.setIdentity();
@@ -389,7 +367,7 @@ void PositionalLight::use() {
         shaderPrograms[positionalLightSP]->use();
     
     if(cubemapsEnabled) {
-        Matrix4 viewMat;
+        btTransform viewMat;
         viewMat.setIdentity();
         viewMat.setDirection(direction, upDir);
         viewMat = viewMat.getInverse();
@@ -454,6 +432,10 @@ LightManager::~LightManager() {
 
 void LightManager::init() {
     modelMat.setIdentity();
+    
+    btVector3 directionalLightVertices[boxVerticesCount];
+    btVector3 spotLightVertices[parabolidVerticesCount(coneAccuracy, 0)];
+    btVector3 positionalLightVertices[parabolidVerticesCount(sphereAccuracyX, parabolidAccuracyY)];
     Box3 directionalLightVolume(&modelMat, Vector3(-1.0, -1.0, -1.0), Vector3(1.0, 1.0, 0.0));
     Parabolid3 spotLightVolume(&modelMat, 1.0);
     Parabolid3 positionalLightVolume(&modelMat, 1.0);
@@ -547,6 +529,7 @@ void LightManager::calculateShadows(unsigned int maxShadows) {
 void LightManager::illuminate() {
     for(unsigned int i = 0; i < lights.size(); i ++)
         lights[i]->use();
+    glDisableVertexAttribArray(COLOR_ATTRIBUTE);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glFrontFace(GL_CCW);
@@ -591,6 +574,6 @@ void LightManager::drawDeferred() {
     glDepthMask(GL_TRUE);
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
-}
+}*/
 
 LightManager lightManager;

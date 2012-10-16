@@ -36,17 +36,13 @@ void GUIProgressBar::generateBar(bool filled) {
     }
     
     roundedRect.cornerRadius = 6;
-    roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 160;
+    roundedRect.borderColor = Color4(0.63);
     if(filled) {
-        roundedRect.topColor.r = 100;
-        roundedRect.topColor.g = 250;
-        roundedRect.topColor.b = 190;
-        roundedRect.bottomColor.r = 10;
-        roundedRect.bottomColor.g = 150;
-        roundedRect.bottomColor.b = 50;
+        roundedRect.topColor = Color4(0.4, 0.98, 0.75);
+        roundedRect.bottomColor = Color4(0.04, 0.59, 0.2);
     }else{
-        roundedRect.topColor.r = roundedRect.topColor.g = roundedRect.topColor.b = 180;
-        roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 255;
+        roundedRect.topColor = Color4(0.71);
+        roundedRect.bottomColor = Color4(1.0);
     }
     roundedRect.drawInTexture();
 }
@@ -78,7 +74,7 @@ void GUIProgressBar::drawBar(GUIClipRect clipRect, bool filled) {
     }
 }
 
-void GUIProgressBar::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
+void GUIProgressBar::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     if(!textureL) updateContent();
     
@@ -86,8 +82,9 @@ void GUIProgressBar::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect)
     if(!getLimSize(clipRectL, parentClipRect)) return;
     clipRectR = clipRectL;
     
-    modelMat = parentTransform;
-    modelMat.translate(Vector3(posX, posY, 0.0));
+    transform += btVector3(posX, posY, 0.0);
+    modelMat.setIdentity();
+    modelMat.setOrigin(transform);
     shaderPrograms[spriteSP]->use();
     
     drawBar(clipRectL, true);

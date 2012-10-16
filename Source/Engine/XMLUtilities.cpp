@@ -48,3 +48,43 @@ bool writeXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string file
     file.close();
     return true;
 }
+
+btTransform readTransformationXML(rapidxml::xml_node<xmlUsedCharType>* node) {
+    btTransform transform;
+    transform.setIdentity();
+    node = node->first_node();
+    while(node) {
+        if(strcmp(node->name(), "matrix") == 0) {
+            XMLValueArray<btScalar> matrixData;
+            matrixData.readString(node->value(), "%f");
+            btTransform mat;
+            mat.setFromOpenGLMatrix(matrixData.data);
+            transform = mat * transform;
+        }else if(strcmp(node->name(), "translate") == 0) {
+            XMLValueArray<float> vectorData;
+            vectorData.readString(node->value(), "%f");
+            btTransform mat;
+            mat.setIdentity();
+            mat.setOrigin(btVector3(vectorData.data[0], vectorData.data[1], vectorData.data[2]));
+            transform = mat * transform;
+        }else if(strcmp(node->name(), "rotate") == 0) {
+            XMLValueArray<float> vectorData;
+            vectorData.readString(node->value(), "%f");
+            btTransform mat;
+            mat.setIdentity();
+            mat.setRotation(btQuaternion(vectorData.data[0], vectorData.data[1], vectorData.data[2], vectorData.data[3]/180.0*M_PI));
+            transform = mat * transform;
+        }else if(strcmp(node->name(), "scale") == 0) {
+            XMLValueArray<float> vectorData;
+            vectorData.readString(node->value(), "%f");
+            btTransform mat;
+            mat.setIdentity();
+            mat.setBasis(btMatrix3x3(btVector3(vectorData.data[0], 0, 0),
+                                     btVector3(0, vectorData.data[1], 0),
+                                     btVector3(0, 0, vectorData.data[2])));
+            transform = mat * transform;
+        }
+        node = node->next_sibling();
+    }
+    return transform;
+}

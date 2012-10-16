@@ -24,16 +24,20 @@ void ObjectBase::gameTick() {
     
 }
 
-Matrix4 ObjectBase::getTransformation() {
+btTransform ObjectBase::getTransformation() {
     log(error_log, "Unreachable function called: ObjectBase::getTransformation();");
-    return Matrix4().setIdentity();
+    return btTransform::getIdentity();
 }
 
 
 
-/*void PhysicObject::physicsTick() {
+PhysicObject::PhysicObject() {
     
-}*/
+}
+
+void PhysicObject::physicsTick() {
+    
+}
 
 void PhysicObject::handleCollision(btPersistentManifold* contactManifold, PhysicObject* b) {
     
@@ -41,39 +45,34 @@ void PhysicObject::handleCollision(btPersistentManifold* contactManifold, Physic
 
 
 
-ZoneObject::ZoneObject(btCollisionShape* shape, const btTransform& transform) {
-    body = new btCollisionObject();
-    body->setCollisionShape(shape);
-    body->setWorldTransform(transform);
-    body->setUserPointer(this);
-    body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-    worldManager.physicsWorld->addCollisionObject(body);
+GraphicObject::GraphicObject() {
+    
 }
 
-ZoneObject::~ZoneObject() {
-    worldManager.physicsWorld->removeCollisionObject(body);
-    delete body;
-}
-
-Matrix4 ZoneObject::getTransformation() {
-    return Matrix4(body->getWorldTransform());
+void GraphicObject::draw() {
+    
 }
 
 
 
-GraphicObject::GraphicObject(std::shared_ptr<Model> modelB) :model(modelB) {
+ModelObject::ModelObject(std::shared_ptr<Model> modelB) :model(modelB) {
     if(model->skeleton) {
         skeletonPose = new SkeletonPose(model->skeleton);
         skeletonPose->calculate();
     }
 }
 
-GraphicObject::~GraphicObject() {
+ModelObject::~ModelObject() {
     if(skeletonPose)
         delete skeletonPose;
 }
 
-void GraphicObject::prepareShaderProgram(Mesh* mesh) {
+void ModelObject::draw() {
+    if(prepareDraw())
+        model->draw(this);
+}
+
+void ModelObject::prepareShaderProgram(Mesh* mesh) {
     if(!lightManager.currentShadowLight) {
         if(mesh->heightMap) {
             if(skeletonPose) {
@@ -106,7 +105,7 @@ void GraphicObject::prepareShaderProgram(Mesh* mesh) {
         currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose->mats, skeletonPose->skeleton->bones.size());
 }
 
-bool GraphicObject::prepareDraw() {
+bool ModelObject::prepareDraw() {
     modelMat = getTransformation();
     return true;
 }

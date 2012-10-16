@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "TextFont.h"
+#import "LightVolume.h"
 #import "GUIClipRect.h"
 
 #ifndef GUIRoundedRect_h
@@ -28,7 +28,7 @@ class GUIRoundedRect {
     GLuint* texture;
     GUICorners roundedCorners;
     unsigned int cornerRadius;
-    GUIColor topColor, bottomColor, borderColor;
+    Color4 topColor, bottomColor, borderColor;
     int width, height, innerShadow;
     GUIRoundedRect();
     void drawInTexture();

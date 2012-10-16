@@ -47,14 +47,14 @@ btCollisionShape* LevelLoader::getCollisionShape(std::string name) {
     }
     rapidxml::xml_node<xmlUsedCharType>* node = nodeIterator->second;
     if(strcmp(node->name(), "Cylinder") == 0 || strcmp(node->name(), "Box") == 0) {
-        Vector3 size;
-        sscanf(node->first_attribute("width")->value(), "%f", &size.x);
-        sscanf(node->first_attribute("height")->value(), "%f", &size.y);
-        sscanf(node->first_attribute("length")->value(), "%f", &size.z);
+        btScalar x, y, z;
+        sscanf(node->first_attribute("width")->value(), "%f", &x);
+        sscanf(node->first_attribute("height")->value(), "%f", &y);
+        sscanf(node->first_attribute("length")->value(), "%f", &z);
         if(strcmp(node->name(), "Cylinder") == 0)
-            shape = new btCylinderShape(size.getBTVector());
+            shape = new btCylinderShape(btVector3(x, y, z));
         else
-            shape = new btBoxShape(size.getBTVector());
+            shape = new btBoxShape(btVector3(x, y, z));
     }else if(strcmp(node->name(), "Sphere") == 0) {
         float radius;
         sscanf(node->first_attribute("radius")->value(), "%f", &radius);
@@ -117,18 +117,17 @@ btCollisionShape* LevelLoader::getCollisionShape(std::string name) {
                 log(error_log, std::string("Found compound collision shape (")+name+") with an invalid child.");
                 return NULL;
             }
-            Matrix4 transformation;
-            transformation.readTransform(childNode);
-            compoundShape->addChildShape(transformation.getBTMatrix(), childShape);
+            btTransform transformation = readTransformationXML(childNode);
+            compoundShape->addChildShape(transformation, childShape);
             childNode = childNode->next_sibling("Child");
         }
         shape = compoundShape;
     }else if(strcmp(node->name(), "VertexCloud") == 0) {
-        XMLValueArray<float> vertices;
+        XMLValueArray<btScalar> vertices;
         sscanf(node->first_attribute("vertexCount")->value(), "%d", &vertices.count);
         vertices.readString(node, vertices.count*3, "%f");
         vertices.count /= 3;
-        shape = new btConvexHullShape(vertices.data, vertices.count, sizeof(float)*3);
+        shape = new btConvexHullShape(vertices.data, vertices.count, sizeof(btScalar)*3);
         if(vertices.count > 100)
             log(warning_log, std::string("Found vertex cloud shape (")+name+") with more than 100 vertices.");
     }else{

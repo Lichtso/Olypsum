@@ -27,7 +27,7 @@ Mesh::~Mesh() {
     if(ibo) glDeleteBuffers(1, &ibo);
 }
 
-void Mesh::draw(GraphicObject* object) {
+void Mesh::draw(ModelObject* object) {
     if(!vbo || elementsCount == 0) {
         log(error_log, "No vertex data to draw in mesh.");
         return;
@@ -95,7 +95,7 @@ struct Material {
     std::string diffuseURL, effectMapURL, heightMapURL;
 };
 
-static Bone* readBone(Skeleton& skeleton, Matrix4& parentMat, rapidxml::xml_node<xmlUsedCharType>* dataNode) {
+static Bone* readBone(Skeleton& skeleton, btTransform& parentMat, rapidxml::xml_node<xmlUsedCharType>* dataNode) {
     rapidxml::xml_attribute<xmlUsedCharType> *typeAttribute, *idAttribute;
     if(!(typeAttribute = dataNode->first_attribute("type")) ||
        strcmp(typeAttribute->value(), "JOINT") != 0 ||
@@ -103,8 +103,7 @@ static Bone* readBone(Skeleton& skeleton, Matrix4& parentMat, rapidxml::xml_node
     
     Bone* bone = new Bone();
     bone->name = idAttribute->value();
-    bone->staticMat.readTransform(dataNode);
-    bone->staticMat *= parentMat;
+    bone->staticMat = readTransformationXML(dataNode) * parentMat;
     
     rapidxml::xml_node<xmlUsedCharType>* childNode = dataNode->first_node("node");
     while(childNode) {
@@ -163,7 +162,7 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
     std::map<std::string, Material> materials;
     XMLValueArray<float> skinData;
     char upAxis = AXIS_Y, *id;
-    Matrix4 modelTransformMat;
+    btTransform modelTransformMat;
     Mesh* mesh;
     
     collada = doc.first_node("COLLADA");
@@ -184,9 +183,9 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
     }
     modelTransformMat.setIdentity();
     if(upAxis == AXIS_X)
-        modelTransformMat.rotateZ(M_PI_2);
+        modelTransformMat.setRotation(btQuaternion(btVector3(0, 0, 1), M_PI_2));
     else if(upAxis == AXIS_Z)
-        modelTransformMat.rotateX(M_PI_2);
+        modelTransformMat.setRotation(btQuaternion(btVector3(1, 0, 0), M_PI_2));
     
     //Load TextureURLs
     library = collada->first_node("library_images");
@@ -529,10 +528,10 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
             
             if(floatArray->stride == 3 && upAxis != AXIS_Y) {
                 for(unsigned int i = 0; i < floatArray->count/floatArray->stride; i ++) {
-                    Vector3 vec = Vector3(floatArray->data[i*3], floatArray->data[i*3+1], floatArray->data[i*3+2]) * modelTransformMat;
-                    floatArray->data[i*3  ] = vec.x;
-                    floatArray->data[i*3+1] = vec.y;
-                    floatArray->data[i*3+2] = vec.z;
+                    btVector3 vec = modelTransformMat * btVector3(floatArray->data[i*3], floatArray->data[i*3+1], floatArray->data[i*3+2]);
+                    floatArray->data[i*3  ] = vec.x();
+                    floatArray->data[i*3+1] = vec.y();
+                    floatArray->data[i*3+2] = vec.z();
                 }
             }
             char floatArrayData[16*floatArray->count], *floatArrayPos = floatArrayData;
@@ -791,7 +790,7 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
     return pointer;
 }
 
-void Model::draw(GraphicObject* object) {
+void Model::draw(ModelObject* object) {
     if(lightManager.currentShadowLight) {
         lightManager.currentShadowLight->prepareShaderProgram(skeleton);
         for(unsigned int i = 0; i < meshes.size(); i ++)
@@ -810,10 +809,10 @@ void Model::draw(GraphicObject* object) {
 
 SkeletonPose::SkeletonPose(Skeleton* skeletonB) {
     skeleton = skeletonB;
-    mats = new Matrix4[skeleton->bones.size()];
+    mats = new btTransform[skeleton->bones.size()];
     std::map<std::string, Bone*>::iterator boneIterator;
     for(boneIterator = skeleton->bones.begin(); boneIterator != skeleton->bones.end(); boneIterator ++) {
-        bonePoses[boneIterator->second->name] = Matrix4();
+        bonePoses[boneIterator->second->name] = btTransform();
         bonePoses[boneIterator->second->name].setIdentity();
     }
 }
@@ -823,17 +822,17 @@ SkeletonPose::~SkeletonPose() {
 }
 
 void SkeletonPose::calculateBonePose(Bone* bone, Bone* parentBone) {
-    mats[bone->jointIndex] = bonePoses[bone->name];
+    btTransform mat = bonePoses[bone->name];
     if(parentBone) {
-        mats[bone->jointIndex].translate(bone->staticMat.pos-parentBone->staticMat.pos);
-        mats[bone->jointIndex] *= mats[parentBone->jointIndex];
+        mat.setOrigin(mat.getOrigin()+bone->staticMat.getOrigin()-parentBone->staticMat.getOrigin());
+        mat *= mats[parentBone->jointIndex];
     }else
-        mats[bone->jointIndex].translate(bone->staticMat.pos);
+        mat.setOrigin(mat.getOrigin()+bone->staticMat.getOrigin());
+    mats[bone->jointIndex] = mat;
     for(unsigned int i = 0; i < bone->children.size(); i ++)
         calculateBonePose(bone->children[i], bone);
-    Matrix4 mat;
     mat.setIdentity();
-    mat.translate(bone->staticMat.pos*-1);
+    mat.setOrigin(bone->staticMat.getOrigin()*-1);
     mats[bone->jointIndex] = mat * mats[bone->jointIndex];
 }
 

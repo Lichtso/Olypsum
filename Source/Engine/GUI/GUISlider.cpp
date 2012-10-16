@@ -36,30 +36,22 @@ void GUISlider::generateBar(bool filled) {
     roundedRect.width = ((orientation & GUIOrientation_Horizontal) ? width : height)-sliderRadius+barHeight;
     roundedRect.height = barHeight;
     roundedRect.cornerRadius = barHeight;
-    roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 160;
+    roundedRect.borderColor = Color4(0.63);
     if(enabled) {
         if(filled) {
-            roundedRect.topColor.r = 0;
-            roundedRect.topColor.g = 60;
-            roundedRect.topColor.b = 160;
-            roundedRect.bottomColor.r = 140;
-            roundedRect.bottomColor.g = 200;
-            roundedRect.bottomColor.b = 240;
+            roundedRect.borderColor = Color4(0.0, 0.24, 0.63);
+            roundedRect.bottomColor = Color4(0.55, 0.78, 0.94);
         }else{
-            roundedRect.topColor.r = roundedRect.topColor.g =roundedRect.topColor.b = 180;
-            roundedRect.bottomColor.r = roundedRect.bottomColor.g =roundedRect.bottomColor.b = 255;
+            roundedRect.topColor = Color4(0.71);
+            roundedRect.bottomColor = Color4(1.0);
         }
     }else{
         if(filled) {
-            roundedRect.topColor.r = 0;
-            roundedRect.topColor.g = 30;
-            roundedRect.topColor.b = 130;
-            roundedRect.bottomColor.r = 90;
-            roundedRect.bottomColor.g = 150;
-            roundedRect.bottomColor.b = 190;
+            roundedRect.borderColor = Color4(0.0, 0.12, 0.51);
+            roundedRect.bottomColor = Color4(0.35, 0.59, 0.75);
         }else{
-            roundedRect.topColor.r = roundedRect.topColor.g =roundedRect.topColor.b = 120;
-            roundedRect.bottomColor.r = roundedRect.bottomColor.g =roundedRect.bottomColor.b = 180;
+            roundedRect.topColor = Color4(0.47);
+            roundedRect.bottomColor = Color4(0.71);
         }
     }
     roundedRect.drawInTexture();
@@ -82,18 +74,18 @@ void GUISlider::updateContent() {
     roundedRect.width = sliderRadius;
     roundedRect.height = sliderRadius;
     roundedRect.cornerRadius = sliderRadius;
-    roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 160;
+    roundedRect.borderColor = Color4(0.63);
     if(enabled) {
         if(highlighted) {
-            roundedRect.topColor.r = roundedRect.topColor.g = roundedRect.topColor.b = 250;
-            roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 210;
+            roundedRect.borderColor = Color4(0.98);
+            roundedRect.bottomColor = Color4(0.82);
         }else{
-            roundedRect.topColor.r = roundedRect.topColor.g = roundedRect.topColor.b = 240;
-            roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 180;
+            roundedRect.borderColor = Color4(0.94);
+            roundedRect.bottomColor = Color4(0.71);
         }
     }else{
-        roundedRect.topColor.r = roundedRect.topColor.g = roundedRect.topColor.b = 150;
-        roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 110;
+        roundedRect.borderColor = Color4(0.59);
+        roundedRect.bottomColor = Color4(0.43);
     }
     roundedRect.drawInTexture();
 }
@@ -101,7 +93,6 @@ void GUISlider::updateContent() {
 void GUISlider::drawBar(GUIClipRect& clipRect, unsigned int barLength, bool filled) {
     GUIClipRect clipRectB;
     int silderPos = (int)(barLength*value)-barLength*0.5;
-    Vector3 minFactor, maxFactor;
     barLength += barHeight*2;
     
     GUIRoundedRect roundedRect;
@@ -126,7 +117,7 @@ void GUISlider::drawBar(GUIClipRect& clipRect, unsigned int barLength, bool fill
     }
 }
 
-void GUISlider::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
+void GUISlider::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     if(!textureL) updateContent();
     
@@ -134,8 +125,9 @@ void GUISlider::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     if(!getLimSize(clipRect, parentClipRect)) return;
     clipRectB = clipRectC = clipRect;
     
-    modelMat = parentTransform;
-    modelMat.translate(Vector3(posX, posY, 0.0));
+    transform += btVector3(posX, posY, 0.0);
+    modelMat.setIdentity();
+    modelMat.setOrigin(transform);
     shaderPrograms[spriteSP]->use();
     
     int barLength = ((orientation & GUIOrientation_Horizontal) ? width*2 : height*2)-sliderRadius*2;

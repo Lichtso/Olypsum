@@ -12,25 +12,20 @@
 #define BasicObjects_h
 
 class ObjectBase {
-    public:
+    protected:
     ObjectBase();
+    public:
     ~ObjectBase();
     virtual void gameTick();
-    virtual Matrix4 getTransformation();
+    virtual btTransform getTransformation();
 };
 
 class PhysicObject : public ObjectBase {
+    protected:
+    PhysicObject();
     public:
-    //virtual void physicsTick();
+    virtual void physicsTick();
     virtual void handleCollision(btPersistentManifold* contactManifold, PhysicObject* b);
-};
-
-class ZoneObject : public PhysicObject {
-    public:
-    btCollisionObject* body;
-    ZoneObject(btCollisionShape* shape, const btTransform& transform);
-    ~ZoneObject();
-    Matrix4 getTransformation();
 };
 
 class SkeletonPose;
@@ -38,11 +33,20 @@ class Mesh;
 class Model;
 
 class GraphicObject : public ObjectBase {
+    protected:
+    GraphicObject();
+    public:
+    virtual void draw();
+};
+
+class ModelObject : public GraphicObject {
+    protected:
+    ModelObject(std::shared_ptr<Model> model);
     public:
     SkeletonPose* skeletonPose;
     std::shared_ptr<Model> model;
-    GraphicObject(std::shared_ptr<Model> model);
-    ~GraphicObject();
+    ~ModelObject();
+    void draw();
     virtual void prepareShaderProgram(Mesh* mesh);
     virtual bool prepareDraw();
 };

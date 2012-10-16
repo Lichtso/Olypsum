@@ -13,7 +13,7 @@
 
 class Decal {
     public:
-    Matrix4 transformation;
+    btTransform transformation;
     std::shared_ptr<Texture> diffuse, heightMap;
     float life;
 };

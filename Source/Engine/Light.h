@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Cam.h"
+#import "LightVolume.h"
 
 #ifndef Light_h
 #define Light_h
@@ -22,22 +22,22 @@ class Light {
     Cam shadowCam;
     ColorBuffer* shadowMap;
     public:
-    Vector3 direction, position, upDir;
+    btTransform transform;
     float range;
     LightType type;
-    Vector3 color;
+    Color4 color;
     Light();
     ~Light();
     virtual bool calculate(bool shadowActive);
     virtual void deleteShadowmap();
     virtual void use();
     virtual void prepareShaderProgram(bool skeletal);
-    float getPriority(Vector3 position);
+    float getPriority(btVector3 position);
 };
 
 class LightPrioritySorter {
     public:
-    Vector3 position;
+    btVector3 position;
     bool operator()(Light* a, Light* b);
 };
 

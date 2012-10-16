@@ -6,18 +6,17 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Ray3.h"
+#import "LinearMaths.h"
 
 Ray3::Ray3() {
     
 }
 
-Ray3::Ray3(Vector3 originB, Vector3 directionB) {
-    origin = originB;
-    direction = directionB;
+Ray3::Ray3(btVector3 originB, btVector3 directionB) :origin(originB), direction(directionB) {
+    
 }
 
-void Ray3::set(Vector3 originB, Vector3 directionB) {
+void Ray3::set(btVector3 originB, btVector3 directionB) {
     origin = originB;
     direction = directionB;
 }

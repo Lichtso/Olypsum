@@ -12,7 +12,7 @@
 #define ParticleSystem_h
 
 struct Particle {
-    Vector3 pos, dir;
+    btVector3 pos, dir;
     float life;
 };
 
@@ -26,7 +26,7 @@ class ParticleSystem {
     float addParticles;
     public:
     PositionalLight* lightSource;
-    Vector3 position, posMin, posMax, force, dirMin, dirMax;
+    btVector3 position, posMin, posMax, force, dirMin, dirMax;
     float lifeMin, lifeMax, systemLife;
     unsigned int maxParticles;
     std::shared_ptr<Texture> texture;

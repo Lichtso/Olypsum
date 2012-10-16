@@ -6,11 +6,25 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#import "Matrix4.h"
 #import "FBO.h"
 #import "Cam.h"
 
 #ifndef ShaderProgram_h
 #define ShaderProgram_h
+
+class Color4 {
+    public:
+    float r, g, b, a;
+    Color4() : r(0), g(0), b(0), a(1) {};
+    Color4(float gray) : r(gray), g(gray), b(gray), a(1) {};
+    Color4(float gray, float aB) : r(gray), g(gray), b(gray), a(aB) {};
+    Color4(float rB, float gB, float bB) : r(rB), g(gB), b(bB), a(1) {};
+    Color4(float rB, float gB, float bB, float aB) : r(rB), g(gB), b(bB), a(aB) {};
+    Color4& operator=(const Color4& B);
+    btVector3 getVector();
+    SDL_Color getSDL();
+};
 
 #define POSITION_ATTRIBUTE 0
 #define TEXTURE_COORD_ATTRIBUTE 1
@@ -34,18 +48,17 @@ class ShaderProgram {
     void setTransformFeedbackVaryings(unsigned int count, const char** varyings);
     bool checkUniformExistence(const char* name);
     void setUniformI(const char* name, int value);
-    void setUniformF(const char* name, float value);
-    void setUniformVec2(const char* name, float x, float y);
-    void setUniformVec3(const char* name, Vector3 value);
-    void setUniformMatrix3(const char* name, btMatrix3x3* mat);
-    void setUniformMatrix3(const char* name, Matrix4* mat);
-    void setUniformMatrix4(const char* name, btTransform* mat);
-    void setUniformMatrix4(const char* name, Matrix4* mat);
-    void setUniformMatrix4(const char* name, Matrix4* mat, unsigned int count);
+    void setUniformF(const char* name, btScalar value);
+    void setUniformVec2(const char* name, btScalar x, btScalar y);
+    void setUniformVec3(const char* name, btVector3 value);
+    void setUniformMatrix3(const char* name, const btMatrix3x3* mat);
+    void setUniformMatrix4(const char* name, const Matrix4* mat);
+    void setUniformMatrix4(const char* name, const btTransform* mat);
+    void setUniformMatrix4(const char* name, const btTransform* mat, unsigned int count);
 	ShaderProgram& operator=(const ShaderProgram &b);
 };
 
-extern Matrix4 modelMat;
+extern btTransform modelMat;
 extern ShaderProgram *shaderPrograms[32], *currentShaderProgram;
 extern float screenBlurFactor;
 extern bool edgeSmoothEnabled, fullScreenEnabled, cubemapsEnabled;

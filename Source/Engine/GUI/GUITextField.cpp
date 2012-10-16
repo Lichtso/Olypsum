@@ -76,24 +76,22 @@ void GUITextField::updateContent() {
     roundedRect.height = height;
     roundedRect.cornerRadius = 8;
     if(highlighted) {
-        roundedRect.borderColor.r = 80;
-        roundedRect.borderColor.g = 130;
-        roundedRect.borderColor.b = 255;
+        roundedRect.borderColor = Color4(0.31, 0.51, 1.0);
     }else{
-        roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 130;
+        roundedRect.borderColor = Color4(0.51);
     }
     roundedRect.drawInTexture();
 }
 
-void GUITextField::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
+void GUITextField::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     if(!texture) updateContent();
     GUIClipRect clipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
     
-    Matrix4 transform = parentTransform;
-    transform.translate(Vector3(posX, posY, 0.0));
-    modelMat = transform;
+    transform += btVector3(posX, posY, 0.0);
+    modelMat.setIdentity();
+    modelMat.setOrigin(transform);
     
     GUIRoundedRect roundedRect;
     roundedRect.texture = &texture;
@@ -125,10 +123,11 @@ void GUITextField::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     }else
         label->posX = label->width-width+8;
     
-    label->draw(modelMat, clipRect);
+    label->draw(transform, clipRect);
     
     if(cursorActive && cursorDrawTick <= 0.25) {
-        modelMat = transform;
+        modelMat.setIdentity();
+        modelMat.setOrigin(transform);
         GUIRoundedRect cursor;
         cursor.width = 1;
         cursor.height = label->fontHeight >> 1;

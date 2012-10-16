@@ -8,23 +8,6 @@
 
 #import "TextFont.h"
 
-GUIColor& GUIColor::operator=(const GUIColor& B) {
-    r = B.r;
-    g = B.g;
-    b = B.b;
-    a = B.a;
-    return *this;
-}
-
-SDL_Color GUIColor::getSDL() {
-    SDL_Color B;
-    B.r = r;
-    B.g = g;
-    B.b = b;
-    B.unused = a;
-    return B;
-}
-
 TextFont::TextFont() {
     ttf = NULL;
     size = 12;
@@ -51,7 +34,7 @@ bool TextFont::loadTTF(const char* fileName) {
     return true;
 }
 
-GLuint TextFont::renderStringToTexture(const char* str, GUIColor colorB, bool antialiasing, int& width, int& height) {
+GLuint TextFont::renderStringToTexture(const char* str, Color4 color, bool antialiasing, int& width, int& height) {
     SDL_Surface *surfaceB;
     GLuint texture;
     glGenTextures(1, &texture);
@@ -59,23 +42,23 @@ GLuint TextFont::renderStringToTexture(const char* str, GUIColor colorB, bool an
     glBindTexture(GL_TEXTURE_2D, texture);
     
     if(antialiasing) {
-        surfaceB = TTF_RenderUTF8_Blended(ttf, str, colorB.getSDL());
+        surfaceB = TTF_RenderUTF8_Blended(ttf, str, color.getSDL());
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surfaceB->w, surfaceB->h, 0, GL_BGRA, GL_UNSIGNED_BYTE, surfaceB->pixels);
     }else{
-        SDL_Color color = {255, 255, 255, 255};
-        SDL_Surface *surfaceA = TTF_RenderUTF8_Solid(ttf, str, color);
+        SDL_Surface *surfaceA = TTF_RenderUTF8_Solid(ttf, str, {255, 255, 255, 255});
         surfaceB = SDL_CreateRGBSurface(surfaceA->flags, surfaceA->w, surfaceA->h, 32, 255, 255 << 8, 255 << 16, 255 << 24);
         unsigned char *pixelsA = (unsigned char*)surfaceA->pixels,
         *pixelsB = (unsigned char*)surfaceB->pixels;
+        SDL_Color charColor = color.getSDL();
         unsigned int index = 0;
         for(unsigned int y = 0; y < surfaceA->h; y ++)
             for(unsigned int x = 0; x < surfaceA->w; x ++) {
                 if(pixelsA[y*surfaceA->pitch+x] == 0) continue;
                 index = y*surfaceB->pitch+x*4;
-                pixelsB[index  ] = colorB.r;
-                pixelsB[index+1] = colorB.g;
-                pixelsB[index+2] = colorB.b;
-                pixelsB[index+3] = colorB.a;
+                pixelsB[index  ] = charColor.r;
+                pixelsB[index+1] = charColor.g;
+                pixelsB[index+2] = charColor.b;
+                pixelsB[index+3] = charColor.unused;
             }
         SDL_FreeSurface(surfaceA);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surfaceB->w, surfaceB->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, surfaceB->pixels);
@@ -92,14 +75,13 @@ GLuint TextFont::renderStringToTexture(const char* str, GUIColor colorB, bool an
     return texture;
 }
 
-void TextFont::renderStringToSurface(const char* str, SDL_Surface* surfaceB, int xPosB, int yPosB, GUIColor colorB, bool antialiasing) {
+void TextFont::renderStringToSurface(const char* str, SDL_Surface* surfaceB, int xPosB, int yPosB, Color4 color, bool antialiasing) {
     SDL_Surface *surfaceA;
     
     if(antialiasing) {
-        surfaceA = TTF_RenderUTF8_Blended(ttf, str, colorB.getSDL());
+        surfaceA = TTF_RenderUTF8_Blended(ttf, str, color.getSDL());
     }else{
-        SDL_Color color = {255, 255, 255, 255};
-        surfaceA = TTF_RenderUTF8_Solid(ttf, str, color);
+        surfaceA = TTF_RenderUTF8_Solid(ttf, str, {255, 255, 255, 255});
     }
     
     unsigned char *pixelsA = (unsigned char*)surfaceA->pixels,
@@ -136,39 +118,40 @@ void TextFont::renderStringToSurface(const char* str, SDL_Surface* surfaceB, int
                 pixelsB[indexB+3] = max(pixelsB[indexB+3], pixelsA[indexA+3]);
             }
     }else{
+        SDL_Color charColor = color.getSDL();
         for(unsigned int y = 0; y < height; y ++)
             for(unsigned int x = 0; x < width; x ++) {
                 if(pixelsA[(y+yPosA)*surfaceA->pitch+(x+xPosA)] == 0) continue;
                 indexB = (y+yPosB)*surfaceB->pitch+(x+xPosB)*4;
-                pixelsB[indexB  ] = colorB.b;
-                pixelsB[indexB+1] = colorB.g;
-                pixelsB[indexB+2] = colorB.r;
-                pixelsB[indexB+3] = colorB.a;
+                pixelsB[indexB  ] = charColor.b;
+                pixelsB[indexB+1] = charColor.g;
+                pixelsB[indexB+2] = charColor.r;
+                pixelsB[indexB+3] = charColor.unused;
             }
     }
     
     SDL_FreeSurface(surfaceA);
 }
 
-void TextFont::renderStringToScreen(const char* str, Vector3 pos, float scale, GUIColor color, bool antialiasing) {
+void TextFont::renderStringToScreen(const char* str, btVector3 pos, float scale, Color4 color, bool antialiasing) {
     int width, height;
     GLuint texture = renderStringToTexture(str, color, antialiasing, width, height);
     
-    Vector3 size = Vector3(width*scale, height*scale, 0.0);
+    btVector3 size = btVector3(width*scale, height*scale, 0.0);
     float vertices[] = {
-        size.x, -size.y,
+        size.x(), -size.y(),
         1.0, 1.0,
-        size.x, size.y,
+        size.x(), size.y(),
         1.0, 0.0,
-        -size.x, size.y,
+        -size.x(), size.y(),
         0.0, 0.0,
-        -size.x, -size.y,
+        -size.x(), -size.y(),
         0.0, 1.0
     };
     
     modelMat.setIdentity();
-    modelMat.setMatrix3(currentCam->camMat);
-    modelMat.translate(pos);
+    modelMat.setBasis(currentCam->camMat.getBasis());
+    modelMat.setOrigin(pos);
     
     shaderPrograms[spriteSP]->use();
     shaderPrograms[spriteSP]->setAttribute(POSITION_ATTRIBUTE, 2, 4*sizeof(float), vertices);

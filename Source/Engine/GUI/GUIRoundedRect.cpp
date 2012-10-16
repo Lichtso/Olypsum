@@ -14,18 +14,17 @@ GUIRoundedRect::GUIRoundedRect() {
     cornerRadius = 8;
     innerShadow = 0;
     width = height = 0;
-    topColor.r = topColor.g = topColor.b = 230;
-    bottomColor.r = bottomColor.g = bottomColor.b = 255;
-    borderColor.r = borderColor.g = borderColor.b = 130;
-    topColor.a = bottomColor.a = borderColor.a = 255;
+    topColor = Color4(0.9);
+    bottomColor = Color4(1.0);
+    borderColor = Color4(0.5);
 }
 
 void GUIRoundedRect::setBorderPixel(unsigned int x, unsigned int y) {
     unsigned char* pixel = pixels+(y*width*8)+x*4;
-    pixel[0] = borderColor.r;
-    pixel[1] = borderColor.g;
-    pixel[2] = borderColor.b;
-    pixel[3] = borderColor.a;
+    pixel[0] = borderColor.r*255;
+    pixel[1] = borderColor.g*255;
+    pixel[2] = borderColor.b*255;
+    pixel[3] = borderColor.a*255;
 }
 
 float GUIRoundedRect::getInnerShadowValue(unsigned int x, unsigned int y) {
@@ -79,9 +78,9 @@ void GUIRoundedRect::drawInTexture() {
                     pixel[3] = 0;
             }
             if(pixel[3] == 0) continue;
-            pixel[0] = ((float)bottomColor.r-(float)topColor.r)*0.5*y/height+topColor.r;
-            pixel[1] = ((float)bottomColor.g-(float)topColor.g)*0.5*y/height+topColor.g;
-            pixel[2] = ((float)bottomColor.b-(float)topColor.b)*0.5*y/height+topColor.b;
+            pixel[0] = ((bottomColor.r-topColor.r)*0.5*y/height+topColor.r)*255.0;
+            pixel[1] = ((bottomColor.g-topColor.g)*0.5*y/height+topColor.g)*255.0;
+            pixel[2] = ((bottomColor.b-topColor.b)*0.5*y/height+topColor.b)*255.0;
         }
     
     if(innerShadow != 0) {
@@ -179,23 +178,23 @@ void GUIRoundedRect::drawOnScreen(bool transposed, int posX, int posY, GUIClipRe
     shaderPrograms[spriteSP]->use();
     
     if(transposed) {
-        Vector3 minFactor(0.5-0.5*(clipRect.maxPosY-posY)/height, 0.5+0.5*(clipRect.minPosX-posX)/width, 0.0),
+        btVector3 minFactor(0.5-0.5*(clipRect.maxPosY-posY)/height, 0.5+0.5*(clipRect.minPosX-posX)/width, 0.0),
                 maxFactor(0.5-0.5*(clipRect.minPosY-posY)/height, 0.5+0.5*(clipRect.maxPosX-posX)/width, 0.0);
         float texCoords[] = {
-            maxFactor.x, maxFactor.y,
-            minFactor.x, maxFactor.y,
-            minFactor.x, minFactor.y,
-            maxFactor.x, minFactor.y
+            maxFactor.x(), maxFactor.y(),
+            minFactor.x(), maxFactor.y(),
+            minFactor.x(), minFactor.y(),
+            maxFactor.x(), minFactor.y()
         };
         shaderPrograms[spriteSP]->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 2*sizeof(float), texCoords);
     }else{
-        Vector3 minFactor(0.5+0.5*(clipRect.minPosX-posX)/width, 0.5-0.5*(clipRect.maxPosY-posY)/height, 0.0),
+        btVector3 minFactor(0.5+0.5*(clipRect.minPosX-posX)/width, 0.5-0.5*(clipRect.maxPosY-posY)/height, 0.0),
                 maxFactor(0.5+0.5*(clipRect.maxPosX-posX)/width, 0.5-0.5*(clipRect.minPosY-posY)/height, 0.0);
         float texCoords[] = {
-            maxFactor.x, maxFactor.y,
-            maxFactor.x, minFactor.y,
-            minFactor.x, minFactor.y,
-            minFactor.x, maxFactor.y
+            maxFactor.x(), maxFactor.y(),
+            maxFactor.x(), minFactor.y(),
+            minFactor.x(), minFactor.y(),
+            minFactor.x(), maxFactor.y()
         };
         shaderPrograms[spriteSP]->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 2*sizeof(float), texCoords);
     }

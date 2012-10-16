@@ -68,13 +68,8 @@ float SoundTrack::getLength() {
     return (float)size/bits;
 }
 
-SoundSource::SoundSource() {
-    soundTrack = NULL;
-    looping = false;
-    autoDelete = true;
-    direction = Vector3(0, 0, 1);
-    position = Vector3(0, 0, 0);
-    velocity = Vector3(0, 0, 0);
+SoundSource::SoundSource() :soundTrack(NULL), looping(false), autoDelete(true),
+direction(btVector3(0, 0, 1)), position(btVector3(0, 0, 1)), velocity(btVector3(0, 0, 1)) {
     alGenSources(1, &ALname);
     soundSourcesManager.soundSources.push_back(this);
 }
@@ -96,9 +91,9 @@ void SoundSource::setSoundTrack(std::shared_ptr<SoundTrack> soundTrackB) {
 void SoundSource::play() {
     if(!soundTrack || !soundTrack->ALname) return;
     alSourcei(ALname, AL_LOOPING, looping);
-    alSource3f(ALname, AL_DIRECTION, direction.x, direction.y, direction.z);
-    alSource3f(ALname, AL_POSITION, position.x, position.y, position.z);
-    alSource3f(ALname, AL_VELOCITY, velocity.x, velocity.y, velocity.z);
+    alSource3f(ALname, AL_DIRECTION, direction.x(), direction.y(), direction.z());
+    alSource3f(ALname, AL_POSITION, position.x(), position.y(), position.z());
+    alSource3f(ALname, AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());
     alSourcePlay(ALname);
 }
 

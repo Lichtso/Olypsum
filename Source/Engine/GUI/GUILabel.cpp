@@ -11,7 +11,7 @@
 GUILabel::GUILabel() {
     type = GUIType_Label;
     font = mainFont;
-    color = GUIColor(0, 255);
+    color = Color4(0.0, 1.0);
     textAlign = GUITextAlign_Middle;
     sizeAlignment = GUISizeAlignment_All;
     fontHeight = 30;
@@ -71,15 +71,16 @@ void GUILabel::updateContent() {
     }
 }
 
-void GUILabel::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
+void GUILabel::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     if(!visible || text.size() == 0 || fontHeight == 0) return;
     if(lines.size() == 0) updateContent();
     
     GUIClipRect clipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
     
-    modelMat = parentTransform;
-    modelMat.translate(Vector3(posX, posY, 0.0));
+    transform += btVector3(posX, posY, 0.0);
+    modelMat.setIdentity();
+    modelMat.setOrigin(transform);
     
     GUILabelLine* line;
     float minFactorX, minFactorY, maxFactorX, maxFactorY;

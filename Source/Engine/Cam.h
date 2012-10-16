@@ -7,20 +7,30 @@
 //
 
 #import "FBO.h"
-#import "Frustum3.h"
+#import "Matrix4.h"
 
 #ifndef Cam_h
 #define Cam_h
 
+enum CollisionMask {
+    CollisionMask_Frustum = 1,
+    CollisionMask_Zone = 2,
+    CollisionMask_Object = 4
+    //CollisionMask_Item = 8
+};
+
 class Cam {
+    btVector3 prevPos, velocity;
     public:
-    Matrix4 camMat, viewMat;
+    btTransform camMat;
+    Matrix4 viewMat;
     float fov, near, far, width, height;
-    Frustum3 frustum;
+    btCollisionShape* frustumShape;
+    btCollisionObject* frustumBody;
     Cam();
     ~Cam();
-    Ray3 getRayAt(Vector3 screenPos);
-    Frustum3 getFrustumOf(Vector3 screenMin, Vector3 screenMax);
+    Ray3 getRayAt(btVector3 screenPos);
+    void setFrustum(btVector3 screenMin, btVector3 screenMax);
     void calculate();
     void use();
 };

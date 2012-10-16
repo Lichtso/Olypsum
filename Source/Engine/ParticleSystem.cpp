@@ -15,7 +15,7 @@ ParticleSystem::ParticleSystem(unsigned int maxParticlesB) {
     activeVBO = 0;
     addParticles = 0.0;
     systemLife = -1.0;
-    force = Vector3(0, -0.981, 0);
+    force = btVector3(0, -0.981, 0);
     if(particleCalcTarget == 1) {
         particles = new Particle[maxParticles];
         particlesCount = 0;
@@ -66,7 +66,7 @@ bool ParticleSystem::gameTick() {
         }
     
     if(particleCalcTarget == 1) {
-        Vector3 forceAux = force*worldManager.animationFactor;
+        btVector3 forceAux = force*worldManager.animationFactor;
         for(unsigned int p = 0; p < particlesCount; p ++) {
             particles[p].life -= worldManager.animationFactor;
             if(particles[p].life <= 0.0) {
@@ -103,7 +103,7 @@ bool ParticleSystem::gameTick() {
     }
     
     if(lightSource) {
-        lightSource->position = position;
+        lightSource->transform.setOrigin(position);
         lightSource->range = 5.0;
     }
     
@@ -111,15 +111,14 @@ bool ParticleSystem::gameTick() {
 }
 
 void ParticleSystem::draw() {
-    Matrix4 mat;
+    btTransform mat;
     mat.setIdentity();
-    mat.translate(position);
-    Bs3 bs(&mat, 3.0);
-    if(!currentCam->frustum.testBsInclusiveHit(&bs)) return;
+    mat.setOrigin(position);
+    //TODO: Frustum Culling
     
     if(texture) texture->use(GL_TEXTURE_2D, 0);
     if(lightSource)
-        currentShaderProgram->setUniformF("lightEmission", (lightSource->color.x+lightSource->color.y+lightSource->color.z)/3.0);
+        currentShaderProgram->setUniformF("lightEmission", (lightSource->color.r+lightSource->color.g+lightSource->color.b)/3.0);
     else
         currentShaderProgram->setUniformF("lightEmission", 0.0);
     currentShaderProgram->setUniformF("lifeMin", lifeMin);
@@ -129,9 +128,9 @@ void ParticleSystem::draw() {
         float* vertices = new float[4*particlesCount];
         for(unsigned int p = 0; p < particlesCount; p ++) {
             index = p*4;
-            vertices[index] = particles[p].pos.x;
-            vertices[index+1] = particles[p].pos.y;
-            vertices[index+2] = particles[p].pos.z;
+            vertices[index] = particles[p].pos.x();
+            vertices[index+1] = particles[p].pos.y();
+            vertices[index+2] = particles[p].pos.z();
             vertices[index+3] = particles[p].life;
         }
         currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 4, 4*sizeof(float), vertices);

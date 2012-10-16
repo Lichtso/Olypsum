@@ -31,7 +31,7 @@ void GUIImage::updateContent() {
     }
 }
 
-void GUIImage::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
+void GUIImage::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     
     GUIClipRect clipRect;
@@ -39,8 +39,9 @@ void GUIImage::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
     GUIRoundedRect roundedRect;
     GLuint textureP = 0;
     
-    modelMat = parentTransform;
-    modelMat.translate(Vector3(posX, posY, 0.0));
+    transform += btVector3(posX, posY, 0.0);
+    modelMat.setIdentity();
+    modelMat.setOrigin(transform);
     roundedRect.texture = (texture) ? &texture->GLname : &textureP;
     roundedRect.width = width;
     roundedRect.height = height;

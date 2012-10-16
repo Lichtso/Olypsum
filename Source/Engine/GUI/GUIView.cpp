@@ -33,14 +33,13 @@ void GUIView::updateContent() {
         children[i]->updateContent();
 }
 
-void GUIView::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
+void GUIView::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     
     GUIClipRect clipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
     
-    Matrix4 transform = parentTransform;
-    transform.translate(Vector3(posX, posY, 0.0));
+    transform += btVector3(posX, posY, 0.0);
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->draw(transform, clipRect);
 }
@@ -96,9 +95,9 @@ void GUIFramedView::updateContent() {
         roundedRect.height = height;
         roundedRect.innerShadow = innerShadow*screenSize[2];
         roundedRect.cornerRadius = abs(innerShadow)*screenSize[2];
-        roundedRect.topColor.r = roundedRect.topColor.g = roundedRect.topColor.b = 200;
-        roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 200;
-        roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 200;
+        roundedRect.topColor = Color4(0.78);
+        roundedRect.bottomColor = Color4(0.78);
+        roundedRect.borderColor = Color4(0.78);
         roundedRect.drawInTexture();
     }
     
@@ -106,18 +105,18 @@ void GUIFramedView::updateContent() {
         children[i]->updateContent();
 }
 
-void GUIFramedView::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
+void GUIFramedView::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     
     GUIClipRect clipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
     
-    Matrix4 transform = parentTransform;
-    transform.translate(Vector3(posX, posY, 0.0));
+    transform += btVector3(posX, posY, 0.0);
     
     if(innerShadow != 0) {
         if(!texture) updateContent();
-        modelMat = transform;
+        modelMat.setIdentity();
+        modelMat.setOrigin(transform);
         GUIRoundedRect roundedRect;
         roundedRect.texture = &texture;
         roundedRect.width = width;
@@ -172,15 +171,13 @@ void GUIScreenView::draw() {
     shaderPrograms[spriteSP]->use();
     shaderPrograms[spriteSP]->setUniformF("alpha", 1.0);
     
-    Matrix4 transform;
-    transform.setIdentity();
-    transform.translate(Vector3(0.0, 0.0, -1.0));
-    
+    btVector3 transform = btVector3(0.0, 0.0, -1.0);
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->draw(transform, clipRect);
     
     if(modalView) {
-        modelMat = transform;
+        modelMat.setIdentity();
+        modelMat.setOrigin(transform);
         shaderPrograms[spriteSP]->use();
         shaderPrograms[spriteSP]->setUniformF("alpha", 0.8);
         

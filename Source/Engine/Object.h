@@ -24,24 +24,34 @@ class ObjectManager {
 
 extern ObjectManager objectManager;
 
-class ModelObject : public GraphicObject {
+class ZoneObject : public PhysicObject {
     public:
-    Matrix4 transformation;
-    ModelObject(std::shared_ptr<Model> model);
-    Matrix4 getTransformation();
+    btCollisionObject* body;
+    ZoneObject(btCollisionShape* shape, const btTransform& transform);
+    ~ZoneObject();
+    btTransform getTransformation();
 };
 
-class RigidObject : public GraphicObject, PhysicObject {
+class SoftObject : public GraphicObject, PhysicObject { //Not implemented (TODO)
+    public:
+    btSoftBody* body;
+    SoftObject();
+    ~SoftObject();
+    btTransform getTransformation();
+    void draw();
+};
+
+class RigidObject : public ModelObject, PhysicObject {
     public:
     btRigidBody* body;
     RigidObject(std::shared_ptr<Model> model, btRigidBody::btRigidBodyConstructionInfo* rBCI);
     ~RigidObject();
-    Matrix4 getTransformation();
+    btTransform getTransformation();
 };
 
 #define MAX_WAVES 4
 
-class WaterObject : public GraphicObject, ZoneObject {
+class WaterObject : public ModelObject, ZoneObject {
     public:
     float waveSpeed;
     struct WaterObjectWave {

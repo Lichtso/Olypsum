@@ -64,7 +64,7 @@ void setMenu(MenuName menu) {
             label->text = localization.localizeString("loading");
             label->posY = screenSize[1]*-0.1;
             label->fontHeight = screenSize[1]*0.08;
-            label->color = GUIColor(255, 255);
+            label->color = Color4(1.0);
             currentScreenView->addChild(label);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             currentScreenView->draw();

@@ -51,10 +51,9 @@ void DecalManager::draw() {
     currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, byteStride, (float*)(0*sizeof(float)));
     currentShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, byteStride, (float*)(3*sizeof(float)));
     currentShaderProgram->setAttribute(NORMAL_ATTRIBUTE, 3, byteStride, (float*)(5*sizeof(float)));
-    Bs3 bs3(&modelMat, 1.0);
     for(int i = 0; i < decals.size(); i ++) {
         modelMat = decals[i]->transformation;
-        if(!currentCam->frustum.testBsInclusiveHit(&bs3)) continue;
+        //TODO: Frustum Culling
         
         if(decals[i]->diffuse)
             decals[i]->diffuse->use(GL_TEXTURE_2D, 0);

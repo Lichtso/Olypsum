@@ -59,9 +59,9 @@ void GUIScrollView::updateContent() {
     GUIView::updateContent();
     
     GUIRoundedRect roundedRect;
-    roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 220;
-    roundedRect.topColor.r = roundedRect.topColor.g = roundedRect.topColor.b = 140;
-    roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 140;
+    roundedRect.topColor = Color4(0.55);
+    roundedRect.bottomColor = Color4(0.55);
+    roundedRect.borderColor = Color4(0.86);
     
     if(innerShadow != 0) {
         GUIRoundedRect roundedRect;
@@ -70,9 +70,9 @@ void GUIScrollView::updateContent() {
         roundedRect.height = height;
         roundedRect.innerShadow = innerShadow*screenSize[2];
         roundedRect.cornerRadius = abs(innerShadow)*screenSize[2];
-        roundedRect.topColor.r = roundedRect.topColor.g = roundedRect.topColor.b = 200;
-        roundedRect.bottomColor.r = roundedRect.bottomColor.g = roundedRect.bottomColor.b = 200;
-        roundedRect.borderColor.r = roundedRect.borderColor.g = roundedRect.borderColor.b = 200;
+        roundedRect.topColor = Color4(0.78);
+        roundedRect.bottomColor = Color4(0.78);
+        roundedRect.borderColor = Color4(0.78);
         roundedRect.drawInTexture();
     }
     
@@ -93,7 +93,7 @@ void GUIScrollView::updateContent() {
     }
 }
 
-void GUIScrollView::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
+void GUIScrollView::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     if((scrollWidth > width && !textureH) || (scrollHeight > height && !textureV)) updateContent();
     
@@ -106,12 +106,12 @@ void GUIScrollView::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) 
     clipRect.minPosY -= scrollPosY;
     clipRect.maxPosY -= scrollPosY;
     
-    Matrix4 transform = parentTransform;
-    transform.translate(Vector3(posX, posY, 0.0));
+    transform += btVector3(posX, posY, 0.0);
     
     if(innerShadow != 0) {
         if(!texture) updateContent();
-        modelMat = transform;
+        modelMat.setIdentity();
+        modelMat.setOrigin(transform);
         GUIRoundedRect roundedRect;
         roundedRect.texture = &texture;
         roundedRect.width = width;
@@ -124,12 +124,12 @@ void GUIScrollView::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) 
         clipRect.maxPosY -= inset;
     }
     
-    transform.translate(Vector3(-scrollPosX, scrollPosY, 0.0));
+    btVector3 childTransform = transform+btVector3(-scrollPosX, scrollPosY, 0.0);
     for(unsigned int i = 0; i < children.size(); i ++)
-        children[i]->draw(transform, clipRect);
+        children[i]->draw(childTransform, clipRect);
     
-    modelMat = parentTransform;
-    modelMat.translate(Vector3(posX, posY, 0.0));
+    modelMat.setIdentity();
+    modelMat.setOrigin(transform);
     
     if(scrollWidth > width && mouseDragPosX > -2) {
         roundedRect.texture = &textureH;

@@ -12,7 +12,7 @@
 #define Model_h
 
 struct Bone {
-    Matrix4 staticMat;
+    btTransform staticMat;
     unsigned int jointIndex;
     std::string name;
     std::vector<Bone*> children;
@@ -27,8 +27,8 @@ class SkeletonPose {
     void calculateBonePose(Bone* bone, Bone* parentBone);
     public:
     Skeleton* skeleton;
-    Matrix4* mats;
-    std::map<std::string, Matrix4> bonePoses;
+    btTransform* mats;
+    std::map<std::string, btTransform> bonePoses;
     SkeletonPose(Skeleton* skeleton);
     ~SkeletonPose();
     void calculate();
@@ -43,11 +43,11 @@ class Mesh {
     std::shared_ptr<Texture> diffuse, effectMap, heightMap;
     Mesh();
     ~Mesh();
-    void draw(GraphicObject* object);
+    void draw(ModelObject* object);
 };
 
 struct TransparentMesh {
-    GraphicObject* object;
+    ModelObject* object;
     Mesh* mesh;
 };
 
@@ -59,7 +59,7 @@ class Model : public FilePackageResource {
     ~Model();
     std::shared_ptr<FilePackageResource> load(FilePackage* filePackageB, const std::string& name);
     void prepareShaderProgram(Mesh* mesh);
-    void draw(GraphicObject* object);
+    void draw(ModelObject* object);
 };
 
 #endif

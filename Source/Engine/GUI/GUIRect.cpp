@@ -54,7 +54,7 @@ void GUIRect::updateContent() {
     
 }
 
-void GUIRect::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
+void GUIRect::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     GUIClipRect clipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
     
@@ -65,8 +65,8 @@ void GUIRect::draw(Matrix4& parentTransform, GUIClipRect& parentClipRect) {
         (float)clipRect.minPosX, (float)clipRect.minPosY
     };
     
-    modelMat = parentTransform;
-    modelMat.translate(Vector3(posX, posY, 0.0));
+    modelMat.setIdentity();
+    modelMat.setOrigin(transform+btVector3(posX, posY, 0.0));
     shaderPrograms[spriteSP]->use();
     shaderPrograms[spriteSP]->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
     glActiveTexture(GL_TEXTURE0);

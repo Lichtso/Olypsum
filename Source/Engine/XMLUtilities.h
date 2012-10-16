@@ -7,9 +7,9 @@
 //
 
 #import <fstream>
-#import "Utilities.h"
 #import "rapidxml.hpp"
 #import "rapidxml_print.hpp"
+#import "LinearMaths.h"
 
 #ifndef XMLUtilities_h
 #define XMLUtilities_h
@@ -90,5 +90,7 @@ class XMLValueArray {
         return true;
     }
 };
+
+btTransform readTransformationXML(rapidxml::xml_node<xmlUsedCharType>* node);
 
 #endif

@@ -27,7 +27,7 @@ void ObjectManager::physicsTick() {
     for(unsigned int i = 0; i < objects.size(); i ++) {
         PhysicObject* object = dynamic_cast<PhysicObject*>(objects[i]);
         if(!object) continue;
-        //object->physicsTick();
+        object->physicsTick();
     }
     
     btDispatcher* dispatcher = worldManager.physicsWorld->getDispatcher();
@@ -49,8 +49,7 @@ void ObjectManager::draw() {
     for(unsigned int i = 0; i < objects.size(); i ++) {
         GraphicObject* object = dynamic_cast<GraphicObject*>(objects[i]);
         if(!object) continue;
-        if(object->prepareDraw())
-            object->model->draw(object);
+        object->draw();
     }
 }
 
@@ -58,21 +57,31 @@ ObjectManager objectManager;
 
 
 
-ModelObject::ModelObject(std::shared_ptr<Model> modelB) :GraphicObject(modelB) {
-    
+ZoneObject::ZoneObject(btCollisionShape* shape, const btTransform& transform) {
+    body = new btCollisionObject();
+    body->setCollisionShape(shape);
+    body->setWorldTransform(transform);
+    body->setUserPointer(this);
+    body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+    worldManager.physicsWorld->addCollisionObject(body, CollisionMask_Zone, CollisionMask_Object);
 }
 
-Matrix4 ModelObject::getTransformation() {
-    return transformation;
+ZoneObject::~ZoneObject() {
+    worldManager.physicsWorld->removeCollisionObject(body);
+    delete body;
+}
+
+btTransform ZoneObject::getTransformation() {
+    return body->getWorldTransform();
 }
 
 
 
-RigidObject::RigidObject(std::shared_ptr<Model> modelB, btRigidBody::btRigidBodyConstructionInfo* rBCI) :GraphicObject(modelB) {
+RigidObject::RigidObject(std::shared_ptr<Model> modelB, btRigidBody::btRigidBodyConstructionInfo* rBCI) :ModelObject(modelB) {
     rBCI->m_collisionShape->calculateLocalInertia(rBCI->m_mass, rBCI->m_localInertia);
     body = new btRigidBody(*rBCI);
     body->setUserPointer(this);
-    worldManager.physicsWorld->addRigidBody(body);
+    worldManager.physicsWorld->addRigidBody(body, CollisionMask_Object, CollisionMask_Frustum | CollisionMask_Zone | CollisionMask_Object);
 }
 
 RigidObject::~RigidObject() {
@@ -88,15 +97,14 @@ RigidObject::~RigidObject() {
     }
 }
 
-Matrix4 RigidObject::getTransformation() {
-    btTransform transform;
-    body->getMotionState()->getWorldTransform(transform);
-    return Matrix4(transform);
+btTransform RigidObject::getTransformation() {
+    btDefaultMotionState* motionState = static_cast<btDefaultMotionState*>(body->getMotionState());
+    return motionState->m_graphicsWorldTrans;
 }
 
 
 
-WaterObject::WaterObject(std::shared_ptr<Model> modelB, btCollisionShape* shapeB, const btTransform& transformB) :GraphicObject(modelB), ZoneObject(shapeB, transformB), waveSpeed(0.05) {
+WaterObject::WaterObject(std::shared_ptr<Model> modelB, btCollisionShape* shapeB, const btTransform& transformB) :ModelObject(modelB), ZoneObject(shapeB, transformB), waveSpeed(0.05) {
     
 }
 
@@ -149,5 +157,5 @@ void WaterObject::prepareShaderProgram(Mesh* mesh) {
 bool WaterObject::prepareDraw() {
     if(lightManager.currentShadowLight)
         return false;
-    return GraphicObject::prepareDraw();
+    return ModelObject::prepareDraw();
 }

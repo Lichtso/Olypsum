@@ -136,9 +136,9 @@ void FBO::renderInDeferredBuffers(bool transparent) {
 void FBO::renderTransparentInDeferredBuffers() {
     if(objectManager.transparentAccumulator.size() == 0) return;
     
-    Vector3 camMatPos = currentCam->camMat.pos;
+    btVector3 camMatPos = currentCam->camMat.getOrigin();
     std::sort(objectManager.transparentAccumulator.begin(), objectManager.transparentAccumulator.end(), [&camMatPos](TransparentMesh* a, TransparentMesh* b){
-        return (a->object->getTransformation().pos-camMatPos).getLength() > (b->object->getTransformation().pos-camMatPos).getLength();
+        return (a->object->getTransformation().getOrigin()-camMatPos).length() > (b->object->getTransformation().getOrigin()-camMatPos).length();
     });
     
     unsigned int i;

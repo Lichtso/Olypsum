@@ -7,7 +7,7 @@
 //
 
 #import <SDL/SDL.h>
-#import "Matrix4.h"
+#import "LinearMaths.h"
 #import "GUIClipRect.h"
 
 #ifndef GUIRect_h
@@ -50,7 +50,7 @@ class GUIRect {
     virtual void removeFirstResponderStatus();
     virtual bool getLimSize(GUIClipRect& clipRect, GUIClipRect& parentClipRect);
     virtual void updateContent();
-    virtual void draw(Matrix4& parentTransform, GUIClipRect& parentClipRect);
+    virtual void draw(btVector3 transform, GUIClipRect& parentClipRect);
     virtual bool handleMouseDown(int mouseX, int mouseY);
     virtual bool handleMouseUp(int mouseX, int mouseY);
     virtual void handleMouseMove(int mouseX, int mouseY);

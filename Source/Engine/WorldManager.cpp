@@ -52,36 +52,35 @@ void WorldManager::clearPhysics() {
 }
 
 void WorldManager::loadLevel() {
-    Vector3 worldSize = Vector3(50, 50, 50);
+    btVector3 worldSize(50, 50, 50);
     if(physicsWorld != NULL) {
         delete physicsWorld;
         delete broadphase;
     }
-    broadphase = new btAxisSweep3(worldSize.getBTVector(), (worldSize*-1.0).getBTVector());
+    broadphase = new btAxisSweep3(worldSize, worldSize*-1.0);
     physicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
     physicsWorld->setGravity(btVector3(0, -9.81, 0));
     physicsWorld->setInternalTickCallback(calculatePhysicsTick);
     
     if(!sharedCollisionShapes["worldWall"])
         sharedCollisionShapes["worldWall"] = new btStaticPlaneShape(btVector3(1, 0, 0), 0);
-    Matrix4 transform;
     btDefaultMotionState* wallMotionState[6];
-    wallMotionState[0] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0), btVector3(-worldSize.x, 0, 0)));
-    wallMotionState[1] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, M_PI), btVector3( worldSize.x, 0, 0)));
-    wallMotionState[2] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, -M_PI_2), btVector3(0, -worldSize.y, 0)));
-    wallMotionState[3] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, M_PI_2), btVector3(0,  worldSize.y, 0)));
-    wallMotionState[4] = new btDefaultMotionState(btTransform(btQuaternion(-M_PI_2, 0, 0), btVector3(0, 0, -worldSize.z)));
-    wallMotionState[5] = new btDefaultMotionState(btTransform(btQuaternion(M_PI_2, 0, 0), btVector3(0, 0,  worldSize.z)));
+    wallMotionState[0] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0), btVector3(-worldSize.x(), 0, 0)));
+    wallMotionState[1] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, M_PI), btVector3( worldSize.x(), 0, 0)));
+    wallMotionState[2] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, -M_PI_2), btVector3(0, -worldSize.y(), 0)));
+    wallMotionState[3] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, M_PI_2), btVector3(0,  worldSize.y(), 0)));
+    wallMotionState[4] = new btDefaultMotionState(btTransform(btQuaternion(-M_PI_2, 0, 0), btVector3(0, 0, -worldSize.z())));
+    wallMotionState[5] = new btDefaultMotionState(btTransform(btQuaternion(M_PI_2, 0, 0), btVector3(0, 0,  worldSize.z())));
     for(unsigned char i = 0; i < 6; i ++) {
         worldWallBodys[i] = new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(0, wallMotionState[i], sharedCollisionShapes["worldWall"], btVector3(0, 0, 0)));
         physicsWorld->addRigidBody(worldWallBodys[i]);
     }
     
-    ModelObject* object = new ModelObject(fileManager.getPackage("Default")->getResource<Model>("man.dae"));
-    object->transformation.setIdentity();
+    /*ModelObject* object = new ModelObject(fileManager.getPackage("Default")->getResource<Model>("man.dae"));
+    object->transformation.setIdentity();*/
     mainCam->camMat.setIdentity();
     //mainCam->camMat.rotateX(0.5);
-    mainCam->camMat.translate(Vector3(0,1,2));
+    mainCam->camMat.setOrigin(btVector3(0, 1, 2));
     mainCam->calculate();
     
     gameStatus = localGame;

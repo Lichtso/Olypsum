@@ -8,7 +8,7 @@
 
 #import <OpenAL/al.h>
 #import <OpenAL/alc.h>
-#import "Vector3.h"
+#import "LinearMaths.h"
 
 #ifndef Audio_h
 #define Audio_h
@@ -27,7 +27,7 @@ class SoundSource {
     ALuint ALname;
     std::shared_ptr<SoundTrack> soundTrack;
     bool looping, autoDelete;
-    Vector3 direction, position, velocity;
+    btVector3 direction, position, velocity;
     SoundSource();
     ~SoundSource();
     void setSoundTrack(std::shared_ptr<SoundTrack> soundTrack);
