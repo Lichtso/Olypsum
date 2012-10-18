@@ -29,6 +29,7 @@ class Matrix4 {
     Matrix4& operator*=(const Matrix4&);
     Matrix4& operator=(const Matrix4&);
     Matrix4& scale(btVector3 vec);
+    Matrix4& makeTextureMat();
     Matrix4& perspective(btScalar fovy, btScalar aspect, btScalar near, btScalar far);
     Matrix4& frustum(btScalar width, btScalar height, btScalar near, btScalar far);
     Matrix4& ortho(btScalar width, btScalar height, btScalar near, btScalar far);

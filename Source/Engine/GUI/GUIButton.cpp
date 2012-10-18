@@ -143,8 +143,8 @@ void GUIButton::updateContent() {
         case GUIButtonStatePressed:
             switch(buttonType) {
                 case GUIButtonTypeNormal:
-                    roundedRect.topColor = Color4(0.71);
-                    roundedRect.bottomColor = Color4(0.64);
+                    roundedRect.topColor = Color4(0.7);
+                    roundedRect.bottomColor = Color4(0.78);
                     break;
                 case GUIButtonTypeDelete:
                     roundedRect.topColor = Color4(0.55, 0.0, 0.0);

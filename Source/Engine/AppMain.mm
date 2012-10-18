@@ -166,7 +166,7 @@ void AppMain(int argc, char *argv[]) {
         }
         
         if(worldManager.gameStatus == noGame) {
-            glClearColor(1, 1, 1, 1);
+            glClearColor(0, 0, 0, 1);
             glViewport(0, 0, screenSize[0], screenSize[1]);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT);

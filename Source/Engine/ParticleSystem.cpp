@@ -103,8 +103,8 @@ bool ParticleSystem::gameTick() {
     }
     
     if(lightSource) {
-        lightSource->transform.setOrigin(position);
-        lightSource->range = 5.0;
+        lightSource->shadowCam.camMat.setOrigin(position);
+        lightSource->setRange(5.0);
     }
     
     return false;

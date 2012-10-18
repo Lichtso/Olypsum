@@ -29,8 +29,8 @@ class Cam {
     btCollisionObject* frustumBody;
     Cam();
     ~Cam();
-    Ray3 getRayAt(btVector3 screenPos);
-    void setFrustum(btVector3 screenMin, btVector3 screenMax);
+    Ray3 getRayAt(btVector3 screenPos, bool absolute);
+    void calculateFrustum(btVector3 screenMin, btVector3 screenMax);
     void calculate();
     void use();
 };

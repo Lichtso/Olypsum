@@ -14,8 +14,8 @@ Cam::Cam() :fov(70.0/180.0*M_PI), near(1.0), far(100000.0), width(1.0), height(1
     
     frustumBody = new btCollisionObject();
     frustumBody->setCollisionFlags(frustumBody->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-    worldManager.physicsWorld->addCollisionObject(frustumBody, CollisionMask_Frustum, CollisionMask_Object);
-    setFrustum(btVector3(-1, -1, 0), btVector3(1, 1, 0));
+    //TODO: worldManager.physicsWorld->addCollisionObject(frustumBody, CollisionMask_Frustum, CollisionMask_Object);
+    calculateFrustum(btVector3(-1, -1, 0), btVector3(1, 1, 0));
 }
 
 Cam::~Cam() {
@@ -26,73 +26,79 @@ Cam::~Cam() {
     delete frustumBody;
 }
 
-Ray3 Cam::getRayAt(btVector3 screenPos) {
-    Ray3 ray(btVector3(0, 0, -screenPos.z()), btVector3(0, 0, -1));
+Ray3 Cam::getRayAt(btVector3 screenPos, bool absolute) {
+    Ray3 ray;
     
     if(fov > 0.0) {
         float aux = tan(fov*0.5);
         ray.direction.setX(screenPos.x()*aux*(width/height));
         ray.direction.setY(-screenPos.y()*aux);
         ray.direction.normalize();
-        
+        ray.origin = ray.direction*-screenPos.z();
     }else{
-        ray.origin.setX(screenPos.x()*width);
-        ray.origin.setY(-screenPos.y()*height);
+        ray.direction = btVector3(0, 0, -1);
+        ray.origin = btVector3(screenPos.x()*width, -screenPos.y()*height, -screenPos.z());
     }
     
-    btMatrix3x3 normalMat = camMat.getBasis();
-    ray.origin += camMat.getOrigin();
-    ray.direction = ray.direction*normalMat;
-    
+    if(absolute) {
+        btMatrix3x3 normalMat = camMat.getBasis();
+        ray.origin = ray.origin*normalMat+camMat.getOrigin();
+        ray.direction = ray.direction*normalMat;
+    }
     return ray;
 }
 
-void Cam::setFrustum(btVector3 screenMin, btVector3 screenMax) {
+void Cam::calculateFrustum(btVector3 screenMin, btVector3 screenMax) {
+    if(frustumShape) delete frustumShape;
     if(fov > 0.0) {
-        Ray3 rayLT = getRayAt(screenMin),
-             rayLB = getRayAt(btVector3(screenMin.x(), screenMax.y(), 0.0)),
-             rayRT = getRayAt(btVector3(screenMax.x(), screenMin.y(), 0.0)),
-             rayRB = getRayAt(screenMax);
-        btConvexHullShape* shape = dynamic_cast<btConvexHullShape*>(frustumShape);
-        if(!shape) {
-            if(frustumShape) delete frustumShape;
-            btScalar vertices[5*3];
-            vertices[0] = 0.0;
-            vertices[1] = 0.0;
-            vertices[2] = 0.0;
-            frustumShape = shape = new btConvexHullShape(vertices, 5, sizeof(btScalar)*3);
-            frustumBody->setCollisionShape(frustumShape);
-        }
-        btVector3* vertices = shape->getUnscaledPoints();
+        Ray3 rayLT = getRayAt(btVector3(screenMin.x(), screenMin.y(), near), false),
+             rayLB = getRayAt(btVector3(screenMin.x(), screenMax.y(), near), false),
+             rayRT = getRayAt(btVector3(screenMax.x(), screenMin.y(), near), false),
+             rayRB = getRayAt(btVector3(screenMax.x(), screenMax.y(), near), false);
+        btVector3 vertices[5];
+        vertices[0] = btVector3(0, 0, 0);
         vertices[1] = rayLT.origin+rayLT.direction*far;
         vertices[2] = rayLB.origin+rayLB.direction*far;
         vertices[3] = rayRT.origin+rayRT.direction*far;
         vertices[4] = rayRB.origin+rayRB.direction*far;
+        frustumBody->setCollisionShape(new btConvexHullShape((btScalar*)vertices, 5));
         frustumBody->setWorldTransform(camMat);
-    }else{
-        if(frustumShape) delete frustumShape;
+    }else if(fov < M_PI) {
         screenMin.setZ(near);
         screenMax.setZ(far);
         btVector3 halfSize = (screenMax-screenMin)*0.5;
-        frustumShape = new btBoxShape(halfSize);
-        frustumBody->setCollisionShape(frustumShape);
+        frustumBody->setCollisionShape(new btBoxShape(halfSize));
         btVector3 shift(halfSize.x()*0.5, halfSize.y()*0.5, -near-halfSize.z());
         shift = shift*camMat.getBasis();
         btTransform frustumMat = camMat;
         frustumMat.setOrigin(shift+camMat.getOrigin());
         frustumBody->setWorldTransform(frustumMat);
+    }else{
+        LightParabolidVolume volume(far, 10, 4);
+        unsigned int verticesCount;
+        std::unique_ptr<btScalar[]> vertices = volume.getVertices(verticesCount);
+        frustumBody->setCollisionShape(new btConvexHullShape(vertices.get(), verticesCount, sizeof(btScalar)*3));
+        frustumBody->setWorldTransform(camMat);
     }
 }
 
 void Cam::calculate() {
     viewMat = camMat.inverse();
     
-    /*if(fov > 0.0)
+    if(fov > 0.0) {
         viewMat.perspective(fov, width/height, near, far);
-    else
-        viewMat.ortho(width, height, near, far);*/
+        frustumBody->setWorldTransform(camMat);
+    }else if(fov < M_PI) {
+        viewMat.ortho(width, height, near, far);
+        btVector3 shift(0.0, 0.0, -near-far*0.5);
+        shift = shift*camMat.getBasis();
+        btTransform frustumMat = camMat;
+        frustumMat.setOrigin(shift+camMat.getOrigin());
+        frustumBody->setWorldTransform(frustumMat);
+    }else{
+        frustumBody->setWorldTransform(camMat);
+    }
     
-    setFrustum(btVector3(-1, -1, 0), btVector3(1, 1, 0));
     velocity = camMat.getOrigin()-prevPos;
     prevPos = camMat.getOrigin();
 }

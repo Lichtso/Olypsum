@@ -39,7 +39,7 @@ void GUISlider::generateBar(bool filled) {
     roundedRect.borderColor = Color4(0.63);
     if(enabled) {
         if(filled) {
-            roundedRect.borderColor = Color4(0.0, 0.24, 0.63);
+            roundedRect.topColor = Color4(0.0, 0.24, 0.63);
             roundedRect.bottomColor = Color4(0.55, 0.78, 0.94);
         }else{
             roundedRect.topColor = Color4(0.71);
@@ -47,7 +47,7 @@ void GUISlider::generateBar(bool filled) {
         }
     }else{
         if(filled) {
-            roundedRect.borderColor = Color4(0.0, 0.12, 0.51);
+            roundedRect.topColor = Color4(0.0, 0.12, 0.51);
             roundedRect.bottomColor = Color4(0.35, 0.59, 0.75);
         }else{
             roundedRect.topColor = Color4(0.47);
@@ -77,14 +77,14 @@ void GUISlider::updateContent() {
     roundedRect.borderColor = Color4(0.63);
     if(enabled) {
         if(highlighted) {
-            roundedRect.borderColor = Color4(0.98);
+            roundedRect.topColor = Color4(0.98);
             roundedRect.bottomColor = Color4(0.82);
         }else{
-            roundedRect.borderColor = Color4(0.94);
+            roundedRect.topColor = Color4(0.94);
             roundedRect.bottomColor = Color4(0.71);
         }
     }else{
-        roundedRect.borderColor = Color4(0.59);
+        roundedRect.topColor = Color4(0.59);
         roundedRect.bottomColor = Color4(0.43);
     }
     roundedRect.drawInTexture();

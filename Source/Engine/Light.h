@@ -19,11 +19,9 @@ enum LightType {
 
 class Light {
     protected:
-    Cam shadowCam;
     ColorBuffer* shadowMap;
     public:
-    btTransform transform;
-    float range;
+    Cam shadowCam;
     LightType type;
     Color4 color;
     Light();
@@ -32,6 +30,7 @@ class Light {
     virtual void deleteShadowmap();
     virtual void use();
     virtual void prepareShaderProgram(bool skeletal);
+    void setRange(float range);
     float getPriority(btVector3 position);
 };
 
@@ -43,7 +42,6 @@ class LightPrioritySorter {
 
 class DirectionalLight : public Light {
     public:
-    float width, height;
     DirectionalLight();
     bool calculate(bool shadowActive);
     void deleteShadowmap();
@@ -53,7 +51,6 @@ class DirectionalLight : public Light {
 
 class SpotLight : public Light {
     public:
-    float cutoff;
     SpotLight();
     bool calculate(bool shadowActive);
     void deleteShadowmap();

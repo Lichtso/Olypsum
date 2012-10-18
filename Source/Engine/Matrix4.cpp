@@ -20,12 +20,11 @@ Matrix4::Matrix4(Matrix4 const &mat) {
 }
 
 Matrix4::Matrix4(btTransform const &mat) {
-    btScalar matData[16];
-    mat.getOpenGLMatrix(matData);
-    x = btVector3(matData[0], matData[1], matData[2]);
-    y = btVector3(matData[4], matData[5], matData[6]);
-    z = btVector3(matData[8], matData[9], matData[10]);
-    w = btVector3(matData[12], matData[13], matData[14]);
+    btMatrix3x3 basis = mat.getBasis();
+    x = basis.getRow(0);
+    y = basis.getRow(1);
+    z = basis.getRow(2);
+    w = mat.getOrigin();
 }
 
 Matrix4::Matrix4(float matData[16]) {
@@ -40,16 +39,15 @@ Matrix4::Matrix4(float matData[16]) {
 }
 
 std::string Matrix4::getString() {
+    char buffer[64];
     btScalar values[16];
     getOpenGLMatrix(values);
-    
-    char buffer[64];
     std::string str = "(";
     for(unsigned char i = 0; i < 16; i ++) {
         if(i % 4 > 0) str += ", ";
         sprintf(buffer, "%f", values[i]);
         str += buffer;
-        if(i % 4 == 3) str += "\n";
+        if(i % 4 == 3 && i < 15) str += ",\n ";
     }
     return str+")";
 }
@@ -169,6 +167,26 @@ Matrix4& Matrix4::operator=(const Matrix4& mat) {
     return *this;
 }
 
+Matrix4& Matrix4::scale(btVector3 vec) {
+    Matrix4 a;
+    a.setIdentity();
+    a.x.setX(vec.x());
+    a.y.setY(vec.y());
+    a.z.setZ(vec.z());
+    *this = a;
+    return *this;
+}
+
+Matrix4& Matrix4::makeTextureMat() {
+    Matrix4 a;
+    a.setIdentity();
+    a.x.setX(0.5);
+    a.y.setY(0.5);
+    a.w = btVector3(0.5, 0.5, 0.0);
+    *this = a;
+    return *this;
+}
+
 Matrix4& Matrix4::perspective(float fovy, float aspect, float n, float f) {
     float a = 1.0/tan(fovy*0.5);
     Matrix4 b;
@@ -176,8 +194,8 @@ Matrix4& Matrix4::perspective(float fovy, float aspect, float n, float f) {
     b.x.setX(a/aspect);
     b.y.setY(a);
     b.z.setZ((n+f)/(n-f));
-    b.z.setW(-1.0);
-    b.w.setZ((2.0*n*f)/(n-f));
+    b.z.setW((2.0*n*f)/(n-f));
+    b.w.setZ(-1.0);
     b.w.setW(0.0);
     return (*this *= b);
 }
@@ -188,8 +206,8 @@ Matrix4& Matrix4::frustum(float w, float h, float n, float f) {
     b.x.setX(n/w);
     b.y.setY(n/h);
     b.z.setZ((n+f)/(n-f));
-    b.z.setW(-1.0);
-    b.w.setZ((2.0*n*f)/(n-f));
+    b.z.setW((2.0*n*f)/(n-f));
+    b.w.setZ(-1.0);
     b.w.setW(0.0);
     return (*this *= b);
 }
@@ -199,7 +217,7 @@ Matrix4& Matrix4::ortho(float w, float h, float n, float f) {
     b.setIdentity();
     b.x.setX(1.0/w);
     b.y.setY(1.0/h);
-    b.z.setZ(-2.0/(f-n));
-    b.w.setZ((-f-n)/(f-n));
+    b.z.setZ(2.0/(n-f));
+    b.z.setW((f+n)/(n-f));
     return (*this *= b);
 }
