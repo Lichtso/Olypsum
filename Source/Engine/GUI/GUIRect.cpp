@@ -19,6 +19,10 @@ GUIRect::GUIRect() {
     height = 100;
 }
 
+GUIRect::~GUIRect() {
+    
+}
+
 GUIRect* GUIRect::getRootParent() {
     GUIRect* node = parent;
     while(node->parent)

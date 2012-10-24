@@ -13,17 +13,23 @@
 
 class Matrix4 {
     public:
-    btVector3 x, y, z, w;
+    union {
+        struct {
+            btVector3 x, y, z, w;
+        } data;
+        btScalar values[16];
+    };
     Matrix4();
     Matrix4(Matrix4 const &mat);
     Matrix4(btTransform const &mat);
-    Matrix4(float matData[16]);
+    Matrix4(btScalar matData[16]);
     std::string getString();
     btTransform getBTMatrix();
     btMatrix3x3 getNormalMatrix();
-    void getOpenGLMatrix(btScalar* matData) const;
+    void getOpenGLMatrix(float* matData) const;
     Matrix4& setIdentity();
-    Matrix4 getTransposed();
+    Matrix4 getTransposed() const;
+    Matrix4 getInverse();
     Matrix4& normalize();
     Matrix4 operator*(const Matrix4&);
     Matrix4& operator*=(const Matrix4&);

@@ -17,7 +17,7 @@ class LightVolume {
     GLuint vbo, ibo;
     public:
     LightVolume();
-    ~LightVolume();
+    virtual ~LightVolume();
     void init();
     virtual std::unique_ptr<btScalar[]> getVertices(unsigned int& verticesCount);
     virtual std::unique_ptr<unsigned int[]> getIndecies(unsigned int& trianglesCount);

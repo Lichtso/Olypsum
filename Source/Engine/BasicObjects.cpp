@@ -20,15 +20,6 @@ ObjectBase::~ObjectBase() {
     }
 }
 
-void ObjectBase::gameTick() {
-    
-}
-
-btTransform ObjectBase::getTransformation() {
-    log(error_log, "Unreachable function called: ObjectBase::getTransformation();");
-    return btTransform::getIdentity();
-}
-
 
 
 PhysicObject::PhysicObject() {
@@ -49,8 +40,10 @@ GraphicObject::GraphicObject() {
     
 }
 
-void GraphicObject::draw() {
-    
+bool GraphicObject::isInFrustum(btCollisionObject* body) {
+    FrustumCullingCallback callback;
+    worldManager.physicsWorld->contactPairTest(currentCam->frustumBody, body, callback);
+    return callback.inView;
 }
 
 
@@ -68,44 +61,77 @@ ModelObject::~ModelObject() {
 }
 
 void ModelObject::draw() {
-    if(prepareDraw())
-        model->draw(this);
+    modelMat = getTransformation();
+    model->draw(this);
+}
+
+void ModelObject::drawMesh(Mesh* mesh) {
+    modelMat = getTransformation();
+    mesh->draw(this);
 }
 
 void ModelObject::prepareShaderProgram(Mesh* mesh) {
     if(!lightManager.currentShadowLight) {
-        if(mesh->heightMap) {
-            if(skeletonPose) {
-                if(mesh->transparent && blendingQuality > 0)
-                    shaderPrograms[glassSkeletalBumpGeometrySP]->use();
-                else
-                    shaderPrograms[skeletalBumpGeometrySP]->use();
-            }else{
-                if(mesh->transparent && blendingQuality > 0)
-                    shaderPrograms[glassBumpGeometrySP]->use();
-                else
-                    shaderPrograms[solidBumpGeometrySP]->use();
-            }
-        }else{
-            if(skeletonPose) {
-                if(mesh->transparent && blendingQuality > 0)
-                    shaderPrograms[glassSkeletalGeometrySP]->use();
-                else
-                    shaderPrograms[skeletalGeometrySP]->use();
-            }else{
-                if(mesh->transparent && blendingQuality > 0)
-                    shaderPrograms[glassGeometrySP]->use();
-                else
-                    shaderPrograms[solidGeometrySP]->use();
-            }
-        }
+        char index = (mesh->heightMap) ? 1 : 0;
+        if(skeletonPose) index |= 2;
+        if(mesh->transparent && blendingQuality > 0) index |= 4;
+        ShaderProgramNames lookup[] = {
+            solidGeometrySP, solidBumpGeometrySP, skeletalGeometrySP, skeletalBumpGeometrySP,
+            glassGeometrySP, glassBumpGeometrySP, glassSkeletalGeometrySP, glassSkeletalBumpGeometrySP
+        };
+        shaderPrograms[lookup[index]]->use();
     }
+    
     currentShaderProgram->setUniformF("discardDensity", 1.0);
     if(skeletonPose)
         currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose->mats, skeletonPose->skeleton->bones.size());
 }
 
-bool ModelObject::prepareDraw() {
-    modelMat = getTransformation();
-    return true;
+
+
+ObjectManager::~ObjectManager() {
+    clear();
 }
+
+void ObjectManager::clear() {
+    for(unsigned int i = 0; i < objects.size(); i ++)
+        delete objects[i];
+    objects.clear();
+}
+
+void ObjectManager::gameTick() {
+    for(unsigned int i = 0; i < objects.size(); i ++)
+        objects[i]->gameTick();
+}
+
+void ObjectManager::physicsTick() {
+    for(unsigned int i = 0; i < objects.size(); i ++) {
+        PhysicObject* object = dynamic_cast<PhysicObject*>(objects[i]);
+        if(!object) continue;
+        object->physicsTick();
+    }
+    
+    btDispatcher* dispatcher = worldManager.physicsWorld->getDispatcher();
+    unsigned int numManifolds = dispatcher->getNumManifolds();
+	for(unsigned int i = 0; i < numManifolds; i ++) {
+		btPersistentManifold* contactManifold =  dispatcher->getManifoldByIndexInternal(i);
+		void *objectA = static_cast<const btCollisionObject*>(contactManifold->getBody0())->getUserPointer(),
+        *objectB = static_cast<const btCollisionObject*>(contactManifold->getBody1())->getUserPointer();
+        
+        PhysicObject *userObjectA = static_cast<PhysicObject*>(objectA),
+        *userObjectB = static_cast<PhysicObject*>(objectB);
+        
+        if(userObjectA) userObjectA->handleCollision(contactManifold, userObjectB);
+        if(userObjectB) userObjectB->handleCollision(contactManifold, userObjectA);
+	}
+}
+
+void ObjectManager::draw() {
+    for(unsigned int i = 0; i < objects.size(); i ++) {
+        GraphicObject* object = dynamic_cast<GraphicObject*>(objects[i]);
+        if(object)
+            object->draw();
+    }
+}
+
+ObjectManager objectManager;

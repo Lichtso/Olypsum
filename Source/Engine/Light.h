@@ -19,13 +19,14 @@ enum LightType {
 
 class Light {
     protected:
+    bool premareLightVolume();
     ColorBuffer* shadowMap;
     public:
     Cam shadowCam;
     LightType type;
     Color4 color;
     Light();
-    ~Light();
+    virtual ~Light();
     virtual bool calculate(bool shadowActive);
     virtual void deleteShadowmap();
     virtual void use();

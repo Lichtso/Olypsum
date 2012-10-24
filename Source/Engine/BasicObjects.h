@@ -15,9 +15,9 @@ class ObjectBase {
     protected:
     ObjectBase();
     public:
-    ~ObjectBase();
-    virtual void gameTick();
-    virtual btTransform getTransformation();
+    virtual ~ObjectBase();
+    virtual void gameTick() { };
+    virtual btTransform getTransformation() = 0;
 };
 
 class PhysicObject : public ObjectBase {
@@ -30,13 +30,15 @@ class PhysicObject : public ObjectBase {
 
 class SkeletonPose;
 class Mesh;
+class TransparentMesh;
 class Model;
 
 class GraphicObject : public ObjectBase {
     protected:
     GraphicObject();
+    bool isInFrustum(btCollisionObject* body);
     public:
-    virtual void draw();
+    virtual void draw() = 0;
 };
 
 class ModelObject : public GraphicObject {
@@ -47,8 +49,21 @@ class ModelObject : public GraphicObject {
     std::shared_ptr<Model> model;
     ~ModelObject();
     void draw();
+    virtual void drawMesh(Mesh* mesh);
     virtual void prepareShaderProgram(Mesh* mesh);
-    virtual bool prepareDraw();
 };
+
+class ObjectManager {
+    public:
+    std::vector<TransparentMesh*> transparentAccumulator;
+    std::vector<ObjectBase*> objects;
+    ~ObjectManager();
+    void clear();
+    void gameTick();
+    void physicsTick();
+    void draw();
+};
+
+extern ObjectManager objectManager;
 
 #endif

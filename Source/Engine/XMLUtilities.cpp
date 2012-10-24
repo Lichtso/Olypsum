@@ -58,31 +58,35 @@ btTransform readTransformationXML(rapidxml::xml_node<xmlUsedCharType>* node) {
             XMLValueArray<btScalar> matrixData;
             matrixData.readString(node->value(), "%f");
             btTransform mat;
-            mat.setFromOpenGLMatrix(matrixData.data);
-            transform = mat * transform;
+            mat.setBasis(btMatrix3x3(matrixData.data[0], matrixData.data[1], matrixData.data[2],
+                                     matrixData.data[4], matrixData.data[5], matrixData.data[6],
+                                     matrixData.data[8], matrixData.data[9], matrixData.data[10]));
+            mat.setOrigin(btVector3(matrixData.data[3], matrixData.data[7], matrixData.data[11]));
+            transform = transform * mat;
         }else if(strcmp(node->name(), "translate") == 0) {
             XMLValueArray<float> vectorData;
             vectorData.readString(node->value(), "%f");
             btTransform mat;
             mat.setIdentity();
             mat.setOrigin(btVector3(vectorData.data[0], vectorData.data[1], vectorData.data[2]));
-            transform = mat * transform;
+            transform = transform * mat;
         }else if(strcmp(node->name(), "rotate") == 0) {
             XMLValueArray<float> vectorData;
             vectorData.readString(node->value(), "%f");
             btTransform mat;
             mat.setIdentity();
             mat.setRotation(btQuaternion(vectorData.data[0], vectorData.data[1], vectorData.data[2], vectorData.data[3]/180.0*M_PI));
-            transform = mat * transform;
+            transform = transform * mat;
         }else if(strcmp(node->name(), "scale") == 0) {
             XMLValueArray<float> vectorData;
             vectorData.readString(node->value(), "%f");
             btTransform mat;
             mat.setIdentity();
+            //mat.setBasis(mat.getBasis().scaled(btVector3(vectorData.data[0], vectorData.data[1], vectorData.data[2])));
             mat.setBasis(btMatrix3x3(btVector3(vectorData.data[0], 0, 0),
                                      btVector3(0, vectorData.data[1], 0),
                                      btVector3(0, 0, vectorData.data[2])));
-            transform = mat * transform;
+            transform = transform * mat;
         }
         node = node->next_sibling();
     }

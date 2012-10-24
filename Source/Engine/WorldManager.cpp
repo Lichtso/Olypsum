@@ -76,11 +76,15 @@ void WorldManager::loadLevel() {
         physicsWorld->addRigidBody(worldWallBodys[i]);
     }
     
-    /*ModelObject* object = new ModelObject(fileManager.getPackage("Default")->getResource<Model>("man.dae"));
-    object->transformation.setIdentity();*/
+    btDefaultMotionState* MS = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0), btVector3(0, 0, 0)));
+    sharedCollisionShapes["objectShape"] = new btBoxShape(btVector3(1, 1, 1));
+    btRigidBody::btRigidBodyConstructionInfo cI(0, MS, sharedCollisionShapes["objectShape"], btVector3(0, 0, 0));
+    RigidObject* object = new RigidObject(fileManager.getPackage("Default")->getResource<Model>("man.dae"), cI);
+    
+    //TODO: DEBUG
     mainCam->camMat.setIdentity();
-    //mainCam->camMat.rotateX(0.5);
-    mainCam->camMat.setOrigin(btVector3(0, 1, 2));
+    //mainCam->camMat.setRotation(btQuaternion(0, 0, 0));
+    mainCam->camMat.setOrigin(btVector3(0, 0, 3));
     mainCam->calculate();
     
     gameStatus = localGame;

@@ -45,7 +45,7 @@ template <class T> inline const T clamp(T x, T a, T b) {
 }
 
 template <class T> inline const T frand(T min, T max) {
-    return ((max-min)*((float)rand()/RAND_MAX))+min;
+    return ((max-min)*((T)rand()/RAND_MAX))+min;
 }
 
 extern int screenSize[3];

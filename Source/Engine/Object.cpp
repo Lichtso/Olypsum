@@ -8,55 +8,6 @@
 
 #import "WorldManager.h"
 
-ObjectManager::~ObjectManager() {
-    clear();
-}
-
-void ObjectManager::clear() {
-    for(unsigned int i = 0; i < objects.size(); i ++)
-        delete objects[i];
-    objects.clear();
-}
-
-void ObjectManager::gameTick() {
-    for(unsigned int i = 0; i < objects.size(); i ++)
-        objects[i]->gameTick();
-}
-
-void ObjectManager::physicsTick() {
-    for(unsigned int i = 0; i < objects.size(); i ++) {
-        PhysicObject* object = dynamic_cast<PhysicObject*>(objects[i]);
-        if(!object) continue;
-        object->physicsTick();
-    }
-    
-    btDispatcher* dispatcher = worldManager.physicsWorld->getDispatcher();
-    unsigned int numManifolds = dispatcher->getNumManifolds();
-	for(unsigned int i = 0; i < numManifolds; i ++) {
-		btPersistentManifold* contactManifold =  dispatcher->getManifoldByIndexInternal(i);
-		void *objectA = static_cast<const btCollisionObject*>(contactManifold->getBody0())->getUserPointer(),
-             *objectB = static_cast<const btCollisionObject*>(contactManifold->getBody1())->getUserPointer();
-        
-        PhysicObject *userObjectA = static_cast<PhysicObject*>(objectA),
-                     *userObjectB = static_cast<PhysicObject*>(objectB);
-        
-        if(userObjectA) userObjectA->handleCollision(contactManifold, userObjectB);
-        if(userObjectB) userObjectB->handleCollision(contactManifold, userObjectA);
-	}
-}
-
-void ObjectManager::draw() {
-    for(unsigned int i = 0; i < objects.size(); i ++) {
-        GraphicObject* object = dynamic_cast<GraphicObject*>(objects[i]);
-        if(!object) continue;
-        object->draw();
-    }
-}
-
-ObjectManager objectManager;
-
-
-
 ZoneObject::ZoneObject(btCollisionShape* shape, const btTransform& transform) {
     body = new btCollisionObject();
     body->setCollisionShape(shape);
@@ -77,11 +28,14 @@ btTransform ZoneObject::getTransformation() {
 
 
 
-RigidObject::RigidObject(std::shared_ptr<Model> modelB, btRigidBody::btRigidBodyConstructionInfo* rBCI) :ModelObject(modelB) {
-    rBCI->m_collisionShape->calculateLocalInertia(rBCI->m_mass, rBCI->m_localInertia);
-    body = new btRigidBody(*rBCI);
+RigidObject::RigidObject(std::shared_ptr<Model> modelB, btRigidBody::btRigidBodyConstructionInfo& rBCI) :ModelObject(modelB) {
+    rBCI.m_collisionShape->calculateLocalInertia(rBCI.m_mass, rBCI.m_localInertia);
+    body = new btRigidBody(rBCI);
     body->setUserPointer(this);
-    worldManager.physicsWorld->addRigidBody(body, CollisionMask_Object, CollisionMask_Frustum | CollisionMask_Zone | CollisionMask_Object);
+    if(rBCI.m_mass == 0.0)
+        worldManager.physicsWorld->addRigidBody(body, CollisionMask_Static, CollisionMask_Frustum | CollisionMask_Object);
+    else
+        worldManager.physicsWorld->addRigidBody(body, CollisionMask_Object, CollisionMask_Frustum | CollisionMask_Zone | CollisionMask_Static | CollisionMask_Object);
 }
 
 RigidObject::~RigidObject() {
@@ -100,6 +54,21 @@ RigidObject::~RigidObject() {
 btTransform RigidObject::getTransformation() {
     btDefaultMotionState* motionState = static_cast<btDefaultMotionState*>(body->getMotionState());
     return motionState->m_graphicsWorldTrans;
+}
+
+void RigidObject::draw() {
+    //TODO: DEBUG
+    static float rotY;
+    rotY -= 0.01;
+    skeletonPose->bonePoses["Thigh_Right"].setIdentity();
+    skeletonPose->bonePoses["Thigh_Right"].setRotation(btQuaternion(0, 0, rotY));
+    skeletonPose->bonePoses["Shin_Right"].setIdentity();
+    skeletonPose->bonePoses["Shin_Right"].setRotation(btQuaternion(0, 0, rotY*2.0));
+    skeletonPose->calculate();
+    skeletonPose->draw(0.1, 0.0, 0.02);
+    
+    //if(GraphicObject::isInFrustum(body))
+        ModelObject::draw();
 }
 
 
@@ -154,8 +123,7 @@ void WaterObject::prepareShaderProgram(Mesh* mesh) {
     currentShaderProgram->setUniformF("discardDensity", 1.0);
 }
 
-bool WaterObject::prepareDraw() {
-    if(lightManager.currentShadowLight)
-        return false;
-    return ModelObject::prepareDraw();
+void WaterObject::draw() {
+    if(!lightManager.currentShadowLight && GraphicObject::isInFrustum(body))
+        ModelObject::draw();
 }

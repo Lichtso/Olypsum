@@ -21,6 +21,16 @@ class Ray3 {
     void set(btVector3 origin, btVector3 direction);
 };
 
+class FrustumCullingCallback : public btCollisionWorld::ContactResultCallback {
+    public:
+    bool inView;
+	FrustumCullingCallback() : inView(false) { }
+	virtual	btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0,const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1) {
+        inView = true;
+        return 0;
+	}
+};
+
 inline btVector3 vec3rand(btVector3 min, btVector3 max) {
     return btVector3(frand(min.x(), max.x()), frand(min.y(), max.y()), frand(min.z(), max.z()));
 }

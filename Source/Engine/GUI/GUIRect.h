@@ -44,6 +44,7 @@ class GUIRect {
     bool visible;
     int posX, posY, width, height;
     GUIRect();
+    virtual ~GUIRect();
     GUIRect* getRootParent();
     bool isFirstResponder();
     virtual void setFirstResponderStatus();

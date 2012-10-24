@@ -11,6 +11,7 @@
 #import "ParticleSystem.h"
 #import "Decals.h"
 #import "FileManager.h"
+#import "TextFont.h"
 
 #ifndef LevelLoader_h
 #define LevelLoader_h

@@ -9,12 +9,12 @@
 #import <OpenAL/al.h>
 #import "WorldManager.h"
 
-Cam::Cam() :fov(70.0/180.0*M_PI), near(1.0), far(100000.0), width(1.0), height(1.0), frustumShape(NULL) {
+Cam::Cam() :fov(70.0/180.0*M_PI), near(1.0), far(100000.0), width(screenSize[0]/2), height(screenSize[1]/2), frustumShape(NULL) {
     camMat.setIdentity();
     
     frustumBody = new btCollisionObject();
-    frustumBody->setCollisionFlags(frustumBody->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-    //TODO: worldManager.physicsWorld->addCollisionObject(frustumBody, CollisionMask_Frustum, CollisionMask_Object);
+    frustumBody->setCollisionFlags(frustumBody->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE | btCollisionObject::CF_KINEMATIC_OBJECT);
+    frustumBody->setActivationState(DISABLE_DEACTIVATION);
     calculateFrustum(btVector3(-1, -1, 0), btVector3(1, 1, 0));
 }
 
@@ -83,7 +83,7 @@ void Cam::calculateFrustum(btVector3 screenMin, btVector3 screenMax) {
 }
 
 void Cam::calculate() {
-    viewMat = camMat.inverse();
+    viewMat = Matrix4(camMat).getInverse();
     
     if(fov > 0.0) {
         viewMat.perspective(fov, width/height, near, far);

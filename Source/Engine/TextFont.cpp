@@ -137,15 +137,16 @@ void TextFont::renderStringToScreen(const char* str, btVector3 pos, float scale,
     int width, height;
     GLuint texture = renderStringToTexture(str, color, antialiasing, width, height);
     
-    btVector3 size = btVector3(width*scale, height*scale, 0.0);
+    scale /= size;
+    btVector3 rect = btVector3(width*scale, height*scale, 0.0);
     float vertices[] = {
-        size.x(), -size.y(),
+        rect.x(), -rect.y(),
         1.0, 1.0,
-        size.x(), size.y(),
+        rect.x(), rect.y(),
         1.0, 0.0,
-        -size.x(), size.y(),
+        -rect.x(), rect.y(),
         0.0, 0.0,
-        -size.x(), -size.y(),
+        -rect.x(), -rect.y(),
         0.0, 1.0
     };
     

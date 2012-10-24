@@ -15,17 +15,17 @@
 enum CollisionMask {
     CollisionMask_Frustum = 1,
     CollisionMask_Zone = 2,
-    CollisionMask_Object = 4
-    //CollisionMask_Item = 8
+    CollisionMask_Static = 4,
+    CollisionMask_Object = 8
 };
 
 class Cam {
+    btCollisionShape* frustumShape;
     btVector3 prevPos, velocity;
     public:
     btTransform camMat;
     Matrix4 viewMat;
     float fov, near, far, width, height;
-    btCollisionShape* frustumShape;
     btCollisionObject* frustumBody;
     Cam();
     ~Cam();

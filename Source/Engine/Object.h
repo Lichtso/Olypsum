@@ -11,19 +11,6 @@
 #ifndef Object_h
 #define Object_h
 
-class ObjectManager {
-    public:
-    std::vector<TransparentMesh*> transparentAccumulator;
-    std::vector<ObjectBase*> objects;
-    ~ObjectManager();
-    void clear();
-    void gameTick();
-    void physicsTick();
-    void draw();
-};
-
-extern ObjectManager objectManager;
-
 class ZoneObject : public PhysicObject {
     public:
     btCollisionObject* body;
@@ -44,9 +31,10 @@ class SoftObject : public GraphicObject, PhysicObject { //Not implemented (TODO)
 class RigidObject : public ModelObject, PhysicObject {
     public:
     btRigidBody* body;
-    RigidObject(std::shared_ptr<Model> model, btRigidBody::btRigidBodyConstructionInfo* rBCI);
+    RigidObject(std::shared_ptr<Model> model, btRigidBody::btRigidBodyConstructionInfo& rBCI);
     ~RigidObject();
-    btTransform getTransformation();
+    btTransform getTransformation() override;
+    void draw() override;
 };
 
 #define MAX_WAVES 4
@@ -63,7 +51,7 @@ class WaterObject : public ModelObject, ZoneObject {
     void addWave(float maxAge, float ampitude, float length, float originX, float originY);
     void gameTick();
     void prepareShaderProgram(Mesh* mesh);
-    bool prepareDraw();
+    void draw();
 };
 
 #endif

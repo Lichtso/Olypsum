@@ -95,25 +95,31 @@ struct Material {
     std::string diffuseURL, effectMapURL, heightMapURL;
 };
 
-static Bone* readBone(Skeleton& skeleton, btTransform& parentMat, rapidxml::xml_node<xmlUsedCharType>* dataNode) {
-    rapidxml::xml_attribute<xmlUsedCharType> *typeAttribute, *idAttribute;
-    if(!(typeAttribute = dataNode->first_attribute("type")) ||
-       strcmp(typeAttribute->value(), "JOINT") != 0 ||
-       !(idAttribute = dataNode->first_attribute("id"))) return NULL;
-    
-    Bone* bone = new Bone();
-    bone->name = idAttribute->value();
-    bone->staticMat = readTransformationXML(dataNode) * parentMat;
+static Bone* readBone(Skeleton& skeleton, btTransform& modelTrans, Bone* parent, rapidxml::xml_node<xmlUsedCharType>* dataNode) {
+    Bone* bone;
+    {
+        rapidxml::xml_attribute<xmlUsedCharType> *typeAttribute, *idAttribute;
+        if(!(typeAttribute = dataNode->first_attribute("type")) ||
+           strcmp(typeAttribute->value(), "JOINT") != 0 ||
+           !(idAttribute = dataNode->first_attribute("id"))) return NULL;
+        bone = new Bone();
+        bone->name = idAttribute->value();
+        bone->relativeMat = readTransformationXML(dataNode);
+        bone->absoluteMat = (parent) ? parent->absoluteMat * bone->relativeMat : bone->relativeMat;
+        skeleton.bones[bone->name] = bone;
+    }
     
     rapidxml::xml_node<xmlUsedCharType>* childNode = dataNode->first_node("node");
     while(childNode) {
-        Bone* childBone = readBone(skeleton, bone->staticMat, childNode);
+        Bone* childBone = readBone(skeleton, modelTrans, bone, childNode);
         if(childBone)
             bone->children.push_back(childBone);
         childNode = childNode->next_sibling("node");
     }
     
-    skeleton.bones[bone->name] = bone;
+    bone->relativeInv = bone->relativeMat.inverse();
+    bone->absoluteMat = modelTrans * bone->absoluteMat;
+    bone->absoluteInv = bone->absoluteMat.inverse();
     return bone;
 }
 
@@ -183,9 +189,13 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
     }
     modelTransformMat.setIdentity();
     if(upAxis == AXIS_X)
-        modelTransformMat.setRotation(btQuaternion(btVector3(0, 0, 1), M_PI_2));
+        modelTransformMat.setBasis(btMatrix3x3(btVector3(0, 1, 0),
+                                               btVector3(1, 0, 0),
+                                               btVector3(0, 0, -1)));
     else if(upAxis == AXIS_Z)
-        modelTransformMat.setRotation(btQuaternion(btVector3(1, 0, 0), M_PI_2));
+        modelTransformMat.setBasis(btMatrix3x3(btVector3(-1, 0, 0),
+                                               btVector3(0, 0, 1),
+                                               btVector3(0, 1, 0)));
     
     //Load TextureURLs
     library = collada->first_node("library_images");
@@ -345,7 +355,7 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
                             goto endParsingXML;
                         }
                         skeleton = new Skeleton();
-                        skeleton->rootBone = readBone(*skeleton, modelTransformMat, source);
+                        skeleton->rootBone = readBone(*skeleton, modelTransformMat, NULL, source);
                         if(skeleton->bones.size() > maxJointsCount) {
                             char buffer[128];
                             sprintf(buffer, "More joints (%lu) found than supported (%d).\n", skeleton->bones.size(), maxJointsCount);
@@ -822,20 +832,87 @@ SkeletonPose::~SkeletonPose() {
 }
 
 void SkeletonPose::calculateBonePose(Bone* bone, Bone* parentBone) {
-    btTransform mat = bonePoses[bone->name];
     if(parentBone) {
-        mat.setOrigin(mat.getOrigin()+bone->staticMat.getOrigin()-parentBone->staticMat.getOrigin());
-        mat *= mats[parentBone->jointIndex];
+        mats[bone->jointIndex] = bone->relativeMat * bonePoses[bone->name];
+        mats[bone->jointIndex] = mats[parentBone->jointIndex] * mats[bone->jointIndex];
+        mats[bone->jointIndex] = bone->relativeInv * mats[bone->jointIndex];
     }else
-        mat.setOrigin(mat.getOrigin()+bone->staticMat.getOrigin());
-    mats[bone->jointIndex] = mat;
+        mats[bone->jointIndex] = bonePoses[bone->name];
+    
     for(unsigned int i = 0; i < bone->children.size(); i ++)
         calculateBonePose(bone->children[i], bone);
-    mat.setIdentity();
-    mat.setOrigin(bone->staticMat.getOrigin()*-1);
-    mats[bone->jointIndex] = mat * mats[bone->jointIndex];
+    
+    mats[bone->jointIndex] = bone->absoluteMat * (mats[bone->jointIndex] * bone->absoluteInv);
 }
 
 void SkeletonPose::calculate() {
     calculateBonePose(skeleton->rootBone, NULL);
+}
+
+void SkeletonPose::drawBonePose(Bone* bone, float axesSize, float linesSize, float textSize) {
+    btVector3* childrenPos = (linesSize > 0.0) ? new btVector3[bone->children.size()] : NULL;
+    for(unsigned int i = 0; i < bone->children.size(); i ++) {
+        drawBonePose(bone->children[i], axesSize, linesSize, textSize);
+        if(linesSize > 0.0) childrenPos[i] = modelMat.getOrigin();
+    }
+    
+    modelMat = mats[bone->jointIndex] * bone->absoluteMat;
+    btTransform inverse = modelMat.inverse();
+    modelMat.setBasis(inverse.getBasis());
+    
+    shaderPrograms[colorSP]->use();
+    float* vertices;
+    {
+        unsigned int verticesCount = 36+12*bone->children.size();
+        if(axesSize > 0.0) verticesCount += 36;
+        if(linesSize > 0.0) verticesCount += 12*bone->children.size();
+        vertices = (verticesCount) ? new float[verticesCount] : NULL;
+    }
+    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, sizeof(float)*6, vertices);
+    currentShaderProgram->setAttribute(COLOR_ATTRIBUTE, 3, sizeof(float)*6, &vertices[3]);
+    
+    if(axesSize > 0.0) {
+        for(unsigned int i = 0; i < 6; i ++) {
+            vertices[i*6  ] = (i == 1) ? axesSize : 0.0;
+            vertices[i*6+1] = (i == 3) ? axesSize : 0.0;
+            vertices[i*6+2] = (i == 5) ? axesSize : 0.0;
+            vertices[i*6+3] = (i < 2) ? 1.0 : 0.0;
+            vertices[i*6+4] = (i == 2 || i == 3) ? 1.0 : 0.0;
+            vertices[i*6+5] = (i >= 4) ? 1.0 : 0.0;
+        }
+        glDrawArrays(GL_LINES, 0, 6);
+    }
+    
+    if(linesSize > 0.0) {
+        for(unsigned int i = 0; i < bone->children.size(); i ++) {
+            btVector3 pos = inverse(childrenPos[i]);
+            vertices[i*12] = 0.0;
+            vertices[i*12+1] = 0.0;
+            vertices[i*12+2] = 0.0;
+            vertices[i*12+3] = 1.0;
+            vertices[i*12+4] = 1.0;
+            vertices[i*12+5] = 1.0;
+            vertices[i*12+6] = pos.x();
+            vertices[i*12+7] = pos.y();
+            vertices[i*12+8] = pos.z();
+            vertices[i*12+9] = 0.5;
+            vertices[i*12+10] = 0.5;
+            vertices[i*12+11] = 0.5;
+        }
+        glLineWidth(linesSize);
+        glDrawArrays(GL_LINES, 0, bone->children.size()*2);
+        glLineWidth(1);
+        delete [] childrenPos;
+    }
+    
+    if(vertices) delete [] vertices;
+    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
+    glDisableVertexAttribArray(COLOR_ATTRIBUTE);
+    
+    if(textSize > 0.0)
+        mainFont->renderStringToScreen(bone->name.c_str(), modelMat.getOrigin(), 0.02, Color4(1.0), false);
+}
+
+void SkeletonPose::draw(float axesSize, float linesSize, float textSize) {
+    drawBonePose(skeleton->rootBone, axesSize, linesSize, textSize);
 }

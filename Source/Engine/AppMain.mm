@@ -78,14 +78,10 @@ void AppMain(int argc, char *argv[]) {
     
     //Init Cams
     mainCam = new Cam();
-    mainCam->width = screenSize[0]/2;
-    mainCam->height = screenSize[1]/2;
     mainCam->calculate();
     mainCam->use();
     guiCam = new Cam();
     guiCam->fov = 0.0;
-    guiCam->width = screenSize[0]/2;
-    guiCam->height = screenSize[1]/2;
     guiCam->calculate();
     
     //Init Resources
@@ -146,6 +142,12 @@ void AppMain(int argc, char *argv[]) {
                     event.button.y = (event.button.y+mouseTranslation[1])*screenSize[2];
                     if(currentScreenView)
                         currentScreenView->handleMouseMove(event.button.x, event.button.y);
+                    
+                    //TODO: DEBUG
+                    mainCam->camMat.setIdentity();
+                    mainCam->camMat.setRotation(btQuaternion(((float)event.button.x/screenSize[0]-0.5)*M_PI*2.0, ((float)event.button.y/screenSize[1]-0.5)*M_PI*2.0, 0));
+                    mainCam->camMat.setOrigin(mainCam->camMat.getBasis().inverse()*btVector3(0, 0, 3));
+                    mainCam->calculate();
                 break;
                 case SDL_QUIT:
                     AppTerminate();

@@ -257,7 +257,7 @@ void ShaderProgram::setUniformMatrix4(const char* name, const btTransform* mat) 
     if(location < 0) return;
     btScalar matData[16];
     mat->getOpenGLMatrix(matData);
-    glUniformMatrix4fv(location, 1, false, matData);
+    glUniformMatrix4fv(location, 1, true, matData);
 }
 
 void ShaderProgram::setUniformMatrix4(const char* name, const btTransform* mat, unsigned int count) {
@@ -266,7 +266,7 @@ void ShaderProgram::setUniformMatrix4(const char* name, const btTransform* mat, 
     btScalar matData[count*16];
     for(unsigned int i = 0; i < count; i ++)
         mat[i].getOpenGLMatrix(matData+i*16);
-    glUniformMatrix4fv(location, count, false, matData);
+    glUniformMatrix4fv(location, count, true, matData);
 }
 
 ShaderProgram& ShaderProgram::operator=(const ShaderProgram &b) {

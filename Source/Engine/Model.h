@@ -12,7 +12,7 @@
 #define Model_h
 
 struct Bone {
-    btTransform staticMat;
+    btTransform relativeMat, absoluteMat, relativeInv, absoluteInv;
     unsigned int jointIndex;
     std::string name;
     std::vector<Bone*> children;
@@ -25,6 +25,7 @@ struct Skeleton {
 
 class SkeletonPose {
     void calculateBonePose(Bone* bone, Bone* parentBone);
+    void drawBonePose(Bone* bone, float axesSize, float linesSize, float textSize);
     public:
     Skeleton* skeleton;
     btTransform* mats;
@@ -32,6 +33,7 @@ class SkeletonPose {
     SkeletonPose(Skeleton* skeleton);
     ~SkeletonPose();
     void calculate();
+    void draw(float axesSize, float linesSize, float textSize);
 };
 
 class Mesh {

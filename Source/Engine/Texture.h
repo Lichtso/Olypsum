@@ -20,7 +20,7 @@ class FilePackageResource {
     FilePackage* filePackage;
     std::string name;
     FilePackageResource() :filePackage(NULL) { }
-    ~FilePackageResource();
+    virtual ~FilePackageResource();
     virtual std::shared_ptr<FilePackageResource> load(FilePackage* filePackage, const std::string& name);
 };
 

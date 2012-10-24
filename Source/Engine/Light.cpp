@@ -24,22 +24,6 @@ unsigned char inBuffersB[] = { depthDBuffer }, outBuffersB[] = { ssaoDBuffer };
 unsigned char inBuffersC[] = { colorDBuffer, diffuseDBuffer, specularDBuffer, materialDBuffer, normalDBuffer, ssaoDBuffer }, outBuffersC[] = { colorDBuffer };
 unsigned char inBuffersD[] = { depthDBuffer, colorDBuffer }, outBuffersD[] = { colorDBuffer };
 
-static bool drawLightVolume() {
-    //TODO: Reimplement
-    /*if(!) { //NOT IN FRUSTUM
-        return false;
-    }
-    if() { //ALL IN FRUSTUM
-        glEnable(GL_DEPTH_TEST);
-        glFrontFace(GL_CCW);
-    }else{ //PART IN FRUSTUM
-        glDisable(GL_DEPTH_TEST);
-        glFrontFace(GL_CW);
-    }*/
-    mainFBO.renderDeferred(false, inBuffersA, sizeof(inBuffersA)/sizeof(unsigned char), outBuffersA, sizeof(outBuffersA)/sizeof(unsigned char));
-    return true;
-}
-
 
 
 Light::Light() {
@@ -55,6 +39,34 @@ Light::~Light() {
             lightManager.lights.erase(lightManager.lights.begin()+i);
             return;
         }
+}
+
+bool Light::premareLightVolume() {
+    FrustumCullingCallback callback;
+    worldManager.physicsWorld->contactPairTest(currentCam->frustumBody, shadowCam.frustumBody, callback);
+    if(!callback.inView) //NOT IN FRUSTUM
+        return false;
+    
+    btStaticPlaneShape* shape = new btStaticPlaneShape(btVector3(0, 0, -1), 1);
+    btCollisionObject* plane = new btCollisionObject();
+    plane->setCollisionShape(shape);
+    plane->setWorldTransform(shadowCam.camMat);
+    plane->setCollisionFlags(plane->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+    callback.inView = false;
+    worldManager.physicsWorld->contactPairTest(plane, shadowCam.frustumBody, callback);
+    delete plane;
+    delete shape;
+    
+    if(callback.inView) { //PART IN FRUSTUM
+        glDisable(GL_DEPTH_TEST);
+        glFrontFace(GL_CW);
+    }else{ //ALL IN FRUSTUM
+        glEnable(GL_DEPTH_TEST);
+        glFrontFace(GL_CCW);
+    }
+    
+    mainFBO.renderDeferred(false, inBuffersA, sizeof(inBuffersA)/sizeof(unsigned char), outBuffersA, sizeof(outBuffersA)/sizeof(unsigned char));
+    return true;
 }
 
 bool Light::calculate(bool shadowActive) {
@@ -157,7 +169,7 @@ void DirectionalLight::use() {
         shaderPrograms[directionalLightSP]->use();
     Light::use();
     
-    if(drawLightVolume())
+    if(Light::premareLightVolume())
         lightBox.draw();
 }
 
@@ -222,7 +234,7 @@ void SpotLight::use() {
     currentShaderProgram->setUniformVec3("lPosition", shadowCam.camMat.getOrigin());
     Light::use();
     
-    if(drawLightVolume())
+    if(Light::premareLightVolume())
         lightCone.draw();
 }
 
@@ -283,7 +295,7 @@ bool PositionalLight::calculate(bool shadowActive) {
                     rotation.setEulerZYX(M_PI, M_PI_2, 0.0);
                 break;
                 case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
-                   rotation.setEulerZYX(M_PI, -M_PI_2, 0.0);
+                    rotation.setEulerZYX(M_PI, -M_PI_2, 0.0);
                 break;
                 case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
                     rotation.setEulerZYX(0.0, 0.0, -M_PI_2);
@@ -356,10 +368,10 @@ void PositionalLight::use() {
     Light::use();
     
     if(!cubemapsEnabled && !omniDirectional) {
-        if(drawLightVolume())
+        if(Light::premareLightVolume())
             lightParabolid.draw();
         return;
-    }else if(drawLightVolume())
+    }else if(Light::premareLightVolume())
         lightSphere.draw();
 }
 
