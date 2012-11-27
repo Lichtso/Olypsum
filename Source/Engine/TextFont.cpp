@@ -151,7 +151,7 @@ void TextFont::renderStringToScreen(const char* str, btVector3 pos, float scale,
     };
     
     modelMat.setIdentity();
-    modelMat.setBasis(currentCam->camMat.getBasis());
+    modelMat.setBasis(currentCam->getTransformation().getBasis());
     modelMat.setOrigin(pos);
     
     shaderPrograms[spriteSP]->use();

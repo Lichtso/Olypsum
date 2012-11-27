@@ -6,10 +6,13 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#import <BulletDynamics/btBulletDynamicsCommon.h>
+#import <BulletSoftBody/btSoftBody.h>
 #import <math.h>
 #import <dirent.h>
 #import <sys/stat.h>
 #import <map>
+#import <set>
 #import <string>
 #import <vector>
 
@@ -46,6 +49,10 @@ template <class T> inline const T clamp(T x, T a, T b) {
 
 template <class T> inline const T frand(T min, T max) {
     return ((max-min)*((T)rand()/RAND_MAX))+min;
+}
+
+inline btVector3 vec3rand(btVector3 min, btVector3 max) {
+    return btVector3(frand(min.x(), max.x()), frand(min.y(), max.y()), frand(min.z(), max.z()));
 }
 
 extern int screenSize[3];

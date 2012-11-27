@@ -7,6 +7,7 @@
 //
 
 #import "FileManager.h"
+#import "ShaderProgram.h"
 
 std::shared_ptr<FilePackageResource> FilePackageResource::load(FilePackage* filePackageB, const std::string& nameB) {
     filePackage = filePackageB;

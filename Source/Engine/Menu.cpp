@@ -30,6 +30,13 @@ void handleMenuKeyUp(SDL_keysym* key) {
             case gameEscMenu:
                 setMenu(inGameMenu);
                 break;
+            default:
+            //case loadingMenu:
+            //case languagesMenu:
+            //case newGameMenu:
+            //case removeGameMenu:
+                //TODO
+                break;
         }
     }
 }
@@ -580,6 +587,9 @@ void setMenu(MenuName menu) {
                 button->onClick = onClick[i];
             }
         } break;
+        default:
+            log(error_log, "Tried to call setMenu() with invalid menu id.");
+            break;
     }
 }
 

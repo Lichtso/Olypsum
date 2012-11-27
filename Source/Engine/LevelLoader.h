@@ -6,10 +6,7 @@
 //
 //
 
-#import "Object.h"
-#import "Light.h"
-#import "ParticleSystem.h"
-#import "Decals.h"
+#import "ObjectManager.h"
 #import "FileManager.h"
 #import "TextFont.h"
 

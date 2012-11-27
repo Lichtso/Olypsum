@@ -6,7 +6,6 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "FBO.h"
 #import "Cam.h"
 
 #ifndef ShaderProgram_h

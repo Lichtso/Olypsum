@@ -7,6 +7,7 @@
 //
 
 #import <SDL_image/SDL_image.h>
+#import "ShaderProgram.h"
 #import "FileManager.h"
 
 Texture::Texture() :GLname(0), surface(NULL), minFilter(GL_LINEAR_MIPMAP_LINEAR), magFilter(GL_LINEAR) {

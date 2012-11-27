@@ -1,14 +1,12 @@
-Fix the compiling errors in Light
+
 Frustum Culling using Bullet Physics
 Add antialiasing to the corners of GUI elements
 Make options GUI
 Highmap terrains
 Use C++11 Multithreading
 Level File Formats
-Object Editor
 Use Bullet-Engine
 GUITextField Copy & Paste
-Retina Display Support
 Anisotropic filtering
 
 Not sure:

@@ -7,8 +7,7 @@
 //
 
 #import "Utilities.h"
-#import "Object.h"
-#import "Light.h"
+#import "ObjectManager.h"
 
 FBO::FBO() {
     for(unsigned char i = 0; i < gBuffersCount; i ++)
@@ -136,8 +135,8 @@ void FBO::renderInDeferredBuffers(bool transparent) {
 void FBO::renderTransparentInDeferredBuffers() {
     if(objectManager.transparentAccumulator.size() == 0) return;
     
-    btVector3 camMatPos = currentCam->camMat.getOrigin();
-    std::sort(objectManager.transparentAccumulator.begin(), objectManager.transparentAccumulator.end(), [&camMatPos](TransparentMesh* a, TransparentMesh* b){
+    btVector3 camMatPos = currentCam->getTransformation().getOrigin();
+    std::sort(objectManager.transparentAccumulator.begin(), objectManager.transparentAccumulator.end(), [&camMatPos](AccumulatedMesh* a, AccumulatedMesh* b){
         return (a->object->getTransformation().getOrigin()-camMatPos).length() > (b->object->getTransformation().getOrigin()-camMatPos).length();
     });
     
@@ -150,13 +149,13 @@ void FBO::renderTransparentInDeferredBuffers() {
         glDepthMask(GL_TRUE);
         glEnable(GL_DEPTH_TEST);
         glDisable(GL_BLEND);
-        TransparentMesh* tMesh = objectManager.transparentAccumulator[i];
-        tMesh->object->drawMesh(tMesh->mesh);
+        AccumulatedMesh* tMesh = objectManager.transparentAccumulator[i];
+        tMesh->object->drawAccumulatedMesh(tMesh->mesh);
         delete tMesh;
         glDisable(GL_BLEND);
         glDisable(GL_DEPTH_TEST);
         glDepthMask(GL_FALSE);
-        lightManager.illuminate();
+        objectManager.illuminate();
         
         shaderPrograms[deferredCombineTransparentSP]->use();
         unsigned char inBuffers[] = { transparentDBuffer, diffuseDBuffer, specularDBuffer, materialDBuffer, colorDBuffer }, outBuffers[] = { colorDBuffer };

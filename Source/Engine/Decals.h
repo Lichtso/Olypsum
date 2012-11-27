@@ -18,17 +18,4 @@ class Decal {
     float life;
 };
 
-class DecalManager {
-    GLuint vbo;
-    public:
-    std::vector<Decal*> decals;
-    ~DecalManager();
-    void init();
-    void clear();
-    void gameTick();
-    void draw();
-};
-
-extern DecalManager decalManager;
-
 #endif

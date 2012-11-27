@@ -14,7 +14,6 @@ void main() {
 #separator
 
 uniform sampler2D sampler0;
-uniform float lightEmission;
 uniform mat3 viewNormalMat;
 varying vec3 vPosition;
 varying float vAlpha;
@@ -25,7 +24,7 @@ void main() {
     if(gl_FragData[0].a < 0.0039) discard;
     
     vec2 corner = vec2(gl_PointCoord.xy)*2.0-vec2(1.0);
-    gl_FragData[1] = vec4(0.0, 0.0, lightEmission, 1.0);
+    gl_FragData[1] = vec4(0.0, 0.0, 0.0, 1.0);
     gl_FragData[2] = vec4(viewNormalMat[0]*corner.x - viewNormalMat[1]*corner.y + viewNormalMat[2], 1.0);
     gl_FragData[3] = vec4(vPosition + viewNormalMat[0]*corner.x - viewNormalMat[1]*corner.y, 1.0);
 }

@@ -19,7 +19,6 @@ enum GameStatusName {
 };
 
 class WorldManager {
-    btBroadphaseInterface* broadphase;
     btDefaultCollisionConfiguration* collisionConfiguration;
     btCollisionDispatcher* dispatcher;
     btSequentialImpulseConstraintSolver* solver;
@@ -28,6 +27,7 @@ class WorldManager {
     void clearAll();
     void clearPhysics();
     public:
+    btBroadphaseInterface* broadphase;
     btDiscreteDynamicsWorld* physicsWorld;
     WorldManager();
     ~WorldManager();

@@ -7,6 +7,7 @@
 //
 
 #import <Vorbis/vorbisfile.h>
+#import "ObjectManager.h"
 #import "FileManager.h"
 
 #ifdef LITTLE_ENDIAN
@@ -68,88 +69,67 @@ float SoundTrack::getLength() {
     return (float)size/bits;
 }
 
-SoundSource::SoundSource() :soundTrack(NULL), looping(false), autoDelete(true),
-direction(btVector3(0, 0, 1)), position(btVector3(0, 0, 1)), velocity(btVector3(0, 0, 1)) {
+
+
+
+SoundSourceObject::SoundSourceObject() :soundTrack(NULL), mode(SoundSource_disposable), velocity(btVector3(0, 0, 0)) {
     alGenSources(1, &ALname);
-    soundSourcesManager.soundSources.push_back(this);
+    objectManager.soundSourceObjects.insert(this);
 }
 
-SoundSource::~SoundSource() {
+SoundSourceObject::~SoundSourceObject() {
     alDeleteSources(1, &ALname);
-    for(int s = 0; s < soundSourcesManager.soundSources.size(); s ++)
-        if(soundSourcesManager.soundSources[s] == this) {
-            soundSourcesManager.soundSources.erase(soundSourcesManager.soundSources.begin()+s);
-            return;
-        }
 }
 
-void SoundSource::setSoundTrack(std::shared_ptr<SoundTrack> soundTrackB) {
+void SoundSourceObject::remove() {
+    objectManager.soundSourceObjects.erase(this);
+    delete this;
+}
+
+void SoundSourceObject::setSoundTrack(std::shared_ptr<SoundTrack> soundTrackB) {
     soundTrack = soundTrackB;
     alSourcei(ALname, AL_BUFFER, soundTrack->ALname);
 }
 
-void SoundSource::play() {
+void SoundSourceObject::play() {
     if(!soundTrack || !soundTrack->ALname) return;
-    alSourcei(ALname, AL_LOOPING, looping);
-    alSource3f(ALname, AL_DIRECTION, direction.x(), direction.y(), direction.z());
-    alSource3f(ALname, AL_POSITION, position.x(), position.y(), position.z());
-    alSource3f(ALname, AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());
+    btVector3 direction = transformation.getBasis().getRow(2),
+              position = transformation.getOrigin();
+    alSourcei(ALname, AL_LOOPING, mode == SoundSource_looping);
     alSourcePlay(ALname);
 }
 
-void SoundSource::pause() {
+void SoundSourceObject::pause() {
     alSourcePause(ALname);
 }
 
-void SoundSource::stop() {
+void SoundSourceObject::stop() {
     alSourceStop(ALname);
 }
 
-bool SoundSource::isPlaying() {
+bool SoundSourceObject::isPlaying() {
+    if(!soundTrack) return false;
     ALint state;
     alGetSourcei(ALname, AL_SOURCE_STATE, &state);
     return (state == AL_PLAYING);
 }
 
-void SoundSource::setTimeOffset(float timeOffset) {
+void SoundSourceObject::setTimeOffset(float timeOffset) {
     alSourcef(ALname, AL_SEC_OFFSET, timeOffset);
 }
 
-float SoundSource::getTimeOffset() {
+float SoundSourceObject::getTimeOffset() {
     ALfloat timeOffset;
     alGetSourcef(ALname, AL_SEC_OFFSET, &timeOffset);
     return timeOffset;
 }
 
-bool SoundSource::gameTick() {
-    if(!autoDelete || !soundTrack || looping || isPlaying()) return false;
-    delete this;
-    return true;
+void SoundSourceObject::gameTick() {
+    btVector3 direction = transformation.getBasis().getRow(2),
+    position = transformation.getOrigin();
+    velocity = position-prevPosition;
+    alSource3f(ALname, AL_DIRECTION, direction.x(), direction.y(), direction.z());
+    alSource3f(ALname, AL_POSITION, position.x(), position.y(), position.z());
+    alSource3f(ALname, AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());
+    prevPosition = position;
 }
-
-SoundSourcesManager::SoundSourcesManager() {
-    soundDevice = alcOpenDevice(NULL);
-    soundContext = alcCreateContext(soundDevice, NULL);
-    alcMakeContextCurrent(soundContext);
-    log(info_log, std::string("OpenAL, sound output ")+alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
-}
-
-SoundSourcesManager::~SoundSourcesManager() {
-    clear();
-    alcDestroyContext(soundContext);
-    alcCloseDevice(soundDevice);
-}
-
-void SoundSourcesManager::clear() {
-    for(unsigned int i = 0; i < soundSources.size(); i ++)
-        delete soundSources[i];
-    soundSources.clear();
-}
-
-void SoundSourcesManager::gameTick() {
-    for(unsigned int s = 0; s < soundSources.size(); s ++)
-        if(soundSources[s]->gameTick())
-            s --;
-}
-
-SoundSourcesManager soundSourcesManager;

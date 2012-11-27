@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "LinearMaths.h"
+#import "Utilities.h"
 
 #ifndef Matrix4_h
 #define Matrix4_h

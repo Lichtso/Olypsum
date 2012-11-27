@@ -1,5 +1,5 @@
 //
-//  ParticleSystem.cpp
+//  ParticlesObject.cpp
 //  Olypsum
 //
 //  Created by Alexander Meißner on 25.05.12.
@@ -8,9 +8,8 @@
 
 #import "WorldManager.h"
 
-ParticleSystem::ParticleSystem(unsigned int maxParticlesB) {
+ParticlesObject::ParticlesObject(unsigned int maxParticlesB) {
     texture = NULL;
-    lightSource = NULL;
     maxParticles = maxParticlesB;
     activeVBO = 0;
     addParticles = 0.0;
@@ -29,32 +28,48 @@ ParticleSystem::ParticleSystem(unsigned int maxParticlesB) {
         glBufferData(GL_ARRAY_BUFFER, 7*sizeof(float)*maxParticles, 0, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
-    particleSystemManager.particleSystems.push_back(this);
+    objectManager.particlesObjects.insert(this);
+    body = new btCollisionObject();
+    body->setCollisionShape(new btSphereShape(3.0));
+    body->setUserPointer(this);
+    body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+    worldManager.physicsWorld->addCollisionObject(body, CollisionMask_Light, 0);
 }
 
-ParticleSystem::~ParticleSystem() {
+ParticlesObject::~ParticlesObject() {
+    if(body) {
+        delete body->getCollisionShape();
+        delete body;
+    }
     if(particleCalcTarget == 1)
         delete [] (Particle*)particles;
-    if(lightSource) delete lightSource;
     if(particlesVBO[0]) {
         glDeleteBuffers(1, &particlesVBO[0]);
         glDeleteBuffers(1, &particlesVBO[1]);
     }
-    for(int p = 0; p < particleSystemManager.particleSystems.size(); p ++)
-        if(particleSystemManager.particleSystems[p] == this) {
-            particleSystemManager.particleSystems.erase(particleSystemManager.particleSystems.begin()+p);
-            return;
-        }
 }
 
-bool ParticleSystem::gameTick() {
+void ParticlesObject::remove() {
+    objectManager.particlesObjects.erase(this);
+    delete this;
+}
+
+void ParticlesObject::setTransformation(const btTransform& transformation) {
+    body->setWorldTransform(transformation);
+}
+
+btTransform ParticlesObject::getTransformation() {
+    return body->getWorldTransform();
+}
+
+void ParticlesObject::gameTick() {
+    btVector3 position = getTransformation().getOrigin();
+    
     if(particleCalcTarget == 0) systemLife = 0.0;
     if(systemLife > -1.0) {
         systemLife -= worldManager.animationFactor;
-        if(systemLife <= 0.0) {
-            delete this;
-            return true;
-        }
+        if(systemLife <= 0.0)
+            return;
     }
     
     if(particleCalcTarget == 1 && (systemLife == -1.0 || systemLife > lifeMax))
@@ -102,25 +117,12 @@ bool ParticleSystem::gameTick() {
         activeVBO = !activeVBO;
     }
     
-    if(lightSource) {
-        lightSource->shadowCam.camMat.setOrigin(position);
-        lightSource->setRange(5.0);
-    }
-    
-    return false;
+    return;
 }
 
-void ParticleSystem::draw() {
-    btTransform mat;
-    mat.setIdentity();
-    mat.setOrigin(position);
-    //TODO: Frustum Culling
-    
+void ParticlesObject::draw() {
+    modelMat = getTransformation();
     if(texture) texture->use(GL_TEXTURE_2D, 0);
-    if(lightSource)
-        currentShaderProgram->setUniformF("lightEmission", (lightSource->color.r+lightSource->color.g+lightSource->color.b)/3.0);
-    else
-        currentShaderProgram->setUniformF("lightEmission", 0.0);
     currentShaderProgram->setUniformF("lifeMin", lifeMin);
     
     if(particleCalcTarget == 1) {
@@ -141,39 +143,3 @@ void ParticleSystem::draw() {
     
     glDrawArrays(GL_POINTS, 0, particlesCount);
 }
-
-ParticleSystemManager::~ParticleSystemManager() {
-    clear();
-}
-
-void ParticleSystemManager::clear() {
-    for(unsigned int i = 0; i < particleSystems.size(); i ++)
-        delete particleSystems[i];
-    particleSystems.clear();
-}
-
-void ParticleSystemManager::gameTick() {
-    if(particleCalcTarget == 2) glEnable(GL_RASTERIZER_DISCARD_EXT);
-    for(unsigned int p = 0; p < particleSystems.size(); p ++)
-        if(particleSystems[p]->gameTick())
-            p --;
-    if(particleCalcTarget == 2) glDisable(GL_RASTERIZER_DISCARD_EXT);
-}
-
-void ParticleSystemManager::draw() {
-    if(lightManager.currentShadowLight || particleCalcTarget == 0) return;
-    modelMat.setIdentity();
-    shaderPrograms[particleDrawSP]->use();
-    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-    glDepthMask(GL_FALSE);
-    for(unsigned int p = 0; p < particleSystems.size(); p ++)
-        particleSystems[p]->draw();
-    glDepthMask(GL_TRUE);
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, 0);
-    glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
-}
-
-ParticleSystemManager particleSystemManager;

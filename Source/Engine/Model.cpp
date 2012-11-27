@@ -760,11 +760,11 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
                 glGenBuffers(1, &mesh->ibo);
                 glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
                 glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->elementsCount*sizeof(unsigned int), indecies, GL_STATIC_DRAW);
-                /*if(combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int) > mesh->elementsCount*strideIndex*sizeof(float)) {
-                 char buffer[128];
-                 sprintf(buffer, "Loading COLLADA, Index-Mode is contra-productive: Used %lu bytes, but %lu would be necessary.", combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int), mesh->elementsCount*strideIndex*sizeof(float));
-                 log(warning_log, buffer);
-                 }*/
+                if(combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int) > mesh->elementsCount*strideIndex*sizeof(float)) {
+                    char buffer[128];
+                    sprintf(buffer, "Loading COLLADA, Index-Mode is contra-productive: Used %lu bytes, but %lu would be necessary.", combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int), mesh->elementsCount*strideIndex*sizeof(float));
+                    log(warning_log, buffer);
+                }
             }else{ //Don't use IndexBuffer
                 dataIndex = 0;
                 for(unsigned int i = 0; i < mesh->elementsCount; i ++)
@@ -801,24 +801,27 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
 }
 
 void Model::draw(ModelObject* object) {
-    if(lightManager.currentShadowLight) {
-        lightManager.currentShadowLight->prepareShaderProgram(skeleton);
+    if(objectManager.currentShadowLight) {
+        objectManager.currentShadowLight->prepareShaderProgram(skeleton);
         for(unsigned int i = 0; i < meshes.size(); i ++)
             meshes[i]->draw(object);
     }else for(unsigned int i = 0; i < meshes.size(); i ++) {
         if(meshes[i]->transparent && blendingQuality > 0) {
-            TransparentMesh* tMesh = new TransparentMesh();
-            tMesh->object = object;
-            tMesh->mesh = meshes[i];
-            objectManager.transparentAccumulator.push_back(tMesh);
+            AccumulatedMesh* aMesh = new AccumulatedMesh();
+            aMesh->object = object;
+            aMesh->mesh = meshes[i];
+            objectManager.transparentAccumulator.push_back(aMesh);
             continue;
         }
         meshes[i]->draw(object);
     }
 }
 
+
+/*
 SkeletonPose::SkeletonPose(Skeleton* skeletonB) {
     skeleton = skeletonB;
+    needsUpdate = true;
     mats = new btTransform[skeleton->bones.size()];
     std::map<std::string, Bone*>::iterator boneIterator;
     for(boneIterator = skeleton->bones.begin(); boneIterator != skeleton->bones.end(); boneIterator ++) {
@@ -836,8 +839,10 @@ void SkeletonPose::calculateBonePose(Bone* bone, Bone* parentBone) {
         mats[bone->jointIndex] = bone->relativeMat * bonePoses[bone->name];
         mats[bone->jointIndex] = mats[parentBone->jointIndex] * mats[bone->jointIndex];
         mats[bone->jointIndex] = bone->relativeInv * mats[bone->jointIndex];
-    }else
-        mats[bone->jointIndex] = bonePoses[bone->name];
+    }else{
+        mats[bone->jointIndex] *= bone->absoluteMat;
+        mats[bone->jointIndex] = bone->absoluteInv * mats[bone->jointIndex];
+    }
     
     for(unsigned int i = 0; i < bone->children.size(); i ++)
         calculateBonePose(bone->children[i], bone);
@@ -845,8 +850,16 @@ void SkeletonPose::calculateBonePose(Bone* bone, Bone* parentBone) {
     mats[bone->jointIndex] = bone->absoluteMat * (mats[bone->jointIndex] * bone->absoluteInv);
 }
 
-void SkeletonPose::calculate() {
+void SkeletonPose::calculate(btTransform transform) {
+    if(!needsUpdate) return;
+    
+    btTransform mat = bonePoses[skeleton->rootBone->name];
+    transform.setBasis(transform.getBasis().inverse());
+    mat.setBasis(mat.getBasis().inverse());
+    mats[skeleton->rootBone->jointIndex] = transform * mat;
+    
     calculateBonePose(skeleton->rootBone, NULL);
+    needsUpdate = false;
 }
 
 void SkeletonPose::drawBonePose(Bone* bone, float axesSize, float linesSize, float textSize) {
@@ -915,4 +928,4 @@ void SkeletonPose::drawBonePose(Bone* bone, float axesSize, float linesSize, flo
 
 void SkeletonPose::draw(float axesSize, float linesSize, float textSize) {
     drawBonePose(skeleton->rootBone, axesSize, linesSize, textSize);
-}
+}*/

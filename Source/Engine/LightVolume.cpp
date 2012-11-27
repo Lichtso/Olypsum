@@ -22,44 +22,32 @@ void LightVolume::init() {
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &ibo);
     unsigned int verticesCount, trianglesCount;
-    std::unique_ptr<btScalar[]> vertices = getVertices(verticesCount);
+    std::unique_ptr<float[]> vertices = getVertices(verticesCount);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, verticesCount*3*sizeof(btScalar), vertices.get(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, verticesCount*3*sizeof(float), vertices.get(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
     std::unique_ptr<unsigned int[]> indecies = getIndecies(trianglesCount);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, trianglesCount*3*sizeof(unsigned int), indecies.get(), GL_STATIC_DRAW);
-}
-
-std::unique_ptr<btScalar[]> LightVolume::getVertices(unsigned int& verticesCount) {
-    verticesCount = 0;
-    return std::unique_ptr<btScalar[]>();
-}
-
-std::unique_ptr<unsigned int[]> LightVolume::getIndecies(unsigned int& trianglesCount) {
-    trianglesCount = 0;
-    return std::unique_ptr<unsigned int[]>();
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void LightVolume::drawWireFrameBegin() {
     shaderPrograms[colorSP]->use();
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, sizeof(btScalar)*3, NULL);
+    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, sizeof(float)*3, NULL);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void LightVolume::drawWireFrameEnd() {
     glDisableVertexAttribArray(POSITION_ATTRIBUTE);
     glDisableVertexAttribArray(COLOR_ATTRIBUTE);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-void LightVolume::drawWireFrame(Color4 color) {
-    
 }
 
 void LightVolume::draw() {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(btScalar), NULL);
+    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float), NULL);
 }
 
 
@@ -71,9 +59,9 @@ LightBoxVolume::LightBoxVolume(btVector3 halfSizeB) :halfSize(halfSizeB) {
     
 }
 
-std::unique_ptr<btScalar[]> LightBoxVolume::getVertices(unsigned int& verticesCount) {
+std::unique_ptr<float[]> LightBoxVolume::getVertices(unsigned int& verticesCount) {
     verticesCount = boxVerticesCount;
-    std::unique_ptr<btScalar[]> vertices(new btScalar[verticesCount*3]);
+    std::unique_ptr<float[]> vertices(new float[verticesCount*3]);
     for(unsigned char i = 0; i < boxVerticesCount; i ++) {
         vertices[i*3  ] = (i < 4) ? -halfSize.x() : halfSize.x();
         vertices[i*3+1] = (i % 4 < 2) ? -halfSize.y() : halfSize.y();
@@ -126,22 +114,22 @@ void LightBoxVolume::draw() {
 #define sphereTrianglesCount(accuracyX, accuracyY) (accuracyX*accuracyY*2)
 #define sphereVerticesCount(accuracyX, accuracyY) (accuracyX*accuracyY+2)
 
-LightSphereVolume::LightSphereVolume(btScalar radiusB, unsigned int accuracyXb, unsigned int accuracyYb)
+LightSphereVolume::LightSphereVolume(float radiusB, unsigned int accuracyXb, unsigned int accuracyYb)
 :radius(radiusB), accuracyX(accuracyXb), accuracyY(accuracyYb) {
     
 }
 
-std::unique_ptr<btScalar[]> LightSphereVolume::getVertices(unsigned int& verticesCount) {
+std::unique_ptr<float[]> LightSphereVolume::getVertices(unsigned int& verticesCount) {
     verticesCount = sphereVerticesCount(accuracyX, accuracyY);
-    std::unique_ptr<btScalar[]> vertices(new btScalar[verticesCount*3]);
+    std::unique_ptr<float[]> vertices(new float[verticesCount*3]);
     unsigned int index = 0;
     vertices[index ++] = 0.0;
     vertices[index ++] = 0.0;
     vertices[index ++] = radius;
     for(unsigned char y = 0; y < accuracyY; y ++) {
-        btScalar circleAngle = (btScalar)(y+1)/(accuracyY+1)*M_PI, circleRadius = sinf(circleAngle), circleZ = cosf(circleAngle);
+        float circleAngle = (float)(y+1)/(accuracyY+1)*M_PI, circleRadius = sinf(circleAngle), circleZ = cosf(circleAngle);
         for(unsigned char x = 0; x < accuracyX; x ++) {
-            btScalar angle = (btScalar)x/accuracyX*M_PI*2.0;
+            float angle = (float)x/accuracyX*M_PI*2.0;
             vertices[index ++] = sinf(angle)*circleRadius;
             vertices[index ++] = cosf(angle)*circleRadius;
             vertices[index ++] = circleZ;
@@ -226,29 +214,29 @@ void LightSphereVolume::draw() {
 #define parabolidTrianglesCount(accuracyX, accuracyY) (accuracyX*2+accuracyX*accuracyY*2-2)
 #define parabolidVerticesCount(accuracyX, accuracyY) (accuracyX+accuracyX*accuracyY+1)
 
-LightParabolidVolume::LightParabolidVolume(btScalar radiusB, unsigned int accuracyXb, unsigned int accuracyYb)
+LightParabolidVolume::LightParabolidVolume(float radiusB, unsigned int accuracyXb, unsigned int accuracyYb)
 :radius(radiusB), accuracyX(accuracyXb), accuracyY(accuracyYb) {
     
 }
 
-std::unique_ptr<btScalar[]> LightParabolidVolume::getVertices(unsigned int& verticesCount) {
+std::unique_ptr<float[]> LightParabolidVolume::getVertices(unsigned int& verticesCount) {
     verticesCount = parabolidVerticesCount(accuracyX, accuracyY);
-    std::unique_ptr<btScalar[]> vertices(new btScalar[verticesCount*3]);
+    std::unique_ptr<float[]> vertices(new float[verticesCount*3]);
     unsigned int index = 0;
     vertices[index ++] = 0.0;
     vertices[index ++] = 0.0;
     vertices[index ++] = radius;
     for(unsigned char y = 0; y < accuracyY; y ++) {
-        btScalar circleAngle = (btScalar)(y+1)/(accuracyY*2+2)*M_PI, circleRadius = sinf(circleAngle), circleZ = cosf(circleAngle);
+        float circleAngle = (float)(y+1)/(accuracyY*2+2)*M_PI, circleRadius = sinf(circleAngle), circleZ = cosf(circleAngle);
         for(unsigned char x = 0; x < accuracyX; x ++) {
-            btScalar angle = (btScalar)x/accuracyX*M_PI*2.0;
+            float angle = (float)x/accuracyX*M_PI*2.0;
             vertices[index ++] = sinf(angle)*circleRadius;
             vertices[index ++] = cosf(angle)*circleRadius;
             vertices[index ++] = circleZ;
         }
     }
     for(unsigned char x = 0; x < accuracyX; x ++) {
-        btScalar angle = (btScalar)x/accuracyX*M_PI*2.0;
+        float angle = (float)x/accuracyX*M_PI*2.0;
         vertices[index ++] = sinf(angle)*radius;
         vertices[index ++] = cosf(angle)*radius;
         vertices[index ++] = 0.0;

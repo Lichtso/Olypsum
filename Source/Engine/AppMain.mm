@@ -78,18 +78,18 @@ void AppMain(int argc, char *argv[]) {
     
     //Init Cams
     mainCam = new Cam();
-    mainCam->calculate();
+    mainCam->gameTick();
     mainCam->use();
     guiCam = new Cam();
     guiCam->fov = 0.0;
-    guiCam->calculate();
+    guiCam->gameTick();
     
     //Init Resources
     mainFont = new TextFont();
     mainFont->size = screenSize[1]*0.05;
     mainFont->loadTTF("font");
-    lightManager.init();
-    decalManager.init();
+    initLightVolumes();
+    objectManager.init();
     
     //Load Shader Programs
     loadStaticShaderPrograms();
@@ -144,10 +144,17 @@ void AppMain(int argc, char *argv[]) {
                         currentScreenView->handleMouseMove(event.button.x, event.button.y);
                     
                     //TODO: DEBUG
-                    mainCam->camMat.setIdentity();
-                    mainCam->camMat.setRotation(btQuaternion(((float)event.button.x/screenSize[0]-0.5)*M_PI*2.0, ((float)event.button.y/screenSize[1]-0.5)*M_PI*2.0, 0));
-                    mainCam->camMat.setOrigin(mainCam->camMat.getBasis().inverse()*btVector3(0, 0, 3));
-                    mainCam->calculate();
+                {
+                    btQuaternion rot;
+                    rot.setEulerZYX(0, ((float)event.button.x/screenSize[0]-0.5)*M_PI*2.0, ((float)event.button.y/screenSize[1]-0.5)*M_PI*2.0);
+                    btTransform camMat;
+                    camMat.setIdentity();
+                    camMat.setRotation(rot);
+                    //camMat.setOrigin(mainCam->camMat.getBasis().inverse()*btVector3(0, 0, 10));
+                    camMat.setOrigin(btVector3(0, 0, 4));
+                    mainCam->setTransformation(camMat);
+                    mainCam->gameTick();
+                }
                 break;
                 case SDL_QUIT:
                     AppTerminate();
@@ -175,16 +182,7 @@ void AppMain(int argc, char *argv[]) {
         }else{
             objectManager.gameTick();
             worldManager.gameTick();
-            soundSourcesManager.gameTick();
-            lightManager.calculateShadows(1);
-            particleSystemManager.gameTick();
-            decalManager.gameTick();
-            mainCam->use();
-            mainFBO.renderInDeferredBuffers(false);
-            objectManager.draw();
-            decalManager.draw();
-            particleSystemManager.draw();
-            lightManager.drawDeferred();
+            objectManager.drawFrame();
         }
         if(currentScreenView) currentScreenView->draw();
         SDL_GL_SwapBuffers();

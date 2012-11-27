@@ -6,7 +6,6 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "ShaderProgram.h"
 #import "GUIView.h"
 
 GUIRect::GUIRect() {

@@ -192,7 +192,7 @@ void ShaderProgram::use () {
         setUniformMatrix3("normalMat", &normalMat);
     }
     if(currentCam) {
-        setUniformVec3("camPos", currentCam->camMat.getOrigin());
+        setUniformVec3("camPos", currentCam->getTransformation().getOrigin());
         setUniformMatrix4("viewMat", &currentCam->viewMat);
         if(checkUniformExistence("viewNormalMat")) {
             btMatrix3x3 viewNormalMat = Matrix4(modelMat).getNormalMatrix();

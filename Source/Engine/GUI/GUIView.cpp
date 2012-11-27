@@ -6,7 +6,6 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Cam.h"
 #import "GUIView.h"
 
 GUIView::GUIView() {

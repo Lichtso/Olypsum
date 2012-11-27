@@ -7,7 +7,6 @@
 //
 
 #import <SDL/SDL.h>
-#import "LinearMaths.h"
 #import "GUIClipRect.h"
 
 #ifndef GUIRect_h

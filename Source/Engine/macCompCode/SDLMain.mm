@@ -8,7 +8,7 @@
 #include "Utilities.h"
 #include "SDLMain.h"
 #include "AppMain.h"
-#include "ShaderProgram.h"
+//#include "ShaderProgram.h"
 #include <sys/param.h> /* for MAXPATHLEN */
 #include <unistd.h>
 
