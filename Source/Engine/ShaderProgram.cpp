@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "ShaderProgram.h"
+#import "Cam.h"
 
 Color4& Color4::operator=(const Color4& B) {
     r = B.r;

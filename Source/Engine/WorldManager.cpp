@@ -70,7 +70,7 @@ void WorldManager::loadLevel() {
     wallMotionState[5] = new btDefaultMotionState(btTransform(btQuaternion(0, -M_PI_2, 0), btVector3(0, 0, worldSize.z())));
     for(unsigned char i = 0; i < 6; i ++) {
         worldWallBodys[i] = new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(0, wallMotionState[i], sharedCollisionShapes["worldWall"], btVector3(0, 0, 0)));
-        physicsWorld->addRigidBody(worldWallBodys[i], 0, CollisionMask_Object);
+        physicsWorld->addRigidBody(worldWallBodys[i], CollisionMask_Zone, CollisionMask_Object);
     }
     
     btDefaultMotionState* MS = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0), btVector3(0, 0, 0)));

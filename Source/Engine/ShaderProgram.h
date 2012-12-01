@@ -6,7 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Cam.h"
+#import "Matrix4.h"
+#import "Object.h"
 
 #ifndef ShaderProgram_h
 #define ShaderProgram_h

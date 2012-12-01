@@ -29,3 +29,14 @@ PhysicObject::~PhysicObject() {
         delete body;
     }
 }
+
+
+PhysicLink::PhysicLink(BaseObject* a, BaseObject* b, std::string nameInA, std::string nameInB, btTypedConstraint* constraintB)
+    :BaseLink(a, b, nameInA, nameInB), constraint(constraintB) {
+    constraint->setUserConstraintPtr(this);
+    worldManager.physicsWorld->addConstraint(constraint);
+}
+
+PhysicLink::~PhysicLink() {
+    worldManager.physicsWorld->removeConstraint(constraint);
+}

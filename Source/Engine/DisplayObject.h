@@ -93,10 +93,10 @@ class RigidObject : public ModelObject {
 class WaterObject : public ModelObject {
     public:
     float waveSpeed;
-    struct WaterObjectWave {
+    struct Wave {
         float length, age, maxAge, ampitude, originX, originY;
     };
-    std::vector<WaterObjectWave> waves;
+    std::vector<Wave> waves;
     WaterObject(std::shared_ptr<Model> model, btCollisionShape* shape, const btTransform& transform);
     ~WaterObject();
     void gameTick();

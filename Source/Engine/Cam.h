@@ -7,8 +7,7 @@
 //
 
 #import "Ray3.h"
-#import "Matrix4.h"
-#import "Object.h"
+#import "ShaderProgram.h"
 
 #ifndef Cam_h
 #define Cam_h
@@ -26,10 +25,10 @@ class Cam : public SimpleObject {
     public:
     Matrix4 viewMat; //!< Projection matrix used for OpenGL
     float fov, //!< Field of view, = 0 : Ortho, < 90 : Perspective, = 90 : Parabolid, = 180 : Sphere
-          near, //!< Distance of the near plane used for clipping
-          far, //!< Distance of the far plane used for clipping
-          width, //!< Width of the view used when fov < 90
-          height;//!< Height of the view used when fov < 90
+          near, //!< Distance of the near plane if fov < 90
+          far, //!< Distance of the far plane if fov < 90 else the radius of the parabolid or sphere
+          width, //!< Width of the view used if fov < 90
+          height;//!< Height of the view used if fov < 90
     Cam();
     ~Cam();
     /*! Calculates a ray shot from this Cam
@@ -46,6 +45,11 @@ class Cam : public SimpleObject {
      @see LightObject
      */
     bool testInverseNearPlaneHit(btDbvtProxy* node);
+    /*! Draws a wireframe model of the frustum for debuging.
+     @param color The color used for rendering
+     @see LightVolume
+     */
+    void drawWireframeFrustum(Color4 color);
     void gameTick();
     //! Sets this cam as the currentCam
     void use();

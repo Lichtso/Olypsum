@@ -11,7 +11,7 @@
 #ifndef Object_h
 #define Object_h
 
-class LinkObject;
+class BaseLink;
 
 //! Objects basic class
 /*!
@@ -24,7 +24,7 @@ class BaseObject {
     BaseObject() { };
     public:
     virtual ~BaseObject();
-    std::map<std::string, LinkObject*> links; //!< A map of LinkObject and names to connect BaseObject to others
+    std::map<std::string, BaseLink*> links; //!< A map of LinkObject and names to connect BaseObject to others
     /*! Used to update the transfomation of this object
      @param transformation The new transformation
      */
@@ -90,7 +90,7 @@ class PhysicObject : public BaseObject {
 /*!
  This is the basic class for all LinkObjects.
  */
-class LinkObject {
+class BaseLink {
     BaseObject* fusion; //!< A pointer which combines the pointers of BaseObject a and b via xor
     public:
     /*! Constructs a new LinkObject
@@ -99,12 +99,12 @@ class LinkObject {
      @param nameInA The name this LinkObject shall get in the BaseObject::links map of a
      @param nameInB The name this LinkObject shall get in the BaseObject::links map of b
      */
-    LinkObject(BaseObject* a, BaseObject* b, std::string nameInA, std::string nameInB) {
+    BaseLink(BaseObject* a, BaseObject* b, std::string nameInA, std::string nameInB) {
         fusion = reinterpret_cast<BaseObject*>(reinterpret_cast<unsigned long>(a) ^ reinterpret_cast<unsigned long>(b));
         a->links[nameInA] = this;
         b->links[nameInB] = this;
     }
-    virtual ~LinkObject() {
+    virtual ~BaseLink() {
         //if(fusion) log(error_log, "LinkObject being freed is not clear");
     }
     //! Is called by a parent BaseObject to its children to prepare the next graphics frame
@@ -133,6 +133,20 @@ class LinkObject {
     };
 };
 
+
+class PhysicLink : public BaseLink {
+    public:
+    btTypedConstraint* constraint;
+    /*! Constructs a new PhysicLink
+     @param a A BaseObject to be connected
+     @param b The other BaseObject to be connected
+     @param nameInA The name this LinkObject shall get in the BaseObject::links map of a
+     @param nameInB The name this LinkObject shall get in the BaseObject::links map of b
+     @param constraint The bullet physics constraint to be attached
+     */
+    PhysicLink(BaseObject* a, BaseObject* b, std::string nameInA, std::string nameInB, btTypedConstraint* constraint);
+    ~PhysicLink();
+};
 
 
 #endif

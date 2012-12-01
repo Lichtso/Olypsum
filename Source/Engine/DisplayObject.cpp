@@ -122,7 +122,7 @@ WaterObject::~WaterObject() {
 
 void WaterObject::addWave(float maxAge, float ampitude, float length, float originX, float originY) {
     if(waves.size() >= MAX_WAVES) return;
-    WaterObjectWave wave;
+    Wave wave;
     wave.age = 0.0;
     wave.maxAge = maxAge;
     wave.ampitude = ampitude;

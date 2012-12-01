@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "ShaderProgram.h"
+#import "Cam.h"
 
 #ifndef LightVolume_h
 #define LightVolume_h
@@ -30,6 +30,17 @@ class LightBoxVolume : public LightVolume {
     public:
     btVector3 halfSize;
     LightBoxVolume(btVector3 halfSize);
+    std::unique_ptr<float[]> getVertices(unsigned int& verticesCount);
+    std::unique_ptr<unsigned int[]> getIndecies(unsigned int& trianglesCount);
+    void drawWireFrame(Color4 color);
+    void draw();
+};
+
+class FrustumVolume : public LightVolume {
+    public:
+    Ray3 bounds[4];
+    float length;
+    FrustumVolume(Ray3 bounds[4], float length);
     std::unique_ptr<float[]> getVertices(unsigned int& verticesCount);
     std::unique_ptr<unsigned int[]> getIndecies(unsigned int& trianglesCount);
     void drawWireFrame(Color4 color);

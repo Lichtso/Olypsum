@@ -55,6 +55,21 @@ void LightVolume::draw() {
 #define boxTrianglesCount 12
 #define boxVerticesCount 8
 
+unsigned int staticBoxIndecies[boxTrianglesCount*3] = {
+    0, 1, 2, 1, 3, 2,
+    6, 5, 4, 6, 7, 5,
+    4, 1, 0, 4, 5, 1,
+    2, 3, 6, 3, 7, 6,
+    6, 4, 0, 2, 6, 0,
+    7, 3, 1, 5, 7, 1
+};
+
+unsigned int staticBoxWireFrame[] = {
+    0, 1, 2, 3, 4, 5, 6, 7,
+    0, 2, 1, 3, 4, 6, 5, 7,
+    0, 4, 1, 5, 2, 6, 3, 7
+};
+
 LightBoxVolume::LightBoxVolume(btVector3 halfSizeB) :halfSize(halfSizeB) {
     
 }
@@ -73,15 +88,7 @@ std::unique_ptr<float[]> LightBoxVolume::getVertices(unsigned int& verticesCount
 std::unique_ptr<unsigned int[]> LightBoxVolume::getIndecies(unsigned int& trianglesCount) {
     trianglesCount = boxTrianglesCount;
     std::unique_ptr<unsigned int[]> indecies(new unsigned int[trianglesCount*3]);
-    unsigned int staticIndecies[boxTrianglesCount*3] = {
-        0, 1, 2, 1, 3, 2,
-        6, 5, 4, 6, 7, 5,
-        4, 1, 0, 4, 5, 1,
-        2, 3, 6, 3, 7, 6,
-        6, 4, 0, 2, 6, 0,
-        7, 3, 1, 5, 7, 1
-    };
-    memcpy(indecies.get(), staticIndecies, sizeof(staticIndecies));
+    memcpy(indecies.get(), staticBoxIndecies, sizeof(staticBoxIndecies));
     return indecies;
 }
 
@@ -92,19 +99,65 @@ void LightBoxVolume::drawWireFrame(Color4 color) {
         colors[i*3+1] = color.g;
         colors[i*3+2] = color.b;
     }
-    unsigned int boxWireFrame[] = {
-        0, 1, 2, 3, 4, 5, 6, 7,
-        0, 2, 1, 3, 4, 6, 5, 7,
-        0, 4, 1, 5, 2, 6, 3, 7
-    };
+    
     LightVolume::drawWireFrameBegin();
     currentShaderProgram->setAttribute(COLOR_ATTRIBUTE, 3, sizeof(float)*3, colors);
-    glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, boxWireFrame);
+    glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, staticBoxWireFrame);
     LightVolume::drawWireFrameEnd();
     delete [] colors;
 }
 
 void LightBoxVolume::draw() {
+    LightVolume::draw();
+    glDrawElements(GL_TRIANGLES, boxTrianglesCount*3, GL_UNSIGNED_INT, 0);
+}
+
+
+
+FrustumVolume::FrustumVolume(Ray3 boundsB[4], float lengthB) :length(lengthB) {
+    bounds[0] = boundsB[0];
+    bounds[1] = boundsB[1];
+    bounds[2] = boundsB[2];
+    bounds[3] = boundsB[3];
+}
+
+std::unique_ptr<float[]> FrustumVolume::getVertices(unsigned int& verticesCount) {
+    verticesCount = boxVerticesCount;
+    std::unique_ptr<float[]> vertices(new float[verticesCount*3]);
+    for(unsigned char i = 0; i < 4; i ++) {
+        vertices[i*6  ] = bounds[i].origin.x();
+        vertices[i*6+1] = bounds[i].origin.y();
+        vertices[i*6+2] = bounds[i].origin.z();
+        vertices[i*6+3] = bounds[i].origin.x()+bounds[i].direction.x()*length;
+        vertices[i*6+4] = bounds[i].origin.y()+bounds[i].direction.y()*length;
+        vertices[i*6+5] = bounds[i].origin.z()+bounds[i].direction.z()*length;
+    }
+    return vertices;
+}
+
+std::unique_ptr<unsigned int[]> FrustumVolume::getIndecies(unsigned int& trianglesCount) {
+    trianglesCount = boxTrianglesCount;
+    std::unique_ptr<unsigned int[]> indecies(new unsigned int[trianglesCount*3]);
+    memcpy(indecies.get(), staticBoxIndecies, sizeof(staticBoxIndecies));
+    return indecies;
+}
+
+void FrustumVolume::drawWireFrame(Color4 color) {
+    float* colors = new float[boxVerticesCount*3];
+    for(unsigned int i = 0; i < 8; i ++) {
+        colors[i*3  ] = color.r;
+        colors[i*3+1] = color.g;
+        colors[i*3+2] = color.b;
+    }
+    
+    LightVolume::drawWireFrameBegin();
+    currentShaderProgram->setAttribute(COLOR_ATTRIBUTE, 3, sizeof(float)*3, colors);
+    glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, staticBoxWireFrame);
+    LightVolume::drawWireFrameEnd();
+    delete [] colors;
+}
+
+void FrustumVolume::draw() {
     LightVolume::draw();
     glDrawElements(GL_TRIANGLES, boxTrianglesCount*3, GL_UNSIGNED_INT, 0);
 }
@@ -127,7 +180,7 @@ std::unique_ptr<float[]> LightSphereVolume::getVertices(unsigned int& verticesCo
     vertices[index ++] = 0.0;
     vertices[index ++] = radius;
     for(unsigned char y = 0; y < accuracyY; y ++) {
-        float circleAngle = (float)(y+1)/(accuracyY+1)*M_PI, circleRadius = sinf(circleAngle), circleZ = cosf(circleAngle);
+        float circleAngle = (float)(y+1)/(accuracyY+1)*M_PI, circleRadius = sinf(circleAngle)*radius, circleZ = cosf(circleAngle)*radius;
         for(unsigned char x = 0; x < accuracyX; x ++) {
             float angle = (float)x/accuracyX*M_PI*2.0;
             vertices[index ++] = sinf(angle)*circleRadius;
@@ -173,7 +226,7 @@ std::unique_ptr<unsigned int[]> LightSphereVolume::getIndecies(unsigned int& tri
 void LightSphereVolume::drawWireFrame(Color4 color) {
     unsigned int verticesCount = sphereVerticesCount(accuracyX, accuracyY);
     float* colors = new float[verticesCount*3];
-    for(unsigned int i = 0; i < 8; i ++) {
+    for(unsigned int i = 0; i < verticesCount; i ++) {
         colors[i*3  ] = color.r;
         colors[i*3+1] = color.g;
         colors[i*3+2] = color.b;
@@ -227,7 +280,7 @@ std::unique_ptr<float[]> LightParabolidVolume::getVertices(unsigned int& vertice
     vertices[index ++] = 0.0;
     vertices[index ++] = radius;
     for(unsigned char y = 0; y < accuracyY; y ++) {
-        float circleAngle = (float)(y+1)/(accuracyY*2+2)*M_PI, circleRadius = sinf(circleAngle), circleZ = cosf(circleAngle);
+        float circleAngle = (float)(y+1)/(accuracyY*2+2)*M_PI, circleRadius = sinf(circleAngle)*radius, circleZ = cosf(circleAngle)*radius;
         for(unsigned char x = 0; x < accuracyX; x ++) {
             float angle = (float)x/accuracyX*M_PI*2.0;
             vertices[index ++] = sinf(angle)*circleRadius;
@@ -274,9 +327,9 @@ std::unique_ptr<unsigned int[]> LightParabolidVolume::getIndecies(unsigned int& 
 }
 
 void LightParabolidVolume::drawWireFrame(Color4 color) {
-    unsigned int verticesCount = sphereVerticesCount(accuracyX, accuracyY);
+    unsigned int verticesCount = parabolidVerticesCount(accuracyX, accuracyY);
     float* colors = new float[verticesCount*3];
-    for(unsigned int i = 0; i < 8; i ++) {
+    for(unsigned int i = 0; i < verticesCount; i ++) {
         colors[i*3  ] = color.r;
         colors[i*3+1] = color.g;
         colors[i*3+2] = color.b;

@@ -7,7 +7,7 @@
 //
 
 #import <SDL_ttf/SDL_ttf.h>
-#import "ShaderProgram.h"
+#import "Cam.h"
 
 #ifndef TextFont_h
 #define TextFont_h
