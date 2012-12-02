@@ -146,10 +146,10 @@ void AppMain(int argc, char *argv[]) {
                     //TODO: DEBUG
                 {
                     btQuaternion rot;
-                    rot.setEuler(((float)event.button.x/screenSize[0]-0.5)*M_PI*2.0, ((float)event.button.y/screenSize[1]-0.5)*M_PI*2.0, 0);
+                    rot.setEuler(-((float)event.button.x/screenSize[0]-0.5)*M_PI*2.0, -((float)event.button.y/screenSize[1]-0.5)*M_PI*2.0, 0);
                     btTransform camMat;
                     camMat.setIdentity();
-                    camMat.setOrigin(btVector3(0, 0, 4));
+                    camMat.setOrigin(btVector3(0, 0, 5));
                     camMat.setRotation(rot);
                     mainCam->setTransformation(camMat);
                     mainCam->gameTick();

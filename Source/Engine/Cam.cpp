@@ -55,7 +55,6 @@ Ray3 Cam::getRayAt(btVector3 screenPos) {
         ray.direction.setX(screenPos.x()*aux*(width/height));
         ray.direction.setY(-screenPos.y()*aux);
         ray.direction.setZ(-1.0);
-        //ray.direction.normalize();
         ray.origin = ray.direction*near;
     }else{
         ray.direction = btVector3(0, 0, -1);
@@ -63,8 +62,8 @@ Ray3 Cam::getRayAt(btVector3 screenPos) {
     }
     
     btMatrix3x3 normalMat = transformation.getBasis();
-    ray.origin = ray.origin*normalMat+transformation.getOrigin();
-    ray.direction = ray.direction*normalMat;
+    ray.origin = transformation(ray.origin);
+    ray.direction = normalMat*ray.direction;
     return ray;
 }
 
@@ -74,7 +73,7 @@ void Cam::doFrustumCulling(short int filterMask) {
     btScalar planes_o[6];
     btVector3 origin = transformation.getOrigin();
     
-    planes_n[0] = -transformation.getBasis().getRow(2);
+    planes_n[0] = -transformation.getBasis().getColumn(2);
     planes_n[1] = -planes_n[0];
     planes_o[1] = -planes_n[1].dot(origin+planes_n[0]*far);
     
@@ -97,11 +96,11 @@ void Cam::doFrustumCulling(short int filterMask) {
             planes_o[0] = -planes_n[0].dot(origin);
         else
             planes_o[0] = -planes_n[0].dot(origin-planes_n[0]*far);
-        planes_n[2] = transformation.getBasis().getRow(0);
+        planes_n[2] = transformation.getBasis().getColumn(0);
         planes_o[2] = -planes_n[2].dot(origin-planes_n[2]*far);
         planes_n[3] = -planes_n[2];
         planes_o[3] = -planes_n[3].dot(origin-planes_n[3]*far);
-        planes_n[4] = transformation.getBasis().getRow(1);
+        planes_n[4] = transformation.getBasis().getColumn(1);
         planes_o[4] = -planes_n[4].dot(origin-planes_n[4]*far);
         planes_n[5] = -planes_n[4];
         planes_o[5] = -planes_n[5].dot(origin-planes_n[5]*far);
@@ -117,8 +116,11 @@ bool Cam::testInverseNearPlaneHit(btDbvtProxy* node) {
     btVector3 planes_n[1];
     btScalar planes_o[1];
     
-    planes_n[0] = transformation.getBasis().getRow(2);
-    planes_o[0] = -planes_n[0].dot(transformation.getOrigin()+planes_n[0]*near);
+    planes_n[0] = transformation.getBasis().getColumn(2);
+    if(fov < M_PI)
+        planes_o[0] = -planes_n[0].dot(transformation.getOrigin()-planes_n[0]*near);
+    else
+        planes_o[0] = -planes_n[0].dot(transformation.getOrigin());
     
     PlaneCullingCallback fCC;
     btDbvt::collideKDOP(node->leaf, planes_n, planes_o, 1, fCC);
@@ -136,9 +138,8 @@ void Cam::drawWireframeFrustum(Color4 color) {
         volume.init();
         volume.drawWireFrame(color);
     }else if(abs(fov-M_PI) < 0.001) {
-        modelMat.setIdentity();
-        modelMat.setOrigin(-transformation.getBasis().getRow(2)*far*0.5);
-        modelMat = modelMat*transformation;
+        modelMat = transformation;
+        modelMat.setOrigin(modelMat.getOrigin()-transformation.getBasis().getColumn(2)*far*0.5);
         LightBoxVolume volume(btVector3(far, far, far*0.5));
         volume.init();
         volume.drawWireFrame(color);
@@ -166,7 +167,7 @@ void Cam::gameTick() {
 void Cam::use() {
     currentCam = this;
     btMatrix3x3 mat = transformation.getBasis();
-    btVector3 up = mat.getRow(1), front = mat.getRow(2), pos = transformation.getOrigin();
+    btVector3 up = mat.getColumn(1), front = mat.getColumn(2), pos = transformation.getOrigin();
     float orientation[] = { front.x(), front.y(), front.z(), up.x(), up.y(), up.z() };
     alListenerfv(AL_ORIENTATION, orientation);
     alListener3f(AL_POSITION, pos.x(), pos.y(), pos.z());

@@ -66,6 +66,25 @@ class SoftObject : public GraphicObject {
     }
 };
 
+//! A simple implementation of btMotionState
+class simpleMotionState : public btMotionState {
+    public:
+    btTransform transformation; //!< The transformation used for graphics
+    simpleMotionState(const btTransform& trans) :transformation(trans) { }
+    virtual void getWorldTransform(btTransform& centerOfMassWorldTrans) const;
+    virtual void setWorldTransform(const btTransform& centerOfMassWorldTrans);
+};
+
+//! A simpleMotionState for a RigidObject with a shifted center of mass
+class comMotionState : public simpleMotionState {
+    btTransform centerOfMassOffset; //!< The center of mass used for shifting between physics and graphics
+    public:
+    comMotionState(const btTransform& trans, const btTransform& COMO = btTransform::getIdentity())
+    :simpleMotionState(trans), centerOfMassOffset(COMO) { }
+    virtual void getWorldTransform(btTransform& centerOfMassWorldTrans) const;
+    virtual void setWorldTransform(const btTransform& centerOfMassWorldTrans);
+};
+
 //! A ModelObject with a rigid-physics-body
 /*!
  This is the basic class for all Objects with a rigid-physics-body.

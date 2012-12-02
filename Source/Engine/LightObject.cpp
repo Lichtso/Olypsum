@@ -83,7 +83,7 @@ bool LightObject::gameTick(bool shadowActive) {
 void LightObject::draw() {
     currentShaderProgram->setUniformF("lRange", shadowCam.far);
     currentShaderProgram->setUniformVec3("lColor", color.getVector());
-    currentShaderProgram->setUniformVec3("lDirection", shadowCam.getTransformation().getBasis().getRow(2)*-1.0);
+    currentShaderProgram->setUniformVec3("lDirection", shadowCam.getTransformation().getBasis().getColumn(2)*-1.0);
     
     btStaticPlaneShape* shape = new btStaticPlaneShape(btVector3(0, 0, -1), 1);
     btCollisionObject* plane = new btCollisionObject();

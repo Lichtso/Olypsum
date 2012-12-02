@@ -52,6 +52,26 @@ void ModelObject::prepareShaderProgram(Mesh* mesh) {
 
 
 
+void simpleMotionState::getWorldTransform(btTransform& centerOfMassWorldTrans) const {
+    centerOfMassWorldTrans = transformation;
+}
+
+void simpleMotionState::setWorldTransform(const btTransform& centerOfMassWorldTrans) {
+    transformation = centerOfMassWorldTrans;
+}
+
+
+
+void comMotionState::getWorldTransform(btTransform& centerOfMassWorldTrans) const {
+    centerOfMassWorldTrans = centerOfMassOffset.inverse() * transformation;
+}
+
+void comMotionState::setWorldTransform(const btTransform& centerOfMassWorldTrans) {
+    transformation = centerOfMassWorldTrans * centerOfMassOffset;
+}
+
+
+
 RigidObject::RigidObject(std::shared_ptr<Model> modelB, btRigidBody::btRigidBodyConstructionInfo& rBCI) :ModelObject(modelB) {
     rBCI.m_collisionShape->calculateLocalInertia(rBCI.m_mass, rBCI.m_localInertia);
     body = new btRigidBody(rBCI);
@@ -79,13 +99,13 @@ RigidObject::~RigidObject() {
 }
 
 void RigidObject::setTransformation(const btTransform& transformation) {
-    btDefaultMotionState* motionState = static_cast<btDefaultMotionState*>(getBody()->getMotionState());
-    motionState->m_graphicsWorldTrans = transformation;
+    simpleMotionState* motionState = static_cast<simpleMotionState*>(getBody()->getMotionState());
+    motionState->transformation = transformation;
 }
 
 btTransform RigidObject::getTransformation() {
-    btDefaultMotionState* motionState = static_cast<btDefaultMotionState*>(getBody()->getMotionState());
-    return motionState->m_graphicsWorldTrans;
+    simpleMotionState* motionState = static_cast<simpleMotionState*>(getBody()->getMotionState());
+    return motionState->transformation;
 }
 
 void RigidObject::draw() {

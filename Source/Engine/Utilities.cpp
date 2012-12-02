@@ -80,6 +80,38 @@ bool removeDir(std::string path) {
         return false;
 }
 
+std::string stringOf(int value) {
+    char buffer[32];
+    sprintf(buffer, "%d", value);
+    return buffer;
+}
+
+std::string stringOf(float value) {
+    char buffer[32];
+    sprintf(buffer, "%f", value);
+    return buffer;
+}
+
+std::string stringOf(btVector3 vec) {
+    char buffer[128];
+    sprintf(buffer, "%f %f %f", vec.x(), vec.y(), vec.z());
+    return buffer;
+}
+
+std::string stringOf(btTransform mat) {
+    btScalar values[16];
+    mat.getOpenGLMatrix(values);
+    char buffer[64];
+    std::string str = "(";
+    for(unsigned char i = 0; i < 16; i ++) {
+        if(i % 4 > 0) str += ", ";
+        sprintf(buffer, "%f", values[i]);
+        str += buffer;
+        if(i % 4 == 3 && i < 15) str += ",\n ";
+    }
+    return str+")";
+}
+
 int screenSize[3];
 std::string resourcesDir, gameDataDir, parentDir;
 float mouseTranslation[2] = { 0.0, 0.0 };

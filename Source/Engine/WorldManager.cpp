@@ -73,10 +73,16 @@ void WorldManager::loadLevel() {
         physicsWorld->addRigidBody(worldWallBodys[i], CollisionMask_Zone, CollisionMask_Object);
     }
     
-    btDefaultMotionState* MS = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0), btVector3(0, 0, 0)));
+    btVector3 inertia;
     sharedCollisionShapes["objectShape"] = new btBoxShape(btVector3(1, 1, 0.2));
+    sharedCollisionShapes["objectShape"]->calculateLocalInertia(1.0, inertia);
+    simpleMotionState* MS = new simpleMotionState(btTransform(btQuaternion(0, 0, 0), btVector3(0, 0, 0)));
     btRigidBody::btRigidBodyConstructionInfo cI(0, MS, sharedCollisionShapes["objectShape"], btVector3(0, 0, 0));
     new RigidObject(fileManager.getPackage("Default")->getResource<Model>("man.dae"), cI);
+    
+    MS = new simpleMotionState(btTransform(btQuaternion(0, 0, 0), btVector3(1.1, 4, 0)));
+    btRigidBody::btRigidBodyConstructionInfo cI2(1, MS, sharedCollisionShapes["objectShape"], inertia);
+    new RigidObject(fileManager.getPackage("Default")->getResource<Model>("man.dae"), cI2);
     
     gameStatus = localGame;
     setMenu(inGameMenu);

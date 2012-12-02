@@ -35,6 +35,16 @@ bool createDir(std::string path);
 bool scanDir(std::string path, std::vector<std::string>& files);
 bool removeDir(std::string path);
 
+std::string stringOf(int value);
+std::string stringOf(float value);
+std::string stringOf(btVector3 vec);
+std::string stringOf(btTransform mat);
+template <class T> std::string stringOf(const char* format, T value) {
+    char buffer[64];
+    sprintf(buffer, format, value);
+    return buffer;
+}
+
 template <class T> inline const T max(T a, T b) {
 	return (b<a)?a:b;
 }

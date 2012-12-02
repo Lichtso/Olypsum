@@ -93,8 +93,6 @@ void SoundSourceObject::setSoundTrack(std::shared_ptr<SoundTrack> soundTrackB) {
 
 void SoundSourceObject::play() {
     if(!soundTrack || !soundTrack->ALname) return;
-    btVector3 direction = transformation.getBasis().getRow(2),
-              position = transformation.getOrigin();
     alSourcei(ALname, AL_LOOPING, mode == SoundSource_looping);
     alSourcePlay(ALname);
 }
@@ -125,7 +123,7 @@ float SoundSourceObject::getTimeOffset() {
 }
 
 void SoundSourceObject::gameTick() {
-    btVector3 direction = transformation.getBasis().getRow(2),
+    btVector3 direction = transformation.getBasis().getColumn(2),
     position = transformation.getOrigin();
     velocity = position-prevPosition;
     alSource3f(ALname, AL_DIRECTION, direction.x(), direction.y(), direction.z());

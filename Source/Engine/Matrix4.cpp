@@ -21,9 +21,9 @@ Matrix4::Matrix4(Matrix4 const &mat) {
 
 Matrix4::Matrix4(btTransform const &mat) {
     btMatrix3x3 basis = mat.getBasis();
-    data.x = basis.getRow(0);
-    data.y = basis.getRow(1);
-    data.z = basis.getRow(2);
+    data.x = basis.getColumn(0);
+    data.y = basis.getColumn(1);
+    data.z = basis.getColumn(2);
     data.w = mat.getOrigin();
     data.w.setW(1.0);
 }
@@ -50,7 +50,7 @@ btMatrix3x3 Matrix4::getNormalMatrix() {
 
 btTransform Matrix4::getBTMatrix() {
     btTransform mat;
-    mat.setBasis(btMatrix3x3(data.x, data.y, data.z));
+    mat.setBasis(btMatrix3x3(data.x, data.y, data.z).transpose());
     mat.setOrigin(data.w);
     return mat;
 }
