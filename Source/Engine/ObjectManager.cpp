@@ -6,7 +6,7 @@
 //
 //
 
-#import "WorldManager.h"
+#import "Menu.h"
 
 ALCdevice* soundDevice;
 ALCcontext* soundContext;
@@ -75,9 +75,9 @@ void ObjectManager::clear() {
         delete particlesObject;
     particlesObjects.clear();
     
-    for(auto soundSourceObject : soundSourceObjects)
-        delete soundSourceObject;
-    soundSourceObjects.clear();
+    for(auto simpleObject : simpleObjects)
+        delete simpleObject;
+    simpleObjects.clear();
 }
 
 void ObjectManager::gameTick() {
@@ -97,9 +97,8 @@ void ObjectManager::gameTick() {
     //Calculate ParticleSystems
     if(particleCalcTarget == 2) glEnable(GL_RASTERIZER_DISCARD_EXT);
     for(auto iterator = particlesObjects.begin(); iterator != particlesObjects.end(); iterator ++) {
-        (*iterator)->gameTick();
-        if((*iterator)->systemLife > 0.0) continue;
-        delete *iterator;
+        if((*iterator)->gameTick()) continue;
+        particlesObjects.erase(iterator);
         iterator --;
     }
     if(particleCalcTarget == 2) glDisable(GL_RASTERIZER_DISCARD_EXT);
@@ -114,14 +113,11 @@ void ObjectManager::gameTick() {
         lightObjects[i]->gameTick(i < maxShadows);
     currentShadowLight = NULL;
     
-    //Calculate SoundSources
-    for(auto iterator = soundSourceObjects.begin(); iterator != soundSourceObjects.end(); iterator ++) {
-        if((*iterator)->mode == SoundSourceObject::SoundSource_disposable && !(*iterator)->isPlaying()) {
-            delete *iterator;
-            soundSourceObjects.erase(iterator);
-            iterator --;
-        }else
-            (*iterator)->gameTick();
+    //Calculate SimpleObjects
+    for(auto iterator = simpleObjects.begin(); iterator != simpleObjects.end(); iterator ++) {
+        if((*iterator)->gameTick()) continue;
+        simpleObjects.erase(iterator);
+        iterator --;
     }
 }
 
@@ -233,6 +229,16 @@ void ObjectManager::drawFrame() {
     mainCam->use();
     drawScene();
     
+    //Calculate Screen Blur
+    if(screenBlurFactor > -1.0) {
+        float speed = worldManager.animationFactor*5.0;
+        if(currentMenu == inGameMenu) {
+            screenBlurFactor -= min(screenBlurFactor*speed, speed);
+            if(screenBlurFactor < 0.01) screenBlurFactor = 0.0;
+        }else
+            screenBlurFactor += min((2-screenBlurFactor)*speed, speed);
+    }
+    
     //Draw LightObjects
     glDisable(GL_BLEND);
     glDepthMask(GL_FALSE);
@@ -248,7 +254,8 @@ void ObjectManager::drawFrame() {
     }
     
     shaderPrograms[deferredCombineSP]->use();
-    mainFBO.renderDeferred(true, inBuffersCombine, (ssaoQuality) ? 6 : 4, outBuffersCombine, (objectManager.transparentAccumulator.size() > 0) ? 1 : 0);
+    mainFBO.renderDeferred(true, inBuffersCombine, (ssaoQuality) ? 6 : 4, outBuffersCombine,
+                           (objectManager.transparentAccumulator.size() > 0 || screenBlurFactor > 0.0 || edgeSmoothEnabled || depthOfFieldQuality) ? 1 : 0);
     mainFBO.renderTransparentInDeferredBuffers();
     
     if(screenBlurFactor > 0.0) {

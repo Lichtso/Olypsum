@@ -57,17 +57,17 @@ void FBO::init() {
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
     
     initBuffer(depthDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_DEPTH_COMPONENT16, maxSize, maxSize, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_DEPTH_COMPONENT16, screenSize[0], screenSize[1], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     initBuffer(colorDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, maxSize, maxSize, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, screenSize[0], screenSize[1], 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     initBuffer(materialDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, screenSize[0], screenSize[1], 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     initBuffer(normalDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, screenSize[0], screenSize[1], 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(positionDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB32F_ARB, screenSize[0], screenSize[1], 0, GL_RGB, GL_FLOAT, NULL);
-    initBuffer(specularDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, screenSize[0], screenSize[1], 0, GL_RGB, GL_FLOAT, NULL);
+    initBuffer(specularDBuffer); //Needs maxSize because it is used as color buffer for shadow map calculations
+    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, maxSize, maxSize, 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(diffuseDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, screenSize[0], screenSize[1], 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(transparentDBuffer);
@@ -236,7 +236,7 @@ void FBO::renderInTexture(ColorBuffer* colorBuffer, GLenum side) {
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
     if(colorBuffer->shadowMap) {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, (colorBuffer->cubeMap) ? side : GL_TEXTURE_2D, colorBuffer->texture, 0);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE_ARB, gBuffers[colorDBuffer], 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE_ARB, gBuffers[specularDBuffer], 0);
         glDrawBuffer(GL_NONE);
         glClear(GL_DEPTH_BUFFER_BIT);
     }else{

@@ -83,7 +83,7 @@ void main() {
     vec3 lightDir = lPosition-pos;
     float lightDirLen = length(lightDir), intensity;
     lightDir /= lightDirLen;
-    intensity = 1.0-clamp(lightDirLen / lRange, step(dot(lDirection, lightDir), lCutoff), 1.0);
+    intensity = 1.0-clamp(lightDirLen / lRange, step(lCutoff, dot(lDirection, lightDir)), 1.0);
     #endif
     
     #if SHADOW_QUALITY > 0

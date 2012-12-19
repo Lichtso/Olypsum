@@ -17,7 +17,7 @@ Color4& Color4::operator=(const Color4& B) {
 }
 
 btVector3 Color4::getVector() {
-    return btVector3(r, b, b);
+    return btVector3(r, g, b);
 }
 
 SDL_Color Color4::getSDL() {

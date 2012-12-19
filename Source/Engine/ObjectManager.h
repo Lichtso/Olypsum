@@ -29,7 +29,7 @@ class ObjectManager {
     std::set<Decal*> decals;
     std::set<GraphicObject*> graphicObjects;
     std::set<ParticlesObject*> particlesObjects;
-    std::set<SoundSourceObject*> soundSourceObjects;
+    std::set<SimpleObject*> simpleObjects;
     
     ObjectManager();
     ~ObjectManager();

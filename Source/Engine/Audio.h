@@ -75,7 +75,7 @@ class SoundSourceObject : public SimpleObject {
      @return The current playback position in seconds
      */
     float getTimeOffset();
-    void gameTick();
+    bool gameTick();
 };
 
 #endif

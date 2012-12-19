@@ -78,11 +78,27 @@ void WorldManager::loadLevel() {
     sharedCollisionShapes["objectShape"]->calculateLocalInertia(1.0, inertia);
     simpleMotionState* MS = new simpleMotionState(btTransform(btQuaternion(0, 0, 0), btVector3(0, 0, 0)));
     btRigidBody::btRigidBodyConstructionInfo cI(0, MS, sharedCollisionShapes["objectShape"], btVector3(0, 0, 0));
-    new RigidObject(fileManager.getPackage("Default")->getResource<Model>("man.dae"), cI);
+    RigidObject* a = new RigidObject(fileManager.getPackage("Default")->getResource<Model>("man.dae"), cI);
     
-    MS = new simpleMotionState(btTransform(btQuaternion(0, 0, 0), btVector3(1.1, 4, 0)));
-    btRigidBody::btRigidBodyConstructionInfo cI2(1, MS, sharedCollisionShapes["objectShape"], inertia);
-    new RigidObject(fileManager.getPackage("Default")->getResource<Model>("man.dae"), cI2);
+    /*MS = new simpleMotionState(btTransform(btQuaternion(0, 0, 0), btVector3(1.1, 4, 0)));
+    btRigidBody::btRigidBodyConstructionInfo cI2(0, MS, sharedCollisionShapes["objectShape"], inertia);
+    RigidObject* b = new RigidObject(fileManager.getPackage("Default")->getResource<Model>("man.dae"), cI2);*/
+    
+    /*btHingeConstraint* constraint = new btHingeConstraint(*a->getBody(), *b->getBody(),
+                                                          btVector3(0, -2, 0), btVector3(0, 1, 0),
+                                                          btVector3(0, 0, 1), btVector3(1, 0, 0));
+    new PhysicLink(a, b, "b", "a", constraint);*/
+    TransformLink* link = (TransformLink*)a->links["Back"];
+    link = (TransformLink*)link->getOther(a)->links["Hip"];
+    auto animationR = new TransformLink::AnimationEntry();
+    animationR->frames.push_back(new TransformLink::AnimationEntry::Frame(0, 0, 4, btQuaternion(0, 0, 0), btVector3(0, 0, 0)));
+    animationR->frames.push_back(new TransformLink::AnimationEntry::Frame(1, 1, 2, btQuaternion(M_PI_2, 0, 0), btVector3(2, 0, 0)));
+    animationR->frames.push_back(new TransformLink::AnimationEntry::Frame(1, 1, 3, btQuaternion(0, M_PI_2, 0), btVector3(0, 2, 0)));
+    link->transforms.push_back(animationR);
+    
+    SpotLight* light = new SpotLight();
+    light->setBounds(30.0/180.0*M_PI, 5.0);
+    light->setTransformation(btTransform(btQuaternion(0.8, 0.2, 0), btVector3(2, 1, 2)));
     
     gameStatus = localGame;
     setMenu(inGameMenu);

@@ -42,7 +42,7 @@ class ParticlesObject : public DisplayObject {
     void remove();
     void setTransformation(const btTransform& transformation);
     btTransform getTransformation();
-    void gameTick();
+    bool gameTick();
     void draw();
 };
 

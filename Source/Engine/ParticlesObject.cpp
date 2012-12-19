@@ -51,7 +51,7 @@ ParticlesObject::~ParticlesObject() {
 
 void ParticlesObject::remove() {
     objectManager.particlesObjects.erase(this);
-    delete this;
+    BaseObject::remove();
 }
 
 void ParticlesObject::setTransformation(const btTransform& transformation) {
@@ -62,14 +62,16 @@ btTransform ParticlesObject::getTransformation() {
     return body->getWorldTransform();
 }
 
-void ParticlesObject::gameTick() {
+bool ParticlesObject::gameTick() {
     btVector3 position = getTransformation().getOrigin();
     
     if(particleCalcTarget == 0) systemLife = 0.0;
     if(systemLife > -1.0) {
         systemLife -= worldManager.animationFactor;
-        if(systemLife <= 0.0)
-            return;
+        if(systemLife <= 0.0) {
+            delete this;
+            return false;
+        }
     }
     
     if(particleCalcTarget == 1 && (systemLife == -1.0 || systemLife > lifeMax))
@@ -117,7 +119,7 @@ void ParticlesObject::gameTick() {
         activeVBO = !activeVBO;
     }
     
-    return;
+    return true;
 }
 
 void ParticlesObject::draw() {

@@ -25,7 +25,7 @@ class LightObject : public DisplayObject {
     ~LightObject();
     void remove();
     btTransform getTransformation();
-    bool gameTick(bool shadowActive);
+    virtual bool gameTick(bool shadowActive);
     void draw();
     virtual void prepareShaderProgram(bool skeletal) = 0;
     virtual float getPriority(btVector3 position) = 0;

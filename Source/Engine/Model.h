@@ -46,19 +46,6 @@ struct AccumulatedMesh {
     Mesh* mesh;
 };
 
-//! A Bone of a Skeleton
-/*!
- This class is used internally to hold the hierarchical structure of a Skeleton
- 
- @warning Don't use it directly
- */
-struct Bone {
-    btTransform relativeMat, absoluteMat, relativeInv, absoluteInv;
-    unsigned int jointIndex; //!< The index of this Bone in the matrix array used for OpenGL
-    std::string name; //!< A human readable name of this Bone found in the COLLADA-file
-    std::vector<Bone*> children; //!< A array of all children of this Bone
-};
-
 //! A Skeleton of a Model
 /*!
  This class is used internally to hold the hierarchical structure of a Skeleton found in the COLLADA-file

@@ -32,7 +32,7 @@ void initLightVolumes() {
 LightObject::LightObject() {
     objectManager.lightObjects.push_back(this);
     body = new btCollisionObject();
-    body->setCollisionShape(NULL);
+    body->setCollisionShape(new btBoxShape(btVector3(1, 1, 1)));
     body->setUserPointer(this);
     body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_NO_CONTACT_RESPONSE);
     worldManager.physicsWorld->addCollisionObject(body, CollisionMask_Light, 0);
@@ -49,9 +49,9 @@ void LightObject::remove() {
     for(int i = 0; i < objectManager.lightObjects.size(); i ++)
         if(objectManager.lightObjects[i] == this) {
             objectManager.lightObjects.erase(objectManager.lightObjects.begin()+i);
-            return;
+            break;
         }
-    delete this;
+    BaseObject::remove();
 }
 
 btTransform LightObject::getTransformation() {
@@ -83,13 +83,6 @@ bool LightObject::gameTick(bool shadowActive) {
 void LightObject::draw() {
     currentShaderProgram->setUniformF("lRange", shadowCam.far);
     currentShaderProgram->setUniformVec3("lColor", color.getVector());
-    currentShaderProgram->setUniformVec3("lDirection", shadowCam.getTransformation().getBasis().getColumn(2)*-1.0);
-    
-    btStaticPlaneShape* shape = new btStaticPlaneShape(btVector3(0, 0, -1), 1);
-    btCollisionObject* plane = new btCollisionObject();
-    plane->setCollisionShape(shape);
-    plane->setWorldTransform(shadowCam.getTransformation());
-    plane->setCollisionFlags(plane->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
     
     if(currentCam->testInverseNearPlaneHit(static_cast<btDbvtProxy*>(body->getBroadphaseHandle()))) { //PART IN FRUSTUM
         glDisable(GL_DEPTH_TEST);
@@ -119,7 +112,7 @@ void DirectionalLight::setTransformation(const btTransform& transformation) {
     btTransform shiftMat;
     shiftMat.setIdentity();
     shiftMat.setOrigin(btVector3(0, 0, -shadowCam.far*0.5));
-    body->setWorldTransform(shiftMat * transformation);
+    body->setWorldTransform(transformation * shiftMat);
 }
 
 void DirectionalLight::setBounds(float width, float height, float range) {
@@ -132,8 +125,9 @@ void DirectionalLight::setBounds(float width, float height, float range) {
 
 bool DirectionalLight::gameTick(bool shadowActive) {
     shadowCam.gameTick();
+    if(!LightObject::gameTick(shadowActive)) return true;
     shadowCam.use();
-    if(!LightObject::gameTick(shadowActive)) return false;
+    
     glDisable(GL_BLEND);
     mainFBO.renderInTexture(shadowMap, 0);
     objectManager.drawScene();
@@ -143,9 +137,9 @@ bool DirectionalLight::gameTick(bool shadowActive) {
 
 void DirectionalLight::draw() {
     modelMat.setIdentity();
-    btMatrix3x3 basis = modelMat.getBasis();
-    modelMat.setBasis(basis.scaled(btVector3(shadowCam.width, shadowCam.height, shadowCam.far)));
-    modelMat *= shadowCam.getTransformation();
+    modelMat.setBasis(modelMat.getBasis().scaled(btVector3(shadowCam.width, shadowCam.height, shadowCam.far*0.5)));
+    modelMat.setOrigin(btVector3(0.0, 0.0, -shadowCam.far*0.5));
+    modelMat = shadowCam.getTransformation()*modelMat;
     
     if(shadowMap) {
         shaderPrograms[directionalShadowLightSP]->use();
@@ -156,6 +150,7 @@ void DirectionalLight::draw() {
     }else
         shaderPrograms[directionalLightSP]->use();
     
+    currentShaderProgram->setUniformVec3("lDirection", shadowCam.getTransformation().getBasis().getColumn(2));
     LightObject::draw();
     lightBox.draw();
 }
@@ -178,7 +173,7 @@ SpotLight::SpotLight() {
     shadowCam.height = 1.0;
     shadowCam.near = 0.1;
     
-    setBounds(90.0/180.0*M_PI, 10.0);
+    setBounds(30.0/180.0*M_PI, 5.0);
 }
 
 void SpotLight::setTransformation(const btTransform& transformation) {
@@ -186,21 +181,22 @@ void SpotLight::setTransformation(const btTransform& transformation) {
     btTransform shiftMat;
     shiftMat.setIdentity();
     shiftMat.setOrigin(btVector3(0, 0, -shadowCam.far*0.5));
-    body->setWorldTransform(shiftMat * transformation);
+    body->setWorldTransform(transformation * shiftMat);
 }
 
 void SpotLight::setBounds(float cutoff, float range) {
-    shadowCam.width = shadowCam.height = shadowCam.far*tan(cutoff*0.5);
+    shadowCam.width = shadowCam.height = 1.0;
     shadowCam.fov = cutoff;
     shadowCam.far = range;
     
-    setPhysicsShape(new btConeShapeZ(shadowCam.width, range));
+    setPhysicsShape(new btConeShapeZ(tan(shadowCam.fov*0.5)*shadowCam.far, shadowCam.far));
 }
 
 bool SpotLight::gameTick(bool shadowActive) {
     shadowCam.gameTick();
+    if(!LightObject::gameTick(shadowActive)) return true;
     shadowCam.use();
-    if(!LightObject::gameTick(shadowActive)) return false;
+    
     glDisable(GL_BLEND);
     mainFBO.renderInTexture(shadowMap, 0);
     //Render circle mask
@@ -216,11 +212,11 @@ bool SpotLight::gameTick(bool shadowActive) {
 }
 
 void SpotLight::draw() {
+    float radius = tan(shadowCam.fov*0.5)*shadowCam.far;
     modelMat.setIdentity();
-    btMatrix3x3 basis = modelMat.getBasis();
-    modelMat.setBasis(basis.scaled(btVector3(shadowCam.width*1.05, shadowCam.height*1.05, shadowCam.far)));
+    modelMat.setBasis(modelMat.getBasis().scaled(btVector3(radius*1.05, radius*1.05, shadowCam.far)));
     modelMat.setOrigin(btVector3(0.0, 0.0, -shadowCam.far));
-    modelMat *= shadowCam.getTransformation();
+    modelMat = shadowCam.getTransformation()*modelMat;
     
     if(shadowMap) {
         shaderPrograms[spotShadowLightSP]->use();
@@ -231,8 +227,9 @@ void SpotLight::draw() {
     }else
         shaderPrograms[spotLightSP]->use();
     
-    currentShaderProgram->setUniformF("lCutoff", cos(shadowCam.fov*0.5));
+    currentShaderProgram->setUniformF("lCutoff", -cos(shadowCam.fov*0.5));
     currentShaderProgram->setUniformVec3("lPosition", shadowCam.getTransformation().getOrigin());
+    currentShaderProgram->setUniformVec3("lDirection", shadowCam.getTransformation().getBasis().getColumn(2)*-1.0);
     LightObject::draw();
     lightCone.draw();
 }
@@ -265,14 +262,14 @@ PositionalLight::~PositionalLight() {
 
 void PositionalLight::setTransformation(const btTransform& transformation) {
     shadowCam.setTransformation(transformation);
-    if(shadowCam.fov != M_PI) {
+    if(abs(shadowCam.fov-M_PI*2.0) < 0.001) {
         body->setWorldTransform(transformation);
         return;
     }
     btTransform shiftMat;
     shiftMat.setIdentity();
     shiftMat.setOrigin(btVector3(0, 0, -shadowCam.far*0.5));
-    body->setWorldTransform(shiftMat * transformation);
+    body->setWorldTransform(transformation * shiftMat);
 }
 
 void PositionalLight::setBounds(bool omniDirectional, float range) {
@@ -282,15 +279,15 @@ void PositionalLight::setBounds(bool omniDirectional, float range) {
     if(omniDirectional)
         setPhysicsShape(new btSphereShape(range));
     else
-        setPhysicsShape(new btCylinderShapeZ(btVector3(range, range, range)));
+        setPhysicsShape(new btCylinderShape(btVector3(range, range, range*0.5)));
 }
 
 bool PositionalLight::gameTick(bool shadowActive) {
     shadowCam.gameTick();
-    shadowCam.use();
-    if(!LightObject::gameTick(shadowActive)) return false;
-    if(shadowCam.fov == M_PI*2.0 && !shadowMapB)
+    if(!LightObject::gameTick(shadowActive)) return true;
+    if(abs(shadowCam.fov-M_PI*2.0) < 0.001 && !shadowMapB)
         shadowMapB = mainFBO.addTexture(1024, true, false);
+    shadowCam.use();
     
     Matrix4 viewMat = shadowCam.viewMat;
     glDisable(GL_BLEND);
@@ -349,7 +346,7 @@ void PositionalLight::draw() {
     modelMat.setIdentity();
     btMatrix3x3 basis(btQuaternion(btVector3(0.0, 1.0, 0.0), M_PI));
     modelMat.setBasis(basis.scaled(btVector3(shadowCam.far*1.05, shadowCam.far*1.05, shadowCam.far*1.05)));
-    modelMat *= shadowCam.getTransformation();
+    modelMat = shadowCam.getTransformation()*modelMat;
     
     if(shadowMap) {
         mainFBO.useTexture(shadowMap, 5);
@@ -362,10 +359,11 @@ void PositionalLight::draw() {
         shaderPrograms[positionalLightSP]->use();
     
     currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowCam.viewMat);
-    currentShaderProgram->setUniformF("lCutoff", (shadowCam.fov == M_PI*2.0) ? -1.0 : 0.0);
+    currentShaderProgram->setUniformF("lCutoff", (abs(shadowCam.fov-M_PI*2.0) < 0.001) ? 1.0 : 0.0);
     currentShaderProgram->setUniformVec3("lPosition", shadowCam.getTransformation().getOrigin());
+    currentShaderProgram->setUniformVec3("lDirection", shadowCam.getTransformation().getBasis().getColumn(2)*-1.0);
     LightObject::draw();
-    if(shadowCam.fov == M_PI)
+    if(abs(shadowCam.fov-M_PI) < 0.001)
         lightParabolid.draw();
     else
         lightSphere.draw();

@@ -295,8 +295,7 @@ Matrix4& Matrix4::scale(btVector3 vec) {
     a.data.x.setX(vec.x());
     a.data.y.setY(vec.y());
     a.data.z.setZ(vec.z());
-    *this = a;
-    return *this;
+    return (*this *= a);
 }
 
 Matrix4& Matrix4::makeTextureMat() {
@@ -305,8 +304,8 @@ Matrix4& Matrix4::makeTextureMat() {
     a.data.x.setX(0.5);
     a.data.y.setY(0.5);
     a.data.w = btVector3(0.5, 0.5, 0.0);
-    *this = a;
-    return *this;
+    a.data.w.setW(1.0);
+    return (*this *= a);
 }
 
 Matrix4& Matrix4::perspective(float fovy, float aspect, float n, float f) {

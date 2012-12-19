@@ -31,6 +31,7 @@ class Cam : public SimpleObject {
           height;//!< Height of the view used if fov < 90
     Cam();
     ~Cam();
+    void remove();
     /*! Calculates a ray shot from this Cam
      @param screenPos from (-1, -1) to (1, 1)
      @return A new ray with the relative direction of the screenPos parameter
@@ -50,7 +51,7 @@ class Cam : public SimpleObject {
      @see LightVolume
      */
     void drawWireframeFrustum(Color4 color);
-    void gameTick();
+    bool gameTick();
     //! Sets this cam as the currentCam
     void use();
 };

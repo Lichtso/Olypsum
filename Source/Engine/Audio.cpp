@@ -74,7 +74,6 @@ float SoundTrack::getLength() {
 
 SoundSourceObject::SoundSourceObject() :soundTrack(NULL), mode(SoundSource_disposable), velocity(btVector3(0, 0, 0)) {
     alGenSources(1, &ALname);
-    objectManager.soundSourceObjects.insert(this);
 }
 
 SoundSourceObject::~SoundSourceObject() {
@@ -82,8 +81,8 @@ SoundSourceObject::~SoundSourceObject() {
 }
 
 void SoundSourceObject::remove() {
-    objectManager.soundSourceObjects.erase(this);
-    delete this;
+    objectManager.simpleObjects.erase(this);
+    BaseObject::remove();
 }
 
 void SoundSourceObject::setSoundTrack(std::shared_ptr<SoundTrack> soundTrackB) {
@@ -122,7 +121,11 @@ float SoundSourceObject::getTimeOffset() {
     return timeOffset;
 }
 
-void SoundSourceObject::gameTick() {
+bool SoundSourceObject::gameTick() {
+    if(mode == SoundSource_disposable && !isPlaying()) {
+        delete this;
+        return false;
+    }
     btVector3 direction = transformation.getBasis().getColumn(2),
     position = transformation.getOrigin();
     velocity = position-prevPosition;
@@ -130,4 +133,5 @@ void SoundSourceObject::gameTick() {
     alSource3f(ALname, AL_POSITION, position.x(), position.y(), position.z());
     alSource3f(ALname, AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());
     prevPosition = position;
+    return true;
 }

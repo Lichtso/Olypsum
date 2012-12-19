@@ -149,8 +149,8 @@ void AppMain(int argc, char *argv[]) {
                     rot.setEuler(-((float)event.button.x/screenSize[0]-0.5)*M_PI*2.0, -((float)event.button.y/screenSize[1]-0.5)*M_PI*2.0, 0);
                     btTransform camMat;
                     camMat.setIdentity();
-                    camMat.setOrigin(btVector3(0, 0, 5));
                     camMat.setRotation(rot);
+                    camMat.setOrigin(camMat.getBasis()*btVector3(0, 0, 3));
                     mainCam->setTransformation(camMat);
                     mainCam->gameTick();
                 }

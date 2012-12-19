@@ -47,6 +47,11 @@ Cam::~Cam() {
         currentCam = NULL;
 }
 
+void Cam::remove() {
+    objectManager.simpleObjects.erase(this);
+    BaseObject::remove();
+}
+
 Ray3 Cam::getRayAt(btVector3 screenPos) {
     Ray3 ray;
     
@@ -133,8 +138,9 @@ void Cam::drawWireframeFrustum(Color4 color) {
             getRayAt(btVector3(-1, -1, near)), getRayAt(btVector3(-1, 1, near)),
             getRayAt(btVector3(1, -1, near)), getRayAt(btVector3(1, 1, near))
         };
+        
         modelMat.setIdentity();
-        FrustumVolume volume(bounds, far);
+        FrustumVolume volume(bounds, far-near);
         volume.init();
         volume.drawWireFrame(color);
     }else if(abs(fov-M_PI) < 0.001) {
@@ -151,17 +157,17 @@ void Cam::drawWireframeFrustum(Color4 color) {
     }
 }
 
-void Cam::gameTick() {
+bool Cam::gameTick() {
     viewMat = Matrix4(transformation).getInverse();
     
-    if(fov > 0.0) {
-        viewMat.perspective(fov, width/height, near, far);
-    }else if(fov == 0.0) {
+    if(fov == 0.0)
         viewMat.ortho(width, height, near, far);
-    }
+    else if(fov < M_PI)
+        viewMat.perspective(fov, width/height, near, far);
     
     velocity = transformation.getOrigin()-prevPos;
     prevPos = transformation.getOrigin();
+    return true;
 }
 
 void Cam::use() {

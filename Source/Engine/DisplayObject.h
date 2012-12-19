@@ -43,12 +43,18 @@ class GraphicObject : public DisplayObject {
  @warning Don't use it directly
  */
 class ModelObject : public GraphicObject {
+    btTransform* skeletonPose;
+    void setupModelObjectBones(BaseObject* object, Bone* bone);
+    void updateSkeletonPose(BaseObject* object, Bone* bone);
+    void drawBonePose(BaseObject* object, Bone* bone, float axesSize, float linesSize, float textSize);
     protected:
     ModelObject(std::shared_ptr<Model> model);
     public:
     std::shared_ptr<Model> model;
+    bool gameTick();
     void draw();
     void drawAccumulatedMesh(Mesh* mesh);
+    void drawSkeletonPose(float axesSize, float linesSize, float textSize);
     virtual void prepareShaderProgram(Mesh* mesh);
 };
 
@@ -118,7 +124,7 @@ class WaterObject : public ModelObject {
     std::vector<Wave> waves;
     WaterObject(std::shared_ptr<Model> model, btCollisionShape* shape, const btTransform& transform);
     ~WaterObject();
-    void gameTick();
+    bool gameTick();
     void draw();
     void prepareShaderProgram(Mesh* mesh);
     void addWave(float maxAge, float ampitude, float length, float originX, float originY);
