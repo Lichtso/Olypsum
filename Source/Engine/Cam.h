@@ -52,7 +52,7 @@ class Cam : public SimpleObject {
      */
     void drawWireframeFrustum(Color4 color);
     bool gameTick();
-    //! Sets this cam as the currentCam
+    //! Sets this Cam as the currentCam
     void use();
 };
 

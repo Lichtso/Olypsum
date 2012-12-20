@@ -9,6 +9,8 @@
 #import <OpenAL/al.h>
 #import "WorldManager.h"
 
+
+//! @cond
 struct PlaneCullingCallback : btDbvt::ICollide {
     bool hit;
     
@@ -35,6 +37,7 @@ struct FrustumCullingCallback : btDbvt::ICollide {
         go->inFrustum = true;
     }
 };
+//! @endcond
 
 
 
@@ -73,7 +76,7 @@ Ray3 Cam::getRayAt(btVector3 screenPos) {
 }
 
 void Cam::doFrustumCulling(short int filterMask) {
-    btDbvtBroadphase* broadphase = static_cast<btDbvtBroadphase*>(worldManager.broadphase);
+    btDbvtBroadphase* broadphase = static_cast<btDbvtBroadphase*>(objectManager.broadphase);
     btVector3* planes_n = new btVector3[6];
     btScalar planes_o[6];
     btVector3 origin = transformation.getOrigin();

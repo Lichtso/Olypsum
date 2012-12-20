@@ -27,7 +27,7 @@ PhysicObject::PhysicObject(btCollisionShape* shape) :body(new btCollisionObject(
     body->setCollisionShape(shape);
     body->setUserPointer(this);
     body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-    worldManager.physicsWorld->addCollisionObject(body, CollisionMask_Zone, CollisionMask_Object);
+    objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Zone, CollisionMask_Object);
 }
 
 PhysicObject::~PhysicObject() {
@@ -62,11 +62,11 @@ void BaseLink::remove(BaseObject* a, const std::map<std::string, BaseLink*>::ite
 PhysicLink::PhysicLink(BaseObject* a, BaseObject* b, std::string nameInA, std::string nameInB, btTypedConstraint* constraintB)
     :BaseLink(a, b, nameInA, nameInB), constraint(constraintB) {
     constraint->setUserConstraintPtr(this);
-    worldManager.physicsWorld->addConstraint(constraint);
+    objectManager.physicsWorld->addConstraint(constraint);
 }
 
 PhysicLink::~PhysicLink() {
-    worldManager.physicsWorld->removeConstraint(constraint);
+    objectManager.physicsWorld->removeConstraint(constraint);
 }
 
 
@@ -101,7 +101,7 @@ btTransform TransformLink::AnimationEntry::gameTick() {
     if(frames.size() == 0) return btTransform::getIdentity();
     if(frames.size() == 1) return frames[0]->getTransform();
     btTransform transform = frames[0]->interpolateTo(frames[1], animationTime);
-    animationTime += worldManager.animationFactor;
+    animationTime += animationFactor;
     if(animationTime > frames[0]->duration) {
         animationTime -= frames[0]->duration;
         frames.erase(frames.begin());

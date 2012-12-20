@@ -35,14 +35,15 @@ LightObject::LightObject() {
     body->setCollisionShape(new btBoxShape(btVector3(1, 1, 1)));
     body->setUserPointer(this);
     body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-    worldManager.physicsWorld->addCollisionObject(body, CollisionMask_Light, 0);
+    objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Light, 0);
     
     shadowMap = NULL;
     color = Color4(1.0);
 }
 
 LightObject::~LightObject() {
-    if(shadowMap) mainFBO.deleteTexture(shadowMap);
+    if(shadowMap)
+        delete shadowMap;
 }
 
 void LightObject::remove() {
@@ -66,15 +67,18 @@ void LightObject::setPhysicsShape(btCollisionShape* shape) {
 
 bool LightObject::gameTick(bool shadowActive) {
     if(!shadowActive) {
-        mainFBO.deleteTexture(shadowMap);
+        if(shadowMap)
+            delete shadowMap;
         shadowMap = NULL;
         return false;
     }
     if(!shadowMap) {
-        shadowMap = mainFBO.addTexture(min(1024U, mainFBO.maxSize), true,
-                                       cubemapsEnabled && dynamic_cast<PositionalLight*>(this));
-        if(!shadowMap)
+        shadowMap = new ColorBuffer(min(1024U, mainFBO.maxSize), true, cubemapsEnabled && dynamic_cast<PositionalLight*>(this));
+        if(glGetError() == GL_OUT_OF_MEMORY) {
+            delete shadowMap;
+            shadowMap = NULL;
             return false;
+        }
     }
     objectManager.currentShadowLight = this;
     return true;
@@ -93,10 +97,6 @@ void LightObject::draw() {
     }
     
     mainFBO.renderDeferred(false, inBuffers, sizeof(inBuffers)/sizeof(unsigned char), outBuffers, sizeof(outBuffers)/sizeof(unsigned char));
-}
-
-bool LightPrioritySorter::operator()(LightObject* a, LightObject* b) {
-    return a->getPriority(position) > b->getPriority(position);
 }
 
 
@@ -129,7 +129,7 @@ bool DirectionalLight::gameTick(bool shadowActive) {
     shadowCam.use();
     
     glDisable(GL_BLEND);
-    mainFBO.renderInTexture(shadowMap, 0);
+    mainFBO.renderInTexture(shadowMap, GL_TEXTURE_2D);
     objectManager.drawScene();
     glEnable(GL_BLEND);
     return true;
@@ -146,7 +146,7 @@ void DirectionalLight::draw() {
         Matrix4 shadowMat = shadowCam.viewMat;
         shadowMat.makeTextureMat();
         currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowMat);
-        mainFBO.useTexture(shadowMap, 5);
+        shadowMap->use(5);
     }else
         shaderPrograms[directionalLightSP]->use();
     
@@ -198,7 +198,7 @@ bool SpotLight::gameTick(bool shadowActive) {
     shadowCam.use();
     
     glDisable(GL_BLEND);
-    mainFBO.renderInTexture(shadowMap, 0);
+    mainFBO.renderInTexture(shadowMap, GL_TEXTURE_2D);
     //Render circle mask
     float vertices[12] = { -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0 };
     shaderPrograms[spotShadowCircleLightSP]->use();
@@ -223,7 +223,7 @@ void SpotLight::draw() {
         Matrix4 shadowMat = shadowCam.viewMat;
         shadowMat.makeTextureMat();
         currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowMat);
-        mainFBO.useTexture(shadowMap, 5);
+        shadowMap->use(5);
     }else
         shaderPrograms[spotLightSP]->use();
     
@@ -257,7 +257,8 @@ PositionalLight::PositionalLight() {
 }
 
 PositionalLight::~PositionalLight() {
-    if(shadowMapB) mainFBO.deleteTexture(shadowMapB);
+    if(shadowMapB)
+        delete shadowMapB;
 }
 
 void PositionalLight::setTransformation(const btTransform& transformation) {
@@ -285,8 +286,13 @@ void PositionalLight::setBounds(bool omniDirectional, float range) {
 bool PositionalLight::gameTick(bool shadowActive) {
     shadowCam.gameTick();
     if(!LightObject::gameTick(shadowActive)) return true;
-    if(abs(shadowCam.fov-M_PI*2.0) < 0.001 && !shadowMapB)
-        shadowMapB = mainFBO.addTexture(1024, true, false);
+    if(abs(shadowCam.fov-M_PI*2.0) < 0.001 && !shadowMapB) {
+        shadowMapB = new ColorBuffer(1024, true, false);
+        if(glGetError() == GL_OUT_OF_MEMORY) {
+            delete shadowMapB;
+            shadowMapB = NULL;
+        }
+    }
     shadowCam.use();
     
     Matrix4 viewMat = shadowCam.viewMat;
@@ -329,11 +335,11 @@ bool PositionalLight::gameTick(bool shadowActive) {
         shaderPrograms[solidParabolidShadowSP]->setUniformF("lRange", shadowCam.far);
         shaderPrograms[skeletalParabolidShadowSP]->use();
         shaderPrograms[skeletalParabolidShadowSP]->setUniformF("lRange", shadowCam.far);
-        mainFBO.renderInTexture(shadowMap, 0);
+        mainFBO.renderInTexture(shadowMap, GL_TEXTURE_2D);
         objectManager.drawScene();
         if(shadowMapB) {
             shadowCam.viewMat.scale(btVector3(-1.0, 1.0, -1.0));
-            mainFBO.renderInTexture(shadowMapB, 0);
+            mainFBO.renderInTexture(shadowMapB, GL_TEXTURE_2D);
             objectManager.drawScene();
             shadowCam.viewMat = viewMat;
         }
@@ -349,9 +355,9 @@ void PositionalLight::draw() {
     modelMat = shadowCam.getTransformation()*modelMat;
     
     if(shadowMap) {
-        mainFBO.useTexture(shadowMap, 5);
+        shadowMap->use(5);
         if(shadowMapB) {
-            mainFBO.useTexture(shadowMapB, 6);
+            shadowMapB->use(6);
             shaderPrograms[positionalShadowDualLightSP]->use();
         }else
             shaderPrograms[positionalShadowLightSP]->use();

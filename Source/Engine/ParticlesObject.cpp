@@ -33,7 +33,7 @@ ParticlesObject::ParticlesObject(unsigned int maxParticlesB) {
     body->setCollisionShape(new btSphereShape(3.0));
     body->setUserPointer(this);
     body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-    worldManager.physicsWorld->addCollisionObject(body, CollisionMask_Light, 0);
+    objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Light, 0);
 }
 
 ParticlesObject::~ParticlesObject() {
@@ -67,7 +67,7 @@ bool ParticlesObject::gameTick() {
     
     if(particleCalcTarget == 0) systemLife = 0.0;
     if(systemLife > -1.0) {
-        systemLife -= worldManager.animationFactor;
+        systemLife -= animationFactor;
         if(systemLife <= 0.0) {
             delete this;
             return false;
@@ -83,29 +83,29 @@ bool ParticlesObject::gameTick() {
         }
     
     if(particleCalcTarget == 1) {
-        btVector3 forceAux = force*worldManager.animationFactor;
+        btVector3 forceAux = force*animationFactor;
         for(unsigned int p = 0; p < particlesCount; p ++) {
-            particles[p].life -= worldManager.animationFactor;
+            particles[p].life -= animationFactor;
             if(particles[p].life <= 0.0) {
                 memcpy(&particles[p], &particles[p+1], sizeof(Particle)*(particlesCount-p-1));
                 particlesCount --;
                 p --;
                 continue;
             }
-            particles[p].pos += particles[p].dir*worldManager.animationFactor;
+            particles[p].pos += particles[p].dir*animationFactor;
             particles[p].dir += forceAux;
         }
     }else if(particleCalcTarget == 2) {
         shaderPrograms[particleCalculateSP]->use();
         currentShaderProgram->setUniformF("respawnParticles", (systemLife == -1.0 || systemLife > lifeMax) ? 1.0 : 0.0);
-        currentShaderProgram->setUniformF("animationFactor", worldManager.animationFactor);
+        currentShaderProgram->setUniformF("animationFactor", animationFactor);
         currentShaderProgram->setUniformF("lifeMin", lifeMin);
         currentShaderProgram->setUniformF("lifeRange", lifeMax-lifeMin);
         currentShaderProgram->setUniformVec3("posMin", posMin+position);
         currentShaderProgram->setUniformVec3("posRange", posMax-posMin);
         currentShaderProgram->setUniformVec3("dirMin", dirMin);
         currentShaderProgram->setUniformVec3("dirRange", dirMax-dirMin);
-        currentShaderProgram->setUniformVec3("velocityAdd", force*worldManager.animationFactor);
+        currentShaderProgram->setUniformVec3("velocityAdd", force*animationFactor);
         
         glBindBuffer(GL_ARRAY_BUFFER, particlesVBO[activeVBO]);
         currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 4, 7*sizeof(float), 0);

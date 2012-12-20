@@ -1,8 +1,6 @@
-Skeletal animation and bones
 Add antialiasing to the corners of GUI elements
 Make options GUI
 Highmap terrains
-Key frame or script animations
 Use C++11 Multithreading
 Level File Formats
 Use Bullet-Engine

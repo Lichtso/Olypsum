@@ -28,7 +28,7 @@ std::shared_ptr<FilePackageResource> SoundTrack::load(FilePackage* filePackageB,
     auto pointer = FilePackageResource::load(filePackageB, name);
     if(ALname) return NULL;
     
-    std::string filePath = filePackageB->getUrlOfFile("Sounds", name);
+    std::string filePath = filePackageB->getPathOfFile("Sounds", name);
     FILE* fp = fopen(filePath.c_str(), "r");
     if(!fp) {
         log(error_log, std::string("The file ")+filePath+" couldn't be found.");

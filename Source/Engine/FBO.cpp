@@ -9,6 +9,52 @@
 #import "Utilities.h"
 #import "ObjectManager.h"
 
+ColorBuffer::ColorBuffer(unsigned int sizeB, bool shadowMapB, bool cubeMapB) :size(sizeB), shadowMap(shadowMapB), cubeMap(cubeMapB) {
+    glGenTextures(1, &texture);
+    
+    GLenum textureTarget = (cubeMap) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
+    glBindTexture(textureTarget, texture);
+    glTexParameteri(textureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(textureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    if(cubeMap) glTexParameteri(textureTarget, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    if(shadowMap) {
+        glTexParameteri(textureTarget, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
+        glTexParameteri(textureTarget, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+        glTexParameteri(textureTarget, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+        if(cubeMap) {
+            for(GLenum side = GL_TEXTURE_CUBE_MAP_POSITIVE_X; side <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; side ++)
+                glTexImage2D(side, 0, GL_DEPTH_COMPONENT16, size, size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+        }else
+            glTexImage2D(textureTarget, 0, GL_DEPTH_COMPONENT16, size, size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    }else{
+        if(cubeMap) {
+            for(GLenum side = GL_TEXTURE_CUBE_MAP_POSITIVE_X; side <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; side ++)
+                glTexImage2D(side, 0, GL_RGB, size, size, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        }else
+            glTexImage2D(textureTarget, 0, GL_RGB, size, size, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    }
+}
+
+ColorBuffer::~ColorBuffer() {
+    glDeleteTextures(1, &texture);
+}
+
+void ColorBuffer::use(GLuint targetIndex) {
+    glActiveTexture(GL_TEXTURE0+targetIndex);
+    glBindTexture((cubeMap) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, texture);
+}
+
+void ColorBuffer::mipmapTexture() {
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+
+
 FBO::FBO() {
     for(unsigned char i = 0; i < gBuffersCount; i ++)
         gBuffers[i] = 0;
@@ -16,21 +62,10 @@ FBO::FBO() {
 }
 
 FBO::~FBO() {
-    for(unsigned int i = 0; i < colorBuffers.size(); i ++) {
-        glDeleteTextures(1, &colorBuffers[i]->texture);
-        delete colorBuffers[i];
-    }
     for(unsigned char i = 0; i < gBuffersCount; i ++)
         if(gBuffers[i])
             glDeleteTextures(1, &gBuffers[i]);
     glDeleteFramebuffers(1, &frameBuffer);
-}
-
-int FBO::getColorBufferIndex(ColorBuffer* colorBuffer) {
-    for(unsigned int i = 0; i < colorBuffers.size(); i ++)
-        if(colorBuffers[i] == colorBuffer)
-            return i;
-    return -1;
 }
 
 void FBO::initBuffer(unsigned int index) {
@@ -83,7 +118,7 @@ void FBO::init() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void FBO::copyColorBuffer(unsigned char source, unsigned char destination) {
+void FBO::copyGBuffer(unsigned char source, unsigned char destination) {
     if(source == 0)
         glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     else{
@@ -126,6 +161,7 @@ void FBO::renderInDeferredBuffers(bool transparent) {
         for(unsigned char o = 0; o < 4; o ++)
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+o, GL_TEXTURE_RECTANGLE_ARB, gBuffers[colorDBuffer+o], 0);
     }
+    
     glDrawBuffers(4, drawBuffers);
     glClear(GL_COLOR_BUFFER_BIT);
     if(transparent && blendingQuality == 3)
@@ -164,7 +200,7 @@ void FBO::renderTransparentInDeferredBuffers() {
 
     objectManager.transparentAccumulator.clear();
     if(!edgeSmoothEnabled && !depthOfFieldQuality && screenBlurFactor <= 0.0)
-        copyColorBuffer(colorDBuffer, 0);
+        copyGBuffer(colorDBuffer, 0);
 }
 
 void FBO::renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned char inBuffersCount, unsigned char* outBuffers, unsigned char outBuffersCount) {
@@ -193,76 +229,21 @@ void FBO::renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned cha
     glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 }
 
-ColorBuffer* FBO::addTexture(unsigned int size, bool shadowMap, bool cubeMap) {
-    if(colorBuffers.size() >= maxColorBufferCount) return NULL;
-    GLuint texture = 0;
-    glGenTextures(1, &texture);
-    if(texture == 0) return NULL;
-    ColorBuffer* colorBuffer = new ColorBuffer();
-    colorBuffer->size = size;
-    colorBuffer->texture = texture;
-    colorBuffer->shadowMap = shadowMap;
-    colorBuffer->cubeMap = cubeMap;
-    GLenum textureTarget = (cubeMap) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
-    glBindTexture(textureTarget, colorBuffer->texture);
-    glTexParameteri(textureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(textureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    if(cubeMap) glTexParameteri(textureTarget, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    if(shadowMap) {
-        glTexParameteri(textureTarget, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
-        glTexParameteri(textureTarget, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-        glTexParameteri(textureTarget, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-        if(cubeMap) {
-            for(GLenum side = GL_TEXTURE_CUBE_MAP_POSITIVE_X; side <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; side ++)
-                glTexImage2D(side, 0, GL_DEPTH_COMPONENT16, colorBuffer->size, colorBuffer->size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-        }else
-            glTexImage2D(textureTarget, 0, GL_DEPTH_COMPONENT16, colorBuffer->size, colorBuffer->size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-    }else{
-        if(cubeMap) {
-            for(GLenum side = GL_TEXTURE_CUBE_MAP_POSITIVE_X; side <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; side ++)
-                glTexImage2D(side, 0, GL_RGB, colorBuffer->size, colorBuffer->size, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-        }else
-            glTexImage2D(textureTarget, 0, GL_RGB, colorBuffer->size, colorBuffer->size, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    }
-    colorBuffers.push_back(colorBuffer);
-    return colorBuffer;
-}
-
-void FBO::renderInTexture(ColorBuffer* colorBuffer, GLenum side) {
+void FBO::renderInTexture(ColorBuffer* colorBuffer, GLenum textureTarget) {
     glViewport(0, 0, colorBuffer->size, colorBuffer->size);
     
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
     if(colorBuffer->shadowMap) {
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, (colorBuffer->cubeMap) ? side : GL_TEXTURE_2D, colorBuffer->texture, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureTarget, colorBuffer->texture, 0);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE_ARB, gBuffers[specularDBuffer], 0);
         glDrawBuffer(GL_NONE);
         glClear(GL_DEPTH_BUFFER_BIT);
     }else{
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_RECTANGLE_ARB, gBuffers[depthDBuffer], 0);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, (colorBuffer->cubeMap) ? side : GL_TEXTURE_2D, colorBuffer->texture, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureTarget, colorBuffer->texture, 0);
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     }
-}
-
-void FBO::mipmapTexture(ColorBuffer* colorBuffer) {
-    glBindTexture(GL_TEXTURE_2D, colorBuffer->texture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glGenerateMipmap(GL_TEXTURE_2D);
-}
-
-void FBO::useTexture(ColorBuffer* colorBuffer, GLuint targetIndex) {
-    glActiveTexture(GL_TEXTURE0+targetIndex);
-    glBindTexture((colorBuffer->cubeMap) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, colorBuffer->texture);
-}
-
-void FBO::deleteTexture(ColorBuffer* colorBuffer) {
-    int index = getColorBufferIndex(colorBuffer);
-    glDeleteTextures(1, &colorBuffer->texture);
-    colorBuffers.erase(colorBuffers.begin()+index);
-    delete colorBuffer;
 }
 
 FBO mainFBO;

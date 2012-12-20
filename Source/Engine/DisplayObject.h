@@ -118,16 +118,29 @@ class RigidObject : public ModelObject {
 class WaterObject : public ModelObject {
     public:
     float waveSpeed;
+    //! A wave in a WaterObject
     struct Wave {
-        float length, age, maxAge, ampitude, originX, originY;
+        float length, //! The length of the wave
+              age, //! The time in seconds until the wave will be deleted
+              duration, //! The life duration in seconds
+              ampitude, //! The height of the wave
+              originX, //! The s coord of the center
+              originY; //! The t coord of the center
     };
-    std::vector<Wave> waves;
+    std::vector<Wave> waves; //!< The waves on the surface of this WaterObject
     WaterObject(std::shared_ptr<Model> model, btCollisionShape* shape, const btTransform& transform);
     ~WaterObject();
     bool gameTick();
     void draw();
     void prepareShaderProgram(Mesh* mesh);
-    void addWave(float maxAge, float ampitude, float length, float originX, float originY);
+    /*! Adds a wave to the surface
+     @param duration The time in seconds until the wave will be deleted
+     @param ampitude The height of the wave
+     @param length The length of the wave
+     @param originX The s coord of the center
+     @param originY The t coord of the center
+     */
+    void addWave(float duration, float ampitude, float length, float originX, float originY);
 };
 
 #endif

@@ -46,7 +46,7 @@ void setMenu(MenuName menu) {
     if(currentScreenView) delete currentScreenView;
     currentScreenView = new GUIScreenView();
     
-    if(worldManager.gameStatus == noGame) {
+    if(worldManager.gameStatus == noGame && menu != loadingMenu) {
         GUIImage* image = new GUIImage();
         image->texture = fileManager.getPackage("Default")->getResource<Texture>("background.png");
         image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
@@ -60,18 +60,18 @@ void setMenu(MenuName menu) {
     switch(menu) {
         case loadingMenu: {
             GUIImage* image = new GUIImage();
+            image->sizeAlignment = GUISizeAlignment_Height;
             image->texture = fileManager.getPackage("Default")->getResource<Texture>("logo.png");
             image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGBA);
-            
-            image->sizeAlignment = GUISizeAlignment_Height;
             image->width = screenSize[0]*0.4;
             image->posY = screenSize[1]*0.1;
+            image->updateContent();
+            
             currentScreenView->addChild(image);
             GUILabel* label = new GUILabel();
             label->text = localization.localizeString("loading");
-            label->posY = screenSize[1]*-0.1;
+            label->posY = screenSize[1]*-0.2;
             label->fontHeight = screenSize[1]*0.08;
-            label->color = Color4(1.0);
             currentScreenView->addChild(label);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             currentScreenView->draw();

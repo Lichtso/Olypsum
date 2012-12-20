@@ -8,16 +8,13 @@
 
 #import "AppMain.h"
 #import <sys/time.h>
-#import <Cocoa/Cocoa.h>
 
 Uint8* keyState;
 SDLMod modKeyState;
-float timeInLastSec = 0.0;
+float timeInLastSec = 0.0, loadingScreen = 1.0;
 unsigned int currentFPS = 0, newFPS = 0;
 
-#ifdef __MAC_OS__
-#import "macCompCode/SDLMain.h"
-#else
+#ifndef __MAC_OS__
 void updateVideoMode() {
     const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
     if(!videoInfo) {
@@ -98,8 +95,6 @@ void AppMain(int argc, char *argv[]) {
     
     SDL_Event event;
     SDL_PollEvent(&event);
-    setMenu(mainMenu);
-    
     timeval timeThen, timeNow;
     gettimeofday(&timeThen, 0);
     while(true) {
@@ -174,25 +169,30 @@ void AppMain(int argc, char *argv[]) {
         }
         
         if(worldManager.gameStatus == noGame) {
-            glClearColor(0, 0, 0, 1);
+            if(currentMenu == loadingMenu) {
+                loadingScreen -= animationFactor;
+                if(loadingScreen <= 0.0)
+                    setMenu(mainMenu);
+            }
+            
+            glClearColor(1, 1, 1, 1);
             glViewport(0, 0, screenSize[0], screenSize[1]);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT);
         }else{
             objectManager.gameTick();
-            worldManager.gameTick();
             objectManager.drawFrame();
         }
         if(currentScreenView) currentScreenView->draw();
         SDL_GL_SwapBuffers();
         
         gettimeofday(&timeNow, 0);
-        worldManager.animationFactor = timeNow.tv_sec - timeThen.tv_sec;
-        worldManager.animationFactor += (timeNow.tv_usec - timeThen.tv_usec) / 1000000.0;
+        animationFactor = timeNow.tv_sec - timeThen.tv_sec;
+        animationFactor += (timeNow.tv_usec - timeThen.tv_usec) / 1000000.0;
         gettimeofday(&timeThen, 0);
         
         newFPS ++;
-        timeInLastSec += worldManager.animationFactor;
+        timeInLastSec += animationFactor;
         if(timeInLastSec >= 1.0) {
             timeInLastSec -= 1.0;
             currentFPS = newFPS;

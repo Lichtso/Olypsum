@@ -16,17 +16,37 @@
 
 #define xmlUsedCharType char
 
+/*! Parses the content of a file as XML
+ @param doc A reference to the rapidxml::xml_document which will be used to store the content
+ @param filePath The file to be parsed
+ @param logs Enables console logs if a error occurs
+ @return A string with the raw content of the file to be deleted by the receiver
+ */
 std::unique_ptr<char[]> readXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string filePath, bool logs);
 
-void addXMLNode(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* nodes, const char* name, const char* value);
+/*! Adds a rapidxml::xml_node with a "value" attribute to a rapidxml::xml_document
+ @param doc A reference to the rapidxml::xml_document
+ @param parent The parent node to be used to attach the new child
+ @param name The name of the new child node
+ @param name The value of the "value" attribute
+ */
+void addXMLNode(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* parent, const char* name, const char* value);
 
+/*! Writes a rapidxml::xml_document to a file
+ @param doc A reference to the rapidxml::xml_document
+ @param filePath The file to be written
+ @param logs Enables console logs if a error occurs
+ @return Success
+ */
 bool writeXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string filePath, bool logs);
 
+//! A utility used to parse XML and string value arrays
 template <class T>
 class XMLValueArray {
     public:
-    T* data;
-    unsigned int count, stride;
+    T* data; //!< The content of this array
+    unsigned int count, //!< The size of this array
+                 stride; //!< The stried used to interleave with other XMLValueArrays (ignored in parsing)
     XMLValueArray() {
         data = NULL;
         count = 0;
@@ -35,12 +55,17 @@ class XMLValueArray {
         if(data)
             delete [] data;
     }
+    //! Deletes the content
     void clear() {
         if(!data) return;
         delete [] data;
         data = NULL;
     }
-    bool readString(char* dataStr, const char* readType) {
+    /*! Parses a string of values separated by ' '
+     @param dataStr The string to be parsed
+     @param readType The format like in scanf()
+     */
+    void readString(char* dataStr, const char* readType) {
         char* dataEnd = dataStr+strlen(dataStr);
         if(!data) {
             count = 1;
@@ -56,8 +81,12 @@ class XMLValueArray {
             sscanf(lastPos, readType, &data[count ++]);
             lastPos = dataStr+1;
         }
-        return true;
     }
+    /*! Parses a rapidxml::xml_node of a COLLADA file for example
+     @param node The rapidxml::xml_node to be parsed
+     @param readType The format like in scanf()
+     @return Success
+     */
     bool readString(rapidxml::xml_node<xmlUsedCharType>* node, const char* readType) {
         if(!node) {
             log(error_log, "XMLValueArray readString(): Node is undefined.");
@@ -77,6 +106,12 @@ class XMLValueArray {
         }
         return true;
     }
+    /*! Parses a rapidxml::xml_node of a COLLADA file for example
+     @param node The rapidxml::xml_node to be parsed
+     @param expectedCount Set another count to be expected as size of the array (used for error logs)
+     @param readType The format like in scanf()
+     @return Success
+     */
     bool readString(rapidxml::xml_node<xmlUsedCharType>* node, unsigned int expectedCount, const char* readType) {
         if(!node) {
             log(error_log, "XMLValueArray readString(): Node is undefined.");
@@ -84,13 +119,14 @@ class XMLValueArray {
         }
         readString(node->value(), readType);
         if(count != expectedCount) {
-            log(error_log, "XMLValueArray readString(): Count attribute doesn't match the elements count.");
+            log(error_log, "XMLValueArray readString(): Expected count doesn't match the elements count.");
             return false;
         }
         return true;
     }
 };
 
+//! Parses a rapidxml::xml_node and convertes its content into a btTransform
 btTransform readTransformationXML(rapidxml::xml_node<xmlUsedCharType>* node);
 
 #endif

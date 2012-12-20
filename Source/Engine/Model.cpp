@@ -84,6 +84,7 @@ void Mesh::draw(ModelObject* object) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+//! @cond
 struct VertexReference {
     XMLValueArray<float>* source;
     unsigned int offset;
@@ -94,6 +95,7 @@ struct Material {
     bool transparent;
     std::string diffuseURL, effectMapURL, heightMapURL;
 };
+//! @endcond
 
 static Bone* readBone(Skeleton& skeleton, btTransform& parentTrans, bool isRoot, rapidxml::xml_node<xmlUsedCharType>* dataNode) {
     btTransform absoluteMat;
@@ -159,7 +161,7 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
     if(meshes.size() > 0) return NULL;
     
     rapidxml::xml_document<xmlUsedCharType> doc;
-    std::unique_ptr<char[]> fileData = readXmlFile(doc, filePackage->getUrlOfFile("Models", name), true);
+    std::unique_ptr<char[]> fileData = readXmlFile(doc, filePackage->getPathOfFile("Models", name), true);
     if(!fileData) return NULL;
     
     rapidxml::xml_node<xmlUsedCharType> *collada, *library, *geometry, *meshNode, *source, *dataNode;

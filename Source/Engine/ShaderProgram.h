@@ -12,16 +12,27 @@
 #ifndef ShaderProgram_h
 #define ShaderProgram_h
 
+//! A class to store a color used for graphics
 class Color4 {
     public:
-    float r, g, b, a;
+    float r, //!< The red channel (0.0 - 1.0)
+          g, //!< The green channel (0.0 - 1.0)
+          b, //!< The blue channel (0.0 - 1.0)
+          a; //!< The transparency channel (0.0 - 1.0)
+    //! A black color
     Color4() : r(0), g(0), b(0), a(1) {};
+    //! A gray color
     Color4(float gray) : r(gray), g(gray), b(gray), a(1) {};
+    //! A transparent gray color
     Color4(float gray, float aB) : r(gray), g(gray), b(gray), a(aB) {};
+    //! A rgb color
     Color4(float rB, float gB, float bB) : r(rB), g(gB), b(bB), a(1) {};
+    //! A transparent rgb color
     Color4(float rB, float gB, float bB, float aB) : r(rB), g(gB), b(bB), a(aB) {};
     Color4& operator=(const Color4& B);
+    //! Converts this Color4 to a btVector3
     btVector3 getVector();
+    //! Converts this Color4 to a SDL_Color
     SDL_Color getSDL();
 };
 
@@ -33,28 +44,48 @@ class Color4 {
 #define JOINT_ATTRIBUTE 4
 #define VELOCITY_ATTRIBUTE 5
 
+//! A shader program used for graphics
 class ShaderProgram {
     public:
-	GLuint GLname;
+	GLuint GLname; //!< The OpenGL identifier
 	ShaderProgram();
 	~ShaderProgram();
+    //! Loads a single shader and compiles it. This method is automaticly called by loadShaderProgram()
 	bool loadShader(GLuint shaderType, const char* soucreCode, std::vector<const char*>* macros);
+    /*! Loads all shaders from a file
+     @param fileName The file which contains the shaders
+     @param shaderTypes A array of shader types one entry for each shader
+     @param macros A array of macros to be inserted in every shader
+     */
     bool loadShaderProgram(const char* fileName, std::vector<GLenum> shaderTypes, std::vector<const char*> macros);
+    //! Sets the a attribute that will be linked
     void addAttribute(unsigned int index, const char* attributeName);
-	void link();
-	void use();
-    void setAttribute(unsigned int index, unsigned int size, GLsizei stride, GLfloat* data);
+    //! Sets the transform feedback varings that will be linked
     void setTransformFeedbackVaryings(unsigned int count, const char** varyings);
+    //! Links all shaders to a complete shader programm
+	void link();
+    //! Sets this ShaderProgram as the currentShaderProgram and updates the transformation uniforms
+	void use();
+    //! Enables and sets a attribute
+    void setAttribute(unsigned int index, unsigned int size, GLsizei stride, GLfloat* data);
+    //! Checks if a uniform existis
     bool checkUniformExistence(const char* name);
+    //! Sets a single integer uniform
     void setUniformI(const char* name, int value);
+    //! Sets a single float uniform
     void setUniformF(const char* name, btScalar value);
+    //! Sets a float[2] uniform
     void setUniformVec2(const char* name, btScalar x, btScalar y);
+    //! Sets a float[3] uniform
     void setUniformVec3(const char* name, btVector3 value);
+    //! Sets a 3x3 matrix uniform
     void setUniformMatrix3(const char* name, const btMatrix3x3* mat);
+    //! Sets a 4x4 matrix uniform
     void setUniformMatrix4(const char* name, const Matrix4* mat);
+    //! Sets a 4x4 matrix uniform
     void setUniformMatrix4(const char* name, const btTransform* mat);
+    //! Sets a 4x4 matrix array uniform
     void setUniformMatrix4(const char* name, const btTransform* mat, unsigned int count);
-	ShaderProgram& operator=(const ShaderProgram &b);
 };
 
 extern btTransform modelMat;
@@ -98,7 +129,10 @@ enum ShaderProgramNames {
     waterSP = 31
 };
 
+//! Compiles all shader programs which are not influenced by graphic options
 void loadStaticShaderPrograms();
+
+//! (Re)compiles all shader programs which change their behavior with graphic options
 void loadDynamicShaderPrograms();
 
 #endif

@@ -159,7 +159,7 @@ class PhysicLink : public BaseLink {
     PhysicLink(BaseObject* a, BaseObject* b, std::string nameInA, std::string nameInB, btTypedConstraint* constraint);
 };
 
-// A BaseLink with a parent child relationship
+//! A BaseLink with a parent child relationship
 class TransformLink : public BaseLink {
     public:
     //! This is the base for all entries of a TransformLink

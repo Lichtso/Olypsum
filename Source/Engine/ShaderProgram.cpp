@@ -269,11 +269,6 @@ void ShaderProgram::setUniformMatrix4(const char* name, const btTransform* mat, 
     glUniformMatrix4fv(location, count, true, matData);
 }
 
-ShaderProgram& ShaderProgram::operator=(const ShaderProgram &b) {
-	GLname = b.GLname;
-	return *this;
-}
-
 btTransform modelMat;
 ShaderProgram *shaderPrograms[], *currentShaderProgram;
 float screenBlurFactor = -1.0;

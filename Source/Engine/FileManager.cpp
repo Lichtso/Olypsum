@@ -32,7 +32,7 @@ FilePackage::~FilePackage() {
     
 }
 
-bool FilePackage::load() {
+bool FilePackage::init() {
     path = resourcesDir+"Packages/"+name+'/';
     DIR* dir = opendir(path.c_str());
     if(dir == NULL) {
@@ -47,7 +47,7 @@ bool FilePackage::load() {
     return true;
 }
 
-std::string FilePackage::getUrlOfFile(const char* groupName, const std::string& fileName) {
+std::string FilePackage::getPathOfFile(const char* groupName, const std::string& fileName) {
     return path+groupName+'/'+fileName;
 }
 
@@ -102,7 +102,7 @@ void FileManager::loadOptions() {
         particleCalcTarget = readOptionUInt(graphics->first_node("ParticleCalcTarget"));
     }else saveOptions();
     
-    loadPackage("Default");
+    getPackage("Default");
 }
 
 void FileManager::saveOptions() {
@@ -137,20 +137,17 @@ void FileManager::saveOptions() {
     writeXmlFile(doc, gameDataDir+"Options.xml", true);
 }
 
-FilePackage* FileManager::loadPackage(const char* name) {
-    FilePackage* package = new FilePackage(name);
-    if(!package->load()) {
-        delete package;
-        return NULL;
-    }
-    filePackages[name] = package;
-    return package;
-}
-
 FilePackage* FileManager::getPackage(const char* name) {
     std::map<std::string, FilePackage*>::iterator iterator = filePackages.find(name);
-    if(iterator == filePackages.end())
-        return loadPackage(name);
+    if(iterator == filePackages.end()) {
+        FilePackage* package = new FilePackage(name);
+        if(!package->init()) {
+            delete package;
+            return NULL;
+        }
+        filePackages[name] = package;
+        return package;
+    }
     return iterator->second;
 }
 

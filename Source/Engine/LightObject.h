@@ -31,12 +31,6 @@ class LightObject : public DisplayObject {
     virtual float getPriority(btVector3 position) = 0;
 };
 
-class LightPrioritySorter {
-    public:
-    btVector3 position;
-    bool operator()(LightObject* a, LightObject* b);
-};
-
 class DirectionalLight : public LightObject {
     public:
     DirectionalLight();

@@ -23,7 +23,7 @@ std::shared_ptr<FilePackageResource> Texture::load(FilePackage* filePackageB, co
     auto pointer = FilePackageResource::load(filePackageB, name);
     if(surface) return NULL;
     
-    std::string filePath = filePackage->getUrlOfFile("Textures", name);
+    std::string filePath = filePackage->getPathOfFile("Textures", name);
     surface = IMG_Load(filePath.c_str());
     if(!surface) {
         log(error_log, std::string("Unable to load texture ")+filePath+".\n"+IMG_GetError());

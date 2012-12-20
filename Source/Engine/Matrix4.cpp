@@ -32,18 +32,6 @@ Matrix4::Matrix4(btScalar matData[16]) {
     memcpy(values, matData, sizeof(values));
 }
 
-std::string Matrix4::getString() {
-    char buffer[64];
-    std::string str = "(";
-    for(unsigned char i = 0; i < 16; i ++) {
-        if(i % 4 > 0) str += ", ";
-        sprintf(buffer, "%f", values[i]);
-        str += buffer;
-        if(i % 4 == 3 && i < 15) str += ",\n ";
-    }
-    return str+")";
-}
-
 btMatrix3x3 Matrix4::getNormalMatrix() {
     return btMatrix3x3(data.x.normalized(), data.y.normalized(), data.z.normalized());
 }
@@ -341,4 +329,16 @@ Matrix4& Matrix4::ortho(float w, float h, float n, float f) {
     b.data.z.setZ(2.0/(n-f));
     b.data.w.setZ((n+f)/(n-f));
     return (*this *= b);
+}
+
+std::string stringOf(Matrix4& mat) {
+    char buffer[64];
+    std::string str = "(";
+    for(unsigned char i = 0; i < 16; i ++) {
+        if(i % 4 > 0) str += ", ";
+        sprintf(buffer, "%f", mat.values[i]);
+        str += buffer;
+        if(i % 4 == 3 && i < 15) str += ",\n ";
+    }
+    return str+")";
 }

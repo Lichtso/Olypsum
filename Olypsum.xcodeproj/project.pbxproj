@@ -16,7 +16,7 @@
 		118620481650165400A32518 /* ObjectManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118620461650165400A32518 /* ObjectManager.cpp */; };
 		118B60621573E2E8004C132E /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118B60611573E2E8004C132E /* Audio.cpp */; };
 		11A5C2C915752306002991E5 /* Vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11A5C2C815752306002991E5 /* Vorbis.framework */; };
-		11A79B6A153C2FE9002B9F0A /* AppMain.mm in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B20153C2FE9002B9F0A /* AppMain.mm */; };
+		11A79B6A153C2FE9002B9F0A /* AppMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B20153C2FE9002B9F0A /* AppMain.cpp */; };
 		11A79B6B153C2FE9002B9F0A /* Cam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B22153C2FE9002B9F0A /* Cam.cpp */; };
 		11A79B6C153C2FE9002B9F0A /* FileManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B24153C2FE9002B9F0A /* FileManager.cpp */; };
 		11A79B6D153C2FE9002B9F0A /* GUIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B27153C2FE9002B9F0A /* GUIButton.cpp */; };
@@ -84,7 +84,7 @@
 		118B60601573E2DF004C132E /* Audio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Audio.h; sourceTree = "<group>"; };
 		118B60611573E2E8004C132E /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Audio.cpp; sourceTree = "<group>"; };
 		11A5C2C815752306002991E5 /* Vorbis.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vorbis.framework; path = ../../../../Library/Frameworks/Vorbis.framework; sourceTree = "<group>"; };
-		11A79B20153C2FE9002B9F0A /* AppMain.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = AppMain.mm; sourceTree = "<group>"; };
+		11A79B20153C2FE9002B9F0A /* AppMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppMain.cpp; sourceTree = "<group>"; };
 		11A79B21153C2FE9002B9F0A /* AppMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppMain.h; sourceTree = "<group>"; };
 		11A79B22153C2FE9002B9F0A /* Cam.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Cam.cpp; sourceTree = "<group>"; };
 		11A79B23153C2FE9002B9F0A /* Cam.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cam.h; sourceTree = "<group>"; };
@@ -306,7 +306,7 @@
 				11BB4D1E15BC818E0094A73B /* Menu.h */,
 				1130ECBA15BC1CA600203C2E /* Menu.cpp */,
 				11A79B21153C2FE9002B9F0A /* AppMain.h */,
-				11A79B20153C2FE9002B9F0A /* AppMain.mm */,
+				11A79B20153C2FE9002B9F0A /* AppMain.cpp */,
 				11A79B54153C2FE9002B9F0A /* macCompCode */,
 			);
 			path = Engine;
@@ -445,7 +445,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				11A9075F1629B19000B16607 /* Utilities.cpp in Sources */,
-				11A79B6A153C2FE9002B9F0A /* AppMain.mm in Sources */,
+				11A79B6A153C2FE9002B9F0A /* AppMain.cpp in Sources */,
 				11A79B6B153C2FE9002B9F0A /* Cam.cpp in Sources */,
 				11A79B6C153C2FE9002B9F0A /* FileManager.cpp in Sources */,
 				11A79B6D153C2FE9002B9F0A /* GUIButton.cpp in Sources */,

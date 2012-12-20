@@ -35,10 +35,23 @@ bool createDir(std::string path);
 bool scanDir(std::string path, std::vector<std::string>& files);
 bool removeDir(std::string path);
 
+//! Converts a int into a std::string
 std::string stringOf(int value);
+
+//! Converts a float into a std::string
 std::string stringOf(float value);
-std::string stringOf(btVector3 vec);
-std::string stringOf(btTransform mat);
+
+//! Converts a btVector3 into a std::string
+std::string stringOf(btVector3& vec);
+
+//! Converts a btTransform into a std::string
+std::string stringOf(btTransform& mat);
+
+/*! Converts a any value into a std::string
+ @param format A string to be used for conversion like in printf()
+ @param value The value to be converted
+ @return The converted std::string
+ */
 template <class T> std::string stringOf(const char* format, T value) {
     char buffer[64];
     sprintf(buffer, format, value);

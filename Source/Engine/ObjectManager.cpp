@@ -17,14 +17,40 @@ unsigned char inBuffersSSAO[] = { depthDBuffer }, outBuffersSSAO[] = { ssaoDBuff
 unsigned char inBuffersCombine[] = { colorDBuffer, diffuseDBuffer, specularDBuffer, materialDBuffer, normalDBuffer, ssaoDBuffer }, outBuffersCombine[] = { colorDBuffer };
 unsigned char inBuffersPost[] = { depthDBuffer, colorDBuffer }, outBuffersPost[] = { colorDBuffer };
 
+//! @cond
+class LightPrioritySorter {
+    public:
+    btVector3 position;
+    bool operator()(LightObject* a, LightObject* b) {
+        return a->getPriority(position) > b->getPriority(position);
+    }
+};
+
+static void calculatePhysicsTick(btDynamicsWorld* world, btScalar timeStep) {
+    printf("%d\n", objectManager.collisionDispatcher->getNumManifolds());
+    objectManager.physicsTick();
+}
+//! @endcond
+
 ObjectManager::ObjectManager() {
     currentShadowLight = NULL;
+    physicsWorld = NULL;
+    collisionConfiguration = new btDefaultCollisionConfiguration();
+    collisionDispatcher = new btCollisionDispatcher(collisionConfiguration);
+    constraintSolver = new btSequentialImpulseConstraintSolver();
+    broadphase = new btDbvtBroadphase();
 }
 
 ObjectManager::~ObjectManager() {
     alcDestroyContext(soundContext);
     alcCloseDevice(soundDevice);
     clear();
+    clearSharedObjects();
+    
+    delete broadphase;
+    delete constraintSolver;
+    delete collisionDispatcher;
+    delete collisionConfiguration;
 }
 
 void ObjectManager::init() {
@@ -53,6 +79,28 @@ void ObjectManager::init() {
     log(info_log, std::string("OpenAL, sound output ")+alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
 }
 
+void ObjectManager::initPhysics(btVector3 worldSize) {
+    clear();
+    
+    physicsWorld = new btDiscreteDynamicsWorld(collisionDispatcher, broadphase, constraintSolver, collisionConfiguration);
+    physicsWorld->setGravity(btVector3(0, -9.81, 0));
+    physicsWorld->setInternalTickCallback(calculatePhysicsTick);
+    
+    if(!sharedCollisionShapes["worldWall"])
+        sharedCollisionShapes["worldWall"] = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
+    btDefaultMotionState* wallMotionState[6];
+    wallMotionState[0] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, -M_PI_2), btVector3(-worldSize.x(), 0, 0)));
+    wallMotionState[1] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, M_PI_2), btVector3(worldSize.x(), 0, 0)));
+    wallMotionState[2] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0), btVector3(0, -worldSize.y(), 0)));
+    wallMotionState[3] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, M_PI), btVector3(0, worldSize.y(), 0)));
+    wallMotionState[4] = new btDefaultMotionState(btTransform(btQuaternion(0, M_PI_2, 0), btVector3(0, 0, -worldSize.z())));
+    wallMotionState[5] = new btDefaultMotionState(btTransform(btQuaternion(0, -M_PI_2, 0), btVector3(0, 0, worldSize.z())));
+    for(unsigned char i = 0; i < 6; i ++) {
+        worldWalls[i] = new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(0, wallMotionState[i], sharedCollisionShapes["worldWall"], btVector3(0, 0, 0)));
+        physicsWorld->addRigidBody(worldWalls[i], CollisionMask_Zone, CollisionMask_Object);
+    }
+}
+
 void ObjectManager::clear() {
     currentShadowLight = NULL;
     for(unsigned int i = 0; i < lightObjects.size(); i ++)
@@ -78,12 +126,31 @@ void ObjectManager::clear() {
     for(auto simpleObject : simpleObjects)
         delete simpleObject;
     simpleObjects.clear();
+    
+    if(physicsWorld) {
+        for(unsigned char i = 0; i < 6; i ++) {
+            delete worldWalls[i]->getMotionState();
+            delete worldWalls[i];
+            worldWalls[i] = NULL;
+        }
+        delete physicsWorld;
+        physicsWorld = NULL;
+    }
+}
+
+void ObjectManager::clearSharedObjects() {
+    for(auto iterator: sharedCollisionShapes)
+        delete iterator.second;
+    sharedCollisionShapes.clear();
 }
 
 void ObjectManager::gameTick() {
+    //Calculate Physics
+    physicsWorld->stepSimulation(animationFactor, 4, 1.0/60.0); //Try to maintain 60 FPS
+    
     //Calculate Decals
     for(auto iterator = decals.begin(); iterator != decals.end(); iterator ++) {
-        (*iterator)->life -= worldManager.animationFactor;
+        (*iterator)->life -= animationFactor;
         if((*iterator)->life > 0.0) continue;
         delete *iterator;
         decals.erase(iterator);
@@ -122,10 +189,9 @@ void ObjectManager::gameTick() {
 }
 
 void ObjectManager::physicsTick() {
-    btDispatcher* dispatcher = worldManager.physicsWorld->getDispatcher();
-    unsigned int numManifolds = dispatcher->getNumManifolds();
+    unsigned int numManifolds = collisionDispatcher->getNumManifolds();
 	for(unsigned int i = 0; i < numManifolds; i ++) {
-		btPersistentManifold* contactManifold = dispatcher->getManifoldByIndexInternal(i);
+		btPersistentManifold* contactManifold = collisionDispatcher->getManifoldByIndexInternal(i);
         if(contactManifold->getNumContacts() == 0) continue;
         
 		void *objectA = static_cast<const btCollisionObject*>(contactManifold->getBody0())->getUserPointer(),
@@ -231,7 +297,7 @@ void ObjectManager::drawFrame() {
     
     //Calculate Screen Blur
     if(screenBlurFactor > -1.0) {
-        float speed = worldManager.animationFactor*5.0;
+        float speed = animationFactor*5.0;
         if(currentMenu == inGameMenu) {
             screenBlurFactor -= min(screenBlurFactor*speed, speed);
             if(screenBlurFactor < 0.01) screenBlurFactor = 0.0;
@@ -280,4 +346,5 @@ void ObjectManager::drawFrame() {
     glEnable(GL_DEPTH_TEST);
 }
 
+float animationFactor;
 ObjectManager objectManager;

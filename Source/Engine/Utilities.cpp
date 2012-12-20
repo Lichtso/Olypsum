@@ -92,13 +92,13 @@ std::string stringOf(float value) {
     return buffer;
 }
 
-std::string stringOf(btVector3 vec) {
+std::string stringOf(btVector3& vec) {
     char buffer[128];
     sprintf(buffer, "%f %f %f", vec.x(), vec.y(), vec.z());
     return buffer;
 }
 
-std::string stringOf(btTransform mat) {
+std::string stringOf(btTransform& mat) {
     btScalar values[16];
     mat.getOpenGLMatrix(values);
     char buffer[64];

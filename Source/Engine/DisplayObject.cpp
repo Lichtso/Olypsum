@@ -173,9 +173,9 @@ RigidObject::RigidObject(std::shared_ptr<Model> modelB, btRigidBody::btRigidBody
     body->setUserPointer(this);
     btRigidBody* body = getBody();
     if(rBCI.m_mass == 0.0)
-        worldManager.physicsWorld->addRigidBody(body, CollisionMask_Static, CollisionMask_Object);
+        objectManager.physicsWorld->addRigidBody(body, CollisionMask_Static, CollisionMask_Object);
     else
-        worldManager.physicsWorld->addRigidBody(body, CollisionMask_Object, CollisionMask_Zone | CollisionMask_Static | CollisionMask_Object);
+        objectManager.physicsWorld->addRigidBody(body, CollisionMask_Object, CollisionMask_Zone | CollisionMask_Static | CollisionMask_Object);
 }
 
 RigidObject::~RigidObject() {
@@ -183,11 +183,11 @@ RigidObject::~RigidObject() {
         btRigidBody* rigidBody = getBody();
         while(rigidBody->getNumConstraintRefs() > 0) {
             btTypedConstraint* constraint = rigidBody->getConstraintRef(0);
-            worldManager.physicsWorld->removeConstraint(constraint);
+            objectManager.physicsWorld->removeConstraint(constraint);
             delete constraint;
         }
         delete rigidBody->getMotionState();
-        worldManager.physicsWorld->removeRigidBody(rigidBody);
+        objectManager.physicsWorld->removeRigidBody(rigidBody);
         delete rigidBody;
         body = NULL;
     }
@@ -235,11 +235,11 @@ WaterObject::~WaterObject() {
     
 }
 
-void WaterObject::addWave(float maxAge, float ampitude, float length, float originX, float originY) {
+void WaterObject::addWave(float duration, float ampitude, float length, float originX, float originY) {
     if(waves.size() >= MAX_WAVES) return;
     Wave wave;
     wave.age = 0.0;
-    wave.maxAge = maxAge;
+    wave.duration = duration;
     wave.ampitude = ampitude;
     wave.length = length;
     wave.originX = originX;
@@ -249,8 +249,8 @@ void WaterObject::addWave(float maxAge, float ampitude, float length, float orig
 
 bool WaterObject::gameTick() {
     for(unsigned int i = 0; i < waves.size(); i ++) {
-        waves[i].age += worldManager.animationFactor;
-        if(waves[i].age >= waves[i].maxAge) {
+        waves[i].age += animationFactor;
+        if(waves[i].age >= waves[i].duration) {
             waves.erase(waves.begin()+i);
             i --;
         }
@@ -268,7 +268,7 @@ void WaterObject::prepareShaderProgram(Mesh* mesh) {
         sprintf(str, "waveAge[%d]", i);
         currentShaderProgram->setUniformF(str, active ? waves[i].age/waves[i].length*waveSpeed-M_PI*2.0 : 0.0);
         sprintf(str, "waveAmp[%d]", i);
-        currentShaderProgram->setUniformF(str, active ? waves[i].ampitude*(1.0-waves[i].age/waves[i].maxAge) : 0.0);
+        currentShaderProgram->setUniformF(str, active ? waves[i].ampitude*(1.0-waves[i].age/waves[i].duration) : 0.0);
         sprintf(str, "waveOri[%d]", i);
         if(active)
             currentShaderProgram->setUniformVec2(str, waves[i].originX, waves[i].originY);

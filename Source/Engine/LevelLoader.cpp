@@ -16,10 +16,10 @@ LevelLoader::~LevelLoader() {
     //Clean up unused shared collision shapes
     decltype(collisionShapeNodes)::iterator iterator;
     for(iterator = collisionShapeNodes.begin(); iterator != collisionShapeNodes.end(); iterator ++) {
-        auto sharedCollisionShape = worldManager.sharedCollisionShapes.find(iterator->first);
-        if(sharedCollisionShape == worldManager.sharedCollisionShapes.end()) continue;
+        auto sharedCollisionShape = objectManager.sharedCollisionShapes.find(iterator->first);
+        if(sharedCollisionShape == objectManager.sharedCollisionShapes.end()) continue;
         delete sharedCollisionShape->second;
-        worldManager.sharedCollisionShapes.erase(sharedCollisionShape);
+        objectManager.sharedCollisionShapes.erase(sharedCollisionShape);
     }
 }
 
@@ -35,7 +35,7 @@ void LevelLoader::deleteCollisionShapeNode(std::string name) {
 }
 
 btCollisionShape* LevelLoader::getCollisionShape(std::string name) {
-    btCollisionShape* shape = worldManager.sharedCollisionShapes[name];
+    btCollisionShape* shape = objectManager.sharedCollisionShapes[name];
     if(shape) {
         deleteCollisionShapeNode(name);
         return shape;
@@ -134,7 +134,7 @@ btCollisionShape* LevelLoader::getCollisionShape(std::string name) {
         log(error_log, std::string("Found collision shape (")+name+") shape with an unknown type: "+node->name()+'.');
         return NULL;
     }
-    worldManager.sharedCollisionShapes[name] = shape;
+    objectManager.sharedCollisionShapes[name] = shape;
     collisionShapeNodes.erase(nodeIterator);
     return shape;
 }
@@ -142,7 +142,7 @@ btCollisionShape* LevelLoader::getCollisionShape(std::string name) {
 bool LevelLoader::loadLevel() {
     //Load CollisionShape index
     rapidxml::xml_document<xmlUsedCharType> doc;
-    collisionShapesData = readXmlFile(doc, worldManager.gamePackage->path+'/'+"CollisionShapes.xml", false);
+    collisionShapesData = readXmlFile(doc, worldManager.levelPackage->path+'/'+"CollisionShapes.xml", false);
     if(!collisionShapesData) {
         log(error_log, "Could not load package, because CollisionShapes.xml is missing.");
         return false;
