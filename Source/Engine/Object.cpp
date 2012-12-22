@@ -6,7 +6,7 @@
 //
 //
 
-#import "WorldManager.h"
+#import "LevelManager.h"
 
 bool BaseObject::gameTick() {
     for(auto link : links)
@@ -21,14 +21,19 @@ void BaseObject::remove() {
     delete this;
 }
 
-
-
-PhysicObject::PhysicObject(btCollisionShape* shape) :body(new btCollisionObject()) {
-    body->setCollisionShape(shape);
-    body->setUserPointer(this);
-    body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-    objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Zone, CollisionMask_Object);
+void BaseObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+    setTransformation(readTransformtion(node, levelLoader));
 }
+
+btTransform BaseObject::readTransformtion(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+    /*if(!node) {
+        log(error_log, "Tried to construct BaseObject without \"Transformation\"-nodes.");
+        return btTransform::getIdentity();
+    }*/
+    return levelLoader->transformation * readTransformationXML(node);
+}
+
+
 
 PhysicObject::~PhysicObject() {
     if(body) {
@@ -36,6 +41,35 @@ PhysicObject::~PhysicObject() {
             delete body->getCollisionShape();
         delete body;
     }
+}
+
+void PhysicObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+    btCollisionShape* collisionShape = readCollisionShape(node->first_node("PhysicsBody"), levelLoader);
+    if(!collisionShape) return;
+    body = new btCollisionObject();
+    body->setCollisionShape(collisionShape);
+    body->setWorldTransform(BaseObject::readTransformtion(node, levelLoader));
+    body->setUserPointer(this);
+    body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+    objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Zone, CollisionMask_Object);
+}
+
+btCollisionShape* PhysicObject::readCollisionShape(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+    if(!node) {
+        log(error_log, "Tried to construct PhysicObject without \"PhysicsBody\"-node.");
+        return NULL;
+    }
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("collisionShape");
+    if(!attribute) {
+        log(error_log, "Tried to construct PhysicObject without \"collisionShape\"-attribute.");
+        return NULL;
+    }
+    btCollisionShape* shape = levelLoader->getCollisionShape(attribute->value());
+    if(!shape) {
+        log(error_log, std::string("Tried to construct PhysicObject with invalid \"collisionShape\"-attribute: ")+attribute->value()+'.');
+        return NULL;
+    }
+    return shape;
 }
 
 
@@ -130,12 +164,10 @@ void TransformLink::gameTickFrom(BaseObject* parent) {
             transform = transforms[i]->gameTick()*transform;
     }
     
-    if(boneObject) {
-        boneObject->gameTick();
-        transform = boneObject->bone->relativeMat*transform;
-    }
-    
+    if(boneObject) transform = boneObject->bone->relativeMat*transform;
     child->setTransformation(parent->getTransformation()*transform);
+    
+    if(boneObject) boneObject->gameTick();
 }
 
 void TransformLink::remove(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {

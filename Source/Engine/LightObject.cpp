@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "WorldManager.h"
+#import "LevelManager.h"
 
 #define coneAccuracy 12
 #define sphereAccuracyX 10
@@ -99,12 +99,35 @@ void LightObject::draw() {
     mainFBO.renderDeferred(false, inBuffers, sizeof(inBuffers)/sizeof(unsigned char), outBuffers, sizeof(outBuffers)/sizeof(unsigned char));
 }
 
+void LightObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+    BaseObject::init(node, levelLoader);
+    node = node->first_node("Color");
+    if(!node) {
+        log(error_log, "Tried to construct LightObject without \"Color\"-node.");
+        return;
+    }
+    XMLValueArray<float> vectorData;
+    vectorData.readString(node->value(), "%f");
+    color = Color4(vectorData.data[0], vectorData.data[1], vectorData.data[2]);
+}
+
 
 
 DirectionalLight::DirectionalLight() {
     shadowCam.fov = 0.0;
     shadowCam.near = 1.0;
-    setBounds(10.0, 10.0, 100.0);
+}
+
+DirectionalLight::DirectionalLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :DirectionalLight() {
+    rapidxml::xml_node<xmlUsedCharType>* bounds = node->first_node("Bounds");
+    if(!node) {
+        log(error_log, "Tried to construct DirectionalLight without \"Bounds\"-node.");
+        return;
+    }
+    XMLValueArray<float> vectorData;
+    vectorData.readString(bounds->value(), "%f");
+    setBounds(vectorData.data[0], vectorData.data[1], vectorData.data[2]);
+    LightObject::init(node, levelLoader);
 }
 
 void DirectionalLight::setTransformation(const btTransform& transformation) {
@@ -172,8 +195,29 @@ SpotLight::SpotLight() {
     shadowCam.width = 1.0;
     shadowCam.height = 1.0;
     shadowCam.near = 0.1;
-    
-    setBounds(30.0/180.0*M_PI, 5.0);
+}
+
+SpotLight::SpotLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :SpotLight() {
+    rapidxml::xml_node<xmlUsedCharType>* bounds = node->first_node("Bounds");
+    if(!node) {
+        log(error_log, "Tried to construct SpotLight without \"Bounds\"-node.");
+        return;
+    }
+    float cutoff, range;
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = bounds->first_attribute("range");
+    if(!attribute) {
+        log(error_log, "Tried to construct SpotLight without \"range\"-attribute.");
+        return;
+    }
+    sscanf(attribute->value(), "%f", &range);
+    attribute = bounds->first_attribute("cutoff");
+    if(!attribute) {
+        log(error_log, "Tried to construct SpotLight without \"cutoff\"-attribute.");
+        return;
+    }
+    sscanf(attribute->value(), "%f", &cutoff);
+    setBounds(cutoff, range);
+    LightObject::init(node, levelLoader);
 }
 
 void SpotLight::setTransformation(const btTransform& transformation) {
@@ -247,13 +291,32 @@ float SpotLight::getPriority(btVector3 position) {
 
 
 
-PositionalLight::PositionalLight() {
-    shadowMapB = NULL;
+PositionalLight::PositionalLight() :shadowMapB(NULL) {
     shadowCam.width = 1.0;
     shadowCam.height = 1.0;
     shadowCam.near = 0.1;
-    
-    setBounds(true, 10.0);
+}
+
+PositionalLight::PositionalLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :PositionalLight() {
+    rapidxml::xml_node<xmlUsedCharType>* bounds = node->first_node("Bounds");
+    if(!node) {
+        log(error_log, "Tried to construct PositionalLight without \"Bounds\"-node.");
+        return;
+    }
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = bounds->first_attribute("range");
+    if(!attribute) {
+        log(error_log, "Tried to construct PositionalLight without \"range\"-attribute.");
+        return;
+    }
+    float range;
+    sscanf(attribute->value(), "%f", &range);
+    attribute = bounds->first_attribute("omniDirectional");
+    if(!attribute) {
+        log(error_log, "Tried to construct PositionalLight without \"omniDirectional\"-attribute.");
+        return;
+    }
+    setBounds(strcmp(attribute->value(), "true") == 0, range);
+    LightObject::init(node, levelLoader);
 }
 
 PositionalLight::~PositionalLight() {

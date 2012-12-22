@@ -12,6 +12,7 @@
 #define Object_h
 
 class BaseLink;
+class LevelLoader;
 
 //! Objects basic class
 /*!
@@ -39,6 +40,10 @@ class BaseObject {
     virtual bool gameTick();
     //! Used to remove a BaseObject from all lists correctly
     virtual void remove();
+    //! Initialize from rapidxml::xml_node
+    void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    //! Reads the transformation from a rapidxml::xml_node named "Transformation"
+    static btTransform readTransformtion(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
 };
 
 //! BaseObject without physics-body, only transformation
@@ -90,7 +95,6 @@ class PhysicObject : public BaseObject {
     protected:
     btCollisionObject* body; //!< The physics-body
     PhysicObject() :body(NULL) { }
-    PhysicObject(btCollisionShape* shape);
     public:
     ~PhysicObject();
     virtual void setTransformation(const btTransform& transformation) {
@@ -107,6 +111,10 @@ class PhysicObject : public BaseObject {
     btCollisionObject* getBody() {
         return body;
     }
+    //! Initialize from rapidxml::xml_node as btCollisionObject
+    void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    //! Reads the collision shape from a rapidxml::xml_node named "PhysicsBody"
+    btCollisionShape* readCollisionShape(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
 };
 
 
@@ -229,7 +237,7 @@ class TransformLink : public BaseLink {
      @param a One of the two BaseObject passed in the constructor. Either parent or child
      @param iteratorInA the iterator of this LinkObject in the BaseObject::links map of the first parameter
      
-     @warning Don't call this method directly, remove the parent or child object instead
+     @warning This method calls remove() on the child object but only if it is called from the parent
      */
     void remove(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
 };

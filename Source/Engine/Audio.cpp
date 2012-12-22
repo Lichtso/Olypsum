@@ -129,6 +129,7 @@ bool SoundSourceObject::gameTick() {
     btVector3 direction = transformation.getBasis().getColumn(2),
     position = transformation.getOrigin();
     velocity = position-prevPosition;
+    alSourcef(ALname, AL_GAIN, globalVolume);
     alSource3f(ALname, AL_DIRECTION, direction.x(), direction.y(), direction.z());
     alSource3f(ALname, AL_POSITION, position.x(), position.y(), position.z());
     alSource3f(ALname, AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());

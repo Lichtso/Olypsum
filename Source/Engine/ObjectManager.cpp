@@ -45,7 +45,6 @@ ObjectManager::~ObjectManager() {
     alcDestroyContext(soundContext);
     alcCloseDevice(soundDevice);
     clear();
-    clearSharedObjects();
     
     delete broadphase;
     delete constraintSolver;
@@ -79,15 +78,13 @@ void ObjectManager::init() {
     log(info_log, std::string("OpenAL, sound output ")+alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
 }
 
-void ObjectManager::initPhysics(btVector3 worldSize) {
-    clear();
-    
+void ObjectManager::initPhysics(btVector3 worldSize, float gravity) {
     physicsWorld = new btDiscreteDynamicsWorld(collisionDispatcher, broadphase, constraintSolver, collisionConfiguration);
-    physicsWorld->setGravity(btVector3(0, -9.81, 0));
+    physicsWorld->setGravity(btVector3(0, gravity, 0));
     physicsWorld->setInternalTickCallback(calculatePhysicsTick);
     
-    if(!sharedCollisionShapes["worldWall"])
-        sharedCollisionShapes["worldWall"] = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
+    if(!levelManager.sharedCollisionShapes["worldWall"])
+        levelManager.sharedCollisionShapes["worldWall"] = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
     btDefaultMotionState* wallMotionState[6];
     wallMotionState[0] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, -M_PI_2), btVector3(-worldSize.x(), 0, 0)));
     wallMotionState[1] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, M_PI_2), btVector3(worldSize.x(), 0, 0)));
@@ -96,7 +93,7 @@ void ObjectManager::initPhysics(btVector3 worldSize) {
     wallMotionState[4] = new btDefaultMotionState(btTransform(btQuaternion(0, M_PI_2, 0), btVector3(0, 0, -worldSize.z())));
     wallMotionState[5] = new btDefaultMotionState(btTransform(btQuaternion(0, -M_PI_2, 0), btVector3(0, 0, worldSize.z())));
     for(unsigned char i = 0; i < 6; i ++) {
-        worldWalls[i] = new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(0, wallMotionState[i], sharedCollisionShapes["worldWall"], btVector3(0, 0, 0)));
+        worldWalls[i] = new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(0, wallMotionState[i], levelManager.sharedCollisionShapes["worldWall"], btVector3(0, 0, 0)));
         physicsWorld->addRigidBody(worldWalls[i], CollisionMask_Zone, CollisionMask_Object);
     }
 }
@@ -136,12 +133,6 @@ void ObjectManager::clear() {
         delete physicsWorld;
         physicsWorld = NULL;
     }
-}
-
-void ObjectManager::clearSharedObjects() {
-    for(auto iterator: sharedCollisionShapes)
-        delete iterator.second;
-    sharedCollisionShapes.clear();
 }
 
 void ObjectManager::gameTick() {

@@ -8,7 +8,7 @@
 
 #import <OpenGL/gl.h>
 #import <SDL/SDL.h>
-#import "Utilities.h"
+#import "XMLUtilities.h"
 
 #ifndef Texture_h
 #define Texture_h

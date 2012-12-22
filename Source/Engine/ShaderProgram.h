@@ -90,7 +90,7 @@ class ShaderProgram {
 
 extern btTransform modelMat;
 extern ShaderProgram *shaderPrograms[32], *currentShaderProgram;
-extern float screenBlurFactor;
+extern float screenBlurFactor, globalVolume, musicVolume;
 extern bool edgeSmoothEnabled, fullScreenEnabled, cubemapsEnabled;
 extern unsigned char depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, blendingQuality, particleCalcTarget;
 

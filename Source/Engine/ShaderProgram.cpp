@@ -271,7 +271,7 @@ void ShaderProgram::setUniformMatrix4(const char* name, const btTransform* mat, 
 
 btTransform modelMat;
 ShaderProgram *shaderPrograms[], *currentShaderProgram;
-float screenBlurFactor = -1.0;
+float screenBlurFactor = -1.0, globalVolume = 0.5, musicVolume = 0.5;
 bool edgeSmoothEnabled = false, fullScreenEnabled = false, cubemapsEnabled = false;
 unsigned char depthOfFieldQuality = 0, bumpMappingQuality = 1, shadowQuality = 1, ssaoQuality = 0, blendingQuality = 2, particleCalcTarget = 2;
 
@@ -319,7 +319,7 @@ void loadDynamicShaderPrograms() {
     sprintf(depthOfFieldMacro, "DOF_QUALITY %d", depthOfFieldQuality);
     sprintf(ssaoQualityMacro, "SSAO_QUALITY %d", ssaoQuality);
     sprintf(blendingQualityMacro, "BLENDING_QUALITY %d", blendingQuality);
-    sprintf(bumpMappingMacro, "BUMP_MAPPING %d", min(bumpMappingQuality, (unsigned char) 2));
+    sprintf(bumpMappingMacro, "BUMP_MAPPING %d", bumpMappingQuality);
     sprintf(shadowQualityMacro, "SHADOW_QUALITY %d", shadowQuality);
     
     shaderPrograms[solidGeometrySP]->loadShaderProgram("gBuffer", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 0", "BUMP_MAPPING 0" });

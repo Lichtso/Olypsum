@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "WorldManager.h"
+#import "LevelManager.h"
 
 ParticlesObject::ParticlesObject(unsigned int maxParticlesB) {
     texture = NULL;

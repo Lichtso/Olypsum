@@ -41,18 +41,14 @@ class ObjectManager {
     btBroadphaseInterface* broadphase; //!< The physics broadphase
     btDiscreteDynamicsWorld* physicsWorld; //!< The physics world
     
-    std::map<std::string, btCollisionShape*> sharedCollisionShapes; //!< All available collision shapes
-    
     ObjectManager();
     ~ObjectManager();
     //! Initialize
     void init();
     //! Deletes all Objects and the physics world
     void clear();
-    //! Deletes all sharedCollisionShapes
-    void clearSharedObjects();
     //! Initializes the physics world
-    void initPhysics(btVector3 worldSize);
+    void initPhysics(btVector3 worldSize, float gravity);
     //! Calculate a game tick
     void gameTick();
     //! Calculate the physics

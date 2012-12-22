@@ -7,7 +7,7 @@
 //
 
 #import <SDL/SDL.h>
-#import "WorldManager.h"
+#import "LevelManager.h"
 #import "GUIScrollView.h"
 #import "GUICheckBox.h"
 #import "GUITabs.h"

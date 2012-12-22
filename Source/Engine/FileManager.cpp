@@ -68,10 +68,11 @@ static bool readOptionBool(rapidxml::xml_node<xmlUsedCharType>* option) {
     return strcmp(attribute->value(), "true") == 0;
 }
 
-static unsigned int readOptionUInt(rapidxml::xml_node<xmlUsedCharType>* option) {
+template <class T>
+static T readOptionValue(rapidxml::xml_node<xmlUsedCharType>* option, const char* format) {
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = option->first_attribute("value");
-    unsigned int value;
-    sscanf(attribute->value(), "%d", &value);
+    T value;
+    sscanf(attribute->value(), format, &value);
     return value;
 }
 
@@ -89,50 +90,61 @@ void FileManager::loadOptions() {
             return;
         }
         localization.selected = options->first_node("Language")->first_attribute("value")->value();
-        rapidxml::xml_node<xmlUsedCharType>* graphics = options->first_node("Graphics");
-        screenBlurFactor = (readOptionBool(graphics->first_node("ScreenBlurEnabled"))) ? 0.0 : -1.0;
-        edgeSmoothEnabled = readOptionBool(graphics->first_node("EdgeSmoothEnabled"));
-        fullScreenEnabled = readOptionBool(graphics->first_node("FullScreenEnabled"));
-        cubemapsEnabled = readOptionBool(graphics->first_node("CubemapsEnabled"));
-        depthOfFieldQuality = readOptionUInt(graphics->first_node("DepthOfFieldQuality"));
-        bumpMappingQuality = readOptionUInt(graphics->first_node("BumpMappingQuality"));
-        shadowQuality = readOptionUInt(graphics->first_node("ShadowQuality"));
-        ssaoQuality = readOptionUInt(graphics->first_node("SsaoQuality"));
-        blendingQuality = readOptionUInt(graphics->first_node("BlendingQuality"));
-        particleCalcTarget = readOptionUInt(graphics->first_node("ParticleCalcTarget"));
+        rapidxml::xml_node<xmlUsedCharType>* optionGroup = options->first_node("Graphics");
+        screenBlurFactor = (readOptionBool(optionGroup->first_node("ScreenBlurEnabled"))) ? 0.0 : -1.0;
+        edgeSmoothEnabled = readOptionBool(optionGroup->first_node("EdgeSmoothEnabled"));
+        fullScreenEnabled = readOptionBool(optionGroup->first_node("FullScreenEnabled"));
+        cubemapsEnabled = readOptionBool(optionGroup->first_node("CubemapsEnabled"));
+        depthOfFieldQuality = readOptionValue<unsigned int>(optionGroup->first_node("DepthOfFieldQuality"), "%d");
+        bumpMappingQuality = readOptionValue<unsigned int>(optionGroup->first_node("BumpMappingQuality"), "%d");
+        shadowQuality = readOptionValue<unsigned int>(optionGroup->first_node("ShadowQuality"), "%d");
+        ssaoQuality = readOptionValue<unsigned int>(optionGroup->first_node("SsaoQuality"), "%d");
+        blendingQuality = readOptionValue<unsigned int>(optionGroup->first_node("BlendingQuality"), "%d");
+        particleCalcTarget = readOptionValue<unsigned int>(optionGroup->first_node("ParticleCalcTarget"), "%d");
+        optionGroup = options->first_node("Sound");
+        globalVolume = readOptionValue<float>(optionGroup->first_node("globalVolume"), "%f");
+        musicVolume = readOptionValue<float>(optionGroup->first_node("musicVolume"), "%f");
     }else saveOptions();
     
     getPackage("Default");
 }
 
 void FileManager::saveOptions() {
+    char str[40];
     rapidxml::xml_document<xmlUsedCharType> doc;
     rapidxml::xml_node<xmlUsedCharType>* options = doc.allocate_node(rapidxml::node_element);
     options->name("Options");
     doc.append_node(options);
     addXMLNode(doc, options, "Version", VERSION);
     addXMLNode(doc, options, "Language", localization.selected.c_str());
-    rapidxml::xml_node<xmlUsedCharType>* graphics = doc.allocate_node(rapidxml::node_element);
-    graphics->name("Graphics");
-    options->append_node(graphics);
     
-    char str[24];
-    addXMLNode(doc, graphics, "ScreenBlurEnabled", (screenBlurFactor > -1.0) ? "true" : "false");
-    addXMLNode(doc, graphics, "EdgeSmoothEnabled", (edgeSmoothEnabled) ? "true" : "false");
-    addXMLNode(doc, graphics, "FullScreenEnabled", (fullScreenEnabled) ? "true" : "false");
-    addXMLNode(doc, graphics, "CubemapsEnabled", (cubemapsEnabled) ? "true" : "false");
+    rapidxml::xml_node<xmlUsedCharType>* optionGroup = doc.allocate_node(rapidxml::node_element);
+    optionGroup->name("Graphics");
+    options->append_node(optionGroup);
+    addXMLNode(doc, optionGroup, "ScreenBlurEnabled", (screenBlurFactor > -1.0) ? "true" : "false");
+    addXMLNode(doc, optionGroup, "EdgeSmoothEnabled", (edgeSmoothEnabled) ? "true" : "false");
+    addXMLNode(doc, optionGroup, "FullScreenEnabled", (fullScreenEnabled) ? "true" : "false");
+    addXMLNode(doc, optionGroup, "CubemapsEnabled", (cubemapsEnabled) ? "true" : "false");
     sprintf(&str[0], "%d", depthOfFieldQuality);
-    addXMLNode(doc, graphics, "DepthOfFieldQuality", &str[0]);
+    addXMLNode(doc, optionGroup, "DepthOfFieldQuality", &str[0]);
     sprintf(&str[4], "%d", bumpMappingQuality);
-    addXMLNode(doc, graphics, "BumpMappingQuality", &str[4]);
+    addXMLNode(doc, optionGroup, "BumpMappingQuality", &str[4]);
     sprintf(&str[8], "%d", shadowQuality);
-    addXMLNode(doc, graphics, "ShadowQuality", &str[8]);
+    addXMLNode(doc, optionGroup, "ShadowQuality", &str[8]);
     sprintf(&str[12], "%d", ssaoQuality);
-    addXMLNode(doc, graphics, "SsaoQuality", &str[12]);
+    addXMLNode(doc, optionGroup, "SsaoQuality", &str[12]);
     sprintf(&str[16], "%d", blendingQuality);
-    addXMLNode(doc, graphics, "BlendingQuality", &str[16]);
+    addXMLNode(doc, optionGroup, "BlendingQuality", &str[16]);
     sprintf(&str[20], "%d", particleCalcTarget);
-    addXMLNode(doc, graphics, "ParticleCalcTarget", &str[20]);
+    addXMLNode(doc, optionGroup, "ParticleCalcTarget", &str[20]);
+    
+    optionGroup = doc.allocate_node(rapidxml::node_element);
+    optionGroup->name("Sound");
+    options->append_node(optionGroup);
+    sprintf(&str[24], "%1.5f", globalVolume);
+    addXMLNode(doc, optionGroup, "globalVolume", &str[24]);
+    sprintf(&str[32], "%1.5f", musicVolume);
+    addXMLNode(doc, optionGroup, "musicVolume", &str[32]);
     
     writeXmlFile(doc, gameDataDir+"Options.xml", true);
 }

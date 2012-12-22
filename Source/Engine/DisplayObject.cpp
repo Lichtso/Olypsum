@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "WorldManager.h"
+#import "LevelManager.h"
 
 GraphicObject::GraphicObject() {
     objectManager.graphicObjects.insert(this);
@@ -18,13 +18,6 @@ void GraphicObject::remove() {
 }
 
 
-
-ModelObject::ModelObject(std::shared_ptr<Model> modelB) :model(modelB), skeletonPose(NULL) {
-    if(model->skeleton) {
-        skeletonPose = new btTransform[model->skeleton->bones.size()];
-        setupModelObjectBones(this, model->skeleton->rootBone);
-    }
-}
 
 void ModelObject::setupModelObjectBones(BaseObject* object, Bone* bone) {
     BoneObject* boneObject = new BoneObject(bone);
@@ -145,6 +138,28 @@ void ModelObject::prepareShaderProgram(Mesh* mesh) {
         currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose, model->skeleton->bones.size());
 }
 
+void ModelObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+    node = node->first_node("Model");
+    if(!node) {
+        log(error_log, "Tried to construct ModelObject without \"Model\"-node.");
+        return;
+    }
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("package");
+    FilePackage* levelPack = levelManager.levelPackage;
+    if(attribute)
+        levelPack = fileManager.getPackage(attribute->value());
+    attribute = node->first_attribute("src");
+    if(!attribute) {
+        log(error_log, "Tried to construct ModelObject without \"src\"-attribute.");
+        return;
+    }
+    model = levelPack->getResource<Model>(attribute->value());
+    if(model->skeleton) {
+        skeletonPose = new btTransform[model->skeleton->bones.size()];
+        setupModelObjectBones(this, model->skeleton->rootBone);
+    }
+}
+
 
 
 void simpleMotionState::getWorldTransform(btTransform& centerOfMassWorldTrans) const {
@@ -167,12 +182,30 @@ void comMotionState::setWorldTransform(const btTransform& centerOfMassWorldTrans
 
 
 
-RigidObject::RigidObject(std::shared_ptr<Model> modelB, btRigidBody::btRigidBodyConstructionInfo& rBCI) :ModelObject(modelB) {
-    rBCI.m_collisionShape->calculateLocalInertia(rBCI.m_mass, rBCI.m_localInertia);
+RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+    ModelObject::init(node, levelLoader);
+    rapidxml::xml_node<xmlUsedCharType>* physicsBody = node->first_node("PhysicsBody");
+    if(!node) {
+        log(error_log, "Tried to construct RigidObject without \"PhysicsBody\"-node.");
+        return;
+    }
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = physicsBody->first_attribute("mass");
+    if(!attribute) {
+        log(error_log, "Tried to construct RigidObject without \"mass\"-attribute.");
+        return;
+    }
+    float mass = 1.0;
+    sscanf(attribute->value(), "%f", &mass);
+    btCollisionShape* collisionShape = PhysicObject::readCollisionShape(physicsBody, levelLoader);
+    if(!collisionShape) return;
+    btVector3 localInertia;
+    collisionShape->calculateLocalInertia(mass, localInertia);
+    btTransform transform = BaseObject::readTransformtion(node, levelLoader);
+    btRigidBody::btRigidBodyConstructionInfo rBCI(mass, new simpleMotionState(transform), collisionShape, localInertia);
     body = new btRigidBody(rBCI);
     body->setUserPointer(this);
     btRigidBody* body = getBody();
-    if(rBCI.m_mass == 0.0)
+    if(mass == 0.0)
         objectManager.physicsWorld->addRigidBody(body, CollisionMask_Static, CollisionMask_Object);
     else
         objectManager.physicsWorld->addRigidBody(body, CollisionMask_Object, CollisionMask_Zone | CollisionMask_Static | CollisionMask_Object);
@@ -205,30 +238,22 @@ btTransform RigidObject::getTransformation() {
 
 void RigidObject::draw() {
     modelMat = getTransformation();
-    /*
-    //TODO: DEBUG
-    static float rotY;
-    rotY -= 0.01;
-    skeletonPose->bonePoses["Back"].setIdentity();
-    skeletonPose->bonePoses["Back"].setOrigin(btVector3(0, -0.9, 0));
-    //skeletonPose->bonePoses["Back"].setRotation(btQuaternion(-1, 0, 0));
-    skeletonPose->bonePoses["Thigh_Right"].setIdentity();
-    skeletonPose->bonePoses["Thigh_Right"].setRotation(btQuaternion(0, 0, rotY));
-    skeletonPose->bonePoses["Shin_Right"].setIdentity();
-    skeletonPose->bonePoses["Shin_Right"].setRotation(btQuaternion(0, 0, rotY*2.0));
-    skeletonPose->needsUpdate = true;
-    //skeletonPose->draw(0.1, 0.0, 0.02);
-    */
-    LightBoxVolume bV(btVector3(1.0, 1.0, 0.2));
-    bV.init();
-    bV.drawWireFrame(Color4(1.0, 1.0, 0.0, 1.0));
+    
+    //TODO: Debug drawing
+    btBoxShape* boxShape = dynamic_cast<btBoxShape*>(body->getCollisionShape());
+    if(boxShape) {
+        LightBoxVolume bV(boxShape->getHalfExtentsWithoutMargin());
+        bV.init();
+        bV.drawWireFrame(Color4(1.0, 1.0, 0.0, 1.0));
+    }
     
     ModelObject::draw();
 }
 
 
-WaterObject::WaterObject(std::shared_ptr<Model> modelB, btCollisionShape* shapeB, const btTransform& transformB) :ModelObject(modelB), waveSpeed(0.05) {
-    
+WaterObject::WaterObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :waveSpeed(0.05) {
+    ModelObject::init(node, levelLoader);
+    PhysicObject::init(node, levelLoader);
 }
 
 WaterObject::~WaterObject() {

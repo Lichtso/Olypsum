@@ -7,7 +7,7 @@
 //
 
 #import "GUITextField.h"
-#import "WorldManager.h"
+#import "LevelManager.h"
 #import "AppMain.h"
 
 GUITextField::GUITextField() {
@@ -31,7 +31,7 @@ GUITextField::~GUITextField() {
 void GUITextField::removeChar() {
     if(cursorIndexX == 0) return;
     moveCursorLeft();
-    unsigned char len = label->getUTF8Length(cursorIndexX);
+    unsigned char len = label->getCharSizeAt(cursorIndexX);
     label->text = label->text.substr(0, cursorIndexX)+label->text.substr(cursorIndexX+len);
     cursorDrawTick = 0.0;
     label->updateContent();
@@ -48,7 +48,7 @@ void GUITextField::moveCursorLeft() {
 
 void GUITextField::moveCursorRight() {
     if(cursorIndexX == label->text.size()) return;
-    cursorIndexX += label->getUTF8Length(cursorIndexX);
+    cursorIndexX += label->getCharSizeAt(cursorIndexX);
     cursorDrawTick = 0.0;
 }
 
@@ -154,7 +154,7 @@ bool GUITextField::handleMouseDown(int mouseX, int mouseY) {
     int cursorPosXa, cursorPosXb, cursorPosY;
     label->getPosOfChar(0, 0, cursorPosXa, cursorPosY);
     for(cursorIndexX = 0; cursorIndexX < label->text.size(); cursorPosXa = cursorPosXb) {
-        unsigned int len = label->getUTF8Length(cursorIndexX);
+        unsigned int len = label->getCharSizeAt(cursorIndexX);
         label->getPosOfChar(cursorIndexX+len, 0, cursorPosXb, cursorPosY);
         if(cursorPosXa-mouseX <= 0 && cursorPosXb-mouseX >= 0) {
             if(mouseX-cursorPosXa > cursorPosXb-mouseX)
@@ -212,7 +212,7 @@ bool GUITextField::handleKeyDown(SDL_keysym* key) {
             }
             
             label->text = label->text.substr(0, cursorIndexX)+str+label->text.substr(cursorIndexX);
-            cursorIndexX += label->getUTF8Length(cursorIndexX);
+            cursorIndexX += label->getCharSizeAt(cursorIndexX);
             cursorDrawTick = 0.0;
             label->updateContent();
             if(onChange) onChange(this);

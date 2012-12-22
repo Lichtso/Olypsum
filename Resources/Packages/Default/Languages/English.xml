@@ -11,9 +11,9 @@
 	<Entry key="mainMenu">Main Menu</Entry>
 	<Entry key="graphics">Graphics</Entry>
 	<Entry key="language">Language</Entry>
-	<Entry key="selectedLanguage">Selected</Entry>
-	<Entry key="selectLanguage">Languages</Entry>
 	<Entry key="sound">Sound</Entry>
+	<Entry key="soundGlobal">Volume</Entry>
+	<Entry key="soundMusic">Music</Entry>
 	<Entry key="fullScreenEnabled">Full Screen</Entry>
 	<Entry key="edgeSmoothEnabled">Antialiasing</Entry>
 	<Entry key="cubemapsEnabled">Cubemaps</Entry>
@@ -31,7 +31,6 @@
 	<Entry key="cancel">Cancel</Entry>
 	<Entry key="ok">Ok</Entry>
 	<Entry key="name">Name</Entry>
-	<Entry key="package">Package</Entry>
 	<Entry key="newGame">New Game</Entry>
 	<Entry key="removeGame">Remove Game</Entry>
 </Localization>

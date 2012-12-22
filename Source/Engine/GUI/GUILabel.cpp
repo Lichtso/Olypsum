@@ -118,12 +118,20 @@ void GUILabel::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     }
 }
 
-unsigned char GUILabel::getUTF8Length(unsigned int pos) {
-    unsigned char len = 1;
-    if((text[pos ++] & 0xC0) == 0xC0)
-        while((text[pos ++] & 0xC0) == 0x80)
-            len ++;
-    return len;
+unsigned char GUILabel::getCharSizeAt(unsigned int byteIndex) {
+    if((text[byteIndex ++] & 0xC0) != 0xC0) return 1;
+    unsigned char length = 1;
+    while((text[byteIndex ++] & 0xC0) == 0x80)
+        length ++;
+    return length;
+}
+
+unsigned int GUILabel::getUTF8Length() {
+    unsigned char byteIndex = 0, length = 0;
+    while(byteIndex < text.size())
+        if((text[byteIndex ++] & 0xC0) != 0x80)
+            length ++;
+    return length;
 }
 
 void GUILabel::getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int& posX, int& posY) {

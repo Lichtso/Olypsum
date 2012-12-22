@@ -18,10 +18,10 @@ class LightObject : public DisplayObject {
     protected:
     ColorBuffer* shadowMap;
     void setPhysicsShape(btCollisionShape* shape);
+    LightObject();
     public:
     Cam shadowCam;
     Color4 color;
-    LightObject();
     ~LightObject();
     void remove();
     btTransform getTransformation();
@@ -29,11 +29,13 @@ class LightObject : public DisplayObject {
     void draw();
     virtual void prepareShaderProgram(bool skeletal) = 0;
     virtual float getPriority(btVector3 position) = 0;
+    void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
 };
 
 class DirectionalLight : public LightObject {
     public:
     DirectionalLight();
+    DirectionalLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     void setTransformation(const btTransform& transformation);
     void setBounds(float width, float height, float range);
     bool gameTick(bool shadowActive);
@@ -45,6 +47,7 @@ class DirectionalLight : public LightObject {
 class SpotLight : public LightObject {
     public:
     SpotLight();
+    SpotLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     void setTransformation(const btTransform& transformation);
     void setBounds(float cutoff, float range);
     bool gameTick(bool shadowActive);
@@ -57,6 +60,7 @@ class PositionalLight : public LightObject {
     ColorBuffer* shadowMapB;
     public:
     PositionalLight();
+    PositionalLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     ~PositionalLight();
     void setTransformation(const btTransform& transformation);
     void setBounds(bool omniDirectional, float range);

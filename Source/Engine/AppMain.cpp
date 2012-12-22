@@ -168,7 +168,7 @@ void AppMain(int argc, char *argv[]) {
             labelFPS->updateContent();
         }
         
-        if(worldManager.gameStatus == noGame) {
+        if(levelManager.gameStatus == noGame) {
             if(currentMenu == loadingMenu) {
                 loadingScreen -= animationFactor;
                 if(loadingScreen <= 0.0)

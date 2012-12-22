@@ -37,7 +37,7 @@ void GUIButton::updateContent() {
             GUILabel* label = (GUILabel*)children[i];
             switch(state) {
                 case GUIButtonStateDisabled:
-                    label->color = Color4(0.24);
+                    label->color = Color4(0.12);
                 break;
                 case GUIButtonStateNormal:
                 case GUIButtonStateHighlighted:

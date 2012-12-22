@@ -138,8 +138,7 @@ GUIScreenView::GUIScreenView() {
     type = GUIType_ScreenView;
     modalView = NULL;
     firstResponder = NULL;
-    width = screenSize[0] >> 1;
-    height = screenSize[1] >> 1;
+    updateContent();
 }
 
 bool GUIScreenView::getLimSize(GUIClipRect& clipRect) {

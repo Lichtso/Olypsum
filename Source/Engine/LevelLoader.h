@@ -14,13 +14,16 @@
 #define LevelLoader_h
 
 class LevelLoader {
+    std::set<std::string> containerStack;
     std::unique_ptr<char[]> collisionShapesData;
     std::map<std::string, rapidxml::xml_node<xmlUsedCharType>*> collisionShapeNodes;
     void deleteCollisionShapeNode(std::string name);
     public:
+    btTransform transformation;
     LevelLoader();
     ~LevelLoader();
     btCollisionShape* getCollisionShape(std::string name);
+    bool loadContainer(std::string name);
     bool loadLevel();
 };
 

@@ -1,5 +1,5 @@
 //
-//  WorldManager.h
+//  LevelManager.h
 //  Olypsum
 //
 //  Created by Alexander Meißner on 26.09.12.
@@ -8,8 +8,8 @@
 
 #import "LevelLoader.h"
 
-#ifndef WorldManager_h
-#define WorldManager_h
+#ifndef LevelManager_h
+#define LevelManager_h
 
 enum GameStatusName {
     noGame = 0,
@@ -18,14 +18,18 @@ enum GameStatusName {
     networkGame = 3
 };
 
-class WorldManager {
+class LevelManager {
     public:
-    WorldManager();
-    ~WorldManager();
+    LevelManager();
+    ~LevelManager();
+    std::map<std::string, btCollisionShape*> sharedCollisionShapes; //!< All available collision shapes
+    //std::map<std::string, v8::Handle> sharedScripts; //!< All available scripts
     FilePackage* levelPackage;
     std::string levelPackageName, levelId;
     GameStatusName gameStatus = noGame;
-    void loadLevel();
+    //! Deletes all shared objects
+    void clear();
+    void loadLevel(std::string levelId);
     void saveLevel();
     void leaveGame();
     bool loadGame(std::string name);
@@ -33,6 +37,6 @@ class WorldManager {
     bool removeGame(std::string name);
 };
 
-extern WorldManager worldManager;
+extern LevelManager levelManager;
 
 #endif

@@ -48,14 +48,18 @@ class ModelObject : public GraphicObject {
     void updateSkeletonPose(BaseObject* object, Bone* bone);
     void drawBonePose(BaseObject* object, Bone* bone, float axesSize, float linesSize, float textSize);
     protected:
-    ModelObject(std::shared_ptr<Model> model);
+    ModelObject() :skeletonPose(NULL) { };
     public:
     std::shared_ptr<Model> model;
     bool gameTick();
     void draw();
+    //! Draws a single mesh
     void drawAccumulatedMesh(Mesh* mesh);
+    //! A debug draw of the skeleton
     void drawSkeletonPose(float axesSize, float linesSize, float textSize);
+    //! Called by a Mesh to prepare the shader program to draw this ModelObject
     virtual void prepareShaderProgram(Mesh* mesh);
+    void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
 };
 
 //! A GraphicObject with a soft-physics-body
@@ -98,7 +102,7 @@ class comMotionState : public simpleMotionState {
  */
 class RigidObject : public ModelObject {
     public:
-    RigidObject(std::shared_ptr<Model> model, btRigidBody::btRigidBodyConstructionInfo& rBCI);
+    RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     ~RigidObject();
     void setTransformation(const btTransform& transformation);
     btTransform getTransformation();
@@ -128,7 +132,7 @@ class WaterObject : public ModelObject {
               originY; //! The t coord of the center
     };
     std::vector<Wave> waves; //!< The waves on the surface of this WaterObject
-    WaterObject(std::shared_ptr<Model> model, btCollisionShape* shape, const btTransform& transform);
+    WaterObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     ~WaterObject();
     bool gameTick();
     void draw();

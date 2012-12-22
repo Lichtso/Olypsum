@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "WorldManager.h"
+#import "LevelManager.h"
 
 #define AXIS_X 0
 #define AXIS_Y 1
