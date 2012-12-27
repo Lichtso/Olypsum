@@ -45,6 +45,29 @@ Cam::Cam() :fov(70.0/180.0*M_PI), near(1.0), far(100000.0), width(screenSize[0]/
     setTransformation(btTransform::getIdentity());
 }
 
+Cam::Cam(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :width(screenSize[0]/2), height(screenSize[1]/2) {
+    BaseObject::init(node, levelLoader);
+    
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("fov");
+    if(!attribute) {
+        log(error_log, "Tried to construct Cam without \"fov\"-attribute.");
+        return;
+    }
+    sscanf(attribute->value(), "%f", &fov);
+    attribute = node->first_attribute("near");
+    if(!attribute) {
+        log(error_log, "Tried to construct Cam without \"near\"-attribute.");
+        return;
+    }
+    sscanf(attribute->value(), "%f", &near);
+    attribute = node->first_attribute("far");
+    if(!attribute) {
+        log(error_log, "Tried to construct Cam without \"far\"-attribute.");
+        return;
+    }
+    sscanf(attribute->value(), "%f", &far);
+}
+
 Cam::~Cam() {
     if(currentCam == this)
         currentCam = NULL;
@@ -168,16 +191,20 @@ bool Cam::gameTick() {
     else if(fov < M_PI)
         viewMat.perspective(fov, width/height, near, far);
     
-    velocity = transformation.getOrigin()-prevPos;
+    velocity = (transformation.getOrigin()-prevPos)/animationFactor;
     prevPos = transformation.getOrigin();
     return true;
 }
 
 void Cam::use() {
     currentCam = this;
+}
+
+void Cam::updateAudioListener() {
     btMatrix3x3 mat = transformation.getBasis();
     btVector3 up = mat.getColumn(1), front = mat.getColumn(2), pos = transformation.getOrigin();
     float orientation[] = { front.x(), front.y(), front.z(), up.x(), up.y(), up.z() };
+    alListenerf(AL_GAIN, globalVolume);
     alListenerfv(AL_ORIENTATION, orientation);
     alListener3f(AL_POSITION, pos.x(), pos.y(), pos.z());
     alListener3f(AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());

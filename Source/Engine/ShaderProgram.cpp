@@ -195,7 +195,7 @@ void ShaderProgram::use () {
         setUniformVec3("camPos", currentCam->getTransformation().getOrigin());
         setUniformMatrix4("viewMat", &currentCam->viewMat);
         if(checkUniformExistence("viewNormalMat")) {
-            btMatrix3x3 viewNormalMat = Matrix4(modelMat).getNormalMatrix();
+            btMatrix3x3 viewNormalMat = currentCam->getTransformation().getBasis();
             setUniformMatrix3("viewNormalMat", &viewNormalMat);
         }
         if(checkUniformExistence("modelViewMat")) {
@@ -453,8 +453,9 @@ void loadDynamicShaderPrograms() {
     }
     
     if(particleCalcTarget > 0) {
-        shaderPrograms[particleDrawSP]->loadShaderProgram("particle", shaderTypeVertexFragment, { });
+        shaderPrograms[particleDrawSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { });
         shaderPrograms[particleDrawSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+        shaderPrograms[particleDrawSP]->addAttribute(VELOCITY_ATTRIBUTE, "velocity");
         shaderPrograms[particleDrawSP]->link();
         
         if(particleCalcTarget == 2) {

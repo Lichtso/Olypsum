@@ -31,14 +31,14 @@ void LevelManager::loadLevel(std::string nextLevelId) {
 
 void LevelManager::saveLevel() {
     rapidxml::xml_document<xmlUsedCharType> doc;
-    std::unique_ptr<char[]> fileData = readXmlFile(doc, gameDataDir+"Saves/"+levelPackageName+'/'+"Status.xml", false);
+    std::unique_ptr<char[]> fileData = readXmlFile(doc, gameDataDir+"Saves/"+saveGameName+'/'+"Status.xml", false);
     doc.first_node("Status")->first_node("Level")->first_attribute("value")->value(levelId.c_str());
-    writeXmlFile(doc, gameDataDir+"Saves/"+levelPackageName+'/'+"Status.xml", true);
+    writeXmlFile(doc, gameDataDir+"Saves/"+saveGameName+'/'+"Status.xml", true);
 }
 
 void LevelManager::leaveGame() {
     levelId = "";
-    levelPackageName = "";
+    saveGameName = "";
     levelPackage = NULL;
     gameStatus = noGame;
     objectManager.clear();
@@ -65,7 +65,7 @@ bool LevelManager::loadGame(std::string name) {
         log(error_log, "Could not load saved game, because its version is outdated.");
         return false;
     }
-    levelPackageName = name;
+    saveGameName = name;
     levelPackage = fileManager.getPackage(statusNode->first_node("Package")->first_attribute("value")->value());
     loadLevel(statusNode->first_node("Level")->first_attribute("value")->value());
     return true;

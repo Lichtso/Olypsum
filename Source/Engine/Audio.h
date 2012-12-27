@@ -29,9 +29,9 @@ class SoundTrack : public FilePackageResource {
      @see FilePackage::getResource()
      */
     std::shared_ptr<FilePackageResource> load(FilePackage* filePackage, const std::string& name);
-    /*!
-     @return The length of the OGG-file in seconds
-     */
+    //! True if there are two channels
+    bool isStereo();
+    //! Calculates the length of the OGG-file in seconds
     float getLength();
 };
 
@@ -50,7 +50,8 @@ class SoundSourceObject : public SimpleObject {
         SoundSource_hold, //!< Stops playing if the SoundTrack reaches its end
         SoundSource_disposable //!< Deletes this SoundSourceObject if the SoundTrack reaches its end
     } mode;
-    SoundSourceObject();
+    SoundSourceObject(SoundTrack* soundTrack);
+    SoundSourceObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     ~SoundSourceObject();
     void remove();
     /*! Adds a SoundTrack to this SoundSourceObject

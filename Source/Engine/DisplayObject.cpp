@@ -98,8 +98,6 @@ void ModelObject::drawBonePose(BaseObject* object, Bone* bone, float axesSize, f
 bool ModelObject::gameTick() {
     BaseObject::gameTick();
     if(model->skeleton) {
-        //if(!skeletonPose)
-        //    skeletonPose = new btTransform[model->skeleton->bones.size()];
         Bone* rootBone = model->skeleton->rootBone;
         updateSkeletonPose(links[rootBone->name]->getOther(this), rootBone);
     }
@@ -185,7 +183,7 @@ void comMotionState::setWorldTransform(const btTransform& centerOfMassWorldTrans
 RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
     ModelObject::init(node, levelLoader);
     rapidxml::xml_node<xmlUsedCharType>* physicsBody = node->first_node("PhysicsBody");
-    if(!node) {
+    if(!physicsBody) {
         log(error_log, "Tried to construct RigidObject without \"PhysicsBody\"-node.");
         return;
     }
@@ -236,6 +234,14 @@ btTransform RigidObject::getTransformation() {
     return motionState->transformation;
 }
 
+bool RigidObject::gameTick() {
+    if(model)
+        ModelObject::gameTick();
+    else
+        BaseObject::gameTick();
+    return true;
+}
+
 void RigidObject::draw() {
     modelMat = getTransformation();
     
@@ -247,7 +253,8 @@ void RigidObject::draw() {
         bV.drawWireFrame(Color4(1.0, 1.0, 0.0, 1.0));
     }
     
-    ModelObject::draw();
+    if(model)
+        ModelObject::draw();
 }
 
 

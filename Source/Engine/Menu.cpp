@@ -54,7 +54,6 @@ void setMenu(MenuName menu) {
         GUIImage* image = new GUIImage();
         image->texture = fileManager.getPackage("Default")->getResource<Texture>("background.png");
         image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
-        
         image->sizeAlignment = GUISizeAlignment_Height;
         image->width = currentScreenView->width;
         image->updateContent();
@@ -365,6 +364,16 @@ void setMenu(MenuName menu) {
             label->textAlign = GUITextAlign_Left;
             label->sizeAlignment = GUISizeAlignment_Height;
             currentScreenView->addChild(label);
+            
+            label = new GUILabel();
+            label->text = std::string("Collisions: --");
+            label->posX = currentScreenView->width*-0.67;
+            label->posY = currentScreenView->height*0.90;
+            label->width = currentScreenView->width*0.3;
+            label->color = Color4(1.0);
+            label->textAlign = GUITextAlign_Left;
+            label->sizeAlignment = GUISizeAlignment_Height;
+            currentScreenView->addChild(label);
         } break;
         case gameEscMenu: {
             std::function<void(GUIButton*)> onClick[] = {
@@ -382,7 +391,6 @@ void setMenu(MenuName menu) {
             for(unsigned char i = 0; i < 4; i ++) {
                 GUIButton* button = new GUIButton();
                 button->posY = currentScreenView->height*(0.32-0.16*i);
-                currentScreenView->addChild(button);
                 GUILabel* label = new GUILabel();
                 label->text = localization.localizeString(buttonLabels[i]);
                 label->textAlign = GUITextAlign_Left;
@@ -391,6 +399,7 @@ void setMenu(MenuName menu) {
                 label->sizeAlignment = GUISizeAlignment_Height;
                 button->addChild(label);
                 button->onClick = onClick[i];
+                currentScreenView->addChild(button);
             }
         } break;
         case saveGamesMenu: {

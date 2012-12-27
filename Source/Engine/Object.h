@@ -42,7 +42,7 @@ class BaseObject {
     virtual void remove();
     //! Initialize from rapidxml::xml_node
     void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    //! Reads the transformation from a rapidxml::xml_node named "Transformation"
+    //! Reads the transformation from a rapidxml::xml_node
     static btTransform readTransformtion(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
 };
 
@@ -126,6 +126,7 @@ class PhysicObject : public BaseObject {
 class BaseLink {
     BaseObject* fusion; //!< A pointer which combines the pointers of BaseObject a and b via xor
     protected:
+    BaseLink() { };
     virtual ~BaseLink() { }
     public:
     /*! Constructs a new LinkObject
@@ -135,6 +136,8 @@ class BaseLink {
      @param nameInB The name this LinkObject shall get in the BaseObject::links map of b
      */
     BaseLink(BaseObject* a, BaseObject* b, std::string nameInA, std::string nameInB);
+    //! Initialize from rapidxml::xml_node
+    BaseLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     //! Is called by a parent BaseObject to its children to prepare the next graphics frame
     virtual void gameTickFrom(BaseObject* parent) { };
     /*! Gets the other BaseObject
@@ -149,6 +152,11 @@ class BaseLink {
      @param iteratorInA the iterator of this LinkObject in the BaseObject::links map of the first parameter
      */
     virtual void remove(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
+    /*! Initialize from rapidxml::xml_node
+     @param a Reference to store the first BaseObject*
+     @param b Reference to store the second BaseObject*
+     */
+    void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader, BaseObject*& a, BaseObject*& b);
 };
 
 //! A BaseLink with a btTypedConstraint
@@ -165,6 +173,7 @@ class PhysicLink : public BaseLink {
      @param constraint The bullet physics constraint to be attached
      */
     PhysicLink(BaseObject* a, BaseObject* b, std::string nameInA, std::string nameInB, btTypedConstraint* constraint);
+    PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
 };
 
 //! A BaseLink with a parent child relationship
@@ -231,6 +240,7 @@ class TransformLink : public BaseLink {
      @param childName The name of the child in the BaseObject::links map of the parent
      */
     TransformLink(BaseObject* parent, BaseObject* child, std::string childName);
+    TransformLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     ~TransformLink();
     /*! Used to remove a HierarchicalLink correctly.
      This will call BaseObject::remove() on the child if and only if the parameter a is the parent.

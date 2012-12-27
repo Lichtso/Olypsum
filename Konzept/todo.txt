@@ -1,9 +1,7 @@
 Add antialiasing to the corners of GUI elements
-Make options GUI
 Highmap terrains
 Use C++11 Multithreading
-Level File Formats
-Use Bullet-Engine
+Save Level Files
 GUITextField Copy & Paste
 Anisotropic filtering
 
@@ -12,3 +10,6 @@ PCSS
 Fog
 Enviornment maping
 OpenAL Sound Engine: Add track queue
+
+Bugs:
+Finder start on mac

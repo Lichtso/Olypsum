@@ -130,6 +130,12 @@ btCollisionShape* LevelLoader::getCollisionShape(std::string name) {
         shape = new btConvexHullShape(vertices.data, vertices.count, sizeof(btScalar)*3);
         if(vertices.count > 100)
             log(warning_log, std::string("Found vertex cloud shape (")+name+") with more than 100 vertices.");
+    }else if(strcmp(node->name(), "StaticPlane") == 0) {
+        btScalar distance;
+        sscanf(node->first_attribute("distance")->value(), "%f", &distance);
+        XMLValueArray<btScalar> vec;
+        vec.readString(node->value(), "%f");
+        shape = new btStaticPlaneShape(btVector3(vec.data[0], vec.data[1], vec.data[2]), distance);
     }else{
         log(error_log, std::string("Found collision shape (")+name+") shape with an unknown type: "+node->name()+'.');
         return NULL;
@@ -139,33 +145,46 @@ btCollisionShape* LevelLoader::getCollisionShape(std::string name) {
     return shape;
 }
 
+BaseObject* LevelLoader::getObjectLinking(const char* id) {
+    unsigned int offset;
+    sscanf(id, "%d", &offset);
+    offset += objectLinkingOffset;
+    if(offset < objectLinkingScope || offset >= objectLinkingIndex.size()) {
+        log(error_log, std::string("Object linking offset out of scope: ")+id+'.');
+        return NULL;
+    }
+    return objectLinkingIndex[offset];
+}
+
 bool LevelLoader::loadContainer(std::string name) {
     rapidxml::xml_document<xmlUsedCharType> doc;
-    std::unique_ptr<char[]> rawData = readXmlFile(doc, levelManager.levelPackage->path+"/Containers/"+name+".xml", false);
+    std::unique_ptr<char[]> rawData = readXmlFile(doc, gameDataDir+"Saves/"+levelManager.saveGameName+"/Containers/"+name+".xml", false);
+    if(!rawData)
+        rawData = readXmlFile(doc, levelManager.levelPackage->path+"/Containers/"+name+".xml", false);
     if(!rawData) {
         log(error_log, std::string("Could not find container by name: ")+name+'.');
         return false;
     }
-    rapidxml::xml_node<xmlUsedCharType>* node = doc.first_node("Container");
-    if(!node) {
+    rapidxml::xml_node<xmlUsedCharType>* containerNode = doc.first_node("Container");
+    if(!containerNode) {
         log(error_log, std::string("Could not find \"Container\"-node in container: ")+name+'.');
         return false;
     }
-    //Push the name on the stack and avoid self recursion
+    //Push the container on the stack and avoid self recursion
     if(containerStack.find(name) != containerStack.end()) {
         log(error_log, std::string("Container contains its self: ")+name+'.');
         return false;
     }
     containerStack.insert(name);
-    
-    node = node->first_node();
+    //Prepare object linking
+    objectLinkingScope = objectLinkingIndex.size();
+    //Check for Level-node
+    rapidxml::xml_node<xmlUsedCharType>* node = containerNode->first_node();
     if(strcmp(node->name(), "Level") == 0) {
         if(containerStack.size() > 1) {
             log(error_log, "Found a \"Level\"-node in a child container.");
             return false;
         }
-        XMLValueArray<float> vectorData;
-        vectorData.readString(node->value(), "%f");
         rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("gravity");
         if(!attribute) {
             log(error_log, "Tried to construct Level without \"gravity\"-attribute.");
@@ -173,46 +192,84 @@ bool LevelLoader::loadContainer(std::string name) {
         }
         float gravity;
         sscanf(attribute->value(), "%f", &gravity);
-        objectManager.initPhysics(btVector3(vectorData.data[0], vectorData.data[1], vectorData.data[2]), gravity);
+        objectManager.physicsWorld->setGravity(btVector3(0, gravity, 0));
         node = node->next_sibling();
     }else if(containerStack.size() == 1) {
         log(error_log, "Root container does not begin with a \"Level\"-node.");
         return false;
     }
-    
+    //Load containers
+    node = containerNode->first_node("Container");
     while(node) {
-        if(strcmp(node->name(), "RigidObject") == 0) {
-            new RigidObject(node, this);
-        }else if(strcmp(node->name(), "WaterObject") == 0) {
-            new WaterObject(node, this);
-        }else if(strcmp(node->name(), "LightObject") == 0) {
-            rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("type");
-            if(!attribute) {
-                log(error_log, "Tried to construct LightObject without \"type\"-attribute.");
-                return false;
-            }
-            if(strcmp(attribute->value(), "directional") == 0) {
-                new DirectionalLight(node, this);
-            }else if(strcmp(attribute->value(), "spot") == 0) {
-                new SpotLight(node, this);
-            }else if(strcmp(attribute->value(), "positional") == 0) {
-                new PositionalLight(node, this);
-            }
-        }else if(strcmp(node->name(), "Container") == 0) {
-            rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("src");
-            if(!attribute) {
-                log(error_log, "Tried to construct Container without \"src\"-attribute.");
-                return false;
-            }
-            btTransform parentTransform = transformation;
-            transformation *= readTransformationXML(node);
-            if(!loadContainer(attribute->value())) return false;
-            transformation = parentTransform;
+        rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("src");
+        if(!attribute) {
+            log(error_log, "Tried to construct Container without \"src\"-attribute.");
+            return false;
         }
-        node = node->next_sibling();
+        btTransform parentTransform = transformation;
+        transformation *= readTransformationXML(node);
+        if(!loadContainer(attribute->value())) return false;
+        transformation = parentTransform;
+        node = node->next_sibling("Container");
     }
-    
-    //Pop the name from the stack
+    //Prepare object linking
+    objectLinkingOffset = objectLinkingIndex.size();
+    //Load objects
+    node = containerNode->first_node("Objects");
+    if(node) {
+        node = node->first_node();
+        while(node) {
+            BaseObject* object = NULL;
+            if(strcmp(node->name(), "RigidObject") == 0) {
+                object = new RigidObject(node, this);
+            }else if(strcmp(node->name(), "LightObject") == 0) {
+                rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("type");
+                if(!attribute) {
+                    log(error_log, "Tried to construct LightObject without \"type\"-attribute.");
+                    return false;
+                }
+                if(strcmp(attribute->value(), "positional") == 0) {
+                    object = new PositionalLight(node, this);
+                }else if(strcmp(attribute->value(), "spot") == 0) {
+                    object = new SpotLight(node, this);
+                }else if(strcmp(attribute->value(), "directional") == 0) {
+                    object = new DirectionalLight(node, this);
+                }
+            }else if(strcmp(node->name(), "ParticlesObject") == 0) {
+                object = new ParticlesObject(node, this);
+            }else if(strcmp(node->name(), "SoundSourceObject") == 0) {
+                object = new SoundSourceObject(node, this);
+            }else if(strcmp(node->name(), "WaterObject") == 0) {
+                object = new WaterObject(node, this);
+            }else if(strcmp(node->name(), "Cam") == 0) {
+                object = new Cam(node, this);
+            }else{
+                log(error_log, std::string("Tried to construct invalid Object: ")+node->name()+'.');
+                return false;
+            }
+            objectLinkingIndex.push_back(object);
+            node = node->next_sibling();
+        }
+    }
+    //Load links
+    node = containerNode->first_node("Links");
+    if(node) {
+        node = node->first_node();
+        while(node) {
+            if(strcmp(node->name(), "BaseLink") == 0) {
+                new BaseLink(node, this);
+            }else if(strcmp(node->name(), "PhysicLink") == 0) {
+                new PhysicLink(node, this);
+            }else if(strcmp(node->name(), "TransformLink") == 0) {
+                new TransformLink(node, this);
+            }else{
+                log(error_log, std::string("Tried to construct invalid Link: ")+node->name()+'.');
+                return false;
+            }
+            node = node->next_sibling();
+        }
+    }
+    //Pop the container from the stack
     containerStack.erase(name);
     return true;
 }
@@ -228,12 +285,12 @@ bool LevelLoader::loadLevel() {
     rapidxml::xml_node<xmlUsedCharType>* node = doc.first_node("CollisionShapes")->first_node();
     while(node) {
         collisionShapeNodes[node->first_attribute("id")->value()] = node;
-        auto iterator = collisionShapeNodes.find(node->first_attribute("id")->value());
         node = node->next_sibling();
     }
     
     //Load root conatiner
     objectManager.clear();
+    objectManager.initPhysics();
     if(!loadContainer(levelManager.levelId)) return false;
     
     levelManager.gameStatus = localGame;

@@ -10,16 +10,31 @@
 		<Sphere x="0.0" y="-0.5" z="0.5" radius="0.5"/>
 		<Sphere x="0.0" y="0.5" z="0.0" radius="0.5"/>
 	</SphereCompound>
-	<Compound id="compound0">
-		<Child collisionShape="cylinder0">
-			<translate>0.0 0.0 0.0</translate>
+	<VertexCloud id="vertexCloud0" vertexCount="4">-0.5 -0.5 -0.5 0.5 -0.5 -0.5 0.0 -0.5 0.5 0.0 0.5 0.0</VertexCloud>
+	<StaticPlane id="staticPlane" distance="0.0">0.0 1.0 0.0</StaticPlane>
+	<Compound id="worldBox">
+		<Child collisionShape="staticPlane">
+			<Translate>0.0 -5.0 0.0</Translate>
 		</Child>
-		<Child collisionShape="box0">
-			<translate>0.0 -1.0 0.0</translate>
+		<Child collisionShape="staticPlane">
+			<Translate>0.0 5.0 0.0</Translate>
+			<Rotate>0.0 0.0 1.0 180.0</Rotate>
 		</Child>
-		<Child collisionShape="sphere0">
-			<translate>0.0 1.0 0.0</translate>
+		<Child collisionShape="staticPlane">
+			<Translate>-10.0 0.0 0.0</Translate>
+			<Rotate>0.0 0.0 1.0 -90.0</Rotate>
+		</Child>
+		<Child collisionShape="staticPlane">
+			<Translate>10.0 0.0 0.0</Translate>
+			<Rotate>0.0 0.0 1.0 90.0</Rotate>
+		</Child>
+		<Child collisionShape="staticPlane">
+			<Translate>0.0 0.0 -10.0</Translate>
+			<Rotate>1.0 0.0 0.0 90.0</Rotate>
+		</Child>
+		<Child collisionShape="staticPlane">
+			<Translate>0.0 0.0 10.0</Translate>
+			<Rotate>1.0 0.0 0.0 -90.0</Rotate>
 		</Child>
 	</Compound>
-	<VertexCloud id="vertexCloud0" vertexCount="4">-0.5 -0.5 -0.5 0.5 -0.5 -0.5 0.0 -0.5 0.5 0.0 0.5 0.0</VertexCloud>
 </CollisionShapes>

@@ -1,18 +1,20 @@
 #extension GL_EXT_gpu_shader4 : require
 
 attribute vec4 position;
-attribute vec3 velocity;
+attribute vec4 velocity;
 uniform float respawnParticles;
 uniform float animationFactor;
-uniform float lifeMin;
+uniform float lifeCenter;
 uniform float lifeRange;
-uniform vec3 posMin;
+uniform float sizeCenter;
+uniform float sizeRange;
+uniform vec3 posCenter;
 uniform vec3 posRange;
-uniform vec3 dirMin;
+uniform vec3 dirCenter;
 uniform vec3 dirRange;
 uniform vec3 velocityAdd;
 varying vec4 vPosition;
-varying vec3 vVelocity;
+varying vec4 vVelocity;
 
 const float InverseMaxInt = 1.0 / 4294967295.0;
 
@@ -32,12 +34,14 @@ vec3 vec3rand(inout int seed, vec3 max) {
 void main() {
     vPosition.w = position.w-animationFactor;
     if(vPosition.w <= 0.0 && respawnParticles == 1.0) {
-        int seed = gl_VertexID*3;
-        vPosition.xyz = vec3rand(seed, posRange)+posMin;
-        vPosition.w = frand(seed, lifeRange)+lifeMin;
-        vVelocity = vec3rand(seed, dirRange)+dirMin;
+        int seed = gl_VertexID*8;
+        vPosition.xyz = vec3rand(seed, posRange)+posCenter;
+        vPosition.w = frand(seed, lifeRange)+lifeCenter;
+        vVelocity.xyz = vec3rand(seed, dirRange)+dirCenter;
+        vVelocity.w = frand(seed, sizeRange)+sizeCenter;
     }else{
-        vPosition.xyz = position.xyz+velocity*animationFactor;
-        vVelocity = velocity+velocityAdd;
+        vPosition.xyz = position.xyz+velocity.xyz*animationFactor;
+        vVelocity.xyz = velocity.xyz+velocityAdd;
+        vVelocity.w = velocity.w;
     }
 }

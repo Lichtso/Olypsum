@@ -15,7 +15,7 @@
       <init_from>glass.jpg</init_from>
     </image>
     <image id="bump_map" name="bump_map">
-      <init_from>glassHeighmap.png</init_from>
+      <init_from>heightMap.png</init_from>
     </image>
   </library_images>
   <library_effects>

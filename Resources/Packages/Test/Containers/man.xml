@@ -1,8 +1,13 @@
 <Container>
-	<RigidObject>
-		<Rotate>1.0 0.0 0.0 70.0</Rotate>
-		<Rotate>0.0 1.0 0.0 20.0</Rotate>
-		<Model src="man.dae" />
-		<PhysicsBody collisionShape="box0" mass="1.0" />
-	</RigidObject>
+	<Objects>
+		<RigidObject>
+			<Rotate>1.0 0.0 0.0 70.0</Rotate>
+			<Rotate>0.0 1.0 0.0 20.0</Rotate>
+			<Model src="man.dae" />
+			<PhysicsBody collisionShape="box0" mass="1.0" />
+		</RigidObject>
+	</Objects>
+	<Links>
+
+	</Links>
 </Container>

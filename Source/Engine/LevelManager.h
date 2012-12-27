@@ -25,7 +25,7 @@ class LevelManager {
     std::map<std::string, btCollisionShape*> sharedCollisionShapes; //!< All available collision shapes
     //std::map<std::string, v8::Handle> sharedScripts; //!< All available scripts
     FilePackage* levelPackage;
-    std::string levelPackageName, levelId;
+    std::string saveGameName, levelId;
     GameStatusName gameStatus = noGame;
     //! Deletes all shared objects
     void clear();

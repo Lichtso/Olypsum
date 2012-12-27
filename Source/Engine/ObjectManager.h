@@ -37,7 +37,6 @@ class ObjectManager {
     btDefaultCollisionConfiguration* collisionConfiguration; //!< The physics collision configuration
     btCollisionDispatcher* collisionDispatcher; //!< The physics collision dispatcher
     btSequentialImpulseConstraintSolver* constraintSolver; //!< The physics constraint solver
-    btRigidBody* worldWalls[6]; //!< The bounding box of the scene
     btBroadphaseInterface* broadphase; //!< The physics broadphase
     btDiscreteDynamicsWorld* physicsWorld; //!< The physics world
     
@@ -48,7 +47,7 @@ class ObjectManager {
     //! Deletes all Objects and the physics world
     void clear();
     //! Initializes the physics world
-    void initPhysics(btVector3 worldSize, float gravity);
+    void initPhysics();
     //! Calculate a game tick
     void gameTick();
     //! Calculate the physics

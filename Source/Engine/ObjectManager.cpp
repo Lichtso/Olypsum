@@ -27,7 +27,6 @@ class LightPrioritySorter {
 };
 
 static void calculatePhysicsTick(btDynamicsWorld* world, btScalar timeStep) {
-    printf("%d\n", objectManager.collisionDispatcher->getNumManifolds());
     objectManager.physicsTick();
 }
 //! @endcond
@@ -75,27 +74,13 @@ void ObjectManager::init() {
     soundDevice = alcOpenDevice(NULL);
     soundContext = alcCreateContext(soundDevice, NULL);
     alcMakeContextCurrent(soundContext);
-    log(info_log, std::string("OpenAL, sound output ")+alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
+    alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
+    log(info_log, std::string("OpenAL, sound output: ")+alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
 }
 
-void ObjectManager::initPhysics(btVector3 worldSize, float gravity) {
+void ObjectManager::initPhysics() {
     physicsWorld = new btDiscreteDynamicsWorld(collisionDispatcher, broadphase, constraintSolver, collisionConfiguration);
-    physicsWorld->setGravity(btVector3(0, gravity, 0));
     physicsWorld->setInternalTickCallback(calculatePhysicsTick);
-    
-    if(!levelManager.sharedCollisionShapes["worldWall"])
-        levelManager.sharedCollisionShapes["worldWall"] = new btStaticPlaneShape(btVector3(0, 1, 0), 0);
-    btDefaultMotionState* wallMotionState[6];
-    wallMotionState[0] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, -M_PI_2), btVector3(-worldSize.x(), 0, 0)));
-    wallMotionState[1] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, M_PI_2), btVector3(worldSize.x(), 0, 0)));
-    wallMotionState[2] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0), btVector3(0, -worldSize.y(), 0)));
-    wallMotionState[3] = new btDefaultMotionState(btTransform(btQuaternion(0, 0, M_PI), btVector3(0, worldSize.y(), 0)));
-    wallMotionState[4] = new btDefaultMotionState(btTransform(btQuaternion(0, M_PI_2, 0), btVector3(0, 0, -worldSize.z())));
-    wallMotionState[5] = new btDefaultMotionState(btTransform(btQuaternion(0, -M_PI_2, 0), btVector3(0, 0, worldSize.z())));
-    for(unsigned char i = 0; i < 6; i ++) {
-        worldWalls[i] = new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(0, wallMotionState[i], levelManager.sharedCollisionShapes["worldWall"], btVector3(0, 0, 0)));
-        physicsWorld->addRigidBody(worldWalls[i], CollisionMask_Zone, CollisionMask_Object);
-    }
 }
 
 void ObjectManager::clear() {
@@ -125,11 +110,6 @@ void ObjectManager::clear() {
     simpleObjects.clear();
     
     if(physicsWorld) {
-        for(unsigned char i = 0; i < 6; i ++) {
-            delete worldWalls[i]->getMotionState();
-            delete worldWalls[i];
-            worldWalls[i] = NULL;
-        }
         delete physicsWorld;
         physicsWorld = NULL;
     }
@@ -181,17 +161,29 @@ void ObjectManager::gameTick() {
 
 void ObjectManager::physicsTick() {
     unsigned int numManifolds = collisionDispatcher->getNumManifolds();
+    
+    //TODO: Debugging
+    if(currentMenu == inGameMenu) {
+        char str[64];
+        sprintf(str, "Collisions: %d", numManifolds);
+        GUILabel* label = (GUILabel*)currentScreenView->children[1];
+        label->text = str;
+        label->updateContent();
+    }
+    
 	for(unsigned int i = 0; i < numManifolds; i ++) {
 		btPersistentManifold* contactManifold = collisionDispatcher->getManifoldByIndexInternal(i);
         if(contactManifold->getNumContacts() == 0) continue;
         
-		void *objectA = static_cast<const btCollisionObject*>(contactManifold->getBody0())->getUserPointer(),
-             *objectB = static_cast<const btCollisionObject*>(contactManifold->getBody1())->getUserPointer();
-        PhysicObject *userObjectA = static_cast<PhysicObject*>(objectA),
-                     *userObjectB = static_cast<PhysicObject*>(objectB);
+		const btCollisionObject *objectA = static_cast<const btCollisionObject*>(contactManifold->getBody0()),
+                                *objectB = static_cast<const btCollisionObject*>(contactManifold->getBody1());
+        PhysicObject *userObjectA = static_cast<PhysicObject*>(objectA->getUserPointer()),
+                     *userObjectB = static_cast<PhysicObject*>(objectB->getUserPointer());
         
-        if(userObjectA) userObjectA->handleCollision(contactManifold, userObjectB);
-        if(userObjectB) userObjectB->handleCollision(contactManifold, userObjectA);
+        //printf("%p %p (%p %p) %d\n", objectA, objectB, userObjectA, userObjectB, contactManifold->getNumContacts());
+        
+        userObjectA->handleCollision(contactManifold, userObjectB);
+        userObjectB->handleCollision(contactManifold, userObjectA);
 	}
     
     for(auto graphicObject : graphicObjects)
@@ -284,6 +276,7 @@ void ObjectManager::illuminate() {
 void ObjectManager::drawFrame() {
     mainFBO.renderInDeferredBuffers(false);
     mainCam->use();
+    currentCam->updateAudioListener();
     drawScene();
     
     //Calculate Screen Blur

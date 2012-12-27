@@ -14,8 +14,11 @@
 #define LevelLoader_h
 
 class LevelLoader {
+    unsigned int objectLinkingScope, objectLinkingOffset;
+    std::vector<BaseObject*> objectLinkingIndex;
     std::set<std::string> containerStack;
     std::unique_ptr<char[]> collisionShapesData;
+    std::map<std::string, BaseObject*> namedObjects;
     std::map<std::string, rapidxml::xml_node<xmlUsedCharType>*> collisionShapeNodes;
     void deleteCollisionShapeNode(std::string name);
     public:
@@ -23,6 +26,7 @@ class LevelLoader {
     LevelLoader();
     ~LevelLoader();
     btCollisionShape* getCollisionShape(std::string name);
+    BaseObject* getObjectLinking(const char* id);
     bool loadContainer(std::string name);
     bool loadLevel();
 };

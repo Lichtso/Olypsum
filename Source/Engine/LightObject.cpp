@@ -32,9 +32,9 @@ void initLightVolumes() {
 LightObject::LightObject() {
     objectManager.lightObjects.push_back(this);
     body = new btCollisionObject();
-    body->setCollisionShape(new btBoxShape(btVector3(1, 1, 1)));
+    body->setCollisionShape(new btSphereShape(1.0));
     body->setUserPointer(this);
-    body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+    body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
     objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Light, 0);
     
     shadowMap = NULL;
@@ -106,9 +106,9 @@ void LightObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
         log(error_log, "Tried to construct LightObject without \"Color\"-node.");
         return;
     }
-    XMLValueArray<float> vectorData;
-    vectorData.readString(node->value(), "%f");
-    color = Color4(vectorData.data[0], vectorData.data[1], vectorData.data[2]);
+    XMLValueArray<float> vecData;
+    vecData.readString(node->value(), "%f");
+    color = Color4(vecData.data[0], vecData.data[1], vecData.data[2]);
 }
 
 
@@ -124,9 +124,9 @@ DirectionalLight::DirectionalLight(rapidxml::xml_node<xmlUsedCharType>* node, Le
         log(error_log, "Tried to construct DirectionalLight without \"Bounds\"-node.");
         return;
     }
-    XMLValueArray<float> vectorData;
-    vectorData.readString(bounds->value(), "%f");
-    setBounds(vectorData.data[0], vectorData.data[1], vectorData.data[2]);
+    XMLValueArray<float> vecData;
+    vecData.readString(bounds->value(), "%f");
+    setBounds(vecData.data[0], vecData.data[1], vecData.data[2]);
     LightObject::init(node, levelLoader);
 }
 

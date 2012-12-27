@@ -1,18 +1,40 @@
 <Container>
-	<Level gravity="-9.81">10.0 5.0 10.0</Level>
+	<Level gravity="-9.81" />
 	<Container src="man">
 		<Translate>0.7 2.0 0.0</Translate>
 	</Container>
-	<RigidObject>
-		<Translate>0.0 0.0 0.0</Translate>
-		<Model src="man.dae" />
-		<PhysicsBody collisionShape="box0" mass="0.0" />
-	</RigidObject>
-	<LightObject type="spot">
-		<Translate>2.0 1.0 2.0</Translate>
-		<Rotate>0.0 1.0 0.0 45.0</Rotate>
-		<Rotate>1.0 0.0 0.0 10.0</Rotate>
-		<Color>1.0 1.0 1.0</Color>
-		<Bounds cutoff="0.50" range="5.0"/>
-	</LightObject>
+	<Objects>
+		<RigidObject>
+			<PhysicsBody collisionShape="worldBox" mass="0.0" />
+		</RigidObject>
+		<RigidObject>
+			<Model src="man.dae" />
+			<PhysicsBody collisionShape="box0" mass="0.0" />
+		</RigidObject>
+		<LightObject type="spot">
+			<Translate>2.0 1.5 2.0</Translate>
+			<Rotate>0.0 1.0 0.0 45.0</Rotate>
+			<Rotate>1.0 0.0 0.0 -20.0</Rotate>
+			<Color>1.0 1.0 1.0</Color>
+			<Bounds cutoff="0.50" range="5.0" />
+		</LightObject>
+		<ParticlesObject particles="50" force="0.0 0.0 0.0">
+			<Texture src="glass.jpg" />
+			<PhysicsBody collisionShape="box0" />
+			<Life min="3.0" max="7.0" />
+			<Size min="0.1" max="0.1" />
+			<SpawnBox min="-0.3 -0.3 -0.3" max="0.3 0.0 0.3" />
+			<Velocity min="-0.1 0.1 -0.1" max="0.1 0.9 0.1" />
+		</ParticlesObject>
+	</Objects>
+	<Links>
+		<PhysicLink>
+			<Object id="-1" name="a" />
+			<Object id="1" name="b" />
+			<Constraint type="hinge">
+				<Axis origin="0.0 1.0 0.0">1.0 0.0 0.0</Axis>
+				<Axis origin="0.0 -1.0 0.0">0.0 0.0 1.0</Axis>
+			</Constraint>
+		</PhysicLink>
+	</Links>
 </Container>

@@ -61,6 +61,10 @@ class XMLValueArray {
         delete [] data;
         data = NULL;
     }
+    //! Convertes data to a btVector3 and returns it
+    btVector3 getVector3() {
+        return btVector3(data[0], data[1], data[2]);
+    }
     /*! Parses a string of values separated by ' '
      @param dataStr The string to be parsed
      @param readType The format like in scanf()

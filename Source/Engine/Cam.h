@@ -30,6 +30,7 @@ class Cam : public SimpleObject {
           width, //!< Width of the view used if fov < 90
           height;//!< Height of the view used if fov < 90
     Cam();
+    Cam(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     ~Cam();
     void remove();
     /*! Calculates a ray shot from this Cam
@@ -54,6 +55,8 @@ class Cam : public SimpleObject {
     bool gameTick();
     //! Sets this Cam as the currentCam
     void use();
+    //! Updates the OpenAL listener
+    void updateAudioListener();
 };
 
 extern Cam *mainCam, *guiCam, *currentCam;

@@ -7,8 +7,7 @@
 //
 
 #import <Vorbis/vorbisfile.h>
-#import "ObjectManager.h"
-#import "FileManager.h"
+#import "LevelManager.h"
 
 #ifdef LITTLE_ENDIAN
 #define ENDIAN 0
@@ -58,6 +57,13 @@ std::shared_ptr<FilePackageResource> SoundTrack::load(FilePackage* filePackageB,
     return pointer;
 }
 
+bool SoundTrack::isStereo() {
+    if(!ALname) return 0.0;
+    ALint channels;
+    alGetBufferi(ALname, AL_CHANNELS, &channels);
+    return (channels == 2);
+}
+
 float SoundTrack::getLength() {
     if(!ALname) return 0.0;
     ALint bits, channels, freq, size;
@@ -71,9 +77,34 @@ float SoundTrack::getLength() {
 
 
 
-
-SoundSourceObject::SoundSourceObject() :soundTrack(NULL), mode(SoundSource_disposable), velocity(btVector3(0, 0, 0)) {
+SoundSourceObject::SoundSourceObject(SoundTrack* soundTrackB) :soundTrack(soundTrackB), mode(SoundSource_disposable), velocity(btVector3(0, 0, 0)) {
+    objectManager.simpleObjects.insert(this);
     alGenSources(1, &ALname);
+    alSourcei(ALname, AL_BUFFER, soundTrack->ALname);
+    play();
+}
+
+SoundSourceObject::SoundSourceObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :mode(SoundSource_looping), velocity(btVector3(0, 0, 0)) {
+    objectManager.simpleObjects.insert(this);
+    alGenSources(1, &ALname);
+    BaseObject::init(node, levelLoader);
+    
+    node = node->first_node("SoundTrack");
+    if(!node) {
+        log(error_log, "Tried to construct SoundSourceObject without \"SoundTrack\"-node.");
+        return;
+    }
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("package");
+    FilePackage* levelPack = levelManager.levelPackage;
+    if(attribute)
+        levelPack = fileManager.getPackage(attribute->value());
+    attribute = node->first_attribute("src");
+    if(!attribute) {
+        log(error_log, "Tried to construct SoundSourceObject without \"src\"-attribute.");
+        return;
+    }
+    setSoundTrack(levelPack->getResource<SoundTrack>(attribute->value()));
+    play();
 }
 
 SoundSourceObject::~SoundSourceObject() {
@@ -128,8 +159,9 @@ bool SoundSourceObject::gameTick() {
     }
     btVector3 direction = transformation.getBasis().getColumn(2),
     position = transformation.getOrigin();
-    velocity = position-prevPosition;
-    alSourcef(ALname, AL_GAIN, globalVolume);
+    velocity = (position-prevPosition)/animationFactor;
+    if(soundTrack->isStereo())
+        alSourcef(ALname, AL_GAIN, musicVolume);
     alSource3f(ALname, AL_DIRECTION, direction.x(), direction.y(), direction.z());
     alSource3f(ALname, AL_POSITION, position.x(), position.y(), position.z());
     alSource3f(ALname, AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());

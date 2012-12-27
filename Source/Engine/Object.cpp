@@ -50,7 +50,7 @@ void PhysicObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* 
     body->setCollisionShape(collisionShape);
     body->setWorldTransform(BaseObject::readTransformtion(node, levelLoader));
     body->setUserPointer(this);
-    body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+    body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
     objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Zone, CollisionMask_Object);
 }
 
@@ -80,6 +80,11 @@ BaseLink::BaseLink(BaseObject* a, BaseObject* b, std::string nameInA, std::strin
     b->links[nameInB] = this;
 }
 
+BaseLink::BaseLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+    BaseObject *a, *b;
+    init(node, levelLoader, a, b);
+}
+
 void BaseLink::remove(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
     a->links.erase(iteratorInA);
     BaseObject* b = getOther(a);
@@ -91,10 +96,170 @@ void BaseLink::remove(BaseObject* a, const std::map<std::string, BaseLink*>::ite
     delete this;
 }
 
+void BaseLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader, BaseObject*& a, BaseObject*& b) {
+    node = node->first_node("Object");
+    if(!node) {
+        log(error_log, "Tried to construct BaseLink without first \"Object\"-node.");
+        return;
+    }
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("id");
+    if(!attribute) {
+        log(error_log, "Tried to construct BaseLink without first \"id\"-attribute.");
+        return;
+    }
+    a = levelLoader->getObjectLinking(attribute->value());
+    attribute = node->first_attribute("name");
+    if(!attribute) {
+        log(error_log, "Tried to construct BaseLink without first \"name\"-attribute.");
+        return;
+    }
+    const char *nameOfA = attribute->value();
+    
+    node = node->next_sibling("Object");
+    if(!node) {
+        log(error_log, "Tried to construct BaseLink without first \"Object\"-node.");
+        return;
+    }
+    attribute = node->first_attribute("id");
+    if(!attribute) {
+        log(error_log, "Tried to construct BaseLink without first \"id\"-attribute.");
+        return;
+    }
+    b = levelLoader->getObjectLinking(attribute->value());
+    attribute = node->first_attribute("name");
+    if(!attribute) {
+        log(error_log, "Tried to construct BaseLink without first \"name\"-attribute.");
+        return;
+    }
+    
+    decltype(a->links)::iterator iterator;
+    if(strcmp(attribute->value(), "parent") != 0) {
+        iterator = a->links.find(attribute->value());
+        if(iterator != a->links.end())
+            iterator->second->remove(b, iterator);
+    }else if(strcmp(nameOfA, "parent") != 0) {
+        iterator = b->links.find(nameOfA);
+        if(iterator != b->links.end())
+            iterator->second->remove(a, iterator);
+    }else{
+        log(error_log, "Tried to construct BaseLink with two parent relationships.");
+        return;
+    }
+    a->links[attribute->value()] = this;
+    b->links[nameOfA] = this;
+    fusion = reinterpret_cast<BaseObject*>(reinterpret_cast<unsigned long>(a) ^ reinterpret_cast<unsigned long>(b));
+}
+
 
 
 PhysicLink::PhysicLink(BaseObject* a, BaseObject* b, std::string nameInA, std::string nameInB, btTypedConstraint* constraintB)
     :BaseLink(a, b, nameInA, nameInB), constraint(constraintB) {
+    constraint->setUserConstraintPtr(this);
+    objectManager.physicsWorld->addConstraint(constraint);
+}
+
+PhysicLink::PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+    rapidxml::xml_node<xmlUsedCharType>* constraintNode = node->first_node("Constraint");
+    if(!constraintNode) {
+        log(error_log, "Tried to construct PhysicLink without \"Constraint\"-node.");
+        return;
+    }
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = constraintNode->first_attribute("type");
+    if(!attribute) {
+        log(error_log, "Tried to construct PhysicLink without \"type\"-attribute.");
+        return;
+    }
+    BaseObject *c, *d;
+    BaseLink::init(node, levelLoader, c, d);
+    RigidObject *a = dynamic_cast<RigidObject*>(c), *b = dynamic_cast<RigidObject*>(d);
+    if(!a || !b) {
+        log(error_log, "Tried to construct PhysicLink with objects which aren't RigidObjects.");
+        return;
+    }
+    
+    if(strcmp(attribute->value(), "point") == 0) {
+        rapidxml::xml_node<xmlUsedCharType>* pointNode = constraintNode->first_node("Point");
+        if(!pointNode) {
+            log(error_log, "Tried to construct Point-PhysicLink without first \"Point\"-node.");
+            return;
+        }
+        XMLValueArray<float> vecData;
+        vecData.readString(pointNode->value(), "%f");
+        btVector3 pointA = vecData.getVector3();
+        
+        pointNode = pointNode->next_sibling("Point");
+        if(!pointNode) {
+            log(error_log, "Tried to construct Point-PhysicLink without second \"Point\"-node.");
+            return;
+        }
+        vecData.readString(pointNode->value(), "%f");
+        btVector3 pointB = vecData.getVector3();
+        
+        constraint = new btPoint2PointConstraint(*a->getBody(), *b->getBody(), pointA, pointB);
+    }else if(strcmp(attribute->value(), "gear") == 0) {
+        rapidxml::xml_node<xmlUsedCharType>* pointNode = constraintNode->first_node("Axis");
+        if(!pointNode) {
+            log(error_log, "Tried to construct Gear-PhysicLink without first \"Axis\"-node.");
+            return;
+        }
+        XMLValueArray<float> vecData;
+        vecData.readString(pointNode->value(), "%f");
+        btVector3 axisA = vecData.getVector3();
+        
+        pointNode = pointNode->next_sibling("Axis");
+        if(!pointNode) {
+            log(error_log, "Tried to construct Gear-PhysicLink without second \"Axis\"-node.");
+            return;
+        }
+        vecData.readString(pointNode->value(), "%f");
+        btVector3 axisB = vecData.getVector3();
+        
+        attribute = constraintNode->first_attribute("ratio");
+        if(!attribute) {
+            log(error_log, "Tried to construct Gear-PhysicLink without \"ratio\"-attribute.");
+            return;
+        }
+        float ratio;
+        sscanf(attribute->value(), "%f", &ratio);
+        
+        constraint = new btGearConstraint(*a->getBody(), *b->getBody(), axisA, axisB, ratio);
+    }else if(strcmp(attribute->value(), "hinge") == 0) {
+        rapidxml::xml_node<xmlUsedCharType>* axisNode = constraintNode->first_node("Axis");
+        if(!axisNode) {
+            log(error_log, "Tried to construct Hinge-PhysicLink without first \"Axis\"-node.");
+            return;
+        }
+        XMLValueArray<float> vecData;
+        vecData.readString(axisNode->value(), "%f");
+        btVector3 axisA = vecData.getVector3();
+        attribute = axisNode->first_attribute("origin");
+        if(!attribute) {
+            log(error_log, "Tried to construct Hinge-PhysicLink without first \"origin\"-attribute.");
+            return;
+        }
+        vecData.readString(attribute->value(), "%f");
+        btVector3 originA = vecData.getVector3();
+        
+        axisNode = axisNode->next_sibling("Axis");
+        if(!axisNode) {
+            log(error_log, "Tried to construct Hinge-PhysicLink without second \"Axis\"-node.");
+            return;
+        }
+        vecData.readString(axisNode->value(), "%f");
+        btVector3 axisB = vecData.getVector3();
+        attribute = axisNode->first_attribute("origin");
+        if(!attribute) {
+            log(error_log, "Tried to construct Hinge-PhysicLink without second \"origin\"-attribute.");
+            return;
+        }
+        vecData.readString(attribute->value(), "%f");
+        btVector3 originB = vecData.getVector3();
+        
+        constraint = new btHingeConstraint(*a->getBody(), *b->getBody(), originA, originB, axisA, axisB);
+    }else{
+        log(error_log, std::string("Tried to construct PhysicLink with invalid \"type\"-attribute: ")+attribute->value()+'.');
+        return;
+    }
     constraint->setUserConstraintPtr(this);
     objectManager.physicsWorld->addConstraint(constraint);
 }
@@ -146,6 +311,11 @@ btTransform TransformLink::AnimationEntry::gameTick() {
 TransformLink::TransformLink(BaseObject* parent, BaseObject* child, std::string childName)
     :BaseLink(parent, child, childName, "parent") {
     
+}
+
+TransformLink::TransformLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+    BaseObject *a, *b;
+    BaseLink::init(node, levelLoader, a, b);
 }
 
 TransformLink::~TransformLink() {

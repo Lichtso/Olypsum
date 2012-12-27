@@ -109,6 +109,7 @@ class RigidObject : public ModelObject {
     btRigidBody* getBody() {
         return static_cast<btRigidBody*>(body);
     }
+    bool gameTick();
     void draw();
 };
 
