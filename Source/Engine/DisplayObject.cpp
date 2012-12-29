@@ -182,19 +182,19 @@ void comMotionState::setWorldTransform(const btTransform& centerOfMassWorldTrans
 
 RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
     ModelObject::init(node, levelLoader);
-    rapidxml::xml_node<xmlUsedCharType>* physicsBody = node->first_node("PhysicsBody");
-    if(!physicsBody) {
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("PhysicsBody");
+    if(!parameterNode) {
         log(error_log, "Tried to construct RigidObject without \"PhysicsBody\"-node.");
         return;
     }
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = physicsBody->first_attribute("mass");
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = parameterNode->first_attribute("mass");
     if(!attribute) {
         log(error_log, "Tried to construct RigidObject without \"mass\"-attribute.");
         return;
     }
     float mass = 1.0;
     sscanf(attribute->value(), "%f", &mass);
-    btCollisionShape* collisionShape = PhysicObject::readCollisionShape(physicsBody, levelLoader);
+    btCollisionShape* collisionShape = PhysicObject::readCollisionShape(parameterNode, levelLoader);
     if(!collisionShape) return;
     btVector3 localInertia;
     collisionShape->calculateLocalInertia(mass, localInertia);
@@ -207,6 +207,18 @@ RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
         objectManager.physicsWorld->addRigidBody(body, CollisionMask_Static, CollisionMask_Object);
     else
         objectManager.physicsWorld->addRigidBody(body, CollisionMask_Object, CollisionMask_Zone | CollisionMask_Static | CollisionMask_Object);
+    
+    XMLValueArray<float> vecData;
+    parameterNode = node->first_node("AngularVelocity");
+    if(parameterNode) {
+        vecData.readString(parameterNode->value(), "%f");
+        body->setAngularVelocity(vecData.getVector3());
+    }
+    parameterNode = node->first_node("LinearVelocity");
+    if(parameterNode) {
+        vecData.readString(parameterNode->value(), "%f");
+        body->setLinearVelocity(vecData.getVector3());
+    }
 }
 
 RigidObject::~RigidObject() {

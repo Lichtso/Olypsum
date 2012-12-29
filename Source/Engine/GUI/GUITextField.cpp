@@ -28,10 +28,18 @@ GUITextField::~GUITextField() {
     delete label;
 }
 
+void GUITextField::insertStr(const char* str) {
+    label->text = label->text.substr(0, cursorIndexX)+str+label->text.substr(cursorIndexX);
+    cursorIndexX += strlen(str);
+    cursorDrawTick = 0.0;
+    label->updateContent();
+    if(onChange) onChange(this);
+}
+
 void GUITextField::removeChar() {
     if(cursorIndexX == 0) return;
     moveCursorLeft();
-    unsigned char len = label->getCharSizeAt(cursorIndexX);
+    unsigned char len = getNextCharSize(&label->text[cursorIndexX]);
     label->text = label->text.substr(0, cursorIndexX)+label->text.substr(cursorIndexX+len);
     cursorDrawTick = 0.0;
     label->updateContent();
@@ -48,7 +56,7 @@ void GUITextField::moveCursorLeft() {
 
 void GUITextField::moveCursorRight() {
     if(cursorIndexX == label->text.size()) return;
-    cursorIndexX += label->getCharSizeAt(cursorIndexX);
+    cursorIndexX += getNextCharSize(&label->text[cursorIndexX]);
     cursorDrawTick = 0.0;
 }
 
@@ -154,7 +162,7 @@ bool GUITextField::handleMouseDown(int mouseX, int mouseY) {
     int cursorPosXa, cursorPosXb, cursorPosY;
     label->getPosOfChar(0, 0, cursorPosXa, cursorPosY);
     for(cursorIndexX = 0; cursorIndexX < label->text.size(); cursorPosXa = cursorPosXb) {
-        unsigned int len = label->getCharSizeAt(cursorIndexX);
+        unsigned int len = getNextCharSize(&label->text[cursorIndexX]);
         label->getPosOfChar(cursorIndexX+len, 0, cursorPosXb, cursorPosY);
         if(cursorPosXa-mouseX <= 0 && cursorPosXb-mouseX >= 0) {
             if(mouseX-cursorPosXa > cursorPosXb-mouseX)
@@ -177,6 +185,22 @@ void GUITextField::handleMouseMove(int mouseX, int mouseY) {
 }
 
 bool GUITextField::handleKeyDown(SDL_keysym* key) {
+    if(keyState[SDLK_LMETA] || keyState[SDLK_RMETA]) {
+        switch(key->sym) {
+            case SDLK_c:
+                setClipboardText(label->text);
+                break;
+            case SDLK_v: {
+                if(!hasClipboardText()) break;
+                insertStr(getClipboardText().c_str());
+            } break;
+            default:
+                
+                break;
+        }
+        return true;
+    }
+    
     switch(key->sym) {
         case SDLK_TAB:
         case SDLK_RETURN:
@@ -210,12 +234,7 @@ bool GUITextField::handleKeyDown(SDL_keysym* key) {
                 str[0] = 0xC0 | ((key->unicode >> 6) & 0x1F);
                 str[1] = 0x80 | (key->unicode & 0x3F);
             }
-            
-            label->text = label->text.substr(0, cursorIndexX)+str+label->text.substr(cursorIndexX);
-            cursorIndexX += label->getCharSizeAt(cursorIndexX);
-            cursorDrawTick = 0.0;
-            label->updateContent();
-            if(onChange) onChange(this);
+            insertStr(str);
         } break;
     }
     return true;

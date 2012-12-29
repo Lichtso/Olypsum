@@ -22,9 +22,9 @@
 			<Texture src="glass.jpg" />
 			<PhysicsBody collisionShape="box0" />
 			<Life min="3.0" max="7.0" />
-			<Size min="0.1" max="0.1" />
-			<SpawnBox min="-0.3 -0.3 -0.3" max="0.3 0.0 0.3" />
-			<Velocity min="-0.1 0.1 -0.1" max="0.1 0.9 0.1" />
+			<Size min="0.1" max="0.2" />
+			<SpawnBox min="-0.2 0.0 -0.2" max="0.2 0.0 0.2" />
+			<Velocity min="-0.2 0.3 -0.2" max="0.2 1.2 0.2" />
 		</ParticlesObject>
 	</Objects>
 	<Links>

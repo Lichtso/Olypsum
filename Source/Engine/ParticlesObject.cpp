@@ -166,16 +166,16 @@ bool ParticlesObject::gameTick() {
         }
     }
     
-    if(particleCalcTarget == 1 && (systemLife == -1.0 || systemLife > lifeMax))
-        for(; particlesCount < maxParticles; particlesCount ++) {
-            Particle* particle = &particles[particlesCount];
-            particle->pos = vec3rand(posMin, posMax)+position;
-            particle->dir = vec3rand(dirMin, dirMax);
-            particle->life = frand(lifeMin, lifeMax);
-            particle->size = frand(sizeMin, sizeMax);
-        }
-    
     if(particleCalcTarget == 1) {
+        if(systemLife == -1.0 || systemLife > lifeMax)
+            for(; particlesCount < maxParticles; particlesCount ++) {
+                Particle* particle = &particles[particlesCount];
+                particle->pos = vec3rand(posMin, posMax)+position;
+                particle->dir = vec3rand(dirMin, dirMax).normalize()*(dirMax-dirMin).length()*0.5;
+                particle->life = frand(lifeMin, lifeMax);
+                particle->size = frand(sizeMin, sizeMax);
+            }
+        
         btVector3 forceAux = force*animationFactor;
         for(unsigned int p = 0; p < particlesCount; p ++) {
             particles[p].life -= animationFactor;

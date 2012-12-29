@@ -118,22 +118,6 @@ void GUILabel::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     }
 }
 
-unsigned char GUILabel::getCharSizeAt(unsigned int byteIndex) {
-    if((text[byteIndex ++] & 0xC0) != 0xC0) return 1;
-    unsigned char length = 1;
-    while((text[byteIndex ++] & 0xC0) == 0x80)
-        length ++;
-    return length;
-}
-
-unsigned int GUILabel::getUTF8Length() {
-    unsigned char byteIndex = 0, length = 0;
-    while(byteIndex < text.size())
-        if((text[byteIndex ++] & 0xC0) != 0x80)
-            length ++;
-    return length;
-}
-
 void GUILabel::getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int& posX, int& posY) {
     if(lineIndex >= lines.size()) {
         posY = 0;
@@ -156,4 +140,20 @@ void GUILabel::getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int&
     TTF_SizeUTF8(font->ttf, str.c_str(), &posX, &height);
     posX = (float)fontHeight/height*posX+line->posX-line->width;
     return;
+}
+
+unsigned char getNextCharSize(const char* str) {
+    if((*str & 0xC0) != 0xC0) return 1;
+    unsigned char length = 1;
+    while((str[length] & 0xC0) == 0x80)
+        length ++;
+    return length;
+}
+
+unsigned int getUTF8Length(const char* str) {
+    unsigned char byteIndex = 0, length = 0;
+    while(byteIndex < strlen(str))
+        if((str[byteIndex ++] & 0xC0) != 0x80)
+            length ++;
+    return length;
 }

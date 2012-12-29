@@ -593,7 +593,7 @@ void setMenu(MenuName menu) {
             button->state = GUIButtonStateDisabled;
             textField->onChange = [button](GUITextField* textField) {
                 std::string path = gameDataDir+"Saves/"+textField->label->text+'/';
-                button->state = (!checkDir(path) && textField->label->getUTF8Length() > 3) ? GUIButtonStateNormal : GUIButtonStateDisabled;
+                button->state = (!checkDir(path) && getUTF8Length(textField->label->text.c_str()) > 3) ? GUIButtonStateNormal : GUIButtonStateDisabled;
                 button->updateContent();
             };
         } break;

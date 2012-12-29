@@ -2,8 +2,8 @@ Add antialiasing to the corners of GUI elements
 Highmap terrains
 Use C++11 Multithreading
 Save Level Files
-GUITextField Copy & Paste
 Anisotropic filtering
+Windows Support
 
 Not sure:
 PCSS

@@ -5,7 +5,6 @@
     Feel free to customize this file to suit your needs
 */
 
-#include "Utilities.h"
 #include "SDLMain.h"
 #include "AppMain.h"
 #include <sys/param.h> /* for MAXPATHLEN */
@@ -314,4 +313,20 @@ void updateVideoMode() {
         mouseTranslation[0] = -rect.origin.x;
         mouseTranslation[1] = -rect.origin.y;
     }
+}
+
+void setClipboardText(std::string str) {
+    [[NSPasteboard generalPasteboard] clearContents];
+    [[NSPasteboard generalPasteboard] setString:[NSString stringWithUTF8String:str.c_str()] forType:NSStringPboardType];
+}
+
+std::string getClipboardText() {
+    NSData* data = [[NSPasteboard generalPasteboard] dataForType:NSStringPboardType];
+    if(!data) return "";
+    return std::string(static_cast<const char*>([data bytes]));
+}
+
+bool hasClipboardText() {
+    NSData* data = [[NSPasteboard generalPasteboard] dataForType:NSStringPboardType];
+    return data;
 }

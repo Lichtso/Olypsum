@@ -38,9 +38,10 @@ class GUILabel : public GUIRect {
     ~GUILabel();
     void updateContent();
     void draw(btVector3 transform, GUIClipRect& parentClipRect);
-    unsigned char getCharSizeAt(unsigned int byteIndex);
-    unsigned int getUTF8Length();
     void getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int& posX, int& posY);
 };
+
+unsigned char getNextCharSize(const char* str);
+unsigned int getUTF8Length(const char* str);
 
 #endif

@@ -34,10 +34,10 @@ vec3 vec3rand(inout int seed, vec3 max) {
 void main() {
     vPosition.w = position.w-animationFactor;
     if(vPosition.w <= 0.0 && respawnParticles == 1.0) {
-        int seed = gl_VertexID*8;
+        int seed = gl_VertexID*int(1000*animationFactor);
         vPosition.xyz = vec3rand(seed, posRange)+posCenter;
         vPosition.w = frand(seed, lifeRange)+lifeCenter;
-        vVelocity.xyz = vec3rand(seed, dirRange)+dirCenter;
+        vVelocity.xyz = normalize(vec3rand(seed, dirRange)+dirCenter)*length(dirRange)*0.5;
         vVelocity.w = frand(seed, sizeRange)+sizeCenter;
     }else{
         vPosition.xyz = position.xyz+velocity.xyz*animationFactor;
