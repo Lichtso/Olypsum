@@ -51,6 +51,7 @@ class ParticlesObject : public DisplayObject {
     btTransform getTransformation();
     bool gameTick();
     void draw();
+    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
 #endif

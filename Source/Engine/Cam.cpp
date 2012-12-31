@@ -210,4 +210,22 @@ void Cam::updateAudioListener() {
     alListener3f(AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());
 }
 
+rapidxml::xml_node<xmlUsedCharType>* Cam::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
+    node->name("Cam");
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    attribute->name("fov");
+    attribute->value(doc.allocate_string(stringOf(fov).c_str()));
+    node->append_attribute(attribute);
+    attribute = doc.allocate_attribute();
+    attribute->name("near");
+    attribute->value(doc.allocate_string(stringOf(near).c_str()));
+    node->append_attribute(attribute);
+    attribute = doc.allocate_attribute();
+    attribute->name("far");
+    attribute->value(doc.allocate_string(stringOf(far).c_str()));
+    node->append_attribute(attribute);
+    return node;
+}
+
 Cam *mainCam, *guiCam, *currentCam;

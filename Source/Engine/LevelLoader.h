@@ -7,8 +7,6 @@
 //
 
 #import "ObjectManager.h"
-#import "FileManager.h"
-#import "TextFont.h"
 
 #ifndef LevelLoader_h
 #define LevelLoader_h
@@ -18,7 +16,6 @@ class LevelLoader {
     std::vector<BaseObject*> objectLinkingIndex;
     std::set<std::string> containerStack;
     std::unique_ptr<char[]> collisionShapesData;
-    std::map<std::string, BaseObject*> namedObjects;
     std::map<std::string, rapidxml::xml_node<xmlUsedCharType>*> collisionShapeNodes;
     void deleteCollisionShapeNode(std::string name);
     public:
@@ -27,6 +24,7 @@ class LevelLoader {
     ~LevelLoader();
     btCollisionShape* getCollisionShape(std::string name);
     BaseObject* getObjectLinking(const char* id);
+    void pushObject(BaseObject* object);
     bool loadContainer(std::string name);
     bool loadLevel();
 };

@@ -11,8 +11,10 @@
 #ifndef Object_h
 #define Object_h
 
+class Skeleton;
 class BaseLink;
 class LevelLoader;
+class LevelSaver;
 
 //! Objects basic class
 /*!
@@ -44,6 +46,10 @@ class BaseObject {
     void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     //! Reads the transformation from a rapidxml::xml_node
     static btTransform readTransformtion(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    //! Writes its self to rapidxml::xml_node and returns it
+    virtual rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
+    //! Returns the object at the end of the path (seperated by '/')
+    BaseObject* findObjectByPath(std::string path);
 };
 
 //! BaseObject without physics-body, only transformation
@@ -56,11 +62,14 @@ class SimpleObject : public BaseObject {
     protected:
     btTransform transformation; //!< The transformation in the world
     SimpleObject() { }
+    SimpleObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+        BaseObject::init(node, levelLoader);
+    }
     public:
-    virtual void setTransformation(const btTransform& t) {
+    void setTransformation(const btTransform& t) {
         transformation = t;
     }
-    virtual btTransform getTransformation() {
+    btTransform getTransformation() {
         return transformation;
     }
 };
@@ -83,6 +92,7 @@ class BoneObject : public SimpleObject {
     public:
     Bone* bone;
     BoneObject(Bone* boneB) : bone(boneB) { }
+    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
 //! BaseObject with physics-body
@@ -115,9 +125,18 @@ class PhysicObject : public BaseObject {
     void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     //! Reads the collision shape from a rapidxml::xml_node named "PhysicsBody"
     btCollisionShape* readCollisionShape(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
 
+
+//! A simple structure to construct links
+struct LinkInitializer {
+    BaseObject *a, //!< The first object (or parent)
+               *b; //!< The second object (or child)
+    std::string nameOfA, //!< The name of the first object (or ".." for parent)
+                nameOfB; //!< The name of the second object
+};
 
 //! Links basic class
 /*!
@@ -130,12 +149,9 @@ class BaseLink {
     virtual ~BaseLink() { }
     public:
     /*! Constructs a new LinkObject
-     @param a A BaseObject to be connected
-     @param b The other BaseObject to be connected
-     @param nameInA The name this LinkObject shall get in the BaseObject::links map of a
-     @param nameInB The name this LinkObject shall get in the BaseObject::links map of b
+     @param initializer A LinkInitializer which contains the objects and names to be linked together
      */
-    BaseLink(BaseObject* a, BaseObject* b, std::string nameInA, std::string nameInB);
+    BaseLink(LinkInitializer& initializer);
     //! Initialize from rapidxml::xml_node
     BaseLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     //! Is called by a parent BaseObject to its children to prepare the next graphics frame
@@ -152,11 +168,12 @@ class BaseLink {
      @param iteratorInA the iterator of this LinkObject in the BaseObject::links map of the first parameter
      */
     virtual void remove(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
-    /*! Initialize from rapidxml::xml_node
-     @param a Reference to store the first BaseObject*
-     @param b Reference to store the second BaseObject*
-     */
-    void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader, BaseObject*& a, BaseObject*& b);
+    //! Reads the LinkInitializer from rapidxml::xml_node
+    static LinkInitializer readInitializer(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    //! Initialize from LinkInitializer
+    void init(LinkInitializer& initializer);
+    //! Writes its self to rapidxml::xml_node and returns it
+    virtual void write(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* node);
 };
 
 //! A BaseLink with a btTypedConstraint
@@ -166,14 +183,12 @@ class PhysicLink : public BaseLink {
     public:
     btTypedConstraint* constraint;
     /*! Constructs a new PhysicLink
-     @param a A BaseObject to be connected
-     @param b The other BaseObject to be connected
-     @param nameInA The name this LinkObject shall get in the BaseObject::links map of a
-     @param nameInB The name this LinkObject shall get in the BaseObject::links map of b
+     @param initializer A LinkInitializer which contains the objects and names to be linked together
      @param constraint The bullet physics constraint to be attached
      */
-    PhysicLink(BaseObject* a, BaseObject* b, std::string nameInA, std::string nameInB, btTypedConstraint* constraint);
+    PhysicLink(LinkInitializer& initializer, btTypedConstraint* constraint);
     PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    void write(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* node);
 };
 
 //! A BaseLink with a parent child relationship
@@ -235,11 +250,9 @@ class TransformLink : public BaseLink {
     std::vector<BaseEntry*> transforms; //!< A array with all the transformations to be applied
     virtual void gameTickFrom(BaseObject* parent);
     /*! Constructs a new HierarchicalLink
-     @param parent The BaseObject to be the parent
-     @param child The BaseObject which will be the child
-     @param childName The name of the child in the BaseObject::links map of the parent
+     @param initializer A LinkInitializer which contains the objects and names to be linked together
      */
-    TransformLink(BaseObject* parent, BaseObject* child, std::string childName);
+    TransformLink(LinkInitializer& initializer);
     TransformLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     ~TransformLink();
     /*! Used to remove a HierarchicalLink correctly.
@@ -250,6 +263,8 @@ class TransformLink : public BaseLink {
      @warning This method calls remove() on the child object but only if it is called from the parent
      */
     void remove(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
+    void init(LinkInitializer& initializer);
+    void write(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* node);
 };
 
 #endif

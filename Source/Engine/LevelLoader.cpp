@@ -156,6 +156,10 @@ BaseObject* LevelLoader::getObjectLinking(const char* id) {
     return objectLinkingIndex[offset];
 }
 
+void LevelLoader::pushObject(BaseObject* object) {
+    objectLinkingIndex.push_back(object);
+}
+
 bool LevelLoader::loadContainer(std::string name) {
     rapidxml::xml_document<xmlUsedCharType> doc;
     std::unique_ptr<char[]> rawData = readXmlFile(doc, gameDataDir+"Saves/"+levelManager.saveGameName+"/Containers/"+name+".xml", false);
@@ -190,9 +194,9 @@ bool LevelLoader::loadContainer(std::string name) {
             log(error_log, "Tried to construct Level without \"gravity\"-attribute.");
             return false;
         }
-        float gravity;
-        sscanf(attribute->value(), "%f", &gravity);
-        objectManager.physicsWorld->setGravity(btVector3(0, gravity, 0));
+        XMLValueArray<float> vecData;
+        vecData.readString(attribute->value(), "%f");
+        objectManager.physicsWorld->setGravity(vecData.getVector3());
         node = node->next_sibling();
     }else if(containerStack.size() == 1) {
         log(error_log, "Root container does not begin with a \"Level\"-node.");
@@ -219,35 +223,32 @@ bool LevelLoader::loadContainer(std::string name) {
     if(node) {
         node = node->first_node();
         while(node) {
-            BaseObject* object = NULL;
             if(strcmp(node->name(), "RigidObject") == 0) {
-                object = new RigidObject(node, this);
+                new RigidObject(node, this);
             }else if(strcmp(node->name(), "LightObject") == 0) {
                 rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("type");
                 if(!attribute) {
                     log(error_log, "Tried to construct LightObject without \"type\"-attribute.");
                     return false;
                 }
-                if(strcmp(attribute->value(), "positional") == 0) {
-                    object = new PositionalLight(node, this);
-                }else if(strcmp(attribute->value(), "spot") == 0) {
-                    object = new SpotLight(node, this);
-                }else if(strcmp(attribute->value(), "directional") == 0) {
-                    object = new DirectionalLight(node, this);
-                }
+                if(strcmp(attribute->value(), "positional") == 0)
+                    new PositionalLight(node, this);
+                else if(strcmp(attribute->value(), "spot") == 0)
+                    new SpotLight(node, this);
+                else if(strcmp(attribute->value(), "directional") == 0)
+                    new DirectionalLight(node, this);
             }else if(strcmp(node->name(), "ParticlesObject") == 0) {
-                object = new ParticlesObject(node, this);
+                new ParticlesObject(node, this);
             }else if(strcmp(node->name(), "SoundSourceObject") == 0) {
-                object = new SoundSourceObject(node, this);
+                new SoundSourceObject(node, this);
             }else if(strcmp(node->name(), "WaterObject") == 0) {
-                object = new WaterObject(node, this);
+                new WaterObject(node, this);
             }else if(strcmp(node->name(), "Cam") == 0) {
-                object = new Cam(node, this);
+                new Cam(node, this);
             }else{
                 log(error_log, std::string("Tried to construct invalid Object: ")+node->name()+'.');
                 return false;
             }
-            objectLinkingIndex.push_back(object);
             node = node->next_sibling();
         }
     }

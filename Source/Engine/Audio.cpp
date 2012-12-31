@@ -94,16 +94,7 @@ SoundSourceObject::SoundSourceObject(rapidxml::xml_node<xmlUsedCharType>* node, 
         log(error_log, "Tried to construct SoundSourceObject without \"SoundTrack\"-node.");
         return;
     }
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("package");
-    FilePackage* levelPack = levelManager.levelPackage;
-    if(attribute)
-        levelPack = fileManager.getPackage(attribute->value());
-    attribute = node->first_attribute("src");
-    if(!attribute) {
-        log(error_log, "Tried to construct SoundSourceObject without \"src\"-attribute.");
-        return;
-    }
-    setSoundTrack(levelPack->getResource<SoundTrack>(attribute->value()));
+    setSoundTrack(fileManager.initResource<SoundTrack>(node));
     play();
 }
 
@@ -167,4 +158,11 @@ bool SoundSourceObject::gameTick() {
     alSource3f(ALname, AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());
     prevPosition = position;
     return true;
+}
+
+rapidxml::xml_node<xmlUsedCharType>* SoundSourceObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
+    node->name("SoundSourceObject");
+    node->append_node(fileManager.writeResource(doc, "SoundTrack", soundTrack));
+    return node;
 }

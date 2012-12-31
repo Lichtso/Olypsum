@@ -10,7 +10,7 @@
 
 bool BaseObject::gameTick() {
     for(auto link : links)
-        if(link.first != "parent")
+        if(link.first != "..") //Don't process parent
             link.second->gameTickFrom(this);
     return true;
 }
@@ -22,15 +22,91 @@ void BaseObject::remove() {
 }
 
 void BaseObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+    levelLoader->pushObject(this);
     setTransformation(readTransformtion(node, levelLoader));
 }
 
 btTransform BaseObject::readTransformtion(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
-    /*if(!node) {
-        log(error_log, "Tried to construct BaseObject without \"Transformation\"-nodes.");
-        return btTransform::getIdentity();
-    }*/
     return levelLoader->transformation * readTransformationXML(node);
+}
+
+rapidxml::xml_node<xmlUsedCharType>* BaseObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
+    node->name("BaseObject");
+    rapidxml::xml_node<xmlUsedCharType>* matrix = doc.allocate_node(rapidxml::node_element);
+    matrix->name("Matrix");
+    btScalar values[16];
+    btTransform transform = getTransformation();
+    transform.getBasis().transpose().getOpenGLSubMatrix(values);
+    values[3] = transform.getOrigin().x();
+    values[7] = transform.getOrigin().y();
+    values[11] = transform.getOrigin().z();
+    values[15] = btScalar(1.0);
+    char buffer[64];
+    std::string str = "";
+    for(unsigned char i = 0; i < 16; i ++) {
+        if(i > 0) str += " ";
+        sprintf(buffer, "%g", values[i]);
+        str += buffer;
+    }
+    matrix->value(doc.allocate_string(str.c_str()));
+    node->append_node(matrix);
+    levelSaver->pushObject(this);
+    return node;
+}
+
+BaseObject* BaseObject::findObjectByPath(std::string path) {
+    std::vector<char*> objectNames;
+    char buffer[path.size()+1], *str = buffer;
+    strcpy(buffer, path.c_str());
+    
+    objectNames.push_back(buffer);
+    while(*str != 0) {
+        if(*str != '/') {
+            str ++;
+            continue;
+        }
+        *str = 0;
+        str ++;
+        objectNames.push_back(str);
+    }
+    
+    BaseObject* object = this;
+    for(char* objectName : objectNames) {
+        auto iterator = object->links.find(objectName);
+        if(iterator == object->links.end()) {
+            log(error_log, std::string("Couldn't find object (")+objectName+") in path: "+path+'.');
+            return NULL;
+        }
+        object = iterator->second->getOther(object);
+    }
+    
+    return object;
+}
+
+
+
+rapidxml::xml_node<xmlUsedCharType>* BoneObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
+    node->name("BoneObject");
+    
+    std::string path = "";
+    BaseObject* object = this;
+    auto parentIterator = object->links.find(".."); //Find parent
+    while(parentIterator != object->links.end()) {
+        object = parentIterator->second->getOther(object);
+        for(auto iterator : object->links)
+            if(iterator.second == parentIterator->second) {
+                path = (path.size() == 0) ? iterator.first : iterator.first+'/'+path;
+                break;
+            }
+        parentIterator = object->links.find(".."); //Find parent
+    }
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    attribute->name("path");
+    attribute->value(doc.allocate_string(path.c_str()));
+    node->append_attribute(attribute);
+    return node;
 }
 
 
@@ -72,17 +148,32 @@ btCollisionShape* PhysicObject::readCollisionShape(rapidxml::xml_node<xmlUsedCha
     return shape;
 }
 
+rapidxml::xml_node<xmlUsedCharType>* PhysicObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
+    rapidxml::xml_node<xmlUsedCharType>* physicsBody = doc.allocate_node(rapidxml::node_element);
+    physicsBody->name("PhysicsBody");
+    node->append_node(physicsBody);
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    attribute->name("collisionShape");
+    physicsBody->append_attribute(attribute);
+    for(auto iterator : levelManager.sharedCollisionShapes)
+        if(iterator.second == body->getCollisionShape()) {
+            attribute->value(doc.allocate_string(iterator.first.c_str()));
+            return node;
+        }
+    log(error_log, "Couldn't find collision shape of PhysicObject.");
+    return node;
+}
 
 
-BaseLink::BaseLink(BaseObject* a, BaseObject* b, std::string nameInA, std::string nameInB) {
-    fusion = reinterpret_cast<BaseObject*>(reinterpret_cast<unsigned long>(a) ^ reinterpret_cast<unsigned long>(b));
-    a->links[nameInA] = this;
-    b->links[nameInB] = this;
+
+BaseLink::BaseLink(LinkInitializer& initializer) {
+    init(initializer);
 }
 
 BaseLink::BaseLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
-    BaseObject *a, *b;
-    init(node, levelLoader, a, b);
+    LinkInitializer initializer = readInitializer(node, levelLoader);
+    init(initializer);
 }
 
 void BaseLink::remove(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
@@ -96,64 +187,62 @@ void BaseLink::remove(BaseObject* a, const std::map<std::string, BaseLink*>::ite
     delete this;
 }
 
-void BaseLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader, BaseObject*& a, BaseObject*& b) {
+LinkInitializer BaseLink::readInitializer(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+    LinkInitializer initializer;
+    
     node = node->first_node("Object");
     if(!node) {
         log(error_log, "Tried to construct BaseLink without first \"Object\"-node.");
-        return;
+        return initializer;
     }
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("id");
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("index");
     if(!attribute) {
-        log(error_log, "Tried to construct BaseLink without first \"id\"-attribute.");
-        return;
+        log(error_log, "Tried to construct BaseLink without first \"index\"-attribute.");
+        return initializer;
     }
-    a = levelLoader->getObjectLinking(attribute->value());
+    initializer.a = levelLoader->getObjectLinking(attribute->value());
     attribute = node->first_attribute("name");
     if(!attribute) {
         log(error_log, "Tried to construct BaseLink without first \"name\"-attribute.");
-        return;
+        return initializer;
     }
-    const char *nameOfA = attribute->value();
+    initializer.nameOfA = attribute->value();
     
     node = node->next_sibling("Object");
     if(!node) {
         log(error_log, "Tried to construct BaseLink without first \"Object\"-node.");
-        return;
+        return initializer;
     }
-    attribute = node->first_attribute("id");
+    attribute = node->first_attribute("index");
     if(!attribute) {
-        log(error_log, "Tried to construct BaseLink without first \"id\"-attribute.");
-        return;
+        log(error_log, "Tried to construct BaseLink without first \"index\"-attribute.");
+        return initializer;
     }
-    b = levelLoader->getObjectLinking(attribute->value());
+    initializer.b = levelLoader->getObjectLinking(attribute->value());
     attribute = node->first_attribute("name");
     if(!attribute) {
         log(error_log, "Tried to construct BaseLink without first \"name\"-attribute.");
-        return;
+        return initializer;
     }
+    initializer.nameOfB = attribute->value();
     
-    decltype(a->links)::iterator iterator;
-    if(strcmp(attribute->value(), "parent") != 0) {
-        iterator = a->links.find(attribute->value());
-        if(iterator != a->links.end())
-            iterator->second->remove(b, iterator);
-    }else if(strcmp(nameOfA, "parent") != 0) {
-        iterator = b->links.find(nameOfA);
-        if(iterator != b->links.end())
-            iterator->second->remove(a, iterator);
-    }else{
-        log(error_log, "Tried to construct BaseLink with two parent relationships.");
-        return;
-    }
-    a->links[attribute->value()] = this;
-    b->links[nameOfA] = this;
-    fusion = reinterpret_cast<BaseObject*>(reinterpret_cast<unsigned long>(a) ^ reinterpret_cast<unsigned long>(b));
+    return initializer;
+}
+
+void BaseLink::init(LinkInitializer& initializer) {
+    initializer.a->links[initializer.nameOfB] = this;
+    initializer.b->links[initializer.nameOfA] = this;
+    fusion = reinterpret_cast<BaseObject*>(reinterpret_cast<unsigned long>(initializer.a) ^ reinterpret_cast<unsigned long>(initializer.b));
+}
+
+void BaseLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* node) {
+    node->name("BaseLink");
 }
 
 
 
-PhysicLink::PhysicLink(BaseObject* a, BaseObject* b, std::string nameInA, std::string nameInB, btTypedConstraint* constraintB)
-    :BaseLink(a, b, nameInA, nameInB), constraint(constraintB) {
+PhysicLink::PhysicLink(LinkInitializer& initializer, btTypedConstraint* constraintB)
+    :BaseLink(initializer), constraint(constraintB) {
     constraint->setUserConstraintPtr(this);
     objectManager.physicsWorld->addConstraint(constraint);
 }
@@ -169,13 +258,14 @@ PhysicLink::PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
         log(error_log, "Tried to construct PhysicLink without \"type\"-attribute.");
         return;
     }
-    BaseObject *c, *d;
-    BaseLink::init(node, levelLoader, c, d);
-    RigidObject *a = dynamic_cast<RigidObject*>(c), *b = dynamic_cast<RigidObject*>(d);
+    
+    LinkInitializer initializer = BaseLink::readInitializer(node, levelLoader);
+    RigidObject *a = dynamic_cast<RigidObject*>(initializer.a), *b = dynamic_cast<RigidObject*>(initializer.b);
     if(!a || !b) {
         log(error_log, "Tried to construct PhysicLink with objects which aren't RigidObjects.");
         return;
     }
+    BaseLink::init(initializer);
     
     if(strcmp(attribute->value(), "point") == 0) {
         rapidxml::xml_node<xmlUsedCharType>* pointNode = constraintNode->first_node("Point");
@@ -268,6 +358,10 @@ PhysicLink::~PhysicLink() {
     objectManager.physicsWorld->removeConstraint(constraint);
 }
 
+void PhysicLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* node) {
+    node->name("PhysicLink");
+}
+
 
 
 TransformLink::AnimationEntry::Frame::Frame(float accBeginB, float accEndB, float durationB, btQuaternion rotationB, btVector3 positionB)
@@ -308,14 +402,13 @@ btTransform TransformLink::AnimationEntry::gameTick() {
     return transform;
 }
 
-TransformLink::TransformLink(BaseObject* parent, BaseObject* child, std::string childName)
-    :BaseLink(parent, child, childName, "parent") {
-    
+TransformLink::TransformLink(LinkInitializer& initializer) {
+    init(initializer);
 }
 
 TransformLink::TransformLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
-    BaseObject *a, *b;
-    BaseLink::init(node, levelLoader, a, b);
+    LinkInitializer initializer = BaseLink::readInitializer(node, levelLoader);
+    init(initializer);
 }
 
 TransformLink::~TransformLink() {
@@ -348,7 +441,40 @@ void TransformLink::remove(BaseObject* a, const std::map<std::string, BaseLink*>
             b->links.erase(iterator.first);
             break;
         }
-    if(iteratorInA->first != "parent")
+    if(iteratorInA->first != "..") //Only remove child if called by parent
         b->remove();
     delete this;
+}
+
+void TransformLink::init(LinkInitializer &initializer) {
+    //Make sure that a is the parent and b the child node
+    if(initializer.nameOfB == "..") {
+        if(initializer.nameOfA == "..") {
+            log(error_log, "Tried to construct TransformLink with two parent nodes.");
+            return;
+        }
+        std::swap(initializer.a, initializer.b);
+        std::swap(initializer.nameOfA, initializer.nameOfB);
+    }else if(initializer.nameOfA != "..") {
+        log(error_log, "Tried to construct TransformLink without parent nodes.");
+        return;
+    }
+    
+    //Replace link and child object if there is already one
+    auto iterator = initializer.a->links.find(initializer.nameOfB);
+    if(iterator != initializer.a->links.end()) {
+        iterator->second->remove(initializer.a, iterator);
+    }else{
+        iterator = initializer.b->links.find("..");
+        if(iterator != initializer.b->links.end()) {
+            log(warning_log, "Constructed TransformLink with a child node which was already bound.");
+            iterator->second->remove(initializer.b, iterator);
+        }
+    }
+    
+    BaseLink::init(initializer);
+}
+
+void TransformLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* node) {
+    node->name("TransformLink");
 }

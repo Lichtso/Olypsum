@@ -34,9 +34,14 @@ void LevelManager::saveLevel() {
     std::unique_ptr<char[]> fileData = readXmlFile(doc, gameDataDir+"Saves/"+saveGameName+'/'+"Status.xml", false);
     doc.first_node("Status")->first_node("Level")->first_attribute("value")->value(levelId.c_str());
     writeXmlFile(doc, gameDataDir+"Saves/"+saveGameName+'/'+"Status.xml", true);
+    
+    LevelSaver levelSaver;
+    levelSaver.saveLevel();
 }
 
 void LevelManager::leaveGame() {
+    saveLevel();
+    
     levelId = "";
     saveGameName = "";
     levelPackage = NULL;
@@ -76,6 +81,7 @@ bool LevelManager::newGame(std::string packageName, std::string name) {
         log(error_log, "Could not create new game, because the name already exists.");
         return false;
     }
+    createDir(gameDataDir+"Saves/"+saveGameName+"/Containers/");
     
     rapidxml::xml_document<xmlUsedCharType> doc;
     rapidxml::xml_node<xmlUsedCharType>* statusNode = doc.allocate_node(rapidxml::node_element);

@@ -44,7 +44,9 @@ class GraphicObject : public DisplayObject {
  */
 class ModelObject : public GraphicObject {
     btTransform* skeletonPose;
-    void setupModelObjectBones(BaseObject* object, Bone* bone);
+    void setupBones(BaseObject* object, Bone* bone);
+    void writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver,
+                    rapidxml::xml_node<xmlUsedCharType>* node, BoneObject *object);
     void updateSkeletonPose(BaseObject* object, Bone* bone);
     void drawBonePose(BaseObject* object, Bone* bone, float axesSize, float linesSize, float textSize);
     protected:
@@ -60,6 +62,7 @@ class ModelObject : public GraphicObject {
     //! Called by a Mesh to prepare the shader program to draw this ModelObject
     virtual void prepareShaderProgram(Mesh* mesh);
     void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
 //! A GraphicObject with a soft-physics-body
@@ -111,6 +114,7 @@ class RigidObject : public ModelObject {
     }
     bool gameTick();
     void draw();
+    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
 #define MAX_WAVES 4
@@ -146,6 +150,7 @@ class WaterObject : public ModelObject {
      @param originY The t coord of the center
      */
     void addWave(float duration, float ampitude, float length, float originX, float originY);
+    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
 #endif

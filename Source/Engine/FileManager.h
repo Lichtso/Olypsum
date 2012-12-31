@@ -42,6 +42,15 @@ class FilePackage {
         }
         return std::static_pointer_cast<T>((new T())->load(this, fileName));
     }
+    //! Finds the name of a already loaded resource
+    template <class T> std::string getNameOfResource(std::shared_ptr<T>& resource) {
+        for(auto iterator : resources) {
+            std::shared_ptr<FilePackageResource> ptr = iterator.second.lock();
+            if(ptr == resource)
+                return iterator.first;
+        }
+        return "";
+    }
 };
 
 //! This class manages all FilePackages
@@ -59,6 +68,10 @@ class FileManager {
     FilePackage* getPackage(const char* name);
     //! Deletes a FilePackage
     void unloadPackage(const char* name);
+    //! Initialize a resource from rapidxml::xml_node
+    template <class T> std::shared_ptr<T> initResource(rapidxml::xml_node<xmlUsedCharType>* node);
+    //! Writes a resource to rapidxml::xml_node and returns it
+    template <class T> rapidxml::xml_node<xmlUsedCharType>* writeResource(rapidxml::xml_document<xmlUsedCharType>& doc, const char* nodeName, std::shared_ptr<T>& resource);
 };
 
 extern FileManager fileManager;

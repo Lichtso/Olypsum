@@ -111,6 +111,21 @@ void LightObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
     color = Color4(vecData.data[0], vecData.data[1], vecData.data[2]);
 }
 
+rapidxml::xml_node<xmlUsedCharType>* LightObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
+    node->name("LightObject");
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    attribute->name("type");
+    node->append_attribute(attribute);
+    rapidxml::xml_node<xmlUsedCharType>* colorNode = doc.allocate_node(rapidxml::node_element);
+    colorNode->name("Color");
+    char buffer[64];
+    sprintf(buffer, "%f %f %f", color.r, color.g, color.b);
+    colorNode->value(doc.allocate_string(buffer));
+    node->append_node(colorNode);
+    return node;
+}
+
 
 
 DirectionalLight::DirectionalLight() {
@@ -187,6 +202,18 @@ void DirectionalLight::prepareShaderProgram(bool skeletal) {
 
 float DirectionalLight::getPriority(btVector3 position) {
     return 2.0;
+}
+
+rapidxml::xml_node<xmlUsedCharType>* DirectionalLight::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = LightObject::write(doc, levelSaver);
+    node->first_attribute("type")->value("directional");
+    rapidxml::xml_node<xmlUsedCharType>* boundsNode = doc.allocate_node(rapidxml::node_element);
+    boundsNode->name("Bounds");
+    char buffer[64];
+    sprintf(buffer, "%f %f %f", shadowCam.width, shadowCam.height, shadowCam.far);
+    boundsNode->value(doc.allocate_string(buffer));
+    node->append_node(boundsNode);
+    return node;
 }
 
 
@@ -287,6 +314,23 @@ void SpotLight::prepareShaderProgram(bool skeletal) {
 
 float SpotLight::getPriority(btVector3 position) {
     return 1.0;
+}
+
+rapidxml::xml_node<xmlUsedCharType>* SpotLight::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = LightObject::write(doc, levelSaver);
+    node->first_attribute("type")->value("spot");
+    rapidxml::xml_node<xmlUsedCharType>* boundsNode = doc.allocate_node(rapidxml::node_element);
+    boundsNode->name("Bounds");
+    node->append_node(boundsNode);
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    attribute->name("cutoff");
+    attribute->value(doc.allocate_string(stringOf(shadowCam.fov).c_str()));
+    boundsNode->append_attribute(attribute);
+    attribute = doc.allocate_attribute();
+    attribute->name("range");
+    attribute->value(doc.allocate_string(stringOf(shadowCam.far).c_str()));
+    boundsNode->append_attribute(attribute);
+    return node;
 }
 
 
@@ -454,4 +498,24 @@ void PositionalLight::prepareShaderProgram(bool skeletal) {
 
 float PositionalLight::getPriority(btVector3 position) {
     return 1.0-(position-shadowCam.getTransformation().getOrigin()).length()/shadowCam.far;
+}
+
+rapidxml::xml_node<xmlUsedCharType>* PositionalLight::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = LightObject::write(doc, levelSaver);
+    node->first_attribute("type")->value("positional");
+    rapidxml::xml_node<xmlUsedCharType>* boundsNode = doc.allocate_node(rapidxml::node_element);
+    boundsNode->name("Bounds");
+    node->append_node(boundsNode);
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    attribute->name("omniDirectional");
+    if(abs(shadowCam.fov-M_PI*2.0) < 0.001)
+        attribute->value("true");
+    else
+        attribute->value("false");
+    boundsNode->append_attribute(attribute);
+    attribute = doc.allocate_attribute();
+    attribute->name("range");
+    attribute->value(doc.allocate_string(stringOf(shadowCam.far).c_str()));
+    boundsNode->append_attribute(attribute);
+    return node;
 }

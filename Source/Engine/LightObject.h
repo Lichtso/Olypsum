@@ -30,6 +30,7 @@ class LightObject : public DisplayObject {
     virtual void prepareShaderProgram(bool skeletal) = 0;
     virtual float getPriority(btVector3 position) = 0;
     void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
 class DirectionalLight : public LightObject {
@@ -40,8 +41,9 @@ class DirectionalLight : public LightObject {
     void setBounds(float width, float height, float range);
     bool gameTick(bool shadowActive);
     void draw();
-    virtual void prepareShaderProgram(bool skeletal);
-    virtual float getPriority(btVector3 position);
+    void prepareShaderProgram(bool skeletal);
+    float getPriority(btVector3 position);
+    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
 class SpotLight : public LightObject {
@@ -52,8 +54,9 @@ class SpotLight : public LightObject {
     void setBounds(float cutoff, float range);
     bool gameTick(bool shadowActive);
     void draw();
-    virtual void prepareShaderProgram(bool skeletal);
-    virtual float getPriority(btVector3 position);
+    void prepareShaderProgram(bool skeletal);
+    float getPriority(btVector3 position);
+    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
 class PositionalLight : public LightObject {
@@ -66,8 +69,9 @@ class PositionalLight : public LightObject {
     void setBounds(bool omniDirectional, float range);
     bool gameTick(bool shadowActive);
     void draw();
-    virtual void prepareShaderProgram(bool skeletal);
-    virtual float getPriority(btVector3 position);
+    void prepareShaderProgram(bool skeletal);
+    float getPriority(btVector3 position);
+    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
 #endif

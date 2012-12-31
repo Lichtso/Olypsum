@@ -57,6 +57,7 @@ class Cam : public SimpleObject {
     void use();
     //! Updates the OpenAL listener
     void updateAudioListener();
+    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
 extern Cam *mainCam, *guiCam, *currentCam;

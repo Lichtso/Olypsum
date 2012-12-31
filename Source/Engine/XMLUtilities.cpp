@@ -41,7 +41,7 @@ bool writeXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string file
     file.open(filePath.c_str(), std::ios_base::trunc);
     if(!file.is_open()) {
         if(!logs) return false;
-        log(error_log, std::string("The file ")+filePath.c_str()+" couldn't be found.");
+        log(error_log, std::string("The file ")+filePath.c_str()+" couldn't be opened.");
         return false;
     }
     file << doc;

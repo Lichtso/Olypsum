@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "LevelManager.h"
+#import "Menu.h"
 
 GraphicObject::GraphicObject() {
     objectManager.graphicObjects.insert(this);
@@ -19,11 +19,26 @@ void GraphicObject::remove() {
 
 
 
-void ModelObject::setupModelObjectBones(BaseObject* object, Bone* bone) {
-    BoneObject* boneObject = new BoneObject(bone);
-    new TransformLink(object, boneObject, bone->name);
+void ModelObject::setupBones(BaseObject* object, Bone* bone) {
+    LinkInitializer initializer;
+    initializer.a = object;
+    initializer.b = object = new BoneObject(bone);
+    initializer.nameOfA = ".."; //parent
+    initializer.nameOfB = bone->name;
+    new TransformLink(initializer);
     for(auto childBone : bone->children)
-        setupModelObjectBones(boneObject, childBone);
+        setupBones(object, childBone);
+}
+
+void ModelObject::writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver,
+                             rapidxml::xml_node<xmlUsedCharType>* node, BoneObject *object) {
+    node->append_node(object->write(doc, levelSaver));
+    for(auto iterator : object->links) {
+        if(iterator.first == "..") continue; //Don't process parent again
+        BoneObject* boneObject = dynamic_cast<BoneObject*>(iterator.second->getOther(object));
+        if(boneObject)
+            writeBones(doc, levelSaver, node, boneObject);
+    }
 }
 
 void ModelObject::updateSkeletonPose(BaseObject* object, Bone* bone) {
@@ -137,25 +152,53 @@ void ModelObject::prepareShaderProgram(Mesh* mesh) {
 }
 
 void ModelObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
-    node = node->first_node("Model");
-    if(!node) {
+    levelLoader->pushObject(this);
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Model");
+    if(!parameterNode) {
         log(error_log, "Tried to construct ModelObject without \"Model\"-node.");
         return;
     }
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("package");
-    FilePackage* levelPack = levelManager.levelPackage;
-    if(attribute)
-        levelPack = fileManager.getPackage(attribute->value());
-    attribute = node->first_attribute("src");
-    if(!attribute) {
-        log(error_log, "Tried to construct ModelObject without \"src\"-attribute.");
-        return;
-    }
-    model = levelPack->getResource<Model>(attribute->value());
+    model = fileManager.initResource<Model>(parameterNode);
     if(model->skeleton) {
         skeletonPose = new btTransform[model->skeleton->bones.size()];
-        setupModelObjectBones(this, model->skeleton->rootBone);
+        setupBones(this, model->skeleton->rootBone);
     }
+    parameterNode = node->first_node("SkeletonPose");
+    if(parameterNode) {
+        parameterNode = parameterNode->first_node();
+        while(parameterNode) {
+            rapidxml::xml_attribute<xmlUsedCharType>* attribute = parameterNode->first_attribute("path");
+            if(!attribute) {
+                log(error_log, "Tried to construct BoneObject without \"path\"-attribute.");
+                return;
+            }
+            BoneObject* boneObject = dynamic_cast<BoneObject*>(findObjectByPath(attribute->value()));
+            if(!boneObject) {
+                log(error_log, "Tried to construct BoneObject with invalid path.");
+                return;
+            }
+            levelLoader->pushObject(boneObject);
+            boneObject->setTransformation(BaseObject::readTransformtion(parameterNode, levelLoader));
+            parameterNode = parameterNode->next_sibling();
+        }
+    }
+}
+
+rapidxml::xml_node<xmlUsedCharType>* ModelObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = PhysicObject::write(doc, levelSaver);
+    if(!model) {
+        log(error_log, "Tried to save ModelObject without model.");
+        return node;
+    }
+    node->append_node(fileManager.writeResource(doc, "Model", model));
+    if(skeletonPose) {
+        rapidxml::xml_node<xmlUsedCharType>* skeletonPoseNode = doc.allocate_node(rapidxml::node_element);
+        skeletonPoseNode->name("SkeletonPose");
+        writeBones(doc, levelSaver, skeletonPoseNode,
+                   static_cast<BoneObject*>(links[model->skeleton->rootBone->name]->getOther(this)));
+        node->append_node(skeletonPoseNode);
+    }
+    return node;
 }
 
 
@@ -269,6 +312,40 @@ void RigidObject::draw() {
         ModelObject::draw();
 }
 
+rapidxml::xml_node<xmlUsedCharType>* RigidObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = ModelObject::write(doc, levelSaver);
+    node->name("RigidObject");
+    btRigidBody* body = getBody();
+    
+    rapidxml::xml_node<xmlUsedCharType>* tmpNode;
+    btVector3 velocity = body->getAngularVelocity();
+    if(velocity.length() > 0.0) {
+        tmpNode = doc.allocate_node(rapidxml::node_element);
+        tmpNode->name("AngularVelocity");
+        tmpNode->value(doc.allocate_string(stringOf(velocity).c_str()));
+        node->append_node(tmpNode);
+    }
+    
+    velocity = body->getLinearVelocity();
+    if(velocity.length() > 0.0) {
+        tmpNode = doc.allocate_node(rapidxml::node_element);
+        tmpNode->name("LinearVelocity");
+        tmpNode->value(doc.allocate_string(stringOf(velocity).c_str()));
+        node->append_node(tmpNode);
+    }
+    
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    attribute->name("mass");
+    if(body->getInvMass() == 0.0)
+        attribute->value("0.0");
+    else
+        attribute->value(doc.allocate_string(stringOf(1.0f/body->getInvMass()).c_str()));
+    node->first_node("PhysicsBody")->append_attribute(attribute);
+    
+    return node;
+}
+
+
 
 WaterObject::WaterObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :waveSpeed(0.05) {
     ModelObject::init(node, levelLoader);
@@ -325,4 +402,10 @@ void WaterObject::prepareShaderProgram(Mesh* mesh) {
 void WaterObject::draw() {
     if(!objectManager.currentShadowLight)
         ModelObject::draw();
+}
+
+rapidxml::xml_node<xmlUsedCharType>* WaterObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = ModelObject::write(doc, levelSaver);
+    node->name("WaterObject");
+    return node;
 }

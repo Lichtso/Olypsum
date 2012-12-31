@@ -77,6 +77,7 @@ class SoundSourceObject : public SimpleObject {
      */
     float getTimeOffset();
     bool gameTick();
+    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
 #endif

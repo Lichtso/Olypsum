@@ -1,5 +1,5 @@
 <Container>
-	<Level gravity="-9.81" />
+	<Level gravity="0.0 -9.81 0.0" />
 	<Container src="man">
 		<Translate>0.7 2.0 0.0</Translate>
 	</Container>
@@ -29,8 +29,8 @@
 	</Objects>
 	<Links>
 		<PhysicLink>
-			<Object id="-1" name="a" />
-			<Object id="1" name="b" />
+			<Object index="-1" name="a" />
+			<Object index="1" name="b" />
 			<Constraint type="hinge">
 				<Axis origin="0.0 1.0 0.0">1.0 0.0 0.0</Axis>
 				<Axis origin="0.0 -1.0 0.0">0.0 0.0 1.0</Axis>

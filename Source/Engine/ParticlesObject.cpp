@@ -54,6 +54,21 @@ static bool readRangeNode(rapidxml::xml_node<xmlUsedCharType>* node, const char*
     return true;
 }
 
+template<class T>
+rapidxml::xml_node<xmlUsedCharType>* writeBoundsNode(rapidxml::xml_document<xmlUsedCharType>& doc, const char* name, T min, T max) {
+    rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
+    node->name(name);
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    attribute->name("min");
+    attribute->value(doc.allocate_string(stringOf(min).c_str()));
+    node->append_attribute(attribute);
+    attribute = doc.allocate_attribute();
+    attribute->name("max");
+    attribute->value(doc.allocate_string(stringOf(max).c_str()));
+    node->append_attribute(attribute);
+    return node;
+}
+
 ParticlesObject::ParticlesObject() :activeVBO(0), addParticles(0.0), systemLife(-1.0), force(btVector3(0, -9.81, 0)) {
     objectManager.particlesObjects.insert(this);
     body = new btCollisionObject();
@@ -86,6 +101,7 @@ ParticlesObject::ParticlesObject(unsigned int maxParticlesB, btCollisionShape* c
 }
 
 ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :ParticlesObject() {
+    levelLoader->pushObject(this);
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("particles");
     if(!attribute) {
         log(error_log, "Tried to construct ParticlesObject without \"particles\"-attribute.");
@@ -115,16 +131,7 @@ ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, Leve
         log(error_log, "Tried to construct ParticlesObject without \"Texture\"-node.");
         return;
     }
-    attribute = parameterNode->first_attribute("package");
-    FilePackage* levelPack = levelManager.levelPackage;
-    if(attribute)
-        levelPack = fileManager.getPackage(attribute->value());
-    attribute = parameterNode->first_attribute("src");
-    if(!attribute) {
-        log(error_log, "Tried to construct ParticlesObject without \"src\"-attribute.");
-        return;
-    }
-    texture = levelPack->getResource<Texture>(attribute->value());
+    texture = fileManager.initResource<Texture>(parameterNode);
     texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
 }
 
@@ -249,4 +256,26 @@ void ParticlesObject::draw() {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glDisableVertexAttribArray(VELOCITY_ATTRIBUTE);
     glDisableVertexAttribArray(POSITION_ATTRIBUTE);
+}
+
+rapidxml::xml_node<xmlUsedCharType>* ParticlesObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = PhysicObject::write(doc, levelSaver);
+    node->name("ParticlesObject");
+    
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    attribute->name("particles");
+    attribute->value(doc.allocate_string(stringOf((int)maxParticles).c_str()));
+    node->append_attribute(attribute);
+    attribute = doc.allocate_attribute();
+    attribute->name("force");
+    attribute->value(doc.allocate_string(stringOf(force).c_str()));
+    node->append_attribute(attribute);
+    
+    node->append_node(fileManager.writeResource(doc, "Texture", texture));
+    node->append_node(writeBoundsNode(doc, "Life", lifeMin, lifeMax));
+    node->append_node(writeBoundsNode(doc, "Size", sizeMin, sizeMax));
+    node->append_node(writeBoundsNode(doc, "SpawnBox", posMin, posMax));
+    node->append_node(writeBoundsNode(doc, "Velocity", dirMin, dirMax));
+    
+    return node;
 }
