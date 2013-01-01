@@ -33,24 +33,8 @@ btTransform BaseObject::readTransformtion(rapidxml::xml_node<xmlUsedCharType>* n
 rapidxml::xml_node<xmlUsedCharType>* BaseObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
     rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
     node->name("BaseObject");
-    rapidxml::xml_node<xmlUsedCharType>* matrix = doc.allocate_node(rapidxml::node_element);
-    matrix->name("Matrix");
-    btScalar values[16];
     btTransform transform = getTransformation();
-    transform.getBasis().transpose().getOpenGLSubMatrix(values);
-    values[3] = transform.getOrigin().x();
-    values[7] = transform.getOrigin().y();
-    values[11] = transform.getOrigin().z();
-    values[15] = btScalar(1.0);
-    char buffer[64];
-    std::string str = "";
-    for(unsigned char i = 0; i < 16; i ++) {
-        if(i > 0) str += " ";
-        sprintf(buffer, "%g", values[i]);
-        str += buffer;
-    }
-    matrix->value(doc.allocate_string(str.c_str()));
-    node->append_node(matrix);
+    node->append_node(writeTransformationXML(doc, transform));
     levelSaver->pushObject(this);
     return node;
 }
@@ -189,54 +173,52 @@ void BaseLink::remove(BaseObject* a, const std::map<std::string, BaseLink*>::ite
 
 LinkInitializer BaseLink::readInitializer(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
     LinkInitializer initializer;
-    
     node = node->first_node("Object");
-    if(!node) {
-        log(error_log, "Tried to construct BaseLink without first \"Object\"-node.");
-        return initializer;
+    for(char i = 0; i < 2; i ++) {
+        if(!node) {
+            log(error_log, "Tried to construct BaseLink without \"Object\"-node.");
+            return initializer;
+        }
+        rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("index");
+        if(!attribute) {
+            log(error_log, "Tried to construct BaseLink without \"index\"-attribute.");
+            return initializer;
+        }
+        initializer.object[i] = levelLoader->getObjectLinking(attribute->value());
+        attribute = node->first_attribute("name");
+        if(!attribute) {
+            log(error_log, "Tried to construct BaseLink without \"name\"-attribute.");
+            return initializer;
+        }
+        initializer.name[i] = attribute->value();
+        node = node->next_sibling("Object");
     }
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("index");
-    if(!attribute) {
-        log(error_log, "Tried to construct BaseLink without first \"index\"-attribute.");
-        return initializer;
-    }
-    initializer.a = levelLoader->getObjectLinking(attribute->value());
-    attribute = node->first_attribute("name");
-    if(!attribute) {
-        log(error_log, "Tried to construct BaseLink without first \"name\"-attribute.");
-        return initializer;
-    }
-    initializer.nameOfA = attribute->value();
-    
-    node = node->next_sibling("Object");
-    if(!node) {
-        log(error_log, "Tried to construct BaseLink without first \"Object\"-node.");
-        return initializer;
-    }
-    attribute = node->first_attribute("index");
-    if(!attribute) {
-        log(error_log, "Tried to construct BaseLink without first \"index\"-attribute.");
-        return initializer;
-    }
-    initializer.b = levelLoader->getObjectLinking(attribute->value());
-    attribute = node->first_attribute("name");
-    if(!attribute) {
-        log(error_log, "Tried to construct BaseLink without first \"name\"-attribute.");
-        return initializer;
-    }
-    initializer.nameOfB = attribute->value();
-    
     return initializer;
 }
 
 void BaseLink::init(LinkInitializer& initializer) {
-    initializer.a->links[initializer.nameOfB] = this;
-    initializer.b->links[initializer.nameOfA] = this;
-    fusion = reinterpret_cast<BaseObject*>(reinterpret_cast<unsigned long>(initializer.a) ^ reinterpret_cast<unsigned long>(initializer.b));
+    initializer.object[0]->links[initializer.name[1]] = this;
+    initializer.object[1]->links[initializer.name[0]] = this;
+    fusion = reinterpret_cast<BaseObject*>(reinterpret_cast<unsigned long>(initializer.object[0]) ^ reinterpret_cast<unsigned long>(initializer.object[1]));
 }
 
-void BaseLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* node) {
+rapidxml::xml_node<xmlUsedCharType>* BaseLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
     node->name("BaseLink");
+    for(char i = 0; i < 2; i ++) {
+        rapidxml::xml_node<xmlUsedCharType>* objectNode = doc.allocate_node(rapidxml::node_element);
+        objectNode->name("Object");
+        node->append_node(objectNode);
+        rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+        attribute->name("index");
+        attribute->value(doc.allocate_string(stringOf(linkSaver->index[i]).c_str()));
+        objectNode->append_attribute(attribute);
+        attribute = doc.allocate_attribute();
+        attribute->name("name");
+        attribute->value(doc.allocate_string(linkSaver->name[i].c_str()));
+        objectNode->append_attribute(attribute);
+    }
+    return node;
 }
 
 
@@ -260,7 +242,7 @@ PhysicLink::PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
     }
     
     LinkInitializer initializer = BaseLink::readInitializer(node, levelLoader);
-    RigidObject *a = dynamic_cast<RigidObject*>(initializer.a), *b = dynamic_cast<RigidObject*>(initializer.b);
+    RigidObject *a = dynamic_cast<RigidObject*>(initializer.object[0]), *b = dynamic_cast<RigidObject*>(initializer.object[1]);
     if(!a || !b) {
         log(error_log, "Tried to construct PhysicLink with objects which aren't RigidObjects.");
         return;
@@ -314,38 +296,19 @@ PhysicLink::PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
         
         constraint = new btGearConstraint(*a->getBody(), *b->getBody(), axisA, axisB, ratio);
     }else if(strcmp(attribute->value(), "hinge") == 0) {
-        rapidxml::xml_node<xmlUsedCharType>* axisNode = constraintNode->first_node("Axis");
-        if(!axisNode) {
-            log(error_log, "Tried to construct Hinge-PhysicLink without first \"Axis\"-node.");
+        rapidxml::xml_node<xmlUsedCharType>* frameNode = constraintNode->first_node("Frame");
+        if(!frameNode) {
+            log(error_log, "Tried to construct Hinge-PhysicLink without first \"Frame\"-node.");
             return;
         }
-        XMLValueArray<float> vecData;
-        vecData.readString(axisNode->value(), "%f");
-        btVector3 axisA = vecData.getVector3();
-        attribute = axisNode->first_attribute("origin");
-        if(!attribute) {
-            log(error_log, "Tried to construct Hinge-PhysicLink without first \"origin\"-attribute.");
-            return;
-        }
-        vecData.readString(attribute->value(), "%f");
-        btVector3 originA = vecData.getVector3();
-        
-        axisNode = axisNode->next_sibling("Axis");
-        if(!axisNode) {
+        btTransform frameA = readTransformationXML(frameNode);
+        frameNode = frameNode->next_sibling("Frame");
+        if(!frameNode) {
             log(error_log, "Tried to construct Hinge-PhysicLink without second \"Axis\"-node.");
             return;
         }
-        vecData.readString(axisNode->value(), "%f");
-        btVector3 axisB = vecData.getVector3();
-        attribute = axisNode->first_attribute("origin");
-        if(!attribute) {
-            log(error_log, "Tried to construct Hinge-PhysicLink without second \"origin\"-attribute.");
-            return;
-        }
-        vecData.readString(attribute->value(), "%f");
-        btVector3 originB = vecData.getVector3();
-        
-        constraint = new btHingeConstraint(*a->getBody(), *b->getBody(), originA, originB, axisA, axisB);
+        btTransform frameB = readTransformationXML(frameNode);
+        constraint = new btHingeConstraint(*a->getBody(), *b->getBody(), frameA, frameB);
     }else{
         log(error_log, std::string("Tried to construct PhysicLink with invalid \"type\"-attribute: ")+attribute->value()+'.');
         return;
@@ -358,8 +321,86 @@ PhysicLink::~PhysicLink() {
     objectManager.physicsWorld->removeConstraint(constraint);
 }
 
-void PhysicLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* node) {
+rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = BaseLink::write(doc, linkSaver);
     node->name("PhysicLink");
+    rapidxml::xml_node<xmlUsedCharType>* constraintNode = doc.allocate_node(rapidxml::node_element);
+    constraintNode->name("Constraint");
+    node->append_node(constraintNode);
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    attribute->name("type");
+    constraintNode->append_attribute(attribute);
+    
+    if(&constraint->getRigidBodyA() == static_cast<RigidObject*>(linkSaver->object[1])->getBody()) {
+        linkSaver->swap();
+        printf("linkSaver->swap()\n");
+    }
+    
+    switch(constraint->getConstraintType()) {
+        case POINT2POINT_CONSTRAINT_TYPE: {
+            attribute->value("point");
+            btPoint2PointConstraint* pointConstraint = static_cast<btPoint2PointConstraint*>(constraint);
+            rapidxml::xml_node<xmlUsedCharType>* pointNode = doc.allocate_node(rapidxml::node_element);
+            pointNode->name("Point");
+            btVector3 point = pointConstraint->getPivotInA();
+            pointNode->value(doc.allocate_string(stringOf(point).c_str()));
+            node->append_node(pointNode);
+            pointNode = doc.allocate_node(rapidxml::node_element);
+            pointNode->name("Point");
+            point = pointConstraint->getPivotInB();
+            pointNode->value(doc.allocate_string(stringOf(point).c_str()));
+            node->append_node(pointNode);
+        } break;
+        case GEAR_CONSTRAINT_TYPE: {
+            attribute->value("gear");
+            btGearConstraint* gearConstraint = static_cast<btGearConstraint*>(constraint);
+            rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+            attribute->name("ratio");
+            attribute->value(doc.allocate_string(stringOf(gearConstraint->getRatio()).c_str()));
+            node->append_attribute(attribute);
+            rapidxml::xml_node<xmlUsedCharType>* axisNode = doc.allocate_node(rapidxml::node_element);
+            axisNode->name("Axis");
+            btVector3 axis = gearConstraint->getAxisA();
+            axisNode->value(doc.allocate_string(stringOf(axis).c_str()));
+            node->append_node(axisNode);
+            axisNode = doc.allocate_node(rapidxml::node_element);
+            axisNode->name("Axis");
+            axis = gearConstraint->getAxisB();
+            axisNode->value(doc.allocate_string(stringOf(axis).c_str()));
+            node->append_node(axisNode);
+        } break;
+        case HINGE_CONSTRAINT_TYPE: {
+            attribute->value("hinge");
+            btHingeConstraint* hingeConstraint = static_cast<btHingeConstraint*>(constraint);
+            rapidxml::xml_node<xmlUsedCharType>* frameNode = doc.allocate_node(rapidxml::node_element);
+            frameNode->name("Frame");
+            btTransform transform = hingeConstraint->getFrameOffsetA();
+            frameNode->append_node(writeTransformationXML(doc, transform));
+            node->append_node(frameNode);
+            frameNode = doc.allocate_node(rapidxml::node_element);
+            frameNode->name("Frame");
+            transform = hingeConstraint->getFrameOffsetB();
+            frameNode->append_node(writeTransformationXML(doc, transform));
+            node->append_node(frameNode);
+        } break;
+        case CONETWIST_CONSTRAINT_TYPE:
+            attribute->value("coneTwist");
+            
+            break;
+        case SLIDER_CONSTRAINT_TYPE:
+            attribute->value("slider");
+            break;
+        case D6_CONSTRAINT_TYPE:
+            attribute->value("dof6");
+            break;
+        case D6_SPRING_CONSTRAINT_TYPE:
+            attribute->value("dof6Spring");
+            break;
+        default:
+            log(error_log, "Tried to save PhysicLink with invalid constraint type.");
+            break;
+    }
+    return node;
 }
 
 
@@ -448,33 +489,34 @@ void TransformLink::remove(BaseObject* a, const std::map<std::string, BaseLink*>
 
 void TransformLink::init(LinkInitializer &initializer) {
     //Make sure that a is the parent and b the child node
-    if(initializer.nameOfB == "..") {
-        if(initializer.nameOfA == "..") {
+    if(initializer.name[1] == "..") {
+        if(initializer.name[0] == "..") {
             log(error_log, "Tried to construct TransformLink with two parent nodes.");
             return;
         }
-        std::swap(initializer.a, initializer.b);
-        std::swap(initializer.nameOfA, initializer.nameOfB);
-    }else if(initializer.nameOfA != "..") {
+        initializer.swap();
+    }else if(initializer.name[0] != "..") {
         log(error_log, "Tried to construct TransformLink without parent nodes.");
         return;
     }
     
     //Replace link and child object if there is already one
-    auto iterator = initializer.a->links.find(initializer.nameOfB);
-    if(iterator != initializer.a->links.end()) {
-        iterator->second->remove(initializer.a, iterator);
+    auto iterator = initializer.object[0]->links.find(initializer.name[1]);
+    if(iterator != initializer.object[0]->links.end()) {
+        iterator->second->remove(initializer.object[0], iterator);
     }else{
-        iterator = initializer.b->links.find("..");
-        if(iterator != initializer.b->links.end()) {
+        iterator = initializer.object[1]->links.find("..");
+        if(iterator != initializer.object[1]->links.end()) {
             log(warning_log, "Constructed TransformLink with a child node which was already bound.");
-            iterator->second->remove(initializer.b, iterator);
+            iterator->second->remove(initializer.object[1], iterator);
         }
     }
     
     BaseLink::init(initializer);
 }
 
-void TransformLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* node) {
+rapidxml::xml_node<xmlUsedCharType>* TransformLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = BaseLink::write(doc, linkSaver);
     node->name("TransformLink");
+    return node;
 }

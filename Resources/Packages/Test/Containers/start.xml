@@ -32,8 +32,12 @@
 			<Object index="-1" name="a" />
 			<Object index="1" name="b" />
 			<Constraint type="hinge">
-				<Axis origin="0.0 1.0 0.0">1.0 0.0 0.0</Axis>
-				<Axis origin="0.0 -1.0 0.0">0.0 0.0 1.0</Axis>
+				<Frame>
+					<Translate>0.0 1.0 0.0</Translate>
+				</Frame>
+				<Frame>
+					<Translate>0.0 -1.0 0.0</Translate>
+				</Frame>
 			</Constraint>
 		</PhysicLink>
 	</Links>

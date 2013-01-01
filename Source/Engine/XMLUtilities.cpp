@@ -94,3 +94,24 @@ btTransform readTransformationXML(rapidxml::xml_node<xmlUsedCharType>* node) {
     }
     return transform;
 }
+
+rapidxml::xml_node<xmlUsedCharType>* writeTransformationXML(rapidxml::xml_document<xmlUsedCharType> &doc, btTransform& transform) {
+    rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
+    node->name("Matrix");
+    btScalar values[16];
+    transform.getBasis().transpose().getOpenGLSubMatrix(values);
+    values[3] = transform.getOrigin().x();
+    values[7] = transform.getOrigin().y();
+    values[11] = transform.getOrigin().z();
+    values[12] = values[13] = values[14] = btScalar(0.0);
+    values[15] = btScalar(1.0);
+    char buffer[64];
+    std::string str = "";
+    for(unsigned char i = 0; i < 16; i ++) {
+        if(i > 0) str += " ";
+        sprintf(buffer, "%g", values[i]);
+        str += buffer;
+    }
+    node->value(doc.allocate_string(str.c_str()));
+    return node;
+}

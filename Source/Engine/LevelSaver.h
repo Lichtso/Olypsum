@@ -11,16 +11,9 @@
 #ifndef LevelSaver_h
 #define LevelSaver_h
 
-//! @cond
-struct LinkSaver {
-    int index[2];
-    std::string name[2];
-};
-//! @endcond
-
 class LevelSaver {
     int objectCounter;
-    std::map<BaseLink*, LinkSaver*> linkingMap;
+    std::map<BaseLink*, LinkInitializer*> linkingMap;
     public:
     LevelSaver();
     ~LevelSaver();

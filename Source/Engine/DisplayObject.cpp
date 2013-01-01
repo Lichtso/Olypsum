@@ -21,10 +21,10 @@ void GraphicObject::remove() {
 
 void ModelObject::setupBones(BaseObject* object, Bone* bone) {
     LinkInitializer initializer;
-    initializer.a = object;
-    initializer.b = object = new BoneObject(bone);
-    initializer.nameOfA = ".."; //parent
-    initializer.nameOfB = bone->name;
+    initializer.object[0] = object;
+    initializer.object[1] = object = new BoneObject(bone);
+    initializer.name[0] = ".."; //parent
+    initializer.name[1] = bone->name;
     new TransformLink(initializer);
     for(auto childBone : bone->children)
         setupBones(object, childBone);

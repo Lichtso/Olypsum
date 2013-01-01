@@ -133,4 +133,7 @@ class XMLValueArray {
 //! Parses a rapidxml::xml_node and convertes its content into a btTransform
 btTransform readTransformationXML(rapidxml::xml_node<xmlUsedCharType>* node);
 
+//! Writes a btTransform and returns it as rapidxml::xml_node
+rapidxml::xml_node<xmlUsedCharType>* writeTransformationXML(rapidxml::xml_document<xmlUsedCharType> &doc, btTransform& transform);
+
 #endif

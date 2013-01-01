@@ -130,12 +130,16 @@ class PhysicObject : public BaseObject {
 
 
 
-//! A simple structure to construct links
-struct LinkInitializer {
-    BaseObject *a, //!< The first object (or parent)
-               *b; //!< The second object (or child)
-    std::string nameOfA, //!< The name of the first object (or ".." for parent)
-                nameOfB; //!< The name of the second object
+//! A structure that contains all the information needed to construct or save a BaseLink
+class LinkInitializer {
+    public:
+    BaseObject* object[2]; //!< The objects to be linked together
+    std::string name[2]; //!< The name of the link in each object
+    int index[2];  //!< The index of each object (only needed to save the link)
+    void swap() {
+        std::swap(object[0], object[1]);
+        std::swap(name[0], name[1]);
+    }
 };
 
 //! Links basic class
@@ -173,7 +177,7 @@ class BaseLink {
     //! Initialize from LinkInitializer
     void init(LinkInitializer& initializer);
     //! Writes its self to rapidxml::xml_node and returns it
-    virtual void write(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* node);
+    virtual rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
 
 //! A BaseLink with a btTypedConstraint
@@ -188,7 +192,7 @@ class PhysicLink : public BaseLink {
      */
     PhysicLink(LinkInitializer& initializer, btTypedConstraint* constraint);
     PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    void write(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* node);
+    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
 
 //! A BaseLink with a parent child relationship
@@ -264,7 +268,7 @@ class TransformLink : public BaseLink {
      */
     void remove(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
     void init(LinkInitializer& initializer);
-    void write(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>* node);
+    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
 
 #endif

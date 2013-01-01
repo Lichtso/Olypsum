@@ -1,9 +1,11 @@
-Add antialiasing to the corners of GUI elements
-Highmap terrains
-Use C++11 Multithreading
-Save Level Files
+ParticleSystem billboard direction
+HightMap terrains
+HightMap terrains: 3d Textures
+Implement more PhysicLink types
 Anisotropic filtering
+Use C++11 Multithreading
 Windows Support
+Add antialiasing to the corners of GUI elements
 
 Not sure:
 PCSS

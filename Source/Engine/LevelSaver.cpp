@@ -22,13 +22,15 @@ void LevelSaver::pushObject(BaseObject* object) {
             continue; //Don't export BoneObject or parent links
         auto iteratorInSet = linkingMap.find(iteratorInObject.second);
         if(iteratorInSet == linkingMap.end()) {
-            LinkSaver* linkSaver = new LinkSaver();
+            LinkInitializer* linkSaver = new LinkInitializer();
             linkSaver->index[0] = objectCounter;
+            linkSaver->object[0] = object;
             linkSaver->name[1] = iteratorInObject.first;
             linkingMap[iteratorInObject.second] = linkSaver;
         }else{
-            LinkSaver* linkSaver = iteratorInSet->second;
+            LinkInitializer* linkSaver = iteratorInSet->second;
             linkSaver->index[1] = objectCounter;
+            linkSaver->object[1] = object;
             linkSaver->name[0] = iteratorInObject.first;
         }
     }
@@ -73,24 +75,8 @@ bool LevelSaver::saveLevel() {
     node = doc.allocate_node(rapidxml::node_element);
     node->name("Links");
     container->append_node(node);
-    for(auto iterator : linkingMap) {
-        rapidxml::xml_node<xmlUsedCharType>* linkNode = doc.allocate_node(rapidxml::node_element);
-        for(char i = 0; i < 2; i ++) {
-            rapidxml::xml_node<xmlUsedCharType>* objectNode = doc.allocate_node(rapidxml::node_element);
-            objectNode->name("Object");
-            linkNode->append_node(objectNode);
-            rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
-            attribute->name("index");
-            attribute->value(doc.allocate_string(stringOf(iterator.second->index[i]).c_str()));
-            objectNode->append_attribute(attribute);
-            attribute = doc.allocate_attribute();
-            attribute->name("name");
-            attribute->value(doc.allocate_string(iterator.second->name[i].c_str()));
-            objectNode->append_attribute(attribute);
-        }
-        node->append_node(linkNode);
-        iterator.first->write(doc, linkNode);
-    }
+    for(auto iterator : linkingMap)
+        node->append_node(iterator.first->write(doc, iterator.second));
     
     return writeXmlFile(doc, gameDataDir+"Saves/"+levelManager.saveGameName+"/Containers/"+levelManager.levelId+".xml", true);
 }
