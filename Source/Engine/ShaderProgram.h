@@ -89,7 +89,7 @@ class ShaderProgram {
 };
 
 extern btTransform modelMat;
-extern ShaderProgram *shaderPrograms[44], *currentShaderProgram;
+extern ShaderProgram *shaderPrograms[45], *currentShaderProgram;
 extern float screenBlurFactor, globalVolume, musicVolume;
 extern bool edgeSmoothEnabled, fullScreenEnabled, cubemapsEnabled;
 extern unsigned char depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, blendingQuality, particleCalcTarget;
@@ -118,7 +118,7 @@ enum ShaderProgramNames {
     skeletalBumpGlassGSP = 18,
     solidAnimatedBumpGlassGSP = 19,
     skeletalAnimatedBumpGlassGSP = 20,
-    animatedWaterSP = 21,
+    waterAnimatedSP = 21,
     //Shadow Map Generators
     solidShadowSP = 22,
     skeletalShadowSP = 23,
@@ -142,8 +142,9 @@ enum ShaderProgramNames {
     deferredCombineTransparentSP = 39,
     edgeSmoothSP = 40,
     depthOfFieldSP = 41,
-    particleDrawSP = 42,
-    particleCalculateSP = 43
+    particleCalculateSP = 42,
+    particleDrawSP = 43,
+    particleDrawAnimatedSP = 44
 };
 
 //! Compiles all shader programs which are not influenced by graphic options

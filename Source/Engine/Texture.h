@@ -32,7 +32,7 @@ class FilePackageResource {
 //! A texture used for graphics
 class Texture : public FilePackageResource {
     public:
-    unsigned int width, height; //!< The size of this Texture
+    unsigned int width, height, depth; //!< The size of this Texture
     GLuint GLname; //!< The OpenGL identifier if the Texture is present in the VRAM
     GLenum minFilter, magFilter; //!< The OpenGL texture filters
     SDL_Surface* surface; //!< The SDL_Surface if the Texture is present in the RAM
@@ -50,10 +50,9 @@ class Texture : public FilePackageResource {
     //! Deletes the OpenGL texture (unload from VRAM)
     void unloadTexture();
     /*! Sets the Texture as OpenGL texture target
-     @param textureTarget GL_TEXTURE_2D, GL_TEXTURE_RECTANGLE_ARB or GL_TEXTURE_CUBE_MAP_x
      @param targetIndex A index between 0 and x will be a texture target between GL_TEXTURE0 and GL_TEXTUREx
      */
-    void use(GLenum textureTarget, GLuint targetIndex);
+    void use(GLuint targetIndex);
 };
 
 #endif

@@ -38,15 +38,15 @@ void Mesh::draw(ModelObject* object) {
     }
     
     if(diffuse)
-        diffuse->use(GL_TEXTURE_2D, 0);
+        diffuse->use(0);
     if(effectMap)
-        effectMap->use(GL_TEXTURE_2D, 1);
+        effectMap->use(1);
     else{
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
     if(heightMap)
-        heightMap->use(GL_TEXTURE_2D, 2);
+        heightMap->use(2);
     else{
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -55,7 +55,7 @@ void Mesh::draw(ModelObject* object) {
     if(objectManager.currentShadowLight) {
         unsigned int shaderProgram = solidShadowSP;
         if(weightJoints >= 0) shaderProgram += 1;
-        //if(diffuse) shaderProgram += 2;
+        if(diffuse && diffuse->depth > 1) shaderProgram += 2;
         if(dynamic_cast<PositionalLight*>(objectManager.currentShadowLight) && !cubemapsEnabled) shaderProgram += 4;
         shaderPrograms[shaderProgram]->use();
     }

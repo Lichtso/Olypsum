@@ -236,7 +236,14 @@ bool ParticlesObject::gameTick() {
 
 void ParticlesObject::draw() {
     modelMat = getTransformation();
-    if(texture) texture->use(GL_TEXTURE_2D, 0);
+    if(texture) {
+        texture->use(0);
+        if(texture->depth > 1)
+            shaderPrograms[particleDrawAnimatedSP]->use();
+        else
+            shaderPrograms[particleDrawSP]->use();
+    }
+    
     currentShaderProgram->setUniformF("lifeMin", 5.0/lifeMin);
     if(transformAligned) {
         btMatrix3x3 viewNormalMat = getTransformation().getBasis();

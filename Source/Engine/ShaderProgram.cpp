@@ -359,11 +359,11 @@ void loadDynamicShaderPrograms() {
         shaderPrograms[solidGSP+p]->link();
     }
     
-    shaderPrograms[animatedWaterSP]->loadShaderProgram("gBuffer", shaderTypeVertexFragmentGeometry, { "SKELETAL_ANIMATION 0", blendingQualityMacro, "BUMP_MAPPING 2", "TEXTURE_ANIMATION 1" });
-    shaderPrograms[animatedWaterSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[animatedWaterSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shaderPrograms[animatedWaterSP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
-    shaderPrograms[animatedWaterSP]->link();
+    shaderPrograms[waterAnimatedSP]->loadShaderProgram("gBuffer", shaderTypeVertexFragmentGeometry, { "SKELETAL_ANIMATION 0", blendingQualityMacro, "BUMP_MAPPING 2", "TEXTURE_ANIMATION 1" });
+    shaderPrograms[waterAnimatedSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[waterAnimatedSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
+    shaderPrograms[waterAnimatedSP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
+    shaderPrograms[waterAnimatedSP]->link();
     
     //Shadow Map Generators
     
@@ -475,11 +475,6 @@ void loadDynamicShaderPrograms() {
     }
     
     if(particleCalcTarget > 0) {
-        shaderPrograms[particleDrawSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { });
-        shaderPrograms[particleDrawSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-        shaderPrograms[particleDrawSP]->addAttribute(VELOCITY_ATTRIBUTE, "velocity");
-        shaderPrograms[particleDrawSP]->link();
-        
         if(particleCalcTarget == 2) {
             const char* varyings[] = { "vPosition", "vVelocity" };
             shaderPrograms[particleCalculateSP]->loadShaderProgram("particleCalc", shaderTypeVertex, { });
@@ -488,6 +483,16 @@ void loadDynamicShaderPrograms() {
             shaderPrograms[particleCalculateSP]->setTransformFeedbackVaryings(2, varyings);
             shaderPrograms[particleCalculateSP]->link();
         }
+        
+        shaderPrograms[particleDrawSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { "TEXTURE_ANIMATION 0" });
+        shaderPrograms[particleDrawSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+        shaderPrograms[particleDrawSP]->addAttribute(VELOCITY_ATTRIBUTE, "velocity");
+        shaderPrograms[particleDrawSP]->link();
+        
+        shaderPrograms[particleDrawAnimatedSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { "TEXTURE_ANIMATION 1" });
+        shaderPrograms[particleDrawAnimatedSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+        shaderPrograms[particleDrawAnimatedSP]->addAttribute(VELOCITY_ATTRIBUTE, "velocity");
+        shaderPrograms[particleDrawAnimatedSP]->link();
     }
     
     mainFBO.init();

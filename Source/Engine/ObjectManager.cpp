@@ -225,10 +225,10 @@ void ObjectManager::drawScene() {
         modelMat = decal->transformation;
         
         if(decal->diffuse)
-            decal->diffuse->use(GL_TEXTURE_2D, 0);
+            decal->diffuse->use(0);
         
         if(decal->heightMap) {
-            decal->heightMap->use(GL_TEXTURE_2D, 2);
+            decal->heightMap->use(2);
             shaderPrograms[solidBumpGSP]->use();
         }else{
             glActiveTexture(GL_TEXTURE2);
@@ -246,9 +246,7 @@ void ObjectManager::drawScene() {
     
     //Draw Particle Systems
     if(particleCalcTarget == 0) return;
-    modelMat.setIdentity();
-    shaderPrograms[particleDrawSP]->use();
-    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+    //glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
     glDepthMask(GL_FALSE);
     for(auto particlesObject : particlesObjects)
         if(particlesObject->inFrustum)
@@ -258,7 +256,7 @@ void ObjectManager::drawScene() {
     glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, 0);
-    glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+    //glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
 }
 
 void ObjectManager::illuminate() {
@@ -296,7 +294,7 @@ void ObjectManager::drawFrame() {//return;
     
     if(ssaoQuality) {
         glViewport(0, 0, screenSize[0] >> 1, screenSize[1] >> 1);
-        randomNormalMap.use(GL_TEXTURE_2D, 1);
+        randomNormalMap.use(1);
         shaderPrograms[ssaoSP]->use();
         mainFBO.renderDeferred(true, inBuffersSSAO, 1, outBuffersSSAO, 1);
         glViewport(0, 0, screenSize[0], screenSize[1]);

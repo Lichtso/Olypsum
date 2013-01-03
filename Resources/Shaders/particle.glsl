@@ -13,13 +13,22 @@ void main() {
 
 #separator
 
+#if TEXTURE_ANIMATION == 0
 uniform sampler2D sampler0;
+#else
+uniform float animationTime;
+uniform sampler3D sampler0;
+#endif
 varying vec3 vPosition;
 varying vec3 vTexCoord;
 varying vec3 vNormal;
 
 void main() {
-    gl_FragData[0] = texture2D(sampler0, vTexCoord.xy);
+    #if TEXTURE_ANIMATION == 0 //2D texture
+    gl_FragData[0] = texture2D(sampler0, vTexCoord.xy); //Color
+    #else //3D texture
+    gl_FragData[0] = texture3D(sampler0, vec3(vTexCoord.xy, animationTime)); //Color
+    #endif
     gl_FragData[0].a *= vTexCoord.z;
     if(gl_FragData[0].a < 0.0039) discard;
     

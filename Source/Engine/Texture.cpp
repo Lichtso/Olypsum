@@ -101,18 +101,26 @@ bool Texture::uploadTexture(GLenum textureTarget, GLenum format) {
         return false;
     }
     
-    width = surface->w;
-    height = surface->h;
+    if(textureTarget == GL_TEXTURE_3D) {
+        width = surface->w;
+        height = surface->w;
+        depth = surface->h/surface->w;
+        glTexImage3D(textureTarget, 0, format, width, height, depth, 0, readFormat, GL_UNSIGNED_BYTE, surface->pixels);
+    }else{
+        width = surface->w;
+        height = surface->h;
+        depth = 1;
+        glTexImage2D(textureTarget, 0, format, width, height, 0, readFormat, GL_UNSIGNED_BYTE, surface->pixels);
+    }
     
-    glTexImage2D(textureTarget, 0, format, width, height, 0, readFormat, GL_UNSIGNED_BYTE, surface->pixels);
-    glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, (textureTarget == GL_TEXTURE_2D) ? minFilter : GL_NEAREST);
+    glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, (textureTarget == GL_TEXTURE_RECTANGLE_ARB) ? GL_NEAREST : minFilter);
     glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, magFilter);
-    if(textureTarget == GL_TEXTURE_2D)
+    if(textureTarget != GL_TEXTURE_RECTANGLE_ARB)
         glGenerateMipmap(textureTarget);
     
     GLint compressed;
-    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_COMPRESSED, &compressed);
-    if(!compressed)
+    glGetTexLevelParameteriv(textureTarget, 0, GL_TEXTURE_COMPRESSED, &compressed);
+    if(!compressed && textureTarget != GL_TEXTURE_RECTANGLE_ARB)
         log(info_log, "Texture has not been compressed.");
     
     unloadImage();
@@ -161,7 +169,7 @@ void Texture::unloadTexture() {
     GLname = 0;
 }
 
-void Texture::use(GLenum textureTarget, GLuint targetIndex) {
+void Texture::use(GLuint targetIndex) {
     glActiveTexture(GL_TEXTURE0+targetIndex);
-    glBindTexture(textureTarget, GLname);
+    glBindTexture((depth == 1) ? GL_TEXTURE_2D : GL_TEXTURE_3D, GLname);
 }

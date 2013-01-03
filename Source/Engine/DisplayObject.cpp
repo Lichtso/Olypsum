@@ -138,7 +138,7 @@ void ModelObject::prepareShaderProgram(Mesh* mesh) {
     if(!objectManager.currentShadowLight) {
         unsigned int shaderProgram = solidGSP;
         if(model->skeleton) shaderProgram += 1;
-        //if(mesh->diffuse) shaderProgram += 2;
+        if(mesh->diffuse && mesh->diffuse->depth > 1) shaderProgram += 2;
         if(mesh->heightMap) shaderProgram += 4;
         if(mesh->transparent && blendingQuality > 0) shaderProgram += 8;
         shaderPrograms[shaderProgram]->use();
@@ -378,7 +378,7 @@ bool WaterObject::gameTick() {
 }
 
 void WaterObject::prepareShaderProgram(Mesh* mesh) {
-    shaderPrograms[animatedWaterSP]->use();
+    shaderPrograms[waterAnimatedSP]->use();
     char str[64];
     for(unsigned int i = 0; i < MAX_WAVES; i ++) {
         bool active = (i < waves.size());
