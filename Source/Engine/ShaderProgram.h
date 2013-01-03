@@ -51,7 +51,7 @@ class ShaderProgram {
 	ShaderProgram();
 	~ShaderProgram();
     //! Loads a single shader and compiles it. This method is automaticly called by loadShaderProgram()
-	bool loadShader(GLuint shaderType, const char* soucreCode, std::vector<const char*>* macros);
+	bool loadShader(GLuint shaderType, const char* soucreCode, std::vector<const char*>& macros);
     /*! Loads all shaders from a file
      @param fileName The file which contains the shaders
      @param shaderTypes A array of shader types one entry for each shader
@@ -89,44 +89,61 @@ class ShaderProgram {
 };
 
 extern btTransform modelMat;
-extern ShaderProgram *shaderPrograms[32], *currentShaderProgram;
+extern ShaderProgram *shaderPrograms[44], *currentShaderProgram;
 extern float screenBlurFactor, globalVolume, musicVolume;
 extern bool edgeSmoothEnabled, fullScreenEnabled, cubemapsEnabled;
 extern unsigned char depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, blendingQuality, particleCalcTarget;
 
 enum ShaderProgramNames {
+    //Static Shaders
     normalMapGenSP = 0,
     blurSP = 1,
     spotShadowCircleLightSP = 2,
     spriteSP = 3,
     colorSP = 4,
-    solidGeometrySP = 5,
-    solidBumpGeometrySP = 6,
-    solidShadowSP = 7,
-    solidParabolidShadowSP = 8,
-    skeletalGeometrySP = 9,
-    skeletalBumpGeometrySP = 10,
-    skeletalShadowSP = 11,
-    skeletalParabolidShadowSP = 12,
-    directionalLightSP = 13,
-    directionalShadowLightSP = 14,
-    spotLightSP = 15,
-    spotShadowLightSP = 16,
-    positionalLightSP = 17,
-    positionalShadowLightSP = 18,
-    positionalShadowDualLightSP = 19,
-    ssaoSP = 20,
-    deferredCombineSP = 21,
-    deferredCombineTransparentSP = 22,
-    edgeSmoothSP = 23,
-    depthOfFieldSP = 24,
-    particleDrawSP = 25,
-    particleCalculateSP = 26,
-    glassGeometrySP = 27,
-    glassBumpGeometrySP = 28,
-    glassSkeletalGeometrySP = 29,
-    glassSkeletalBumpGeometrySP = 30,
-    waterSP = 31
+    //G-Buffer Shaders
+    solidGSP = 5,
+    skeletalGSP = 6,
+    solidAnimatedGSP = 7,
+    skeletalAnimatedGSP = 8,
+    solidBumpGSP = 9,
+    skeletalBumpGSP = 10,
+    solidAnimatedBumpGSP = 11,
+    skeletalAnimatedBumpGSP = 12,
+    solidGlassGSP = 13,
+    skeletalGlassGSP = 14,
+    solidAnimatedGlassGSP = 15,
+    skeletalAnimatedGlassGSP = 16,
+    solidBumpGlassGSP = 17,
+    skeletalBumpGlassGSP = 18,
+    solidAnimatedBumpGlassGSP = 19,
+    skeletalAnimatedBumpGlassGSP = 20,
+    animatedWaterSP = 21,
+    //Shadow Map Generators
+    solidShadowSP = 22,
+    skeletalShadowSP = 23,
+    solidAnimatedShadowSP = 24,
+    skeletalAnimatedShadowSP = 25,
+    solidParabolidShadowSP = 26,
+    skeletalParabolidShadowSP = 27,
+    solidAnimatedParabolidShadowSP = 28,
+    skeletalAnimatedParabolidShadowSP = 29,
+    //Illumination Shaders
+    directionalLightSP = 30,
+    directionalShadowLightSP = 31,
+    spotLightSP = 32,
+    spotShadowLightSP = 33,
+    positionalLightSP = 34,
+    positionalShadowLightSP = 35,
+    positionalShadowDualLightSP = 36,
+    //Post Effect Shaders
+    ssaoSP = 37,
+    deferredCombineSP = 38,
+    deferredCombineTransparentSP = 39,
+    edgeSmoothSP = 40,
+    depthOfFieldSP = 41,
+    particleDrawSP = 42,
+    particleCalculateSP = 43
 };
 
 //! Compiles all shader programs which are not influenced by graphic options

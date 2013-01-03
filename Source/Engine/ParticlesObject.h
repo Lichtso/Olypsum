@@ -28,11 +28,12 @@ class ParticlesObject : public DisplayObject {
     //! Internal initialize arrays and OpenGL buffers
     void init();
     public:
+    bool transformAligned; //!< If set to false the particles will be orientated to view
     btVector3 posMin, //!< The negative position vector relative to the system for spawning new particles
               posMax, //!< The positive position vector relative to the system for spawning new particles
-              force, //!< A force to be applied to all particles every frame like gravity
               dirMin, //!< The negative velocity vector for spawning new particles
-              dirMax; //!< The positive velocity vector for spawning new particles
+              dirMax, //!< The positive velocity vector for spawning new particles
+              force; //!< A force to be applied to all particles every frame like gravity
     float lifeMin, //!< The minimal life time of a new particle in seconds
           lifeMax, //!< The maximal life time of a new particle in seconds
           sizeMin, //!< The minimal size of a new particle in world units

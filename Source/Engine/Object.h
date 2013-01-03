@@ -139,6 +139,7 @@ class LinkInitializer {
     void swap() {
         std::swap(object[0], object[1]);
         std::swap(name[0], name[1]);
+        std::swap(index[0], index[1]);
     }
 };
 

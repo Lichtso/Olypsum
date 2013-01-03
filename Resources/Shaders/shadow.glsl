@@ -4,19 +4,17 @@ attribute vec2 texCoord;
 attribute vec3 weights;
 attribute vec3 joints;
 
-
 uniform mat4 jointMats[64];
 uniform mat4 viewMat;
 #else
 uniform mat4 modelViewMat;
 #endif
 
-#if LIGHT_TYPE == 2
+#if PARABOLID == 1
 uniform float lRange;
 varying float vClip;
 #endif
 varying vec2 vTexCoord;
-
 
 void main() {
     #if SKELETAL_ANIMATION
@@ -29,7 +27,7 @@ void main() {
     gl_Position = vec4(position, 1.0)*modelViewMat;
     #endif
     
-    #if LIGHT_TYPE == 2
+    #if PARABOLID == 1
     gl_Position.xyz /= gl_Position.w;
     gl_Position.w = 1.0;
     gl_Position.z *= -1.0;
@@ -44,11 +42,16 @@ void main() {
 
 #separator
 
+#if TEXTURE_ANIMATION == 0
 uniform sampler2D sampler0;
+#else
+uniform float animationTime;
+uniform sampler3D sampler0;
+#endif
 uniform float paraboloidRange;
 uniform float discardDensity;
 
-#if LIGHT_TYPE == 2
+#if PARABOLID == 1
 varying float vClip;
 #endif
 varying vec2 vTexCoord;
@@ -58,9 +61,13 @@ float random(vec2 co) {
 }
 
 void main() {
+    #if TEXTURE_ANIMATION == 0 //2D texture
     float alpha = texture2D(sampler0, vTexCoord).a;
+    #else //3D texture
+    float alpha = texture3D(sampler0, vec3(vTexCoord, animationTime)).a;
+    #endif
     
-    #if LIGHT_TYPE == 2
+    #if PARABOLID == 1
     if(alpha < 0.1 || vClip < 0.0 || random(gl_FragCoord.xy) > discardDensity) discard;
     #else
     if(alpha < 0.1 || random(gl_FragCoord.xy) > discardDensity) discard;

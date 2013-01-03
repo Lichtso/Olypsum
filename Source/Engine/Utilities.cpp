@@ -20,7 +20,7 @@ void log(logMessageType type, std::string message) {
             printf("ERROR: %s\n", message.c_str());
             break;
         case shader_log:
-            printf("SHADER: %s\n", message.c_str());
+            printf("SHADER-%s\n", message.c_str());
             break;
         case script_log:
             printf("SCRIPT: %s\n", message.c_str());

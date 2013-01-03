@@ -217,11 +217,10 @@ void ObjectManager::drawScene() {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, 0);
     glBindBuffer(GL_ARRAY_BUFFER, decalVBO);
-    unsigned int byteStride = 8*sizeof(float);
-    shaderPrograms[solidGeometrySP]->use();
-    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, byteStride, (float*)(0*sizeof(float)));
-    currentShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, byteStride, (float*)(3*sizeof(float)));
-    currentShaderProgram->setAttribute(NORMAL_ATTRIBUTE, 3, byteStride, (float*)(5*sizeof(float)));
+    shaderPrograms[solidGSP]->use();
+    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 8*sizeof(float), (float*)(0*sizeof(float)));
+    currentShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 8*sizeof(float), (float*)(3*sizeof(float)));
+    currentShaderProgram->setAttribute(NORMAL_ATTRIBUTE, 3, 8*sizeof(float), (float*)(5*sizeof(float)));
     for(auto decal : decals) {
         modelMat = decal->transformation;
         
@@ -230,11 +229,11 @@ void ObjectManager::drawScene() {
         
         if(decal->heightMap) {
             decal->heightMap->use(GL_TEXTURE_2D, 2);
-            shaderPrograms[solidBumpGeometrySP]->use();
+            shaderPrograms[solidBumpGSP]->use();
         }else{
             glActiveTexture(GL_TEXTURE2);
             glBindTexture(GL_TEXTURE_2D, 0);
-            shaderPrograms[solidGeometrySP]->use();
+            shaderPrograms[solidGSP]->use();
         }
         
         currentShaderProgram->setUniformF("discardDensity", min(1.0F, decal->life));
@@ -273,7 +272,7 @@ void ObjectManager::illuminate() {
     glDisable(GL_DEPTH_TEST);
 }
 
-void ObjectManager::drawFrame() {
+void ObjectManager::drawFrame() {//return;
     mainFBO.renderInDeferredBuffers(false);
     mainCam->use();
     currentCam->updateAudioListener();

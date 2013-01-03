@@ -304,7 +304,7 @@ PhysicLink::PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
         btTransform frameA = readTransformationXML(frameNode);
         frameNode = frameNode->next_sibling("Frame");
         if(!frameNode) {
-            log(error_log, "Tried to construct Hinge-PhysicLink without second \"Axis\"-node.");
+            log(error_log, "Tried to construct Hinge-PhysicLink without second \"Frame\"-node.");
             return;
         }
         btTransform frameB = readTransformationXML(frameNode);
@@ -322,6 +322,9 @@ PhysicLink::~PhysicLink() {
 }
 
 rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver) {
+    if(&constraint->getRigidBodyA() == static_cast<RigidObject*>(linkSaver->object[1])->getBody())
+        linkSaver->swap();
+    
     rapidxml::xml_node<xmlUsedCharType>* node = BaseLink::write(doc, linkSaver);
     node->name("PhysicLink");
     rapidxml::xml_node<xmlUsedCharType>* constraintNode = doc.allocate_node(rapidxml::node_element);
@@ -331,11 +334,6 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
     attribute->name("type");
     constraintNode->append_attribute(attribute);
     
-    if(&constraint->getRigidBodyA() == static_cast<RigidObject*>(linkSaver->object[1])->getBody()) {
-        linkSaver->swap();
-        printf("linkSaver->swap()\n");
-    }
-    
     switch(constraint->getConstraintType()) {
         case POINT2POINT_CONSTRAINT_TYPE: {
             attribute->value("point");
@@ -344,12 +342,12 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
             pointNode->name("Point");
             btVector3 point = pointConstraint->getPivotInA();
             pointNode->value(doc.allocate_string(stringOf(point).c_str()));
-            node->append_node(pointNode);
+            constraintNode->append_node(pointNode);
             pointNode = doc.allocate_node(rapidxml::node_element);
             pointNode->name("Point");
             point = pointConstraint->getPivotInB();
             pointNode->value(doc.allocate_string(stringOf(point).c_str()));
-            node->append_node(pointNode);
+            constraintNode->append_node(pointNode);
         } break;
         case GEAR_CONSTRAINT_TYPE: {
             attribute->value("gear");
@@ -357,17 +355,17 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
             rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
             attribute->name("ratio");
             attribute->value(doc.allocate_string(stringOf(gearConstraint->getRatio()).c_str()));
-            node->append_attribute(attribute);
+            constraintNode->append_attribute(attribute);
             rapidxml::xml_node<xmlUsedCharType>* axisNode = doc.allocate_node(rapidxml::node_element);
             axisNode->name("Axis");
             btVector3 axis = gearConstraint->getAxisA();
             axisNode->value(doc.allocate_string(stringOf(axis).c_str()));
-            node->append_node(axisNode);
+            constraintNode->append_node(axisNode);
             axisNode = doc.allocate_node(rapidxml::node_element);
             axisNode->name("Axis");
             axis = gearConstraint->getAxisB();
             axisNode->value(doc.allocate_string(stringOf(axis).c_str()));
-            node->append_node(axisNode);
+            constraintNode->append_node(axisNode);
         } break;
         case HINGE_CONSTRAINT_TYPE: {
             attribute->value("hinge");
@@ -376,12 +374,12 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
             frameNode->name("Frame");
             btTransform transform = hingeConstraint->getFrameOffsetA();
             frameNode->append_node(writeTransformationXML(doc, transform));
-            node->append_node(frameNode);
+            constraintNode->append_node(frameNode);
             frameNode = doc.allocate_node(rapidxml::node_element);
             frameNode->name("Frame");
             transform = hingeConstraint->getFrameOffsetB();
             frameNode->append_node(writeTransformationXML(doc, transform));
-            node->append_node(frameNode);
+            constraintNode->append_node(frameNode);
         } break;
         case CONETWIST_CONSTRAINT_TYPE:
             attribute->value("coneTwist");

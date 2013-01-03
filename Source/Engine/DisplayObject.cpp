@@ -136,14 +136,12 @@ void ModelObject::drawSkeletonPose(float axesSize, float linesSize, float textSi
 
 void ModelObject::prepareShaderProgram(Mesh* mesh) {
     if(!objectManager.currentShadowLight) {
-        char index = (mesh->heightMap) ? 1 : 0;
-        if(model->skeleton) index |= 2;
-        if(mesh->transparent && blendingQuality > 0) index |= 4;
-        ShaderProgramNames lookup[] = {
-            solidGeometrySP, solidBumpGeometrySP, skeletalGeometrySP, skeletalBumpGeometrySP,
-            glassGeometrySP, glassBumpGeometrySP, glassSkeletalGeometrySP, glassSkeletalBumpGeometrySP
-        };
-        shaderPrograms[lookup[index]]->use();
+        unsigned int shaderProgram = solidGSP;
+        if(model->skeleton) shaderProgram += 1;
+        //if(mesh->diffuse) shaderProgram += 2;
+        if(mesh->heightMap) shaderProgram += 4;
+        if(mesh->transparent && blendingQuality > 0) shaderProgram += 8;
+        shaderPrograms[shaderProgram]->use();
     }
     
     currentShaderProgram->setUniformF("discardDensity", 1.0);
@@ -380,7 +378,7 @@ bool WaterObject::gameTick() {
 }
 
 void WaterObject::prepareShaderProgram(Mesh* mesh) {
-    shaderPrograms[waterSP]->use();
+    shaderPrograms[animatedWaterSP]->use();
     char str[64];
     for(unsigned int i = 0; i < MAX_WAVES; i ++) {
         bool active = (i < waves.size());

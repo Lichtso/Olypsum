@@ -69,7 +69,7 @@ rapidxml::xml_node<xmlUsedCharType>* writeBoundsNode(rapidxml::xml_document<xmlU
     return node;
 }
 
-ParticlesObject::ParticlesObject() :activeVBO(0), addParticles(0.0), systemLife(-1.0), force(btVector3(0, -9.81, 0)) {
+ParticlesObject::ParticlesObject() :activeVBO(0), addParticles(0.0), systemLife(-1.0), force(btVector3(0, -9.81, 0)), transformAligned(false) {
     objectManager.particlesObjects.insert(this);
     body = new btCollisionObject();
     body->setUserPointer(this);
@@ -93,7 +93,7 @@ void ParticlesObject::init() {
 }
 
 ParticlesObject::ParticlesObject(unsigned int maxParticlesB, btCollisionShape* collisionShape) :ParticlesObject() {
-    texture = NULL;
+    //texture = NULL;
     maxParticles = maxParticlesB;
     init();
     body->setCollisionShape(collisionShape);
@@ -119,6 +119,12 @@ ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, Leve
     vecData.readString(attribute->value(), "%f");
     force = vecData.getVector3();
     
+    attribute = node->first_attribute("transformAligned");
+    if(attribute)
+        if(strcmp(attribute->value(), "true") == 0)
+            transformAligned = true;
+    
+    body->setWorldTransform(BaseObject::readTransformtion(node, levelLoader));
     body->setCollisionShape(PhysicObject::readCollisionShape(node->first_node("PhysicsBody"), levelLoader));
     objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Light, 0);
     if(!readRangeNode(node, "Life", lifeMin, lifeMax)) return;
@@ -232,6 +238,10 @@ void ParticlesObject::draw() {
     modelMat = getTransformation();
     if(texture) texture->use(GL_TEXTURE_2D, 0);
     currentShaderProgram->setUniformF("lifeMin", 5.0/lifeMin);
+    if(transformAligned) {
+        btMatrix3x3 viewNormalMat = getTransformation().getBasis();
+        currentShaderProgram->setUniformMatrix3("viewNormalMat", &viewNormalMat);
+    }
     
     if(particleCalcTarget == 1) {
         unsigned int index;
@@ -270,6 +280,12 @@ rapidxml::xml_node<xmlUsedCharType>* ParticlesObject::write(rapidxml::xml_docume
     attribute->name("force");
     attribute->value(doc.allocate_string(stringOf(force).c_str()));
     node->append_attribute(attribute);
+    if(transformAligned) {
+        attribute = doc.allocate_attribute();
+        attribute->name("transformAligned");
+        attribute->value("true");
+        node->append_attribute(attribute);
+    }
     
     node->append_node(fileManager.writeResource(doc, "Texture", texture));
     node->append_node(writeBoundsNode(doc, "Life", lifeMin, lifeMax));

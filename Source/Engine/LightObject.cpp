@@ -85,7 +85,7 @@ bool LightObject::gameTick(bool shadowActive) {
 }
 
 void LightObject::draw() {
-    currentShaderProgram->setUniformF("lRange", shadowCam.far);
+    currentShaderProgram->setUniformF("lInvRange", 1.0/shadowCam.far);
     currentShaderProgram->setUniformVec3("lColor", color.getVector());
     
     if(currentCam->testInverseNearPlaneHit(static_cast<btDbvtProxy*>(body->getBroadphaseHandle()))) { //PART IN FRUSTUM
@@ -193,13 +193,6 @@ void DirectionalLight::draw() {
     lightBox.draw();
 }
 
-void DirectionalLight::prepareShaderProgram(bool skeletal) {
-    if(skeletal)
-        shaderPrograms[skeletalShadowSP]->use();
-    else
-        shaderPrograms[solidShadowSP]->use();
-}
-
 float DirectionalLight::getPriority(btVector3 position) {
     return 2.0;
 }
@@ -305,13 +298,6 @@ void SpotLight::draw() {
     lightCone.draw();
 }
 
-void SpotLight::prepareShaderProgram(bool skeletal) {
-    if(skeletal)
-        shaderPrograms[skeletalShadowSP]->use();
-    else
-        shaderPrograms[solidShadowSP]->use();
-}
-
 float SpotLight::getPriority(btVector3 position) {
     return 1.0;
 }
@@ -381,7 +367,7 @@ void PositionalLight::setTransformation(const btTransform& transformation) {
 }
 
 void PositionalLight::setBounds(bool omniDirectional, float range) {
-    shadowCam.fov = (cubemapsEnabled) ? M_PI_2 : ((omniDirectional) ? M_PI*2.0 : M_PI);
+    shadowCam.fov = (omniDirectional) ? M_PI*2.0 : M_PI;
     shadowCam.far = range;
     
     if(omniDirectional)
@@ -393,7 +379,7 @@ void PositionalLight::setBounds(bool omniDirectional, float range) {
 bool PositionalLight::gameTick(bool shadowActive) {
     shadowCam.gameTick();
     if(!LightObject::gameTick(shadowActive)) return true;
-    if(abs(shadowCam.fov-M_PI*2.0) < 0.001 && !shadowMapB) {
+    if(abs(shadowCam.fov-M_PI*2.0) < 0.001 && !shadowMapB && !cubemapsEnabled) {
         shadowMapB = new ColorBuffer(1024, true, false);
         if(glGetError() == GL_OUT_OF_MEMORY) {
             delete shadowMapB;
@@ -405,6 +391,8 @@ bool PositionalLight::gameTick(bool shadowActive) {
     Matrix4 viewMat = shadowCam.viewMat;
     glDisable(GL_BLEND);
     if(cubemapsEnabled) {
+        float fov = shadowCam.fov;
+        shadowCam.fov = M_PI_2;
         btTransform camMat = shadowCam.getTransformation();
         for(GLenum side = GL_TEXTURE_CUBE_MAP_POSITIVE_X; side <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; side ++) {
             btQuaternion rotation;
@@ -416,10 +404,10 @@ bool PositionalLight::gameTick(bool shadowActive) {
                     rotation.setEulerZYX(M_PI, -M_PI_2, 0.0);
                 break;
                 case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
-                    rotation.setEulerZYX(0.0, 0.0, -M_PI_2);
+                    rotation.setEulerZYX(0.0, 0.0, M_PI_2);
                 break;
                 case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
-                    rotation.setEulerZYX(0.0, 0.0, M_PI_2);
+                    rotation.setEulerZYX(0.0, 0.0, -M_PI_2);
                 break;
                 case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
                     rotation.setEulerZYX(M_PI, M_PI, 0.0);
@@ -428,15 +416,16 @@ bool PositionalLight::gameTick(bool shadowActive) {
                     rotation.setEulerZYX(M_PI, 0.0, 0.0);
                 break;
             }
-            btTransform rotTransform;
+            btTransform rotTransform = btTransform::getIdentity();
             rotTransform.setRotation(rotation);
-            shadowCam.setTransformation(rotTransform * camMat);
+            shadowCam.setTransformation(camMat * rotTransform);
             shadowCam.gameTick();
             mainFBO.renderInTexture(shadowMap, side);
             objectManager.drawScene();
         }
         shadowCam.setTransformation(camMat);
         shadowCam.viewMat = viewMat;
+        shadowCam.fov = fov;
     }else{
         shaderPrograms[solidParabolidShadowSP]->use();
         shaderPrograms[solidParabolidShadowSP]->setUniformF("lRange", shadowCam.far);
@@ -475,25 +464,15 @@ void PositionalLight::draw() {
     currentShaderProgram->setUniformF("lCutoff", (abs(shadowCam.fov-M_PI*2.0) < 0.001) ? 1.0 : 0.0);
     currentShaderProgram->setUniformVec3("lPosition", shadowCam.getTransformation().getOrigin());
     currentShaderProgram->setUniformVec3("lDirection", shadowCam.getTransformation().getBasis().getColumn(2)*-1.0);
+    if(cubemapsEnabled)
+        currentShaderProgram->setUniformVec2("shadowDepthTransform", (shadowCam.far+shadowCam.near)/(shadowCam.far-shadowCam.near)*0.5+0.5,
+                                                                    -(shadowCam.far*shadowCam.near)/(shadowCam.far-shadowCam.near)*1.005);
+    
     LightObject::draw();
     if(abs(shadowCam.fov-M_PI) < 0.001)
         lightParabolid.draw();
     else
         lightSphere.draw();
-}
-
-void PositionalLight::prepareShaderProgram(bool skeletal) {
-    if(cubemapsEnabled) {
-        if(skeletal)
-            shaderPrograms[skeletalShadowSP]->use();
-        else
-            shaderPrograms[solidShadowSP]->use();
-    }else{
-        if(skeletal)
-            shaderPrograms[skeletalParabolidShadowSP]->use();
-        else
-            shaderPrograms[solidParabolidShadowSP]->use();
-    }
 }
 
 float PositionalLight::getPriority(btVector3 position) {

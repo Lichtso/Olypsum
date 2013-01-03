@@ -8,10 +8,11 @@ void main() {
 
 #separator
 
+#extension GL_EXT_gpu_shader4 : require
 #extension GL_ARB_texture_rectangle : enable
 
 uniform vec3 camPos;
-uniform float lRange;
+uniform float lInvRange;
 uniform vec3 lColor, lDirection;
 #if LIGHT_TYPE > 1
 uniform float lCutoff;
@@ -31,12 +32,11 @@ uniform sampler2DShadow sampler5;
 uniform sampler2DShadow sampler6;
 #elif SHADOWS_ACTIVE == 3
 uniform samplerCubeShadow sampler5;
+uniform vec2 shadowDepthTransform;
 #endif
 
-#if SHADOWS_ACTIVE > 0 && SHADOWS_ACTIVE < 3
+#if SHADOWS_ACTIVE > 0
 uniform mat4 lShadowMat;
-#elif SHADOWS_ACTIVE == 3
-uniform mat3 lShadowMat;
 #endif
 
 #if LIGHT_TYPE == 1
@@ -83,42 +83,39 @@ void main() {
     vec3 lightDir = lPosition-pos;
     float lightDirLen = length(lightDir), intensity;
     lightDir /= lightDirLen;
-    intensity = 1.0-clamp(lightDirLen / lRange, step(lCutoff, dot(lDirection, lightDir)), 1.0);
+    intensity = clamp(lightDirLen * lInvRange, step(lCutoff, dot(lDirection, lightDir)), 1.0);
     #endif
-    
-    #if SHADOW_QUALITY > 0
-    #if LIGHT_TYPE < 3 || SHADOWS_ACTIVE < 3
+
+    #if SHADOW_QUALITY > 0 //Shadows enabled
     vec4 shadowCoord = vec4(pos, 1.0) * lShadowMat;
-    #endif
-    #if LIGHT_TYPE < 3
+    #if LIGHT_TYPE < 3 //Directional or spot light
     shadowCoord.z = shadowCoord.z*depthBias*0.5+0.5*shadowCoord.w;
-    intensity *= shadowLookup2D(sampler5, shadowCoord.xyz/shadowCoord.w);
-    #else
-    
-    #if SHADOWS_ACTIVE < 3
+    intensity = (1.0-intensity)*shadowLookup2D(sampler5, shadowCoord.xyz/shadowCoord.w);
+    #else //Positional light
+    #if SHADOWS_ACTIVE < 3 //Parabolid
     #if SHADOWS_ACTIVE == 2
     if(shadowCoord.z < 0.0) {
     #endif
         shadowCoord.xy /= (lightDirLen - shadowCoord.z) * 2.0;
-        shadowCoord.z = (1.0 - intensity) * depthBias;
+        shadowCoord.z = intensity * depthBias;
         shadowCoord.xyz += vec3(0.5);
-        intensity *= shadowLookup2D(sampler5, shadowCoord.xyz);
+        intensity = (1.0-intensity)*shadowLookup2D(sampler5, shadowCoord.xyz);
     #if SHADOWS_ACTIVE == 2
     }else{
         shadowCoord.x *= -1.0;
         shadowCoord.xy /= (lightDirLen + shadowCoord.z) * 2.0;
-        shadowCoord.z = (1.0 - intensity) * depthBias;
+        shadowCoord.z = intensity * depthBias;
         shadowCoord.xyz += vec3(0.5);
-        intensity *= shadowLookup2D(sampler6, shadowCoord.xyz);
+        intensity = (1.0-intensity)*shadowLookup2D(sampler6, shadowCoord.xyz);
     }
     #endif
-    #else
-    vec3 shadowCoord = (pos-lPosition)*lShadowMat;
-    intensity *= shadowCube(sampler5, shadowCoord).x;
-    //TODO SHADOW_QUALITY > 1
-    #endif
-    #endif
-    #endif
+    #else //Cubemap
+    shadowCoord.w = max(max(abs(shadowCoord.x), abs(shadowCoord.y)), abs(shadowCoord.z));
+    shadowCoord.w = (shadowDepthTransform.x + shadowDepthTransform.y/shadowCoord.w);
+    intensity = (1.0-intensity)*shadowCube(sampler5, shadowCoord).x;
+    #endif //Cubemap
+    #endif //Positional light
+    #endif //Shadows enabled
     
     diffuseLight += lColor*intensity*max(dot(lightDir, normal), 0.0);
     specularLight += lColor*intensity*pow(max(dot(reflect(lightDir, normal), normalize(pos-camPos)), 0.0), material.r*19.0+1.0)*material.g;

@@ -42,7 +42,7 @@ ShaderProgram::~ShaderProgram() {
 	glDeleteProgram(GLname);
 }
 
-bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::vector<const char*>* macros) {
+bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::vector<const char*>& macros) {
 	unsigned int shaderId = glCreateShader(shaderType);
     
     if(shaderType == GL_GEOMETRY_SHADER_EXT) {
@@ -102,8 +102,8 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::v
     }
     
     std::string soucreStr = "#version 120\n";
-    for(unsigned int m = 0; m < macros->size(); m ++)
-        soucreStr += std::string("#define ")+(*macros)[m]+"\n";
+    for(unsigned int m = 0; m < macros.size(); m ++)
+        soucreStr += std::string("#define ")+macros[m]+"\n";
     
     soucreStr += soucreCode;
     const GLchar* soucre = soucreStr.c_str();
@@ -144,10 +144,10 @@ bool ShaderProgram::loadShaderProgram(const char* fileName, std::vector<GLenum> 
         char* seperator = strstr(dataPos, seperatorString);
         if(seperator) {
             *seperator = 0;
-            loadShader(shaderType, dataPos, &macros);
+            loadShader(shaderType, dataPos, macros);
             dataPos = seperator+strlen(seperatorString);
         }else
-            loadShader(shaderType, dataPos, &macros);
+            loadShader(shaderType, dataPos, macros);
     }
     
     return true;
@@ -305,7 +305,7 @@ void loadStaticShaderPrograms() {
 }
 
 void loadDynamicShaderPrograms() {
-    for(unsigned int p = solidGeometrySP; p < sizeof(shaderPrograms)/sizeof(ShaderProgram*); p ++) {
+    for(unsigned int p = solidGSP; p < sizeof(shaderPrograms)/sizeof(ShaderProgram*); p ++) {
         if(shaderPrograms[p]) delete shaderPrograms[p];
         shaderPrograms[p] = new ShaderProgram();
     }
@@ -322,59 +322,79 @@ void loadDynamicShaderPrograms() {
     sprintf(bumpMappingMacro, "BUMP_MAPPING %d", bumpMappingQuality);
     sprintf(shadowQualityMacro, "SHADOW_QUALITY %d", shadowQuality);
     
-    shaderPrograms[solidGeometrySP]->loadShaderProgram("gBuffer", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 0", "BUMP_MAPPING 0" });
-    shaderPrograms[solidGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[solidGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shaderPrograms[solidGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
-    shaderPrograms[solidGeometrySP]->link();
+    //G-Buffer Shaders
     
-    shaderPrograms[solidBumpGeometrySP]->loadShaderProgram("gBuffer", (bumpMappingQuality) ? shaderTypeVertexFragmentGeometry : shaderTypeVertexFragment,
-                                                           { "SKELETAL_ANIMATION 0", bumpMappingMacro });
-    shaderPrograms[solidBumpGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[solidBumpGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shaderPrograms[solidBumpGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
-    shaderPrograms[solidBumpGeometrySP]->link();
+    for(unsigned int p = 0; p < 16; p ++) {
+        std::vector<const char*> macros;
+        if(p % 2 == 0)
+            macros.push_back("SKELETAL_ANIMATION 0");
+        else
+            macros.push_back("SKELETAL_ANIMATION 1");
+        
+        if(p % 4 < 2)
+            macros.push_back("TEXTURE_ANIMATION 0");
+        else
+            macros.push_back("TEXTURE_ANIMATION 1");
+        
+        if(p % 8 < 4)
+            macros.push_back("BUMP_MAPPING 0");
+        else
+            macros.push_back(((p % 8 == 7 || p % 16 >= 8) && bumpMappingQuality > 1) ? "BUMP_MAPPING 1" : bumpMappingMacro);
+        
+        if(p % 16 < 8)
+            macros.push_back("BLENDING_QUALITY 0");
+        else
+            macros.push_back(blendingQualityMacro);
+        
+        shaderPrograms[solidGSP+p]->loadShaderProgram("gBuffer",
+                                                      (p % 8 < 4) ? shaderTypeVertexFragment : shaderTypeVertexFragmentGeometry,
+                                                      macros);
+        shaderPrograms[solidGSP+p]->addAttribute(POSITION_ATTRIBUTE, "position");
+        shaderPrograms[solidGSP+p]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
+        shaderPrograms[solidGSP+p]->addAttribute(NORMAL_ATTRIBUTE, "normal");
+        if(p % 2 == 1) {
+            shaderPrograms[solidGSP+p]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
+            shaderPrograms[solidGSP+p]->addAttribute(JOINT_ATTRIBUTE, "joints");
+        }
+        shaderPrograms[solidGSP+p]->link();
+    }
     
-    shaderPrograms[solidShadowSP]->loadShaderProgram("shadow", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 0", "LIGHT_TYPE 0" });
-    shaderPrograms[solidShadowSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[solidShadowSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shaderPrograms[solidShadowSP]->link();
+    shaderPrograms[animatedWaterSP]->loadShaderProgram("gBuffer", shaderTypeVertexFragmentGeometry, { "SKELETAL_ANIMATION 0", blendingQualityMacro, "BUMP_MAPPING 2", "TEXTURE_ANIMATION 1" });
+    shaderPrograms[animatedWaterSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[animatedWaterSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
+    shaderPrograms[animatedWaterSP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
+    shaderPrograms[animatedWaterSP]->link();
     
-    shaderPrograms[solidParabolidShadowSP]->loadShaderProgram("shadow", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 0", "LIGHT_TYPE 2" });
-    shaderPrograms[solidParabolidShadowSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[solidParabolidShadowSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shaderPrograms[solidParabolidShadowSP]->link();
+    //Shadow Map Generators
     
-    shaderPrograms[skeletalGeometrySP]->loadShaderProgram("gBuffer", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 1", "BUMP_MAPPING 0" });
-    shaderPrograms[skeletalGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[skeletalGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shaderPrograms[skeletalGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
-    shaderPrograms[skeletalGeometrySP]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
-    shaderPrograms[skeletalGeometrySP]->addAttribute(JOINT_ATTRIBUTE, "joints");
-    shaderPrograms[skeletalGeometrySP]->link();
+    for(unsigned int p = 0; p < 8; p ++) {
+        std::vector<const char*> macros;
+        if(p % 2 == 0)
+            macros.push_back("SKELETAL_ANIMATION 0");
+        else
+            macros.push_back("SKELETAL_ANIMATION 1");
+        
+        if(p % 4 < 2)
+            macros.push_back("TEXTURE_ANIMATION 0");
+        else
+            macros.push_back("TEXTURE_ANIMATION 1");
+        
+        if(p % 8 < 4)
+            macros.push_back("PARABOLID 0");
+        else
+            macros.push_back("PARABOLID 1");
+        
+        shaderPrograms[solidShadowSP+p]->loadShaderProgram("shadow", shaderTypeVertexFragment, macros);
+        shaderPrograms[solidShadowSP+p]->addAttribute(POSITION_ATTRIBUTE, "position");
+        shaderPrograms[solidShadowSP+p]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
+        if(p % 2 == 1) {
+            shaderPrograms[solidShadowSP+p]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
+            shaderPrograms[solidShadowSP+p]->addAttribute(JOINT_ATTRIBUTE, "joints");
+        }
+        shaderPrograms[solidShadowSP+p]->link();
+    }
     
-    shaderPrograms[skeletalBumpGeometrySP]->loadShaderProgram("gBuffer", (bumpMappingQuality) ? shaderTypeVertexFragmentGeometry : shaderTypeVertexFragment,
-                                                           { "SKELETAL_ANIMATION 1", (bumpMappingQuality > 2) ? "BUMP_MAPPING 2" : bumpMappingMacro });
-    shaderPrograms[skeletalBumpGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[skeletalBumpGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shaderPrograms[skeletalBumpGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
-    shaderPrograms[skeletalBumpGeometrySP]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
-    shaderPrograms[skeletalBumpGeometrySP]->addAttribute(JOINT_ATTRIBUTE, "joints");
-    shaderPrograms[skeletalBumpGeometrySP]->link();
-    
-    shaderPrograms[skeletalShadowSP]->loadShaderProgram("shadow", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 1", "LIGHT_TYPE 0" });
-    shaderPrograms[skeletalShadowSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[skeletalShadowSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shaderPrograms[skeletalShadowSP]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
-    shaderPrograms[skeletalShadowSP]->addAttribute(JOINT_ATTRIBUTE, "joints");
-    shaderPrograms[skeletalShadowSP]->link();
-    
-    shaderPrograms[skeletalParabolidShadowSP]->loadShaderProgram("shadow", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 1", "LIGHT_TYPE 2" });
-    shaderPrograms[skeletalParabolidShadowSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[skeletalParabolidShadowSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shaderPrograms[skeletalParabolidShadowSP]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
-    shaderPrograms[skeletalParabolidShadowSP]->addAttribute(JOINT_ATTRIBUTE, "joints");
-    shaderPrograms[skeletalParabolidShadowSP]->link();
+    //Illumination Shaders
     
     shaderPrograms[directionalLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, { "LIGHT_TYPE 1", "SHADOWS_ACTIVE 0", "SHADOW_QUALITY 0" });
     shaderPrograms[directionalLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
@@ -409,6 +429,8 @@ void loadDynamicShaderPrograms() {
         shaderPrograms[positionalShadowDualLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[positionalShadowDualLightSP]->link();
     }
+    
+    //Post Effect Shaders
     
     if(ssaoQuality) {
         unsigned char samples = 32;
@@ -467,40 +489,6 @@ void loadDynamicShaderPrograms() {
             shaderPrograms[particleCalculateSP]->link();
         }
     }
-    
-    shaderPrograms[glassGeometrySP]->loadShaderProgram("transparent", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 0", blendingQualityMacro, "BUMP_MAPPING 0" });
-    shaderPrograms[glassGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[glassGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shaderPrograms[glassGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
-    shaderPrograms[glassGeometrySP]->link();
-    
-    shaderPrograms[glassBumpGeometrySP]->loadShaderProgram("transparent", (bumpMappingQuality) ? shaderTypeVertexFragmentGeometry : shaderTypeVertexFragment, { "SKELETAL_ANIMATION 0", blendingQualityMacro, bumpMappingMacro });
-    shaderPrograms[glassBumpGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[glassBumpGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shaderPrograms[glassBumpGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
-    shaderPrograms[glassBumpGeometrySP]->link();
-    
-    shaderPrograms[glassSkeletalGeometrySP]->loadShaderProgram("transparent", shaderTypeVertexFragment, { "SKELETAL_ANIMATION 1", blendingQualityMacro, "BUMP_MAPPING 0" });
-    shaderPrograms[glassSkeletalGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[glassSkeletalGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shaderPrograms[glassSkeletalGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
-    shaderPrograms[glassSkeletalGeometrySP]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
-    shaderPrograms[glassSkeletalGeometrySP]->addAttribute(JOINT_ATTRIBUTE, "joints");
-    shaderPrograms[glassSkeletalGeometrySP]->link();
-    
-    shaderPrograms[glassSkeletalBumpGeometrySP]->loadShaderProgram("transparent", (bumpMappingQuality) ? shaderTypeVertexFragmentGeometry : shaderTypeVertexFragment, { "SKELETAL_ANIMATION 1", blendingQualityMacro, bumpMappingMacro });
-    shaderPrograms[glassSkeletalBumpGeometrySP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[glassSkeletalBumpGeometrySP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shaderPrograms[glassSkeletalBumpGeometrySP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
-    shaderPrograms[glassSkeletalBumpGeometrySP]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
-    shaderPrograms[glassSkeletalBumpGeometrySP]->addAttribute(JOINT_ATTRIBUTE, "joints");
-    shaderPrograms[glassSkeletalBumpGeometrySP]->link();
-    
-    shaderPrograms[waterSP]->loadShaderProgram("transparent", shaderTypeVertexFragmentGeometry, { "SKELETAL_ANIMATION 0", blendingQualityMacro, "BUMP_MAPPING 2" });
-    shaderPrograms[waterSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[waterSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shaderPrograms[waterSP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
-    shaderPrograms[waterSP]->link();
     
     mainFBO.init();
 }

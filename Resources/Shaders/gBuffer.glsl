@@ -56,22 +56,47 @@ void main() {
 
 #separator
 
+#define M_PI 3.14159265358979323846
+
 varying vec3 vPosition;
 varying vec2 vTexCoord;
 varying vec3 vNormal;
 #if BUMP_MAPPING > 0
 varying vec3 vTangent;
 varying vec3 vBitangent;
-
-uniform vec3 camPos;
-uniform sampler2D sampler2;
 #endif
+
+#if TEXTURE_ANIMATION == 0
 uniform sampler2D sampler0;
+#else
+uniform float animationTime;
+uniform sampler3D sampler0;
+#endif
 uniform sampler2D sampler1;
+uniform sampler2D sampler2;
+uniform sampler2DRect sampler3;
 uniform float discardDensity;
+uniform vec3 camPos;
+uniform mat3 viewNormalMat;
+
+#if BLENDING_QUALITY > 0 && BUMP_MAPPING == 2
+const int maxWaves = 4;
+uniform float waveLen[maxWaves];
+uniform float waveAge[maxWaves];
+uniform float waveAmp[maxWaves];
+uniform vec2 waveOri[maxWaves];
+#endif
 
 float random(vec2 co) {
     return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+void setColor(vec2 texCoord) {
+    #if TEXTURE_ANIMATION == 0 //2D texture
+    gl_FragData[0] = texture2D(sampler0, texCoord); //Color
+    #else //3D texture
+    gl_FragData[0] = texture3D(sampler0, vec3(texCoord, animationTime)); //Color
+    #endif
 }
 
 #if BUMP_MAPPING == 3
@@ -94,24 +119,28 @@ void BinaryParallax(inout vec3 texCoord, vec3 viewVec) {
 #endif
 
 void main() {
-    #if BUMP_MAPPING <= 1
-	gl_FragData[0] = texture2D(sampler0, vTexCoord); //Color
-    if(gl_FragData[0].a < 0.0039 || random(gl_FragCoord.xy) > discardDensity) discard;
+    if(random(gl_FragCoord.xy) > discardDensity) discard;
+    
+    #if BUMP_MAPPING <= 1 || BLENDING_QUALITY > 0
+    setColor(vTexCoord);
+    if(gl_FragData[0].a < 0.0039) discard;
     gl_FragData[1] = vec4(texture2D(sampler1, vTexCoord).rgb, 1.0); //Material
     #endif
-    
     vec3 normal = normalize(vNormal);
-    #if BUMP_MAPPING == 1
+    
+    #if BLENDING_QUALITY == 0 //Solid
+    
+    #if BUMP_MAPPING == 1 //Normal mapping
     vec3 bumpMap = texture2D(sampler2, vTexCoord).xyz;
     bumpMap.xy = bumpMap.xy*2.0-vec2(1.0);
     normal = mat3(vTangent, vBitangent, normal)*bumpMap;
-    #elif BUMP_MAPPING > 1
-    if(random(gl_FragCoord.xy) > discardDensity) discard;
+    #elif BUMP_MAPPING > 1 //Parallax
+    
     vec3 viewVec = normalize(camPos-vPosition);
-    #if BUMP_MAPPING == 2
+    #if BUMP_MAPPING == 2 //Parallax simple
     viewVec.xy = vec2(dot(viewVec, vTangent), dot(viewVec, vBitangent));
     vec2 texCoord = vTexCoord-viewVec.xy*texture2D(sampler2, vTexCoord).a*0.04;
-    #elif BUMP_MAPPING == 3
+    #elif BUMP_MAPPING == 3 //Parallax occlusion
     viewVec = vec3(dot(viewVec, vTangent), dot(viewVec, vBitangent), dot(viewVec, normal));
     float steps = floor((1.0 - viewVec.z) * 18.0) + 2.0;
     viewVec.xy *= -0.04/viewVec.z;
@@ -121,15 +150,46 @@ void main() {
     LinearParallax(texCoord, viewVec, steps);
 	BinaryParallax(texCoord, viewVec);
     #endif
-    gl_FragData[0] = texture2D(sampler0, texCoord.xy); //Color
+    setColor(texCoord);
     //if(abs(texCoord.x-0.5) > 0.5 || abs(texCoord.y-0.5) > 0.5) discard;
-    if(gl_FragData[0].a < 0.0039 || random(gl_FragCoord.xy) > discardDensity) discard;
+    if(gl_FragData[0].a < 0.0039) discard;
     gl_FragDepth = gl_FragCoord.z+length(texCoord.xy-vTexCoord)*0.2; //Depth
     vec3 bumpMap = texture2D(sampler2, texCoord.xy).xyz;
     bumpMap.xy = bumpMap.xy*2.0-vec2(1.0);
     normal = mat3(vTangent, vBitangent, normal)*bumpMap;
 	gl_FragData[1] = vec4(texture2D(sampler1, texCoord.xy).rgb, 1.0); //Material
+    #endif //Parallax
+    
+    #else //Transparent
+    
+    #if BUMP_MAPPING == 1 //Glass refraction
+    vec3 bumpMap = texture2D(sampler2, vTexCoord).xyz;
+    bumpMap.xy = bumpMap.xy*2.0-vec2(1.0);
+    normal = mat3(vTangent, vBitangent, normal)*bumpMap;
+    #elif BUMP_MAPPING == 2 //Water waves
+    vec3 bumpMap = vec3(0.0);
+    for(int i = 0; i < maxWaves; i ++) {
+        //if(waveAmp[i] <= 0.0) continue; //UNKNOWN PERFORMANCE USE
+        vec2 diff = waveOri[i]-vTexCoord;
+        float len = length(diff);
+        diff /= len;
+        len = sin(clamp(len*waveLen[i]-waveAge[i], 0.0, M_PI*2.0))*0.5+0.5;
+        bumpMap.xy += diff*len*waveAmp[i];
+        bumpMap.xy -= diff*(1.0-len)*waveAmp[i];
+    }
+    bumpMap.z = 1.0;
+    normal = mat3(vTangent, vBitangent, normal)*normalize(bumpMap);
+    #endif //Water waves
+    
+    #if BLENDING_QUALITY == 2
+    gl_FragData[0].rgb *= gl_FragData[0].a;
+    gl_FragData[0].rgb += (1.0-gl_FragData[0].a)*texture2DRect(sampler3, gl_FragCoord.xy+(viewNormalMat*normal).xy*10.0).rgb; //Color
+    gl_FragData[0].a = 1.0;
+    #elif BLENDING_QUALITY == 3
+    gl_FragData[4].rgb = (1.0-gl_FragData[0].a)*texture2DRect(sampler3, gl_FragCoord.xy+(viewNormalMat*normal).xy*10.0).rgb; //Specular
+    gl_FragData[4].a = 1.0;
     #endif
+    #endif //Transparent
     
     gl_FragData[2] = vec4(normal, 1.0); //Normal
 	gl_FragData[3] = vec4(vPosition, 1.0); //Position

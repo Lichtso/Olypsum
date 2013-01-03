@@ -52,6 +52,13 @@ void Mesh::draw(ModelObject* object) {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
     
+    if(objectManager.currentShadowLight) {
+        unsigned int shaderProgram = solidShadowSP;
+        if(weightJoints >= 0) shaderProgram += 1;
+        //if(diffuse) shaderProgram += 2;
+        if(dynamic_cast<PositionalLight*>(objectManager.currentShadowLight) && !cubemapsEnabled) shaderProgram += 4;
+        shaderPrograms[shaderProgram]->use();
+    }
     object->prepareShaderProgram(this);
     
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -803,12 +810,8 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
 }
 
 void Model::draw(ModelObject* object) {
-    if(objectManager.currentShadowLight) {
-        objectManager.currentShadowLight->prepareShaderProgram(skeleton);
-        for(unsigned int i = 0; i < meshes.size(); i ++)
-            meshes[i]->draw(object);
-    }else for(unsigned int i = 0; i < meshes.size(); i ++) {
-        if(meshes[i]->transparent && blendingQuality > 0) {
+    for(unsigned int i = 0; i < meshes.size(); i ++) {
+        if(blendingQuality > 0 && !objectManager.currentShadowLight && meshes[i]->transparent) {
             AccumulatedMesh* aMesh = new AccumulatedMesh();
             aMesh->object = object;
             aMesh->mesh = meshes[i];
