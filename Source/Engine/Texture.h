@@ -32,6 +32,13 @@ class FilePackageResource {
 //! A texture used for graphics
 class Texture : public FilePackageResource {
     public:
+    //! A single frame used for texture animation
+    struct AnimationFrame {
+        float accBegin, //!< The acceleration at t = 0
+              accEnd, //!< The acceleration at t = duration
+              duration; //!< The duration of this frame in seconds
+    };
+    AnimationFrame* frames;
     unsigned int width, height, depth; //!< The size of this Texture
     GLuint GLname; //!< The OpenGL identifier if the Texture is present in the VRAM
     GLenum minFilter, magFilter; //!< The OpenGL texture filters
@@ -39,6 +46,8 @@ class Texture : public FilePackageResource {
     Texture();
     ~Texture();
     std::shared_ptr<FilePackageResource> load(FilePackage* filePackageB, const std::string& name);
+    //! Prepare to be uploaded as a 3D Texture, returns success
+    bool setAnimationFrames(std::vector<AnimationFrame> frames);
     //! Loads random data in a SDL_Surface
     void loadRandom();
     //! Deletes the SDL_Surface of the Texture (unload from RAM)
@@ -49,10 +58,15 @@ class Texture : public FilePackageResource {
     bool uploadNormalMap(float processingValue);
     //! Deletes the OpenGL texture (unload from VRAM)
     void unloadTexture();
-    /*! Sets the Texture as OpenGL texture target
+    /*! Sets the Texture as OpenGL 2D texture target
      @param targetIndex A index between 0 and x will be a texture target between GL_TEXTURE0 and GL_TEXTUREx
      */
     void use(GLuint targetIndex);
+    /*! Sets the Texture as OpenGL 3D texture target
+     @param targetIndex A index between 0 and x will be a texture target between GL_TEXTURE0 and GL_TEXTUREx
+     @param animationTime A float that is used to store the time of animation in seconds
+     */
+    void use(GLuint targetIndex, float& animationTime);
 };
 
 #endif

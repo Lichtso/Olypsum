@@ -59,42 +59,42 @@
   <library_geometries>
     <geometry id="Cube-mesh" name="Cube">
       <mesh>
-        <source id="Cube-mesh-positions">
-          <float_array id="Cube-mesh-positions-array" count="24">5 5 -5 5 -5 -5 -5 -5 -5 -5 5 -5 5 5 5 5 -5 5 -5 -5 5 -5 5 5</float_array>
+        <source id="Cube_001-mesh-positions">
+          <float_array id="Cube_001-mesh-positions-array" count="24">5 5 -5 5 -5 -5 -5 -5 -5 -5 5 -5 5 5 5 5 -5 5 -5 -5 5 -5 5 5</float_array>
           <technique_common>
-            <accessor source="#Cube-mesh-positions-array" count="8" stride="3">
+            <accessor source="#Cube_001-mesh-positions-array" count="8" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Cube-mesh-normals">
-          <float_array id="Cube-mesh-normals-array" count="18">0 0 1 0 0 -1 -1 0 0 0 1 0 1 0 0 0 -1 0</float_array>
+        <source id="Cube_001-mesh-normals">
+          <float_array id="Cube_001-mesh-normals-array" count="18">0 0 1 0 0 -1 -1 0 0 0 1 0 1 0 0 0 -1 0</float_array>
           <technique_common>
-            <accessor source="#Cube-mesh-normals-array" count="6" stride="3">
+            <accessor source="#Cube_001-mesh-normals-array" count="6" stride="3">
               <param name="X" type="float"/>
               <param name="Y" type="float"/>
               <param name="Z" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <source id="Cube-mesh-map-0">
-          <float_array id="Cube-mesh-map-0-array" count="48">0.6676862 0.6666668 1 0.6676862 0.9989805 1 0.6666668 0.9989805 0.6666668 0.3343527 0.9989806 0.3333334 1 0.6656472 0.6676862 0.6666666 0.3323139 0 0.3333334 0.3323139 0.001019477 0.3333335 0 0.001019537 0.6656473 0.3333334 0.6666668 0.6656472 0.3343529 0.6666668 0.3333334 0.3343529 1.5846e-7 0.334353 0.332314 0.3333335 0.3333334 0.6656473 0.001019656 0.6666668 0.6656472 0 0.6666668 0.3323138 0.3343529 0.3333334 0.3333334 0.001019418</float_array>
+        <source id="Cube_001-mesh-map-0">
+          <float_array id="Cube_001-mesh-map-0-array" count="48">0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1 0 0 1 0 1 1 0 1</float_array>
           <technique_common>
-            <accessor source="#Cube-mesh-map-0-array" count="24" stride="2">
+            <accessor source="#Cube_001-mesh-map-0-array" count="24" stride="2">
               <param name="S" type="float"/>
               <param name="T" type="float"/>
             </accessor>
           </technique_common>
         </source>
-        <vertices id="Cube-mesh-vertices">
-          <input semantic="POSITION" source="#Cube-mesh-positions"/>
+        <vertices id="Cube_001-mesh-vertices">
+          <input semantic="POSITION" source="#Cube_001-mesh-positions"/>
         </vertices>
-        <polylist material="Material1" count="6">
-          <input semantic="VERTEX" source="#Cube-mesh-vertices" offset="0"/>
-          <input semantic="NORMAL" source="#Cube-mesh-normals" offset="1"/>
-          <input semantic="TEXCOORD" source="#Cube-mesh-map-0" offset="2" set="0"/>
+        <polylist material="Material" count="6">
+          <input semantic="VERTEX" source="#Cube_001-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Cube_001-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Cube_001-mesh-map-0" offset="2" set="0"/>
           <vcount>4 4 4 4 4 4 </vcount>
           <p>0 0 0 3 0 1 2 0 2 1 0 3 4 1 4 5 1 5 6 1 6 7 1 7 0 2 8 1 2 9 5 2 10 4 2 11 1 3 12 2 3 13 6 3 14 5 3 15 2 4 16 3 4 17 7 4 18 6 4 19 3 5 20 0 5 21 4 5 22 7 5 23</p>
         </polylist>
@@ -108,11 +108,11 @@
         <rotate sid="rotationZ">0 0 1 0</rotate>
         <rotate sid="rotationY">0 1 0 0</rotate>
         <rotate sid="rotationX">1 0 0 0</rotate>
-        <scale sid="scale">4 4 4</scale>
+        <scale sid="scale">1 1 1</scale>
         <instance_geometry url="#Cube-mesh">
           <bind_material>
             <technique_common>
-              <instance_material symbol="Material1" target="#Material-material">
+              <instance_material symbol="Material" target="#Material-material">
                 <bind_vertex_input semantic="UVMap" input_semantic="TEXCOORD" input_set="0"/>
               </instance_material>
             </technique_common>

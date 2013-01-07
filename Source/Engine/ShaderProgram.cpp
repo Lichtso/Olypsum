@@ -359,11 +359,16 @@ void loadDynamicShaderPrograms() {
         shaderPrograms[solidGSP+p]->link();
     }
     
-    shaderPrograms[waterAnimatedSP]->loadShaderProgram("gBuffer", shaderTypeVertexFragmentGeometry, { "SKELETAL_ANIMATION 0", blendingQualityMacro, "BUMP_MAPPING 2", "TEXTURE_ANIMATION 1" });
-    shaderPrograms[waterAnimatedSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[waterAnimatedSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shaderPrograms[waterAnimatedSP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
-    shaderPrograms[waterAnimatedSP]->link();
+    shaderPrograms[waterAnimatedGSP]->loadShaderProgram("gBuffer", shaderTypeVertexFragmentGeometry, { "SKELETAL_ANIMATION 0", blendingQualityMacro, "BUMP_MAPPING 2", "TEXTURE_ANIMATION 1" });
+    shaderPrograms[waterAnimatedGSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[waterAnimatedGSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
+    shaderPrograms[waterAnimatedGSP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
+    shaderPrograms[waterAnimatedGSP]->link();
+    
+    shaderPrograms[terrainGSP]->loadShaderProgram("gBufferTerrain", shaderTypeVertexFragment, { });
+    shaderPrograms[terrainGSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[terrainGSP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
+    shaderPrograms[terrainGSP]->link();
     
     //Shadow Map Generators
     

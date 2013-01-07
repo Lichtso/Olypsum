@@ -10,6 +10,8 @@
 		1118251B14F2553A00F198A7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118251A14F2553A00F198A7 /* Cocoa.framework */; };
 		1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254114F2559600F198A7 /* OpenGL.framework */; };
 		1118254414F2559B00F198A7 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254314F2559B00F198A7 /* OpenAL.framework */; };
+		112672E91699BBFD000BB805 /* Links.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112672E71699BBFD000BB805 /* Links.cpp */; };
+		112672EC1699BCF1000BB805 /* HeightfieldTerrain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112672EA1699BCF0000BB805 /* HeightfieldTerrain.cpp */; };
 		112BF180162AFE8100CF0C0D /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112BF17E162AFE8100CF0C0D /* Object.cpp */; };
 		1130ECBB15BC1CA600203C2E /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1130ECBA15BC1CA600203C2E /* Menu.cpp */; };
 		114A0E6B169064E800D2CE9C /* LevelSaver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 114A0E69169064E800D2CE9C /* LevelSaver.cpp */; };
@@ -75,6 +77,10 @@
 		1118251F14F2553A00F198A7 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1118254114F2559600F198A7 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		1118254314F2559B00F198A7 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
+		112672E71699BBFD000BB805 /* Links.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Links.cpp; sourceTree = "<group>"; };
+		112672E81699BBFD000BB805 /* Links.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Links.h; sourceTree = "<group>"; };
+		112672EA1699BCF0000BB805 /* HeightfieldTerrain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HeightfieldTerrain.cpp; sourceTree = "<group>"; };
+		112672EB1699BCF0000BB805 /* HeightfieldTerrain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HeightfieldTerrain.h; sourceTree = "<group>"; };
 		112BF17E162AFE8100CF0C0D /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Object.cpp; sourceTree = "<group>"; };
 		112BF17F162AFE8100CF0C0D /* Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Object.h; sourceTree = "<group>"; };
 		1130ECBA15BC1CA600203C2E /* Menu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Menu.cpp; sourceTree = "<group>"; };
@@ -277,6 +283,8 @@
 				11648F6D153DEE63004CA74D /* FBO.cpp */,
 				112BF17F162AFE8100CF0C0D /* Object.h */,
 				112BF17E162AFE8100CF0C0D /* Object.cpp */,
+				112672E81699BBFD000BB805 /* Links.h */,
+				112672E71699BBFD000BB805 /* Links.cpp */,
 				11A79B63153C2FE9002B9F0A /* ShaderProgram.h */,
 				11A79B62153C2FE9002B9F0A /* ShaderProgram.cpp */,
 				11A79B23153C2FE9002B9F0A /* Cam.h */,
@@ -285,6 +293,8 @@
 				11A79B5B153C2FE9002B9F0A /* Model.cpp */,
 				11B2626E15E28DF6002C638D /* DisplayObject.h */,
 				11B2626D15E28DF6002C638D /* DisplayObject.cpp */,
+				112672EB1699BCF0000BB805 /* HeightfieldTerrain.h */,
+				112672EA1699BCF0000BB805 /* HeightfieldTerrain.cpp */,
 				118B60601573E2DF004C132E /* Audio.h */,
 				118B60611573E2E8004C132E /* Audio.cpp */,
 				11F1EEB5156FE48B00F7275D /* ParticlesObject.h */,
@@ -489,6 +499,8 @@
 				11DA1F16162DEA18007D7E6C /* LightVolume.cpp in Sources */,
 				118620481650165400A32518 /* ObjectManager.cpp in Sources */,
 				114A0E6B169064E800D2CE9C /* LevelSaver.cpp in Sources */,
+				112672E91699BBFD000BB805 /* Links.cpp in Sources */,
+				112672EC1699BCF1000BB805 /* HeightfieldTerrain.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

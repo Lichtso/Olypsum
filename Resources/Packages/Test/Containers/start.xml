@@ -19,13 +19,17 @@
 		</LightObject>
 		<ParticlesObject particles="50" force="0.0 0.0 0.0">
 			<Translate>0.0 0.0 0.0</Translate>
-			<Texture src="glass.jpg" />
+			<Texture src="flash.png" />
 			<PhysicsBody collisionShape="box0" />
 			<Life min="3.0" max="7.0" />
 			<Size min="0.1" max="0.2" />
 			<SpawnBox min="-0.2 0.0 -0.2" max="0.2 0.0 0.2" />
 			<Velocity min="-0.2 0.3 -0.2" max="0.2 1.2 0.2" />
 		</ParticlesObject>
+		<HeightfieldTerrain size="5.0 2.0 5.0" textureScale="20.0 20.0">
+			<Diffuse src="wallAnim.png" />
+			<HeightsMap src="terrainMap.png" />
+		</HeightfieldTerrain>
 	</Objects>
 	<Links>
 		<PhysicLink>

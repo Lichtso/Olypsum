@@ -309,6 +309,8 @@ void updateVideoMode() {
         NSDictionary* opts = @{ @"NSFullScreenModeApplicationPresentationOptions": @(0) };
         [view enterFullScreenMode:[NSScreen mainScreen] withOptions:opts];
         [NSApp setPresentationOptions:NSApplicationPresentationHideDock | NSApplicationPresentationAutoHideMenuBar];
+        [window becomeKeyWindow];
+        
         NSRect rect = [window convertRectToScreen:NSMakeRect(0, 0, 1, 1)];
         mouseTranslation[0] = -rect.origin.x;
         mouseTranslation[1] = -rect.origin.y;

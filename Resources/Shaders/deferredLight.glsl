@@ -8,7 +8,9 @@ void main() {
 
 #separator
 
+#if SHADOWS_ACTIVE == 3
 #extension GL_EXT_gpu_shader4 : require
+#endif
 #extension GL_ARB_texture_rectangle : enable
 
 uniform vec3 camPos;

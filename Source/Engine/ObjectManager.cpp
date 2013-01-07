@@ -270,7 +270,7 @@ void ObjectManager::illuminate() {
     glDisable(GL_DEPTH_TEST);
 }
 
-void ObjectManager::drawFrame() {//return;
+void ObjectManager::drawFrame() {
     mainFBO.renderInDeferredBuffers(false);
     mainCam->use();
     currentCam->updateAudioListener();

@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#import <BulletCollision/btBulletCollisionCommon.h>
 #import <BulletDynamics/btBulletDynamicsCommon.h>
 #import <BulletSoftBody/btSoftBody.h>
 #import <math.h>
@@ -13,8 +14,9 @@
 #import <sys/stat.h>
 #import <map>
 #import <set>
-#import <string>
 #import <vector>
+#import <string>
+#import <sstream>
 
 #ifndef Utilities_h
 #define Utilities_h

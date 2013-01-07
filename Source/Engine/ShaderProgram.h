@@ -7,7 +7,7 @@
 //
 
 #import "Matrix4.h"
-#import "Object.h"
+#import "Links.h"
 
 #ifndef ShaderProgram_h
 #define ShaderProgram_h
@@ -89,7 +89,7 @@ class ShaderProgram {
 };
 
 extern btTransform modelMat;
-extern ShaderProgram *shaderPrograms[45], *currentShaderProgram;
+extern ShaderProgram *shaderPrograms[46], *currentShaderProgram;
 extern float screenBlurFactor, globalVolume, musicVolume;
 extern bool edgeSmoothEnabled, fullScreenEnabled, cubemapsEnabled;
 extern unsigned char depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, blendingQuality, particleCalcTarget;
@@ -118,33 +118,34 @@ enum ShaderProgramNames {
     skeletalBumpGlassGSP = 18,
     solidAnimatedBumpGlassGSP = 19,
     skeletalAnimatedBumpGlassGSP = 20,
-    waterAnimatedSP = 21,
+    waterAnimatedGSP = 21,
+    terrainGSP = 22,
     //Shadow Map Generators
-    solidShadowSP = 22,
-    skeletalShadowSP = 23,
-    solidAnimatedShadowSP = 24,
-    skeletalAnimatedShadowSP = 25,
-    solidParabolidShadowSP = 26,
-    skeletalParabolidShadowSP = 27,
-    solidAnimatedParabolidShadowSP = 28,
-    skeletalAnimatedParabolidShadowSP = 29,
+    solidShadowSP = 23,
+    skeletalShadowSP = 24,
+    solidAnimatedShadowSP = 25,
+    skeletalAnimatedShadowSP = 26,
+    solidParabolidShadowSP = 27,
+    skeletalParabolidShadowSP = 28,
+    solidAnimatedParabolidShadowSP = 29,
+    skeletalAnimatedParabolidShadowSP = 30,
     //Illumination Shaders
-    directionalLightSP = 30,
-    directionalShadowLightSP = 31,
-    spotLightSP = 32,
-    spotShadowLightSP = 33,
-    positionalLightSP = 34,
-    positionalShadowLightSP = 35,
-    positionalShadowDualLightSP = 36,
+    directionalLightSP = 31,
+    directionalShadowLightSP = 32,
+    spotLightSP = 33,
+    spotShadowLightSP = 34,
+    positionalLightSP = 35,
+    positionalShadowLightSP = 36,
+    positionalShadowDualLightSP = 37,
     //Post Effect Shaders
-    ssaoSP = 37,
-    deferredCombineSP = 38,
-    deferredCombineTransparentSP = 39,
-    edgeSmoothSP = 40,
-    depthOfFieldSP = 41,
-    particleCalculateSP = 42,
-    particleDrawSP = 43,
-    particleDrawAnimatedSP = 44
+    ssaoSP = 38,
+    deferredCombineSP = 39,
+    deferredCombineTransparentSP = 40,
+    edgeSmoothSP = 41,
+    depthOfFieldSP = 42,
+    particleCalculateSP = 43,
+    particleDrawSP = 44,
+    particleDrawAnimatedSP = 45
 };
 
 //! Compiles all shader programs which are not influenced by graphic options

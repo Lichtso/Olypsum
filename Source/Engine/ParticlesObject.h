@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "DisplayObject.h"
+#import "HeightfieldTerrain.h"
 
 #ifndef ParticlesObject_h
 #define ParticlesObject_h

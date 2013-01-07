@@ -81,7 +81,7 @@ bool LevelManager::newGame(std::string packageName, std::string name) {
         log(error_log, "Could not create new game, because the name already exists.");
         return false;
     }
-    createDir(gameDataDir+"Saves/"+saveGameName+"/Containers/");
+    createDir(gameDataDir+"Saves/"+name+"/Containers/");
     
     rapidxml::xml_document<xmlUsedCharType> doc;
     rapidxml::xml_node<xmlUsedCharType>* statusNode = doc.allocate_node(rapidxml::node_element);

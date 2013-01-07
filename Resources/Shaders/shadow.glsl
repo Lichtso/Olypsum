@@ -42,11 +42,14 @@ void main() {
 
 #separator
 
+#extension GL_EXT_texture_array : require
+
 #if TEXTURE_ANIMATION == 0
 uniform sampler2D sampler0;
 #else
-uniform float animationTime;
-uniform sampler3D sampler0;
+uniform vec2 texCoordAnimF;
+uniform vec2 texCoordAnimZ;
+uniform sampler2DArray sampler0;
 #endif
 uniform float paraboloidRange;
 uniform float discardDensity;
@@ -64,7 +67,7 @@ void main() {
     #if TEXTURE_ANIMATION == 0 //2D texture
     float alpha = texture2D(sampler0, vTexCoord).a;
     #else //3D texture
-    float alpha = texture3D(sampler0, vec3(vTexCoord, animationTime)).a;
+    float alpha = texture2DArray(sampler0, vec3(vTexCoord.xy, texCoordAnimZ.x+0.5)).a;
     #endif
     
     #if PARABOLID == 1

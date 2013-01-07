@@ -56,6 +56,7 @@ void main() {
 
 #separator
 
+#extension GL_EXT_texture_array : require
 #define M_PI 3.14159265358979323846
 
 varying vec3 vPosition;
@@ -69,8 +70,9 @@ varying vec3 vBitangent;
 #if TEXTURE_ANIMATION == 0
 uniform sampler2D sampler0;
 #else
-uniform float animationTime;
-uniform sampler3D sampler0;
+uniform vec2 texCoordAnimF;
+uniform vec2 texCoordAnimZ;
+uniform sampler2DArray sampler0;
 #endif
 uniform sampler2D sampler1;
 uniform sampler2D sampler2;
@@ -95,7 +97,8 @@ void setColor(vec2 texCoord) {
     #if TEXTURE_ANIMATION == 0 //2D texture
     gl_FragData[0] = texture2D(sampler0, texCoord); //Color
     #else //3D texture
-    gl_FragData[0] = texture3D(sampler0, vec3(texCoord, animationTime)); //Color
+    gl_FragData[0] = texture2DArray(sampler0, vec3(texCoord.xy, texCoordAnimZ.x))*texCoordAnimF.x; //Color
+    gl_FragData[0] += texture2DArray(sampler0, vec3(texCoord.xy, texCoordAnimZ.y))*texCoordAnimF.y;
     #endif
 }
 

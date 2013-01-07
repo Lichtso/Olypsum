@@ -17,9 +17,9 @@
 Mesh::Mesh() {
     elementsCount = 0;
     vbo = ibo = 0;
-    transparent = false;
     postions = texcoords = normals = weightJoints = -1;
-    diffuse = effectMap = heightMap = NULL;
+    material.transparent = false;
+    material.diffuse = material.effectMap = material.heightMap = NULL;
 }
 
 Mesh::~Mesh() {
@@ -37,16 +37,14 @@ void Mesh::draw(ModelObject* object) {
         return;
     }
     
-    if(diffuse)
-        diffuse->use(0);
-    if(effectMap)
-        effectMap->use(1);
+    if(material.effectMap)
+        material.effectMap->use(1);
     else{
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
-    if(heightMap)
-        heightMap->use(2);
+    if(material.heightMap)
+        material.heightMap->use(2);
     else{
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -55,7 +53,7 @@ void Mesh::draw(ModelObject* object) {
     if(objectManager.currentShadowLight) {
         unsigned int shaderProgram = solidShadowSP;
         if(weightJoints >= 0) shaderProgram += 1;
-        if(diffuse && diffuse->depth > 1) shaderProgram += 2;
+        if(material.diffuse && material.diffuse->depth > 1) shaderProgram += 2;
         if(dynamic_cast<PositionalLight*>(objectManager.currentShadowLight) && !cubemapsEnabled) shaderProgram += 4;
         shaderPrograms[shaderProgram]->use();
     }
@@ -67,12 +65,12 @@ void Mesh::draw(ModelObject* object) {
     if(normals >= 0) byteStride += 3;
     if(weightJoints >= 0) byteStride += jointsPerVertex*2;
     byteStride *= sizeof(float);
-    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, byteStride, (float*)(postions*sizeof(float)));
-    if(texcoords >= 0) currentShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, byteStride, (float*)(texcoords*sizeof(float)));
-    if(normals >= 0) currentShaderProgram->setAttribute(NORMAL_ATTRIBUTE, 3, byteStride, (float*)(normals*sizeof(float)));
+    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, byteStride, reinterpret_cast<float*>(postions*sizeof(float)));
+    if(texcoords >= 0) currentShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, byteStride, reinterpret_cast<float*>(texcoords*sizeof(float)));
+    if(normals >= 0) currentShaderProgram->setAttribute(NORMAL_ATTRIBUTE, 3, byteStride, reinterpret_cast<float*>(normals*sizeof(float)));
     if(weightJoints >= 0) {
-        currentShaderProgram->setAttribute(WEIGHT_ATTRIBUTE, jointsPerVertex, byteStride, (float*)(weightJoints*sizeof(float)));
-        currentShaderProgram->setAttribute(JOINT_ATTRIBUTE, jointsPerVertex, byteStride, (float*)((weightJoints+jointsPerVertex)*sizeof(float)));
+        currentShaderProgram->setAttribute(WEIGHT_ATTRIBUTE, jointsPerVertex, byteStride, reinterpret_cast<float*>(weightJoints*sizeof(float)));
+        currentShaderProgram->setAttribute(JOINT_ATTRIBUTE, jointsPerVertex, byteStride, reinterpret_cast<float*>((weightJoints+jointsPerVertex)*sizeof(float)));
     }
     
     if(ibo) {
@@ -96,11 +94,6 @@ struct VertexReference {
     XMLValueArray<float>* source;
     unsigned int offset;
     char* name;
-};
-
-struct Material {
-    bool transparent;
-    std::string diffuseURL, effectMapURL, heightMapURL;
 };
 //! @endcond
 
@@ -130,6 +123,36 @@ static Bone* readBone(Skeleton& skeleton, btTransform& parentTrans, bool isRoot,
     }
     
     return bone;
+}
+
+static std::vector<Texture::AnimationFrame> readTextureFrames(rapidxml::xml_node<xmlUsedCharType>* node) {
+    std::vector<Texture::AnimationFrame> frameVec;
+    if(!node || !node->first_node()) return frameVec;
+    node = node->first_node("frame");
+    while(node) {
+        Texture::AnimationFrame frame;
+        rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("duration");
+        if(!attribute) {
+            log(error_log, "Tried to construct 3D Texture Frame without \"duration\"-attribute.");
+            return frameVec;
+        }
+        sscanf(attribute->value(), "%f", &frame.duration);
+        attribute = node->first_attribute("accBegin");
+        if(!attribute) {
+            log(error_log, "Tried to construct 3D Texture Frame without \"accBegin\"-attribute.");
+            return frameVec;
+        }
+        sscanf(attribute->value(), "%f", &frame.accBegin);
+        attribute = node->first_attribute("accEnd");
+        if(!attribute) {
+            log(error_log, "Tried to construct 3D Texture Frame without \"accEnd\"-attribute.");
+            return frameVec;
+        }
+        sscanf(attribute->value(), "%f", &frame.accEnd);
+        frameVec.push_back(frame);
+        node = node->next_sibling("frame");
+    }
+    return frameVec;
 }
 
 static std::string readTextureURL(std::map<std::string, std::string> samplerURLs, rapidxml::xml_node<xmlUsedCharType>* dataNode) {
@@ -174,7 +197,7 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
     rapidxml::xml_node<xmlUsedCharType> *collada, *library, *geometry, *meshNode, *source, *dataNode;
     rapidxml::xml_attribute<xmlUsedCharType> *dataAttribute;
     std::map<std::string, std::string> textureURLs;
-    std::map<std::string, Material> materials;
+    std::map<std::string, Mesh::Material> materials;
     XMLValueArray<float> skinData;
     char upAxis = AXIS_Y, *id;
     btTransform modelTransformMat;
@@ -228,7 +251,7 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
             dataAttribute = geometry->first_attribute("id");
             if(!dataAttribute) goto endParsingXML;
             id = dataAttribute->value();
-            Material material;
+            Mesh::Material material;
             material.transparent = false;
             meshNode = geometry->first_node("profile_COMMON");
             if(!meshNode) goto endParsingXML;
@@ -281,12 +304,6 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
                 while(source->first_node("technique"))
                     source = source->first_node("technique");
                 
-                if((dataNode = source->first_node("diffuse")))
-                    material.diffuseURL = readTextureURL(samplerURLs, dataNode);
-                if((dataNode = source->first_node("specular")))
-                    material.effectMapURL = readTextureURL(samplerURLs, dataNode);
-                if((dataNode = source->first_node("bump")))
-                    material.heightMapURL = readTextureURL(samplerURLs, dataNode);
                 if((dataNode = source->first_node("index_of_refraction"))) {
                     dataNode = dataNode->first_node();
                     if(dataNode) {
@@ -295,6 +312,29 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
                         if(value > 1.0) material.transparent = true;
                     }
                 }
+                if((dataNode = source->first_node("diffuse"))) {
+                    std::string url = readTextureURL(samplerURLs, dataNode);
+                    if(url.size() > 0) {
+                        material.diffuse = filePackage->getResource<Texture>(url);
+                        material.diffuse->setAnimationFrames(readTextureFrames(dataNode->first_node("texture")));
+                        material.diffuse->uploadTexture(GL_TEXTURE_2D_ARRAY_EXT, (material.transparent) ? GL_COMPRESSED_RGBA : GL_COMPRESSED_RGB);
+                    }
+                }
+                if((dataNode = source->first_node("specular"))) {
+                    std::string url = readTextureURL(samplerURLs, dataNode);
+                    if(url.size() > 0) {
+                        material.effectMap = filePackage->getResource<Texture>(url);
+                        material.effectMap->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
+                    }
+                }
+                if((dataNode = source->first_node("bump"))) {
+                    std::string url = readTextureURL(samplerURLs, dataNode);
+                    if(url.size() > 0) {
+                        material.heightMap = filePackage->getResource<Texture>(url);
+                        material.heightMap->uploadNormalMap(4.0);
+                    }
+                }
+                
                 source = source->next_sibling();
             }
             materials[id] = material;
@@ -313,7 +353,7 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
             if(!meshNode) goto endParsingXML;
             dataAttribute = meshNode->first_attribute("url");
             if(!dataAttribute) goto endParsingXML;
-            std::map<std::string, Material>::iterator iterator = materials.find(dataAttribute->value()+1);
+            std::map<std::string, Mesh::Material>::iterator iterator = materials.find(dataAttribute->value()+1);
             if(iterator == materials.end()) {
                 log(error_log, std::string("No material by id ")+(dataAttribute->value()+1)+" found.");
                 goto endParsingXML;
@@ -345,7 +385,7 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
                         id = dataAttribute->value();
                         dataAttribute = dataNode->first_attribute("target");
                         if(!dataAttribute) goto endParsingXML;
-                        std::map<std::string, Material>::iterator iterator = materials.find(dataAttribute->value()+1);
+                        std::map<std::string, Mesh::Material>::iterator iterator = materials.find(dataAttribute->value()+1);
                         if(iterator == materials.end()) {
                             log(error_log, std::string("No material by id ")+(dataAttribute->value()+1)+" found.");
                             goto endParsingXML;
@@ -602,24 +642,12 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
             //Set material
             dataAttribute = source->first_attribute("material");
             if(!dataAttribute) goto endParsingXML;
-            std::map<std::string, Material>::iterator material = materials.find(dataAttribute->value());
+            std::map<std::string, Mesh::Material>::iterator material = materials.find(dataAttribute->value());
             if(material == materials.end()) {
                 log(error_log, std::string("No material by id ")+dataAttribute->value()+" found.");
                 goto endParsingXML;
             }
-            mesh->transparent = material->second.transparent;
-            if(material->second.diffuseURL.size()) {
-                mesh->diffuse = filePackage->getResource<Texture>(material->second.diffuseURL);
-                mesh->diffuse->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGBA);
-            }
-            if(material->second.effectMapURL.size()) {
-                mesh->effectMap = filePackage->getResource<Texture>(material->second.effectMapURL);
-                mesh->effectMap->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
-            }
-            if(material->second.heightMapURL.size()) {
-                mesh->heightMap = filePackage->getResource<Texture>(material->second.heightMapURL);
-                mesh->heightMap->uploadNormalMap(4.0);
-            }
+            mesh->material = material->second;
             
             unsigned int dataIndex, valueIndex, indexCount = 0, strideIndex = 0;
             std::map<std::string, VertexReference> vertexReferences;
@@ -811,7 +839,7 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
 
 void Model::draw(ModelObject* object) {
     for(unsigned int i = 0; i < meshes.size(); i ++) {
-        if(blendingQuality > 0 && !objectManager.currentShadowLight && meshes[i]->transparent) {
+        if(blendingQuality > 0 && !objectManager.currentShadowLight && meshes[i]->material.transparent) {
             AccumulatedMesh* aMesh = new AccumulatedMesh();
             aMesh->object = object;
             aMesh->mesh = meshes[i];

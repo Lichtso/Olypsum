@@ -18,14 +18,17 @@ class Mesh {
     public:
     GLuint vbo, ibo; //!< VertexBufferObject and IndexBufferObject used for OpenGL
     unsigned int elementsCount; //!< The count of triangles * 3 or the count of indecies in this Model
-    bool transparent; //!< Is this Model transparent
     int postions, //!< The count of postions in this Model
         texcoords, //!< The count of texcoords in this Model
         normals, //!< The count of normals in this Model
         weightJoints; //!< The count of weightJoints in this Model
-    std::shared_ptr<Texture> diffuse, //!< The diffuse texture
-                             effectMap, //!< The specular texture (optional)
-                             heightMap; //!< The highmap (optional)
+    //! Surface material of a Mesh used for OpenGL
+    struct Material {
+        bool transparent; //!< Is this Model transparent
+        std::shared_ptr<Texture> diffuse, //!< The diffuse texture
+                                 effectMap, //!< The specular texture (optional)
+                                 heightMap; //!< The highmap (optional)
+    } material;
     Mesh();
     ~Mesh();
     /*! Used by the engine to render this Mesh

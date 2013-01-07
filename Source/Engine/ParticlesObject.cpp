@@ -132,13 +132,8 @@ ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, Leve
     if(!readBoundsNode(node, "SpawnBox", posMin, posMax)) return;
     if(!readBoundsNode(node, "Velocity", dirMin, dirMax)) return;
     
-    rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Texture");
-    if(!parameterNode) {
-        log(error_log, "Tried to construct ParticlesObject without \"Texture\"-node.");
-        return;
-    }
-    texture = fileManager.initResource<Texture>(parameterNode);
-    texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
+    texture = fileManager.initResource<Texture>(node->first_node("Texture"));
+    texture->uploadTexture(GL_TEXTURE_2D_ARRAY_EXT, GL_COMPRESSED_RGB);
 }
 
 ParticlesObject::~ParticlesObject() {
@@ -236,15 +231,14 @@ bool ParticlesObject::gameTick() {
 
 void ParticlesObject::draw() {
     modelMat = getTransformation();
-    if(texture) {
-        texture->use(0);
-        if(texture->depth > 1)
-            shaderPrograms[particleDrawAnimatedSP]->use();
-        else
-            shaderPrograms[particleDrawSP]->use();
-    }
+    if(texture->depth > 1)
+        shaderPrograms[particleDrawAnimatedSP]->use();
+    else
+        shaderPrograms[particleDrawSP]->use();
+    texture->use(0);
     
-    currentShaderProgram->setUniformF("lifeMin", 5.0/lifeMin);
+    currentShaderProgram->setUniformF("lifeInvMin", 5.0/lifeMin);
+    currentShaderProgram->setUniformF("lifeInvMax", (float)texture->depth/lifeMax);
     if(transformAligned) {
         btMatrix3x3 viewNormalMat = getTransformation().getBasis();
         currentShaderProgram->setUniformMatrix3("viewNormalMat", &viewNormalMat);
@@ -294,11 +288,11 @@ rapidxml::xml_node<xmlUsedCharType>* ParticlesObject::write(rapidxml::xml_docume
         node->append_attribute(attribute);
     }
     
-    node->append_node(fileManager.writeResource(doc, "Texture", texture));
     node->append_node(writeBoundsNode(doc, "Life", lifeMin, lifeMax));
     node->append_node(writeBoundsNode(doc, "Size", sizeMin, sizeMax));
     node->append_node(writeBoundsNode(doc, "SpawnBox", posMin, posMax));
     node->append_node(writeBoundsNode(doc, "Velocity", dirMin, dirMax));
+    node->append_node(fileManager.writeResource(doc, "Texture", texture));
     
     return node;
 }

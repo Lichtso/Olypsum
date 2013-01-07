@@ -19,6 +19,11 @@ void GraphicObject::remove() {
 
 
 
+ModelObject::~ModelObject() {
+    if(skeletonPose) delete [] skeletonPose;
+    if(textureAnimation) delete [] textureAnimation;
+}
+
 void ModelObject::setupBones(BaseObject* object, Bone* bone) {
     LinkInitializer initializer;
     initializer.object[0] = object;
@@ -116,6 +121,10 @@ bool ModelObject::gameTick() {
         Bone* rootBone = model->skeleton->rootBone;
         updateSkeletonPose(links[rootBone->name]->getOther(this), rootBone);
     }
+    unsigned int animatedMeshes = 0;
+    for(unsigned int i = 0; i < model->meshes.size(); i ++)
+        if(model->meshes[i]->material.diffuse->depth > 1)
+            textureAnimation[animatedMeshes ++] += animationFactor;
     return true;
 }
 
@@ -138,10 +147,24 @@ void ModelObject::prepareShaderProgram(Mesh* mesh) {
     if(!objectManager.currentShadowLight) {
         unsigned int shaderProgram = solidGSP;
         if(model->skeleton) shaderProgram += 1;
-        if(mesh->diffuse && mesh->diffuse->depth > 1) shaderProgram += 2;
-        if(mesh->heightMap) shaderProgram += 4;
-        if(mesh->transparent && blendingQuality > 0) shaderProgram += 8;
+        if(mesh->material.diffuse && mesh->material.diffuse->depth > 1) shaderProgram += 2;
+        if(mesh->material.heightMap) shaderProgram += 4;
+        if(mesh->material.transparent && blendingQuality > 0) shaderProgram += 8;
         shaderPrograms[shaderProgram]->use();
+    }
+    
+    if(mesh->material.diffuse) {
+        if(mesh->material.diffuse->depth > 1) {
+            unsigned int meshIndex = 0;
+            for(unsigned int i = 0; i < model->meshes.size(); i ++) {
+                if(model->meshes[i] == mesh)
+                    break;
+                if(model->meshes[i]->material.diffuse->depth > 1)
+                    meshIndex ++;
+            }
+            mesh->material.diffuse->use(0, textureAnimation[meshIndex]);
+        }else
+            mesh->material.diffuse->use(0);
     }
     
     currentShaderProgram->setUniformF("discardDensity", 1.0);
@@ -157,6 +180,24 @@ void ModelObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
         return;
     }
     model = fileManager.initResource<Model>(parameterNode);
+    
+    unsigned int animatedMeshes = 0;
+    for(unsigned int i = 0; i < model->meshes.size(); i ++)
+        if(model->meshes[i]->material.diffuse->depth > 1)
+            animatedMeshes ++;
+    if(animatedMeshes > 0)
+        textureAnimation = new float[animatedMeshes];
+    parameterNode = node->first_node("TextureAnimation");
+    if(parameterNode) {
+        XMLValueArray<float> animationTime;
+        animationTime.readString(parameterNode->value(), "%f");
+        if(animationTime.count != animatedMeshes) {
+            log(error_log, "Tried to construct ModelObject with invalid \"TextureAnimation\"-node.");
+            return;
+        }
+        memcpy(textureAnimation, animationTime.data, animationTime.count*sizeof(float));
+    }
+    
     if(model->skeleton) {
         skeletonPose = new btTransform[model->skeleton->bones.size()];
         setupBones(this, model->skeleton->rootBone);
@@ -189,6 +230,19 @@ rapidxml::xml_node<xmlUsedCharType>* ModelObject::write(rapidxml::xml_document<x
         return node;
     }
     node->append_node(fileManager.writeResource(doc, "Model", model));
+    if(textureAnimation) {
+        rapidxml::xml_node<xmlUsedCharType>* textureAnimationNode = doc.allocate_node(rapidxml::node_element);
+        textureAnimationNode->name("TextureAnimation");
+        std::ostringstream data;
+        unsigned int animatedMeshes = 0;
+        for(unsigned int i = 0; i < model->meshes.size(); i ++)
+            if(model->meshes[i]->material.diffuse->depth > 1) {
+                if(animatedMeshes > 0) data << " ";
+                data << textureAnimation[animatedMeshes ++];
+            }
+        textureAnimationNode->value(doc.allocate_string(data.str().c_str()));
+        node->append_node(textureAnimationNode);
+    }
     if(skeletonPose) {
         rapidxml::xml_node<xmlUsedCharType>* skeletonPoseNode = doc.allocate_node(rapidxml::node_element);
         skeletonPoseNode->name("SkeletonPose");
@@ -378,7 +432,7 @@ bool WaterObject::gameTick() {
 }
 
 void WaterObject::prepareShaderProgram(Mesh* mesh) {
-    shaderPrograms[waterAnimatedSP]->use();
+    shaderPrograms[waterAnimatedGSP]->use();
     char str[64];
     for(unsigned int i = 0; i < MAX_WAVES; i ++) {
         bool active = (i < waves.size());

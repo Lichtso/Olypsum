@@ -1,5 +1,5 @@
 HightMap terrains
-HightMap terrains: 3d Textures
+Implement btSoftBody
 Implement more PhysicLink types
 Anisotropic filtering
 Use C++11 Multithreading
@@ -13,4 +13,3 @@ Enviornment maping
 OpenAL Sound Engine: Add track queue
 
 Bugs:
-Finder start on mac

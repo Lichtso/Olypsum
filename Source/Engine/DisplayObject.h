@@ -44,14 +44,16 @@ class GraphicObject : public DisplayObject {
  */
 class ModelObject : public GraphicObject {
     btTransform* skeletonPose;
+    float* textureAnimation;
     void setupBones(BaseObject* object, Bone* bone);
     void writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver,
                     rapidxml::xml_node<xmlUsedCharType>* node, BoneObject *object);
     void updateSkeletonPose(BaseObject* object, Bone* bone);
     void drawBonePose(BaseObject* object, Bone* bone, float axesSize, float linesSize, float textSize);
     protected:
-    ModelObject() :skeletonPose(NULL) { };
+    ModelObject() :skeletonPose(NULL), textureAnimation(NULL) { };
     public:
+    ~ModelObject();
     std::shared_ptr<Model> model;
     bool gameTick();
     void draw();

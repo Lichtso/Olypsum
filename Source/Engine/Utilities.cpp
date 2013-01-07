@@ -70,7 +70,7 @@ bool removeDir(std::string path) {
             if(file->d_namlen < 3 && strncmp(file->d_name, "..", file->d_namlen) == 0) continue;
             std::string filePath = path+std::string(file->d_name, file->d_namlen);
             if(file->d_type == DT_DIR)
-                removeDir(filePath);
+                removeDir(filePath+'/');
             else
                 remove(filePath.c_str());
         }
