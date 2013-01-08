@@ -314,6 +314,33 @@ RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
         vecData.readString(parameterNode->value(), "%f");
         body->setLinearVelocity(vecData.getVector3());
     }
+    parameterNode = node->first_node("AngularFactor");
+    if(parameterNode) {
+        vecData.readString(parameterNode->value(), "%f");
+        body->setAngularFactor(vecData.getVector3());
+    }
+    parameterNode = node->first_node("LinearFactor");
+    if(parameterNode) {
+        vecData.readString(parameterNode->value(), "%f");
+        body->setLinearFactor(vecData.getVector3());
+    }
+    parameterNode = node->first_node("Damping");
+    if(parameterNode) {
+        float linear, angular;
+        attribute = parameterNode->first_attribute("linear");
+        if(!attribute) {
+            log(error_log, "Tried to construct RigidObject-Damping without \"linear\"-attribute.");
+            return;
+        }
+        sscanf(attribute->value(), "%f", &linear);
+        attribute = parameterNode->first_attribute("angular");
+        if(!attribute) {
+            log(error_log, "Tried to construct RigidObject-Damping without \"angular\"-attribute.");
+            return;
+        }
+        sscanf(attribute->value(), "%f", &angular);
+        body->setDamping(linear, angular);
+    }
 }
 
 RigidObject::~RigidObject() {
@@ -369,21 +396,34 @@ rapidxml::xml_node<xmlUsedCharType>* RigidObject::write(rapidxml::xml_document<x
     node->name("RigidObject");
     btRigidBody* body = getBody();
     
-    rapidxml::xml_node<xmlUsedCharType>* tmpNode;
-    btVector3 velocity = body->getAngularVelocity();
-    if(velocity.length() > 0.0) {
-        tmpNode = doc.allocate_node(rapidxml::node_element);
-        tmpNode->name("AngularVelocity");
-        tmpNode->value(doc.allocate_string(stringOf(velocity).c_str()));
-        node->append_node(tmpNode);
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode;
+    btVector3 vector = body->getAngularVelocity();
+    if(vector.length() > 0.0) {
+        parameterNode = doc.allocate_node(rapidxml::node_element);
+        parameterNode->name("AngularVelocity");
+        parameterNode->value(doc.allocate_string(stringOf(vector).c_str()));
+        node->append_node(parameterNode);
     }
-    
-    velocity = body->getLinearVelocity();
-    if(velocity.length() > 0.0) {
-        tmpNode = doc.allocate_node(rapidxml::node_element);
-        tmpNode->name("LinearVelocity");
-        tmpNode->value(doc.allocate_string(stringOf(velocity).c_str()));
-        node->append_node(tmpNode);
+    vector = body->getLinearVelocity();
+    if(vector.length() > 0.0) {
+        parameterNode = doc.allocate_node(rapidxml::node_element);
+        parameterNode->name("LinearVelocity");
+        parameterNode->value(doc.allocate_string(stringOf(vector).c_str()));
+        node->append_node(parameterNode);
+    }
+    vector = body->getAngularFactor();
+    if(vector != btVector3(1, 1, 1)) {
+        parameterNode = doc.allocate_node(rapidxml::node_element);
+        parameterNode->name("AngularFactor");
+        parameterNode->value(doc.allocate_string(stringOf(vector).c_str()));
+        node->append_node(parameterNode);
+    }
+    vector = body->getLinearFactor();
+    if(vector != btVector3(1, 1, 1)) {
+        parameterNode = doc.allocate_node(rapidxml::node_element);
+        parameterNode->name("LinearFactor");
+        parameterNode->value(doc.allocate_string(stringOf(vector).c_str()));
+        node->append_node(parameterNode);
     }
     
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
@@ -393,6 +433,20 @@ rapidxml::xml_node<xmlUsedCharType>* RigidObject::write(rapidxml::xml_document<x
     else
         attribute->value(doc.allocate_string(stringOf(1.0f/body->getInvMass()).c_str()));
     node->first_node("PhysicsBody")->append_attribute(attribute);
+    
+    if(body->getLinearDamping() != 0.0 || body->getAngularDamping() != 0.0) {
+        parameterNode = doc.allocate_node(rapidxml::node_element);
+        parameterNode->name("Damping");
+        node->append_node(parameterNode);
+        attribute = doc.allocate_attribute();
+        attribute->name("linear");
+        attribute->value(doc.allocate_string(stringOf(body->getLinearDamping()).c_str()));
+        parameterNode->append_attribute(attribute);
+        attribute = doc.allocate_attribute();
+        attribute->name("angular");
+        attribute->value(doc.allocate_string(stringOf(body->getAngularDamping()).c_str()));
+        parameterNode->append_attribute(attribute);
+    }
     
     return node;
 }

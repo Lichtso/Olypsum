@@ -153,19 +153,63 @@ PhysicLink::PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
         
         constraint = new btGearConstraint(*a->getBody(), *b->getBody(), axisA, axisB, ratio);
     }else if(strcmp(attribute->value(), "hinge") == 0) {
-        rapidxml::xml_node<xmlUsedCharType>* frameNode = constraintNode->first_node("Frame");
-        if(!frameNode) {
+        rapidxml::xml_node<xmlUsedCharType>* parameterNode = constraintNode->first_node("Frame");
+        if(!parameterNode) {
             log(error_log, "Tried to construct Hinge-PhysicLink without first \"Frame\"-node.");
             return;
         }
-        btTransform frameA = readTransformationXML(frameNode);
-        frameNode = frameNode->next_sibling("Frame");
-        if(!frameNode) {
+        btTransform frameA = readTransformationXML(parameterNode);
+        parameterNode = parameterNode->next_sibling("Frame");
+        if(!parameterNode) {
             log(error_log, "Tried to construct Hinge-PhysicLink without second \"Frame\"-node.");
             return;
         }
-        btTransform frameB = readTransformationXML(frameNode);
-        constraint = new btHingeConstraint(*a->getBody(), *b->getBody(), frameA, frameB);
+        btTransform frameB = readTransformationXML(parameterNode);
+        btHingeConstraint* constraint = new btHingeConstraint(*a->getBody(), *b->getBody(), frameA, frameB);
+        
+        parameterNode = constraintNode->first_node("Limit");
+        if(parameterNode) {
+            float low, high;
+            attribute = parameterNode->first_attribute("low");
+            if(!attribute) {
+                log(error_log, "Tried to construct Hinge-PhysicLink-Limit without \"low\"-attribute.");
+                return;
+            }
+            sscanf(attribute->value(), "%f", &low);
+            attribute = parameterNode->first_attribute("high");
+            if(!attribute) {
+                log(error_log, "Tried to construct Hinge-PhysicLink-Limit without \"high\"-attribute.");
+                return;
+            }
+            sscanf(attribute->value(), "%f", &high);
+            constraint->setLimit(low, high);
+        }
+        
+        parameterNode = constraintNode->first_node("Motor");
+        if(parameterNode) {
+            attribute = parameterNode->first_attribute("enabled");
+            if(!attribute) {
+                log(error_log, "Tried to construct Hinge-PhysicLink-Limit without \"enabled\"-attribute.");
+                return;
+            }
+            bool enabled = (strcmp(attribute->value(), "true") == 0);
+            float velocity, impulse;
+            attribute = parameterNode->first_attribute("velocity");
+            if(!attribute) {
+                log(error_log, "Tried to construct Hinge-PhysicLink-Limit without \"velocity\"-attribute.");
+                return;
+            }
+            sscanf(attribute->value(), "%f", &velocity);
+            attribute = parameterNode->first_attribute("impulse");
+            if(!attribute) {
+                log(error_log, "Tried to construct Hinge-PhysicLink-Limit without \"impulse\"-attribute.");
+                return;
+            }
+            sscanf(attribute->value(), "%f", &impulse);
+            constraint->enableAngularMotor(enabled, velocity, impulse);
+        }
+        
+        this->constraint = constraint;
     }else{
         log(error_log, std::string("Tried to construct PhysicLink with invalid \"type\"-attribute: ")+attribute->value()+'.');
         return;
@@ -227,16 +271,48 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
         case HINGE_CONSTRAINT_TYPE: {
             attribute->value("hinge");
             btHingeConstraint* hingeConstraint = static_cast<btHingeConstraint*>(constraint);
-            rapidxml::xml_node<xmlUsedCharType>* frameNode = doc.allocate_node(rapidxml::node_element);
-            frameNode->name("Frame");
+            rapidxml::xml_node<xmlUsedCharType>* parameterNode = doc.allocate_node(rapidxml::node_element);
+            parameterNode->name("Frame");
             btTransform transform = hingeConstraint->getFrameOffsetA();
-            frameNode->append_node(writeTransformationXML(doc, transform));
-            constraintNode->append_node(frameNode);
-            frameNode = doc.allocate_node(rapidxml::node_element);
-            frameNode->name("Frame");
+            parameterNode->append_node(writeTransformationXML(doc, transform));
+            constraintNode->append_node(parameterNode);
+            parameterNode = doc.allocate_node(rapidxml::node_element);
+            parameterNode->name("Frame");
             transform = hingeConstraint->getFrameOffsetB();
-            frameNode->append_node(writeTransformationXML(doc, transform));
-            constraintNode->append_node(frameNode);
+            parameterNode->append_node(writeTransformationXML(doc, transform));
+            constraintNode->append_node(parameterNode);
+            if(hingeConstraint->getLowerLimit() != 1.0 || hingeConstraint->getUpperLimit() != -1.0) {
+                parameterNode = doc.allocate_node(rapidxml::node_element);
+                parameterNode->name("Limit");
+                constraintNode->append_node(parameterNode);
+                attribute = doc.allocate_attribute();
+                attribute->name("low");
+                attribute->value(doc.allocate_string(stringOf(hingeConstraint->getLowerLimit()).c_str()));
+                parameterNode->append_attribute(attribute);
+                attribute = doc.allocate_attribute();
+                attribute->name("high");
+                attribute->value(doc.allocate_string(stringOf(hingeConstraint->getUpperLimit()).c_str()));
+                parameterNode->append_attribute(attribute);
+            }
+            if(hingeConstraint->getEnableAngularMotor() ||
+               hingeConstraint->getMotorTargetVelosity() > 0.0 ||
+               hingeConstraint->getMaxMotorImpulse() > 0.0) {
+                parameterNode = doc.allocate_node(rapidxml::node_element);
+                parameterNode->name("Motor");
+                constraintNode->append_node(parameterNode);
+                attribute = doc.allocate_attribute();
+                attribute->name("enabled");
+                attribute->value((hingeConstraint->getEnableAngularMotor()) ? "true" : "false");
+                parameterNode->append_attribute(attribute);
+                attribute = doc.allocate_attribute();
+                attribute->name("velocity");
+                attribute->value(doc.allocate_string(stringOf(hingeConstraint->getMotorTargetVelosity()).c_str()));
+                parameterNode->append_attribute(attribute);
+                attribute = doc.allocate_attribute();
+                attribute->name("impulse");
+                attribute->value(doc.allocate_string(stringOf(hingeConstraint->getMaxMotorImpulse()).c_str()));
+                parameterNode->append_attribute(attribute);
+            }
         } break;
         case CONETWIST_CONSTRAINT_TYPE:
             attribute->value("coneTwist");

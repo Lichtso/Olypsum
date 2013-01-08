@@ -5,6 +5,7 @@
 			<Rotate>0.0 1.0 0.0 20.0</Rotate>
 			<Model src="man.dae" />
 			<PhysicsBody collisionShape="box0" mass="1.0" />
+			<Damping linear="0.0" angular="0.3" />
 		</RigidObject>
 	</Objects>
 	<Links>

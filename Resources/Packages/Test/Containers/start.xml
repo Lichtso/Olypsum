@@ -26,7 +26,7 @@
 			<SpawnBox min="-0.2 0.0 -0.2" max="0.2 0.0 0.2" />
 			<Velocity min="-0.2 0.3 -0.2" max="0.2 1.2 0.2" />
 		</ParticlesObject>
-		<HeightfieldTerrain size="5.0 2.0 5.0" textureScale="20.0 20.0">
+		<HeightfieldTerrain size="5.0 4.0 5.0" textureScale="20.0 20.0">
 			<Diffuse src="wallAnim.png" />
 			<HeightsMap src="terrainMap.png" />
 		</HeightfieldTerrain>
