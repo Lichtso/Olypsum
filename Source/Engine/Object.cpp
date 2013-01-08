@@ -16,9 +16,12 @@ bool BaseObject::gameTick() {
 }
 
 void BaseObject::remove() {
+    delete this;
+}
+
+BaseObject::~BaseObject() {
     while(links.size() > 0)
         links.begin()->second->remove(this, links.begin());
-    delete this;
 }
 
 void BaseObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {

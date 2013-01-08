@@ -13,7 +13,8 @@ LevelSaver::LevelSaver() :objectCounter(0) {
 }
 
 LevelSaver::~LevelSaver() {
-    
+    for(auto iterator : linkingMap)
+        delete iterator.second;
 }
 
 void LevelSaver::pushObject(BaseObject* object) {

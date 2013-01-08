@@ -23,6 +23,7 @@ class GUIRoundedRect {
     unsigned char* pixels;
     float getInnerShadowValue(unsigned int x, unsigned int y);
     void setBorderPixel(unsigned int x, unsigned int y);
+    void setBorderPixelBlended(unsigned int x, unsigned int y, float alpha);
     void setInnerShadowPixel(unsigned int x, unsigned int y, float value);
     public:
     GLuint* texture;

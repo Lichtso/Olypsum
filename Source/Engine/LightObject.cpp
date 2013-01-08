@@ -18,7 +18,7 @@ LightSphereVolume lightSphere(1, sphereAccuracyX, sphereAccuracyY);
 LightParabolidVolume lightCone(1, coneAccuracy, 0);
 LightParabolidVolume lightParabolid(1, sphereAccuracyX, parabolidAccuracyY);
 
-unsigned char inBuffers[] = { positionDBuffer, normalDBuffer, materialDBuffer, diffuseDBuffer, specularDBuffer }, outBuffers[] = { diffuseDBuffer, specularDBuffer };
+unsigned char inBuffers[] = { positionDBuffer, normalDBuffer, materialDBuffer }, outBuffers[] = { diffuseDBuffer, specularDBuffer };
 
 void initLightVolumes() {
     lightBox.init();
@@ -184,7 +184,7 @@ void DirectionalLight::draw() {
         Matrix4 shadowMat = shadowCam.viewMat;
         shadowMat.makeTextureMat();
         currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowMat);
-        shadowMap->use(5);
+        shadowMap->use(3);
     }else
         shaderPrograms[directionalLightSP]->use();
     
@@ -287,7 +287,7 @@ void SpotLight::draw() {
         Matrix4 shadowMat = shadowCam.viewMat;
         shadowMat.makeTextureMat();
         currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowMat);
-        shadowMap->use(5);
+        shadowMap->use(3);
     }else
         shaderPrograms[spotLightSP]->use();
     
@@ -451,9 +451,9 @@ void PositionalLight::draw() {
     modelMat = shadowCam.getTransformation()*modelMat;
     
     if(shadowMap) {
-        shadowMap->use(5);
+        shadowMap->use(3);
         if(shadowMapB) {
-            shadowMapB->use(6);
+            shadowMapB->use(4);
             shaderPrograms[positionalShadowDualLightSP]->use();
         }else
             shaderPrograms[positionalShadowLightSP]->use();

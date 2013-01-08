@@ -53,21 +53,15 @@ static NSString *getApplicationName(void)
     return appName;
 }
 
-@interface NSApplication (SDLApplication)
-@end
+/* The main class of the application, the application's delegate */
+@implementation SDLMain
 
-@implementation NSApplication (SDLApplication)
-/* Invoked from the Quit menu item */
-- (void)terminate:(id)sender {
+- (void)applicationWillTerminate:(NSNotification *)notification {
     /* Post a SDL_QUIT event */
     SDL_Event event;
     event.type = SDL_QUIT;
     SDL_PushEvent(&event);
 }
-@end
-
-/* The main class of the application, the application's delegate */
-@implementation SDLMain
 
 /* Set the working directory to the .app's parent directory */
 - (void)setupWorkingDirectory {
@@ -301,20 +295,22 @@ void updateVideoMode() {
     screenSize[0] = videoInfo->current_w*screenSize[2];
     screenSize[1] = videoInfo->current_h*screenSize[2];
     
+    NSWindow* window = [[NSApp windows] objectAtIndex:0];
     if(fullScreenEnabled) {
-        NSWindow* window = [[NSApp windows] objectAtIndex:0];
-        NSView* view = [window contentView];
+        NSView* view = [[[window contentView] subviews] objectAtIndex:0];
+        [view setWantsBestResolutionOpenGLSurface:true];
         
-        [[[view subviews] objectAtIndex:0] setWantsBestResolutionOpenGLSurface:true];
-        NSDictionary* opts = @{ @"NSFullScreenModeApplicationPresentationOptions": @(0) };
-        [view enterFullScreenMode:[NSScreen mainScreen] withOptions:opts];
+        [window setStyleMask:0];
+        [window setHasShadow:false];
+        [window setFrame:NSRectFromCGRect(CGRectMake(0, 0, videoInfo->current_w, videoInfo->current_h)) display:true];
         [NSApp setPresentationOptions:NSApplicationPresentationHideDock | NSApplicationPresentationAutoHideMenuBar];
         [window becomeKeyWindow];
         
         NSRect rect = [window convertRectToScreen:NSMakeRect(0, 0, 1, 1)];
         mouseTranslation[0] = -rect.origin.x;
         mouseTranslation[1] = -rect.origin.y;
-    }
+    }else
+        [window setTitle:@"Olypsum"];
 }
 
 void setClipboardText(std::string str) {

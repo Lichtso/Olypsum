@@ -26,7 +26,7 @@ class BaseObject {
     protected:
     BaseObject() { };
     public:
-    virtual ~BaseObject() { };
+    virtual ~BaseObject();
     std::map<std::string, BaseLink*> links; //!< A map of LinkObject and names to connect BaseObject to others
     /*! Used to update the transfomation of this object
      @param transformation The new transformation

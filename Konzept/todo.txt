@@ -1,10 +1,8 @@
-HightMap terrains
 Implement btSoftBody
 Implement more PhysicLink types
 Anisotropic filtering
 Use C++11 Multithreading
 Windows Support
-Add antialiasing to the corners of GUI elements
 
 Not sure:
 PCSS
@@ -13,3 +11,5 @@ Enviornment maping
 OpenAL Sound Engine: Add track queue
 
 Bugs:
+Check memory leaks
+Change options while game is running

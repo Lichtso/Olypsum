@@ -260,6 +260,7 @@ void ObjectManager::drawScene() {
 }
 
 void ObjectManager::illuminate() {
+    glBlendFunc(GL_ONE, GL_ONE);
     for(unsigned int i = 0; i < lightObjects.size(); i ++)
         if(lightObjects[i]->inFrustum)
             lightObjects[i]->draw();
@@ -268,6 +269,7 @@ void ObjectManager::illuminate() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glFrontFace(GL_CCW);
     glDisable(GL_DEPTH_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void ObjectManager::drawFrame() {
@@ -287,10 +289,10 @@ void ObjectManager::drawFrame() {
     }
     
     //Draw LightObjects
-    glDisable(GL_BLEND);
     glDepthMask(GL_FALSE);
     glDisable(GL_DEPTH_TEST);
     illuminate();
+    glDisable(GL_BLEND);
     
     if(ssaoQuality) {
         glViewport(0, 0, screenSize[0] >> 1, screenSize[1] >> 1);

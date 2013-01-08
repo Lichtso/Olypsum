@@ -153,7 +153,7 @@ void main() {
     LinearParallax(texCoord, viewVec, steps);
 	BinaryParallax(texCoord, viewVec);
     #endif
-    setColor(texCoord);
+    setColor(texCoord.xy);
     //if(abs(texCoord.x-0.5) > 0.5 || abs(texCoord.y-0.5) > 0.5) discard;
     if(gl_FragData[0].a < 0.0039) discard;
     gl_FragDepth = gl_FragCoord.z+length(texCoord.xy-vTexCoord)*0.2; //Depth

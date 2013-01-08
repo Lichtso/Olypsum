@@ -24,16 +24,14 @@ uniform vec3 lPosition;
 uniform sampler2DRect sampler0;
 uniform sampler2DRect sampler1;
 uniform sampler2DRect sampler2;
-uniform sampler2DRect sampler3;
-uniform sampler2DRect sampler4;
 
 #if SHADOWS_ACTIVE == 1
-uniform sampler2DShadow sampler5;
+uniform sampler2DShadow sampler3;
 #elif SHADOWS_ACTIVE == 2
-uniform sampler2DShadow sampler5;
-uniform sampler2DShadow sampler6;
+uniform sampler2DShadow sampler3;
+uniform sampler2DShadow sampler4;
 #elif SHADOWS_ACTIVE == 3
-uniform samplerCubeShadow sampler5;
+uniform samplerCubeShadow sampler3;
 uniform vec2 shadowDepthTransform;
 #endif
 
@@ -74,9 +72,7 @@ float shadowLookup2D(sampler2DShadow sampler, vec3 coord) {
 void main() {
     vec3 pos = texture2DRect(sampler0, gl_FragCoord.xy).xyz,
          normal = texture2DRect(sampler1, gl_FragCoord.xy).xyz,
-         material = texture2DRect(sampler2, gl_FragCoord.xy).rgb,
-         diffuseLight = texture2DRect(sampler3, gl_FragCoord.xy).rgb,
-         specularLight = texture2DRect(sampler4, gl_FragCoord.xy).rgb;
+         material = texture2DRect(sampler2, gl_FragCoord.xy).rgb;
     
     #if LIGHT_TYPE == 1
     vec3 lightDir = lDirection;
@@ -92,7 +88,7 @@ void main() {
     vec4 shadowCoord = vec4(pos, 1.0) * lShadowMat;
     #if LIGHT_TYPE < 3 //Directional or spot light
     shadowCoord.z = shadowCoord.z*depthBias*0.5+0.5*shadowCoord.w;
-    intensity = (1.0-intensity)*shadowLookup2D(sampler5, shadowCoord.xyz/shadowCoord.w);
+    intensity = (1.0-intensity)*shadowLookup2D(sampler3, shadowCoord.xyz/shadowCoord.w);
     #else //Positional light
     #if SHADOWS_ACTIVE < 3 //Parabolid
     #if SHADOWS_ACTIVE == 2
@@ -101,14 +97,14 @@ void main() {
         shadowCoord.xy /= (lightDirLen - shadowCoord.z) * 2.0;
         shadowCoord.z = intensity * depthBias;
         shadowCoord.xyz += vec3(0.5);
-        intensity = (1.0-intensity)*shadowLookup2D(sampler5, shadowCoord.xyz);
+        intensity = (1.0-intensity)*shadowLookup2D(sampler3, shadowCoord.xyz);
     #if SHADOWS_ACTIVE == 2
     }else{
         shadowCoord.x *= -1.0;
         shadowCoord.xy /= (lightDirLen + shadowCoord.z) * 2.0;
         shadowCoord.z = intensity * depthBias;
         shadowCoord.xyz += vec3(0.5);
-        intensity = (1.0-intensity)*shadowLookup2D(sampler6, shadowCoord.xyz);
+        intensity = (1.0-intensity)*shadowLookup2D(sampler4, shadowCoord.xyz);
     }
     #endif
     #else //Cubemap
@@ -117,13 +113,10 @@ void main() {
     intensity = (1.0-intensity)*shadowCube(sampler5, shadowCoord).x;
     #endif //Cubemap
     #endif //Positional light
-    #endif //Shadows enabled
+    #else //Shadows disabled
+    intensity = (1.0-intensity);
+    #endif //Shadows disabled
     
-    diffuseLight += lColor*intensity*max(dot(lightDir, normal), 0.0);
-    specularLight += lColor*intensity*pow(max(dot(reflect(lightDir, normal), normalize(pos-camPos)), 0.0), material.r*19.0+1.0)*material.g;
-    
-    gl_FragData[0].rgb = min(diffuseLight, 1.0);
-    gl_FragData[0].a = 1.0;
-    gl_FragData[1].rgb = min(specularLight, 1.0);
-    gl_FragData[1].a = 1.0;
+    gl_FragData[0].rgb = lColor*intensity*max(dot(lightDir, normal), 0.0);
+    gl_FragData[1].rgb = lColor*intensity*pow(max(dot(reflect(lightDir, normal), normalize(pos-camPos)), 0.0), material.r*19.0+1.0)*material.g;
 }
