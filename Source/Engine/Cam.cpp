@@ -78,20 +78,23 @@ void Cam::remove() {
     BaseObject::remove();
 }
 
-Ray3 Cam::getRayAt(btVector3 screenPos) {
+Ray3 Cam::getRelativeRayAt(float x, float y) {
     Ray3 ray;
-    
     if(fov > 0.0) {
         float aux = tan(fov*0.5);
-        ray.direction.setX(screenPos.x()*aux*(width/height));
-        ray.direction.setY(-screenPos.y()*aux);
+        ray.direction.setX(x*aux*(width/height));
+        ray.direction.setY(-y*aux);
         ray.direction.setZ(-1.0);
         ray.origin = ray.direction*near;
     }else{
         ray.direction = btVector3(0, 0, -1);
-        ray.origin = btVector3(screenPos.x()*width, -screenPos.y()*height, -near);
+        ray.origin = btVector3(x*width, -y*height, -near);
     }
-    
+    return ray;
+}
+
+Ray3 Cam::getRayAt(float x, float y) {
+    Ray3 ray = getRelativeRayAt(x, y);
     btMatrix3x3 normalMat = transformation.getBasis();
     ray.origin = transformation(ray.origin);
     ray.direction = normalMat*ray.direction;
@@ -109,10 +112,10 @@ void Cam::doFrustumCulling(short int filterMask) {
     planes_o[1] = -planes_n[1].dot(origin+planes_n[0]*far);
     
     if(fov < M_PI) {
-        Ray3 rayLT = getRayAt(btVector3(-1, -1, near)),
-             rayLB = getRayAt(btVector3(-1, 1, near)),
-             rayRT = getRayAt(btVector3(1, -1, near)),
-             rayRB = getRayAt(btVector3(1, 1, near));
+        Ray3 rayLT = getRayAt(-1, -1),
+             rayLB = getRayAt(-1, 1),
+             rayRT = getRayAt(1, -1),
+             rayRB = getRayAt(1, 1);
         planes_o[0] = -planes_n[0].dot(origin+planes_n[0]*near);
         planes_n[2] = (rayLB.direction).cross(rayLT.direction).normalize();
         planes_o[2] = -planes_n[2].dot(rayLB.origin);
@@ -161,8 +164,8 @@ bool Cam::testInverseNearPlaneHit(btDbvtProxy* node) {
 void Cam::drawWireframeFrustum(Color4 color) {
     if(fov < M_PI) {
         Ray3 bounds[] = {
-            getRayAt(btVector3(-1, -1, near)), getRayAt(btVector3(-1, 1, near)),
-            getRayAt(btVector3(1, -1, near)), getRayAt(btVector3(1, 1, near))
+            getRayAt(-1, -1), getRayAt(-1, 1),
+            getRayAt(1, -1), getRayAt(1, 1)
         };
         
         modelMat.setIdentity();

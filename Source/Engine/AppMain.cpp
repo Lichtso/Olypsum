@@ -99,56 +99,52 @@ void AppMain(int argc, char *argv[]) {
     gettimeofday(&timeThen, 0);
     while(true) {
         while(SDL_PollEvent(&event)) {
+            if(!currentScreenView) break;
             switch(event.type) {
                 case SDL_KEYDOWN:
-                    if(currentScreenView && currentScreenView->handleKeyDown(&event.key.keysym))
+                    if(currentScreenView->handleKeyDown(&event.key.keysym))
                         break;
                 break;
                 case SDL_KEYUP:
-                    if(currentScreenView && currentScreenView->handleKeyUp(&event.key.keysym))
+                    if(currentScreenView->handleKeyUp(&event.key.keysym))
                         break;
                     handleMenuKeyUp(&event.key.keysym);
                 break;
                 case SDL_MOUSEBUTTONDOWN:
                     event.button.x = (event.button.x+mouseTranslation[0])*screenSize[2];
                     event.button.y = (event.button.y+mouseTranslation[1])*screenSize[2];
-                    if(currentScreenView) {
-                        switch(event.button.button) {
-                            case SDL_BUTTON_LEFT:
-                                currentScreenView->handleMouseDown(event.button.x, event.button.y);
+                    switch(event.button.button) {
+                        case SDL_BUTTON_LEFT:
+                            if(currentScreenView->handleMouseDown(event.button.x, event.button.y))
+                                break;
+                        case SDL_BUTTON_MIDDLE:
+                        case SDL_BUTTON_RIGHT:
+                            if(controlsMangager)
+                                controlsMangager->handleMouseDown(event.button.x, event.button.y, event);
                             break;
-                            case SDL_BUTTON_WHEELDOWN:
-                                currentScreenView->handleMouseWheel(event.button.x, event.button.y, -1.0);
+                        case SDL_BUTTON_WHEELDOWN:
+                        case SDL_BUTTON_WHEELUP:
+                            float delta = (event.button.button == SDL_BUTTON_WHEELDOWN) ? -1.0 : 1.0;
+                            if(currentScreenView->handleMouseWheel(event.button.x, event.button.y, delta))
+                                break;
+                            if(controlsMangager)
+                                controlsMangager->handleMouseWheel(event.button.x, event.button.y, delta);
                             break;
-                            case SDL_BUTTON_WHEELUP:
-                                currentScreenView->handleMouseWheel(event.button.x, event.button.y, 1.0);
-                            break;
-                        }
                     }
                 break;
                 case SDL_MOUSEBUTTONUP:
+                    if(event.button.button == SDL_BUTTON_WHEELDOWN || event.button.button == SDL_BUTTON_WHEELUP) break;
                     event.button.x = (event.button.x+mouseTranslation[0])*screenSize[2];
                     event.button.y = (event.button.y+mouseTranslation[1])*screenSize[2];
-                    if(currentScreenView)
-                        currentScreenView->handleMouseUp(event.button.x, event.button.y);
+                    if(!currentScreenView->handleMouseUp(event.button.x, event.button.y) && controlsMangager)
+                        controlsMangager->handleMouseUp(event.button.x, event.button.y, event);
                 break;
                 case SDL_MOUSEMOTION:
                     event.button.x = (event.button.x+mouseTranslation[0])*screenSize[2];
                     event.button.y = (event.button.y+mouseTranslation[1])*screenSize[2];
-                    if(currentScreenView)
-                        currentScreenView->handleMouseMove(event.button.x, event.button.y);
-                    
-                    //TODO: DEBUG
-                {
-                    btQuaternion rot;
-                    rot.setEuler(-((float)event.button.x/screenSize[0]-0.5)*M_PI*2.0, -((float)event.button.y/screenSize[1]-0.5)*M_PI*2.0, 0);
-                    btTransform camMat;
-                    camMat.setIdentity();
-                    camMat.setRotation(rot);
-                    camMat.setOrigin(camMat.getBasis()*btVector3(0, 0, 3));
-                    mainCam->setTransformation(camMat);
-                    mainCam->gameTick();
-                }
+                    currentScreenView->handleMouseMove(event.button.x, event.button.y);
+                    if(controlsMangager)
+                        controlsMangager->handleMouseMove(event.button.x, event.button.y, event);
                 break;
                 case SDL_QUIT:
                     AppTerminate();

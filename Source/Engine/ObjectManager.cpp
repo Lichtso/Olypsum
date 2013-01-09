@@ -6,7 +6,7 @@
 //
 //
 
-#import "Menu.h"
+#import "Controls.h"
 
 ALCdevice* soundDevice;
 ALCcontext* soundContext;
@@ -118,6 +118,7 @@ void ObjectManager::clear() {
 void ObjectManager::gameTick() {
     //Calculate Physics
     physicsWorld->stepSimulation(animationFactor, 4, 1.0/60.0); //Try to maintain 60 FPS
+    controlsMangager->gameTick();
     
     //Calculate Decals
     for(auto iterator = decals.begin(); iterator != decals.end(); iterator ++) {

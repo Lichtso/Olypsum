@@ -1,6 +1,7 @@
 <CollisionShapes>
 	<Cylinder id="cylinder0" width="0.5" height="0.5" length="0.5"/>
 	<Box id="box0" width="0.5" height="0.5" length="0.5"/>
+	<Box id="manBox" width="1.0" height="1.0" length="0.25"/>
 	<Sphere id="sphere0" radius="0.5"/>
 	<Capsule id="capsule0" radius="0.5" length="0.5" direction="y"/>
 	<Cone id="cone0" radius="0.5" length="0.5" direction="y"/>
@@ -21,19 +22,19 @@
 			<Rotate>0.0 0.0 1.0 180.0</Rotate>
 		</Child>
 		<Child collisionShape="staticPlane">
-			<Translate>-10.0 0.0 0.0</Translate>
+			<Translate>-5.0 0.0 0.0</Translate>
 			<Rotate>0.0 0.0 1.0 -90.0</Rotate>
 		</Child>
 		<Child collisionShape="staticPlane">
-			<Translate>10.0 0.0 0.0</Translate>
+			<Translate>5.0 0.0 0.0</Translate>
 			<Rotate>0.0 0.0 1.0 90.0</Rotate>
 		</Child>
 		<Child collisionShape="staticPlane">
-			<Translate>0.0 0.0 -10.0</Translate>
+			<Translate>0.0 0.0 -5.0</Translate>
 			<Rotate>1.0 0.0 0.0 90.0</Rotate>
 		</Child>
 		<Child collisionShape="staticPlane">
-			<Translate>0.0 0.0 10.0</Translate>
+			<Translate>0.0 0.0 5.0</Translate>
 			<Rotate>1.0 0.0 0.0 -90.0</Rotate>
 		</Child>
 	</Compound>

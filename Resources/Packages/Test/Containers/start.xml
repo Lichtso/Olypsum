@@ -10,7 +10,7 @@
 		</RigidObject>
 		<RigidObject>
 			<Model src="man.dae" />
-			<PhysicsBody collisionShape="box0" mass="0.0" />
+			<PhysicsBody collisionShape="manBox" mass="0.0" />
 		</RigidObject>
 		<LightObject type="positional">
 			<Translate>1.0 1.0 1.0</Translate>
@@ -32,7 +32,7 @@
 		</HeightfieldTerrain>
 	</Objects>
 	<Links>
-		<PhysicLink>
+		<!--<PhysicLink>
 			<Object index="-1" name="a" />
 			<Object index="1" name="b" />
 			<Constraint type="hinge">
@@ -43,6 +43,6 @@
 					<Translate>0.0 -1.0 0.0</Translate>
 				</Frame>
 			</Constraint>
-		</PhysicLink>
+		</PhysicLink>-->
 	</Links>
 </Container>

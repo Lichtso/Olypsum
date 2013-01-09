@@ -6,8 +6,7 @@
 //
 //
 
-#import "Menu.h"
-#import "LevelManager.h"
+#import "Controls.h"
 
 LevelManager::LevelManager() {
     
@@ -51,6 +50,8 @@ void LevelManager::leaveGame() {
     fileManager.clear();
     fileManager.getPackage("Default");
     setMenu(mainMenu);
+    delete controlsMangager;
+    controlsMangager = NULL;
 }
 
 bool LevelManager::loadGame(std::string name) {

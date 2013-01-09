@@ -33,11 +33,18 @@ class Cam : public SimpleObject {
     Cam(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     ~Cam();
     void remove();
-    /*! Calculates a ray shot from this Cam
-     @param screenPos from (-1, -1) to (1, 1)
-     @return A new ray with the relative direction of the screenPos parameter
+    /*! Calculates a ray shot from this Cam in local space
+     @param x from -1.0 to 1.0
+     @param y from -1.0 to 1.0
+     @return A new ray
      */
-    Ray3 getRayAt(btVector3 screenPos);
+    Ray3 getRelativeRayAt(float x, float y);
+    /*! Calculates a ray shot from this Cam in world space
+     @param x from -1.0 to 1.0
+     @param y from -1.0 to 1.0
+     @return A new ray
+     */
+    Ray3 getRayAt(float x, float y);
     /*! Sets the DisplayObject::inFrustum flag for each DisplayObject which is in the frustum of this Cam
      @param filterMask Each DisplayObject with a matching CollisionMask will be proceeded
      */

@@ -6,7 +6,7 @@
 //
 //
 
-#import "Menu.h"
+#import "Controls.h"
 
 LevelLoader::LevelLoader() :transformation(btTransform::getIdentity()) {
     
@@ -298,5 +298,6 @@ bool LevelLoader::loadLevel() {
     
     levelManager.gameStatus = localGame;
     setMenu(inGameMenu);
+    controlsMangager = new ControlsMangager();
     return true;
 }

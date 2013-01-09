@@ -110,7 +110,7 @@ void main() {
     #else //Cubemap
     shadowCoord.w = max(max(abs(shadowCoord.x), abs(shadowCoord.y)), abs(shadowCoord.z));
     shadowCoord.w = (shadowDepthTransform.x + shadowDepthTransform.y/shadowCoord.w);
-    intensity = (1.0-intensity)*shadowCube(sampler5, shadowCoord).x;
+    intensity = (1.0-intensity)*shadowCube(sampler3, shadowCoord).x;
     #endif //Cubemap
     #endif //Positional light
     #else //Shadows disabled
