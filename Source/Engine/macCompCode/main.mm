@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "SDLMain.h"
+#include "SDLMain.h"
 
 int main(int argc, char *argv[]) {
     sdlMacMain(argc, argv);

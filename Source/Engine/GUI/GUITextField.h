@@ -6,14 +6,14 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUIButton.h"
-#import "GUIRoundedRect.h"
-#import "GUILabel.h"
+#include "GUIButton.h"
+#include "GUIRoundedRect.h"
+#include "GUILabel.h"
 
 #ifndef GUITextField_h
 #define GUITextField_h
 
-void setClipboardText(std::string str);
+void setClipboardText(const char* str);
 std::string getClipboardText();
 bool hasClipboardText();
 

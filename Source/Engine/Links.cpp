@@ -6,7 +6,7 @@
 //
 //
 
-#import "LevelManager.h"
+#include "LevelManager.h"
 
 BaseLink::BaseLink(LinkInitializer& initializer) {
     init(initializer);

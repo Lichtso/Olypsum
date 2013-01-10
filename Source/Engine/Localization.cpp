@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Localization.h"
+#include "Localization.h"
 
 std::string LanguagesDir("Packages/Default/Languages/"), LanguagesExtension(".xml");
 

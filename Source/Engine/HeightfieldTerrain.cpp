@@ -6,7 +6,7 @@
 //
 //
 
-#import "LevelManager.h"
+#include "LevelManager.h"
 
 HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoader *levelLoader) :heights(NULL) {
     glGenBuffers(1, &vbo);

@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "TextFont.h"
-#import "GUIRect.h"
+#include "TextFont.h"
+#include "GUIRect.h"
 
 #ifndef GUILabel_h
 #define GUILabel_h

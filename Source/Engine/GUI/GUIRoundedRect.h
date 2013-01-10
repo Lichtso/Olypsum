@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "LightVolume.h"
-#import "GUIClipRect.h"
+#include "LightVolume.h"
+#include "GUIClipRect.h"
 
 #ifndef GUIRoundedRect_h
 #define GUIRoundedRect_h

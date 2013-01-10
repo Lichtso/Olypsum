@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "TextFont.h"
+#include "TextFont.h"
 
 TextFont::TextFont() {
     ttf = NULL;
@@ -163,4 +163,4 @@ void TextFont::renderStringToScreen(const char* str, btVector3 pos, float scale,
     glDeleteTextures(1, &texture);
 }
 
-TextFont* mainFont;
+TextFont *mainFont, *italicFont;

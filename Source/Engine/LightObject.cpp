@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "LevelManager.h"
+#include "LevelManager.h"
 
 #define coneAccuracy 12
 #define sphereAccuracyX 10

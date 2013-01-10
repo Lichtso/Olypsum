@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import <Vorbis/vorbisfile.h>
-#import "LevelManager.h"
+#include <Vorbis/vorbisfile.h>
+#include "LevelManager.h"
 
 #ifdef LITTLE_ENDIAN
 #define ENDIAN 0

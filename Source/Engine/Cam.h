@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Ray3.h"
-#import "ShaderProgram.h"
+#include "Ray3.h"
+#include "ShaderProgram.h"
 
 #ifndef Cam_h
 #define Cam_h

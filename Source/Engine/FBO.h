@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Texture.h"
+#include "Texture.h"
 
 #ifndef FBO_h
 #define FBO_h

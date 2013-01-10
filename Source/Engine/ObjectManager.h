@@ -6,10 +6,10 @@
 //
 //
 
-#import "DisplayObject.h"
-#import "ParticlesObject.h"
-#import "Audio.h"
-#import "LightObject.h"
+#include "DisplayObject.h"
+#include "ParticlesObject.h"
+#include "Audio.h"
+#include "LightObject.h"
 
 #ifndef ObjectManager_h
 #define ObjectManager_h

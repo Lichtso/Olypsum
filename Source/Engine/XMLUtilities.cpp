@@ -6,7 +6,7 @@
 //
 //
 
-#import "XMLUtilities.h"
+#include "XMLUtilities.h"
 
 std::unique_ptr<char[]> readXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string filePath, bool logs) {
     std::ifstream file;

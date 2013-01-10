@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "FileManager.h"
-#import "GUIImage.h"
+#include "FileManager.h"
+#include "GUIImage.h"
 
 GUIImage::GUIImage() :sizeAlignment(GUISizeAlignment_All) {
     

@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUIScrollView.h"
+#include "GUIScrollView.h"
 
 #define scrollBarWidth 6
 

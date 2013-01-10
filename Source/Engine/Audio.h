@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import <OpenAL/al.h>
-#import <OpenAL/alc.h>
-#import "Object.h"
-#import "Texture.h"
+#include <OpenAL/al.h>
+#include <OpenAL/alc.h>
+#include "Object.h"
+#include "Texture.h"
 
 #ifndef Audio_h
 #define Audio_h

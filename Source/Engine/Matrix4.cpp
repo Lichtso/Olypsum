@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Matrix4.h"
+#include "Matrix4.h"
 
 Matrix4::Matrix4() {
     

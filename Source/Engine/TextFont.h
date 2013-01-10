@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import <SDL_ttf/SDL_ttf.h>
-#import "Cam.h"
+#include <SDL_ttf/SDL_ttf.h>
+#include "Cam.h"
 
 #ifndef TextFont_h
 #define TextFont_h
@@ -49,6 +49,6 @@ class TextFont {
     void renderStringToScreen(const char* str, btVector3 pos, float scale, Color4 color, bool antialiasing);
 };
 
-extern TextFont* mainFont;
+extern TextFont *mainFont, *italicFont;
 
 #endif

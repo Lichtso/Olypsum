@@ -6,7 +6,7 @@
 //
 //
 
-#import "DisplayObject.h"
+#include "DisplayObject.h"
 
 #ifndef HeightMap_h
 #define HeightMap_h

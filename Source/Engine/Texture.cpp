@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import <SDL_image/SDL_image.h>
-#import "ShaderProgram.h"
-#import "FileManager.h"
+#include <SDL_image/SDL_image.h>
+#include "ShaderProgram.h"
+#include "FileManager.h"
 
 Texture::Texture() :GLname(0), frames(NULL), surface(NULL), minFilter(GL_LINEAR_MIPMAP_LINEAR), magFilter(GL_LINEAR) {
         

@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "LightVolume.h"
+#include "LightVolume.h"
 
 LightVolume::LightVolume() {
     vbo = ibo = 0;

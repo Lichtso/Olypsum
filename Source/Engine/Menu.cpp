@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Menu.h"
-#import "AppMain.h"
+#include "Menu.h"
+#include "AppMain.h"
 
 void handleMenuKeyUp(SDL_keysym* key) {
     if(key->sym == SDLK_ESCAPE) {
@@ -351,9 +351,47 @@ void setMenu(MenuName menu) {
                 }
             }
         } break;
-        case creditsMenu:
+        case creditsMenu: {
+            GUILabel* label = new GUILabel();
+            label->posY = currentScreenView->height*0.88;
+            label->text = localization.localizeString("credits");
+            label->fontHeight = currentScreenView->height*0.2;
+            currentScreenView->addChild(label);
             
-            break;
+            GUIButton* button = new GUIButton();
+            button->posX = currentScreenView->width*-0.4;
+            button->posY = currentScreenView->height*-0.8;
+            button->onClick = [](GUIButton* button) {
+                setMenu(mainMenu);
+            };
+            currentScreenView->addChild(button);
+            label = new GUILabel();
+            label->text = localization.localizeString("back");
+            label->fontHeight = currentScreenView->height*0.1;
+            label->width = currentScreenView->width*0.14;
+            label->sizeAlignment = GUISizeAlignment_Height;
+            button->addChild(label);
+            
+            button = new GUIButton();
+            button->posX = currentScreenView->width*0.4;
+            button->posY = currentScreenView->height*-0.8;
+            button->onClick = [](GUIButton* button) {
+                openExternURL("http://gamefortec.net/");
+            };
+            currentScreenView->addChild(button);
+            label = new GUILabel();
+            label->text = "http://gamefortec.net/";
+            label->fontHeight = currentScreenView->height*0.1;
+            label->sizeAlignment = GUISizeAlignment_All;
+            button->addChild(label);
+            
+            label = new GUILabel();
+            label->text = std::string("Programming: Alexander Meißner\nMental Support: Noah Hummel");
+            label->width = currentScreenView->width*0.8;
+            label->fontHeight = currentScreenView->height*0.1;
+            label->sizeAlignment = GUISizeAlignment_Height;
+            currentScreenView->addChild(label);
+        } break;
         case inGameMenu: {
             GUILabel* label = new GUILabel();
             label->text = std::string("FPS: --");

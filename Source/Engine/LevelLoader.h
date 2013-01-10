@@ -6,7 +6,7 @@
 //
 //
 
-#import "ObjectManager.h"
+#include "ObjectManager.h"
 
 #ifndef LevelLoader_h
 #define LevelLoader_h

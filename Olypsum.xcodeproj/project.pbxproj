@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		111666DE169E11E300ECBDC9 /* core.cc in Sources */ = {isa = PBXBuildFile; fileRef = 111666CB169E11E300ECBDC9 /* core.cc */; };
+		111666DF169E11E300ECBDC9 /* exception.code.inc in Sources */ = {isa = PBXBuildFile; fileRef = 111666CD169E11E300ECBDC9 /* exception.code.inc */; };
+		111666E0169E11E300ECBDC9 /* smart_buffer.cc in Sources */ = {isa = PBXBuildFile; fileRef = 111666D2169E11E300ECBDC9 /* smart_buffer.cc */; };
+		111666E1169E11E300ECBDC9 /* socket.cc in Sources */ = {isa = PBXBuildFile; fileRef = 111666D5169E11E300ECBDC9 /* socket.cc */; };
+		111666E2169E11E300ECBDC9 /* socket_group.cc in Sources */ = {isa = PBXBuildFile; fileRef = 111666D8169E11E300ECBDC9 /* socket_group.cc */; };
+		111666E3169E11E300ECBDC9 /* util.cc in Sources */ = {isa = PBXBuildFile; fileRef = 111666DB169E11E300ECBDC9 /* util.cc */; };
 		1118251B14F2553A00F198A7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118251A14F2553A00F198A7 /* Cocoa.framework */; };
 		1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254114F2559600F198A7 /* OpenGL.framework */; };
 		1118254414F2559B00F198A7 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254314F2559B00F198A7 /* OpenAL.framework */; };
@@ -18,8 +24,29 @@
 		11648F6E153DEE63004CA74D /* FBO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11648F6D153DEE63004CA74D /* FBO.cpp */; };
 		118620481650165400A32518 /* ObjectManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118620461650165400A32518 /* ObjectManager.cpp */; };
 		118B60621573E2E8004C132E /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118B60611573E2E8004C132E /* Audio.cpp */; };
+		1199754C169F0C330094C661 /* BulletCollision.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11997541169F0C310094C661 /* BulletCollision.framework */; };
+		1199754D169F0C330094C661 /* BulletDynamics.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11997542169F0C320094C661 /* BulletDynamics.framework */; };
+		1199754E169F0C330094C661 /* BulletMultiThreaded.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11997543169F0C320094C661 /* BulletMultiThreaded.framework */; };
+		1199754F169F0C330094C661 /* BulletSoftBody.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11997544169F0C320094C661 /* BulletSoftBody.framework */; };
+		11997550169F0C330094C661 /* LinearMath.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11997545169F0C320094C661 /* LinearMath.framework */; };
+		11997551169F0C330094C661 /* MiniCL.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11997546169F0C320094C661 /* MiniCL.framework */; };
+		11997552169F0C330094C661 /* Ogg.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11997547169F0C320094C661 /* Ogg.framework */; };
+		11997553169F0C330094C661 /* SDL_image.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11997548169F0C320094C661 /* SDL_image.framework */; };
+		11997554169F0C330094C661 /* SDL_ttf.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11997549169F0C320094C661 /* SDL_ttf.framework */; };
+		11997555169F0C330094C661 /* SDL.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1199754A169F0C330094C661 /* SDL.framework */; };
+		11997556169F0C330094C661 /* Vorbis.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1199754B169F0C330094C661 /* Vorbis.framework */; };
+		11997557169F0C520094C661 /* BulletCollision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11997541169F0C310094C661 /* BulletCollision.framework */; };
+		11997558169F0C520094C661 /* BulletDynamics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11997542169F0C320094C661 /* BulletDynamics.framework */; };
+		11997559169F0C520094C661 /* BulletMultiThreaded.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11997543169F0C320094C661 /* BulletMultiThreaded.framework */; };
+		1199755A169F0C520094C661 /* BulletSoftBody.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11997544169F0C320094C661 /* BulletSoftBody.framework */; };
+		1199755B169F0C520094C661 /* LinearMath.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11997545169F0C320094C661 /* LinearMath.framework */; };
+		1199755C169F0C520094C661 /* MiniCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11997546169F0C320094C661 /* MiniCL.framework */; };
+		1199755D169F0C520094C661 /* Ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11997547169F0C320094C661 /* Ogg.framework */; };
+		1199755E169F0C520094C661 /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11997548169F0C320094C661 /* SDL_image.framework */; };
+		1199755F169F0C520094C661 /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11997549169F0C320094C661 /* SDL_ttf.framework */; };
+		11997560169F0C520094C661 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1199754A169F0C330094C661 /* SDL.framework */; };
+		11997561169F0C520094C661 /* Vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1199754B169F0C330094C661 /* Vorbis.framework */; };
 		119F166F169DA12400033832 /* Controls.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 119F166D169DA12400033832 /* Controls.cpp */; };
-		11A5C2C915752306002991E5 /* Vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11A5C2C815752306002991E5 /* Vorbis.framework */; };
 		11A79B6A153C2FE9002B9F0A /* AppMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B20153C2FE9002B9F0A /* AppMain.cpp */; };
 		11A79B6B153C2FE9002B9F0A /* Cam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B22153C2FE9002B9F0A /* Cam.cpp */; };
 		11A79B6C153C2FE9002B9F0A /* FileManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B24153C2FE9002B9F0A /* FileManager.cpp */; };
@@ -50,12 +77,6 @@
 		11B2626F15E28DF7002C638D /* DisplayObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11B2626D15E28DF6002C638D /* DisplayObject.cpp */; };
 		11BD39AD15414AA6007846B8 /* LightObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11BD39AC15414AA6007846B8 /* LightObject.cpp */; };
 		11C238D91613164C009D6F9C /* LevelManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11C238D71613164C009D6F9C /* LevelManager.cpp */; };
-		11D74B3C16270212000EEB50 /* BulletCollision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D74B3616270212000EEB50 /* BulletCollision.framework */; };
-		11D74B3D16270212000EEB50 /* BulletDynamics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D74B3716270212000EEB50 /* BulletDynamics.framework */; };
-		11D74B3E16270212000EEB50 /* BulletMultiThreaded.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D74B3816270212000EEB50 /* BulletMultiThreaded.framework */; };
-		11D74B3F16270212000EEB50 /* BulletSoftBody.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D74B3916270212000EEB50 /* BulletSoftBody.framework */; };
-		11D74B4016270212000EEB50 /* LinearMath.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D74B3A16270212000EEB50 /* LinearMath.framework */; };
-		11D74B4116270212000EEB50 /* MiniCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11D74B3B16270212000EEB50 /* MiniCL.framework */; };
 		11D74B4616270A65000EEB50 /* Fonts in Resources */ = {isa = PBXBuildFile; fileRef = 11D74B4316270A65000EEB50 /* Fonts */; };
 		11D74B4716270A65000EEB50 /* Packages in Resources */ = {isa = PBXBuildFile; fileRef = 11D74B4416270A65000EEB50 /* Packages */; };
 		11D74B4816270A65000EEB50 /* Shaders in Resources */ = {isa = PBXBuildFile; fileRef = 11D74B4516270A65000EEB50 /* Shaders */; };
@@ -64,13 +85,52 @@
 		11DA1F12162DEA03007D7E6C /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11DA1F0F162DEA03007D7E6C /* Matrix4.cpp */; };
 		11DA1F16162DEA18007D7E6C /* LightVolume.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11DA1F14162DEA18007D7E6C /* LightVolume.cpp */; };
 		11F1EEB8156FE49400F7275D /* ParticlesObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11F1EEB7156FE49400F7275D /* ParticlesObject.cpp */; };
-		11FA6D0215B9B3490041F590 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D0115B9B3490041F590 /* SDL.framework */; };
-		11FA6D0615B9B3670041F590 /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D0315B9B3670041F590 /* SDL_image.framework */; };
-		11FA6D0715B9B3670041F590 /* SDL_net.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D0415B9B3670041F590 /* SDL_net.framework */; };
-		11FA6D0815B9B3670041F590 /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FA6D0515B9B3670041F590 /* SDL_ttf.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		111666E5169E1A8B00ECBDC9 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				1199754C169F0C330094C661 /* BulletCollision.framework in CopyFiles */,
+				1199754D169F0C330094C661 /* BulletDynamics.framework in CopyFiles */,
+				1199754E169F0C330094C661 /* BulletMultiThreaded.framework in CopyFiles */,
+				1199754F169F0C330094C661 /* BulletSoftBody.framework in CopyFiles */,
+				11997550169F0C330094C661 /* LinearMath.framework in CopyFiles */,
+				11997551169F0C330094C661 /* MiniCL.framework in CopyFiles */,
+				11997552169F0C330094C661 /* Ogg.framework in CopyFiles */,
+				11997553169F0C330094C661 /* SDL_image.framework in CopyFiles */,
+				11997554169F0C330094C661 /* SDL_ttf.framework in CopyFiles */,
+				11997555169F0C330094C661 /* SDL.framework in CopyFiles */,
+				11997556169F0C330094C661 /* Vorbis.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		111666CA169E11E300ECBDC9 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
+		111666CB169E11E300ECBDC9 /* core.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = core.cc; sourceTree = "<group>"; };
+		111666CC169E11E300ECBDC9 /* core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = core.h; sourceTree = "<group>"; };
+		111666CD169E11E300ECBDC9 /* exception.code.inc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.pascal; path = exception.code.inc; sourceTree = "<group>"; };
+		111666CE169E11E300ECBDC9 /* exception.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = exception.h; sourceTree = "<group>"; };
+		111666CF169E11E300ECBDC9 /* netlink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = netlink.h; sourceTree = "<group>"; };
+		111666D0169E11E300ECBDC9 /* release_manager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = release_manager.h; sourceTree = "<group>"; };
+		111666D1169E11E300ECBDC9 /* release_manager.inline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = release_manager.inline.h; sourceTree = "<group>"; };
+		111666D2169E11E300ECBDC9 /* smart_buffer.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = smart_buffer.cc; sourceTree = "<group>"; };
+		111666D3169E11E300ECBDC9 /* smart_buffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = smart_buffer.h; sourceTree = "<group>"; };
+		111666D4169E11E300ECBDC9 /* smart_buffer.inline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = smart_buffer.inline.h; sourceTree = "<group>"; };
+		111666D5169E11E300ECBDC9 /* socket.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = socket.cc; sourceTree = "<group>"; };
+		111666D6169E11E300ECBDC9 /* socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = socket.h; sourceTree = "<group>"; };
+		111666D7169E11E300ECBDC9 /* socket.inline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = socket.inline.h; sourceTree = "<group>"; };
+		111666D8169E11E300ECBDC9 /* socket_group.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = socket_group.cc; sourceTree = "<group>"; };
+		111666D9169E11E300ECBDC9 /* socket_group.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = socket_group.h; sourceTree = "<group>"; };
+		111666DA169E11E300ECBDC9 /* socket_group.inline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = socket_group.inline.h; sourceTree = "<group>"; };
+		111666DB169E11E300ECBDC9 /* util.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = util.cc; sourceTree = "<group>"; };
+		111666DC169E11E300ECBDC9 /* util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.h; sourceTree = "<group>"; };
+		111666DD169E11E300ECBDC9 /* util.inline.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = util.inline.h; sourceTree = "<group>"; };
 		1118251614F2553A00F198A7 /* Olypsum.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Olypsum.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1118251A14F2553A00F198A7 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		1118251D14F2553A00F198A7 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -93,9 +153,19 @@
 		118620471650165400A32518 /* ObjectManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectManager.h; sourceTree = "<group>"; };
 		118B60601573E2DF004C132E /* Audio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Audio.h; sourceTree = "<group>"; };
 		118B60611573E2E8004C132E /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Audio.cpp; sourceTree = "<group>"; };
+		11997541169F0C310094C661 /* BulletCollision.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletCollision.framework; path = /Library/Frameworks/BulletCollision.framework; sourceTree = "<absolute>"; };
+		11997542169F0C320094C661 /* BulletDynamics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletDynamics.framework; path = /Library/Frameworks/BulletDynamics.framework; sourceTree = "<absolute>"; };
+		11997543169F0C320094C661 /* BulletMultiThreaded.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletMultiThreaded.framework; path = /Library/Frameworks/BulletMultiThreaded.framework; sourceTree = "<absolute>"; };
+		11997544169F0C320094C661 /* BulletSoftBody.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletSoftBody.framework; path = /Library/Frameworks/BulletSoftBody.framework; sourceTree = "<absolute>"; };
+		11997545169F0C320094C661 /* LinearMath.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LinearMath.framework; path = /Library/Frameworks/LinearMath.framework; sourceTree = "<absolute>"; };
+		11997546169F0C320094C661 /* MiniCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MiniCL.framework; path = /Library/Frameworks/MiniCL.framework; sourceTree = "<absolute>"; };
+		11997547169F0C320094C661 /* Ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Ogg.framework; path = /Library/Frameworks/Ogg.framework; sourceTree = "<absolute>"; };
+		11997548169F0C320094C661 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = /Library/Frameworks/SDL_image.framework; sourceTree = "<absolute>"; };
+		11997549169F0C320094C661 /* SDL_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_ttf.framework; path = /Library/Frameworks/SDL_ttf.framework; sourceTree = "<absolute>"; };
+		1199754A169F0C330094C661 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = /Library/Frameworks/SDL.framework; sourceTree = "<absolute>"; };
+		1199754B169F0C330094C661 /* Vorbis.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vorbis.framework; path = /Library/Frameworks/Vorbis.framework; sourceTree = "<absolute>"; };
 		119F166D169DA12400033832 /* Controls.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Controls.cpp; sourceTree = "<group>"; };
 		119F166E169DA12400033832 /* Controls.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controls.h; sourceTree = "<group>"; };
-		11A5C2C815752306002991E5 /* Vorbis.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vorbis.framework; path = ../../../../Library/Frameworks/Vorbis.framework; sourceTree = "<group>"; };
 		11A79B20153C2FE9002B9F0A /* AppMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppMain.cpp; sourceTree = "<group>"; };
 		11A79B21153C2FE9002B9F0A /* AppMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppMain.h; sourceTree = "<group>"; };
 		11A79B22153C2FE9002B9F0A /* Cam.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Cam.cpp; sourceTree = "<group>"; };
@@ -160,12 +230,6 @@
 		11BD39AC15414AA6007846B8 /* LightObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LightObject.cpp; sourceTree = "<group>"; };
 		11C238D71613164C009D6F9C /* LevelManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelManager.cpp; sourceTree = "<group>"; };
 		11C238D81613164C009D6F9C /* LevelManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LevelManager.h; sourceTree = "<group>"; };
-		11D74B3616270212000EEB50 /* BulletCollision.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletCollision.framework; path = ../../../../Library/Frameworks/BulletCollision.framework; sourceTree = "<group>"; };
-		11D74B3716270212000EEB50 /* BulletDynamics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletDynamics.framework; path = ../../../../Library/Frameworks/BulletDynamics.framework; sourceTree = "<group>"; };
-		11D74B3816270212000EEB50 /* BulletMultiThreaded.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletMultiThreaded.framework; path = ../../../../Library/Frameworks/BulletMultiThreaded.framework; sourceTree = "<group>"; };
-		11D74B3916270212000EEB50 /* BulletSoftBody.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletSoftBody.framework; path = ../../../../Library/Frameworks/BulletSoftBody.framework; sourceTree = "<group>"; };
-		11D74B3A16270212000EEB50 /* LinearMath.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LinearMath.framework; path = ../../../../Library/Frameworks/LinearMath.framework; sourceTree = "<group>"; };
-		11D74B3B16270212000EEB50 /* MiniCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MiniCL.framework; path = ../../../../Library/Frameworks/MiniCL.framework; sourceTree = "<group>"; };
 		11D74B4316270A65000EEB50 /* Fonts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Fonts; sourceTree = "<group>"; };
 		11D74B4416270A65000EEB50 /* Packages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Packages; sourceTree = "<group>"; };
 		11D74B4516270A65000EEB50 /* Shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Shaders; sourceTree = "<group>"; };
@@ -179,10 +243,6 @@
 		11DA1F15162DEA18007D7E6C /* LightVolume.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LightVolume.h; sourceTree = "<group>"; };
 		11F1EEB5156FE48B00F7275D /* ParticlesObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParticlesObject.h; sourceTree = "<group>"; };
 		11F1EEB7156FE49400F7275D /* ParticlesObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParticlesObject.cpp; sourceTree = "<group>"; };
-		11FA6D0115B9B3490041F590 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = ../../../../Library/Frameworks/SDL.framework; sourceTree = "<group>"; };
-		11FA6D0315B9B3670041F590 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = /Library/Frameworks/SDL_image.framework; sourceTree = "<absolute>"; };
-		11FA6D0415B9B3670041F590 /* SDL_net.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_net.framework; path = /Library/Frameworks/SDL_net.framework; sourceTree = "<absolute>"; };
-		11FA6D0515B9B3670041F590 /* SDL_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_ttf.framework; path = /Library/Frameworks/SDL_ttf.framework; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -190,26 +250,53 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				11997557169F0C520094C661 /* BulletCollision.framework in Frameworks */,
+				11997558169F0C520094C661 /* BulletDynamics.framework in Frameworks */,
+				11997559169F0C520094C661 /* BulletMultiThreaded.framework in Frameworks */,
+				1199755A169F0C520094C661 /* BulletSoftBody.framework in Frameworks */,
+				1199755B169F0C520094C661 /* LinearMath.framework in Frameworks */,
+				1199755C169F0C520094C661 /* MiniCL.framework in Frameworks */,
+				1199755D169F0C520094C661 /* Ogg.framework in Frameworks */,
+				1199755E169F0C520094C661 /* SDL_image.framework in Frameworks */,
+				1199755F169F0C520094C661 /* SDL_ttf.framework in Frameworks */,
+				11997560169F0C520094C661 /* SDL.framework in Frameworks */,
+				11997561169F0C520094C661 /* Vorbis.framework in Frameworks */,
 				1118254414F2559B00F198A7 /* OpenAL.framework in Frameworks */,
 				1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */,
 				1118251B14F2553A00F198A7 /* Cocoa.framework in Frameworks */,
-				11A5C2C915752306002991E5 /* Vorbis.framework in Frameworks */,
-				11FA6D0215B9B3490041F590 /* SDL.framework in Frameworks */,
-				11FA6D0615B9B3670041F590 /* SDL_image.framework in Frameworks */,
-				11FA6D0715B9B3670041F590 /* SDL_net.framework in Frameworks */,
-				11FA6D0815B9B3670041F590 /* SDL_ttf.framework in Frameworks */,
-				11D74B3C16270212000EEB50 /* BulletCollision.framework in Frameworks */,
-				11D74B3D16270212000EEB50 /* BulletDynamics.framework in Frameworks */,
-				11D74B3E16270212000EEB50 /* BulletMultiThreaded.framework in Frameworks */,
-				11D74B3F16270212000EEB50 /* BulletSoftBody.framework in Frameworks */,
-				11D74B4016270212000EEB50 /* LinearMath.framework in Frameworks */,
-				11D74B4116270212000EEB50 /* MiniCL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		111666C9169E11E300ECBDC9 /* netLink-1.0.3 */ = {
+			isa = PBXGroup;
+			children = (
+				111666CA169E11E300ECBDC9 /* config.h */,
+				111666CB169E11E300ECBDC9 /* core.cc */,
+				111666CC169E11E300ECBDC9 /* core.h */,
+				111666CD169E11E300ECBDC9 /* exception.code.inc */,
+				111666CE169E11E300ECBDC9 /* exception.h */,
+				111666CF169E11E300ECBDC9 /* netlink.h */,
+				111666D0169E11E300ECBDC9 /* release_manager.h */,
+				111666D1169E11E300ECBDC9 /* release_manager.inline.h */,
+				111666D2169E11E300ECBDC9 /* smart_buffer.cc */,
+				111666D3169E11E300ECBDC9 /* smart_buffer.h */,
+				111666D4169E11E300ECBDC9 /* smart_buffer.inline.h */,
+				111666D5169E11E300ECBDC9 /* socket.cc */,
+				111666D6169E11E300ECBDC9 /* socket.h */,
+				111666D7169E11E300ECBDC9 /* socket.inline.h */,
+				111666D8169E11E300ECBDC9 /* socket_group.cc */,
+				111666D9169E11E300ECBDC9 /* socket_group.h */,
+				111666DA169E11E300ECBDC9 /* socket_group.inline.h */,
+				111666DB169E11E300ECBDC9 /* util.cc */,
+				111666DC169E11E300ECBDC9 /* util.h */,
+				111666DD169E11E300ECBDC9 /* util.inline.h */,
+			);
+			path = "netLink-1.0.3";
+			sourceTree = "<group>";
+		};
 		1118250B14F2553900F198A7 = {
 			isa = PBXGroup;
 			children = (
@@ -231,20 +318,17 @@
 		1118251914F2553A00F198A7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				11D74B3616270212000EEB50 /* BulletCollision.framework */,
-				11D74B3716270212000EEB50 /* BulletDynamics.framework */,
-				11D74B3816270212000EEB50 /* BulletMultiThreaded.framework */,
-				11D74B3916270212000EEB50 /* BulletSoftBody.framework */,
-				11D74B3A16270212000EEB50 /* LinearMath.framework */,
-				11D74B3B16270212000EEB50 /* MiniCL.framework */,
-				11FA6D0315B9B3670041F590 /* SDL_image.framework */,
-				11FA6D0415B9B3670041F590 /* SDL_net.framework */,
-				11FA6D0515B9B3670041F590 /* SDL_ttf.framework */,
-				11FA6D0115B9B3490041F590 /* SDL.framework */,
-				11A5C2C815752306002991E5 /* Vorbis.framework */,
-				1118254314F2559B00F198A7 /* OpenAL.framework */,
-				1118254114F2559600F198A7 /* OpenGL.framework */,
-				1118251A14F2553A00F198A7 /* Cocoa.framework */,
+				11997541169F0C310094C661 /* BulletCollision.framework */,
+				11997542169F0C320094C661 /* BulletDynamics.framework */,
+				11997543169F0C320094C661 /* BulletMultiThreaded.framework */,
+				11997544169F0C320094C661 /* BulletSoftBody.framework */,
+				11997545169F0C320094C661 /* LinearMath.framework */,
+				11997546169F0C320094C661 /* MiniCL.framework */,
+				11997547169F0C320094C661 /* Ogg.framework */,
+				11997548169F0C320094C661 /* SDL_image.framework */,
+				11997549169F0C320094C661 /* SDL_ttf.framework */,
+				1199754A169F0C330094C661 /* SDL.framework */,
+				1199754B169F0C330094C661 /* Vorbis.framework */,
 				1118251C14F2553A00F198A7 /* Other Frameworks */,
 			);
 			name = Frameworks;
@@ -253,6 +337,9 @@
 		1118251C14F2553A00F198A7 /* Other Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				1118254314F2559B00F198A7 /* OpenAL.framework */,
+				1118254114F2559600F198A7 /* OpenGL.framework */,
+				1118251A14F2553A00F198A7 /* Cocoa.framework */,
 				1118251D14F2553A00F198A7 /* AppKit.framework */,
 				1118251E14F2553A00F198A7 /* CoreData.framework */,
 				1118251F14F2553A00F198A7 /* Foundation.framework */,
@@ -273,6 +360,7 @@
 			children = (
 				11A79B69153C2FE9002B9F0A /* Utilities.h */,
 				11A79B68153C2FE9002B9F0A /* Utilities.cpp */,
+				111666C9169E11E300ECBDC9 /* netLink-1.0.3 */,
 				11A79B5D153C2FE9002B9F0A /* rapidxml-1.13 */,
 				11A907611629B27A00B16607 /* XMLUtilities.h */,
 				11A907601629B27A00B16607 /* XMLUtilities.cpp */,
@@ -410,6 +498,7 @@
 				1118251214F2553900F198A7 /* Sources */,
 				1118251314F2553900F198A7 /* Frameworks */,
 				1118251414F2553900F198A7 /* Resources */,
+				111666E5169E1A8B00ECBDC9 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -507,6 +596,12 @@
 				112672E91699BBFD000BB805 /* Links.cpp in Sources */,
 				112672EC1699BCF1000BB805 /* HeightfieldTerrain.cpp in Sources */,
 				119F166F169DA12400033832 /* Controls.cpp in Sources */,
+				111666DE169E11E300ECBDC9 /* core.cc in Sources */,
+				111666DF169E11E300ECBDC9 /* exception.code.inc in Sources */,
+				111666E0169E11E300ECBDC9 /* smart_buffer.cc in Sources */,
+				111666E1169E11E300ECBDC9 /* socket.cc in Sources */,
+				111666E2169E11E300ECBDC9 /* socket_group.cc in Sources */,
+				111666E3169E11E300ECBDC9 /* util.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -588,7 +683,6 @@
 		1118253514F2553A00F198A7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -601,11 +695,9 @@
 				);
 				HEADER_SEARCH_PATHS = /usr/local/include;
 				INFOPLIST_FILE = Source/Engine/macCompCode/Info.plist;
-				LIBRARY_SEARCH_PATHS = "";
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SHARED_PRECOMPS_DIR = "$(CACHE_ROOT)/SharedPrecompiledHeaders";
-				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -613,7 +705,6 @@
 		1118253614F2553A00F198A7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				COMBINE_HIDPI_IMAGES = YES;
@@ -626,11 +717,9 @@
 				);
 				HEADER_SEARCH_PATHS = /usr/local/include;
 				INFOPLIST_FILE = Source/Engine/macCompCode/Info.plist;
-				LIBRARY_SEARCH_PATHS = "";
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SHARED_PRECOMPS_DIR = "$(CACHE_ROOT)/SharedPrecompiledHeaders";
-				USER_HEADER_SEARCH_PATHS = "";
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

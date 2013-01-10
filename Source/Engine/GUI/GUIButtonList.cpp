@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUIButtonList.h"
+#include "GUIButtonList.h"
 
 GUIButtonList::GUIButtonList() {
     type = GUIType_ButtonList;

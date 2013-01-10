@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUITabs.h"
+#include "GUITabs.h"
 
 GUITabs::GUITabs() {
     type = GUIType_Tabs;

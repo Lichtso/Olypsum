@@ -32,17 +32,17 @@
 		</HeightfieldTerrain>
 	</Objects>
 	<Links>
-		<!--<PhysicLink>
+		<PhysicLink>
 			<Object index="-1" name="a" />
 			<Object index="1" name="b" />
 			<Constraint type="hinge">
 				<Frame>
-					<Translate>0.0 1.0 0.0</Translate>
+					<Translate>0.0 1.4 0.0</Translate>
 				</Frame>
 				<Frame>
 					<Translate>0.0 -1.0 0.0</Translate>
 				</Frame>
 			</Constraint>
-		</PhysicLink>-->
+		</PhysicLink>
 	</Links>
 </Container>

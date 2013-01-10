@@ -6,14 +6,14 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import <SDL/SDL.h>
-#import "LevelManager.h"
-#import "GUIScrollView.h"
-#import "GUICheckBox.h"
-#import "GUITabs.h"
-#import "GUISlider.h"
-#import "GUITextField.h"
-#import "GUIImage.h"
+#include <SDL/SDL.h>
+#include "LevelManager.h"
+#include "GUIScrollView.h"
+#include "GUICheckBox.h"
+#include "GUITabs.h"
+#include "GUISlider.h"
+#include "GUITextField.h"
+#include "GUIImage.h"
 
 #ifndef Menu_h
 #define Menu_h
@@ -30,6 +30,8 @@ enum MenuName {
     newGameMenu = 8,
     removeGameMenu = 9
 };
+
+void openExternURL(const char* str);
 
 void handleMenuKeyUp(SDL_keysym* key);
 void setMenu(MenuName menu);

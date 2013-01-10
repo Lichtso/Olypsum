@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUIRoundedRect.h"
+#include "GUIRoundedRect.h"
 
 GUIRoundedRect::GUIRoundedRect() {
     texture = NULL;

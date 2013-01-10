@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUIRoundedRect.h"
-#import "GUIRect.h"
+#include "GUIRoundedRect.h"
+#include "GUIRect.h"
 
 #ifndef GUISlider_h
 #define GUISlider_h

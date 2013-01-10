@@ -6,9 +6,9 @@
 //
 //
 
-#import "LevelLoader.h"
-#import "LevelSaver.h"
-#import "FileManager.h"
+#include "LevelLoader.h"
+#include "LevelSaver.h"
+#include "FileManager.h"
 
 #ifndef LevelManager_h
 #define LevelManager_h

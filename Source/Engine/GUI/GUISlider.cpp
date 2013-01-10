@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUISlider.h"
+#include "GUISlider.h"
 
 #define barHeight (6*screenSize[2])
 #define sliderRadius (12*screenSize[2])

@@ -6,7 +6,7 @@
 //
 //
 
-#import "FBO.h"
+#include "FBO.h"
 
 #ifndef Object_h
 #define Object_h

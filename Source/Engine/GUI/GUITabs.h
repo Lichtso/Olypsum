@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUIButtonList.h"
+#include "GUIButtonList.h"
 
 #ifndef GUITabs_h
 #define GUITabs_h

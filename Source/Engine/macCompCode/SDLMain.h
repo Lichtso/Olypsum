@@ -7,10 +7,10 @@
 
 #ifndef _SDLMain_h_
 #define _SDLMain_h_
-#import <Cocoa/Cocoa.h>
-#import <AppKit/AppKit.h>
-#import <Foundation/Foundation.h>
-#import <string.h>
+#include <Cocoa/Cocoa.h>
+#include <AppKit/AppKit.h>
+#include <Foundation/Foundation.h>
+#include <string.h>
 
 @interface SDLMain : NSObject <NSApplicationDelegate>
     

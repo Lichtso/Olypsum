@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUITextField.h"
-#import "LevelManager.h"
-#import "AppMain.h"
+#include "GUITextField.h"
+#include "LevelManager.h"
+#include "AppMain.h"
 
 GUITextField::GUITextField() {
     type = GUIType_TextField;
@@ -188,7 +188,7 @@ bool GUITextField::handleKeyDown(SDL_keysym* key) {
     if(keyState[SDLK_LMETA] || keyState[SDLK_RMETA]) {
         switch(key->sym) {
             case SDLK_c:
-                setClipboardText(label->text);
+                setClipboardText(label->text.c_str());
                 break;
             case SDLK_v: {
                 if(!hasClipboardText()) break;

@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Utilities.h"
+#include "Utilities.h"
 
 void log(logMessageType type, std::string message) {
     switch(type) {

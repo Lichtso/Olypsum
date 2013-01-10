@@ -6,17 +6,17 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import <BulletCollision/btBulletCollisionCommon.h>
-#import <BulletDynamics/btBulletDynamicsCommon.h>
-#import <BulletSoftBody/btSoftBody.h>
-#import <math.h>
-#import <dirent.h>
-#import <sys/stat.h>
-#import <map>
-#import <set>
-#import <vector>
-#import <string>
-#import <sstream>
+#include <BulletCollision/btBulletCollisionCommon.h>
+#include <BulletDynamics/btBulletDynamicsCommon.h>
+#include <BulletSoftBody/btSoftBody.h>
+#include <math.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <map>
+#include <set>
+#include <vector>
+#include <string>
+#include <sstream>
 
 #ifndef Utilities_h
 #define Utilities_h

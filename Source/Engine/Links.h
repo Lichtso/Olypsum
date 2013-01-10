@@ -6,7 +6,7 @@
 //
 //
 
-#import "Object.h"
+#include "Object.h"
 
 #ifndef Links_h
 #define Links_h

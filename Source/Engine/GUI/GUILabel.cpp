@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUILabel.h"
+#include "GUILabel.h"
 
 GUILabel::GUILabel() {
     type = GUIType_Label;
@@ -39,11 +39,16 @@ void GUILabel::updateContent() {
             if(pos == endPos-1) pos ++;
             GUILabelLine line;
             line.text = text.substr(lastPos-startPos, pos-lastPos);
-            line.texture = font->renderStringToTexture(line.text.c_str(), color, true, line.width, line.height);
-            line.width = fontHeight*0.5/line.height*line.width;
+            if(line.text.size() > 0) {
+                line.texture = font->renderStringToTexture(line.text.c_str(), color, true, line.width, line.height);
+                line.width = fontHeight*0.5/line.height*line.width;
+                width = fmax(width, line.width);
+            }else{
+                line.texture = NULL;
+                line.width = 0;
+            }
             line.height = fontHeight>>1;
             lines.push_back(line);
-            width = fmax(width, line.width);
             height += line.height;
             lastPos = pos;
         }
@@ -87,6 +92,7 @@ void GUILabel::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     for(unsigned int i = 0; i < lines.size(); i ++) {
         line = &lines[i];
         
+        if(!line->texture) continue;
         line->clipRect.minPosX = max(clipRect.minPosX, line->posX-(int)line->width);
         line->clipRect.minPosY = max(clipRect.minPosY, line->posY-(int)line->height);
         line->clipRect.maxPosX = min(clipRect.maxPosX, line->posX+(int)line->width);

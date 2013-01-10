@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Ray3.h"
+#include "Ray3.h"
 
 Ray3::Ray3(btVector3 originB, btVector3 directionB) :origin(originB), direction(directionB) {
     

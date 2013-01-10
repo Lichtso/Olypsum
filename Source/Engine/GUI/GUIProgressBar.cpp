@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUIProgressBar.h"
+#include "GUIProgressBar.h"
 
 GUIProgressBar::GUIProgressBar() {
     type = GUIType_ProgressBar;

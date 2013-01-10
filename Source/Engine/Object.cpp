@@ -6,7 +6,7 @@
 //
 //
 
-#import "LevelManager.h"
+#include "LevelManager.h"
 
 bool BaseObject::gameTick() {
     for(auto link : links)

@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Model.h"
-#import "Audio.h"
-#import "Localization.h"
+#include "Model.h"
+#include "Audio.h"
+#include "Localization.h"
 
 #ifndef FileManager_h
 #define FileManager_h

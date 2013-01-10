@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import <OpenAL/al.h>
-#import "LevelManager.h"
+#include <OpenAL/al.h>
+#include "LevelManager.h"
 
 
 //! @cond

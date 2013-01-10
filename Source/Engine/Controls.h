@@ -6,7 +6,7 @@
 //
 //
 
-#import "Menu.h"
+#include "Menu.h"
 
 #ifndef Controls_h
 #define Controls_h

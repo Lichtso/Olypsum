@@ -313,9 +313,9 @@ void updateVideoMode() {
         [window setTitle:@"Olypsum"];
 }
 
-void setClipboardText(std::string str) {
+void setClipboardText(const char* str) {
     [[NSPasteboard generalPasteboard] clearContents];
-    [[NSPasteboard generalPasteboard] setString:[NSString stringWithUTF8String:str.c_str()] forType:NSStringPboardType];
+    [[NSPasteboard generalPasteboard] setString:[NSString stringWithUTF8String:str] forType:NSStringPboardType];
 }
 
 std::string getClipboardText() {
@@ -327,4 +327,9 @@ std::string getClipboardText() {
 bool hasClipboardText() {
     NSData* data = [[NSPasteboard generalPasteboard] dataForType:NSStringPboardType];
     return data;
+}
+
+void openExternURL(const char* str) {
+    NSURL *url = [[NSURL alloc] initWithString:[NSString stringWithUTF8String:str]];
+    [[NSWorkspace sharedWorkspace] openURL:url];
 }

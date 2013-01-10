@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "FileManager.h"
-#import "ShaderProgram.h"
+#include "FileManager.h"
+#include "ShaderProgram.h"
 
 std::shared_ptr<FilePackageResource> FilePackageResource::load(FilePackage* filePackageB, const std::string& nameB) {
     filePackage = filePackageB;

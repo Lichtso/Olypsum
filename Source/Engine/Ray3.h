@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import <BulletDynamics/btBulletDynamicsCommon.h>
-#import <BulletSoftBody/btSoftBody.h>
+#include <BulletDynamics/btBulletDynamicsCommon.h>
+#include <BulletSoftBody/btSoftBody.h>
 
 #ifndef Ray3_h
 #define Ray3_h

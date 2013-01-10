@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import <OpenGL/gl.h>
-#import <SDL/SDL.h>
-#import "XMLUtilities.h"
+#include <OpenGL/gl.h>
+#include <SDL/SDL.h>
+#include "XMLUtilities.h"
 
 #ifndef Texture_h
 #define Texture_h

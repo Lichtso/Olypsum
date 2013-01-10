@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUIView.h"
+#include "GUIView.h"
 
 GUIView::GUIView() {
     type = GUIType_View;
@@ -78,7 +78,8 @@ bool GUIView::handleMouseWheel(int mouseX, int mouseY, float delta) {
 GUIFramedView::GUIFramedView() {
     type = GUIType_View;
     texture = 0;
-    innerShadow = -8;
+    innerShadow = -screenSize[0]/screenSize[2]*0.006;
+    cornerRadius = screenSize[0]/screenSize[2]*0.01;
 }
 
 GUIFramedView::~GUIFramedView() {
@@ -93,7 +94,7 @@ void GUIFramedView::updateContent() {
         roundedRect.width = width;
         roundedRect.height = height;
         roundedRect.innerShadow = innerShadow*screenSize[2];
-        roundedRect.cornerRadius = abs(innerShadow)*screenSize[2];
+        roundedRect.cornerRadius = cornerRadius*screenSize[2];
         roundedRect.topColor = Color4(0.78);
         roundedRect.bottomColor = Color4(0.78);
         roundedRect.borderColor = Color4(0.78);

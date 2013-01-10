@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUIView.h"
+#include "GUIView.h"
 
 #ifndef GUIScrollView_h
 #define GUIScrollView_h

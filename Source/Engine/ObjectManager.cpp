@@ -6,7 +6,7 @@
 //
 //
 
-#import "Controls.h"
+#include "Controls.h"
 
 ALCdevice* soundDevice;
 ALCcontext* soundContext;

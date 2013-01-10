@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Texture.h"
-#import "GUIRect.h"
-#import "GUIRoundedRect.h"
+#include "Texture.h"
+#include "GUIRect.h"
+#include "GUIRoundedRect.h"
 
 #ifndef GUIView_h
 #define GUIView_h
@@ -33,6 +33,7 @@ class GUIFramedView : public GUIView {
     GLuint texture;
     public:
     int innerShadow;
+    unsigned int cornerRadius;
     GUIFramedView();
     ~GUIFramedView();
     void updateContent();

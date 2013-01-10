@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "AppMain.h"
-#import <sys/time.h>
+#include "AppMain.h"
+#include <sys/time.h>
 
 Uint8* keyState;
 SDLMod modKeyState;
@@ -85,6 +85,9 @@ void AppMain(int argc, char *argv[]) {
     mainFont = new TextFont();
     mainFont->size = screenSize[1]*0.05;
     mainFont->loadTTF("font");
+    italicFont = new TextFont();
+    italicFont->size = screenSize[1]*0.05;
+    italicFont->loadTTF("font_italic");
     initLightVolumes();
     objectManager.init();
     

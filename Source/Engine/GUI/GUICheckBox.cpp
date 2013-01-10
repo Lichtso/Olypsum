@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUICheckBox.h"
+#include "GUICheckBox.h"
 
 GUICheckBox::GUICheckBox() {
     type = GUIType_CheckBox;
@@ -14,9 +14,9 @@ GUICheckBox::GUICheckBox() {
     width = height = 15*screenSize[2];
     sizeAlignment = GUISizeAlignment_None;
     GUILabel* label = new GUILabel();
-    label->text = "x";
+    label->text = "√";
     label->parent = this;
-    label->fontHeight = 30*screenSize[2];
+    label->fontHeight = 25*screenSize[2];
     label->posY = 2*screenSize[2];
     children.push_back(label);
 }

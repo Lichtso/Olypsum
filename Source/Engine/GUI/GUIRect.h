@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import <SDL/SDL.h>
-#import "GUIClipRect.h"
+#include <SDL/SDL.h>
+#include "GUIClipRect.h"
 
 #ifndef GUIRect_h
 #define GUIRect_h

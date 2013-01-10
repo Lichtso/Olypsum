@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUIButton.h"
+#include "GUIButton.h"
 
 GUIButton::GUIButton() {
     type = GUIType_Button;
@@ -52,6 +52,7 @@ void GUIButton::updateContent() {
                             label->color = Color4(0.94);
                         break;
                     }
+                    label->font = mainFont;
                 break;
                 case GUIButtonStatePressed:
                     switch(buttonType) {
@@ -65,6 +66,7 @@ void GUIButton::updateContent() {
                             label->color = Color4(0.94);
                         break;
                     }
+                    label->font = italicFont;
                 break;
             }
         }

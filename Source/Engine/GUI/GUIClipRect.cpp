@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUIClipRect.h"
+#include "GUIClipRect.h"
 
 GUIClipRect::GUIClipRect() {
     

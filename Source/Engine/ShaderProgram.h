@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Matrix4.h"
-#import "Links.h"
+#include "Matrix4.h"
+#include "Links.h"
 
 #ifndef ShaderProgram_h
 #define ShaderProgram_h

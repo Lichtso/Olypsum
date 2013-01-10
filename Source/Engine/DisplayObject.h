@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Model.h"
+#include "Model.h"
 
 #ifndef DisplayObject_h
 #define DisplayObject_h

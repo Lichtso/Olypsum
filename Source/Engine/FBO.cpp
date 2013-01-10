@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Utilities.h"
-#import "ObjectManager.h"
+#include "Utilities.h"
+#include "ObjectManager.h"
 
 ColorBuffer::ColorBuffer(unsigned int sizeB, bool shadowMapB, bool cubeMapB) :size(sizeB), shadowMap(shadowMapB), cubeMap(cubeMapB) {
     glGenTextures(1, &texture);

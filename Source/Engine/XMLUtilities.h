@@ -6,10 +6,10 @@
 //
 //
 
-#import <fstream>
-#import "rapidxml.hpp"
-#import "rapidxml_print.hpp"
-#import "Utilities.h"
+#include <fstream>
+#include "rapidxml.hpp"
+#include "rapidxml_print.hpp"
+#include "Utilities.h"
 
 #ifndef XMLUtilities_h
 #define XMLUtilities_h

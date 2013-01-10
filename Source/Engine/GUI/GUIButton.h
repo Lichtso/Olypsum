@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "GUILabel.h"
-#import "GUIView.h"
-#import "GUIRoundedRect.h"
+#include "GUILabel.h"
+#include "GUIView.h"
+#include "GUIRoundedRect.h"
 
 #ifndef GUIButton_h
 #define GUIButton_h

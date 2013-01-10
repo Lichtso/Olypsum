@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "LightVolume.h"
-#import "DisplayObject.h"
+#include "LightVolume.h"
+#include "DisplayObject.h"
 
 #ifndef LightObject_h
 #define LightObject_h

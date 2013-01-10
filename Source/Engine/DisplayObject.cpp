@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#import "Menu.h"
+#include "Menu.h"
 
 GraphicObject::GraphicObject() {
     objectManager.graphicObjects.insert(this);
