@@ -49,7 +49,6 @@ class ModelObject : public GraphicObject {
     void writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver,
                     rapidxml::xml_node<xmlUsedCharType>* node, BoneObject *object);
     void updateSkeletonPose(BaseObject* object, Bone* bone);
-    void drawBonePose(BaseObject* object, Bone* bone, float axesSize, float linesSize, float textSize);
     protected:
     ModelObject() :skeletonPose(NULL), textureAnimation(NULL) { };
     public:
@@ -59,8 +58,6 @@ class ModelObject : public GraphicObject {
     void draw();
     //! Draws a single mesh
     void drawAccumulatedMesh(Mesh* mesh);
-    //! A debug draw of the skeleton
-    void drawSkeletonPose(float axesSize, float linesSize, float textSize);
     //! Called by a Mesh to prepare the shader program to draw this ModelObject
     virtual void prepareShaderProgram(Mesh* mesh);
     void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);

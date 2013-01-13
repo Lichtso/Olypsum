@@ -19,21 +19,28 @@ enum GUICorners {
     GUIBottomRightCorner = 8
 };
 
-class GUIRoundedRect {
-    unsigned char* pixels;
-    float getInnerShadowValue(unsigned int x, unsigned int y);
-    void setBorderPixel(unsigned int x, unsigned int y);
-    void setBorderPixelBlended(unsigned int x, unsigned int y, float alpha);
-    void setInnerShadowPixel(unsigned int x, unsigned int y, float value);
+class GUIDrawableRect {
     public:
-    GLuint* texture;
+    int width, height;
+    void drawOnScreen(btVector3 parentTransform, int posX, int posY, GUIClipRect &parentClipRect);
+};
+
+class GUIRoundedRect : public GUIDrawableRect {
+    float getInnerShadowValue(unsigned char* pixels, unsigned int x, unsigned int y);
+    void setBorderPixel(unsigned char* pixels, unsigned int x, unsigned int y);
+    void setBorderPixelBlended(unsigned char* pixels, unsigned int x, unsigned int y, float alpha);
+    void setInnerShadowPixel(unsigned char* pixels, unsigned int x, unsigned int y, float value);
+    public:
+    GLuint texture;
+    bool transposed;
     GUICorners roundedCorners;
-    unsigned int cornerRadius;
     Color4 topColor, bottomColor, borderColor;
-    int width, height, innerShadow;
+    int innerShadow;
+    unsigned int cornerRadius;
     GUIRoundedRect();
+    ~GUIRoundedRect();
     void drawInTexture();
-    void drawOnScreen(bool transposed, int posX, int posY, GUIClipRect& parentClipRect);
+    void drawOnScreen(btVector3 parentTransform, int posX, int posY, GUIClipRect &parentClipRect);
 };
 
 #endif

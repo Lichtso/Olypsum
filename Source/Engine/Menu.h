@@ -11,6 +11,7 @@
 #include "GUIScrollView.h"
 #include "GUICheckBox.h"
 #include "GUITabs.h"
+#include "GUIProgressBar.h"
 #include "GUISlider.h"
 #include "GUITextField.h"
 #include "GUIImage.h"

@@ -95,12 +95,12 @@ void FileManager::loadOptions() {
         edgeSmoothEnabled = readOptionBool(optionGroup->first_node("EdgeSmoothEnabled"));
         fullScreenEnabled = readOptionBool(optionGroup->first_node("FullScreenEnabled"));
         cubemapsEnabled = readOptionBool(optionGroup->first_node("CubemapsEnabled"));
+        vSyncEnabled = readOptionBool(optionGroup->first_node("VSyncEnabled"));
         depthOfFieldQuality = readOptionValue<unsigned int>(optionGroup->first_node("DepthOfFieldQuality"), "%d");
         bumpMappingQuality = readOptionValue<unsigned int>(optionGroup->first_node("BumpMappingQuality"), "%d");
         shadowQuality = readOptionValue<unsigned int>(optionGroup->first_node("ShadowQuality"), "%d");
         ssaoQuality = readOptionValue<unsigned int>(optionGroup->first_node("SsaoQuality"), "%d");
         blendingQuality = readOptionValue<unsigned int>(optionGroup->first_node("BlendingQuality"), "%d");
-        particleCalcTarget = readOptionValue<unsigned int>(optionGroup->first_node("ParticleCalcTarget"), "%d");
         optionGroup = options->first_node("Sound");
         globalVolume = readOptionValue<float>(optionGroup->first_node("globalVolume"), "%f");
         musicVolume = readOptionValue<float>(optionGroup->first_node("musicVolume"), "%f");
@@ -125,6 +125,7 @@ void FileManager::saveOptions() {
     addXMLNode(doc, optionGroup, "EdgeSmoothEnabled", (edgeSmoothEnabled) ? "true" : "false");
     addXMLNode(doc, optionGroup, "FullScreenEnabled", (fullScreenEnabled) ? "true" : "false");
     addXMLNode(doc, optionGroup, "CubemapsEnabled", (cubemapsEnabled) ? "true" : "false");
+    addXMLNode(doc, optionGroup, "VSyncEnabled", (vSyncEnabled) ? "true" : "false");
     sprintf(&str[0], "%d", depthOfFieldQuality);
     addXMLNode(doc, optionGroup, "DepthOfFieldQuality", &str[0]);
     sprintf(&str[4], "%d", bumpMappingQuality);
@@ -135,8 +136,6 @@ void FileManager::saveOptions() {
     addXMLNode(doc, optionGroup, "SsaoQuality", &str[12]);
     sprintf(&str[16], "%d", blendingQuality);
     addXMLNode(doc, optionGroup, "BlendingQuality", &str[16]);
-    sprintf(&str[20], "%d", particleCalcTarget);
-    addXMLNode(doc, optionGroup, "ParticleCalcTarget", &str[20]);
     
     optionGroup = doc.allocate_node(rapidxml::node_element);
     optionGroup->name("Sound");

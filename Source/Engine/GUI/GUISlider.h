@@ -13,11 +13,10 @@
 #define GUISlider_h
 
 class GUISlider : public GUIRect {
-    GLuint textureL, textureM, textureR;
+    GUIRoundedRect barL, barR, slider;
     int mouseDragPos;
     bool highlighted;
-    void generateBar(bool filled);
-    void drawBar(GUIClipRect& clipRect, unsigned int barLength, bool filled);
+    void drawBar(btVector3 transform, GUIClipRect clipRect, GUIRoundedRect& roundedRect);
     public:
     float value;
     unsigned int steps;
@@ -25,7 +24,6 @@ class GUISlider : public GUIRect {
     GUIOrientation orientation;
     std::function<void(GUISlider*)> onChange;
     GUISlider();
-    ~GUISlider();
     void updateContent();
     void draw(btVector3 transform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);

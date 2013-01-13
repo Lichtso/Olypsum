@@ -29,17 +29,14 @@ enum GUIButtonType {
 };
 
 class GUIButton : public GUIView {
-    GLuint texture;
-    void setInnerPixel(unsigned char* pixel, unsigned int x, unsigned int y);
     public:
+    GUIRoundedRect content;
     GUISizeAlignment sizeAlignment;
     int paddingX, paddingY;
     GUIButtonType buttonType;
-    GUICorners roundedCorners;
     GUIButtonState state;
     std::function<void(GUIButton*)> onClick;
     GUIButton();
-    ~GUIButton();
     void updateContent();
     void draw(btVector3 transform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);

@@ -1,10 +1,10 @@
-attribute vec3 position;
+in vec3 position;
 #if PROCESSING_TYPE == 3
-attribute vec2 texCoord;
-varying vec2 vTexCoord;
+uniform mat3 textureMat;
+out vec2 vTexCoord;
 #elif PROCESSING_TYPE == 4
-attribute vec3 color;
-varying vec3 vColor;
+uniform mat4 modelMat;
+out vec3 vPosition;
 #endif
 
 uniform mat4 modelViewMat;
@@ -12,73 +12,79 @@ uniform mat4 modelViewMat;
 void main() {
     gl_Position = vec4(position, 1.0)*modelViewMat;
     #if PROCESSING_TYPE == 3
-    vTexCoord = texCoord;
+    vTexCoord = (textureMat*vec3(position.xy, 1.0)).xy;
     #elif PROCESSING_TYPE == 4
-    vColor = color;
+    vPosition = (vec4(position, 1.0)*modelMat).xyz;
     #endif
 }
 
 #separator
-
-#extension GL_ARB_texture_rectangle : enable
 
 #if PROCESSING_TYPE < 3
 uniform sampler2DRect sampler0;
 uniform sampler2DRect sampler1;
 #endif
 
-#if PROCESSING_TYPE == 1
+#if PROCESSING_TYPE == 1 //Edge Smooth
+out vec3 colorOut;
 
 void main() {
 	vec4 vDepthDiff;
-	float depth = texture2DRect(sampler0, gl_FragCoord.xy).x;
-	vDepthDiff.x = texture2DRect(sampler0, gl_FragCoord.xy+vec2( 0.0, 1.0)).x + texture2DRect(sampler0, gl_FragCoord.xy+vec2( 0.0,-1.0)).x;
-	vDepthDiff.y = texture2DRect(sampler0, gl_FragCoord.xy+vec2( 1.0, 0.0)).x + texture2DRect(sampler0, gl_FragCoord.xy+vec2(-1.0, 0.0)).x;
-	vDepthDiff.z = texture2DRect(sampler0, gl_FragCoord.xy+vec2( 1.0, 1.0)).x + texture2DRect(sampler0, gl_FragCoord.xy+vec2(-1.0,-1.0)).x;
-	vDepthDiff.w = texture2DRect(sampler0, gl_FragCoord.xy+vec2( 1.0,-1.0)).x + texture2DRect(sampler0, gl_FragCoord.xy+vec2( 1.0,-1.0)).x;
+	float depth = texture(sampler0, gl_FragCoord.xy).x;
+	vDepthDiff.x = texture(sampler0, gl_FragCoord.xy+vec2( 0.0, 1.0)).x + texture(sampler0, gl_FragCoord.xy+vec2( 0.0,-1.0)).x;
+	vDepthDiff.y = texture(sampler0, gl_FragCoord.xy+vec2( 1.0, 0.0)).x + texture(sampler0, gl_FragCoord.xy+vec2(-1.0, 0.0)).x;
+	vDepthDiff.z = texture(sampler0, gl_FragCoord.xy+vec2( 1.0, 1.0)).x + texture(sampler0, gl_FragCoord.xy+vec2(-1.0,-1.0)).x;
+	vDepthDiff.w = texture(sampler0, gl_FragCoord.xy+vec2( 1.0,-1.0)).x + texture(sampler0, gl_FragCoord.xy+vec2( 1.0,-1.0)).x;
 	vDepthDiff = step(0.0, abs(vec4(depth*2.0) - vDepthDiff)*80.0 - vec4(0.5));
     
     float fT = max(dot(vDepthDiff, vec4(0.25)), 0.0);
-	gl_FragData[0].rgb  = texture2DRect(sampler1, gl_FragCoord.xy).xyz * (1.0-fT);
-	gl_FragData[0].rgb += texture2DRect(sampler1, gl_FragCoord.xy+vec2( 0.0, 1.0)).xyz * fT;
-	gl_FragData[0].rgb += texture2DRect(sampler1, gl_FragCoord.xy+vec2( 0.0,-1.0)).xyz * fT;
-	gl_FragData[0].rgb += texture2DRect(sampler1, gl_FragCoord.xy+vec2( 1.0, 0.0)).xyz * fT;
-	gl_FragData[0].rgb += texture2DRect(sampler1, gl_FragCoord.xy+vec2(-1.0, 0.0)).xyz * fT;
-	gl_FragData[0].rgb *= 1.0/(1.0+fT*3.0);
-    gl_FragData[0].a = 1.0;
+	colorOut = texture(sampler1, gl_FragCoord.xy).xyz * (1.0-fT);
+	colorOut += texture(sampler1, gl_FragCoord.xy+vec2( 0.0, 1.0)).xyz * fT;
+	colorOut += texture(sampler1, gl_FragCoord.xy+vec2( 0.0,-1.0)).xyz * fT;
+	colorOut += texture(sampler1, gl_FragCoord.xy+vec2( 1.0, 0.0)).xyz * fT;
+	colorOut += texture(sampler1, gl_FragCoord.xy+vec2(-1.0, 0.0)).xyz * fT;
+	colorOut *= 1.0/(1.0+fT*3.0);
 }
 
-#elif PROCESSING_TYPE == 2
+#elif PROCESSING_TYPE == 2 //Depth of Field
+out vec3 colorOut;
 
 void main() {
-	float factor = max(0.0, texture2DRect(sampler0, gl_FragCoord.xy).x-0.75)*10.0;
-    gl_FragData[0].rgb = vec3(0.0);
+	float factor = max(0.0, texture(sampler0, gl_FragCoord.xy).x-0.75)*10.0;
+    colorOut = vec3(0.0);
     const float blurWidth = float(DOF_QUALITY);
 	for(float x = -blurWidth; x <= blurWidth; x ++)
         for(float y = -blurWidth; y <= blurWidth; y ++)
-            gl_FragData[0].rgb += texture2DRect(sampler1, gl_FragCoord.xy+vec2(x, y)*factor).rgb;
+            colorOut += texture(sampler1, gl_FragCoord.xy+vec2(x, y)*factor).rgb;
     const float blurSum = 1.0 / ((blurWidth*2.0+1.0)*(blurWidth*2.0+1.0));
-    gl_FragData[0].rgb *= blurSum;
-    gl_FragData[0].a = 1.0;
+    colorOut *= blurSum;
 }
 
-#elif PROCESSING_TYPE == 3
-varying vec2 vTexCoord;
+#elif PROCESSING_TYPE == 3 //Sprites
+in vec2 vTexCoord;
+out vec4 colorOut;
 uniform float alpha;
 uniform sampler2D sampler0;
 
 void main() {
-	gl_FragData[0] = texture2D(sampler0, vTexCoord.st);
-    gl_FragData[0].a *= alpha;
-    if(gl_FragData[0].a < 0.0039) discard;
+	colorOut = texture(sampler0, vTexCoord.st);
+    colorOut.a *= alpha;
+    if(colorOut.a < 0.0039) discard;
 }
 
-#elif PROCESSING_TYPE == 4
-varying vec3 vColor;
+#elif PROCESSING_TYPE == 4 //Debug draw colored
+uniform vec3 color;
+in vec3 vPosition;
+out vec3 colorOut;
+out vec3 materialOut;
+out vec3 normalOut;
+out vec3 positionOut;
 
 void main() {
-	gl_FragData[0].rgb = vColor;
-    gl_FragData[0].a = 1.0;
+	colorOut = color;
+    materialOut = vec3(0.0, 0.0, 0.0);
+    normalOut = vec3(0.0);
+    positionOut = vPosition;
 }
 
 #endif

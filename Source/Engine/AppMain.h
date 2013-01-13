@@ -7,6 +7,7 @@
 //
 
 #include "Controls.h"
+#include "netLink-1.0.3/socket.h"
 
 #ifndef AppMain_h
 #define AppMain_h

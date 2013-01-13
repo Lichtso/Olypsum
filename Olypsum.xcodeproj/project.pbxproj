@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1115463916A0BA4200F27340 /* VertexArrayObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1115463716A0BA4200F27340 /* VertexArrayObject.cpp */; };
 		111666DE169E11E300ECBDC9 /* core.cc in Sources */ = {isa = PBXBuildFile; fileRef = 111666CB169E11E300ECBDC9 /* core.cc */; };
 		111666DF169E11E300ECBDC9 /* exception.code.inc in Sources */ = {isa = PBXBuildFile; fileRef = 111666CD169E11E300ECBDC9 /* exception.code.inc */; };
 		111666E0169E11E300ECBDC9 /* smart_buffer.cc in Sources */ = {isa = PBXBuildFile; fileRef = 111666D2169E11E300ECBDC9 /* smart_buffer.cc */; };
@@ -111,6 +112,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1115463716A0BA4200F27340 /* VertexArrayObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VertexArrayObject.cpp; sourceTree = "<group>"; };
+		1115463816A0BA4200F27340 /* VertexArrayObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VertexArrayObject.h; sourceTree = "<group>"; };
 		111666CA169E11E300ECBDC9 /* config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = config.h; sourceTree = "<group>"; };
 		111666CB169E11E300ECBDC9 /* core.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = core.cc; sourceTree = "<group>"; };
 		111666CC169E11E300ECBDC9 /* core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = core.h; sourceTree = "<group>"; };
@@ -370,6 +373,8 @@
 				11DA1F0F162DEA03007D7E6C /* Matrix4.cpp */,
 				11A79B67153C2FE9002B9F0A /* Texture.h */,
 				11A79B66153C2FE9002B9F0A /* Texture.cpp */,
+				1115463816A0BA4200F27340 /* VertexArrayObject.h */,
+				1115463716A0BA4200F27340 /* VertexArrayObject.cpp */,
 				11648F6B153DEE0F004CA74D /* FBO.h */,
 				11648F6D153DEE63004CA74D /* FBO.cpp */,
 				112BF17F162AFE8100CF0C0D /* Object.h */,
@@ -602,6 +607,7 @@
 				111666E1169E11E300ECBDC9 /* socket.cc in Sources */,
 				111666E2169E11E300ECBDC9 /* socket_group.cc in Sources */,
 				111666E3169E11E300ECBDC9 /* util.cc in Sources */,
+				1115463916A0BA4200F27340 /* VertexArrayObject.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

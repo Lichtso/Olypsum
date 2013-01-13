@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Texture.h"
+#include "VertexArrayObject.h"
 
 #ifndef FBO_h
 #define FBO_h
@@ -36,6 +36,7 @@ class FBO {
     //! Internaly used to set up a g-buffer
     void initBuffer(unsigned int index);
     public:
+    VertexArrayObject vao; //!< Used for full screen rendering
     GLuint frameBuffer, //!< The OpenGL identifier of the frame buffer
            gBuffers[gBuffersCount]; //!< The OpenGL identifiers of the g-buffers
     unsigned int maxSize; //! The maximal width and height of a color buffer
@@ -49,8 +50,10 @@ class FBO {
      @param transparent True if this method is called by renderTransparentInDeferredBuffers()
      */
     void renderInDeferredBuffers(bool transparent);
-    //! Renders all transparent meshes which have been accumulated
-    void renderTransparentInDeferredBuffers();
+    /*! Renders all transparent meshes which have been accumulated
+     @param keepInColorBuffer If true the restult will be stored in colorDBuffer
+     */
+    void renderTransparentInDeferredBuffers(bool keepInColorBuffer);
     /*! Prepares the g-buffers to be rendered in and read out
      @param fillScreen If true this method will render the entire screen else it will only prepare the g-buffers
      @param inBuffers A array of g-buffer indecies to be used as textures. The index of each element will also be its texture target index

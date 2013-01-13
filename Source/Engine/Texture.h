@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include <OpenGL/gl.h>
+#include <OpenGL/gl3.h>
 #include <SDL/SDL.h>
 #include "XMLUtilities.h"
 

@@ -19,15 +19,13 @@
 	<Entry key="cubemapsEnabled">Cubemaps</Entry>
 	<Entry key="screenBlurEnabled">Bildunschärfe</Entry>
 	<Entry key="depthOfFieldQuality">Tiefenunschärfe</Entry>
+	<Entry key="vSyncEnabled">V-Sync</Entry>
 	<Entry key="bumpMappingQuality">Oberflächenqualität</Entry>
 	<Entry key="shadowQuality">Schattenqualität</Entry>
 	<Entry key="ssaoQuality">SSAO-Qualität</Entry>
 	<Entry key="blendingQuality">Mischungsqualität</Entry>
-	<Entry key="particleCalcTarget">Partikel-Systeme</Entry>
 	<Entry key="on">An</Entry>
 	<Entry key="off">Aus</Entry>
-	<Entry key="cpu">CPU</Entry>
-	<Entry key="gpu">GPU</Entry>
 	<Entry key="cancel">Abbrechen</Entry>
 	<Entry key="ok">Ok</Entry>
 	<Entry key="name">Name</Entry>

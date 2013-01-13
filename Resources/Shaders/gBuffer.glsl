@@ -1,9 +1,9 @@
-attribute vec3 position;
-attribute vec2 texCoord;
-attribute vec3 normal;
+in vec3 position;
+in vec2 texCoord;
+in vec3 normal;
 #if SKELETAL_ANIMATION
-attribute vec3 weights;
-attribute vec3 joints;
+in vec3 weights;
+in vec3 joints;
 
 uniform mat4 jointMats[64];
 uniform mat4 viewMat;
@@ -14,13 +14,13 @@ uniform mat3 normalMat;
 #endif
 
 #if BUMP_MAPPING > 0
-varying vec3 gPosition;
-varying vec2 gTexCoord;
-varying vec3 gNormal;
+out vec3 gPosition;
+out vec2 gTexCoord;
+out vec3 gNormal;
 #else
-varying vec3 vPosition;
-varying vec2 vTexCoord;
-varying vec3 vNormal;
+out vec3 vPosition;
+out vec2 vTexCoord;
+out vec3 vNormal;
 #endif
 
 void main() {
@@ -56,16 +56,20 @@ void main() {
 
 #separator
 
-#extension GL_EXT_texture_array : require
 #define M_PI 3.14159265358979323846
 
-varying vec3 vPosition;
-varying vec2 vTexCoord;
-varying vec3 vNormal;
+in vec3 vPosition;
+in vec2 vTexCoord;
+in vec3 vNormal;
 #if BUMP_MAPPING > 0
-varying vec3 vTangent;
-varying vec3 vBitangent;
+in vec3 vTangent;
+in vec3 vBitangent;
 #endif
+out vec4 colorOut;
+out vec3 materialOut;
+out vec3 normalOut;
+out vec3 positionOut;
+out vec3 specularOut;
 
 #if TEXTURE_ANIMATION == 0
 uniform sampler2D sampler0;
@@ -95,17 +99,19 @@ float random(vec2 co) {
 
 void setColor(vec2 texCoord) {
     #if TEXTURE_ANIMATION == 0 //2D texture
-    gl_FragData[0] = texture2D(sampler0, texCoord); //Color
+    colorOut = texture(sampler0, texCoord); //Color
     #else //3D texture
-    gl_FragData[0] = texture2DArray(sampler0, vec3(texCoord.xy, texCoordAnimZ.x))*texCoordAnimF.x; //Color
-    gl_FragData[0] += texture2DArray(sampler0, vec3(texCoord.xy, texCoordAnimZ.y))*texCoordAnimF.y;
+    colorOut = texture(sampler0, vec3(texCoord.xy, texCoordAnimZ.x))*texCoordAnimF.x
+                +texture(sampler0, vec3(texCoord.xy, texCoordAnimZ.y))*texCoordAnimF.y; //Color
     #endif
+    if(colorOut.a < 0.0039) discard;
+    colorOut.a = 0.5;
 }
 
 #if BUMP_MAPPING == 3
 void LinearParallax(inout vec3 texCoord, vec3 viewVec, float steps) {
 	for(float i = 0.0; i < steps; i ++) {
-		if(texCoord.z >= texture2D(sampler2, texCoord.xy).a)
+		if(texCoord.z >= texture(sampler2, texCoord.xy).a)
             return;
         texCoord += viewVec;
     }
@@ -113,7 +119,7 @@ void LinearParallax(inout vec3 texCoord, vec3 viewVec, float steps) {
 
 void BinaryParallax(inout vec3 texCoord, vec3 viewVec) {
 	for(int i = 0; i < 6; i ++) {
-		if(texCoord.z < texture2D(sampler2, texCoord.xy).a)
+		if(texCoord.z < texture(sampler2, texCoord.xy).a)
             texCoord += viewVec;
 		viewVec *= 0.5;
 		texCoord -= viewVec;
@@ -126,25 +132,25 @@ void main() {
     
     #if BUMP_MAPPING <= 1 || BLENDING_QUALITY > 0
     setColor(vTexCoord);
-    if(gl_FragData[0].a < 0.0039) discard;
-    gl_FragData[1] = vec4(texture2D(sampler1, vTexCoord).rgb, 1.0); //Material
+    materialOut = texture(sampler1, vTexCoord).rgb;
     #endif
-    vec3 normal = normalize(vNormal);
+    normalOut = normalize(vNormal);
+    positionOut = vPosition;
     
     #if BLENDING_QUALITY == 0 //Solid
     
     #if BUMP_MAPPING == 1 //Normal mapping
-    vec3 bumpMap = texture2D(sampler2, vTexCoord).xyz;
+    vec3 bumpMap = texture(sampler2, vTexCoord).xyz;
     bumpMap.xy = bumpMap.xy*2.0-vec2(1.0);
-    normal = mat3(vTangent, vBitangent, normal)*bumpMap;
+    normalOut = mat3(vTangent, vBitangent, normalOut)*bumpMap;
     #elif BUMP_MAPPING > 1 //Parallax
     
     vec3 viewVec = normalize(camPos-vPosition);
     #if BUMP_MAPPING == 2 //Parallax simple
     viewVec.xy = vec2(dot(viewVec, vTangent), dot(viewVec, vBitangent));
-    vec2 texCoord = vTexCoord-viewVec.xy*texture2D(sampler2, vTexCoord).a*0.04;
+    vec2 texCoord = vTexCoord-viewVec.xy*texture(sampler2, vTexCoord).a*0.04;
     #elif BUMP_MAPPING == 3 //Parallax occlusion
-    viewVec = vec3(dot(viewVec, vTangent), dot(viewVec, vBitangent), dot(viewVec, normal));
+    viewVec = vec3(dot(viewVec, vTangent), dot(viewVec, vBitangent), dot(viewVec, normalOut));
     float steps = floor((1.0 - viewVec.z) * 18.0) + 2.0;
     viewVec.xy *= -0.04/viewVec.z;
     viewVec.z = 1.0;
@@ -155,21 +161,20 @@ void main() {
     #endif
     setColor(texCoord.xy);
     //if(abs(texCoord.x-0.5) > 0.5 || abs(texCoord.y-0.5) > 0.5) discard;
-    if(gl_FragData[0].a < 0.0039) discard;
     gl_FragDepth = gl_FragCoord.z+length(texCoord.xy-vTexCoord)*0.2; //Depth
-    vec3 bumpMap = texture2D(sampler2, texCoord.xy).xyz;
+    vec3 bumpMap = texture(sampler2, texCoord.xy).xyz;
     bumpMap.xy = bumpMap.xy*2.0-vec2(1.0);
-    normal = mat3(vTangent, vBitangent, normal)*bumpMap;
-	gl_FragData[1] = vec4(texture2D(sampler1, texCoord.xy).rgb, 1.0); //Material
+    normalOut = mat3(vTangent, vBitangent, normalOut)*bumpMap;
+	materialOut = texture(sampler1, texCoord.xy).rgb;
     #endif //Parallax
     
     #else //Transparent
     
     #if BUMP_MAPPING == 1 //Glass refraction
-    vec3 bumpMap = texture2D(sampler2, vTexCoord).xyz;
+    vec3 bumpMap = texture(sampler2, vTexCoord).xyz;
     bumpMap.xy = bumpMap.xy*2.0-vec2(1.0);
-    normal = mat3(vTangent, vBitangent, normal)*bumpMap;
-    #elif BUMP_MAPPING == 2 //Water waves
+    normalOut = mat3(vTangent, vBitangent, normalOut)*bumpMap;
+    #elif BUMP_MAPPING == 2 //Water waves refraction
     vec3 bumpMap = vec3(0.0);
     for(int i = 0; i < maxWaves; i ++) {
         //if(waveAmp[i] <= 0.0) continue; //UNKNOWN PERFORMANCE USE
@@ -181,38 +186,42 @@ void main() {
         bumpMap.xy -= diff*(1.0-len)*waveAmp[i];
     }
     bumpMap.z = 1.0;
-    normal = mat3(vTangent, vBitangent, normal)*normalize(bumpMap);
+    normalOut = mat3(vTangent, vBitangent, normalOut)*normalize(bumpMap);
     #endif //Water waves
     
-    #if BLENDING_QUALITY == 2
-    gl_FragData[0].rgb *= gl_FragData[0].a;
-    gl_FragData[0].rgb += (1.0-gl_FragData[0].a)*texture2DRect(sampler3, gl_FragCoord.xy+(viewNormalMat*normal).xy*10.0).rgb; //Color
-    gl_FragData[0].a = 1.0;
-    #elif BLENDING_QUALITY == 3
-    gl_FragData[4].rgb = (1.0-gl_FragData[0].a)*texture2DRect(sampler3, gl_FragCoord.xy+(viewNormalMat*normal).xy*10.0).rgb; //Specular
-    gl_FragData[4].a = 1.0;
-    #endif
-    #endif //Transparent
+    vec3 backgroundColor;
+    #if BUMP_MAPPING == 0 //No refraction
+    texture(sampler2, vTexCoord); //Place holder
+    backgroundColor = texture(sampler3, gl_FragCoord.xy).rgb;
+    #else //Glass refraction
+    backgroundColor = texture(sampler3, gl_FragCoord.xy+(viewNormalMat*normalOut).xy*10.0).rgb;
+    #endif //Glass refraction
+    backgroundColor *= (1.0-colorOut.a);
     
-    gl_FragData[2] = vec4(normal, 1.0); //Normal
-	gl_FragData[3] = vec4(vPosition, 1.0); //Position
+    #if BLENDING_QUALITY == 2 //Mixed Blending
+    colorOut.rgb *= colorOut.a;
+    colorOut.rgb += backgroundColor; //Color
+    colorOut.a = 1.0;
+    #elif BLENDING_QUALITY == 3 //Correct Blending
+    specularOut = backgroundColor; //Transparent
+    #endif //Full Blending
+    
+    #endif //Transparent
 }
 
 #separator
 
-#parameter GL_GEOMETRY_VERTICES_OUT 3
-#parameter GL_GEOMETRY_INPUT_TYPE GL_TRIANGLES
-#parameter GL_GEOMETRY_OUTPUT_TYPE GL_TRIANGLE_STRIP
-#extension GL_EXT_geometry_shader4: enable
+layout(triangles) in;
+layout(triangle_strip, max_vertices = 3) out;
 
-varying in vec3 gPosition[3];
-varying in vec2 gTexCoord[3];
-varying in vec3 gNormal[3];
-varying out vec3 vPosition;
-varying out vec2 vTexCoord;
-varying out vec3 vNormal;
-varying out vec3 vTangent;
-varying out vec3 vBitangent;
+in vec3 gPosition[3];
+in vec2 gTexCoord[3];
+in vec3 gNormal[3];
+out vec3 vPosition;
+out vec2 vTexCoord;
+out vec3 vNormal;
+out vec3 vTangent;
+out vec3 vBitangent;
 
 void main() {
 	vec3 posBA = gPosition[1]-gPosition[0], posCA = gPosition[2]-gPosition[0];
@@ -221,7 +230,7 @@ void main() {
 		 bitangent = normalize((texCA.s*posBA-texBA.s*posCA) / (texBA.t*texCA.s-texBA.s*texCA.t));
     
     for(int i = 0; i < 3; i ++) {
-		gl_Position = gl_PositionIn[i];
+		gl_Position = gl_in[i].gl_Position;
 		vPosition = gPosition[i];
 		vTexCoord = gTexCoord[i];
 		vNormal = gNormal[i];

@@ -1,4 +1,4 @@
-attribute vec2 position;
+in vec2 position;
 
 void main() {
 	gl_Position = vec4(position.x, position.y, 0.0, 1.0);
@@ -6,56 +6,27 @@ void main() {
 
 #separator
 
-#extension GL_ARB_texture_rectangle : enable
-
+out vec3 colorOut;
 uniform sampler2DRect sampler0;
 uniform sampler2DRect sampler1;
 uniform sampler2DRect sampler2;
 uniform sampler2DRect sampler3;
-#if SSAO_QUALITY
 uniform sampler2DRect sampler4;
-uniform sampler2DRect sampler5;
-#elif BLENDING_QUALITY == 1
-uniform sampler2DRect sampler4;
-#endif
 
 void main() {
     #if BLENDING_QUALITY
-    vec4 color = texture2DRect(sampler0, gl_FragCoord.xy);
+    vec4 color = texture(sampler0, gl_FragCoord.xy);
     if(color.a == 0.0) discard;
     #if BLENDING_QUALITY == 1
     color.rgb *= color.a;
-    color.rgb += texture2DRect(sampler4, gl_FragCoord.xy).rgb*(1.0-color.a);
+    color.rgb += texture(sampler4, gl_FragCoord.xy).rgb*(1.0-color.a);
     #endif
     #else
-    vec3 color = texture2DRect(sampler0, gl_FragCoord.xy).rgb;
+    vec3 color = texture(sampler0, gl_FragCoord.xy).rgb;
     #endif
-    vec3 diffuse = texture2DRect(sampler1, gl_FragCoord.xy).rgb+vec3(0.2),
-         specular = texture2DRect(sampler2, gl_FragCoord.xy).rgb;
-    float emission = texture2DRect(sampler3, gl_FragCoord.xy).b;
+    vec3 diffuse = texture(sampler1, gl_FragCoord.xy).rgb+vec3(0.2),
+         specular = texture(sampler2, gl_FragCoord.xy).rgb;
+    float emission = texture(sampler3, gl_FragCoord.xy).b;
     
-    #if SSAO_QUALITY
-    vec2 uvPos;
-    vec3 normal = texture2DRect(sampler4, gl_FragCoord.xy).xyz;
-	float ambientOcclusion = 0.0, occlusionSum = 0.0;
-    const float blurWidth = float(SSAO_QUALITY-1);
-	for(float x = -blurWidth; x <= blurWidth; x ++)
-        for(float y = -blurWidth; y <= blurWidth; y ++) {
-            uvPos = gl_FragCoord.xy+vec2(x, y);
-            if(dot(texture2DRect(sampler4, uvPos).xyz, normal) > 0.99) {
-                occlusionSum += 1.0;
-                ambientOcclusion += texture2DRect(sampler5, uvPos*0.5).x;
-            }
-        }
-    
-    if(occlusionSum > 0.0)
-        ambientOcclusion *= 1.0 / occlusionSum;
-    else
-        ambientOcclusion = texture2DRect(sampler5, gl_FragCoord.xy*0.5).x;
-    
-    gl_FragData[0].rgb = color.rgb*diffuse*ambientOcclusion+color.rgb*emission+specular;
-    #else
-    gl_FragData[0].rgb = color.rgb*(diffuse+vec3(emission))+specular;
-    #endif
-    gl_FragData[0].a = 1.0;
+    colorOut = color.rgb*(diffuse+vec3(emission))+specular;
 }

@@ -21,8 +21,7 @@ ColorBuffer::ColorBuffer(unsigned int sizeB, bool shadowMapB, bool cubeMapB) :si
     glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
     if(shadowMap) {
-        glTexParameteri(textureTarget, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
-        glTexParameteri(textureTarget, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+        glTexParameteri(textureTarget, GL_TEXTURE_COMPARE_MODE, 0x884E); //GL_COMPARE_R_TO_TEXTURE
         glTexParameteri(textureTarget, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
         if(cubeMap) {
             for(GLenum side = GL_TEXTURE_CUBE_MAP_POSITIVE_X; side <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; side ++)
@@ -70,11 +69,11 @@ FBO::~FBO() {
 
 void FBO::initBuffer(unsigned int index) {
     glGenTextures(1, &gBuffers[index]);
-    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, gBuffers[index]);
-    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glBindTexture(GL_TEXTURE_RECTANGLE, gBuffers[index]);
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 }
 
 void FBO::init() {
@@ -92,30 +91,42 @@ void FBO::init() {
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
     
     initBuffer(depthDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_DEPTH_COMPONENT16, screenSize[0], screenSize[1], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_DEPTH_COMPONENT16, screenSize[0], screenSize[1], 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     initBuffer(colorDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, screenSize[0], screenSize[1], 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB, screenSize[0], screenSize[1], 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     initBuffer(materialDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, screenSize[0], screenSize[1], 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB, screenSize[0], screenSize[1], 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     initBuffer(normalDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, screenSize[0], screenSize[1], 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB16F, screenSize[0], screenSize[1], 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(positionDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB32F_ARB, screenSize[0], screenSize[1], 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB32F, screenSize[0], screenSize[1], 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(specularDBuffer); //Needs maxSize because it is used as color buffer for shadow map calculations
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB, maxSize, maxSize, 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB, maxSize, maxSize, 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(diffuseDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGB16F_ARB, screenSize[0], screenSize[1], 0, GL_RGB, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB16F, screenSize[0], screenSize[1], 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(transparentDBuffer);
-    glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA, screenSize[0], screenSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, screenSize[0], screenSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     if(ssaoQuality) {
         initBuffer(ssaoDBuffer);
-        glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_R16F, screenSize[0] >> 1, screenSize[1] >> 1, 0, GL_RED, GL_FLOAT, NULL);
-        glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_R16F, screenSize[0] >> screenSize[2], screenSize[1] >> screenSize[2], 0, GL_RED, GL_FLOAT, NULL);
+        glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
     
-    glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
+    glBindTexture(GL_TEXTURE_RECTANGLE, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
+    VertexArrayObject::Attribute attr;
+    attr.size = 2;
+    std::vector<VertexArrayObject::Attribute> attributes;
+    attr.name = POSITION_ATTRIBUTE;
+    attributes.push_back(attr);
+    vao.init(attributes, false);
+    
+    float vertices[8] = { -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0 };
+    vao.updateVertices(8, vertices, GL_STATIC_DRAW);
+    vao.elementsCount = 4;
+    vao.drawType = GL_TRIANGLE_FAN;
 }
 
 void FBO::copyGBuffer(unsigned char source, unsigned char destination) {
@@ -123,13 +134,13 @@ void FBO::copyGBuffer(unsigned char source, unsigned char destination) {
         glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     else{
         glBindFramebuffer(GL_READ_FRAMEBUFFER, frameBuffer);
-        glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE_ARB, gBuffers[source], 0);
+        glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, gBuffers[source], 0);
     }
     if(destination == 0)
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     else{
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_RECTANGLE_ARB, gBuffers[destination], 0);
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_RECTANGLE, gBuffers[destination], 0);
     }
     glReadBuffer((source == 0) ? GL_BACK : GL_COLOR_ATTACHMENT0);
     glDrawBuffer((destination == 0) ? GL_BACK : GL_COLOR_ATTACHMENT1);
@@ -146,29 +157,32 @@ void FBO::renderInDeferredBuffers(bool transparent) {
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
     GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
     
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_RECTANGLE_ARB, gBuffers[depthDBuffer], 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE_ARB, gBuffers[diffuseDBuffer], 0);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_RECTANGLE_ARB, gBuffers[specularDBuffer], 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_RECTANGLE, gBuffers[depthDBuffer], 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, gBuffers[diffuseDBuffer], 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_RECTANGLE, gBuffers[specularDBuffer], 0);
     glDrawBuffers(2, drawBuffers);
     glClear(GL_COLOR_BUFFER_BIT);
     
     if(transparent) {
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE_ARB, gBuffers[transparentDBuffer], 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, gBuffers[transparentDBuffer], 0);
         for(unsigned char o = 1; o < ((blendingQuality == 3) ? 5 : 4); o ++)
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+o, GL_TEXTURE_RECTANGLE_ARB, gBuffers[colorDBuffer+o], 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+o, GL_TEXTURE_RECTANGLE, gBuffers[colorDBuffer+o], 0);
+        
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, gBuffers[transparentDBuffer], 0);
+        glDrawBuffers(1, drawBuffers);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDrawBuffers((blendingQuality == 3) ? 5 : 4, drawBuffers);
     }else{
         glClear(GL_DEPTH_BUFFER_BIT);
         for(unsigned char o = 0; o < 4; o ++)
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+o, GL_TEXTURE_RECTANGLE_ARB, gBuffers[colorDBuffer+o], 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+o, GL_TEXTURE_RECTANGLE, gBuffers[colorDBuffer+o], 0);
+        
+        glDrawBuffers(4, drawBuffers);
+        glClear(GL_COLOR_BUFFER_BIT);
     }
-    
-    glDrawBuffers(4, drawBuffers);
-    glClear(GL_COLOR_BUFFER_BIT);
-    if(transparent && blendingQuality == 3)
-        glDrawBuffers(5, drawBuffers);
 }
 
-void FBO::renderTransparentInDeferredBuffers() {
+void FBO::renderTransparentInDeferredBuffers(bool keepInColorBuffer) {
     if(objectManager.transparentAccumulator.size() == 0) return;
     
     btVector3 camMatPos = currentCam->getTransformation().getOrigin();
@@ -179,8 +193,10 @@ void FBO::renderTransparentInDeferredBuffers() {
     unsigned int i;
     for(i = 0; i < objectManager.transparentAccumulator.size(); i ++) {
         renderInDeferredBuffers(true);
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_RECTANGLE_ARB, gBuffers[colorDBuffer]);
+        if(blendingQuality > 1) {
+            glActiveTexture(GL_TEXTURE3);
+            glBindTexture(GL_TEXTURE_RECTANGLE, gBuffers[colorDBuffer]);
+        }
         
         glDepthMask(GL_TRUE);
         glEnable(GL_DEPTH_TEST);
@@ -188,19 +204,16 @@ void FBO::renderTransparentInDeferredBuffers() {
         AccumulatedMesh* tMesh = objectManager.transparentAccumulator[i];
         tMesh->object->drawAccumulatedMesh(tMesh->mesh);
         delete tMesh;
-        glDisable(GL_BLEND);
-        glDisable(GL_DEPTH_TEST);
-        glDepthMask(GL_FALSE);
         objectManager.illuminate();
         
         shaderPrograms[deferredCombineTransparentSP]->use();
         unsigned char inBuffers[] = { transparentDBuffer, diffuseDBuffer, specularDBuffer, materialDBuffer, colorDBuffer }, outBuffers[] = { colorDBuffer };
         mainFBO.renderDeferred(true, inBuffers, (blendingQuality == 1) ? 5 : 4, outBuffers, 1);
     }
-
     objectManager.transparentAccumulator.clear();
-    if(!edgeSmoothEnabled && !depthOfFieldQuality && screenBlurFactor <= 0.0)
-        copyGBuffer(colorDBuffer, 0);
+    
+    if(!keepInColorBuffer)
+        mainFBO.copyGBuffer(colorDBuffer, 0);
 }
 
 void FBO::renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned char inBuffersCount, unsigned char* outBuffers, unsigned char outBuffersCount) {
@@ -211,22 +224,20 @@ void FBO::renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned cha
         GLenum drawBuffers[outBuffersCount];
         for(unsigned char o = 0; o < outBuffersCount; o ++) {
             drawBuffers[o] = GL_COLOR_ATTACHMENT0+o;
-            glFramebufferTexture2D(GL_FRAMEBUFFER, drawBuffers[o], GL_TEXTURE_RECTANGLE_ARB, gBuffers[outBuffers[o]], 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, drawBuffers[o], GL_TEXTURE_RECTANGLE, gBuffers[outBuffers[o]], 0);
         }
         glDrawBuffers(outBuffersCount, drawBuffers);
     }
     
     for(unsigned char i = 0; i < inBuffersCount; i ++) {
         glActiveTexture(GL_TEXTURE0+i);
-        glBindTexture(GL_TEXTURE_RECTANGLE_ARB, gBuffers[inBuffers[i]]);
+        glBindTexture(GL_TEXTURE_RECTANGLE, gBuffers[inBuffers[i]]);
     }
     
     if(!fillScreen) return;
     modelMat.setIdentity();
     currentShaderProgram->setUniformMatrix4("modelViewMat", &modelMat);
-    float vertices[12] = { -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0 };
-    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    vao.draw();
 }
 
 void FBO::renderInTexture(ColorBuffer* colorBuffer, GLenum textureTarget) {
@@ -235,11 +246,11 @@ void FBO::renderInTexture(ColorBuffer* colorBuffer, GLenum textureTarget) {
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
     if(colorBuffer->shadowMap) {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureTarget, colorBuffer->texture, 0);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE_ARB, gBuffers[specularDBuffer], 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, gBuffers[specularDBuffer], 0);
         glDrawBuffer(GL_NONE);
         glClear(GL_DEPTH_BUFFER_BIT);
     }else{
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_RECTANGLE_ARB, gBuffers[depthDBuffer], 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_RECTANGLE, gBuffers[depthDBuffer], 0);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureTarget, colorBuffer->texture, 0);
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);

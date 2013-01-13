@@ -55,7 +55,7 @@ void GUITabs::updateContent() {
         button = (GUIButton*)children[i];
         if(button->state != GUIButtonStateDisabled)
             button->state = (i == selectedIndex) ? GUIButtonStatePressed : GUIButtonStateNormal;
-        button->roundedCorners = (GUICorners) 0;
+        button->content.roundedCorners = (GUICorners) 0;
         
         if(orientation & GUIOrientation_Vertical) {
             button->width = width;
@@ -66,21 +66,21 @@ void GUITabs::updateContent() {
             switch((int)orientation) {
                 case GUIOrientation_Left:
                     if(i == 0)
-                        button->roundedCorners = (GUICorners) (button->roundedCorners | GUITopRightCorner);
+                        button->content.roundedCorners = (GUICorners) (button->content.roundedCorners | GUITopRightCorner);
                     if(i == children.size()-1)
-                        button->roundedCorners = (GUICorners) (button->roundedCorners | GUIBottomRightCorner);
+                        button->content.roundedCorners = (GUICorners) (button->content.roundedCorners | GUIBottomRightCorner);
                 break;
                 case GUIOrientation_Right:
                     if(i == 0)
-                        button->roundedCorners = (GUICorners) (button->roundedCorners | GUITopLeftCorner);
+                        button->content.roundedCorners = (GUICorners) (button->content.roundedCorners | GUITopLeftCorner);
                     if(i == children.size()-1)
-                        button->roundedCorners = (GUICorners) (button->roundedCorners | GUIBottomLeftCorner);
+                        button->content.roundedCorners = (GUICorners) (button->content.roundedCorners | GUIBottomLeftCorner);
                 break;
                 case GUIOrientation_Vertical:
                     if(i == 0)
-                        button->roundedCorners = (GUICorners) (button->roundedCorners | GUITopLeftCorner | GUITopRightCorner);
+                        button->content.roundedCorners = (GUICorners) (button->content.roundedCorners | GUITopLeftCorner | GUITopRightCorner);
                     if(i == children.size()-1)
-                        button->roundedCorners = (GUICorners) (button->roundedCorners | GUIBottomLeftCorner | GUIBottomRightCorner);
+                        button->content.roundedCorners = (GUICorners) (button->content.roundedCorners | GUIBottomLeftCorner | GUIBottomRightCorner);
                 break;
             }
             
@@ -94,21 +94,21 @@ void GUITabs::updateContent() {
             switch((int)orientation) {
                 case GUIOrientation_Top:
                     if(i == 0)
-                        button->roundedCorners = (GUICorners) (button->roundedCorners | GUIBottomLeftCorner);
+                        button->content.roundedCorners = (GUICorners) (button->content.roundedCorners | GUIBottomLeftCorner);
                     if(i == children.size()-1)
-                        button->roundedCorners = (GUICorners) (button->roundedCorners | GUIBottomRightCorner);
+                        button->content.roundedCorners = (GUICorners) (button->content.roundedCorners | GUIBottomRightCorner);
                     break;
                 case GUIOrientation_Bottom:
                     if(i == 0)
-                        button->roundedCorners = (GUICorners) (button->roundedCorners | GUITopLeftCorner);
+                        button->content.roundedCorners = (GUICorners) (button->content.roundedCorners | GUITopLeftCorner);
                     if(i == children.size()-1)
-                        button->roundedCorners = (GUICorners) (button->roundedCorners | GUITopRightCorner);
+                        button->content.roundedCorners = (GUICorners) (button->content.roundedCorners | GUITopRightCorner);
                     break;
                 case GUIOrientation_Horizontal:
                     if(i == 0)
-                        button->roundedCorners = (GUICorners) (button->roundedCorners | GUITopLeftCorner | GUIBottomLeftCorner);
+                        button->content.roundedCorners = (GUICorners) (button->content.roundedCorners | GUITopLeftCorner | GUIBottomLeftCorner);
                     if(i == children.size()-1)
-                        button->roundedCorners = (GUICorners) (button->roundedCorners | GUITopRightCorner | GUIBottomRightCorner);
+                        button->content.roundedCorners = (GUICorners) (button->content.roundedCorners | GUITopRightCorner | GUIBottomRightCorner);
                     break;
             }
             

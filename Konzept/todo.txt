@@ -1,3 +1,6 @@
+OpenGL 3.2:
+Texture gray scale
+
 Implement btSoftBody
 Implement more PhysicLink types
 Anisotropic filtering

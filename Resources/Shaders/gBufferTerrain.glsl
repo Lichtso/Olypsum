@@ -1,13 +1,13 @@
-attribute vec3 position;
-attribute vec3 normal;
+in vec3 position;
+in vec3 normal;
 uniform mat4 modelViewMat;
 uniform mat4 modelMat;
 uniform mat3 normalMat;
 uniform vec3 textureScale;
 
-varying vec3 vPosition;
-varying vec3 vTexCoord;
-varying vec3 vNormal;
+out vec3 vPosition;
+out vec3 vTexCoord;
+out vec3 vNormal;
 
 void main() {
     gl_Position = vec4(position, 1.0)*modelViewMat;
@@ -19,11 +19,13 @@ void main() {
 
 #separator
 
-#extension GL_EXT_texture_array : require
-
-varying vec3 vPosition;
-varying vec3 vTexCoord;
-varying vec3 vNormal;
+in vec3 vPosition;
+in vec3 vTexCoord;
+in vec3 vNormal;
+out vec3 colorOut;
+out vec3 materialOut;
+out vec3 normalOut;
+out vec3 positionOut;
 
 uniform sampler2DArray sampler0;
 uniform sampler2DArray sampler1;
@@ -32,12 +34,14 @@ void main() {
     float interpolZ = fract(vTexCoord.z+0.5), interpolZlow = 1.0-interpolZ;
     vec3 highCoord = vec3(vTexCoord.xy, vTexCoord.z+1.0);
     
-    gl_FragData[0] = texture2DArray(sampler0, vTexCoord)*interpolZlow; //Color
-    gl_FragData[0] += texture2DArray(sampler0, highCoord)*interpolZ;
+    vec4 color = texture(sampler0, vTexCoord)*interpolZlow
+                +texture(sampler0, highCoord)*interpolZ; //Color
+    if(color.a < 0.0039) discard;
+    colorOut = color.rgb;
     
-    gl_FragData[1] = texture2DArray(sampler1, vTexCoord)*interpolZlow; //Material
-    gl_FragData[1] += texture2DArray(sampler1, highCoord)*interpolZ;
+    materialOut = texture(sampler1, vTexCoord).rgb*interpolZlow; //Material
+    materialOut += texture(sampler1, highCoord).rgb*interpolZ;
     
-    gl_FragData[2] = vec4(normalize(vNormal), 1.0); //Normal
-	gl_FragData[3] = vec4(vPosition, 1.0); //Position
+    normalOut = normalize(vNormal); //Normal
+	positionOut = vPosition; //Position
 }

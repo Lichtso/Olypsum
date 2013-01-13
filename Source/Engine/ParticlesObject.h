@@ -20,8 +20,8 @@ class ParticlesObject : public DisplayObject {
         float life, //!< The time until it dies in seconds
               size; //!< The size in world units
     } *particles; //!< The particles of this ParticlesObject
-    GLuint particlesVBO[2];
-    bool activeVBO;
+    GLuint particlesVAO[2], particlesVBO[2];
+    bool activeVAO;
     unsigned int particlesCount;
     float addParticles;
     ParticlesObject();

@@ -8,46 +8,29 @@
 
 #include "LightVolume.h"
 
-LightVolume::LightVolume() {
-    vbo = ibo = 0;
-}
-
-LightVolume::~LightVolume() {
-    if(!vbo) return;
-    glDeleteBuffers(1, &vbo);
-    glDeleteBuffers(1, &ibo);
-}
-
 void LightVolume::init() {
-    glGenBuffers(1, &vbo);
-    glGenBuffers(1, &ibo);
+    std::vector<VertexArrayObject::Attribute> attributes;
+    VertexArrayObject::Attribute attr;
+    attr.size = 3;
+    attr.name = POSITION_ATTRIBUTE;
+    attributes.push_back(attr);
+    vao.init(attributes, true);
+    
     unsigned int verticesCount, trianglesCount;
     std::unique_ptr<float[]> vertices = getVertices(verticesCount);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, verticesCount*3*sizeof(float), vertices.get(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    vao.updateVertices(verticesCount*3, vertices.get(), GL_STATIC_DRAW);
     std::unique_ptr<unsigned int[]> indecies = getIndecies(trianglesCount);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, trianglesCount*3*sizeof(unsigned int), indecies.get(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    vao.updateIndecies(trianglesCount*3, indecies.get(), GL_UNSIGNED_INT, GL_STATIC_DRAW);
 }
 
-void LightVolume::drawWireFrameBegin() {
+void LightVolume::drawDebug(Color4 color) {
     shaderPrograms[colorSP]->use();
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, sizeof(float)*3, NULL);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-
-void LightVolume::drawWireFrameEnd() {
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    glDisableVertexAttribArray(COLOR_ATTRIBUTE);
+    shaderPrograms[colorSP]->setUniformVec3("color", color.getVector());
+    vao.draw();
 }
 
 void LightVolume::draw() {
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 3*sizeof(float), NULL);
+    vao.draw();
 }
 
 
@@ -92,26 +75,6 @@ std::unique_ptr<unsigned int[]> LightBoxVolume::getIndecies(unsigned int& triang
     return indecies;
 }
 
-void LightBoxVolume::drawWireFrame(Color4 color) {
-    float* colors = new float[boxVerticesCount*3];
-    for(unsigned int i = 0; i < 8; i ++) {
-        colors[i*3  ] = color.r;
-        colors[i*3+1] = color.g;
-        colors[i*3+2] = color.b;
-    }
-    
-    LightVolume::drawWireFrameBegin();
-    currentShaderProgram->setAttribute(COLOR_ATTRIBUTE, 3, sizeof(float)*3, colors);
-    glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, staticBoxWireFrame);
-    LightVolume::drawWireFrameEnd();
-    delete [] colors;
-}
-
-void LightBoxVolume::draw() {
-    LightVolume::draw();
-    glDrawElements(GL_TRIANGLES, boxTrianglesCount*3, GL_UNSIGNED_INT, 0);
-}
-
 
 
 FrustumVolume::FrustumVolume(Ray3 boundsB[4], float lengthB) :length(lengthB) {
@@ -140,26 +103,6 @@ std::unique_ptr<unsigned int[]> FrustumVolume::getIndecies(unsigned int& triangl
     std::unique_ptr<unsigned int[]> indecies(new unsigned int[trianglesCount*3]);
     memcpy(indecies.get(), staticBoxIndecies, sizeof(staticBoxIndecies));
     return indecies;
-}
-
-void FrustumVolume::drawWireFrame(Color4 color) {
-    float* colors = new float[boxVerticesCount*3];
-    for(unsigned int i = 0; i < 8; i ++) {
-        colors[i*3  ] = color.r;
-        colors[i*3+1] = color.g;
-        colors[i*3+2] = color.b;
-    }
-    
-    LightVolume::drawWireFrameBegin();
-    currentShaderProgram->setAttribute(COLOR_ATTRIBUTE, 3, sizeof(float)*3, colors);
-    glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, staticBoxWireFrame);
-    LightVolume::drawWireFrameEnd();
-    delete [] colors;
-}
-
-void FrustumVolume::draw() {
-    LightVolume::draw();
-    glDrawElements(GL_TRIANGLES, boxTrianglesCount*3, GL_UNSIGNED_INT, 0);
 }
 
 
@@ -221,45 +164,6 @@ std::unique_ptr<unsigned int[]> LightSphereVolume::getIndecies(unsigned int& tri
         indecies[index ++] = (x < accuracyX-1) ? referenceVertex+x+1 : referenceVertex;
     }
     return indecies;
-}
-
-void LightSphereVolume::drawWireFrame(Color4 color) {
-    unsigned int verticesCount = sphereVerticesCount(accuracyX, accuracyY);
-    float* colors = new float[verticesCount*3];
-    for(unsigned int i = 0; i < verticesCount; i ++) {
-        colors[i*3  ] = color.r;
-        colors[i*3+1] = color.g;
-        colors[i*3+2] = color.b;
-    }
-    unsigned int indeciesCount = accuracyX*accuracyY*2+accuracyX*(accuracyY+1)*2, index = 0,
-                *indecies = new unsigned int[indeciesCount];
-    for(unsigned int y = 0; y < accuracyY; y ++) {
-        for(unsigned int x = 0; x < accuracyX-1; x ++) {
-            indecies[index ++] = 1+accuracyX*y+x;
-            indecies[index ++] = 2+accuracyX*y+x;
-        }
-        indecies[index ++] = 1+accuracyX*y;
-        indecies[index ++] = accuracyX*y+accuracyX;
-    }
-    for(unsigned int x = 0; x < accuracyX; x ++) {
-        indecies[index ++] = 0;
-        for(unsigned int y = 0; y < accuracyY; y ++) {
-            indecies[index ++] = 1+accuracyX*y+x;
-            indecies[index ++] = 1+accuracyX*y+x;
-        }
-        indecies[index ++] = verticesCount-1;
-    }
-    LightVolume::drawWireFrameBegin();
-    currentShaderProgram->setAttribute(COLOR_ATTRIBUTE, 3, sizeof(float)*3, colors);
-    glDrawElements(GL_LINES, indeciesCount, GL_UNSIGNED_INT, indecies);
-    LightVolume::drawWireFrameEnd();
-    delete [] colors;
-    delete [] indecies;
-}
-
-void LightSphereVolume::draw() {
-    LightVolume::draw();
-    glDrawElements(GL_TRIANGLES, sphereTrianglesCount(accuracyX, accuracyY)*3, GL_UNSIGNED_INT, 0);
 }
 
 
@@ -324,43 +228,4 @@ std::unique_ptr<unsigned int[]> LightParabolidVolume::getIndecies(unsigned int& 
         indecies[index ++] = referenceVertex+x+2;
     }
     return indecies;
-}
-
-void LightParabolidVolume::drawWireFrame(Color4 color) {
-    unsigned int verticesCount = parabolidVerticesCount(accuracyX, accuracyY);
-    float* colors = new float[verticesCount*3];
-    for(unsigned int i = 0; i < verticesCount; i ++) {
-        colors[i*3  ] = color.r;
-        colors[i*3+1] = color.g;
-        colors[i*3+2] = color.b;
-    }
-    unsigned int indeciesCount = accuracyX*(accuracyY+1)*2+accuracyX*(accuracyY+1)*2, index = 0,
-                *indecies = new unsigned int[indeciesCount];
-    for(unsigned int y = 0; y <= accuracyY; y ++) {
-        for(unsigned int x = 0; x < accuracyX-1; x ++) {
-            indecies[index ++] = 1+accuracyX*y+x;
-            indecies[index ++] = 2+accuracyX*y+x;
-        }
-        indecies[index ++] = 1+accuracyX*y;
-        indecies[index ++] = accuracyX*y+accuracyX;
-    }
-    for(unsigned int x = 0; x < accuracyX; x ++) {
-        indecies[index ++] = 0;
-        for(unsigned int y = 0; y < accuracyY; y ++) {
-            indecies[index ++] = 1+accuracyX*y+x;
-            indecies[index ++] = 1+accuracyX*y+x;
-        }
-        indecies[index ++] = 1+accuracyX*accuracyY+x;
-    }
-    LightVolume::drawWireFrameBegin();
-    currentShaderProgram->setAttribute(COLOR_ATTRIBUTE, 3, sizeof(float)*3, colors);
-    glDrawElements(GL_LINES, indeciesCount, GL_UNSIGNED_INT, indecies);
-    LightVolume::drawWireFrameEnd();
-    delete [] colors;
-    delete [] indecies;
-}
-
-void LightParabolidVolume::draw() {
-    LightVolume::draw();
-    glDrawElements(GL_TRIANGLES, parabolidTrianglesCount(accuracyX, accuracyY)*3, GL_UNSIGNED_INT, 0);
 }

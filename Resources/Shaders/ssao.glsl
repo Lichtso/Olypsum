@@ -1,41 +1,45 @@
-attribute vec3 position;
+in vec3 position;
 uniform mat4 modelViewMat;
-varying vec2 vTexCoord;
 
 void main() {
     gl_Position = vec4(position, 1.0)*modelViewMat;
-    vTexCoord = position.xy*0.5+vec2(0.5);
 }
 
 #separator
 
-#extension GL_ARB_texture_rectangle : enable
-
 uniform sampler2DRect sampler0;
-uniform sampler2D sampler1;
 uniform vec2 pSphere[32];
-varying vec2 vTexCoord;
+out float colorOut;
 
-const float sampleRadius = 20.0;
-const float distanceScale = 100.0;
+const float sampleRadius = 12.0*SSAO_SCALE;
+const float distanceScale = 50.0;
 
-#if SSAO_QUALITY < 4
 #define SAMPLES (SSAO_QUALITY*8)
-#else
-#define SAMPLES 32
-#endif
+
+const float InverseMaxInt = 1.0 / 4294967295.0;
+
+float frand(inout int seed) {
+    int i=(seed^12345391)*2654435769;
+    i^=(i<<6)^(i>>26);
+    i*=2654435769;
+    i+=(i<<5)^(i>>12);
+    seed ++;
+    return float(i) * InverseMaxInt;
+}
 
 void main() {
-	float depth = texture2DRect(sampler0, gl_FragCoord.xy*2.0).x;
-	vec2 randNormal = texture2D(sampler1, vTexCoord * 10.0).xy*0.5+vec2(0.5);
+    int seed = (int(gl_FragCoord.x)^12345391)*2654435769;
+    seed^=(seed<<6)^(seed>>26);
+    seed*=int(gl_FragCoord.y);
+    seed+=(seed<<5)^(seed>>12);
     
-	gl_FragData[0].x = 0.0;
+	float depth = texture(sampler0, gl_FragCoord.xy*SSAO_SCALE).x;
+	colorOut = 0.0;
 	for(int i = 0; i < SAMPLES; i ++) {
-		vec2 ray = reflect(pSphere[i], randNormal) * sampleRadius;
-		float sampleDepth = texture2DRect(sampler0, gl_FragCoord.xy*2.0+ray.xy).x;
+        vec2 ray = reflect(pSphere[i], normalize(vec2(frand(seed), frand(seed))))*sampleRadius;
+		float sampleDepth = texture(sampler0, gl_FragCoord.xy*SSAO_SCALE+ray.xy).x;
 		float occlusion = distanceScale * max(depth-sampleDepth, 0.0);
-        gl_FragData[0].x += 1.0 / (1.0 + occlusion * occlusion * 0.5);
+        colorOut += 1.0 / (1.0 + occlusion * occlusion * 0.5);
 	}
-	gl_FragData[0].x *= 1.0/float(SAMPLES);
-    gl_FragData[0].a = 1.0;
+	colorOut *= 1.0/float(SAMPLES);
 }

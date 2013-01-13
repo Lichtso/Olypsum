@@ -54,11 +54,11 @@ class Cam : public SimpleObject {
      @see LightObject
      */
     bool testInverseNearPlaneHit(btDbvtProxy* node);
-    /*! Draws a wireframe model of the frustum for debuging.
+    /*! Draws a model of the frustum for debuging.
      @param color The color used for rendering
      @see LightVolume
      */
-    void drawWireframeFrustum(Color4 color);
+    void drawDebugFrustum(Color4 color);
     bool gameTick();
     //! Sets this Cam as the currentCam
     void use();

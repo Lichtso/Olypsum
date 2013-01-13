@@ -1,7 +1,5 @@
-#extension GL_EXT_gpu_shader4 : require
-
-attribute vec4 position;
-attribute vec4 velocity;
+in vec4 position;
+in vec4 velocity;
 uniform float respawnParticles;
 uniform float animationFactor;
 uniform float lifeCenter;
@@ -13,8 +11,8 @@ uniform vec3 posRange;
 uniform vec3 dirCenter;
 uniform vec3 dirRange;
 uniform vec3 velocityAdd;
-varying vec4 vPosition;
-varying vec4 vVelocity;
+out vec4 vPosition;
+out vec4 vVelocity;
 
 const float InverseMaxInt = 1.0 / 4294967295.0;
 

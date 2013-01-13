@@ -11,12 +11,12 @@
 GUICheckBox::GUICheckBox() {
     type = GUIType_CheckBox;
     paddingX = paddingY = 0;
-    width = height = 15*screenSize[2];
+    width = height = screenSize[0]*0.011;
     sizeAlignment = GUISizeAlignment_None;
     GUILabel* label = new GUILabel();
     label->text = "√";
     label->parent = this;
-    label->fontHeight = 25*screenSize[2];
+    label->fontHeight = screenSize[0]*0.015;
     label->posY = 2*screenSize[2];
     children.push_back(label);
 }

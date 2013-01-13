@@ -62,20 +62,24 @@ void setMenu(MenuName menu) {
     
     switch(menu) {
         case loadingMenu: {
+            GUIProgressBar* progressBar = new GUIProgressBar();
+            progressBar->posY = currentScreenView->height*-0.7;
+            currentScreenView->addChild(progressBar);
+            
             GUIImage* image = new GUIImage();
             image->sizeAlignment = GUISizeAlignment_Height;
             image->texture = fileManager.getPackage("Default")->getResource<Texture>("logo.png");
             image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGBA);
             image->width = currentScreenView->width*0.8;
             image->posY = currentScreenView->height*0.2;
-            image->updateContent();
-            
             currentScreenView->addChild(image);
+            
             GUILabel* label = new GUILabel();
             label->text = localization.localizeString("loading");
-            label->posY = currentScreenView->height*-0.4;
+            label->posY = currentScreenView->height*-0.5;
             label->fontHeight = currentScreenView->height*0.16;
             currentScreenView->addChild(label);
+            
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             currentScreenView->draw();
             SDL_GL_SwapBuffers();
@@ -85,7 +89,6 @@ void setMenu(MenuName menu) {
             view->width = currentScreenView->width*0.2;
             view->height = currentScreenView->width*0.27;
             view->posX = currentScreenView->width*-0.72;
-            view->innerShadow = -8;
             currentScreenView->addChild(view);
             
             std::function<void(GUIButton*)> onClick[] = {
@@ -147,7 +150,6 @@ void setMenu(MenuName menu) {
             view->width = currentScreenView->width*0.42;
             view->height = currentScreenView->height*0.62;
             view->posX = currentScreenView->width*-0.52;
-            view->innerShadow = -8;
             currentScreenView->addChild(view);
             
             std::function<void(GUICheckBox*)> onClick[] = {
@@ -157,6 +159,8 @@ void setMenu(MenuName menu) {
                     edgeSmoothEnabled = (checkBox->state == GUIButtonStatePressed);
                     if(levelManager.gameStatus != noGame) loadDynamicShaderPrograms();
                 }, [](GUICheckBox* checkBox) {
+                    vSyncEnabled = (checkBox->state == GUIButtonStatePressed);
+                }, [](GUICheckBox* checkBox) {
                     cubemapsEnabled = (checkBox->state == GUIButtonStatePressed);
                     if(levelManager.gameStatus != noGame) loadDynamicShaderPrograms();
                 }, [](GUICheckBox* checkBox) {
@@ -164,9 +168,9 @@ void setMenu(MenuName menu) {
                     if(levelManager.gameStatus != noGame) loadDynamicShaderPrograms();
                 }
             };
-            bool checkBoxActive[] = { fullScreenEnabled, edgeSmoothEnabled, cubemapsEnabled, (screenBlurFactor > -1.0) };
-            const char* checkBoxLabels[] = { "fullScreenEnabled", "edgeSmoothEnabled", "cubemapsEnabled", "screenBlurEnabled" };
-            for(unsigned char i = 0; i < 4; i ++) {
+            bool checkBoxActive[] = { fullScreenEnabled, edgeSmoothEnabled, vSyncEnabled, cubemapsEnabled, (screenBlurFactor > -1.0) };
+            const char* checkBoxLabels[] = { "fullScreenEnabled", "edgeSmoothEnabled", "vSyncEnabled", "cubemapsEnabled", "screenBlurEnabled" };
+            for(unsigned char i = 0; i < 5; i ++) {
                 label = new GUILabel();
                 label->posX = view->width*0.45;
                 label->posY = currentScreenView->height*(0.54-0.12*i);
@@ -184,7 +188,7 @@ void setMenu(MenuName menu) {
                 view->addChild(checkBox);
             }
             
-            unsigned int sliderSteps[] = { 3, 3, 4, 5, 3 };
+            unsigned int sliderSteps[] = { 3, 3, 4, 4, 3 };
             std::function<void(GUISlider*)> onChange[] = {
                 [](GUISlider* slider) {
                     depthOfFieldQuality = slider->value*3.0;
@@ -196,7 +200,7 @@ void setMenu(MenuName menu) {
                     shadowQuality = slider->value*4.0;
                     if(levelManager.gameStatus != noGame) loadDynamicShaderPrograms();
                 }, [](GUISlider* slider) {
-                    ssaoQuality = slider->value*5.0;
+                    ssaoQuality = slider->value*4.0;
                     if(levelManager.gameStatus != noGame) loadDynamicShaderPrograms();
                 }, [](GUISlider* slider) {
                     blendingQuality = slider->value*3.0;
@@ -204,18 +208,17 @@ void setMenu(MenuName menu) {
                 }
             };
             unsigned char sliderValues[] = { depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, blendingQuality };
-            const char* sliderLabels[] = { "depthOfFieldQuality", "bumpMappingQuality", "shadowQuality", "ssaoQuality", "blendingQuality", "particleCalcTarget" };
-            for(unsigned char i = 0; i < 6; i ++) {
+            const char* sliderLabels[] = { "depthOfFieldQuality", "bumpMappingQuality", "shadowQuality", "ssaoQuality", "blendingQuality" };
+            for(unsigned char i = 0; i < 5; i ++) {
                 label = new GUILabel();
                 label->posX = view->width*0.45;
-                label->posY = currentScreenView->height*(0.06-0.12*i);
+                label->posY = currentScreenView->height*(-0.06-0.12*i);
                 label->width = view->width*0.5;
                 label->fontHeight = currentScreenView->height*0.1;
                 label->text = localization.localizeString(sliderLabels[i]);
                 label->textAlign = GUITextAlign_Left;
                 label->sizeAlignment = GUISizeAlignment_Height;
                 view->addChild(label);
-                if(i == 5) break;
                 GUISlider* slider = new GUISlider();
                 slider->posX = view->width*-0.52;
                 slider->posY = label->posY;
@@ -224,29 +227,6 @@ void setMenu(MenuName menu) {
                 slider->steps = sliderSteps[i];
                 slider->onChange = onChange[i];
                 view->addChild(slider);
-            }
-            
-            GUITabs* tabs = new GUITabs();
-            tabs->deactivatable = false;
-            tabs->posX = view->width*-0.52;
-            tabs->posY = currentScreenView->height*-0.54;
-            tabs->width = view->width*0.4;
-            tabs->sizeAlignment = GUISizeAlignment_Height;
-            tabs->selectedIndex = particleCalcTarget;
-            tabs->orientation = GUIOrientation_Horizontal;
-            tabs->onChange = [](GUITabs* tabs) {
-                particleCalcTarget = tabs->selectedIndex;
-            };
-            view->addChild(tabs);
-            
-            const char* buttonLabels[] = { "off", "cpu", "gpu" };
-            for(unsigned char i = 0; i < 3; i ++) {
-                GUIButton* button = new GUIButton();
-                label = new GUILabel();
-                label->text = localization.localizeString(buttonLabels[i]);
-                label->fontHeight = currentScreenView->height*0.06;
-                button->addChild(label);
-                tabs->addChild(button);
             }
             
             label = new GUILabel();
@@ -260,7 +240,6 @@ void setMenu(MenuName menu) {
             view->height = currentScreenView->height*0.16;
             view->posX = currentScreenView->width*0.52;
             view->posY = currentScreenView->height*0.46;
-            view->innerShadow = -8;
             currentScreenView->addChild(view);
             std::function<void(GUISlider*)> onChangeSound[] = {
                 [](GUISlider* slider) {
@@ -490,7 +469,6 @@ void setMenu(MenuName menu) {
                 button->onClick = [&menu, name](GUIButton* button) {
                     currentMenu = removeGameMenu;
                     GUIFramedView* modalView = new GUIFramedView();
-                    modalView->innerShadow = -8;
                     modalView->width = currentScreenView->width*0.4;
                     modalView->height = currentScreenView->height*0.4;
                     GUILabel* label = new GUILabel();
@@ -639,6 +617,8 @@ void setMenu(MenuName menu) {
             log(error_log, "Tried to call setMenu() with invalid menu id.");
             break;
     }
+    
+    currentScreenView->updateContent();
 }
 
 MenuName currentMenu;

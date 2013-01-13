@@ -12,7 +12,6 @@
 
 GUITextField::GUITextField() {
     type = GUIType_TextField;
-    texture = 0;
     highlighted = false;
     enabled = true;
     cursorDrawTick = 0.0;
@@ -20,11 +19,11 @@ GUITextField::GUITextField() {
     label = new GUILabel();
     label->width = 0;
     height = 5 + (label->fontHeight >> 1);
+    cursor.borderColor = Color4(0.0);
+    cursor.cornerRadius = cursor.innerShadow = content.innerShadow = 0;
 }
 
 GUITextField::~GUITextField() {
-    if(texture)
-        glDeleteTextures(1, &texture);
     delete label;
 }
 
@@ -76,24 +75,23 @@ void GUITextField::removeFirstResponderStatus() {
 }
 
 void GUITextField::updateContent() {
-    if(texture) glDeleteTextures(1, &texture);
-    
-    GUIRoundedRect roundedRect;
-    roundedRect.texture = &texture;
-    roundedRect.width = width;
-    roundedRect.height = height;
-    roundedRect.cornerRadius = 8;
+    content.width = width;
+    content.height = height;
+    content.cornerRadius = screenSize[0]*0.007;
     if(highlighted) {
-        roundedRect.borderColor = Color4(0.31, 0.51, 1.0);
+        content.borderColor = Color4(0.31, 0.51, 1.0);
     }else{
-        roundedRect.borderColor = Color4(0.51);
+        content.borderColor = Color4(0.51);
     }
-    roundedRect.drawInTexture();
+    content.drawInTexture();
+    
+    cursor.width = 1;
+    cursor.height = label->fontHeight >> 1;
+    cursor.drawInTexture();
 }
 
 void GUITextField::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     if(!visible) return;
-    if(!texture) updateContent();
     GUIClipRect clipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
     
@@ -101,12 +99,7 @@ void GUITextField::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     modelMat.setIdentity();
     modelMat.setOrigin(transform);
     
-    GUIRoundedRect roundedRect;
-    roundedRect.texture = &texture;
-    roundedRect.width = width;
-    roundedRect.height = height;
-    roundedRect.drawOnScreen(false, 0, 0, clipRect);
-    
+    content.drawOnScreen(transform, 0, 0, clipRect);
     if(!clipRect.getLimSize(posX, posY, width-7, height, parentClipRect)) return;
     
     int cursorPosX, cursorPosY;
@@ -136,11 +129,7 @@ void GUITextField::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     if(cursorActive && cursorDrawTick <= 0.25) {
         modelMat.setIdentity();
         modelMat.setOrigin(transform);
-        GUIRoundedRect cursor;
-        cursor.width = 1;
-        cursor.height = label->fontHeight >> 1;
-        cursor.texture = NULL;
-        cursor.drawOnScreen(false, cursorPosX+label->posX, 0, clipRect);
+        cursor.drawOnScreen(transform, cursorPosX+label->posX, 0, clipRect);
     }
 }
 

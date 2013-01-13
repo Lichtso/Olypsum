@@ -1,8 +1,8 @@
-attribute vec3 position;
-attribute vec2 texCoord;
+in vec3 position;
+in vec2 texCoord;
 #if SKELETAL_ANIMATION
-attribute vec3 weights;
-attribute vec3 joints;
+in vec3 weights;
+in vec3 joints;
 
 uniform mat4 jointMats[64];
 uniform mat4 viewMat;
@@ -12,9 +12,9 @@ uniform mat4 modelViewMat;
 
 #if PARABOLID == 1
 uniform float lRange;
-varying float vClip;
+out float vClip;
 #endif
-varying vec2 vTexCoord;
+out vec2 vTexCoord;
 
 void main() {
     #if SKELETAL_ANIMATION
@@ -42,8 +42,6 @@ void main() {
 
 #separator
 
-#extension GL_EXT_texture_array : require
-
 #if TEXTURE_ANIMATION == 0
 uniform sampler2D sampler0;
 #else
@@ -55,9 +53,9 @@ uniform float paraboloidRange;
 uniform float discardDensity;
 
 #if PARABOLID == 1
-varying float vClip;
+in float vClip;
 #endif
-varying vec2 vTexCoord;
+in vec2 vTexCoord;
 
 float random(vec2 co) {
     return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
@@ -65,9 +63,9 @@ float random(vec2 co) {
 
 void main() {
     #if TEXTURE_ANIMATION == 0 //2D texture
-    float alpha = texture2D(sampler0, vTexCoord).a;
+    float alpha = texture(sampler0, vTexCoord).a;
     #else //3D texture
-    float alpha = texture2DArray(sampler0, vec3(vTexCoord.xy, texCoordAnimZ.x+0.5)).a;
+    float alpha = texture(sampler0, vec3(vTexCoord.xy, texCoordAnimZ.x+0.5)).a;
     #endif
     
     #if PARABOLID == 1

@@ -11,10 +11,9 @@
 ALCdevice* soundDevice;
 ALCcontext* soundContext;
 
-GLuint decalVBO;
-Texture randomNormalMap;
-unsigned char inBuffersSSAO[] = { depthDBuffer }, outBuffersSSAO[] = { ssaoDBuffer };
-unsigned char inBuffersCombine[] = { colorDBuffer, diffuseDBuffer, specularDBuffer, materialDBuffer, normalDBuffer, ssaoDBuffer }, outBuffersCombine[] = { colorDBuffer };
+VertexArrayObject decalVAO;
+unsigned char inBuffersSSAO[] = { depthDBuffer, positionDBuffer, ssaoDBuffer }, outBuffersSSAO[] = { ssaoDBuffer };
+unsigned char inBuffersCombine[] = { colorDBuffer, diffuseDBuffer, specularDBuffer, materialDBuffer }, outBuffersCombine[] = { colorDBuffer };
 unsigned char inBuffersPost[] = { depthDBuffer, colorDBuffer }, outBuffersPost[] = { colorDBuffer };
 
 //! @cond
@@ -59,16 +58,21 @@ void ObjectManager::init() {
         -1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0,
         1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0
     };
-    glGenBuffers(1, &decalVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, decalVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    
-    //Init Lights
-    randomNormalMap.width = 128;
-    randomNormalMap.height = 128;
-    randomNormalMap.loadRandom();
-    randomNormalMap.uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
+    VertexArrayObject::Attribute attr;
+    std::vector<VertexArrayObject::Attribute> attributes;
+    attr.name = POSITION_ATTRIBUTE;
+    attr.size = 3;
+    attributes.push_back(attr);
+    attr.name = TEXTURE_COORD_ATTRIBUTE;
+    attr.size = 2;
+    attributes.push_back(attr);
+    attr.name = NORMAL_ATTRIBUTE;
+    attr.size = 3;
+    attributes.push_back(attr);
+    decalVAO.init(attributes, false);
+    decalVAO.updateVertices(32, vertices, GL_STATIC_DRAW);
+    decalVAO.elementsCount = 4;
+    decalVAO.drawType = GL_TRIANGLE_STRIP;
     
     //Init Sound
     soundDevice = alcOpenDevice(NULL);
@@ -134,20 +138,20 @@ void ObjectManager::gameTick() {
         graphicObject->gameTick();
     
     //Calculate ParticleSystems
-    if(particleCalcTarget == 2) glEnable(GL_RASTERIZER_DISCARD_EXT);
+    if(particleCalcTarget == 2) glEnable(GL_RASTERIZER_DISCARD);
     for(auto iterator = particlesObjects.begin(); iterator != particlesObjects.end(); iterator ++) {
         if((*iterator)->gameTick()) continue;
         particlesObjects.erase(iterator);
         iterator --;
     }
-    if(particleCalcTarget == 2) glDisable(GL_RASTERIZER_DISCARD_EXT);
+    if(particleCalcTarget == 2) glDisable(GL_RASTERIZER_DISCARD);
     
     //Calculate LightObjects
     LightPrioritySorter lightPrioritySorter;
     lightPrioritySorter.position = currentCam->getTransformation().getOrigin();
     std::sort(lightObjects.begin(), lightObjects.end(), lightPrioritySorter);
     
-    unsigned int maxShadows = 1; //TODO
+    unsigned int maxShadows = shadowQuality;
     for(unsigned int i = 0; i < lightObjects.size(); i ++)
         lightObjects[i]->gameTick(i < maxShadows);
     currentShadowLight = NULL;
@@ -164,13 +168,13 @@ void ObjectManager::physicsTick() {
     unsigned int numManifolds = collisionDispatcher->getNumManifolds();
     
     //TODO: Debugging
-    if(currentMenu == inGameMenu) {
+    /*if(currentMenu == inGameMenu) {
         char str[64];
         sprintf(str, "Collisions: %d", numManifolds);
-        GUILabel* label = (GUILabel*)currentScreenView->children[1];
+        GUILabel* label = static_cast<GUILabel*>(currentScreenView->children[1]);
         label->text = str;
         label->updateContent();
-    }
+    }*/
     
 	for(unsigned int i = 0; i < numManifolds; i ++) {
 		btPersistentManifold* contactManifold = collisionDispatcher->getManifoldByIndexInternal(i);
@@ -209,19 +213,16 @@ void ObjectManager::drawScene() {
         currentCam->doFrustumCulling(CollisionMask_Light | CollisionMask_Static | CollisionMask_Object);
     
     //Draw GraphicObjects
+    glDisable(GL_BLEND);
     for(auto graphicObject : graphicObjects)
         if(graphicObject->inFrustum)
             graphicObject->draw();
+    glEnable(GL_BLEND);
     
     //Draw Decals
     if(currentShadowLight) return;
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, decalVBO);
-    shaderPrograms[solidGSP]->use();
-    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 8*sizeof(float), (float*)(0*sizeof(float)));
-    currentShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 8*sizeof(float), (float*)(3*sizeof(float)));
-    currentShaderProgram->setAttribute(NORMAL_ATTRIBUTE, 3, 8*sizeof(float), (float*)(5*sizeof(float)));
     for(auto decal : decals) {
         modelMat = decal->transformation;
         
@@ -238,39 +239,27 @@ void ObjectManager::drawScene() {
         }
         
         currentShaderProgram->setUniformF("discardDensity", min(1.0F, decal->life));
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        decalVAO.draw();
     }
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
-    glDisableVertexAttribArray(NORMAL_ATTRIBUTE);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
     
     //Draw Particle Systems
     if(particleCalcTarget == 0) return;
-    //glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
-    glDepthMask(GL_FALSE);
     for(auto particlesObject : particlesObjects)
         if(particlesObject->inFrustum)
             particlesObject->draw();
-    glDepthMask(GL_TRUE);
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, 0);
-    //glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
 }
 
 void ObjectManager::illuminate() {
+    glDepthMask(GL_FALSE);
+    glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
     for(unsigned int i = 0; i < lightObjects.size(); i ++)
         if(lightObjects[i]->inFrustum)
             lightObjects[i]->draw();
-    glDisableVertexAttribArray(COLOR_ATTRIBUTE);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glFrontFace(GL_CCW);
-    glDisable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
 }
 
 void ObjectManager::drawFrame() {
@@ -290,23 +279,28 @@ void ObjectManager::drawFrame() {
     }
     
     //Draw LightObjects
-    glDepthMask(GL_FALSE);
-    glDisable(GL_DEPTH_TEST);
     illuminate();
-    glDisable(GL_BLEND);
+    
+    //Draw Transparent
+    bool keepInColorBuffer = screenBlurFactor > 0.0 || edgeSmoothEnabled || depthOfFieldQuality;
+    shaderPrograms[deferredCombineSP]->use();
+    mainFBO.renderDeferred(true, inBuffersCombine, 4, outBuffersCombine,
+                           (objectManager.transparentAccumulator.size() > 0 || keepInColorBuffer) ? 1 : 0);
+    mainFBO.renderTransparentInDeferredBuffers(keepInColorBuffer);
     
     if(ssaoQuality) {
-        glViewport(0, 0, screenSize[0] >> 1, screenSize[1] >> 1);
-        randomNormalMap.use(1);
+        glViewport(0, 0, screenSize[0] >> screenSize[2], screenSize[1] >> screenSize[2]);
         shaderPrograms[ssaoSP]->use();
         mainFBO.renderDeferred(true, inBuffersSSAO, 1, outBuffersSSAO, 1);
         glViewport(0, 0, screenSize[0], screenSize[1]);
+        
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_DST_COLOR, GL_ZERO);
+        shaderPrograms[ssaoCombineSP]->use();
+        mainFBO.renderDeferred(true, &inBuffersSSAO[1], 2, outBuffersCombine, (keepInColorBuffer) ? 1 : 0);
+        glDisable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
-    
-    shaderPrograms[deferredCombineSP]->use();
-    mainFBO.renderDeferred(true, inBuffersCombine, (ssaoQuality) ? 6 : 4, outBuffersCombine,
-                           (objectManager.transparentAccumulator.size() > 0 || screenBlurFactor > 0.0 || edgeSmoothEnabled || depthOfFieldQuality) ? 1 : 0);
-    mainFBO.renderTransparentInDeferredBuffers();
     
     if(screenBlurFactor > 0.0) {
         shaderPrograms[blurSP]->use();
@@ -324,9 +318,7 @@ void ObjectManager::drawFrame() {
         }
     }
     
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
     glDepthMask(GL_TRUE);
-    glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
 }
 

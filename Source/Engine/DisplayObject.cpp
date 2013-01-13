@@ -52,6 +52,7 @@ void ModelObject::updateSkeletonPose(BaseObject* object, Bone* bone) {
         updateSkeletonPose(object->links[childBone->name]->getOther(object), childBone);
 }
 
+/* Not OpenGL 3.2 compatible
 void ModelObject::drawBonePose(BaseObject* object, Bone* bone, float axesSize, float linesSize, float textSize) {
     btTransform transform = object->getTransformation(), inverseTransform = transform.inverse();
     btVector3* childrenPos = (linesSize > 0.0) ? new btVector3[bone->children.size()] : NULL;
@@ -113,7 +114,7 @@ void ModelObject::drawBonePose(BaseObject* object, Bone* bone, float axesSize, f
     if(vertices) delete [] vertices;
     glDisableVertexAttribArray(POSITION_ATTRIBUTE);
     glDisableVertexAttribArray(COLOR_ATTRIBUTE);
-}
+}*/
 
 bool ModelObject::gameTick() {
     BaseObject::gameTick();
@@ -138,21 +139,13 @@ void ModelObject::drawAccumulatedMesh(Mesh* mesh) {
     mesh->draw(this);
 }
 
+/* Not OpenGL 3.2 compatible
 void ModelObject::drawSkeletonPose(float axesSize, float linesSize, float textSize) {
     Bone* rootBone = model->skeleton->rootBone;
     drawBonePose(links[rootBone->name]->getOther(this), rootBone, axesSize, linesSize, textSize);
-}
+}*/
 
 void ModelObject::prepareShaderProgram(Mesh* mesh) {
-    if(!objectManager.currentShadowLight) {
-        unsigned int shaderProgram = solidGSP;
-        if(model->skeleton) shaderProgram += 1;
-        if(mesh->material.diffuse && mesh->material.diffuse->depth > 1) shaderProgram += 2;
-        if(mesh->material.heightMap) shaderProgram += 4;
-        if(mesh->material.transparent && blendingQuality > 0) shaderProgram += 8;
-        shaderPrograms[shaderProgram]->use();
-    }
-    
     if(mesh->material.diffuse) {
         if(mesh->material.diffuse->depth > 1) {
             unsigned int meshIndex = 0;
@@ -380,12 +373,12 @@ void RigidObject::draw() {
     modelMat = getTransformation();
     
     //TODO: Debug drawing
-    btBoxShape* boxShape = dynamic_cast<btBoxShape*>(body->getCollisionShape());
+    /*btBoxShape* boxShape = dynamic_cast<btBoxShape*>(body->getCollisionShape());
     if(boxShape) {
         LightBoxVolume bV(boxShape->getHalfExtentsWithoutMargin());
         bV.init();
-        bV.drawWireFrame(Color4(1.0, 1.0, 0.0, 1.0));
-    }
+        bV.drawDebug(Color4(1.0, 1.0, 0.0, 1.0));
+    }*/
     
     if(model)
         ModelObject::draw();

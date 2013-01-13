@@ -40,16 +40,16 @@ void GUILabel::updateContent() {
             GUILabelLine line;
             line.text = text.substr(lastPos-startPos, pos-lastPos);
             if(line.text.size() > 0) {
-                line.texture = font->renderStringToTexture(line.text.c_str(), color, true, line.width, line.height);
-                line.width = fontHeight*0.5/line.height*line.width;
-                width = fmax(width, line.width);
+                line.texture = font->renderStringToTexture(line.text.c_str(), color, true, line.content.width, line.content.height);
+                line.content.width = fontHeight*0.5/line.content.height*line.content.width;
+                width = fmax(width, line.content.width);
             }else{
                 line.texture = NULL;
-                line.width = 0;
+                line.content.width = 0;
             }
-            line.height = fontHeight>>1;
+            line.content.height = fontHeight>>1;
             lines.push_back(line);
-            height += line.height;
+            height += line.content.height;
             lastPos = pos;
         }
     
@@ -62,13 +62,13 @@ void GUILabel::updateContent() {
         line = &lines[i];
         switch(textAlign) {
             case GUITextAlign_Left:
-                line->posX = line->width-width;
+                line->posX = line->content.width-width;
                 break;
             case GUITextAlign_Middle:
                 line->posX = 0;
                 break;
             case GUITextAlign_Right:
-                line->posX = width-line->width;
+                line->posX = width-line->content.width;
                 break;
         }
         line->posY = renderY;
@@ -82,45 +82,18 @@ void GUILabel::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     
     GUIClipRect clipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
-    
     transform += btVector3(posX, posY, 0.0);
-    modelMat.setIdentity();
-    modelMat.setOrigin(transform);
     
     GUILabelLine* line;
-    float minFactorX, minFactorY, maxFactorX, maxFactorY;
     for(unsigned int i = 0; i < lines.size(); i ++) {
         line = &lines[i];
         
         if(!line->texture) continue;
-        line->clipRect.minPosX = max(clipRect.minPosX, line->posX-(int)line->width);
-        line->clipRect.minPosY = max(clipRect.minPosY, line->posY-(int)line->height);
-        line->clipRect.maxPosX = min(clipRect.maxPosX, line->posX+(int)line->width);
-        line->clipRect.maxPosY = min(clipRect.maxPosY, line->posY+(int)line->height);
-        
-        if(line->clipRect.minPosX > line->clipRect.maxPosX || line->clipRect.minPosY > line->clipRect.maxPosY) continue;
-        minFactorX = 0.5+0.5*(line->clipRect.minPosX-line->posX)/line->width;
-        minFactorY = 0.5-0.5*(line->clipRect.maxPosY-line->posY)/line->height;
-        maxFactorX = 0.5+0.5*(line->clipRect.maxPosX-line->posX)/line->width;
-        maxFactorY = 0.5-0.5*(line->clipRect.minPosY-line->posY)/line->height;
-        
-        float vertices[] = {
-            (float)line->clipRect.maxPosX, (float)line->clipRect.minPosY,
-            maxFactorX, maxFactorY,
-            (float)line->clipRect.maxPosX, (float)line->clipRect.maxPosY,
-            maxFactorX, minFactorY,
-            (float)line->clipRect.minPosX, (float)line->clipRect.maxPosY,
-            minFactorX, minFactorY,
-            (float)line->clipRect.minPosX, (float)line->clipRect.minPosY,
-            minFactorX, maxFactorY
-        };
-        
-        shaderPrograms[spriteSP]->use();
-        shaderPrograms[spriteSP]->setAttribute(POSITION_ATTRIBUTE, 2, 4*sizeof(float), vertices);
-        shaderPrograms[spriteSP]->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 4*sizeof(float), &vertices[2]);
+        modelMat.setIdentity();
+        modelMat.setOrigin(transform);
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, lines[i].texture);
-        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+        glBindTexture(GL_TEXTURE_2D, line->texture);
+        line->content.drawOnScreen(transform, line->posX, line->posY, parentClipRect);
     }
 }
 
@@ -144,7 +117,7 @@ void GUILabel::getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int&
     std::string str = line->text.substr(0, charIndex);
     int height;
     TTF_SizeUTF8(font->ttf, str.c_str(), &posX, &height);
-    posX = (float)fontHeight/height*posX+line->posX-line->width;
+    posX = (float)fontHeight/height*posX+line->posX-line->content.width;
     return;
 }
 

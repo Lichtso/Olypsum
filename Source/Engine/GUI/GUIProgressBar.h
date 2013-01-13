@@ -13,14 +13,12 @@
 #define GUIProgressBar_h
 
 class GUIProgressBar : public GUIRect {
-    GLuint textureL, textureR;
-    void generateBar(bool filled);
-    void drawBar(GUIClipRect clipRect, bool filled);
+    GUIRoundedRect barL, barR;
+    void drawBar(btVector3 transform, GUIClipRect clipRect, GUIRoundedRect& roundedRect);
     public:
     float value;
     GUIOrientation orientation;
     GUIProgressBar();
-    ~GUIProgressBar();
     void updateContent();
     void draw(btVector3 transform, GUIClipRect& parentClipRect);
 };

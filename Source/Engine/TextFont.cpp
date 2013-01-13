@@ -138,28 +138,20 @@ void TextFont::renderStringToScreen(const char* str, btVector3 pos, float scale,
     GLuint texture = renderStringToTexture(str, color, antialiasing, width, height);
     
     scale /= size;
-    btVector3 rect = btVector3(width*scale, height*scale, 0.0);
-    float vertices[] = {
-        rect.x(), -rect.y(),
-        1.0, 1.0,
-        rect.x(), rect.y(),
-        1.0, 0.0,
-        -rect.x(), rect.y(),
-        0.0, 0.0,
-        -rect.x(), -rect.y(),
-        0.0, 1.0
-    };
+    btVector3 halfSize(width*scale, height*scale, 0.0);
     
     modelMat.setIdentity();
-    modelMat.setBasis(currentCam->getTransformation().getBasis());
+    modelMat.setBasis(modelMat.getBasis().scaled(halfSize) * currentCam->getTransformation().getBasis());
     modelMat.setOrigin(pos);
     
+    btTransform auxMat = btTransform::getIdentity();
+    auxMat.setBasis(auxMat.getBasis().scaled(btVector3(0.5, 0.5, 0.0)));
+    auxMat.setOrigin(btVector3(0.5, 0.5, 0.0));
+    
     shaderPrograms[spriteSP]->use();
-    shaderPrograms[spriteSP]->setAttribute(POSITION_ATTRIBUTE, 2, 4*sizeof(float), vertices);
-    shaderPrograms[spriteSP]->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 4*sizeof(float), &vertices[2]);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
+    currentShaderProgram->setUniformMatrix3("textureMat", &auxMat);
+    mainFBO.vao.draw();
+    
     glDeleteTextures(1, &texture);
 }
 

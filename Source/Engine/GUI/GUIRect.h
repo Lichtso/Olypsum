@@ -41,7 +41,7 @@ class GUIRect {
     GUIElementType type;
     GUIRect* parent;
     bool visible;
-    int posX, posY, width, height;
+    int width, height, posX, posY;
     GUIRect();
     virtual ~GUIRect();
     GUIRect* getRootParent();
@@ -50,7 +50,7 @@ class GUIRect {
     virtual void removeFirstResponderStatus();
     virtual bool getLimSize(GUIClipRect& clipRect, GUIClipRect& parentClipRect);
     virtual void updateContent();
-    virtual void draw(btVector3 transform, GUIClipRect& parentClipRect);
+    virtual void draw(btVector3 transform, GUIClipRect& parentClipRect) = 0;
     virtual bool handleMouseDown(int mouseX, int mouseY);
     virtual bool handleMouseUp(int mouseX, int mouseY);
     virtual void handleMouseMove(int mouseX, int mouseY);

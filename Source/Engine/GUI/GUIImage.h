@@ -14,6 +14,7 @@
 
 class GUIImage : public GUIRect {
     public:
+    GUIDrawableRect content;
     GUISizeAlignment sizeAlignment;
     std::shared_ptr<Texture> texture;
     GUIImage();

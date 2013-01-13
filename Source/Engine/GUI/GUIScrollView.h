@@ -12,7 +12,7 @@
 #define GUIScrollView_h
 
 class GUIScrollView : public GUIFramedView {
-    GLuint textureV, textureH;
+    GUIRoundedRect sliderV, sliderH;
     int mouseDragPosX, mouseDragPosY;
     int getBarWidth();
     int getBarHeight();
@@ -22,7 +22,6 @@ class GUIScrollView : public GUIFramedView {
     bool hideSliderX, hideSliderY;
     int scrollPosX, scrollPosY, scrollWidth, scrollHeight;
     GUIScrollView();
-    ~GUIScrollView();
     void updateContent();
     void draw(btVector3 transform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);

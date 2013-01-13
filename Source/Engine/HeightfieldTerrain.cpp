@@ -9,14 +9,12 @@
 #include "LevelManager.h"
 
 HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoader *levelLoader) :heights(NULL) {
-    glGenBuffers(1, &vbo);
-    glGenBuffers(1, &ibo);
     levelLoader->pushObject(this);
     
     diffuse = fileManager.initResource<Texture>(node->first_node("Diffuse"));
     if(!diffuse) return;
-    diffuse->uploadTexture(GL_TEXTURE_2D_ARRAY_EXT, GL_COMPRESSED_RGB);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    diffuse->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGB);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     if(diffuse->depth <= 1) {
         log(error_log, "Tried to construct HeightfieldTerrain with invalid \"EffectMap\" texture.");
         return;
@@ -25,8 +23,8 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
     rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("EffectMap");
     if(parameterNode) {
         effectMap = fileManager.initResource<Texture>(parameterNode);
-        effectMap->uploadTexture(GL_TEXTURE_2D_ARRAY_EXT, GL_COMPRESSED_RGB);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY_EXT, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        effectMap->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGB);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         if(effectMap->depth <= 1) {
             log(error_log, "Tried to construct HeightfieldTerrain with invalid \"EffectMap\" texture.");
             return;
@@ -100,6 +98,15 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
     textureScale.setY(vecData.data[1]);
     textureScale.setZ(diffuse->depth);
     
+    VertexArrayObject::Attribute attr;
+    attr.size = 3;
+    std::vector<VertexArrayObject::Attribute> attributes;
+    attr.name = POSITION_ATTRIBUTE;
+    attributes.push_back(attr);
+    attr.name = NORMAL_ATTRIBUTE;
+    attributes.push_back(attr);
+    vao.init(attributes, true);
+    
     unsigned int index = 0, indeciesCount = (width-1) * (length-1) * 6;
     unsigned int* indecies = new unsigned int[indeciesCount];
     for(unsigned int y = 0; y < length-1; y ++)
@@ -111,17 +118,13 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
             indecies[index ++] = (y+1)*width + x;
             indecies[index ++] = (y+1)*width + x+1;
         }
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indeciesCount*sizeof(unsigned int), indecies, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    vao.updateIndecies(indeciesCount, indecies, GL_UNSIGNED_INT, GL_STATIC_DRAW);
     delete [] indecies;
     
     updateModel();
 }
 
 HeightfieldTerrain::~HeightfieldTerrain() {
-    glDeleteBuffers(1, &vbo);
-    glDeleteBuffers(1, &ibo);
     if(heights) delete [] heights;
 }
 
@@ -149,19 +152,11 @@ void HeightfieldTerrain::draw() {
             effectMap->use(1);
         else{
             glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, 0);
+            glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
         }
     }
     
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, 6*sizeof(float), NULL);
-    currentShaderProgram->setAttribute(NORMAL_ATTRIBUTE, 3, 6*sizeof(float), reinterpret_cast<float*>(3*sizeof(float)));
-    glDrawElements(GL_TRIANGLES, width * length * 6, GL_UNSIGNED_INT, NULL);
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    glDisableVertexAttribArray(NORMAL_ATTRIBUTE);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    vao.draw();
 }
 
 btVector3 HeightfieldTerrain::getVertexAt(float* vertices, unsigned int x, unsigned int y) {
@@ -200,9 +195,7 @@ void HeightfieldTerrain::updateModel() {
             vertices[index ++] = normal.y();
             vertices[index ++] = normal.z();
         }
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, verticesCount*sizeof(float), vertices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    vao.updateVertices(verticesCount, vertices, GL_STATIC_DRAW);
     delete [] vertices;
 }
 

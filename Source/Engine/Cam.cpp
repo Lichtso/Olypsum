@@ -161,7 +161,7 @@ bool Cam::testInverseNearPlaneHit(btDbvtProxy* node) {
     return fCC.hit;
 }
 
-void Cam::drawWireframeFrustum(Color4 color) {
+void Cam::drawDebugFrustum(Color4 color) {
     if(fov < M_PI) {
         Ray3 bounds[] = {
             getRayAt(-1, -1), getRayAt(-1, 1),
@@ -171,18 +171,18 @@ void Cam::drawWireframeFrustum(Color4 color) {
         modelMat.setIdentity();
         FrustumVolume volume(bounds, far-near);
         volume.init();
-        volume.drawWireFrame(color);
+        volume.drawDebug(color);
     }else if(abs(fov-M_PI) < 0.001) {
         modelMat = transformation;
         modelMat.setOrigin(modelMat.getOrigin()-transformation.getBasis().getColumn(2)*far*0.5);
         LightBoxVolume volume(btVector3(far, far, far*0.5));
         volume.init();
-        volume.drawWireFrame(color);
+        volume.drawDebug(color);
     }else{
         modelMat = transformation;
         LightBoxVolume volume(btVector3(far, far, far));
         volume.init();
-        volume.drawWireFrame(color);
+        volume.drawDebug(color);
     }
 }
 

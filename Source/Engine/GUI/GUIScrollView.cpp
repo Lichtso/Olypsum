@@ -44,86 +44,45 @@ GUIScrollView::GUIScrollView() {
     scrollPosX = scrollPosY = 0;
     scrollWidth = width;
     scrollHeight = height;
-    innerShadow = 0;
-    textureV = textureH = 0;
+    content.innerShadow = 0;
     mouseDragPosX = mouseDragPosY = -2;
     hideSliderX = hideSliderY = true;
 }
 
-GUIScrollView::~GUIScrollView() {
-    if(textureV) glDeleteTextures(1, &textureV);
-    if(textureH) glDeleteTextures(1, &textureH);
-}
-
 void GUIScrollView::updateContent() {
-    GUIView::updateContent();
-    
-    GUIRoundedRect roundedRect;
-    roundedRect.topColor = Color4(0.55);
-    roundedRect.bottomColor = Color4(0.55);
-    roundedRect.borderColor = Color4(0.86);
-    
-    if(innerShadow != 0) {
-        GUIRoundedRect roundedRect;
-        roundedRect.texture = &texture;
-        roundedRect.width = width;
-        roundedRect.height = height;
-        roundedRect.innerShadow = innerShadow*screenSize[2];
-        roundedRect.cornerRadius = abs(innerShadow)*screenSize[2];
-        roundedRect.topColor = Color4(0.78);
-        roundedRect.bottomColor = Color4(0.78);
-        roundedRect.borderColor = Color4(0.78);
-        roundedRect.drawInTexture();
-    }
+    GUIFramedView::updateContent();
     
     if(scrollWidth > width) {
-        roundedRect.texture = &textureH;
-        roundedRect.width = getBarWidth();
-        roundedRect.height = scrollBarWidth;
-        roundedRect.cornerRadius = scrollBarWidth;
-        roundedRect.drawInTexture();
+        sliderH.width = getBarWidth();
+        sliderH.height = scrollBarWidth;
+        sliderH.cornerRadius = scrollBarWidth;
+        sliderH.drawInTexture();
     }
     
     if(scrollHeight > height) {
-        roundedRect.texture = &textureV;
-        roundedRect.width = scrollBarWidth;
-        roundedRect.height = getBarHeight();
-        roundedRect.cornerRadius = scrollBarWidth;
-        roundedRect.drawInTexture();
+        sliderV.width = scrollBarWidth;
+        sliderV.height = getBarHeight();
+        sliderV.cornerRadius = scrollBarWidth;
+        sliderV.drawInTexture();
     }
 }
 
 void GUIScrollView::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     if(!visible) return;
-    if((scrollWidth > width && !textureH) || (scrollHeight > height && !textureV)) updateContent();
     
-    GUIRoundedRect roundedRect;
     GUIClipRect clipRect, fixedClipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
-    fixedClipRect = clipRect;
-    clipRect.minPosX += scrollPosX;
-    clipRect.maxPosX += scrollPosX;
-    clipRect.minPosY -= scrollPosY;
-    clipRect.maxPosY -= scrollPosY;
     
     transform += btVector3(posX, posY, 0.0);
+    float inset = abs(content.innerShadow)*screenSize[2];
+    if(content.innerShadow != 0)
+        content.drawOnScreen(transform, 0, 0, clipRect);
+    fixedClipRect = clipRect;
     
-    if(innerShadow != 0) {
-        if(!texture) updateContent();
-        modelMat.setIdentity();
-        modelMat.setOrigin(transform);
-        GUIRoundedRect roundedRect;
-        roundedRect.texture = &texture;
-        roundedRect.width = width;
-        roundedRect.height = height;
-        roundedRect.drawOnScreen(false, 0, 0, clipRect);
-        float inset = abs(innerShadow)*screenSize[2];
-        clipRect.minPosX += inset;
-        clipRect.maxPosX -= inset;
-        clipRect.minPosY += inset;
-        clipRect.maxPosY -= inset;
-    }
-    
+    clipRect.minPosX += scrollPosX+inset;
+    clipRect.maxPosX += scrollPosX-inset;
+    clipRect.minPosY += -scrollPosY+inset;
+    clipRect.maxPosY += -scrollPosY-inset;
     btVector3 childTransform = transform+btVector3(-scrollPosX, scrollPosY, 0.0);
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->draw(childTransform, clipRect);
@@ -131,19 +90,11 @@ void GUIScrollView::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     modelMat.setIdentity();
     modelMat.setOrigin(transform);
     
-    if(scrollWidth > width && mouseDragPosX > -2) {
-        roundedRect.texture = &textureH;
-        roundedRect.width = getBarWidth();
-        roundedRect.height = scrollBarWidth;
-        roundedRect.drawOnScreen(false, getBarPosX(), 8-height, fixedClipRect);
-    }
+    if(scrollWidth > width && mouseDragPosX > -2)
+        sliderH.drawOnScreen(transform, getBarPosX(), 8-height, fixedClipRect);
     
-    if(scrollHeight > height && mouseDragPosY > -2) {
-        roundedRect.texture = &textureV;
-        roundedRect.width = scrollBarWidth;
-        roundedRect.height = getBarHeight();
-        roundedRect.drawOnScreen(false, width-9, getBarPosY(), fixedClipRect);
-    }
+    if(scrollHeight > height && mouseDragPosY > -2)
+        sliderV.drawOnScreen(transform, width-9, getBarPosY(), fixedClipRect);
 }
 
 bool GUIScrollView::handleMouseDown(int mouseX, int mouseY) {

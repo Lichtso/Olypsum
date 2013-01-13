@@ -57,26 +57,6 @@ void GUIRect::updateContent() {
     
 }
 
-void GUIRect::draw(btVector3 transform, GUIClipRect& parentClipRect) {
-    GUIClipRect clipRect;
-    if(!getLimSize(clipRect, parentClipRect)) return;
-    
-    float vertices[] = {
-        (float)clipRect.maxPosX, (float)clipRect.minPosY,
-        (float)clipRect.maxPosX, (float)clipRect.maxPosY,
-        (float)clipRect.minPosX, (float)clipRect.maxPosY,
-        (float)clipRect.minPosX, (float)clipRect.minPosY
-    };
-    
-    modelMat.setIdentity();
-    modelMat.setOrigin(transform+btVector3(posX, posY, 0.0));
-    shaderPrograms[spriteSP]->use();
-    shaderPrograms[spriteSP]->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glDrawArrays(GL_LINE_LOOP, 0, 4);
-}
-
 bool GUIRect::handleMouseDown(int mouseX, int mouseY) {
     if(!visible || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
     return true;

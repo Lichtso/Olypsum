@@ -30,12 +30,9 @@ class GUIView : public GUIRect {
 
 class GUIFramedView : public GUIView {
     protected:
-    GLuint texture;
+    GUIRoundedRect content;
     public:
-    int innerShadow;
-    unsigned int cornerRadius;
     GUIFramedView();
-    ~GUIFramedView();
     void updateContent();
     void draw(btVector3 parentTransform, GUIClipRect& parentClipRect);
 };

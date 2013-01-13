@@ -7,7 +7,7 @@
 //
 
 #include "TextFont.h"
-#include "GUIRect.h"
+#include "GUIView.h"
 
 #ifndef GUILabel_h
 #define GUILabel_h
@@ -20,9 +20,9 @@ enum GUITextAlign {
 
 struct GUILabelLine {
     GLuint texture;
-    int posX, posY, width, height;
+    GUIDrawableRect content;
+    int posX, posY;
     std::string text;
-    GUIClipRect clipRect;
 };
 
 class GUILabel : public GUIRect {

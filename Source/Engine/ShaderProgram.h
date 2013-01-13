@@ -46,6 +46,7 @@ class Color4 {
 
 //! A shader program used for graphics
 class ShaderProgram {
+    std::map<const char*, GLint> cachedUniforms;
     public:
 	GLuint GLname; //!< The OpenGL identifier
 	ShaderProgram();
@@ -56,18 +57,21 @@ class ShaderProgram {
      @param fileName The file which contains the shaders
      @param shaderTypes A array of shader types one entry for each shader
      @param macros A array of macros to be inserted in every shader
+     @return Success
      */
     bool loadShaderProgram(const char* fileName, std::vector<GLenum> shaderTypes, std::vector<const char*> macros);
     //! Sets the a attribute that will be linked
-    void addAttribute(unsigned int index, const char* attributeName);
+    void addAttribute(unsigned int index, const char* name);
+    //! Sets the fragment buffers that will be linked
+    void addFragDataLocations(std::vector<const char*> names);
     //! Sets the transform feedback varings that will be linked
     void setTransformFeedbackVaryings(unsigned int count, const char** varyings);
-    //! Links all shaders to a complete shader programm
-	void link();
+    //! Links all shaders to a complete shader programm, returns success
+	bool link();
     //! Sets this ShaderProgram as the currentShaderProgram and updates the transformation uniforms
 	void use();
-    //! Enables and sets a attribute
-    void setAttribute(unsigned int index, unsigned int size, GLsizei stride, GLfloat* data);
+    //! Looks up the GLname of a given uniform
+    GLint getUniformLocation(const char* name);
     //! Checks if a uniform existis
     bool checkUniformExistence(const char* name);
     //! Sets a single integer uniform
@@ -80,6 +84,8 @@ class ShaderProgram {
     void setUniformVec3(const char* name, btVector3 value);
     //! Sets a 3x3 matrix uniform
     void setUniformMatrix3(const char* name, const btMatrix3x3* mat);
+    //! Sets a 3x3 matrix uniform
+    void setUniformMatrix3(const char* name, const btTransform* mat);
     //! Sets a 4x4 matrix uniform
     void setUniformMatrix4(const char* name, const Matrix4* mat);
     //! Sets a 4x4 matrix uniform
@@ -89,9 +95,9 @@ class ShaderProgram {
 };
 
 extern btTransform modelMat;
-extern ShaderProgram *shaderPrograms[46], *currentShaderProgram;
+extern ShaderProgram *shaderPrograms[47], *currentShaderProgram;
 extern float screenBlurFactor, globalVolume, musicVolume;
-extern bool edgeSmoothEnabled, fullScreenEnabled, cubemapsEnabled;
+extern bool edgeSmoothEnabled, fullScreenEnabled, cubemapsEnabled, vSyncEnabled;
 extern unsigned char depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, blendingQuality, particleCalcTarget;
 
 enum ShaderProgramNames {
@@ -101,51 +107,52 @@ enum ShaderProgramNames {
     spotShadowCircleLightSP = 2,
     spriteSP = 3,
     colorSP = 4,
+    deferredCombineSP = 5,
     //G-Buffer Shaders
-    solidGSP = 5,
-    skeletalGSP = 6,
-    solidAnimatedGSP = 7,
-    skeletalAnimatedGSP = 8,
-    solidBumpGSP = 9,
-    skeletalBumpGSP = 10,
-    solidAnimatedBumpGSP = 11,
-    skeletalAnimatedBumpGSP = 12,
-    solidGlassGSP = 13,
-    skeletalGlassGSP = 14,
-    solidAnimatedGlassGSP = 15,
-    skeletalAnimatedGlassGSP = 16,
-    solidBumpGlassGSP = 17,
-    skeletalBumpGlassGSP = 18,
-    solidAnimatedBumpGlassGSP = 19,
-    skeletalAnimatedBumpGlassGSP = 20,
-    waterAnimatedGSP = 21,
-    terrainGSP = 22,
+    solidGSP = 6,
+    skeletalGSP = 7,
+    solidAnimatedGSP = 8,
+    skeletalAnimatedGSP = 9,
+    solidBumpGSP = 10,
+    skeletalBumpGSP = 11,
+    solidAnimatedBumpGSP = 12,
+    skeletalAnimatedBumpGSP = 13,
+    solidGlassGSP = 14,
+    skeletalGlassGSP = 15,
+    solidAnimatedGlassGSP = 16,
+    skeletalAnimatedGlassGSP = 17,
+    solidBumpGlassGSP = 18,
+    skeletalBumpGlassGSP = 19,
+    solidAnimatedBumpGlassGSP = 20,
+    skeletalAnimatedBumpGlassGSP = 21,
+    waterAnimatedGSP = 22,
+    terrainGSP = 23,
     //Shadow Map Generators
-    solidShadowSP = 23,
-    skeletalShadowSP = 24,
-    solidAnimatedShadowSP = 25,
-    skeletalAnimatedShadowSP = 26,
-    solidParabolidShadowSP = 27,
-    skeletalParabolidShadowSP = 28,
-    solidAnimatedParabolidShadowSP = 29,
-    skeletalAnimatedParabolidShadowSP = 30,
+    solidShadowSP = 24,
+    skeletalShadowSP = 25,
+    solidAnimatedShadowSP = 26,
+    skeletalAnimatedShadowSP = 27,
+    solidParabolidShadowSP = 28,
+    skeletalParabolidShadowSP = 29,
+    solidAnimatedParabolidShadowSP = 30,
+    skeletalAnimatedParabolidShadowSP = 31,
     //Illumination Shaders
-    directionalLightSP = 31,
-    directionalShadowLightSP = 32,
-    spotLightSP = 33,
-    spotShadowLightSP = 34,
-    positionalLightSP = 35,
-    positionalShadowLightSP = 36,
-    positionalShadowDualLightSP = 37,
+    directionalLightSP = 32,
+    directionalShadowLightSP = 33,
+    spotLightSP = 34,
+    spotShadowLightSP = 35,
+    positionalLightSP = 36,
+    positionalShadowLightSP = 37,
+    positionalShadowDualLightSP = 38,
     //Post Effect Shaders
-    ssaoSP = 38,
-    deferredCombineSP = 39,
-    deferredCombineTransparentSP = 40,
-    edgeSmoothSP = 41,
-    depthOfFieldSP = 42,
-    particleCalculateSP = 43,
-    particleDrawSP = 44,
-    particleDrawAnimatedSP = 45
+    ssaoSP = 39,
+    ssaoCombineSP = 40,
+    deferredCombineTransparentSP = 41,
+    edgeSmoothSP = 42,
+    depthOfFieldSP = 43,
+    particleCalculateSP = 44,
+    particleDrawSP = 45,
+    particleDrawAnimatedSP = 46
 };
 
 //! Compiles all shader programs which are not influenced by graphic options

@@ -29,21 +29,16 @@ void GUIImage::updateContent() {
         default:
         break;
     }
+    content.width = width;
+    content.height = height;
 }
 
 void GUIImage::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     
-    GUIClipRect clipRect;
-    if(!getLimSize(clipRect, parentClipRect)) return;
-    GUIRoundedRect roundedRect;
-    GLuint textureP = 0;
-    
     transform += btVector3(posX, posY, 0.0);
     modelMat.setIdentity();
     modelMat.setOrigin(transform);
-    roundedRect.texture = (texture) ? &texture->GLname : &textureP;
-    roundedRect.width = width;
-    roundedRect.height = height;
-    roundedRect.drawOnScreen(false, 0, 0, clipRect);
+    texture->use(0);
+    content.drawOnScreen(transform, 0, 0, parentClipRect);
 }

@@ -93,8 +93,9 @@ bool Texture::uploadTexture(GLenum textureTarget, GLenum format) {
     GLenum readFormat;
     switch(surface->format->BitsPerPixel) {
         case 8:
-            readFormat = GL_LUMINANCE;
-            break;
+            //TODO: Build RGB image
+            log(error_log, "Couldn't load texture to VRAM.\nGray scale is unsupported.");
+            return false;
         case 24:
             readFormat = GL_BGR;
             break;
@@ -111,10 +112,10 @@ bool Texture::uploadTexture(GLenum textureTarget, GLenum format) {
         return false;
     }
     
-    if(textureTarget == GL_TEXTURE_2D_ARRAY_EXT && depth > 1) {
+    if(textureTarget == GL_TEXTURE_2D_ARRAY && depth > 1) {
         width = surface->w;
         height = surface->h/depth;
-    }else if(textureTarget == GL_TEXTURE_2D_ARRAY_EXT && surface->h > surface->w) {
+    }else if(textureTarget == GL_TEXTURE_2D_ARRAY && surface->h > surface->w) {
         width = surface->w;
         height = surface->w;
         depth = surface->h/surface->w;
@@ -122,23 +123,23 @@ bool Texture::uploadTexture(GLenum textureTarget, GLenum format) {
         width = surface->w;
         height = surface->h;
         depth = 1;
-        if(textureTarget != GL_TEXTURE_RECTANGLE_ARB)
+        if(textureTarget != GL_TEXTURE_RECTANGLE)
             textureTarget = GL_TEXTURE_2D;
     }
     
     glBindTexture(textureTarget, GLname);
-    if(textureTarget == GL_TEXTURE_2D_ARRAY_EXT)
+    if(textureTarget == GL_TEXTURE_2D_ARRAY)
         glTexImage3D(textureTarget, 0, format, width, height, depth, 0, readFormat, GL_UNSIGNED_BYTE, surface->pixels);
     else
         glTexImage2D(textureTarget, 0, format, width, height, 0, readFormat, GL_UNSIGNED_BYTE, surface->pixels);
-    glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, (textureTarget == GL_TEXTURE_RECTANGLE_ARB) ? GL_NEAREST : minFilter);
+    glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, (textureTarget == GL_TEXTURE_RECTANGLE) ? GL_NEAREST : minFilter);
     glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, magFilter);
-    if(textureTarget != GL_TEXTURE_RECTANGLE_ARB)
+    if(textureTarget != GL_TEXTURE_RECTANGLE)
         glGenerateMipmap(textureTarget);
     
     GLint compressed;
     glGetTexLevelParameteriv(textureTarget, 0, GL_TEXTURE_COMPRESSED, &compressed);
-    if(!compressed && (format == GL_COMPRESSED_INTENSITY || format == GL_COMPRESSED_RGB || format == GL_COMPRESSED_RGBA))
+    if(!compressed && (format == GL_COMPRESSED_RGB || format == GL_COMPRESSED_RGBA))
         log(warning_log, "Texture has not been compressed.");
     
     unloadImage();
@@ -146,9 +147,9 @@ bool Texture::uploadTexture(GLenum textureTarget, GLenum format) {
 }
 
 bool Texture::uploadNormalMap(float processingValue) {
-    if(!uploadTexture(GL_TEXTURE_RECTANGLE_ARB, GL_LUMINANCE)) return false;
-    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    if(!uploadTexture(GL_TEXTURE_RECTANGLE, GL_RED)) return false;
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     
     GLuint normalMap;
     glGenTextures(1, &normalMap);
@@ -166,18 +167,15 @@ bool Texture::uploadNormalMap(float processingValue) {
     
     shaderPrograms[normalMapGenSP]->use();
     currentShaderProgram->setUniformF("processingValue", processingValue);
-    float vertices[12] = { -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0 };
-    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    mainFBO.vao.draw();
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     unloadTexture();
     glBindTexture(GL_TEXTURE_2D, normalMap);
     glGenerateMipmap(GL_TEXTURE_2D);
     GLname = normalMap;
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
     
     return true;
 }
@@ -190,7 +188,7 @@ void Texture::unloadTexture() {
 void Texture::use(GLuint targetIndex) {
     glActiveTexture(GL_TEXTURE0+targetIndex);
     if(depth > 1)
-        glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, GLname);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, GLname);
     else
         glBindTexture(GL_TEXTURE_2D, GLname);
 }
@@ -214,7 +212,7 @@ void Texture::use(GLuint targetIndex, float& animationTime) {
             animationTime -= timeSum;
         else if(animationTime < 0.0)
             animationTime += timeSum;
-        glBindTexture(GL_TEXTURE_2D_ARRAY_EXT, GLname);
+        glBindTexture(GL_TEXTURE_2D_ARRAY, GLname);
     }else
         glBindTexture(GL_TEXTURE_2D, GLname);
 }

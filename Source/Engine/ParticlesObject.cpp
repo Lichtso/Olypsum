@@ -69,7 +69,7 @@ rapidxml::xml_node<xmlUsedCharType>* writeBoundsNode(rapidxml::xml_document<xmlU
     return node;
 }
 
-ParticlesObject::ParticlesObject() :activeVBO(0), addParticles(0.0), systemLife(-1.0), force(btVector3(0, -9.81, 0)), transformAligned(false) {
+ParticlesObject::ParticlesObject() :activeVAO(0), addParticles(0.0), systemLife(-1.0), force(btVector3(0, -9.81, 0)), transformAligned(false) {
     objectManager.particlesObjects.insert(this);
     body = new btCollisionObject();
     body->setUserPointer(this);
@@ -77,23 +77,38 @@ ParticlesObject::ParticlesObject() :activeVBO(0), addParticles(0.0), systemLife(
 }
 
 void ParticlesObject::init() {
-    if(particleCalcTarget == 1) {
+    if(particleCalcTarget == 0) return;
+    GLenum target = (particleCalcTarget == 1) ? GL_DYNAMIC_DRAW : GL_STATIC_COPY;
+    
+    glGenVertexArrays(particleCalcTarget, &particlesVAO[0]);
+    glGenBuffers(particleCalcTarget, &particlesVBO[0]);
+    
+    glBindVertexArray(particlesVAO[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, particlesVBO[0]);
+    glBufferData(GL_ARRAY_BUFFER, 8*sizeof(float)*maxParticles, 0, target);
+    glEnableVertexAttribArray(POSITION_ATTRIBUTE);
+    glEnableVertexAttribArray(VELOCITY_ATTRIBUTE);
+    glVertexAttribPointer(POSITION_ATTRIBUTE, 4, GL_FLOAT, false, 8*sizeof(float), 0);
+    glVertexAttribPointer(VELOCITY_ATTRIBUTE, 4, GL_FLOAT, false, 8*sizeof(float), reinterpret_cast<float*>(4*sizeof(float)));
+    glBindVertexArray(0);
+    
+    if(particleCalcTarget == 2) {
+        glBindVertexArray(particlesVAO[1]);
+        glBindBuffer(GL_ARRAY_BUFFER, particlesVBO[1]);
+        glBufferData(GL_ARRAY_BUFFER, 8*sizeof(float)*maxParticles, 0, target);
+        glEnableVertexAttribArray(POSITION_ATTRIBUTE);
+        glEnableVertexAttribArray(VELOCITY_ATTRIBUTE);
+        glVertexAttribPointer(POSITION_ATTRIBUTE, 4, GL_FLOAT, false, 8*sizeof(float), 0);
+        glVertexAttribPointer(VELOCITY_ATTRIBUTE, 4, GL_FLOAT, false, 8*sizeof(float), reinterpret_cast<float*>(4*sizeof(float)));
+        glBindVertexArray(0);
+        particlesCount = maxParticles;
+    }else{
         particles = new Particle[maxParticles];
         particlesCount = 0;
-    }else if(particleCalcTarget == 2) {
-        particlesCount = maxParticles;
-        glGenBuffers(1, &particlesVBO[0]);
-        glBindBuffer(GL_ARRAY_BUFFER, particlesVBO[0]);
-        glBufferData(GL_ARRAY_BUFFER, 8*sizeof(float)*maxParticles, 0, GL_STATIC_DRAW);
-        glGenBuffers(1, &particlesVBO[1]);
-        glBindBuffer(GL_ARRAY_BUFFER, particlesVBO[1]);
-        glBufferData(GL_ARRAY_BUFFER, 8*sizeof(float)*maxParticles, 0, GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 }
 
 ParticlesObject::ParticlesObject(unsigned int maxParticlesB, btCollisionShape* collisionShape) :ParticlesObject() {
-    //texture = NULL;
     maxParticles = maxParticlesB;
     init();
     body->setCollisionShape(collisionShape);
@@ -133,7 +148,7 @@ ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, Leve
     if(!readBoundsNode(node, "Velocity", dirMin, dirMax)) return;
     
     texture = fileManager.initResource<Texture>(node->first_node("Texture"));
-    texture->uploadTexture(GL_TEXTURE_2D_ARRAY_EXT, GL_COMPRESSED_RGB);
+    texture->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGB);
 }
 
 ParticlesObject::~ParticlesObject() {
@@ -141,11 +156,14 @@ ParticlesObject::~ParticlesObject() {
         delete body;
         body = NULL;
     }
-    if(particleCalcTarget == 1)
+    
+    if(particleCalcTarget == 1) {
         delete [] (Particle*)particles;
-    if(particlesVBO[0]) {
+        glDeleteVertexArrays(1, &particlesVAO[0]);
         glDeleteBuffers(1, &particlesVBO[0]);
-        glDeleteBuffers(1, &particlesVBO[1]);
+    }else{
+        glDeleteVertexArrays(2, &particlesVAO[0]);
+        glDeleteBuffers(2, &particlesVBO[0]);
     }
 }
 
@@ -210,20 +228,15 @@ bool ParticlesObject::gameTick() {
         currentShaderProgram->setUniformVec3("dirRange", dirMax-dirMin);
         currentShaderProgram->setUniformVec3("velocityAdd", force*animationFactor);
         
-        glBindBuffer(GL_ARRAY_BUFFER, particlesVBO[activeVBO]);
-        currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 4, 8*sizeof(float), 0);
-        currentShaderProgram->setAttribute(VELOCITY_ATTRIBUTE, 4, 8*sizeof(float), reinterpret_cast<float*>(4*sizeof(float)));
-        
-        glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, particlesVBO[!activeVBO]);
-        glBindBufferBaseEXT(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, 0, particlesVBO[!activeVBO]);
-        glBeginTransformFeedbackEXT(GL_POINTS);
+        glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, particlesVBO[!activeVAO]);
+        glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, particlesVBO[!activeVAO]);
+        glBindVertexArray(particlesVAO[activeVAO]);
+        glBeginTransformFeedback(GL_POINTS);
         glDrawArrays(GL_POINTS, 0, particlesCount);
-        glEndTransformFeedbackEXT();
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER_EXT, 0);
-        glDisableVertexAttribArray(VELOCITY_ATTRIBUTE);
-        glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-        activeVBO = !activeVBO;
+        glEndTransformFeedback();
+        glBindVertexArray(0);
+        //glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, 0);
+        activeVAO = !activeVAO;
     }
     
     return true;
@@ -244,29 +257,27 @@ void ParticlesObject::draw() {
         currentShaderProgram->setUniformMatrix3("viewNormalMat", &viewNormalMat);
     }
     
+    glBindVertexArray(particlesVAO[activeVAO]);
     if(particleCalcTarget == 1) {
         unsigned int index;
-        float* vertices = new float[5*particlesCount];
+        float* vertices = new float[particlesCount*8];
         for(unsigned int p = 0; p < particlesCount; p ++) {
-            index = p*5;
-            vertices[index] = particles[p].pos.x();
+            index = p*8;
+            vertices[index  ] = particles[p].pos.x();
             vertices[index+1] = particles[p].pos.y();
             vertices[index+2] = particles[p].pos.z();
             vertices[index+3] = particles[p].life;
-            vertices[index+4] = particles[p].size;
+            vertices[index+4] = particles[p].dir.x();
+            vertices[index+5] = particles[p].dir.y();
+            vertices[index+6] = particles[p].dir.z();
+            vertices[index+7] = particles[p].size;
         }
-        currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 4, 5*sizeof(float), vertices);
-        currentShaderProgram->setAttribute(VELOCITY_ATTRIBUTE, 1, 5*sizeof(float), &vertices[4]);
-    }else if(particleCalcTarget == 2) {
-        glBindBuffer(GL_ARRAY_BUFFER, particlesVBO[activeVBO]);
-        currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 4, 8*sizeof(float), 0);
-        currentShaderProgram->setAttribute(VELOCITY_ATTRIBUTE, 1, 8*sizeof(float), reinterpret_cast<float*>(7*sizeof(float)));
+        glBindBuffer(GL_ARRAY_BUFFER, particlesVBO[0]);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, particlesCount*8*sizeof(float), vertices);
     }
     
     glDrawArrays(GL_POINTS, 0, particlesCount);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glDisableVertexAttribArray(VELOCITY_ATTRIBUTE);
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
+    glBindVertexArray(0);
 }
 
 rapidxml::xml_node<xmlUsedCharType>* ParticlesObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {

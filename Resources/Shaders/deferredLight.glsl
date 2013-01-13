@@ -1,4 +1,4 @@
-attribute vec3 position;
+in vec3 position;
 
 uniform mat4 modelViewMat;
 
@@ -8,10 +8,8 @@ void main() {
 
 #separator
 
-#if SHADOWS_ACTIVE == 3
-#extension GL_EXT_gpu_shader4 : require
-#endif
-#extension GL_ARB_texture_rectangle : enable
+out vec3 diffuseOut;
+out vec3 specularOut;
 
 uniform vec3 camPos;
 uniform float lInvRange;
@@ -56,7 +54,7 @@ float random(vec2 co) {
 
 #if SHADOW_QUALITY == 1
 float shadowLookup2D(sampler2DShadow sampler, vec3 coord) {
-    return shadow2D(sampler, coord).x;
+    return texture(sampler, coord);
 }
 #elif SHADOW_QUALITY > 1
 float shadowLookup2D(sampler2DShadow sampler, vec3 coord) {
@@ -64,15 +62,15 @@ float shadowLookup2D(sampler2DShadow sampler, vec3 coord) {
 	const float blurSize = float(SHADOW_QUALITY)-1.0, blurSum = (blurSize*2.0+1.0)*(blurSize*2.0+1.0);
 	for(float y = -blurSize; y <= blurSize; y += 1.0)
 		for(float x = -blurSize; x <= blurSize; x += 1.0)
-			intensity += shadow2D(sampler, vec3(coord.xy+vec2(x, y)*blurBias, coord.z)).x;
+			intensity += texture(sampler, vec3(coord.xy+vec2(x, y)*blurBias, coord.z));
     return intensity / blurSum;
 }
 #endif
 
 void main() {
-    vec3 pos = texture2DRect(sampler0, gl_FragCoord.xy).xyz,
-         normal = texture2DRect(sampler1, gl_FragCoord.xy).xyz,
-         material = texture2DRect(sampler2, gl_FragCoord.xy).rgb;
+    vec3 pos = texture(sampler0, gl_FragCoord.xy).xyz,
+         normal = texture(sampler1, gl_FragCoord.xy).xyz,
+         material = texture(sampler2, gl_FragCoord.xy).rgb;
     
     #if LIGHT_TYPE == 1
     vec3 lightDir = lDirection;
@@ -83,7 +81,7 @@ void main() {
     lightDir /= lightDirLen;
     intensity = clamp(lightDirLen * lInvRange, step(lCutoff, dot(lDirection, lightDir)), 1.0);
     #endif
-
+    
     #if SHADOW_QUALITY > 0 //Shadows enabled
     vec4 shadowCoord = vec4(pos, 1.0) * lShadowMat;
     #if LIGHT_TYPE < 3 //Directional or spot light
@@ -110,13 +108,13 @@ void main() {
     #else //Cubemap
     shadowCoord.w = max(max(abs(shadowCoord.x), abs(shadowCoord.y)), abs(shadowCoord.z));
     shadowCoord.w = (shadowDepthTransform.x + shadowDepthTransform.y/shadowCoord.w);
-    intensity = (1.0-intensity)*shadowCube(sampler3, shadowCoord).x;
+    intensity = (1.0-intensity)*texture(sampler3, shadowCoord);
     #endif //Cubemap
     #endif //Positional light
     #else //Shadows disabled
     intensity = (1.0-intensity);
     #endif //Shadows disabled
     
-    gl_FragData[0].rgb = lColor*intensity*max(dot(lightDir, normal), 0.0);
-    gl_FragData[1].rgb = lColor*intensity*pow(max(dot(reflect(lightDir, normal), normalize(pos-camPos)), 0.0), material.r*19.0+1.0)*material.g;
+    diffuseOut = lColor*intensity*max(dot(lightDir, normal), 0.0);
+    specularOut = lColor*intensity*pow(max(dot(reflect(lightDir, normal), normalize(pos-camPos)), 0.0), material.r*19.0+1.0)*material.g;
 }

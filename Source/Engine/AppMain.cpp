@@ -11,7 +11,8 @@
 
 Uint8* keyState;
 SDLMod modKeyState;
-float timeInLastSec = 0.0, loadingScreen = 1.0;
+const float loadingScreenTime = 0.1;
+float timeInLastSec = 0.0, loadingScreen = loadingScreenTime;
 unsigned int currentFPS = 0, newFPS = 0;
 
 #ifndef __MAC_OS__
@@ -46,6 +47,8 @@ void AppMain(int argc, char *argv[]) {
     }
     
     SDL_EnableUNICODE(1);
+    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+    SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, vSyncEnabled);
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
@@ -62,14 +65,12 @@ void AppMain(int argc, char *argv[]) {
     log(info_log, std::string("OpenGL, renderer: ")+glStr);
     glStr = (char*)glGetString(GL_VERSION);
     log(info_log, std::string("OpenGL, version: ")+glStr);
-    glStr = (char*)glGetString(GL_EXTENSIONS);
+    //glStr = (char*)glGetString(GL_EXTENSIONS);
     //log(info_log, std::string("OpenGL, extensions: ")+glStr);
     
-    glEnable(GL_TEXTURE_2D);
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
-    glEnable(GL_POINT_SPRITE);
     glFrontFace(GL_CCW);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
@@ -79,14 +80,16 @@ void AppMain(int argc, char *argv[]) {
     mainCam->use();
     guiCam = new Cam();
     guiCam->fov = 0.0;
+    guiCam->near = -1.0;
+    guiCam->far = 1.0;
     guiCam->gameTick();
     
     //Init Resources
     mainFont = new TextFont();
-    mainFont->size = screenSize[1]*0.05;
+    mainFont->size = screenSize[1]*0.04;
     mainFont->loadTTF("font");
     italicFont = new TextFont();
-    italicFont->size = screenSize[1]*0.05;
+    italicFont->size = screenSize[1]*0.04;
     italicFont->loadTTF("font_italic");
     initLightVolumes();
     objectManager.init();
@@ -159,10 +162,10 @@ void AppMain(int argc, char *argv[]) {
         keyState = SDL_GetKeyState(NULL);
         modKeyState = SDL_GetModState();
         
-        if(currentMenu == inGameMenu) {
+        if(currentMenu == inGameMenu && newFPS == 0) {
             char str[64];
             sprintf(str, "FPS: %d", currentFPS);
-            GUILabel* labelFPS = (GUILabel*)currentScreenView->children[0];
+            GUILabel* labelFPS = static_cast<GUILabel*>(currentScreenView->children[0]);
             labelFPS->text = str;
             labelFPS->updateContent();
         }
@@ -170,6 +173,10 @@ void AppMain(int argc, char *argv[]) {
         if(levelManager.gameStatus == noGame) {
             if(currentMenu == loadingMenu) {
                 loadingScreen -= animationFactor;
+                char str[64];
+                sprintf(str, "FPS: %d", currentFPS);
+                GUIProgressBar* progressBar = static_cast<GUIProgressBar*>(currentScreenView->children[0]);
+                progressBar->value = 1.0-loadingScreen/loadingScreenTime;
                 if(loadingScreen <= 0.0)
                     setMenu(mainMenu);
             }
@@ -183,6 +190,7 @@ void AppMain(int argc, char *argv[]) {
             objectManager.drawFrame();
         }
         if(currentScreenView) currentScreenView->draw();
+        
         SDL_GL_SwapBuffers();
         
         gettimeofday(&timeNow, 0);
@@ -197,6 +205,8 @@ void AppMain(int argc, char *argv[]) {
             currentFPS = newFPS;
             newFPS = 0;
         }
+        
+        //usleep(1000);
     }
 }
 

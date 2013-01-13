@@ -77,29 +77,15 @@ bool GUIView::handleMouseWheel(int mouseX, int mouseY, float delta) {
 
 GUIFramedView::GUIFramedView() {
     type = GUIType_View;
-    texture = 0;
-    innerShadow = -screenSize[0]/screenSize[2]*0.006;
-    cornerRadius = screenSize[0]/screenSize[2]*0.01;
-}
-
-GUIFramedView::~GUIFramedView() {
-    if(texture)
-        glDeleteTextures(1, &texture);
+    content.topColor = Color4(0.78);
+    content.bottomColor = Color4(0.78);
+    content.borderColor = Color4(0.78);
 }
 
 void GUIFramedView::updateContent() {
-    if(innerShadow != 0) {
-        GUIRoundedRect roundedRect;
-        roundedRect.texture = &texture;
-        roundedRect.width = width;
-        roundedRect.height = height;
-        roundedRect.innerShadow = innerShadow*screenSize[2];
-        roundedRect.cornerRadius = cornerRadius*screenSize[2];
-        roundedRect.topColor = Color4(0.78);
-        roundedRect.bottomColor = Color4(0.78);
-        roundedRect.borderColor = Color4(0.78);
-        roundedRect.drawInTexture();
-    }
+    content.width = width;
+    content.height = height;
+    content.drawInTexture();
     
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->updateContent();
@@ -112,22 +98,12 @@ void GUIFramedView::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     if(!getLimSize(clipRect, parentClipRect)) return;
     
     transform += btVector3(posX, posY, 0.0);
-    
-    if(innerShadow != 0) {
-        if(!texture) updateContent();
-        modelMat.setIdentity();
-        modelMat.setOrigin(transform);
-        GUIRoundedRect roundedRect;
-        roundedRect.texture = &texture;
-        roundedRect.width = width;
-        roundedRect.height = height;
-        roundedRect.drawOnScreen(false, 0, 0, clipRect);
-        float inset = abs(innerShadow)*screenSize[2];
-        clipRect.minPosX += inset;
-        clipRect.maxPosX -= inset;
-        clipRect.minPosY += inset;
-        clipRect.maxPosY -= inset;
-    }
+    content.drawOnScreen(transform, 0, 0, clipRect);
+    float inset = abs(content.innerShadow)*screenSize[2];
+    clipRect.minPosX += inset;
+    clipRect.maxPosX -= inset;
+    clipRect.minPosY += inset;
+    clipRect.maxPosY -= inset;
     
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->draw(transform, clipRect);
@@ -165,44 +141,32 @@ void GUIScreenView::draw() {
     GUIClipRect clipRect;
     if(!getLimSize(clipRect)) return;
     
+    glEnable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
     guiCam->use();
     shaderPrograms[spriteSP]->use();
     shaderPrograms[spriteSP]->setUniformF("alpha", 1.0);
     
-    btVector3 transform = btVector3(0.0, 0.0, -1.0);
+    btVector3 transform = btVector3(0.0, 0.0, 0.0);
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->draw(transform, clipRect);
     
     if(modalView) {
-        modelMat.setIdentity();
-        modelMat.setOrigin(transform);
-        shaderPrograms[spriteSP]->use();
-        shaderPrograms[spriteSP]->setUniformF("alpha", 0.8);
-        
-        float vertices[] = {
-            (float)width, (float)-height,
-            1.0, 0.0, 0.2,
-            (float)width, (float)height,
-            1.0, 1.0, 0.2,
-            (float)-width, (float)height,
-            0.0, 1.0, 0.2,
-            (float)-width, (float)-height,
-            0.0, 0.0, 0.2
-        };
-        
-        shaderPrograms[spriteSP]->setAttribute(POSITION_ATTRIBUTE, 2, 5*sizeof(float), vertices);
-        shaderPrograms[spriteSP]->setAttribute(TEXTURE_COORD_ATTRIBUTE, 3, 5*sizeof(float), &vertices[2]);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
-        glDrawArrays(GL_QUADS, 0, 4);
         
+        btVector3 halfSize(width, height, 0.0);
+        modelMat.setIdentity();
+        modelMat.setBasis(modelMat.getBasis().scaled(halfSize));
+        modelMat.setOrigin(btVector3(0, 0, 0));
+        shaderPrograms[spriteSP]->use();
+        shaderPrograms[spriteSP]->setUniformF("alpha", 0.5);
+        mainFBO.vao.draw();
         shaderPrograms[spriteSP]->setUniformF("alpha", 1.0);
+        
         modalView->draw(transform, clipRect);
     }
     
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
     glEnable(GL_DEPTH_TEST);
 }
 
@@ -276,7 +240,10 @@ void GUIScreenView::setModalView(GUIRect* modalViewB) {
         firstResponder = NULL;
     }
     modalView = modalViewB;
-    if(modalView) modalView->parent = this;
+    if(modalView) {
+        modalView->parent = this;
+        modalView->updateContent();
+    }
 }
 
 GUIScreenView* currentScreenView = NULL;

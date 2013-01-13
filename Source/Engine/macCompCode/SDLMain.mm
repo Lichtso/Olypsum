@@ -302,7 +302,7 @@ void updateVideoMode() {
         
         [window setStyleMask:0];
         [window setHasShadow:false];
-        [window setFrame:NSRectFromCGRect(CGRectMake(0, 0, videoInfo->current_w, videoInfo->current_h)) display:true];
+        [window setFrame:NSRectFromCGRect(CGRectMake(0, 0, videoInfo->current_w, videoInfo->current_h)) display:false];
         [NSApp setPresentationOptions:NSApplicationPresentationHideDock | NSApplicationPresentationAutoHideMenuBar];
         [window becomeKeyWindow];
         

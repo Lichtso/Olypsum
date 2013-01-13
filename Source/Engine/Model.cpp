@@ -15,28 +15,11 @@
 #define maxJointsCount 64
 
 Mesh::Mesh() {
-    elementsCount = 0;
-    vbo = ibo = 0;
-    postions = texcoords = normals = weightJoints = -1;
     material.transparent = false;
     material.diffuse = material.effectMap = material.heightMap = NULL;
 }
 
-Mesh::~Mesh() {
-    if(vbo) glDeleteBuffers(1, &vbo);
-    if(ibo) glDeleteBuffers(1, &ibo);
-}
-
 void Mesh::draw(ModelObject* object) {
-    if(!vbo || elementsCount == 0) {
-        log(error_log, "No vertex data to draw in mesh.");
-        return;
-    }
-    if(postions == -1) {
-        log(error_log, "No postions data to draw in mesh.");
-        return;
-    }
-    
     if(material.effectMap)
         material.effectMap->use(1);
     else{
@@ -50,43 +33,23 @@ void Mesh::draw(ModelObject* object) {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
     
+    unsigned int shaderProgram;
     if(objectManager.currentShadowLight) {
-        unsigned int shaderProgram = solidShadowSP;
-        if(weightJoints >= 0) shaderProgram += 1;
+        shaderProgram = solidShadowSP;
+        if(object->model->skeleton >= 0) shaderProgram += 1;
         if(material.diffuse && material.diffuse->depth > 1) shaderProgram += 2;
         if(dynamic_cast<PositionalLight*>(objectManager.currentShadowLight) && !cubemapsEnabled) shaderProgram += 4;
-        shaderPrograms[shaderProgram]->use();
+    }else{
+        shaderProgram = solidGSP;
+        if(object->model->skeleton) shaderProgram += 1;
+        if(material.diffuse && material.diffuse->depth > 1) shaderProgram += 2;
+        if(material.heightMap) shaderProgram += 4;
+        if(material.transparent && blendingQuality > 0) shaderProgram += 8;
     }
+    shaderPrograms[shaderProgram]->use();
     object->prepareShaderProgram(this);
     
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    unsigned int byteStride = 3;
-    if(texcoords >= 0) byteStride += 2;
-    if(normals >= 0) byteStride += 3;
-    if(weightJoints >= 0) byteStride += jointsPerVertex*2;
-    byteStride *= sizeof(float);
-    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, byteStride, reinterpret_cast<float*>(postions*sizeof(float)));
-    if(texcoords >= 0) currentShaderProgram->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, byteStride, reinterpret_cast<float*>(texcoords*sizeof(float)));
-    if(normals >= 0) currentShaderProgram->setAttribute(NORMAL_ATTRIBUTE, 3, byteStride, reinterpret_cast<float*>(normals*sizeof(float)));
-    if(weightJoints >= 0) {
-        currentShaderProgram->setAttribute(WEIGHT_ATTRIBUTE, jointsPerVertex, byteStride, reinterpret_cast<float*>(weightJoints*sizeof(float)));
-        currentShaderProgram->setAttribute(JOINT_ATTRIBUTE, jointsPerVertex, byteStride, reinterpret_cast<float*>((weightJoints+jointsPerVertex)*sizeof(float)));
-    }
-    
-    if(ibo) {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glDrawElements(GL_TRIANGLES, elementsCount, GL_UNSIGNED_INT, NULL);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    }else{
-        glDrawArrays(GL_TRIANGLES, 0, elementsCount);
-    }
-    
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    glDisableVertexAttribArray(TEXTURE_COORD_ATTRIBUTE);
-    glDisableVertexAttribArray(NORMAL_ATTRIBUTE);
-    glDisableVertexAttribArray(WEIGHT_ATTRIBUTE);
-    glDisableVertexAttribArray(JOINT_ATTRIBUTE);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    vao.draw();
 }
 
 //! @cond
@@ -317,7 +280,7 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
                     if(url.size() > 0) {
                         material.diffuse = filePackage->getResource<Texture>(url);
                         material.diffuse->setAnimationFrames(readTextureFrames(dataNode->first_node("texture")));
-                        material.diffuse->uploadTexture(GL_TEXTURE_2D_ARRAY_EXT, (material.transparent) ? GL_COMPRESSED_RGBA : GL_COMPRESSED_RGB);
+                        material.diffuse->uploadTexture(GL_TEXTURE_2D_ARRAY, (material.transparent) ? GL_COMPRESSED_RGBA : GL_COMPRESSED_RGB);
                     }
                 }
                 if((dataNode = source->first_node("specular"))) {
@@ -637,7 +600,7 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
             if(!dataAttribute) goto endParsingXML;
             mesh = new Mesh();
             meshes.push_back(mesh);
-            sscanf(dataAttribute->value(), "%d", &mesh->elementsCount);
+            sscanf(dataAttribute->value(), "%d", &mesh->vao.elementsCount);
             
             //Set material
             dataAttribute = source->first_attribute("material");
@@ -695,41 +658,47 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
                 vertexReferences[vertexReference.name] = vertexReference;
             }
             
+            VertexArrayObject::Attribute attr;
+            std::vector<VertexArrayObject::Attribute> attributes;
             for(iterator = vertexReferences.begin(); iterator != vertexReferences.end(); iterator ++) {
+                strideIndex += (attr.size = iterator->second.source->stride);
                 if(strcmp(iterator->second.name, "POSITION") == 0) {
-                    mesh->postions = strideIndex;
+                    attr.name = POSITION_ATTRIBUTE;
                 }else if(strcmp(iterator->second.name, "TEXCOORD") == 0) {
-                    mesh->texcoords = strideIndex;
+                    attr.name = TEXTURE_COORD_ATTRIBUTE;
                 }else if(strcmp(iterator->second.name, "NORMAL") == 0) {
-                    mesh->normals = strideIndex;
+                    attr.name = NORMAL_ATTRIBUTE;
                 }else if(strcmp(iterator->second.name, "WEIGHTJOINT") == 0) {
-                    mesh->weightJoints = strideIndex;
+                    attr.size /= 2;
+                    attr.name = WEIGHT_ATTRIBUTE;
+                    attributes.push_back(attr);
+                    attr.name = JOINT_ATTRIBUTE;
                 }else{
                     log(error_log, std::string("Unknown vertex type: ")+iterator->second.name);
                     goto endParsingXML;
                 }
-                strideIndex += iterator->second.source->stride;
+                attributes.push_back(attr);
             }
             
             //Triangulator
             XMLValueArray<int> indexBuffer, indexCountBuffer;
             dataNode = source->first_node("vcount");
             if(dataNode) {
-                indexCountBuffer.readString(dataNode, mesh->elementsCount, "%d");
-                mesh->elementsCount = 0;
+                indexCountBuffer.readString(dataNode, mesh->vao.elementsCount, "%d");
+                mesh->vao.elementsCount = 0;
                 for(unsigned int i = 0; i < indexCountBuffer.count; i ++)
-                    mesh->elementsCount += indexCountBuffer.data[i]-2;
-                indexBuffer.count = (mesh->elementsCount+2*indexCountBuffer.count)*indexCount;
-                mesh->elementsCount *= 3;
+                    mesh->vao.elementsCount += indexCountBuffer.data[i]-2;
+                indexBuffer.count = (mesh->vao.elementsCount+2*indexCountBuffer.count)*indexCount;
+                mesh->vao.elementsCount *= 3;
                 
-                if(mesh->elementsCount == indexCountBuffer.count*3) //All Elements are Triangles
+                if(mesh->vao.elementsCount == indexCountBuffer.count*3) //All Elements are Triangles
                     indexCountBuffer.clear();
                 else //Triangulation needed
-                    indexBuffer.data = new int[mesh->elementsCount*indexCount];
+                    indexBuffer.data = new int[mesh->vao.elementsCount*indexCount];
                 
             }else{
-                mesh->elementsCount *= 3;
-                indexBuffer.count = indexCount*mesh->elementsCount;
+                mesh->vao.elementsCount *= 3;
+                indexBuffer.count = indexCount*mesh->vao.elementsCount;
             }
             
             if(!indexBuffer.readString(source->first_node("p"), indexBuffer.count, "%d"))
@@ -737,8 +706,8 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
             
             if(indexCountBuffer.data) {
                 unsigned int finishedElements = 0, indexBufferSize = indexBuffer.count;
-                indexBuffer.count = indexCount*mesh->elementsCount;
-                mesh->elementsCount = 0;
+                indexBuffer.count = indexCount*mesh->vao.elementsCount;
+                mesh->vao.elementsCount = 0;
                 for(int i = indexCountBuffer.count-1; i >= 0; i --) {
                     unsigned int copyCount = indexCountBuffer.data[i]*indexCount,
                     expandCount = (indexCountBuffer.data[i]-2)*3*indexCount,
@@ -750,26 +719,24 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
                     
                     for(unsigned int j = 0; j < indexCountBuffer.data[i]-2; j ++)
                         for(unsigned int k = 0; k < indexCount; k ++) {
-                            index = indexBuffer.count-mesh->elementsCount*indexCount-expandCount+j*indexCount*3+k;
+                            index = indexBuffer.count-mesh->vao.elementsCount*indexCount-expandCount+j*indexCount*3+k;
                             indexBuffer.data[index] = indexAuxBuffer[k];
                             indexBuffer.data[index+indexCount] = indexAuxBuffer[k+indexCount*(j+1)];
                             indexBuffer.data[index+indexCount*2] = indexAuxBuffer[k+indexCount*(j+2)];
                         }
                     
                     finishedElements += indexCountBuffer.data[i]*indexCount;
-                    mesh->elementsCount += (indexCountBuffer.data[i]-2)*3;
+                    mesh->vao.elementsCount += (indexCountBuffer.data[i]-2)*3;
                 }
                 indexCountBuffer.clear();
             }
             
             //Indecizer
-            float dataBuffer[strideIndex*mesh->elementsCount];
-            glGenBuffers(1, &mesh->vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, mesh->vbo);
+            float dataBuffer[strideIndex*mesh->vao.elementsCount];
             if(indexCount > 1) { //Use IndexBuffer
                 int combinationIndex, combinationCount = 0;
-                unsigned int indecies[mesh->elementsCount];
-                for(unsigned int i = 0; i < mesh->elementsCount; i ++) {
+                unsigned int indecies[mesh->vao.elementsCount];
+                for(unsigned int i = 0; i < mesh->vao.elementsCount; i ++) {
                     combinationIndex = -1;
                     for(unsigned int j = 0; j < combinationCount && combinationIndex == -1; j ++) {
                         combinationIndex = j;
@@ -793,24 +760,26 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
                     indecies[i] = combinationIndex;
                 }
                 
-                glBufferData(GL_ARRAY_BUFFER, combinationCount*strideIndex*sizeof(float), dataBuffer, GL_STATIC_DRAW);
-                glGenBuffers(1, &mesh->ibo);
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->ibo);
-                glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh->elementsCount*sizeof(unsigned int), indecies, GL_STATIC_DRAW);
-                if(combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int) > mesh->elementsCount*strideIndex*sizeof(float)) {
+                mesh->vao.init(attributes, true);
+                mesh->vao.updateVertices(combinationCount*strideIndex, dataBuffer, GL_STATIC_DRAW);
+                mesh->vao.updateIndecies(mesh->vao.elementsCount, indecies, GL_UNSIGNED_INT, GL_STATIC_DRAW);
+                if(combinationCount*strideIndex*sizeof(float)+mesh->vao.elementsCount*sizeof(unsigned int) > mesh->vao.elementsCount*strideIndex*sizeof(float)) {
                     char buffer[128];
-                    sprintf(buffer, "Loading COLLADA, Index-Mode is contra-productive: Used %lu bytes, but %lu would be necessary.", combinationCount*strideIndex*sizeof(float)+mesh->elementsCount*sizeof(unsigned int), mesh->elementsCount*strideIndex*sizeof(float));
+                    sprintf(buffer, "Loading COLLADA, Index-Mode is contra-productive: Used %lu bytes, but %lu would be necessary.",
+                            combinationCount*strideIndex*sizeof(float)+mesh->vao.elementsCount*sizeof(unsigned int),
+                            mesh->vao.elementsCount*strideIndex*sizeof(float));
                     log(warning_log, buffer);
                 }
             }else{ //Don't use IndexBuffer
                 dataIndex = 0;
-                for(unsigned int i = 0; i < mesh->elementsCount; i ++)
+                for(unsigned int i = 0; i < mesh->vao.elementsCount; i ++)
                     for(iterator = vertexReferences.begin(); iterator != vertexReferences.end(); iterator ++) {
                         valueIndex = indexBuffer.data[i*indexCount+iterator->second.offset]*iterator->second.source->stride;
                         for(unsigned char j = 0; j < iterator->second.source->stride; j ++)
                             dataBuffer[dataIndex ++] = iterator->second.source->data[valueIndex+j];
                     }
-                glBufferData(GL_ARRAY_BUFFER, mesh->elementsCount*strideIndex*sizeof(float), dataBuffer, GL_STATIC_DRAW);
+                mesh->vao.init(attributes, false);
+                mesh->vao.updateVertices(mesh->vao.elementsCount*strideIndex, dataBuffer, GL_STATIC_DRAW);
             }
             
             rapidxml::xml_node<xmlUsedCharType>* sourceB = source->next_sibling("triangles");
@@ -832,8 +801,6 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
     }
     
     endParsingXML:
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     return pointer;
 }
 

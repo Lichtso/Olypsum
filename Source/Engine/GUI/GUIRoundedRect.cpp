@@ -8,18 +8,52 @@
 
 #include "GUIRoundedRect.h"
 
+void GUIDrawableRect::drawOnScreen(btVector3 parentTransform, int posX, int posY, GUIClipRect &parentClipRect) {
+    GUIClipRect clipRect;
+    clipRect.minPosX = max(parentClipRect.minPosX, posX-width);
+    clipRect.minPosY = max(parentClipRect.minPosY, posY-height);
+    clipRect.maxPosX = min(parentClipRect.maxPosX, posX+width);
+    clipRect.maxPosY = min(parentClipRect.maxPosY, posY+height);
+    if(clipRect.minPosX > clipRect.maxPosX || clipRect.minPosY > clipRect.maxPosY) return;
+    
+    btTransform auxMat = btTransform::getIdentity();
+    btVector3 halfSize(0.5*(clipRect.maxPosX-clipRect.minPosX), 0.5*(clipRect.maxPosY-clipRect.minPosY), 1.0);
+    auxMat.setBasis(auxMat.getBasis().scaled(halfSize));
+    auxMat.setOrigin(btVector3(halfSize.x()+clipRect.minPosX, halfSize.y()+clipRect.minPosY, 0)+parentTransform);
+    modelMat = auxMat;
+    
+    auxMat.setIdentity();
+    btVector3 minFactor(0.5+0.5*(clipRect.minPosX-posX)/width, 0.5-0.5*(clipRect.maxPosY-posY)/height, 0.0),
+    maxFactor(0.5+0.5*(clipRect.maxPosX-posX)/width, 0.5-0.5*(clipRect.minPosY-posY)/height, 0.0);
+    btVector3 halfCoords(0.5*(maxFactor.x()-minFactor.x()), -0.5*(maxFactor.y()-minFactor.y()), 1.0);
+    auxMat.setBasis(auxMat.getBasis().scaled(halfCoords));
+    auxMat.setOrigin(btVector3(minFactor.x()+halfCoords.x(), minFactor.y()-halfCoords.y(), 0));
+    
+    shaderPrograms[spriteSP]->use();
+    currentShaderProgram->setUniformMatrix3("textureMat", &auxMat);
+    mainFBO.vao.draw();
+}
+
+
+
 GUIRoundedRect::GUIRoundedRect() {
-    texture = NULL;
+    texture = 0;
+    transposed = false;
     roundedCorners = (GUICorners) (GUITopLeftCorner | GUITopRightCorner | GUIBottomLeftCorner | GUIBottomRightCorner);
-    cornerRadius = 8;
-    innerShadow = 0;
-    width = height = 0;
+    innerShadow = -screenSize[0]*0.006;
+    cornerRadius = screenSize[0]*0.01;
+    width = height = 100;
     topColor = Color4(0.9);
     bottomColor = Color4(1.0);
     borderColor = Color4(0.5);
 }
 
-void GUIRoundedRect::setBorderPixel(unsigned int x, unsigned int y) {
+GUIRoundedRect::~GUIRoundedRect() {
+    if(texture)
+        glDeleteTextures(1, &texture);
+}
+
+void GUIRoundedRect::setBorderPixel(unsigned char* pixels, unsigned int x, unsigned int y) {
     unsigned char* pixel = pixels+(y*width*8)+x*4;
     pixel[0] = borderColor.r*255;
     pixel[1] = borderColor.g*255;
@@ -27,7 +61,7 @@ void GUIRoundedRect::setBorderPixel(unsigned int x, unsigned int y) {
     pixel[3] = borderColor.a*255;
 }
 
-void GUIRoundedRect::setBorderPixelBlended(unsigned int x, unsigned int y, float alpha) {
+void GUIRoundedRect::setBorderPixelBlended(unsigned char* pixels, unsigned int x, unsigned int y, float alpha) {
     float antiAlpha = 1.0-alpha;
     alpha *= 255;
     unsigned char* pixel = pixels+(y*width*8)+x*4;
@@ -37,7 +71,7 @@ void GUIRoundedRect::setBorderPixelBlended(unsigned int x, unsigned int y, float
     pixel[3] = pixel[3]*antiAlpha + borderColor.a*alpha;
 }
 
-float GUIRoundedRect::getInnerShadowValue(unsigned int x, unsigned int y) {
+float GUIRoundedRect::getInnerShadowValue(unsigned char* pixels, unsigned int x, unsigned int y) {
     float value = 0.0;
     unsigned int border = abs(innerShadow);
     int x0 = max(0, (int)(x-border)),
@@ -51,7 +85,7 @@ float GUIRoundedRect::getInnerShadowValue(unsigned int x, unsigned int y) {
     return (innerShadow > 0.0) ? value*0.8+0.2 : (1.0-value)*80.0;
 }
 
-void GUIRoundedRect::setInnerShadowPixel(unsigned int x, unsigned int y, float value) {
+void GUIRoundedRect::setInnerShadowPixel(unsigned char* pixels, unsigned int x, unsigned int y, float value) {
     unsigned char* pixel = pixels+(y*width*8)+x*4;
     if(innerShadow > 0.0) {
         pixel[0] *= value;
@@ -65,10 +99,7 @@ void GUIRoundedRect::setInnerShadowPixel(unsigned int x, unsigned int y, float v
 }
 
 void GUIRoundedRect::drawInTexture() {
-    if(*texture) glDeleteTextures(1, texture);
-    
-    pixels = new unsigned char[width*height*16];
-    unsigned char* pixel;
+    unsigned char *pixel, *pixels = new unsigned char[width*height*16];
     
     for(unsigned int y = 0; y < height*2; y ++)
         for(unsigned int x = 0; x < width*2; x ++) {
@@ -91,34 +122,40 @@ void GUIRoundedRect::drawInTexture() {
                 pixel[0] = pixel[1] = pixel[2] = 0;
                 continue;
             }
-            pixel[0] = ((bottomColor.r-topColor.r)*0.5*y/height+topColor.r)*255.0;
-            pixel[1] = ((bottomColor.g-topColor.g)*0.5*y/height+topColor.g)*255.0;
-            pixel[2] = ((bottomColor.b-topColor.b)*0.5*y/height+topColor.b)*255.0;
+            if(transposed) {
+                pixel[0] = ((bottomColor.r-topColor.r)*0.5*x/width+topColor.r)*255.0;
+                pixel[1] = ((bottomColor.g-topColor.g)*0.5*x/width+topColor.g)*255.0;
+                pixel[2] = ((bottomColor.b-topColor.b)*0.5*x/width+topColor.b)*255.0;
+            }else{
+                pixel[0] = ((bottomColor.r-topColor.r)*0.5*y/height+topColor.r)*255.0;
+                pixel[1] = ((bottomColor.g-topColor.g)*0.5*y/height+topColor.g)*255.0;
+                pixel[2] = ((bottomColor.b-topColor.b)*0.5*y/height+topColor.b)*255.0;
+            }
         }
     
     if(innerShadow != 0) {
         for(unsigned int y = 0; y < cornerRadius; y ++)
             for(unsigned int x = 0; x < cornerRadius; x ++) {
                 unsigned int mirX = width*2-1-x, mirY = height*2-1-y;
-                setInnerShadowPixel(x, y, getInnerShadowValue(x, y));
-                setInnerShadowPixel(mirX, y, getInnerShadowValue(mirX, y));
-                setInnerShadowPixel(x, mirY, getInnerShadowValue(x, mirY));
-                setInnerShadowPixel(mirX, mirY, getInnerShadowValue(mirX, mirY));
+                setInnerShadowPixel(pixels, x, y, getInnerShadowValue(pixels, x, y));
+                setInnerShadowPixel(pixels, mirX, y, getInnerShadowValue(pixels, mirX, y));
+                setInnerShadowPixel(pixels, x, mirY, getInnerShadowValue(pixels, x, mirY));
+                setInnerShadowPixel(pixels, mirX, mirY, getInnerShadowValue(pixels, mirX, mirY));
             }
         
         for(unsigned int y = 0; y < cornerRadius; y ++) {
-            float value = getInnerShadowValue(cornerRadius, y);
+            float value = getInnerShadowValue(pixels, cornerRadius, y);
             for(unsigned int x = 0; x < width*2-cornerRadius*2; x ++) {
-                setInnerShadowPixel(cornerRadius+x, y, value);
-                setInnerShadowPixel(cornerRadius+x, height*2-1-y, value);
+                setInnerShadowPixel(pixels, cornerRadius+x, y, value);
+                setInnerShadowPixel(pixels, cornerRadius+x, height*2-1-y, value);
             }
         }
         
         for(unsigned int x = 0; x < cornerRadius; x ++) {
-            float value = getInnerShadowValue(x, cornerRadius);
+            float value = getInnerShadowValue(pixels, x, cornerRadius);
             for(unsigned int y = 0; y < height*2-cornerRadius*2; y ++) {
-                setInnerShadowPixel(x, cornerRadius+y, value);
-                setInnerShadowPixel(width*2-1-x, cornerRadius+y, value);
+                setInnerShadowPixel(pixels, x, cornerRadius+y, value);
+                setInnerShadowPixel(pixels, width*2-1-x, cornerRadius+y, value);
             }
         }
     }
@@ -132,10 +169,10 @@ void GUIRoundedRect::drawInTexture() {
     yMinB = (roundedCorners&GUITopRightCorner)?cornerRadius:0,
     yMaxB = height*2-((roundedCorners&GUIBottomRightCorner)?cornerRadius:0);
     
-    for(unsigned int x = xMinA; x < xMaxA; x ++) setBorderPixel(x, 0);
-    for(unsigned int x = xMinB; x < xMaxB; x ++) setBorderPixel(x, height*2-1);
-    for(unsigned int y = yMinA; y < yMaxA; y ++) setBorderPixel(0, y);
-    for(unsigned int y = yMinB; y < yMaxB; y ++) setBorderPixel(width*2-1, y);
+    for(unsigned int x = xMinA; x < xMaxA; x ++) setBorderPixel(pixels, x, 0);
+    for(unsigned int x = xMinB; x < xMaxB; x ++) setBorderPixel(pixels, x, height*2-1);
+    for(unsigned int y = yMinA; y < yMaxA; y ++) setBorderPixel(pixels, 0, y);
+    for(unsigned int y = yMinB; y < yMaxB; y ++) setBorderPixel(pixels, width*2-1, y);
     
     int error, x, y;
     for(unsigned int radius = cornerRadius; radius <= cornerRadius; radius ++) {
@@ -146,28 +183,28 @@ void GUIRoundedRect::drawInTexture() {
             float alpha = fmax(0.0, sqrt(x*x+(y+1)*(y+1))-cornerRadius);
             
             if(roundedCorners & GUITopLeftCorner) {
-                setBorderPixel(radius-x, radius-y);
-                setBorderPixel(radius-y, radius-x);
-                setBorderPixelBlended(radius-x+1, radius-y, alpha);
-                setBorderPixelBlended(radius-y, radius-x+1, alpha);
+                setBorderPixel(pixels, radius-x, radius-y);
+                setBorderPixel(pixels, radius-y, radius-x);
+                setBorderPixelBlended(pixels, radius-x+1, radius-y, alpha);
+                setBorderPixelBlended(pixels, radius-y, radius-x+1, alpha);
             }
             if(roundedCorners & GUITopRightCorner) {
-                setBorderPixel(x+width*2-radius-1, radius-y);
-                setBorderPixel(y+width*2-radius-1, radius-x);
-                setBorderPixelBlended(x+width*2-radius-2, radius-y, alpha);
-                setBorderPixelBlended(y+width*2-radius-1, radius-x+1, alpha);
+                setBorderPixel(pixels, x+width*2-radius-1, radius-y);
+                setBorderPixel(pixels, y+width*2-radius-1, radius-x);
+                setBorderPixelBlended(pixels, x+width*2-radius-2, radius-y, alpha);
+                setBorderPixelBlended(pixels, y+width*2-radius-1, radius-x+1, alpha);
             }
             if(roundedCorners & GUIBottomLeftCorner) {
-                setBorderPixel(radius-x, y+height*2-radius-1);
-                setBorderPixel(radius-y, x+height*2-radius-1);
-                setBorderPixelBlended(radius-x+1, y+height*2-radius-1, alpha);
-                setBorderPixelBlended(radius-y, x+height*2-radius-2, alpha);
+                setBorderPixel(pixels, radius-x, y+height*2-radius-1);
+                setBorderPixel(pixels, radius-y, x+height*2-radius-1);
+                setBorderPixelBlended(pixels, radius-x+1, y+height*2-radius-1, alpha);
+                setBorderPixelBlended(pixels, radius-y, x+height*2-radius-2, alpha);
             }
             if(roundedCorners & GUIBottomRightCorner) {
-                setBorderPixel(x+width*2-radius-1, y+height*2-radius-1);
-                setBorderPixel(y+width*2-radius-1, x+height*2-radius-1);
-                setBorderPixelBlended(x+width*2-radius-2, y+height*2-radius-1, alpha);
-                setBorderPixelBlended(y+width*2-radius-1, x+height*2-radius-2, alpha);
+                setBorderPixel(pixels, x+width*2-radius-1, y+height*2-radius-1);
+                setBorderPixel(pixels, y+width*2-radius-1, x+height*2-radius-1);
+                setBorderPixelBlended(pixels, x+width*2-radius-2, y+height*2-radius-1, alpha);
+                setBorderPixelBlended(pixels, y+width*2-radius-1, x+height*2-radius-2, alpha);
             }
             error += y ++;
             error += y;
@@ -178,9 +215,9 @@ void GUIRoundedRect::drawInTexture() {
         }
     }
     
-    glGenTextures(1, texture);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, *texture);
+    if(!texture)
+        glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width*2, height*2, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -190,46 +227,9 @@ void GUIRoundedRect::drawInTexture() {
     delete [] pixels;
 }
 
-void GUIRoundedRect::drawOnScreen(bool transposed, int posX, int posY, GUIClipRect& parentClipRect) {
-    GUIClipRect clipRect;
-    clipRect.minPosX = max(parentClipRect.minPosX, posX-width);
-    clipRect.minPosY = max(parentClipRect.minPosY, posY-height);
-    clipRect.maxPosX = min(parentClipRect.maxPosX, posX+width);
-    clipRect.maxPosY = min(parentClipRect.maxPosY, posY+height);
-    if(clipRect.minPosX > clipRect.maxPosX || clipRect.minPosY > clipRect.maxPosY) return;
-    
-    shaderPrograms[spriteSP]->use();
-    
-    if(transposed) {
-        btVector3 minFactor(0.5-0.5*(clipRect.maxPosY-posY)/height, 0.5+0.5*(clipRect.minPosX-posX)/width, 0.0),
-                maxFactor(0.5-0.5*(clipRect.minPosY-posY)/height, 0.5+0.5*(clipRect.maxPosX-posX)/width, 0.0);
-        float texCoords[] = {
-            maxFactor.x(), maxFactor.y(),
-            minFactor.x(), maxFactor.y(),
-            minFactor.x(), minFactor.y(),
-            maxFactor.x(), minFactor.y()
-        };
-        shaderPrograms[spriteSP]->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 2*sizeof(float), texCoords);
-    }else{
-        btVector3 minFactor(0.5+0.5*(clipRect.minPosX-posX)/width, 0.5-0.5*(clipRect.maxPosY-posY)/height, 0.0),
-                maxFactor(0.5+0.5*(clipRect.maxPosX-posX)/width, 0.5-0.5*(clipRect.minPosY-posY)/height, 0.0);
-        float texCoords[] = {
-            maxFactor.x(), maxFactor.y(),
-            maxFactor.x(), minFactor.y(),
-            minFactor.x(), minFactor.y(),
-            minFactor.x(), maxFactor.y()
-        };
-        shaderPrograms[spriteSP]->setAttribute(TEXTURE_COORD_ATTRIBUTE, 2, 2*sizeof(float), texCoords);
-    }
-    
-    float vertices[] = {
-        (float)clipRect.maxPosX, (float)clipRect.minPosY,
-        (float)clipRect.maxPosX, (float)clipRect.maxPosY,
-        (float)clipRect.minPosX, (float)clipRect.maxPosY,
-        (float)clipRect.minPosX, (float)clipRect.minPosY
-    };
-    shaderPrograms[spriteSP]->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
+void GUIRoundedRect::drawOnScreen(btVector3 parentTransform, int posX, int posY, GUIClipRect &parentClipRect) {
+    if(!texture) drawInTexture();
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, (texture) ? *texture : 0);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    GUIDrawableRect::drawOnScreen(parentTransform, posX, posY, parentClipRect);
 }

@@ -264,11 +264,8 @@ bool SpotLight::gameTick(bool shadowActive) {
     glDisable(GL_BLEND);
     mainFBO.renderInTexture(shadowMap, GL_TEXTURE_2D);
     //Render circle mask
-    float vertices[12] = { -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0 };
     shaderPrograms[spotShadowCircleLightSP]->use();
-    shaderPrograms[spotShadowCircleLightSP]->setAttribute(POSITION_ATTRIBUTE, 2, 2*sizeof(float), vertices);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
+    mainFBO.vao.draw();
     objectManager.drawScene();
     glEnable(GL_BLEND);
     

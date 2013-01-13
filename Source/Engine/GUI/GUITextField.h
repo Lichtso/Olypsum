@@ -18,7 +18,7 @@ std::string getClipboardText();
 bool hasClipboardText();
 
 class GUITextField : public GUIRect {
-    GLuint texture;
+    GUIRoundedRect content, cursor;
     float cursorDrawTick;
     bool highlighted;
     void insertStr(const char* str);

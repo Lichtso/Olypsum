@@ -20,7 +20,7 @@ class HeightfieldTerrain : public GraphicObject {
     btVector3 textureScale; //!< Used to scale the diffuse and specular texture in OpenGL
     std::shared_ptr<Texture> diffuse, //!< The diffuse texture
                              effectMap; //!< The specular texture
-    GLuint vbo, ibo; //!< VertexBufferObject and IndexBufferObject used for OpenGL
+    VertexArrayObject vao; //!< VertexArrayObject used for OpenGL
     unsigned int width, length;
     float* heights;
     //! Internally used by updateModel()
