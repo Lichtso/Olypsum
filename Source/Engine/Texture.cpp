@@ -93,9 +93,8 @@ bool Texture::uploadTexture(GLenum textureTarget, GLenum format) {
     GLenum readFormat;
     switch(surface->format->BitsPerPixel) {
         case 8:
-            //TODO: Build RGB image
-            log(error_log, "Couldn't load texture to VRAM.\nGray scale is unsupported.");
-            return false;
+            readFormat = GL_RED;
+            break;
         case 24:
             readFormat = GL_BGR;
             break;

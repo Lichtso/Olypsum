@@ -105,7 +105,7 @@ void setColor(vec2 texCoord) {
                 +texture(sampler0, vec3(texCoord.xy, texCoordAnimZ.y))*texCoordAnimF.y; //Color
     #endif
     if(colorOut.a < 0.0039) discard;
-    colorOut.a = 0.5;
+    //colorOut.a = 0.5;
 }
 
 #if BUMP_MAPPING == 3
@@ -148,7 +148,7 @@ void main() {
     vec3 viewVec = normalize(camPos-vPosition);
     #if BUMP_MAPPING == 2 //Parallax simple
     viewVec.xy = vec2(dot(viewVec, vTangent), dot(viewVec, vBitangent));
-    vec2 texCoord = vTexCoord-viewVec.xy*texture(sampler2, vTexCoord).a*0.04;
+    vec2 texCoord = vTexCoord-viewVec.xy*texture(sampler2, vTexCoord).a*0.07;
     #elif BUMP_MAPPING == 3 //Parallax occlusion
     viewVec = vec3(dot(viewVec, vTangent), dot(viewVec, vBitangent), dot(viewVec, normalOut));
     float steps = floor((1.0 - viewVec.z) * 18.0) + 2.0;
@@ -161,7 +161,7 @@ void main() {
     #endif
     setColor(texCoord.xy);
     //if(abs(texCoord.x-0.5) > 0.5 || abs(texCoord.y-0.5) > 0.5) discard;
-    gl_FragDepth = gl_FragCoord.z+length(texCoord.xy-vTexCoord)*0.2; //Depth
+    gl_FragDepth = gl_FragCoord.z+length(texCoord.xy-vTexCoord)*0.05; //Depth
     vec3 bumpMap = texture(sampler2, texCoord.xy).xyz;
     bumpMap.xy = bumpMap.xy*2.0-vec2(1.0);
     normalOut = mat3(vTangent, vBitangent, normalOut)*bumpMap;

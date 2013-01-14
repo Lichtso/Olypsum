@@ -1,7 +1,6 @@
-OpenGL 3.2:
-Texture gray scale
-
+Improve BaseLink & BoneObject write()
 Implement btSoftBody
+Implement btRayCastVehicle
 Implement more PhysicLink types
 Anisotropic filtering
 Use C++11 Multithreading

@@ -36,7 +36,7 @@ void Mesh::draw(ModelObject* object) {
     unsigned int shaderProgram;
     if(objectManager.currentShadowLight) {
         shaderProgram = solidShadowSP;
-        if(object->model->skeleton >= 0) shaderProgram += 1;
+        if(object->model->skeleton) shaderProgram += 1;
         if(material.diffuse && material.diffuse->depth > 1) shaderProgram += 2;
         if(dynamic_cast<PositionalLight*>(objectManager.currentShadowLight) && !cubemapsEnabled) shaderProgram += 4;
     }else{

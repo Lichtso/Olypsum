@@ -19,8 +19,8 @@ LevelSaver::~LevelSaver() {
 
 void LevelSaver::pushObject(BaseObject* object) {
     for(auto iteratorInObject : object->links) {
-        if(iteratorInObject.first == ".." || dynamic_cast<BoneObject*>(iteratorInObject.second->getOther(object)))
-            continue; //Don't export BoneObject or parent links
+        if(dynamic_cast<BoneObject*>(object) || dynamic_cast<BoneObject*>(iteratorInObject.second->getOther(object)))
+            continue; //Don't export BoneObject
         auto iteratorInSet = linkingMap.find(iteratorInObject.second);
         if(iteratorInSet == linkingMap.end()) {
             LinkInitializer* linkSaver = new LinkInitializer();

@@ -125,15 +125,14 @@ void AppMain(int argc, char *argv[]) {
                                 break;
                         case SDL_BUTTON_MIDDLE:
                         case SDL_BUTTON_RIGHT:
-                            if(controlsMangager)
+                            if(controlsMangager && currentMenu == inGameMenu)
                                 controlsMangager->handleMouseDown(event.button.x, event.button.y, event);
                             break;
                         case SDL_BUTTON_WHEELDOWN:
                         case SDL_BUTTON_WHEELUP:
                             float delta = (event.button.button == SDL_BUTTON_WHEELDOWN) ? -1.0 : 1.0;
-                            if(currentScreenView->handleMouseWheel(event.button.x, event.button.y, delta))
-                                break;
-                            if(controlsMangager)
+                            if(!currentScreenView->handleMouseWheel(event.button.x, event.button.y, delta)
+                               && controlsMangager && currentMenu == inGameMenu)
                                 controlsMangager->handleMouseWheel(event.button.x, event.button.y, delta);
                             break;
                     }
@@ -142,14 +141,14 @@ void AppMain(int argc, char *argv[]) {
                     if(event.button.button == SDL_BUTTON_WHEELDOWN || event.button.button == SDL_BUTTON_WHEELUP) break;
                     event.button.x = (event.button.x+mouseTranslation[0])*screenSize[2];
                     event.button.y = (event.button.y+mouseTranslation[1])*screenSize[2];
-                    if(!currentScreenView->handleMouseUp(event.button.x, event.button.y) && controlsMangager)
+                    if(!currentScreenView->handleMouseUp(event.button.x, event.button.y) && controlsMangager && currentMenu == inGameMenu)
                         controlsMangager->handleMouseUp(event.button.x, event.button.y, event);
                 break;
                 case SDL_MOUSEMOTION:
                     event.button.x = (event.button.x+mouseTranslation[0])*screenSize[2];
                     event.button.y = (event.button.y+mouseTranslation[1])*screenSize[2];
                     currentScreenView->handleMouseMove(event.button.x, event.button.y);
-                    if(controlsMangager)
+                    if(controlsMangager && currentMenu == inGameMenu)
                         controlsMangager->handleMouseMove(event.button.x, event.button.y, event);
                 break;
                 case SDL_QUIT:
@@ -186,6 +185,8 @@ void AppMain(int argc, char *argv[]) {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT);
         }else{
+            if(controlsMangager && currentMenu == inGameMenu)
+                controlsMangager->gameTick();
             objectManager.gameTick();
             objectManager.drawFrame();
         }

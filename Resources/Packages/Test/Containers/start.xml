@@ -1,7 +1,13 @@
 <Container>
 	<Level gravity="0.0 -9.81 0.0" />
-	<Container src="man">
-		<Translate>0.7 2.0 0.0</Translate>
+	<Container src="woodenBox">
+		<Translate>4.0 -3.0 0.0</Translate>
+	</Container>
+	<Container src="woodenBox">
+		<Translate>4.0 -2.0 0.0</Translate>
+	</Container>
+	<Container src="woodenBox">
+		<Translate>4.0 -1.0 0.0</Translate>
 	</Container>
 	<Objects>
 		<RigidObject>
@@ -9,11 +15,18 @@
 			<PhysicsBody collisionShape="worldBox" mass="0.0" />
 		</RigidObject>
 		<RigidObject>
+			<Model src="woodenBox.dae" />
+			<PhysicsBody collisionShape="box0" mass="0.0" />
+		</RigidObject>
+		<RigidObject>
+			<Rotate>1.0 0.0 0.0 70.0</Rotate>
+			<Rotate>0.0 1.0 0.0 20.0</Rotate>
 			<Model src="man.dae" />
-			<PhysicsBody collisionShape="manBox" mass="0.0" />
+			<PhysicsBody collisionShape="manBox" mass="65.0" />
+			<Damping linear="0.0" angular="0.3" />
 		</RigidObject>
 		<LightObject type="positional">
-			<Translate>1.0 1.0 1.0</Translate>
+			<Translate>2.0 3.0 2.0</Translate>
 			<Color>1.0 1.0 1.0</Color>
 			<Bounds omniDirectional="true" range="15.0" />
 		</LightObject>
@@ -26,23 +39,28 @@
 			<SpawnBox min="-0.2 0.0 -0.2" max="0.2 0.0 0.2" />
 			<Velocity min="-0.2 0.3 -0.2" max="0.2 1.2 0.2" />
 		</ParticlesObject>
-		<HeightfieldTerrain size="5.0 4.0 5.0" textureScale="20.0 20.0">
+		<HeightfieldTerrain size="10.0 4.0 10.0" textureScale="20.0 20.0">
 			<Diffuse src="wallAnim.png" />
 			<HeightsMap src="terrainMap.png" />
 		</HeightfieldTerrain>
 	</Objects>
 	<Links>
 		<PhysicLink>
-			<Object index="-1" name="a" />
-			<Object index="1" name="b" />
-			<Constraint type="hinge">
-				<Frame>
-					<Translate>0.0 1.4 0.0</Translate>
-				</Frame>
-				<Frame>
-					<Translate>0.0 -1.0 0.0</Translate>
-				</Frame>
+			<Object index="1" name="a" />
+			<Object index="2" name="b" />
+			<Constraint type="point">
+					<Point>0.0 -1.0 0.0</Point>
+					<Point>0.0 1.0 0.0</Point>
 			</Constraint>
 		</PhysicLink>
+		<TransformLink>
+			<Object index="2" name=".." />
+			<Object index="3" name="child" />
+			<Transforms>
+				<Entry type="transform">
+					<Translate>0.0 7.0 1.0</Translate>
+				</Entry>
+			</Transforms>
+		</TransformLink>
 	</Links>
 </Container>

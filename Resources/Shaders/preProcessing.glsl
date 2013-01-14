@@ -20,19 +20,20 @@ uniform float processingValue;
 #endif
 
 #if PROCESSING_TYPE == 1 //Normal Map Generator
-out vec3 normalOut;
+out vec4 normalOut;
 
 void main() {
+    normalOut.a = texture(sampler0, gl_FragCoord.xy).r;
     vec3 pos = vec3(0.0), posL = vec3(-1.0, 0.0, 0.0), posR = vec3(1.0, 0.0, 0.0),
          posB = vec3(0.0, -1.0, 0.0), posT = vec3(0.0, 1.0, 0.0);
-    pos.z =  texture(sampler0, gl_FragCoord.xy).r*processingValue;
+    pos.z = normalOut.a*processingValue;
     posL.z = texture(sampler0, gl_FragCoord.xy+posL.xy).r*processingValue;
     posR.z = texture(sampler0, gl_FragCoord.xy+posR.xy).r*processingValue;
     posB.z = texture(sampler0, gl_FragCoord.xy+posB.xy).r*processingValue;
     posT.z = texture(sampler0, gl_FragCoord.xy+posT.xy).r*processingValue;
     posL -= pos; posR -= pos; posB -= pos; posT -= pos;
     vec3 normal = normalize(cross(posT, posL)+cross(posR, posT)+cross(posL, posB)+cross(posB, posR));
-    normalOut = vec3(vec2(0.5)-normal.xy*0.5, normal.z);
+    normalOut.rgb = vec3(vec2(0.5)-normal.xy*0.5, normal.z);
 }
 
 #elif PROCESSING_TYPE == 2 //Screen Blur

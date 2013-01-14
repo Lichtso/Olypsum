@@ -336,6 +336,22 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
 
 
 
+rapidxml::xml_node<xmlUsedCharType>* TransformLink::BaseEntry::write(rapidxml::xml_document<xmlUsedCharType>& doc) {
+    rapidxml::xml_node<xmlUsedCharType>* entryNode = doc.allocate_node(rapidxml::node_element);
+    entryNode->name("Entry");
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    attribute->name("type");
+    entryNode->append_attribute(attribute);
+    return entryNode;
+}
+
+rapidxml::xml_node<xmlUsedCharType>* TransformLink::TransformEntry::write(rapidxml::xml_document<xmlUsedCharType>& doc) {
+    rapidxml::xml_node<xmlUsedCharType>* entryNode = BaseEntry::write(doc);
+    entryNode->first_attribute("type")->value("transform");
+    entryNode->append_node(writeTransformationXML(doc, matrix));
+    return entryNode;
+}
+
 TransformLink::AnimationEntry::Frame::Frame(float accBeginB, float accEndB, float durationB, btQuaternion rotationB, btVector3 positionB)
 : accBegin(accBeginB), accEnd(accEndB), duration(durationB), rotation(rotationB), position(positionB) {}
 
@@ -374,13 +390,42 @@ btTransform TransformLink::AnimationEntry::gameTick() {
     return transform;
 }
 
+rapidxml::xml_node<xmlUsedCharType>* TransformLink::AnimationEntry::write(rapidxml::xml_document<xmlUsedCharType>& doc) {
+    rapidxml::xml_node<xmlUsedCharType>* entryNode = BaseEntry::write(doc);
+    entryNode->first_attribute("type")->value("animation");
+    
+    return entryNode;
+}
+
 TransformLink::TransformLink(LinkInitializer& initializer) {
     init(initializer);
 }
 
 TransformLink::TransformLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
     LinkInitializer initializer = BaseLink::readInitializer(node, levelLoader);
+    rapidxml::xml_node<xmlUsedCharType>* entryNode = node->first_node("Transforms");
+    if(!entryNode) {
+        log(error_log, "Tried to construct TransformLink without \"Transforms\"-node.");
+        return;
+    }
     init(initializer);
+    entryNode = entryNode->first_node("Entry");
+    while(entryNode) {
+        rapidxml::xml_attribute<xmlUsedCharType>* attribute = entryNode->first_attribute("type");
+        if(!attribute) {
+            log(error_log, "Tried to construct TransformLink-Entry without \"type\"-attribute.");
+            return;
+        }
+        if(strcmp(attribute->value(), "transform") == 0) {
+            transforms.push_back(new TransformEntry(readTransformationXML(entryNode)));
+        }else if(strcmp(attribute->value(), "animation") == 0) {
+            printf("AnimationEntry\n");
+        }else{
+            log(error_log, std::string("Tried to TransformLink-Entry with invalid type: ")+attribute->value()+'.');
+            return;
+        }
+        entryNode = entryNode->next_sibling("Entry");
+    }
 }
 
 TransformLink::~TransformLink() {
@@ -449,5 +494,12 @@ void TransformLink::init(LinkInitializer &initializer) {
 rapidxml::xml_node<xmlUsedCharType>* TransformLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver) {
     rapidxml::xml_node<xmlUsedCharType>* node = BaseLink::write(doc, linkSaver);
     node->name("TransformLink");
+    rapidxml::xml_node<xmlUsedCharType>* transformsNode = doc.allocate_node(rapidxml::node_element);
+    transformsNode->name("Transforms");
+    node->append_node(transformsNode);
+    
+    for(unsigned int i = 0; i < transforms.size(); i ++)
+        transformsNode->append_node(transforms[i]->write(doc));
+    
     return node;
 }

@@ -94,6 +94,8 @@ class TransformLink : public BaseLink {
         virtual btTransform gameTick() {
             return btTransform::getIdentity();
         }
+        //! Writes its self to rapidxml::xml_node and returns it
+        virtual rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc);
     };
     //! A TransformLink::BaseEntry which transforms with a matrix
     class TransformEntry : public BaseEntry {
@@ -103,6 +105,7 @@ class TransformLink : public BaseLink {
         btTransform gameTick() {
             return matrix;
         }
+        rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc);
     };
     //! A TransformLink::BaseEntry which transforms with animation frames
     class AnimationEntry : public BaseEntry {
@@ -132,6 +135,7 @@ class TransformLink : public BaseLink {
         std::vector<Frame*> frames; //!< The frames in this animation
         ~AnimationEntry();
         btTransform gameTick();
+        rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc);
     };
     std::vector<BaseEntry*> transforms; //!< A array with all the transformations to be applied
     virtual void gameTickFrom(BaseObject* parent);

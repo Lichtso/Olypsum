@@ -122,7 +122,6 @@ void ObjectManager::clear() {
 void ObjectManager::gameTick() {
     //Calculate Physics
     physicsWorld->stepSimulation(animationFactor, 4, 1.0/60.0); //Try to maintain 60 FPS
-    controlsMangager->gameTick();
     
     //Calculate Decals
     for(auto iterator = decals.begin(); iterator != decals.end(); iterator ++) {
@@ -168,13 +167,13 @@ void ObjectManager::physicsTick() {
     unsigned int numManifolds = collisionDispatcher->getNumManifolds();
     
     //TODO: Debugging
-    /*if(currentMenu == inGameMenu) {
+    if(currentMenu == inGameMenu) {
         char str[64];
         sprintf(str, "Collisions: %d", numManifolds);
         GUILabel* label = static_cast<GUILabel*>(currentScreenView->children[1]);
         label->text = str;
         label->updateContent();
-    }*/
+    }
     
 	for(unsigned int i = 0; i < numManifolds; i ++) {
 		btPersistentManifold* contactManifold = collisionDispatcher->getManifoldByIndexInternal(i);
