@@ -102,6 +102,7 @@ PhysicObject::~PhysicObject() {
     if(body) {
         if(body->getCollisionShape())
             delete body->getCollisionShape();
+        objectManager.physicsWorld->removeCollisionObject(body);
         delete body;
     }
 }

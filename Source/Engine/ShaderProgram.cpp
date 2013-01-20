@@ -337,7 +337,7 @@ void ShaderProgram::setUniformMatrix4(const char* name, const btTransform* mat, 
 
 btTransform modelMat;
 ShaderProgram *shaderPrograms[], *currentShaderProgram;
-float screenBlurFactor = -1.0, globalVolume = 0.5, musicVolume = 0.5;
+float screenBlurFactor = -1.0, globalVolume = 0.5, musicVolume = 0.5, mouseSensitivity = 0.005, mouseSmoothing = 0.5;
 bool edgeSmoothEnabled = false, fullScreenEnabled = true, cubemapsEnabled = false, vSyncEnabled = true;
 unsigned char depthOfFieldQuality = 0, bumpMappingQuality = 1, shadowQuality = 1, ssaoQuality = 0, blendingQuality = 2, particleCalcTarget = 2;
 
@@ -434,7 +434,7 @@ void loadDynamicShaderPrograms() {
             shaderPrograms[solidGSP+p]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
             shaderPrograms[solidGSP+p]->addAttribute(JOINT_ATTRIBUTE, "joints");
         }
-        shaderPrograms[solidGSP+p]->addFragDataLocations((p % 16 < 8 || blendingQuality < 3) ? gBufferOut : gBufferTransparentOut);
+        shaderPrograms[solidGSP+p]->addFragDataLocations((p % 16 >= 8 && blendingQuality == 2) ? gBufferTransparentOut : gBufferOut);
         shaderPrograms[solidGSP+p]->link();
     }
     
@@ -578,7 +578,7 @@ void loadDynamicShaderPrograms() {
         shaderPrograms[depthOfFieldSP]->link();
     }
     
-    if(particleCalcTarget > 0) {
+    if(blendingQuality > 0) {
         const char* varyings[] = { "vPosition", "vVelocity" };
         if(particleCalcTarget == 2 && shaderPrograms[particleCalculateSP]->loadShaderProgram("particleCalc", shaderTypeVertex, { })) {
             shaderPrograms[particleCalculateSP]->addAttribute(POSITION_ATTRIBUTE, "position");
@@ -588,18 +588,19 @@ void loadDynamicShaderPrograms() {
         }else
            particleCalcTarget = 1;
         
-        shaderPrograms[particleDrawSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { "TEXTURE_ANIMATION 0" });
+        shaderPrograms[particleDrawSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { "TEXTURE_ANIMATION 0", blendingQualityMacro });
         shaderPrograms[particleDrawSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[particleDrawSP]->addAttribute(VELOCITY_ATTRIBUTE, "velocity");
-        shaderPrograms[particleDrawSP]->addFragDataLocations(gBufferOut);
+        shaderPrograms[particleDrawSP]->addFragDataLocations((blendingQuality == 2) ? gBufferTransparentOut : gBufferOut);
         shaderPrograms[particleDrawSP]->link();
         
-        shaderPrograms[particleDrawAnimatedSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { "TEXTURE_ANIMATION 1" });
+        shaderPrograms[particleDrawAnimatedSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { "TEXTURE_ANIMATION 1", blendingQualityMacro });
         shaderPrograms[particleDrawAnimatedSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[particleDrawAnimatedSP]->addAttribute(VELOCITY_ATTRIBUTE, "velocity");
-        shaderPrograms[particleDrawAnimatedSP]->addFragDataLocations(gBufferOut);
+        shaderPrograms[particleDrawAnimatedSP]->addFragDataLocations((blendingQuality == 2) ? gBufferTransparentOut : gBufferOut);
         shaderPrograms[particleDrawAnimatedSP]->link();
-    }
+    }else
+        particleCalcTarget = 0;
     
     mainFBO.init();
 }

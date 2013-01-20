@@ -28,7 +28,7 @@ class ObjectManager {
     public:
     LightObject* currentShadowLight; //!< The active light during a shadow map generation
     std::vector<LightObject*> lightObjects; //!< All light sources of the scene
-    std::vector<AccumulatedMesh*> transparentAccumulator; //!< Stores the transparent objects for deferred rendering
+    std::vector<AccumulatedTransparent*> transparentAccumulator; //!< Stores the transparent objects for deferred rendering
     std::set<Decal*> decals; //!< All Decals in the scene
     std::set<GraphicObject*> graphicObjects; //!< All GraphicObjects (without ParticlesObjects) in the scene
     std::set<ParticlesObject*> particlesObjects; //! All ParticlesObjects in the scene

@@ -39,13 +39,14 @@ void main() {
 #elif PROCESSING_TYPE == 2 //Screen Blur
 out vec3 colorOut;
 
+const float blurWidth = 2.0, blurInverse = 1.0/((blurWidth*2+1)*(blurWidth*2+1));
+
 void main() {
     colorOut = vec3(0.0);
-	const float blurSize = 2.0;
-	for(float y = -blurSize; y <= blurSize; y += 1.0)
-		for(float x = -blurSize; x <= blurSize; x += 1.0)
+	for(float y = -blurWidth; y <= blurWidth; y += 1.0)
+		for(float x = -blurWidth; x <= blurWidth; x += 1.0)
 			colorOut += texture(sampler0, gl_FragCoord.xy+vec2(x, y)*processingValue).rgb;
-	colorOut /= (blurSize*2.0+1.0)*(blurSize*2.0+1.0);
+	colorOut *= blurInverse;
 }
 
 #elif PROCESSING_TYPE == 3 //Spot Light Circle Mask
@@ -60,19 +61,16 @@ uniform sampler2DRect sampler0;
 uniform sampler2DRect sampler1;
 out vec3 colorOut;
 
+const float blurWidth = float(SSAO_QUALITY-1), blurInverse = 1.0/((blurWidth*2+1)*(blurWidth*2+1));
+
 void main() {
-	vec2 uvPos;
-    vec3 position = texture(sampler0, gl_FragCoord.xy).xyz;
-	float ambientOcclusion = 0.0, occlusionSum = 0.0;
-    const float blurWidth = float(SSAO_QUALITY-1);
+    float ambientOcclusion = 0.0, depth = 1.0/texture(sampler0, gl_FragCoord.xy).x;
 	for(float x = -blurWidth; x <= blurWidth; x ++)
-        for(float y = -blurWidth; y <= blurWidth; y ++) {
-            uvPos = gl_FragCoord.xy/SSAO_SCALE+vec2(x, y);
-            occlusionSum += step(length(texture(sampler0, gl_FragCoord.xy+vec2(x, y)).xyz-position), 0.1);
-            ambientOcclusion += texture(sampler1, uvPos).x;
-        }
-    occlusionSum /= ((blurWidth*2+1)*(blurWidth*2+1));
-    colorOut = vec3(occlusionSum * ambientOcclusion / ((blurWidth*2+1)*(blurWidth*2+1)));
+        for(float y = -blurWidth; y <= blurWidth; y ++)
+            ambientOcclusion += texture(sampler1, gl_FragCoord.xy/SSAO_SCALE+vec2(x, y)).x *
+                                step(0.995, texture(sampler0, gl_FragCoord.xy+vec2(x, y)*3.5).x*depth);
+    
+    colorOut = vec3(ambientOcclusion*blurInverse);
 }
 
 #endif

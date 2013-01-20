@@ -23,6 +23,11 @@
 
 #define VERSION "0.0.1"
 
+#define foreach_e(c,i) for(auto end##i = (c).end(), next##i = (c).begin(), \
+                            i = (next##i==end##i)?end##i:next##i++; \
+                            i != next##i; \
+                            i = (next##i==end##i)?end##i:next##i++)
+
 enum logMessageType {
     info_log = 0,
     warning_log = 1,

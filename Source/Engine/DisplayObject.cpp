@@ -291,6 +291,7 @@ RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
     body = new btRigidBody(rBCI);
     body->setUserPointer(this);
     btRigidBody* body = getBody();
+    body->setSleepingThresholds(0.5, 0.5);
     if(mass == 0.0)
         objectManager.physicsWorld->addRigidBody(body, CollisionMask_Static, CollisionMask_Object);
     else

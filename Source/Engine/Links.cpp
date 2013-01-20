@@ -87,7 +87,7 @@ PhysicLink::PhysicLink(LinkInitializer& initializer, btTypedConstraint* constrai
 }
 
 PhysicLink::PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
-    rapidxml::xml_node<xmlUsedCharType>* constraintNode = node->first_node("Constraint");
+    rapidxml::xml_node<xmlUsedCharType> *parameterNode, *constraintNode = node->first_node("Constraint");
     if(!constraintNode) {
         log(error_log, "Tried to construct PhysicLink without \"Constraint\"-node.");
         return;
@@ -107,40 +107,40 @@ PhysicLink::PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
     BaseLink::init(initializer);
     
     if(strcmp(attribute->value(), "point") == 0) {
-        rapidxml::xml_node<xmlUsedCharType>* pointNode = constraintNode->first_node("Point");
-        if(!pointNode) {
+        parameterNode = constraintNode->first_node("Point");
+        if(!parameterNode) {
             log(error_log, "Tried to construct Point-PhysicLink without first \"Point\"-node.");
             return;
         }
         XMLValueArray<float> vecData;
-        vecData.readString(pointNode->value(), "%f");
+        vecData.readString(parameterNode->value(), "%f");
         btVector3 pointA = vecData.getVector3();
         
-        pointNode = pointNode->next_sibling("Point");
-        if(!pointNode) {
+        parameterNode = parameterNode->next_sibling("Point");
+        if(!parameterNode) {
             log(error_log, "Tried to construct Point-PhysicLink without second \"Point\"-node.");
             return;
         }
-        vecData.readString(pointNode->value(), "%f");
+        vecData.readString(parameterNode->value(), "%f");
         btVector3 pointB = vecData.getVector3();
         
         constraint = new btPoint2PointConstraint(*a->getBody(), *b->getBody(), pointA, pointB);
     }else if(strcmp(attribute->value(), "gear") == 0) {
-        rapidxml::xml_node<xmlUsedCharType>* pointNode = constraintNode->first_node("Axis");
-        if(!pointNode) {
+        rapidxml::xml_node<xmlUsedCharType>* parameterNode = constraintNode->first_node("Axis");
+        if(!parameterNode) {
             log(error_log, "Tried to construct Gear-PhysicLink without first \"Axis\"-node.");
             return;
         }
         XMLValueArray<float> vecData;
-        vecData.readString(pointNode->value(), "%f");
+        vecData.readString(parameterNode->value(), "%f");
         btVector3 axisA = vecData.getVector3();
         
-        pointNode = pointNode->next_sibling("Axis");
-        if(!pointNode) {
+        parameterNode = parameterNode->next_sibling("Axis");
+        if(!parameterNode) {
             log(error_log, "Tried to construct Gear-PhysicLink without second \"Axis\"-node.");
             return;
         }
-        vecData.readString(pointNode->value(), "%f");
+        vecData.readString(parameterNode->value(), "%f");
         btVector3 axisB = vecData.getVector3();
         
         attribute = constraintNode->first_attribute("ratio");
@@ -152,64 +152,259 @@ PhysicLink::PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
         sscanf(attribute->value(), "%f", &ratio);
         
         constraint = new btGearConstraint(*a->getBody(), *b->getBody(), axisA, axisB, ratio);
-    }else if(strcmp(attribute->value(), "hinge") == 0) {
-        rapidxml::xml_node<xmlUsedCharType>* parameterNode = constraintNode->first_node("Frame");
+    }else if(strcmp(attribute->value(), "hinge") == 0 || strcmp(attribute->value(), "slider") == 0) {
+        parameterNode = constraintNode->first_node("Frame");
         if(!parameterNode) {
-            log(error_log, "Tried to construct Hinge-PhysicLink without first \"Frame\"-node.");
+            log(error_log, "Tried to construct Hinge/Slider-PhysicLink without first \"Frame\"-node.");
             return;
         }
         btTransform frameA = readTransformationXML(parameterNode);
         parameterNode = parameterNode->next_sibling("Frame");
         if(!parameterNode) {
-            log(error_log, "Tried to construct Hinge-PhysicLink without second \"Frame\"-node.");
+            log(error_log, "Tried to construct Hinge/Slider-PhysicLink without second \"Frame\"-node.");
             return;
         }
         btTransform frameB = readTransformationXML(parameterNode);
-        btHingeConstraint* constraint = new btHingeConstraint(*a->getBody(), *b->getBody(), frameA, frameB);
         
-        parameterNode = constraintNode->first_node("Limit");
+        btHingeConstraint* hinge = NULL;
+        btSliderConstraint* slider = NULL;
+        if(strcmp(attribute->value(), "hinge") == 0) {
+            btTransform transform = btTransform::getIdentity();
+            transform.setRotation(btQuaternion(M_PI_2, 0.0, 0.0));
+            frameA *= transform;
+            frameB *= transform;
+            this->constraint = hinge = new btHingeConstraint(*a->getBody(), *b->getBody(), frameA, frameB, true);
+        }else
+            this->constraint = slider = new btSliderConstraint(*a->getBody(), *b->getBody(), frameA, frameB, true);
+        
+        parameterNode = constraintNode->first_node("AngularLimit");
         if(parameterNode) {
             float low, high;
             attribute = parameterNode->first_attribute("low");
             if(!attribute) {
-                log(error_log, "Tried to construct Hinge-PhysicLink-Limit without \"low\"-attribute.");
+                log(error_log, "Tried to construct Hinge/Slider-PhysicLink-AngularLimit without \"low\"-attribute.");
                 return;
             }
             sscanf(attribute->value(), "%f", &low);
             attribute = parameterNode->first_attribute("high");
             if(!attribute) {
-                log(error_log, "Tried to construct Hinge-PhysicLink-Limit without \"high\"-attribute.");
+                log(error_log, "Tried to construct Hinge/Slider-PhysicLink-AngularLimit without \"high\"-attribute.");
                 return;
             }
             sscanf(attribute->value(), "%f", &high);
-            constraint->setLimit(low, high);
+            if(hinge)
+                hinge->setLimit(low, high);
+            else{
+                slider->setLowerAngLimit(low);
+                slider->setUpperAngLimit(high);
+            }
         }
         
-        parameterNode = constraintNode->first_node("Motor");
+        parameterNode = constraintNode->first_node("LinearLimit");
+        if(parameterNode && slider) {
+            float low, high;
+            attribute = parameterNode->first_attribute("low");
+            if(!attribute) {
+                log(error_log, "Tried to construct Slider-PhysicLink-LinearLimit without \"low\"-attribute.");
+                return;
+            }
+            sscanf(attribute->value(), "%f", &low);
+            attribute = parameterNode->first_attribute("high");
+            if(!attribute) {
+                log(error_log, "Tried to construct Slider-PhysicLink-LinearLimit without \"high\"-attribute.");
+                return;
+            }
+            sscanf(attribute->value(), "%f", &high);
+            slider->setLowerLinLimit(low);
+            slider->setUpperLinLimit(high);
+        }
+        
+        parameterNode = constraintNode->first_node("AngularMotor");
         if(parameterNode) {
             attribute = parameterNode->first_attribute("enabled");
             if(!attribute) {
-                log(error_log, "Tried to construct Hinge-PhysicLink-Limit without \"enabled\"-attribute.");
+                log(error_log, "Tried to construct Hinge/Slider-PhysicLink-AngularMotor without \"enabled\"-attribute.");
                 return;
             }
             bool enabled = (strcmp(attribute->value(), "true") == 0);
-            float velocity, impulse;
+            float velocity, force;
             attribute = parameterNode->first_attribute("velocity");
             if(!attribute) {
-                log(error_log, "Tried to construct Hinge-PhysicLink-Limit without \"velocity\"-attribute.");
+                log(error_log, "Tried to construct Hinge/Slider-PhysicLink-AngularMotor without \"velocity\"-attribute.");
                 return;
             }
             sscanf(attribute->value(), "%f", &velocity);
-            attribute = parameterNode->first_attribute("impulse");
+            attribute = parameterNode->first_attribute("force");
             if(!attribute) {
-                log(error_log, "Tried to construct Hinge-PhysicLink-Limit without \"impulse\"-attribute.");
+                log(error_log, "Tried to construct Hinge/Slider-PhysicLink-AngularMotor without \"force\"-attribute.");
                 return;
             }
-            sscanf(attribute->value(), "%f", &impulse);
-            constraint->enableAngularMotor(enabled, velocity, impulse);
+            sscanf(attribute->value(), "%f", &force);
+            if(hinge)
+                hinge->enableAngularMotor(enabled, velocity, force);
+            else{
+                slider->setPoweredAngMotor(enabled);
+                slider->setTargetAngMotorVelocity(velocity);
+                slider->setMaxAngMotorForce(force);
+            }
         }
         
-        this->constraint = constraint;
+        parameterNode = constraintNode->first_node("LinearMotor");
+        if(parameterNode) {
+            attribute = parameterNode->first_attribute("enabled");
+            if(!attribute) {
+                log(error_log, "Tried to construct Slider-PhysicLink-LinearMotor without \"enabled\"-attribute.");
+                return;
+            }
+            bool enabled = (strcmp(attribute->value(), "true") == 0);
+            float velocity, force;
+            attribute = parameterNode->first_attribute("velocity");
+            if(!attribute) {
+                log(error_log, "Tried to construct Slider-PhysicLink-LinearMotor without \"velocity\"-attribute.");
+                return;
+            }
+            sscanf(attribute->value(), "%f", &velocity);
+            attribute = parameterNode->first_attribute("force");
+            if(!attribute) {
+                log(error_log, "Tried to construct Slider-PhysicLink-LinearMotor without \"force\"-attribute.");
+                return;
+            }
+            sscanf(attribute->value(), "%f", &force);
+            slider->setPoweredLinMotor(enabled);
+            slider->setTargetLinMotorVelocity(velocity);
+            slider->setMaxLinMotorForce(force);
+        }
+    }else if(strcmp(attribute->value(), "dof6") == 0) {
+        parameterNode = constraintNode->first_node("Frame");
+        if(!parameterNode) {
+            log(error_log, "Tried to construct DOF6-PhysicLink without first \"Frame\"-node.");
+            return;
+        }
+        btTransform frameA = readTransformationXML(parameterNode);
+        parameterNode = parameterNode->next_sibling("Frame");
+        if(!parameterNode) {
+            log(error_log, "Tried to construct DOF6-PhysicLink without second \"Frame\"-node.");
+            return;
+        }
+        btTransform frameB = readTransformationXML(parameterNode);
+        
+        XMLValueArray<float> vecData;
+        btGeneric6DofConstraint* dof6;
+        btGeneric6DofSpringConstraint* springDof6 = NULL;
+        parameterNode = parameterNode->first_node("Spring");
+        if(parameterNode) {
+            this->constraint = dof6 = springDof6 = new btGeneric6DofSpringConstraint(*a->getBody(), *b->getBody(), frameA, frameB, true);
+            float value;
+            unsigned int index;
+            while(parameterNode) {
+                attribute = parameterNode->first_attribute("index");
+                if(!attribute) {
+                    log(error_log, "Tried to construct DOF6-PhysicLink-Spring without \"index\"-attribute.");
+                    return;
+                }
+                sscanf(attribute->value(), "%d", &index);
+                springDof6->enableSpring(index, true);
+                attribute = parameterNode->first_attribute("stiffness");
+                if(attribute) {
+                    sscanf(attribute->value(), "%f", &value);
+                    springDof6->setStiffness(index, value);
+                }
+                attribute = parameterNode->first_attribute("damping");
+                if(attribute) {
+                    sscanf(attribute->value(), "%f", &value);
+                    springDof6->setDamping(index, value);
+                }
+                attribute = parameterNode->first_attribute("equilibrium");
+                if(attribute) {
+                    sscanf(attribute->value(), "%f", &value);
+                    springDof6->setEquilibriumPoint(index, value);
+                }
+                parameterNode = parameterNode->next_sibling("Spring");
+            }
+        }else
+            this->constraint = dof6 = new btGeneric6DofConstraint(*a->getBody(), *b->getBody(), frameA, frameB, true);
+        
+        parameterNode = constraintNode->first_node("AngularLimit");
+        if(parameterNode) {
+            attribute = parameterNode->first_attribute("low");
+            if(!attribute) {
+                log(error_log, "Tried to construct DOF6-PhysicLink-AngularLimit without \"low\"-attribute.");
+                return;
+            }
+            vecData.readString(attribute->value(), "%f");
+            dof6->setAngularLowerLimit(vecData.getVector3());
+            attribute = parameterNode->first_attribute("high");
+            if(!attribute) {
+                log(error_log, "Tried to construct DOF6-PhysicLink-AngularLimit without \"high\"-attribute.");
+                return;
+            }
+            vecData.readString(attribute->value(), "%f");
+            dof6->setAngularUpperLimit(vecData.getVector3());
+        }
+        
+        parameterNode = constraintNode->first_node("LinearLimit");
+        if(parameterNode) {
+            attribute = parameterNode->first_attribute("low");
+            if(!attribute) {
+                log(error_log, "Tried to construct DOF6-PhysicLink-LinearLimit without \"low\"-attribute.");
+                return;
+            }
+            vecData.readString(attribute->value(), "%f");
+            dof6->setLinearLowerLimit(vecData.getVector3());
+            attribute = parameterNode->first_attribute("high");
+            if(!attribute) {
+                log(error_log, "Tried to construct DOF6-PhysicLink-LinearLimit without \"high\"-attribute.");
+                return;
+            }
+            vecData.readString(attribute->value(), "%f");
+            dof6->setLinearUpperLimit(vecData.getVector3());
+        }
+        
+        btTranslationalLimitMotor* linearMotor = dof6->getTranslationalLimitMotor();
+        parameterNode = constraintNode->first_node("Motor");
+        while(parameterNode) {
+            bool *enabled;
+            unsigned int index;
+            float *velocity, *force;
+            attribute = parameterNode->first_attribute("index");
+            if(!attribute) {
+                log(error_log, "Tried to construct DOF6-PhysicLink-Motor without \"index\"-attribute.");
+                return;
+            }
+            sscanf(attribute->value(), "%d", &index);
+            
+            if(index < 3) {
+                enabled = &linearMotor->m_enableMotor[index];
+                velocity = &linearMotor->m_targetVelocity[index];
+                force = &linearMotor->m_maxMotorForce[index];
+            }else{
+                btRotationalLimitMotor* angularMotor = dof6->getRotationalLimitMotor(index-3);
+                enabled = &angularMotor->m_enableMotor;
+                velocity = &angularMotor->m_targetVelocity;
+                force = &angularMotor->m_maxMotorForce;
+            }
+            
+            attribute = parameterNode->first_attribute("enabled");
+            if(!attribute) {
+                log(error_log, "Tried to construct DOF6-PhysicLink-Motor without \"enabled\"-attribute.");
+                return;
+            }
+            *enabled = (strcmp(attribute->value(), "true") == 0);
+            attribute = parameterNode->first_attribute("velocity");
+            if(!attribute) {
+                log(error_log, "Tried to construct DOF6-PhysicLink-Motor without \"velocity\"-attribute.");
+                return;
+            }
+            sscanf(attribute->value(), "%f", velocity);
+            attribute = parameterNode->first_attribute("force");
+            if(!attribute) {
+                log(error_log, "Tried to construct DOF6-PhysicLink-Motor without \"force\"-attribute.");
+                return;
+            }
+            sscanf(attribute->value(), "%f", force);
+            
+            parameterNode = parameterNode->next_sibling("Motor");
+        }
     }else{
         log(error_log, std::string("Tried to construct PhysicLink with invalid \"type\"-attribute: ")+attribute->value()+'.');
         return;
@@ -226,7 +421,7 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
     if(&constraint->getRigidBodyA() == static_cast<RigidObject*>(linkSaver->object[1])->getBody())
         linkSaver->swap();
     
-    rapidxml::xml_node<xmlUsedCharType>* node = BaseLink::write(doc, linkSaver);
+    rapidxml::xml_node<xmlUsedCharType> *parameterNode, *node = BaseLink::write(doc, linkSaver);
     node->name("PhysicLink");
     rapidxml::xml_node<xmlUsedCharType>* constraintNode = doc.allocate_node(rapidxml::node_element);
     constraintNode->name("Constraint");
@@ -239,16 +434,16 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
         case POINT2POINT_CONSTRAINT_TYPE: {
             attribute->value("point");
             btPoint2PointConstraint* pointConstraint = static_cast<btPoint2PointConstraint*>(constraint);
-            rapidxml::xml_node<xmlUsedCharType>* pointNode = doc.allocate_node(rapidxml::node_element);
-            pointNode->name("Point");
+            parameterNode = doc.allocate_node(rapidxml::node_element);
+            parameterNode->name("Point");
             btVector3 point = pointConstraint->getPivotInA();
-            pointNode->value(doc.allocate_string(stringOf(point).c_str()));
-            constraintNode->append_node(pointNode);
-            pointNode = doc.allocate_node(rapidxml::node_element);
-            pointNode->name("Point");
+            parameterNode->value(doc.allocate_string(stringOf(point).c_str()));
+            constraintNode->append_node(parameterNode);
+            parameterNode = doc.allocate_node(rapidxml::node_element);
+            parameterNode->name("Point");
             point = pointConstraint->getPivotInB();
-            pointNode->value(doc.allocate_string(stringOf(point).c_str()));
-            constraintNode->append_node(pointNode);
+            parameterNode->value(doc.allocate_string(stringOf(point).c_str()));
+            constraintNode->append_node(parameterNode);
         } break;
         case GEAR_CONSTRAINT_TYPE: {
             attribute->value("gear");
@@ -257,75 +452,260 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
             attribute->name("ratio");
             attribute->value(doc.allocate_string(stringOf(gearConstraint->getRatio()).c_str()));
             constraintNode->append_attribute(attribute);
-            rapidxml::xml_node<xmlUsedCharType>* axisNode = doc.allocate_node(rapidxml::node_element);
-            axisNode->name("Axis");
+            parameterNode = doc.allocate_node(rapidxml::node_element);
+            parameterNode->name("Axis");
             btVector3 axis = gearConstraint->getAxisA();
-            axisNode->value(doc.allocate_string(stringOf(axis).c_str()));
-            constraintNode->append_node(axisNode);
-            axisNode = doc.allocate_node(rapidxml::node_element);
-            axisNode->name("Axis");
+            parameterNode->value(doc.allocate_string(stringOf(axis).c_str()));
+            constraintNode->append_node(parameterNode);
+            parameterNode = doc.allocate_node(rapidxml::node_element);
+            parameterNode->name("Axis");
             axis = gearConstraint->getAxisB();
-            axisNode->value(doc.allocate_string(stringOf(axis).c_str()));
-            constraintNode->append_node(axisNode);
+            parameterNode->value(doc.allocate_string(stringOf(axis).c_str()));
+            constraintNode->append_node(parameterNode);
         } break;
-        case HINGE_CONSTRAINT_TYPE: {
-            attribute->value("hinge");
-            btHingeConstraint* hingeConstraint = static_cast<btHingeConstraint*>(constraint);
-            rapidxml::xml_node<xmlUsedCharType>* parameterNode = doc.allocate_node(rapidxml::node_element);
+        case HINGE_CONSTRAINT_TYPE:
+        case SLIDER_CONSTRAINT_TYPE: {
+            btHingeConstraint* hinge = NULL;
+            btSliderConstraint* slider = NULL;
+            bool angLimit, angMotor;
+            btTransform frameA, frameB;
+            float lowAngLim, highAngLim, angMotorVelocity, angMotorForce;
+            if(constraint->getConstraintType() == HINGE_CONSTRAINT_TYPE) {
+                attribute->value("hinge");
+                hinge = static_cast<btHingeConstraint*>(constraint);
+                lowAngLim = hinge->getLowerLimit();
+                highAngLim = hinge->getUpperLimit();
+                angLimit = lowAngLim != 0.0 || highAngLim != 0.0;
+                angMotor = hinge->getEnableAngularMotor();
+                angMotorVelocity = hinge->getMotorTargetVelosity();
+                angMotorForce = hinge->getMaxMotorImpulse();
+                btTransform transform = btTransform::getIdentity();
+                transform.setRotation(btQuaternion(-M_PI_2, 0.0, 0.0));
+                frameA = hinge->getFrameOffsetA()*transform;
+                frameB = hinge->getFrameOffsetB()*transform;
+            }else{
+                attribute->value("slider");
+                slider = static_cast<btSliderConstraint*>(constraint);
+                lowAngLim = slider->getLowerAngLimit();
+                highAngLim = slider->getUpperAngLimit();
+                angLimit = lowAngLim != 1.0 || highAngLim != -1.0;
+                angMotor = slider->getPoweredAngMotor();
+                angMotorVelocity = slider->getTargetAngMotorVelocity();
+                angMotorForce = slider->getMaxAngMotorForce();
+                frameA = slider->getFrameOffsetA();
+                frameB = slider->getFrameOffsetB();
+            }
+            parameterNode = doc.allocate_node(rapidxml::node_element);
             parameterNode->name("Frame");
-            btTransform transform = hingeConstraint->getFrameOffsetA();
+            btTransform transform = frameA;
             parameterNode->append_node(writeTransformationXML(doc, transform));
             constraintNode->append_node(parameterNode);
             parameterNode = doc.allocate_node(rapidxml::node_element);
             parameterNode->name("Frame");
-            transform = hingeConstraint->getFrameOffsetB();
+            transform = frameB;
             parameterNode->append_node(writeTransformationXML(doc, transform));
             constraintNode->append_node(parameterNode);
-            if(hingeConstraint->getLowerLimit() != 1.0 || hingeConstraint->getUpperLimit() != -1.0) {
+            if(angLimit) {
                 parameterNode = doc.allocate_node(rapidxml::node_element);
-                parameterNode->name("Limit");
+                parameterNode->name("AngularLimit");
                 constraintNode->append_node(parameterNode);
                 attribute = doc.allocate_attribute();
                 attribute->name("low");
-                attribute->value(doc.allocate_string(stringOf(hingeConstraint->getLowerLimit()).c_str()));
+                attribute->value(doc.allocate_string(stringOf(lowAngLim).c_str()));
                 parameterNode->append_attribute(attribute);
                 attribute = doc.allocate_attribute();
                 attribute->name("high");
-                attribute->value(doc.allocate_string(stringOf(hingeConstraint->getUpperLimit()).c_str()));
+                attribute->value(doc.allocate_string(stringOf(highAngLim).c_str()));
                 parameterNode->append_attribute(attribute);
             }
-            if(hingeConstraint->getEnableAngularMotor() ||
-               hingeConstraint->getMotorTargetVelosity() > 0.0 ||
-               hingeConstraint->getMaxMotorImpulse() > 0.0) {
+            if(angMotor || angMotorVelocity != 0.0 || angMotorForce != 0.0) {
+                parameterNode = doc.allocate_node(rapidxml::node_element);
+                parameterNode->name("AngularMotor");
+                constraintNode->append_node(parameterNode);
+                attribute = doc.allocate_attribute();
+                attribute->name("enabled");
+                attribute->value((angMotor) ? "true" : "false");
+                parameterNode->append_attribute(attribute);
+                attribute = doc.allocate_attribute();
+                attribute->name("velocity");
+                attribute->value(doc.allocate_string(stringOf(angMotorVelocity).c_str()));
+                parameterNode->append_attribute(attribute);
+                attribute = doc.allocate_attribute();
+                attribute->name("force");
+                attribute->value(doc.allocate_string(stringOf(angMotorForce).c_str()));
+                parameterNode->append_attribute(attribute);
+            }
+            if(slider) {
+                if(slider->getLowerLinLimit() != 1.0 || slider->getUpperLinLimit() != -1.0) {
+                    parameterNode = doc.allocate_node(rapidxml::node_element);
+                    parameterNode->name("LinearLimit");
+                    constraintNode->append_node(parameterNode);
+                    attribute = doc.allocate_attribute();
+                    attribute->name("low");
+                    attribute->value(doc.allocate_string(stringOf(slider->getLowerLinLimit()).c_str()));
+                    parameterNode->append_attribute(attribute);
+                    attribute = doc.allocate_attribute();
+                    attribute->name("high");
+                    attribute->value(doc.allocate_string(stringOf(slider->getUpperLinLimit()).c_str()));
+                    parameterNode->append_attribute(attribute);
+                }
+                if(slider->getPoweredLinMotor() ||
+                   slider->getTargetLinMotorVelocity() != 0.0 ||
+                   slider->getMaxLinMotorForce() != 0.0) {
+                    parameterNode = doc.allocate_node(rapidxml::node_element);
+                    parameterNode->name("LinearMotor");
+                    constraintNode->append_node(parameterNode);
+                    attribute = doc.allocate_attribute();
+                    attribute->name("enabled");
+                    attribute->value((slider->getPoweredLinMotor()) ? "true" : "false");
+                    parameterNode->append_attribute(attribute);
+                    attribute = doc.allocate_attribute();
+                    attribute->name("velocity");
+                    attribute->value(doc.allocate_string(stringOf(slider->getTargetLinMotorVelocity()).c_str()));
+                    parameterNode->append_attribute(attribute);
+                    attribute = doc.allocate_attribute();
+                    attribute->name("force");
+                    attribute->value(doc.allocate_string(stringOf(slider->getMaxLinMotorForce()).c_str()));
+                    parameterNode->append_attribute(attribute);
+                }
+            }
+        } break;
+        case D6_CONSTRAINT_TYPE:
+        case D6_SPRING_CONSTRAINT_TYPE: {
+            attribute->value("dof6");
+            btGeneric6DofConstraint* dof6Constraint = static_cast<btGeneric6DofConstraint*>(constraint);
+            parameterNode = doc.allocate_node(rapidxml::node_element);
+            parameterNode->name("Frame");
+            btTransform transform = dof6Constraint->getFrameOffsetA();
+            parameterNode->append_node(writeTransformationXML(doc, transform));
+            constraintNode->append_node(parameterNode);
+            parameterNode = doc.allocate_node(rapidxml::node_element);
+            parameterNode->name("Frame");
+            transform = dof6Constraint->getFrameOffsetB();
+            parameterNode->append_node(writeTransformationXML(doc, transform));
+            constraintNode->append_node(parameterNode);
+            btVector3 low, high, lowCompare(1.0, 1.0, 1.0), highCompare(-1.0, -1.0, -1.0);
+            dof6Constraint->getAngularLowerLimit(low); lowCompare.setW(low.w());
+            dof6Constraint->getAngularUpperLimit(high); highCompare.setW(high.w());
+            if(low != lowCompare || high != highCompare) {
+                parameterNode = doc.allocate_node(rapidxml::node_element);
+                parameterNode->name("AngularLimit");
+                constraintNode->append_node(parameterNode);
+                attribute = doc.allocate_attribute();
+                attribute->name("low");
+                attribute->value(doc.allocate_string(stringOf(low).c_str()));
+                parameterNode->append_attribute(attribute);
+                attribute = doc.allocate_attribute();
+                attribute->name("high");
+                attribute->value(doc.allocate_string(stringOf(high).c_str()));
+                parameterNode->append_attribute(attribute);
+            }
+            dof6Constraint->getLinearLowerLimit(low); lowCompare.setW(low.w());
+            dof6Constraint->getLinearUpperLimit(high); highCompare.setW(high.w());
+            if(low != lowCompare || high != highCompare) {
+                parameterNode = doc.allocate_node(rapidxml::node_element);
+                parameterNode->name("LinearLimit");
+                constraintNode->append_node(parameterNode);
+                attribute = doc.allocate_attribute();
+                attribute->name("low");
+                attribute->value(doc.allocate_string(stringOf(low).c_str()));
+                parameterNode->append_attribute(attribute);
+                attribute = doc.allocate_attribute();
+                attribute->name("high");
+                attribute->value(doc.allocate_string(stringOf(high).c_str()));
+                parameterNode->append_attribute(attribute);
+            }
+            for(char index = 0; index < 3; index ++) {
+                btRotationalLimitMotor* angularMotor = dof6Constraint->getRotationalLimitMotor(index);
+                if(!angularMotor->m_enableMotor &&
+                   angularMotor->m_targetVelocity == 0.0 &&
+                   angularMotor->m_maxMotorForce == 0.0)
+                    continue;
                 parameterNode = doc.allocate_node(rapidxml::node_element);
                 parameterNode->name("Motor");
                 constraintNode->append_node(parameterNode);
                 attribute = doc.allocate_attribute();
+                attribute->name("index");
+                attribute->value(doc.allocate_string(stringOf(index+3).c_str()));
+                parameterNode->append_attribute(attribute);
+                attribute = doc.allocate_attribute();
                 attribute->name("enabled");
-                attribute->value((hingeConstraint->getEnableAngularMotor()) ? "true" : "false");
+                attribute->value((angularMotor->m_enableMotor) ? "true" : "false");
                 parameterNode->append_attribute(attribute);
                 attribute = doc.allocate_attribute();
                 attribute->name("velocity");
-                attribute->value(doc.allocate_string(stringOf(hingeConstraint->getMotorTargetVelosity()).c_str()));
+                attribute->value(doc.allocate_string(stringOf(angularMotor->m_targetVelocity).c_str()));
                 parameterNode->append_attribute(attribute);
                 attribute = doc.allocate_attribute();
-                attribute->name("impulse");
-                attribute->value(doc.allocate_string(stringOf(hingeConstraint->getMaxMotorImpulse()).c_str()));
+                attribute->name("force");
+                attribute->value(doc.allocate_string(stringOf(angularMotor->m_maxMotorForce).c_str()));
                 parameterNode->append_attribute(attribute);
             }
-        } break;
+            btTranslationalLimitMotor* linearMotor = dof6Constraint->getTranslationalLimitMotor();
+            for(char index = 0; index < 3; index ++) {
+                if(!linearMotor->m_enableMotor[index] &&
+                   linearMotor->m_targetVelocity[index] == 0.0 &&
+                   linearMotor->m_maxMotorForce[index] == 0.0)
+                    continue;
+                parameterNode = doc.allocate_node(rapidxml::node_element);
+                parameterNode->name("Motor");
+                constraintNode->append_node(parameterNode);
+                attribute = doc.allocate_attribute();
+                attribute->name("index");
+                attribute->value(doc.allocate_string(stringOf(index).c_str()));
+                parameterNode->append_attribute(attribute);
+                attribute = doc.allocate_attribute();
+                attribute->name("enabled");
+                attribute->value((linearMotor->m_enableMotor[index]) ? "true" : "false");
+                parameterNode->append_attribute(attribute);
+                attribute = doc.allocate_attribute();
+                attribute->name("velocity");
+                attribute->value(doc.allocate_string(stringOf(linearMotor->m_targetVelocity[index]).c_str()));
+                parameterNode->append_attribute(attribute);
+                attribute = doc.allocate_attribute();
+                attribute->name("force");
+                attribute->value(doc.allocate_string(stringOf(linearMotor->m_maxMotorForce[index]).c_str()));
+                parameterNode->append_attribute(attribute);
+            }
+            if(constraint->getConstraintType() == D6_SPRING_CONSTRAINT_TYPE) {
+                btGeneric6DofSpringConstraint* dof6SpringConstraint = static_cast<btGeneric6DofSpringConstraint*>(constraint);
+                float value;
+                for(unsigned char index = 0; index < 6; index ++) {
+                    if(!dof6SpringConstraint->getEnableSpring(index)) continue;
+                    parameterNode = doc.allocate_node(rapidxml::node_element);
+                    parameterNode->name("Spring");
+                    constraintNode->append_node(parameterNode);
+                    attribute = doc.allocate_attribute();
+                    attribute->name("index");
+                    attribute->value(doc.allocate_string(stringOf(index).c_str()));
+                    parameterNode->append_attribute(attribute);
+                    value = dof6SpringConstraint->getDamping(index);
+                    if(value != 0.0) {
+                        attribute = doc.allocate_attribute();
+                        attribute->name("damping");
+                        attribute->value(doc.allocate_string(stringOf(value).c_str()));
+                        parameterNode->append_attribute(attribute);
+                    }
+                    value = dof6SpringConstraint->getStiffness(index);
+                    if(value != 0.0) {
+                        attribute = doc.allocate_attribute();
+                        attribute->name("stiffness");
+                        attribute->value(doc.allocate_string(stringOf(value).c_str()));
+                        parameterNode->append_attribute(attribute);
+                    }
+                    value = dof6SpringConstraint->getEquilibriumPoint(index);
+                    if(value != 0.0) {
+                        attribute = doc.allocate_attribute();
+                        attribute->name("equilibrium");
+                        attribute->value(doc.allocate_string(stringOf(value).c_str()));
+                        parameterNode->append_attribute(attribute);
+                    }
+                }
+            }
+            } break;
         case CONETWIST_CONSTRAINT_TYPE:
             attribute->value("coneTwist");
             
-            break;
-        case SLIDER_CONSTRAINT_TYPE:
-            attribute->value("slider");
-            break;
-        case D6_CONSTRAINT_TYPE:
-            attribute->value("dof6");
-            break;
-        case D6_SPRING_CONSTRAINT_TYPE:
-            attribute->value("dof6Spring");
             break;
         default:
             log(error_log, "Tried to save PhysicLink with invalid constraint type.");

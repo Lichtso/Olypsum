@@ -189,22 +189,19 @@ void main() {
     normalOut = mat3(vTangent, vBitangent, normalOut)*normalize(bumpMap);
     #endif //Water waves
     
-    vec3 backgroundColor;
+    #if BLENDING_QUALITY > 1 //Background lookup
     #if BUMP_MAPPING == 0 //No refraction
     texture(sampler2, vTexCoord); //Place holder
-    backgroundColor = texture(sampler3, gl_FragCoord.xy).rgb;
-    #else //Glass refraction
-    backgroundColor = texture(sampler3, gl_FragCoord.xy+(viewNormalMat*normalOut).xy*10.0).rgb;
-    #endif //Glass refraction
-    backgroundColor *= (1.0-colorOut.a);
+    #endif //No refraction
+    vec3 backgroundColor = (1.0-colorOut.a) * texture(sampler3, gl_FragCoord.xy+(viewNormalMat*normalOut).xy*10.0).rgb;
+    #endif //Background lookup
     
-    #if BLENDING_QUALITY == 2 //Mixed Blending
     colorOut.rgb *= colorOut.a;
-    colorOut.rgb += backgroundColor; //Color
-    colorOut.a = 1.0;
-    #elif BLENDING_QUALITY == 3 //Correct Blending
-    specularOut = backgroundColor; //Transparent
-    #endif //Full Blending
+    #if BLENDING_QUALITY == 2 //Correct Blending
+    specularOut = backgroundColor;
+    #elif BLENDING_QUALITY == 3 //Mixed Blending
+    colorOut.rgb += backgroundColor;
+    #endif //Mixed Blending
     
     #endif //Transparent
 }

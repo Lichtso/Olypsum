@@ -12,7 +12,7 @@ ALCdevice* soundDevice;
 ALCcontext* soundContext;
 
 VertexArrayObject decalVAO;
-unsigned char inBuffersSSAO[] = { depthDBuffer, positionDBuffer, ssaoDBuffer }, outBuffersSSAO[] = { ssaoDBuffer };
+unsigned char inBuffersSSAO[] = { depthDBuffer, ssaoDBuffer }, outBuffersSSAO[] = { ssaoDBuffer };
 unsigned char inBuffersCombine[] = { colorDBuffer, diffuseDBuffer, specularDBuffer, materialDBuffer }, outBuffersCombine[] = { colorDBuffer };
 unsigned char inBuffersPost[] = { depthDBuffer, colorDBuffer }, outBuffersPost[] = { colorDBuffer };
 
@@ -138,10 +138,8 @@ void ObjectManager::gameTick() {
     
     //Calculate ParticleSystems
     if(particleCalcTarget == 2) glEnable(GL_RASTERIZER_DISCARD);
-    for(auto iterator = particlesObjects.begin(); iterator != particlesObjects.end(); iterator ++) {
-        if((*iterator)->gameTick()) continue;
-        particlesObjects.erase(iterator);
-        iterator --;
+    foreach_e(particlesObjects, iterator) {
+        (*iterator)->gameTick();
     }
     if(particleCalcTarget == 2) glDisable(GL_RASTERIZER_DISCARD);
     
@@ -150,16 +148,14 @@ void ObjectManager::gameTick() {
     lightPrioritySorter.position = currentCam->getTransformation().getOrigin();
     std::sort(lightObjects.begin(), lightObjects.end(), lightPrioritySorter);
     
-    unsigned int maxShadows = shadowQuality;
+    unsigned int maxShadows = 3;
     for(unsigned int i = 0; i < lightObjects.size(); i ++)
         lightObjects[i]->gameTick(i < maxShadows);
     currentShadowLight = NULL;
     
     //Calculate SimpleObjects
-    for(auto iterator = simpleObjects.begin(); iterator != simpleObjects.end(); iterator ++) {
-        if((*iterator)->gameTick()) continue;
-        simpleObjects.erase(iterator);
-        iterator --;
+    foreach_e(simpleObjects, iterator) {
+        (*iterator)->gameTick();
     }
 }
 
@@ -199,17 +195,17 @@ void ObjectManager::drawScene() {
     for(auto graphicObject : graphicObjects)
         graphicObject->inFrustum = false;
     
-    for(auto particlesObject : particlesObjects)
-        particlesObject->inFrustum = false;
-    
-    for(unsigned int i = 0; i < lightObjects.size(); i ++)
-        lightObjects[i]->inFrustum = false;
-    
     //Calculate Frustum Culling
     if(currentShadowLight)
         currentCam->doFrustumCulling(CollisionMask_Static | CollisionMask_Object);
-    else
+    else{
+        for(auto particlesObject : particlesObjects)
+            particlesObject->inFrustum = false;
+        
+        for(unsigned int i = 0; i < lightObjects.size(); i ++)
+            lightObjects[i]->inFrustum = false;
         currentCam->doFrustumCulling(CollisionMask_Light | CollisionMask_Static | CollisionMask_Object);
+    }
     
     //Draw GraphicObjects
     glDisable(GL_BLEND);
@@ -217,9 +213,30 @@ void ObjectManager::drawScene() {
         if(graphicObject->inFrustum)
             graphicObject->draw();
     glEnable(GL_BLEND);
+}
+
+void ObjectManager::illuminate() {
+    glDepthMask(GL_FALSE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
+    for(unsigned int i = 0; i < lightObjects.size(); i ++)
+        if(lightObjects[i]->inFrustum)
+            lightObjects[i]->draw();
+    glFrontFace(GL_CCW);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+}
+
+void ObjectManager::drawFrame() {
+    mainFBO.renderInDeferredBuffers(false);
+    mainCam->use();
+    currentCam->updateAudioListener();
+    
+    //Draw not transparent
+    drawScene();
     
     //Draw Decals
-    if(currentShadowLight) return;
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, 0);
     for(auto decal : decals) {
@@ -241,31 +258,15 @@ void ObjectManager::drawScene() {
         decalVAO.draw();
     }
     
-    //Draw Particle Systems
-    if(particleCalcTarget == 0) return;
+    //Push ParticlesObjects in transparentAccumulator
+    bool keepInColorBuffer = screenBlurFactor > 0.0 || edgeSmoothEnabled || depthOfFieldQuality;
     for(auto particlesObject : particlesObjects)
-        if(particlesObject->inFrustum)
-            particlesObject->draw();
-}
-
-void ObjectManager::illuminate() {
-    glDepthMask(GL_FALSE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE);
-    for(unsigned int i = 0; i < lightObjects.size(); i ++)
-        if(lightObjects[i]->inFrustum)
-            lightObjects[i]->draw();
-    glFrontFace(GL_CCW);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_BLEND);
-}
-
-void ObjectManager::drawFrame() {
-    mainFBO.renderInDeferredBuffers(false);
-    mainCam->use();
-    currentCam->updateAudioListener();
-    drawScene();
+        if(particlesObject->inFrustum) {
+            AccumulatedTransparent* transparent = new AccumulatedTransparent();
+            transparent->object = particlesObject;
+            transparent->mesh = NULL;
+            objectManager.transparentAccumulator.push_back(transparent);
+        }
     
     //Calculate Screen Blur
     if(screenBlurFactor > -1.0) {
@@ -277,15 +278,48 @@ void ObjectManager::drawFrame() {
             screenBlurFactor += min((2-screenBlurFactor)*speed, speed);
     }
     
-    //Draw LightObjects
+    //Illuminate not transparent
     illuminate();
     
-    //Draw Transparent
-    bool keepInColorBuffer = screenBlurFactor > 0.0 || edgeSmoothEnabled || depthOfFieldQuality;
+    //Combine not transparent
     shaderPrograms[deferredCombineSP]->use();
     mainFBO.renderDeferred(true, inBuffersCombine, 4, outBuffersCombine,
-                           (objectManager.transparentAccumulator.size() > 0 || keepInColorBuffer) ? 1 : 0);
-    mainFBO.renderTransparentInDeferredBuffers(keepInColorBuffer);
+                           (transparentAccumulator.size() > 0 || keepInColorBuffer) ? 1 : 0);
+    
+    //Draw Transparent
+    if(transparentAccumulator.size() > 0) {
+        btVector3 camMatPos = currentCam->getTransformation().getOrigin();
+        std::sort(transparentAccumulator.begin(), transparentAccumulator.end(), [&camMatPos](AccumulatedTransparent* a, AccumulatedTransparent* b){
+            return (a->object->getTransformation().getOrigin()-camMatPos).length() > (b->object->getTransformation().getOrigin()-camMatPos).length();
+        });
+        
+        for(unsigned int i = 0; i < transparentAccumulator.size(); i ++) {
+            AccumulatedTransparent* transparent = transparentAccumulator[i];
+            mainFBO.renderInDeferredBuffers(true);
+            
+            glDisable(GL_BLEND);
+            glEnable(GL_DEPTH_TEST);
+            if(blendingQuality > 1) {
+                glActiveTexture((transparent->mesh) ? GL_TEXTURE3 : GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_RECTANGLE, mainFBO.gBuffers[colorDBuffer]);
+            }
+            
+            if(transparent->mesh) {
+                glDepthMask(GL_TRUE);
+                static_cast<ModelObject*>(transparent->object)->drawAccumulatedMesh(transparent->mesh);
+            }else{
+                glDepthMask(GL_FALSE);
+                static_cast<ParticlesObject*>(transparent->object)->draw();
+            }
+            
+            delete transparent;
+            mainFBO.combineTransparent();
+        }
+        transparentAccumulator.clear();
+        
+        if(!keepInColorBuffer)
+            mainFBO.copyGBuffer(colorDBuffer, 0);
+    }
     
     if(ssaoQuality) {
         glViewport(0, 0, screenSize[0] >> screenSize[2], screenSize[1] >> screenSize[2]);
@@ -296,7 +330,7 @@ void ObjectManager::drawFrame() {
         glEnable(GL_BLEND);
         glBlendFunc(GL_DST_COLOR, GL_ZERO);
         shaderPrograms[ssaoCombineSP]->use();
-        mainFBO.renderDeferred(true, &inBuffersSSAO[1], 2, outBuffersCombine, (keepInColorBuffer) ? 1 : 0);
+        mainFBO.renderDeferred(true, inBuffersSSAO, 2, outBuffersCombine, (keepInColorBuffer) ? 1 : 0);
         glDisable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }

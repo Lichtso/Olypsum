@@ -107,6 +107,10 @@ void AppMain(int argc, char *argv[]) {
         while(SDL_PollEvent(&event)) {
             if(!currentScreenView) break;
             switch(event.type) {
+                case SDL_ACTIVEEVENT:
+                    if(!event.active.gain && currentMenu == inGameMenu)
+                        setMenu(gameEscMenu);
+                break;
                 case SDL_KEYDOWN:
                     if(currentScreenView->handleKeyDown(&event.key.keysym))
                         break;

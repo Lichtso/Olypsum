@@ -165,13 +165,12 @@ void FBO::renderInDeferredBuffers(bool transparent) {
     
     if(transparent) {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, gBuffers[transparentDBuffer], 0);
-        for(unsigned char o = 1; o < ((blendingQuality == 3) ? 5 : 4); o ++)
+        for(unsigned char o = 1; o < ((blendingQuality == 2) ? 5 : 4); o ++)
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+o, GL_TEXTURE_RECTANGLE, gBuffers[colorDBuffer+o], 0);
         
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, gBuffers[transparentDBuffer], 0);
         glDrawBuffers(1, drawBuffers);
         glClear(GL_COLOR_BUFFER_BIT);
-        glDrawBuffers((blendingQuality == 3) ? 5 : 4, drawBuffers);
+        glDrawBuffers((blendingQuality == 2) ? 5 : 4, drawBuffers);
     }else{
         glClear(GL_DEPTH_BUFFER_BIT);
         for(unsigned char o = 0; o < 4; o ++)
@@ -182,38 +181,11 @@ void FBO::renderInDeferredBuffers(bool transparent) {
     }
 }
 
-void FBO::renderTransparentInDeferredBuffers(bool keepInColorBuffer) {
-    if(objectManager.transparentAccumulator.size() == 0) return;
-    
-    btVector3 camMatPos = currentCam->getTransformation().getOrigin();
-    std::sort(objectManager.transparentAccumulator.begin(), objectManager.transparentAccumulator.end(), [&camMatPos](AccumulatedMesh* a, AccumulatedMesh* b){
-        return (a->object->getTransformation().getOrigin()-camMatPos).length() > (b->object->getTransformation().getOrigin()-camMatPos).length();
-    });
-    
-    unsigned int i;
-    for(i = 0; i < objectManager.transparentAccumulator.size(); i ++) {
-        renderInDeferredBuffers(true);
-        if(blendingQuality > 1) {
-            glActiveTexture(GL_TEXTURE3);
-            glBindTexture(GL_TEXTURE_RECTANGLE, gBuffers[colorDBuffer]);
-        }
-        
-        glDepthMask(GL_TRUE);
-        glEnable(GL_DEPTH_TEST);
-        glDisable(GL_BLEND);
-        AccumulatedMesh* tMesh = objectManager.transparentAccumulator[i];
-        tMesh->object->drawAccumulatedMesh(tMesh->mesh);
-        delete tMesh;
-        objectManager.illuminate();
-        
-        shaderPrograms[deferredCombineTransparentSP]->use();
-        unsigned char inBuffers[] = { transparentDBuffer, diffuseDBuffer, specularDBuffer, materialDBuffer, colorDBuffer }, outBuffers[] = { colorDBuffer };
-        mainFBO.renderDeferred(true, inBuffers, (blendingQuality == 1) ? 5 : 4, outBuffers, 1);
-    }
-    objectManager.transparentAccumulator.clear();
-    
-    if(!keepInColorBuffer)
-        mainFBO.copyGBuffer(colorDBuffer, 0);
+void FBO::combineTransparent() {
+    objectManager.illuminate();
+    shaderPrograms[deferredCombineTransparentSP]->use();
+    unsigned char inBuffers[] = { transparentDBuffer, diffuseDBuffer, specularDBuffer, materialDBuffer, colorDBuffer }, outBuffers[] = { colorDBuffer };
+    mainFBO.renderDeferred(true, inBuffers, (blendingQuality == 1) ? 5 : 4, outBuffers, 1);
 }
 
 void FBO::renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned char inBuffersCount, unsigned char* outBuffers, unsigned char outBuffersCount) {

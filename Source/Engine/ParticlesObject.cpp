@@ -153,6 +153,7 @@ ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, Leve
 
 ParticlesObject::~ParticlesObject() {
     if(body) {
+        objectManager.physicsWorld->removeCollisionObject(body);
         delete body;
         body = NULL;
     }
@@ -187,7 +188,7 @@ bool ParticlesObject::gameTick() {
     if(systemLife > -1.0) {
         systemLife -= animationFactor;
         if(systemLife <= 0.0) {
-            delete this;
+            remove();
             return false;
         }
     }

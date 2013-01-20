@@ -18,7 +18,7 @@ LightSphereVolume lightSphere(1, sphereAccuracyX, sphereAccuracyY);
 LightParabolidVolume lightCone(1, coneAccuracy, 0);
 LightParabolidVolume lightParabolid(1, sphereAccuracyX, parabolidAccuracyY);
 
-unsigned char inBuffers[] = { positionDBuffer, normalDBuffer, materialDBuffer }, outBuffers[] = { diffuseDBuffer, specularDBuffer };
+unsigned char inBuffers[] = { positionDBuffer, normalDBuffer, materialDBuffer, transparentDBuffer }, outBuffers[] = { diffuseDBuffer, specularDBuffer };
 
 void initLightVolumes() {
     lightBox.init();
@@ -157,6 +157,7 @@ void DirectionalLight::setBounds(float width, float height, float range) {
     shadowCam.width = width;
     shadowCam.height = height;
     shadowCam.far = range;
+    shadowCam.near = range*0.01;
     
     setPhysicsShape(new btBoxShape(btVector3(width, height, range*0.5)));
 }

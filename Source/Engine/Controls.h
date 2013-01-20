@@ -14,7 +14,7 @@
 class ControlsMangager {
     PhysicObject* grabbedObject;
     btVector3 relGrabbPos;
-    float rotX, rotY;
+    float rotX, rotY, targetRotX, targetRotY;
     public:
     ControlsMangager();
     void handleMouseDown(int mouseX, int mouseY, SDL_Event& event);

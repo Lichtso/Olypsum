@@ -25,13 +25,20 @@
 			<PhysicsBody collisionShape="manBox" mass="65.0" />
 			<Damping linear="0.0" angular="0.3" />
 		</RigidObject>
+		<LightObject type="spot">
+			<Color>1.0 0.0 0.0</Color>
+			<Bounds cutoff="0.8" range="10.0" />
+		</LightObject>
 		<LightObject type="positional">
-			<Translate>2.0 3.0 2.0</Translate>
-			<Color>1.0 1.0 1.0</Color>
-			<Bounds omniDirectional="true" range="15.0" />
+			<Color>0.0 1.0 0.0</Color>
+			<Bounds omniDirectional="true" range="5.0" />
+		</LightObject>
+		<LightObject type="directional">
+			<Color>0.0 0.0 1.0</Color>
+			<Bounds>2.0 2.0 10.0</Bounds>
 		</LightObject>
 		<ParticlesObject particles="50" force="0.0 0.0 0.0">
-			<Translate>0.0 0.0 0.0</Translate>
+			<Translate>0.0 1.5 0.0</Translate>
 			<Texture src="flash.png" />
 			<PhysicsBody collisionShape="box0" />
 			<Life min="3.0" max="7.0" />
@@ -39,26 +46,72 @@
 			<SpawnBox min="-0.2 0.0 -0.2" max="0.2 0.0 0.2" />
 			<Velocity min="-0.2 0.3 -0.2" max="0.2 1.2 0.2" />
 		</ParticlesObject>
-		<HeightfieldTerrain size="10.0 4.0 10.0" textureScale="20.0 20.0">
-			<Diffuse src="wallAnim.png" />
+		<ParticlesObject particles="50" force="0.0 0.0 0.0">
+			<Translate>2.0 1.5 0.0</Translate>
+			<Texture src="flash.png" />
+			<PhysicsBody collisionShape="box0" />
+			<Life min="3.0" max="7.0" />
+			<Size min="0.1" max="0.2" />
+			<SpawnBox min="-0.2 0.0 -0.2" max="0.2 0.0 0.2" />
+			<Velocity min="-0.2 0.3 -0.2" max="0.2 1.2 0.2" />
+		</ParticlesObject>
+		<HeightfieldTerrain size="10.0 4.0 10.0" textureScale="10.0 10.0">
+			<Diffuse src="terrainDiffuse.png" />
 			<HeightsMap src="terrainMap.png" />
 		</HeightfieldTerrain>
 	</Objects>
 	<Links>
-		<PhysicLink>
+		<!--<PhysicLink>
 			<Object index="1" name="a" />
 			<Object index="2" name="b" />
 			<Constraint type="point">
 					<Point>0.0 -1.0 0.0</Point>
 					<Point>0.0 1.0 0.0</Point>
 			</Constraint>
+		</PhysicLink>-->
+		<PhysicLink>
+			<Object index="1" name="a" />
+			<Object index="2" name="b" />
+			<Constraint type="slider">
+				<Frame>
+					<Translate>0.0 -1.5 0.0</Translate>
+					<Rotate>0.0 0.0 1.0 90.0</Rotate>
+				</Frame>
+				<Frame>
+					<Translate>0.0 0.5 0.0</Translate>
+					<Rotate>0.0 0.0 1.0 90.0</Rotate>
+				</Frame>
+				<AngularLimit low="1.0" high="-1.0" />
+				<LinearLimit low="0.0" high="0.0" />
+			</Constraint>
 		</PhysicLink>
 		<TransformLink>
 			<Object index="2" name=".." />
-			<Object index="3" name="child" />
+			<Object index="3" name="spotLight" />
 			<Transforms>
 				<Entry type="transform">
-					<Translate>0.0 7.0 1.0</Translate>
+					<Translate>3.0 2.0 0.0</Translate>
+					<Rotate>1.0 0.0 0.0 -45.0</Rotate>
+				</Entry>
+			</Transforms>
+		</TransformLink>
+		<TransformLink>
+			<Object index="2" name=".." />
+			<Object index="4" name="positionalLight" />
+			<Transforms>
+				<Entry type="transform">
+					<Translate>0.0 1.5 5.0</Translate>
+				</Entry>
+			</Transforms>
+		</TransformLink>
+		<TransformLink>
+			<Object index="2" name=".." />
+			<Object index="5" name="directionalLight" />
+			<Transforms>
+				<Entry type="transform">
+					<Translate>0.0 4.0 -3.0</Translate>
+					<Rotate>0.0 1.0 0.0 90.0</Rotate>
+					<Rotate>1.0 0.0 0.0 -45.0</Rotate>
 				</Entry>
 			</Transforms>
 		</TransformLink>

@@ -49,15 +49,15 @@ void main() {
 #elif PROCESSING_TYPE == 2 //Depth of Field
 out vec3 colorOut;
 
+const float blurWidth = float(DOF_QUALITY), blurInverse = 1.0/((blurWidth*2+1)*(blurWidth*2+1));
+
 void main() {
 	float factor = max(0.0, texture(sampler0, gl_FragCoord.xy).x-0.75)*10.0;
     colorOut = vec3(0.0);
-    const float blurWidth = float(DOF_QUALITY);
 	for(float x = -blurWidth; x <= blurWidth; x ++)
         for(float y = -blurWidth; y <= blurWidth; y ++)
             colorOut += texture(sampler1, gl_FragCoord.xy+vec2(x, y)*factor).rgb;
-    const float blurSum = 1.0 / ((blurWidth*2.0+1.0)*(blurWidth*2.0+1.0));
-    colorOut *= blurSum;
+    colorOut *= blurInverse;
 }
 
 #elif PROCESSING_TYPE == 3 //Sprites

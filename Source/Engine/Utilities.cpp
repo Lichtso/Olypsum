@@ -88,28 +88,29 @@ std::string stringOf(int value) {
 
 std::string stringOf(float value) {
     char buffer[32];
-    sprintf(buffer, "%f", value);
+    sprintf(buffer, "%g", value);
     return buffer;
 }
 
 std::string stringOf(btVector3& vec) {
     char buffer[128];
-    sprintf(buffer, "%f %f %f", vec.x(), vec.y(), vec.z());
+    sprintf(buffer, "%g %g %g", vec.x(), vec.y(), vec.z());
     return buffer;
 }
 
 std::string stringOf(btTransform& mat) {
     btScalar values[16];
     mat.getOpenGLMatrix(values);
-    char buffer[64];
-    std::string str = "(";
+    
+    std::ostringstream ss;
+    ss << "(";
     for(unsigned char i = 0; i < 16; i ++) {
-        if(i % 4 > 0) str += ", ";
-        sprintf(buffer, "%f", values[i]);
-        str += buffer;
-        if(i % 4 == 3 && i < 15) str += ",\n ";
+        if(i % 4 > 0) ss << " ";
+        ss << values[i];
+        if(i % 4 == 3 && i < 15) ss << ",\n ";
     }
-    return str+")";
+    ss << ")";
+    return ss.str();
 }
 
 int screenSize[3];

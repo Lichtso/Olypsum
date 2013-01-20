@@ -104,13 +104,16 @@ void FileManager::loadOptions() {
         optionGroup = options->first_node("Sound");
         globalVolume = readOptionValue<float>(optionGroup->first_node("globalVolume"), "%f");
         musicVolume = readOptionValue<float>(optionGroup->first_node("musicVolume"), "%f");
+        optionGroup = options->first_node("Mouse");
+        mouseSensitivity = readOptionValue<float>(optionGroup->first_node("mouseSensitivity"), "%f");
+        mouseSmoothing = readOptionValue<float>(optionGroup->first_node("mouseSmoothing"), "%f");
     }else saveOptions();
     
     getPackage("Default");
 }
 
 void FileManager::saveOptions() {
-    char str[40];
+    char str[56];
     rapidxml::xml_document<xmlUsedCharType> doc;
     rapidxml::xml_node<xmlUsedCharType>* options = doc.allocate_node(rapidxml::node_element);
     options->name("Options");
@@ -144,6 +147,14 @@ void FileManager::saveOptions() {
     addXMLNode(doc, optionGroup, "globalVolume", &str[24]);
     sprintf(&str[32], "%1.5f", musicVolume);
     addXMLNode(doc, optionGroup, "musicVolume", &str[32]);
+    
+    optionGroup = doc.allocate_node(rapidxml::node_element);
+    optionGroup->name("Mouse");
+    options->append_node(optionGroup);
+    sprintf(&str[40], "%1.5f", mouseSensitivity);
+    addXMLNode(doc, optionGroup, "mouseSensitivity", &str[40]);
+    sprintf(&str[48], "%1.5f", mouseSmoothing);
+    addXMLNode(doc, optionGroup, "mouseSmoothing", &str[48]);
     
     writeXmlFile(doc, gameDataDir+"Options.xml", true);
 }

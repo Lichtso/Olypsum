@@ -189,7 +189,7 @@ void setMenu(MenuName menu) {
             }
             
             unsigned int sliderSteps[] = { 3, 3, 4, 4, 3 };
-            std::function<void(GUISlider*)> onChange[] = {
+            std::function<void(GUISlider*)> onChangeGraphics[] = {
                 [](GUISlider* slider) {
                     depthOfFieldQuality = slider->value*3.0;
                     if(levelManager.gameStatus != noGame) loadDynamicShaderPrograms();
@@ -207,15 +207,15 @@ void setMenu(MenuName menu) {
                     if(levelManager.gameStatus != noGame) loadDynamicShaderPrograms();
                 }
             };
-            unsigned char sliderValues[] = { depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, blendingQuality };
-            const char* sliderLabels[] = { "depthOfFieldQuality", "bumpMappingQuality", "shadowQuality", "ssaoQuality", "blendingQuality" };
+            unsigned char sliderValuesGraphics[] = { depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, blendingQuality };
+            const char* sliderLabelsGraphics[] = { "depthOfFieldQuality", "bumpMappingQuality", "shadowQuality", "ssaoQuality", "blendingQuality" };
             for(unsigned char i = 0; i < 5; i ++) {
                 label = new GUILabel();
                 label->posX = view->width*0.45;
                 label->posY = currentScreenView->height*(-0.06-0.12*i);
                 label->width = view->width*0.5;
                 label->fontHeight = currentScreenView->height*0.1;
-                label->text = localization.localizeString(sliderLabels[i]);
+                label->text = localization.localizeString(sliderLabelsGraphics[i]);
                 label->textAlign = GUITextAlign_Left;
                 label->sizeAlignment = GUISizeAlignment_Height;
                 view->addChild(label);
@@ -223,55 +223,62 @@ void setMenu(MenuName menu) {
                 slider->posX = view->width*-0.52;
                 slider->posY = label->posY;
                 slider->width = view->width*0.4;
-                slider->value = (float)sliderValues[i]/(float)sliderSteps[i];
+                slider->value = (float)sliderValuesGraphics[i]/(float)sliderSteps[i];
                 slider->steps = sliderSteps[i];
-                slider->onChange = onChange[i];
+                slider->onChange = onChangeGraphics[i];
                 view->addChild(slider);
             }
             
-            label = new GUILabel();
-            label->posX = currentScreenView->width*0.52;
-            label->posY = currentScreenView->height*0.72;
-            label->text = localization.localizeString("sound");
-            label->fontHeight = currentScreenView->height*0.14;
-            currentScreenView->addChild(label);
-            view = new GUIFramedView();
-            view->width = currentScreenView->width*0.42;
-            view->height = currentScreenView->height*0.16;
-            view->posX = currentScreenView->width*0.52;
-            view->posY = currentScreenView->height*0.46;
-            currentScreenView->addChild(view);
-            std::function<void(GUISlider*)> onChangeSound[] = {
+            std::function<void(GUISlider*)> onChange[] = {
                 [](GUISlider* slider) {
                     globalVolume = slider->value;
                 }, [](GUISlider* slider) {
                     musicVolume = slider->value;
+                }, [](GUISlider* slider) {
+                    mouseSensitivity = slider->value*0.01F;
+                }, [](GUISlider* slider) {
+                    mouseSmoothing = 1.0F-slider->value;
                 }
             };
-            float sliderValuesSound[] = { globalVolume, musicVolume };
-            const char* sliderLabelsSound[] = { "soundGlobal", "soundMusic" };
-            for(unsigned char i = 0; i < 2; i ++) {
+            float sliderValues[] = { globalVolume, musicVolume, mouseSensitivity*100.0F, 1.0F-mouseSmoothing };
+            const char* sliderLabels[] = { "soundGlobal", "soundMusic", "mouseSensitivity", "mouseSmoothing" };
+            
+            for(char m = 0; m < 4; m += 2) {
                 label = new GUILabel();
-                label->posX = view->width*-0.4;
-                label->posY = currentScreenView->height*(0.06-0.12*i);
-                label->width = view->width*0.5;
-                label->fontHeight = currentScreenView->height*0.1;
-                label->text = localization.localizeString(sliderLabelsSound[i]);
-                label->textAlign = GUITextAlign_Left;
-                label->sizeAlignment = GUISizeAlignment_Height;
-                view->addChild(label);
-                GUISlider* slider = new GUISlider();
-                slider->posX = view->width*0.4;
-                slider->posY = label->posY;
-                slider->width = view->width*0.5;
-                slider->value = sliderValuesSound[i];
-                slider->onChange = onChangeSound[i];
-                view->addChild(slider);
+                label->posX = currentScreenView->width*0.52;
+                label->posY = currentScreenView->height*(0.72-0.28*m);
+                label->text = localization.localizeString((m == 0) ? "sound" : "mouse");
+                label->fontHeight = currentScreenView->height*0.14;
+                currentScreenView->addChild(label);
+                view = new GUIFramedView();
+                view->width = currentScreenView->width*0.42;
+                view->height = currentScreenView->height*0.16;
+                view->posX = currentScreenView->width*0.52;
+                view->posY = currentScreenView->height*(0.46-0.28*m);
+                currentScreenView->addChild(view);
+                for(unsigned char i = 0; i < 2; i ++) {
+                    label = new GUILabel();
+                    label->posX = view->width*-0.4;
+                    label->posY = currentScreenView->height*(0.06-0.12*i);
+                    label->width = view->width*0.5;
+                    label->fontHeight = currentScreenView->height*0.1;
+                    label->text = localization.localizeString(sliderLabels[i+m]);
+                    label->textAlign = GUITextAlign_Left;
+                    label->sizeAlignment = GUISizeAlignment_Height;
+                    view->addChild(label);
+                    GUISlider* slider = new GUISlider();
+                    slider->posX = view->width*0.4;
+                    slider->posY = label->posY;
+                    slider->width = view->width*0.5;
+                    slider->value = sliderValues[i+m];
+                    slider->onChange = onChange[i+m];
+                    view->addChild(slider);
+                }
             }
             
             button = new GUIButton();
             button->posX = currentScreenView->width*0.52;
-            button->posY = currentScreenView->height*-0.1;
+            button->posY = currentScreenView->height*-0.48;
             button->onClick = [](GUIButton* button) {
                 setMenu(languagesMenu);
             };

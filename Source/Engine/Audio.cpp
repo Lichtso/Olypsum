@@ -145,7 +145,7 @@ float SoundSourceObject::getTimeOffset() {
 
 bool SoundSourceObject::gameTick() {
     if(mode == SoundSource_disposable && !isPlaying()) {
-        delete this;
+        remove();
         return false;
     }
     btVector3 direction = transformation.getBasis().getColumn(2),

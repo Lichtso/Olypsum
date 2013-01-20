@@ -25,6 +25,17 @@ class DisplayObject : public PhysicObject {
     virtual void draw() = 0;
 };
 
+//! A transparent DisplayObject
+/*!
+ A transparent DisplayObject which is accumulated by the engine to be rendered at the end of the graphics frame
+ 
+ @warning Don't use it directly
+ */
+struct AccumulatedTransparent {
+    DisplayObject* object;
+    Mesh* mesh;
+};
+
 //! A DisplayObject which is managed by the ObjectManager
 /*!
  This is the basic class for all Objects, which are managed by the ObjectManager.

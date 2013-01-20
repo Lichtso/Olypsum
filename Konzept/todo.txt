@@ -1,16 +1,16 @@
-Improve BaseLink & BoneObject write()
 Implement btSoftBody
 Implement btRayCastVehicle
 Implement more PhysicLink types
-Anisotropic filtering
+V8 scripts
 Use C++11 Multithreading
-Windows Support
+Windows / Linux Support
 
 Not sure:
+Anisotropic filtering
+Cube map soft shadows
 PCSS
 Fog
 Enviornment maping
-OpenAL Sound Engine: Add track queue
 
 Bugs:
 Check memory leaks

@@ -50,10 +50,8 @@ class FBO {
      @param transparent True if this method is called by renderTransparentInDeferredBuffers()
      */
     void renderInDeferredBuffers(bool transparent);
-    /*! Renders all transparent meshes which have been accumulated
-     @param keepInColorBuffer If true the restult will be stored in colorDBuffer
-     */
-    void renderTransparentInDeferredBuffers(bool keepInColorBuffer);
+    // Uses the deferredCombineTransparentSP to combine the actual transparent frame with the color buffer
+    void combineTransparent();
     /*! Prepares the g-buffers to be rendered in and read out
      @param fillScreen If true this method will render the entire screen else it will only prepare the g-buffers
      @param inBuffers A array of g-buffer indecies to be used as textures. The index of each element will also be its texture target index

@@ -22,7 +22,6 @@ uniform vec3 lPosition;
 uniform sampler2DRect sampler0;
 uniform sampler2DRect sampler1;
 uniform sampler2DRect sampler2;
-
 #if SHADOWS_ACTIVE == 1
 uniform sampler2DShadow sampler3;
 #elif SHADOWS_ACTIVE == 2
@@ -32,16 +31,13 @@ uniform sampler2DShadow sampler4;
 uniform samplerCubeShadow sampler3;
 uniform vec2 shadowDepthTransform;
 #endif
-
-#if SHADOWS_ACTIVE > 0
 uniform mat4 lShadowMat;
-#endif
 
 #if LIGHT_TYPE == 1
-#define depthBias 1.001
+#define depthOffset -0.002
 #define blurBias 0.001
 #elif LIGHT_TYPE == 2
-#define depthBias 0.999
+#define depthOffset -0.002
 #define blurBias 0.003
 #elif LIGHT_TYPE == 3
 #define depthBias 0.99*0.5
@@ -72,9 +68,16 @@ void main() {
          normal = texture(sampler1, gl_FragCoord.xy).xyz,
          material = texture(sampler2, gl_FragCoord.xy).rgb;
     
+    #if SHADOW_QUALITY > 0 || LIGHT_TYPE == 1
+    vec4 shadowCoord = vec4(pos, 1.0) * lShadowMat;
+    #if LIGHT_TYPE < 3
+    shadowCoord.z = (shadowCoord.w+shadowCoord.z)*0.5+depthOffset;
+    #endif
+    #endif
+    
     #if LIGHT_TYPE == 1
     vec3 lightDir = lDirection;
-    float intensity = 1.0;
+    float intensity = 1.0-step(abs(shadowCoord.x-0.5), 0.5)*step(abs(shadowCoord.y-0.5), 0.5)*step(abs(shadowCoord.z-0.5), 0.5);
     #else
     vec3 lightDir = lPosition-pos;
     float lightDirLen = length(lightDir), intensity;
@@ -82,10 +85,10 @@ void main() {
     intensity = clamp(lightDirLen * lInvRange, step(lCutoff, dot(lDirection, lightDir)), 1.0);
     #endif
     
+    //if(intensity >= 1.0) discard;
+    
     #if SHADOW_QUALITY > 0 //Shadows enabled
-    vec4 shadowCoord = vec4(pos, 1.0) * lShadowMat;
     #if LIGHT_TYPE < 3 //Directional or spot light
-    shadowCoord.z = shadowCoord.z*depthBias*0.5+0.5*shadowCoord.w;
     intensity = (1.0-intensity)*shadowLookup2D(sampler3, shadowCoord.xyz/shadowCoord.w);
     #else //Positional light
     #if SHADOWS_ACTIVE < 3 //Parabolid

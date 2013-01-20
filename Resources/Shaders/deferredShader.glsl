@@ -17,10 +17,6 @@ void main() {
     #if BLENDING_QUALITY
     vec4 color = texture(sampler0, gl_FragCoord.xy);
     if(color.a == 0.0) discard;
-    #if BLENDING_QUALITY == 1
-    color.rgb *= color.a;
-    color.rgb += texture(sampler4, gl_FragCoord.xy).rgb*(1.0-color.a);
-    #endif
     #else
     vec3 color = texture(sampler0, gl_FragCoord.xy).rgb;
     #endif
@@ -29,4 +25,8 @@ void main() {
     float emission = texture(sampler3, gl_FragCoord.xy).b;
     
     colorOut = color.rgb*(diffuse+vec3(emission))+specular;
+    
+    #if BLENDING_QUALITY == 1
+    colorOut += texture(sampler4, gl_FragCoord.xy).rgb*(1.0-color.a);
+    #endif
 }

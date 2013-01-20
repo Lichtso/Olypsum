@@ -20,13 +20,15 @@ uniform sampler2D sampler0;
 #else
 uniform sampler2DArray sampler0;
 #endif
+uniform sampler2DRect sampler1;
 in vec3 vPosition;
 in vec4 vTexCoord;
 in vec3 vNormal;
 out vec4 colorOut;
-out vec4 materialOut;
-out vec4 normalOut;
-out vec4 positionOut;
+out vec3 materialOut;
+out vec3 normalOut;
+out vec3 positionOut;
+out vec3 specularOut;
 
 void main() {
     #if TEXTURE_ANIMATION == 0 //2D texture
@@ -39,9 +41,19 @@ void main() {
     colorOut.a *= vTexCoord.w;
     if(colorOut.a < 0.0039) discard;
     
-    materialOut = vec4(0.0, 0.0, 0.0, colorOut.a);
-    normalOut = vec4(vNormal, colorOut.a);
-    positionOut = vec4(vPosition, colorOut.a);
+    materialOut = vec3(0.0, 0.0, 0.0);
+    normalOut = vNormal;
+    positionOut = vPosition;
+    
+    colorOut.rgb *= colorOut.a;
+    #if BLENDING_QUALITY > 1 //Background lookup
+    vec3 backgroundColor = (1.0-colorOut.a) * texture(sampler1, gl_FragCoord.xy).rgb;
+    #if BLENDING_QUALITY == 2 //Correct Blending
+    specularOut = backgroundColor;
+    #elif BLENDING_QUALITY == 3 //Mixed Blending
+    colorOut.rgb += backgroundColor;
+    #endif //Mixed Blending
+    #endif //Background lookup
 }
 
 #separator

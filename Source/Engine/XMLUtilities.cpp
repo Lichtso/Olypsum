@@ -105,13 +105,12 @@ rapidxml::xml_node<xmlUsedCharType>* writeTransformationXML(rapidxml::xml_docume
     values[11] = transform.getOrigin().z();
     values[12] = values[13] = values[14] = btScalar(0.0);
     values[15] = btScalar(1.0);
-    char buffer[64];
-    std::string str = "";
+    
+    std::ostringstream ss;
     for(unsigned char i = 0; i < 16; i ++) {
-        if(i > 0) str += " ";
-        sprintf(buffer, "%g", values[i]);
-        str += buffer;
+        if(i > 0) ss << " ";
+        ss << values[i];
     }
-    node->value(doc.allocate_string(str.c_str()));
+    node->value(doc.allocate_string(ss.str().c_str()));
     return node;
 }

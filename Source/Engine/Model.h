@@ -31,18 +31,6 @@ class Mesh {
     void draw(ModelObject* object);
 };
 
-//! A transparent Mesh of a Model
-/*!
- A transparent Mesh of a Model which is accumulated by the engine to be rendered at the end of the graphics frame
- 
- @see FBO::renderTransparentInDeferredBuffers()
- @warning Don't use it directly
- */
-struct AccumulatedMesh {
-    ModelObject* object;
-    Mesh* mesh;
-};
-
 //! A Skeleton of a Model
 /*!
  This class is used internally to hold the hierarchical structure of a Skeleton found in the COLLADA-file

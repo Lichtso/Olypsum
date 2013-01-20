@@ -807,10 +807,10 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
 void Model::draw(ModelObject* object) {
     for(unsigned int i = 0; i < meshes.size(); i ++) {
         if(blendingQuality > 0 && !objectManager.currentShadowLight && meshes[i]->material.transparent) {
-            AccumulatedMesh* aMesh = new AccumulatedMesh();
-            aMesh->object = object;
-            aMesh->mesh = meshes[i];
-            objectManager.transparentAccumulator.push_back(aMesh);
+            AccumulatedTransparent* transparent = new AccumulatedTransparent();
+            transparent->object = object;
+            transparent->mesh = meshes[i];
+            objectManager.transparentAccumulator.push_back(transparent);
             continue;
         }
         meshes[i]->draw(object);
