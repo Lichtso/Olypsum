@@ -109,15 +109,15 @@ void setMenu(MenuName menu) {
                 GUIButton* button = new GUIButton();
                 button->posY = currentScreenView->height*(0.32-0.16*i);
                 if(i == 1) button->state = GUIButtonStateDisabled; //Multiplayer is not implemented yet
+                button->onClick = onClick[i];
                 view->addChild(button);
                 GUILabel* label = new GUILabel();
                 label->text = localization.localizeString(buttonLabels[i]);
                 label->textAlign = GUITextAlign_Left;
                 label->fontHeight = currentScreenView->height*0.1;
-                label->width = currentScreenView->width*0.16;
                 label->sizeAlignment = GUISizeAlignment_Height;
+                label->width = view->width+view->content.innerShadow*2.2-button->paddingX*1.0;
                 button->addChild(label);
-                button->onClick = onClick[i];
             }
         } break;
         case optionsMenu: {
@@ -390,13 +390,8 @@ void setMenu(MenuName menu) {
             currentScreenView->addChild(label);
             
             label = new GUILabel();
-            label->text = std::string("Collisions: --");
-            label->posX = currentScreenView->width*-0.67;
-            label->posY = currentScreenView->height*0.90;
-            label->width = currentScreenView->width*0.3;
+            label->text = std::string("+");
             label->color = Color4(1.0);
-            label->textAlign = GUITextAlign_Left;
-            label->sizeAlignment = GUISizeAlignment_Height;
             currentScreenView->addChild(label);
         } break;
         case gameEscMenu: {
@@ -492,7 +487,7 @@ void setMenu(MenuName menu) {
                     modalView->addChild(label);
                     button = new GUIButton();
                     button->posX = modalView->width*-0.55;
-                    button->posY = modalView->height*-0.75;
+                    button->posY = modalView->height*-0.7;
                     button->width = currentScreenView->width*0.14;
                     button->sizeAlignment = GUISizeAlignment_Height;
                     modalView->addChild(button);
@@ -506,7 +501,7 @@ void setMenu(MenuName menu) {
                     };
                     button = new GUIButton();
                     button->posX = modalView->width*0.55;
-                    button->posY = modalView->height*-0.75;
+                    button->posY = modalView->height*-0.7;
                     button->width = currentScreenView->width*0.14;
                     button->sizeAlignment = GUISizeAlignment_Height;
                     modalView->addChild(button);

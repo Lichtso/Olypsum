@@ -24,6 +24,7 @@ void updateVideoMode() {
     }
     screenSize[0] = videoInfo->current_w;
     screenSize[1] = videoInfo->current_h;
+    screenSize[2] = 1;
     SDL_Surface* screen = SDL_SetVideoMode(screenSize[0], screenSize[1], videoInfo->vfmt->BitsPerPixel, (fullScreenEnabled) ? SDL_OPENGL | SDL_FULLSCREEN : SDL_OPENGL);
     if(!screen) {
         log(error_log, "Coudn't set video mode, Quit.");
@@ -121,12 +122,11 @@ void AppMain(int argc, char *argv[]) {
                     handleMenuKeyUp(&event.key.keysym);
                 break;
                 case SDL_MOUSEBUTTONDOWN:
-                    event.button.x = (event.button.x+mouseTranslation[0])*screenSize[2];
-                    event.button.y = (event.button.y+mouseTranslation[1])*screenSize[2];
+                    event.button.x *= screenSize[2];
+                    event.button.y *= screenSize[2];
                     switch(event.button.button) {
                         case SDL_BUTTON_LEFT:
-                            if(currentScreenView->handleMouseDown(event.button.x, event.button.y))
-                                break;
+                            currentScreenView->handleMouseDown(event.button.x, event.button.y);
                         case SDL_BUTTON_MIDDLE:
                         case SDL_BUTTON_RIGHT:
                             if(controlsMangager && currentMenu == inGameMenu)
@@ -143,14 +143,14 @@ void AppMain(int argc, char *argv[]) {
                 break;
                 case SDL_MOUSEBUTTONUP:
                     if(event.button.button == SDL_BUTTON_WHEELDOWN || event.button.button == SDL_BUTTON_WHEELUP) break;
-                    event.button.x = (event.button.x+mouseTranslation[0])*screenSize[2];
-                    event.button.y = (event.button.y+mouseTranslation[1])*screenSize[2];
+                    event.button.x *= screenSize[2];
+                    event.button.y *= screenSize[2];
                     if(!currentScreenView->handleMouseUp(event.button.x, event.button.y) && controlsMangager && currentMenu == inGameMenu)
                         controlsMangager->handleMouseUp(event.button.x, event.button.y, event);
                 break;
                 case SDL_MOUSEMOTION:
-                    event.button.x = (event.button.x+mouseTranslation[0])*screenSize[2];
-                    event.button.y = (event.button.y+mouseTranslation[1])*screenSize[2];
+                    event.button.x *= screenSize[2];
+                    event.button.y *= screenSize[2];
                     currentScreenView->handleMouseMove(event.button.x, event.button.y);
                     if(controlsMangager && currentMenu == inGameMenu)
                         controlsMangager->handleMouseMove(event.button.x, event.button.y, event);
@@ -176,8 +176,6 @@ void AppMain(int argc, char *argv[]) {
         if(levelManager.gameStatus == noGame) {
             if(currentMenu == loadingMenu) {
                 loadingScreen -= animationFactor;
-                char str[64];
-                sprintf(str, "FPS: %d", currentFPS);
                 GUIProgressBar* progressBar = static_cast<GUIProgressBar*>(currentScreenView->children[0]);
                 progressBar->value = 1.0-loadingScreen/loadingScreenTime;
                 if(loadingScreen <= 0.0)
@@ -191,6 +189,8 @@ void AppMain(int argc, char *argv[]) {
         }else{
             if(controlsMangager && currentMenu == inGameMenu)
                 controlsMangager->gameTick();
+            else
+                SDL_ShowCursor(1);
             objectManager.gameTick();
             objectManager.drawFrame();
         }

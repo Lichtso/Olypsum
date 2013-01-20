@@ -82,5 +82,7 @@ bool LevelSaver::saveLevel() {
     for(auto iterator : linkingMap)
         node->append_node(iterator.first->write(doc, iterator.second));
     
-    return writeXmlFile(doc, gameDataDir+"Saves/"+levelManager.saveGameName+"/Containers/"+levelManager.levelId+".xml", true);
+    std::string containersPath = gameDataDir+"Saves/"+levelManager.saveGameName+"/Containers/";
+    createDir(containersPath);
+    return writeXmlFile(doc, containersPath+levelManager.levelId+".xml", true);
 }

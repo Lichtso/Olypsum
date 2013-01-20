@@ -162,14 +162,7 @@ void ObjectManager::gameTick() {
 void ObjectManager::physicsTick() {
     unsigned int numManifolds = collisionDispatcher->getNumManifolds();
     
-    //TODO: Debugging
-    if(currentMenu == inGameMenu) {
-        char str[64];
-        sprintf(str, "Collisions: %d", numManifolds);
-        GUILabel* label = static_cast<GUILabel*>(currentScreenView->children[1]);
-        label->text = str;
-        label->updateContent();
-    }
+    //printf(str, "Collisions: %d", numManifolds);
     
 	for(unsigned int i = 0; i < numManifolds; i ++) {
 		btPersistentManifold* contactManifold = collisionDispatcher->getManifoldByIndexInternal(i);

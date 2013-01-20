@@ -29,9 +29,8 @@ class GUIView : public GUIRect {
 };
 
 class GUIFramedView : public GUIView {
-    protected:
-    GUIRoundedRect content;
     public:
+    GUIRoundedRect content;
     GUIFramedView();
     void updateContent();
     void draw(btVector3 parentTransform, GUIClipRect& parentClipRect);

@@ -11,8 +11,8 @@
 GUIButton::GUIButton() {
     type = GUIType_Button;
     onClick = NULL;
-    paddingX = 10*screenSize[2];
-    paddingY = 5*screenSize[2];
+    paddingX = screenSize[0]*0.006;
+    paddingY = screenSize[0]*0.003;
     sizeAlignment = GUISizeAlignment_All;
     buttonType = GUIButtonTypeNormal;
     state = GUIButtonStateNormal;

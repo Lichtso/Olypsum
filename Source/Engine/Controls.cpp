@@ -59,6 +59,8 @@ void ControlsMangager::handleMouseWheel(int mouseX, int mouseY, float delta) {
 }
 
 void ControlsMangager::gameTick() {
+    SDL_ShowCursor(0);
+    
     btTransform camMat = mainCam->getTransformation();
     btVector3 rotVec(targetRotX-rotX, targetRotY-rotY, 0.0);
     float speed = rotVec.length();

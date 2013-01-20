@@ -74,7 +74,7 @@ void GUIScrollView::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     if(!getLimSize(clipRect, parentClipRect)) return;
     
     transform += btVector3(posX, posY, 0.0);
-    float inset = abs(content.innerShadow)*screenSize[2];
+    float inset = abs(content.innerShadow);
     if(content.innerShadow != 0)
         content.drawOnScreen(transform, 0, 0, clipRect);
     fixedClipRect = clipRect;

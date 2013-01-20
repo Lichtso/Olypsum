@@ -87,6 +87,5 @@ inline btVector3 vec3rand(btVector3 min, btVector3 max) {
 
 extern int screenSize[3];
 extern std::string resourcesDir, gameDataDir, parentDir;
-extern float mouseTranslation[2];
 
 #endif

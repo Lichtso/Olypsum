@@ -99,7 +99,7 @@ void GUIFramedView::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     
     transform += btVector3(posX, posY, 0.0);
     content.drawOnScreen(transform, 0, 0, clipRect);
-    float inset = abs(content.innerShadow)*screenSize[2];
+    float inset = abs(content.innerShadow);
     clipRect.minPosX += inset;
     clipRect.maxPosX -= inset;
     clipRect.minPosY += inset;

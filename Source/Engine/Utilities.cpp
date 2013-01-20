@@ -115,4 +115,3 @@ std::string stringOf(btTransform& mat) {
 
 int screenSize[3];
 std::string resourcesDir, gameDataDir, parentDir;
-float mouseTranslation[2] = { 0.0, 0.0 };

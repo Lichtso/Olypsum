@@ -17,7 +17,7 @@ GUICheckBox::GUICheckBox() {
     label->text = "√";
     label->parent = this;
     label->fontHeight = screenSize[0]*0.015;
-    label->posY = 2*screenSize[2];
+    label->posY = screenSize[0]*0.001;
     children.push_back(label);
 }
 

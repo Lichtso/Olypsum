@@ -286,31 +286,36 @@ void updateVideoMode() {
         exit(3);
     }
     
-    screenSize[2] = (fullScreenEnabled) ? [[NSScreen mainScreen] backingScaleFactor] : 1;
-    SDL_Surface* screen = SDL_SetVideoMode(videoInfo->current_w, videoInfo->current_h, videoInfo->vfmt->BitsPerPixel, SDL_OPENGL);
+    screenSize[0] = videoInfo->current_w;
+    screenSize[1] = videoInfo->current_h;
+    screenSize[2] = [[NSScreen mainScreen] backingScaleFactor];
+    
+    if(!fullScreenEnabled) {
+        screenSize[0] *= screenSize[2];
+        screenSize[1] *= screenSize[2];
+    }
+    
+    SDL_Surface* screen = SDL_SetVideoMode(screenSize[0], screenSize[1], videoInfo->vfmt->BitsPerPixel, SDL_OPENGL);
     if(!screen) {
         log(error_log, "Coudn't set video mode, Quit.");
         exit(4);
     }
-    screenSize[0] = videoInfo->current_w*screenSize[2];
-    screenSize[1] = videoInfo->current_h*screenSize[2];
     
     NSWindow* window = [[NSApp windows] objectAtIndex:0];
+    [window setTitle:@"Olypsum"];
+    NSView* view = [[[window contentView] subviews] objectAtIndex:0];
+    [view setWantsBestResolutionOpenGLSurface:true];
     if(fullScreenEnabled) {
-        NSView* view = [[[window contentView] subviews] objectAtIndex:0];
-        [view setWantsBestResolutionOpenGLSurface:true];
-        
         [window setStyleMask:0];
         [window setHasShadow:false];
-        [window setFrame:NSRectFromCGRect(CGRectMake(0, 0, videoInfo->current_w, videoInfo->current_h)) display:false];
+        [window setFrame:NSRectFromCGRect(CGRectMake(0, 0, screenSize[0], screenSize[1])) display:false];
         [NSApp setPresentationOptions:NSApplicationPresentationHideDock | NSApplicationPresentationAutoHideMenuBar];
-        [window becomeKeyWindow];
-        
-        NSRect rect = [window convertRectToScreen:NSMakeRect(0, 0, 1, 1)];
-        mouseTranslation[0] = -rect.origin.x;
-        mouseTranslation[1] = -rect.origin.y;
+        screenSize[0] *= screenSize[2];
+        screenSize[1] *= screenSize[2];
     }else
-        [window setTitle:@"Olypsum"];
+        [window setFrame:NSRectFromCGRect(CGRectMake(0, 0, videoInfo->current_w/2, videoInfo->current_h/2)) display:false];
+    //NSRect rect = [window convertRectToScreen:NSMakeRect(0, 0, 1, 1)];
+    [window becomeKeyWindow];
 }
 
 void setClipboardText(const char* str) {

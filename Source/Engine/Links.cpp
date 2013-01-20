@@ -475,7 +475,7 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
                 hinge = static_cast<btHingeConstraint*>(constraint);
                 lowAngLim = hinge->getLowerLimit();
                 highAngLim = hinge->getUpperLimit();
-                angLimit = lowAngLim != 0.0 || highAngLim != 0.0;
+                angLimit = lowAngLim != 1.0 || highAngLim != -1.0;
                 angMotor = hinge->getEnableAngularMotor();
                 angMotorVelocity = hinge->getMotorTargetVelosity();
                 angMotorForce = hinge->getMaxMotorImpulse();
@@ -488,7 +488,7 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
                 slider = static_cast<btSliderConstraint*>(constraint);
                 lowAngLim = slider->getLowerAngLimit();
                 highAngLim = slider->getUpperAngLimit();
-                angLimit = lowAngLim != 1.0 || highAngLim != -1.0;
+                angLimit = lowAngLim != 0.0 || highAngLim != 0.0;
                 angMotor = slider->getPoweredAngMotor();
                 angMotorVelocity = slider->getTargetAngMotorVelocity();
                 angMotorForce = slider->getMaxAngMotorForce();
