@@ -85,6 +85,7 @@ void GUILabel::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     transform += btVector3(posX, posY, 0.0);
     
     GUILabelLine* line;
+    shaderPrograms[spriteSP]->setUniformF("alpha", color.a);
     for(unsigned int i = 0; i < lines.size(); i ++) {
         line = &lines[i];
         
@@ -95,6 +96,7 @@ void GUILabel::draw(btVector3 transform, GUIClipRect& parentClipRect) {
         glBindTexture(GL_TEXTURE_2D, line->texture);
         line->content.drawOnScreen(transform, line->posX, line->posY, parentClipRect);
     }
+    shaderPrograms[spriteSP]->setUniformF("alpha", 1.0);
 }
 
 void GUILabel::getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int& posX, int& posY) {

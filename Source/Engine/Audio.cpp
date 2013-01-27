@@ -152,7 +152,7 @@ bool SoundSourceObject::gameTick() {
     position = transformation.getOrigin();
     velocity = (position-prevPosition)/animationFactor;
     if(soundTrack->isStereo())
-        alSourcef(ALname, AL_GAIN, musicVolume);
+        alSourcef(ALname, AL_GAIN, optionsState.musicVolume);
     alSource3f(ALname, AL_DIRECTION, direction.x(), direction.y(), direction.z());
     alSource3f(ALname, AL_POSITION, position.x(), position.y(), position.z());
     alSource3f(ALname, AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());

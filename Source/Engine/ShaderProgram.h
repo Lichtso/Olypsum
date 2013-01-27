@@ -96,9 +96,6 @@ class ShaderProgram {
 
 extern btTransform modelMat;
 extern ShaderProgram *shaderPrograms[47], *currentShaderProgram;
-extern float screenBlurFactor, globalVolume, musicVolume, mouseSensitivity, mouseSmoothing;
-extern bool edgeSmoothEnabled, fullScreenEnabled, cubemapsEnabled, vSyncEnabled;
-extern unsigned char depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, blendingQuality, particleCalcTarget;
 
 enum ShaderProgramNames {
     //Static Shaders

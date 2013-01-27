@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Utilities.h"
 #include "ObjectManager.h"
+#include "FileManager.h"
 
 ColorBuffer::ColorBuffer(unsigned int sizeB, bool shadowMapB, bool cubeMapB) :size(sizeB), shadowMap(shadowMapB), cubeMap(cubeMapB) {
     glGenTextures(1, &texture);
@@ -106,7 +106,7 @@ void FBO::init() {
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB16F, screenSize[0], screenSize[1], 0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(transparentDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, screenSize[0], screenSize[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    if(ssaoQuality) {
+    if(optionsState.ssaoQuality) {
         initBuffer(ssaoDBuffer);
         glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_R16F, screenSize[0] >> screenSize[2], screenSize[1] >> screenSize[2], 0, GL_RED, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -165,12 +165,12 @@ void FBO::renderInDeferredBuffers(bool transparent) {
     
     if(transparent) {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, gBuffers[transparentDBuffer], 0);
-        for(unsigned char o = 1; o < ((blendingQuality == 2) ? 5 : 4); o ++)
+        for(unsigned char o = 1; o < ((optionsState.blendingQuality == 2) ? 5 : 4); o ++)
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+o, GL_TEXTURE_RECTANGLE, gBuffers[colorDBuffer+o], 0);
         
         glDrawBuffers(1, drawBuffers);
         glClear(GL_COLOR_BUFFER_BIT);
-        glDrawBuffers((blendingQuality == 2) ? 5 : 4, drawBuffers);
+        glDrawBuffers((optionsState.blendingQuality == 2) ? 5 : 4, drawBuffers);
     }else{
         glClear(GL_DEPTH_BUFFER_BIT);
         for(unsigned char o = 0; o < 4; o ++)
@@ -185,7 +185,7 @@ void FBO::combineTransparent() {
     objectManager.illuminate();
     shaderPrograms[deferredCombineTransparentSP]->use();
     unsigned char inBuffers[] = { transparentDBuffer, diffuseDBuffer, specularDBuffer, materialDBuffer, colorDBuffer }, outBuffers[] = { colorDBuffer };
-    mainFBO.renderDeferred(true, inBuffers, (blendingQuality == 1) ? 5 : 4, outBuffers, 1);
+    mainFBO.renderDeferred(true, inBuffers, (optionsState.blendingQuality == 1) ? 5 : 4, outBuffers, 1);
 }
 
 void FBO::renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned char inBuffersCount, unsigned char* outBuffers, unsigned char outBuffersCount) {

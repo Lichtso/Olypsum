@@ -31,7 +31,6 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
         }
     }
     
-    XMLValueArray<float> vecData;
     parameterNode = node->first_node("HeightsMap");
     rapidxml::xml_attribute<xmlUsedCharType>* attribute;
     if(parameterNode) {
@@ -39,11 +38,12 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
         if(!heightMap) return;
         width = heightMap->width;
         length = heightMap->height;
+        bitDepth = 2;
+        float scale = 1.0/pow(16.0, bitDepth);
         heights = new float[width * length];
         unsigned char stride = heightMap->surface->format->BytesPerPixel, *data = static_cast<unsigned char*>(heightMap->surface->pixels);
-        for(unsigned int y = 0; y < length; y ++)
-            for(unsigned int x = 0; x < width; x ++)
-                heights[y*width+x] = data[(y*width+x)*stride]/255.0;
+        for(unsigned int i = 0; i < width * length; i ++)
+            heights[i] = scale*data[i*stride];
     }else{
         parameterNode = node->first_node("Heights");
         if(!parameterNode) {
@@ -62,14 +62,14 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
             return;
         }
         sscanf(attribute->value(), "%d", &length);
-        vecData.readString(parameterNode->value(), "%f");
-        if(vecData.count != width * length) {
-            log(error_log, "Tried to construct HeightfieldTerrain with invalid \"Heights\"-node.");
-            return;
-        }
+        bitDepth = strlen(parameterNode->value()) / (width * length);
+        float scale = 1.0/pow(16.0, bitDepth);
+        std::string format = std::string("%")+stringOf(bitDepth)+'x';
         heights = new float[width * length];
-        memcpy(heights, vecData.data, width * length * sizeof(float));
-        vecData.clear();
+        for(unsigned int value, i = 0; i < width * length; i ++) {
+            sscanf(&parameterNode->value()[i*bitDepth], format.c_str(), &value);
+            heights[i] = scale*value;
+        }
     }
     
     attribute = node->first_attribute("size");
@@ -79,6 +79,7 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
     }
     btHeightfieldTerrainShape* collisionShape = new btHeightfieldTerrainShape(width, length, heights, 1.0/255.0,
                                                                               0.0, 1.0, 1, PHY_FLOAT, false);
+    XMLValueArray<float> vecData;
     vecData.readString(attribute->value(), "%f");
     collisionShape->setLocalScaling(vecData.getVector3()*btVector3(2.0/width, 2.0, 2.0/length));
     
@@ -140,7 +141,7 @@ void HeightfieldTerrain::draw() {
     
     if(objectManager.currentShadowLight) {
         unsigned int shaderProgram = solidShadowSP;
-        if(dynamic_cast<PositionalLight*>(objectManager.currentShadowLight) && !cubemapsEnabled) shaderProgram += 4;
+        if(dynamic_cast<PositionalLight*>(objectManager.currentShadowLight) && !optionsState.cubemapsEnabled) shaderProgram += 4;
         shaderPrograms[shaderProgram]->use();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -206,8 +207,8 @@ rapidxml::xml_node<xmlUsedCharType>* HeightfieldTerrain::write(rapidxml::xml_doc
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
     attribute->name("size");
     btHeightfieldTerrainShape* collisionShape = static_cast<btHeightfieldTerrainShape*>(body->getCollisionShape());
-    btVector3 scale = collisionShape->getLocalScaling() * btVector3(width*0.5, 0.5, length*0.5);
-    attribute->value(doc.allocate_string(stringOf(scale).c_str()));
+    btVector3 size = collisionShape->getLocalScaling() * btVector3(width*0.5, 0.5, length*0.5);
+    attribute->value(doc.allocate_string(stringOf(size).c_str()));
     node->append_attribute(attribute);
     
     attribute = doc.allocate_attribute();
@@ -223,10 +224,13 @@ rapidxml::xml_node<xmlUsedCharType>* HeightfieldTerrain::write(rapidxml::xml_doc
     
     rapidxml::xml_node<xmlUsedCharType>* heightsNode = doc.allocate_node(rapidxml::node_element);
     heightsNode->name("Heights");
+    unsigned int scale = pow(16.0, bitDepth)-1;
     std::ostringstream data;
+    data.setf(std::ios::hex, std::ios::basefield);
     for(unsigned int i = 0; i < width * length; i ++) {
-        if(i > 0) data << " ";
-        data << heights[i];
+        data.fill('0');
+        data.width(bitDepth);
+        data << (unsigned int)(scale*heights[i]);
     }
     heightsNode->value(doc.allocate_string(data.str().c_str()));
     node->append_node(heightsNode);

@@ -19,6 +19,7 @@ class GUIView : public GUIRect {
     GUIView();
     ~GUIView();
     virtual void addChild(GUIRect* child);
+    int getIndexOfChild(GUIRect* child);
     void removeChild(unsigned int index);
     void updateContent();
     void draw(btVector3 parentTransform, GUIClipRect& parentClipRect);

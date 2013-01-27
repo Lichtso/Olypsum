@@ -21,7 +21,7 @@ class HeightfieldTerrain : public GraphicObject {
     std::shared_ptr<Texture> diffuse, //!< The diffuse texture
                              effectMap; //!< The specular texture
     VertexArrayObject vao; //!< VertexArrayObject used for OpenGL
-    unsigned int width, length;
+    unsigned int width, length, bitDepth;
     float* heights;
     //! Internally used by updateModel()
     btVector3 getVertexAt(float* vertices, unsigned int x, unsigned int y);

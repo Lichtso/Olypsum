@@ -34,7 +34,7 @@ void updateVideoMode() {
 #endif
 
 void AppMain(int argc, char *argv[]) {
-    fileManager.loadOptions();
+    optionsState.loadOptions();
     
     //Init SDL
     if(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) < 0) {
@@ -49,7 +49,7 @@ void AppMain(int argc, char *argv[]) {
     
     SDL_EnableUNICODE(1);
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-    SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, vSyncEnabled);
+    SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, optionsState.vSyncEnabled);
     SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
@@ -165,13 +165,12 @@ void AppMain(int argc, char *argv[]) {
         keyState = SDL_GetKeyState(NULL);
         modKeyState = SDL_GetModState();
         
-        if(currentMenu == inGameMenu && newFPS == 0) {
+        /*if(currentMenu == inGameMenu && newFPS == 0) {
             char str[64];
             sprintf(str, "FPS: %d", currentFPS);
-            GUILabel* labelFPS = static_cast<GUILabel*>(currentScreenView->children[0]);
-            labelFPS->text = str;
-            labelFPS->updateContent();
-        }
+            if(controlsMangager)
+                controlsMangager->consoleAdd(str, 0.9);
+        }*/
         
         if(levelManager.gameStatus == noGame) {
             if(currentMenu == loadingMenu) {
@@ -187,10 +186,7 @@ void AppMain(int argc, char *argv[]) {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT);
         }else{
-            if(controlsMangager && currentMenu == inGameMenu)
-                controlsMangager->gameTick();
-            else
-                SDL_ShowCursor(1);
+            controlsMangager->gameTick();
             objectManager.gameTick();
             objectManager.drawFrame();
         }

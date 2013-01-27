@@ -60,10 +60,6 @@ class FileManager {
     ~FileManager();
     //! Deletes all FilePackages
     void clear();
-    //! Loads the game options
-    void loadOptions();
-    //! Saves the game options
-    void saveOptions();
     //! Finds a FilePackage and loads it if not already done
     FilePackage* getPackage(const char* name);
     //! Deletes a FilePackage
@@ -74,6 +70,19 @@ class FileManager {
     template <class T> rapidxml::xml_node<xmlUsedCharType>* writeResource(rapidxml::xml_document<xmlUsedCharType>& doc, const char* nodeName, std::shared_ptr<T>& resource);
 };
 
+//! This class manages the options
+class OptionsState {
+    public:
+    float screenBlurFactor, globalVolume, musicVolume, mouseSensitivity, mouseSmoothing; //! Float settings
+    bool edgeSmoothEnabled, fullScreenEnabled, cubemapsEnabled, vSyncEnabled; //! Boolean settings
+    unsigned char depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, blendingQuality, particleCalcTarget; //! Integer settings
+    //! Loads the game options
+    void loadOptions();
+    //! Saves the game options
+    void saveOptions();
+};
+
 extern FileManager fileManager;
+extern OptionsState optionsState;
 
 #endif

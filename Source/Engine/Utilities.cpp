@@ -6,26 +6,62 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Utilities.h"
+#include "Controls.h"
 
 void log(logMessageType type, std::string message) {
+    std::string typeStr;
     switch(type) {
         case info_log:
-            printf("INFO: %s\n", message.c_str());
+            typeStr = "INFO: ";
             break;
         case warning_log:
-            printf("WARNING: %s\n", message.c_str());
+            typeStr = "WARNING: ";
             break;
         case error_log:
-            printf("ERROR: %s\n", message.c_str());
+            typeStr = "ERROR: ";
             break;
         case shader_log:
-            printf("SHADER-%s\n", message.c_str());
+            typeStr = "SHADER-";
             break;
         case script_log:
-            printf("SCRIPT: %s\n", message.c_str());
+            typeStr = "SCRIPT: ";
             break;
     }
+    
+    message = typeStr+message;
+    printf("%s\n", message.c_str());
+    if(controlsMangager)
+        controlsMangager->consoleAdd(message);
+}
+
+std::unique_ptr<char[]> readFile(const std::string& filePath, bool logs) {
+    std::ifstream file;
+    file.open(filePath.c_str(), std::ios::ate);
+    if(!file.is_open()) {
+        if(!logs) return NULL;
+        log(error_log, std::string("The file ")+filePath.c_str()+" couldn't be found.");
+        return NULL;
+    }
+    unsigned int fileSize = file.tellg();
+    std::unique_ptr<char[]> data(new char[fileSize+1]);
+    file.seekg(0, std::ios::beg);
+    file.read(data.get(), fileSize);
+    file.close();
+    data[fileSize] = 0;
+    return data;
+}
+
+bool writeFile(const std::string& filePath, const std::string& content, bool logs) {
+    std::ofstream file;
+    file.open(filePath.c_str(), std::ios_base::trunc);
+    if(!file.is_open()) {
+        if(!logs) return false;
+        log(error_log, std::string("The file ")+filePath.c_str()+" couldn't be opened.");
+        return false;
+    }
+    file << content;
+    file.close();
+    return true;
 }
 
 bool checkDir(std::string path) {
@@ -81,6 +117,12 @@ bool removeDir(std::string path) {
 }
 
 std::string stringOf(int value) {
+    char buffer[32];
+    sprintf(buffer, "%d", value);
+    return buffer;
+}
+
+std::string stringOf(unsigned int value) {
     char buffer[32];
     sprintf(buffer, "%d", value);
     return buffer;

@@ -9,6 +9,27 @@
 #include "Menu.h"
 #include "AppMain.h"
 
+OptionsState prevOptionsState;
+
+static void updateGraphicOptions() {
+    if(levelManager.gameStatus == noGame) return;
+    loadDynamicShaderPrograms();
+    if(prevOptionsState.cubemapsEnabled == optionsState.cubemapsEnabled &&
+       optionsState.shadowQuality > 0) return;
+    prevOptionsState.cubemapsEnabled = optionsState.cubemapsEnabled;
+    for(auto lightObject : objectManager.lightObjects)
+        lightObject->deleteShadowMap();
+}
+
+static void leaveOptionsMenu(GUIButton* button) {
+    optionsState.saveOptions();
+    if(optionsState.fullScreenEnabled != prevOptionsState.fullScreenEnabled ||
+       optionsState.vSyncEnabled != prevOptionsState.vSyncEnabled)
+        AppTerminate();
+    updateGraphicOptions();
+    setMenu((levelManager.gameStatus == noGame) ? mainMenu : gameEscMenu);
+}
+
 void handleMenuKeyUp(SDL_keysym* key) {
     if(key->sym == SDLK_ESCAPE) {
         switch(currentMenu) {
@@ -17,9 +38,7 @@ void handleMenuKeyUp(SDL_keysym* key) {
                 AppTerminate();
                 break;
             case optionsMenu:
-                fileManager.saveOptions();
-                loadDynamicShaderPrograms();
-                setMenu((levelManager.gameStatus == noGame) ? mainMenu : gameEscMenu);
+                leaveOptionsMenu(NULL);
                 break;
             case languagesMenu:
                 setMenu(optionsMenu);
@@ -127,12 +146,9 @@ void setMenu(MenuName menu) {
             label->fontHeight = currentScreenView->height*0.2;
             currentScreenView->addChild(label);
             GUIButton* button = new GUIButton();
+            button->posX = currentScreenView->width*0.52;
             button->posY = currentScreenView->height*-0.8;
-            button->onClick = [](GUIButton* button) {
-                fileManager.saveOptions();
-                loadDynamicShaderPrograms();
-                setMenu((levelManager.gameStatus == noGame) ? mainMenu : gameEscMenu);
-            };
+            button->onClick = leaveOptionsMenu;
             currentScreenView->addChild(button);
             label = new GUILabel();
             label->text = localization.localizeString("back");
@@ -146,30 +162,55 @@ void setMenu(MenuName menu) {
             label->text = localization.localizeString("graphics");
             label->fontHeight = currentScreenView->height*0.14;
             currentScreenView->addChild(label);
+            label = new GUILabel();
+            label->posX = currentScreenView->width*-0.52;
+            label->posY = currentScreenView->height*-0.8;
+            label->text = localization.localizeString("restartNecessary");
+            label->color = Color4(1, 0, 0);
+            label->fontHeight = currentScreenView->height*0.14;
+            label->visible = false;
+            currentScreenView->addChild(label);
             GUIFramedView* view = new GUIFramedView();
             view->width = currentScreenView->width*0.42;
             view->height = currentScreenView->height*0.62;
             view->posX = currentScreenView->width*-0.52;
             currentScreenView->addChild(view);
             
+            prevOptionsState = optionsState;
             std::function<void(GUICheckBox*)> onClick[] = {
-                [](GUICheckBox* checkBox) {
-                    fullScreenEnabled = (checkBox->state == GUIButtonStatePressed);
+                [label](GUICheckBox* checkBox) {
+                    optionsState.fullScreenEnabled = (checkBox->state == GUIButtonStatePressed);
+                    label->visible = (optionsState.fullScreenEnabled != prevOptionsState.fullScreenEnabled ||
+                                      optionsState.vSyncEnabled != prevOptionsState.vSyncEnabled);
+                }, [label](GUICheckBox* checkBox) {
+                    optionsState.vSyncEnabled = (checkBox->state == GUIButtonStatePressed);
+                    label->visible = (optionsState.fullScreenEnabled != prevOptionsState.fullScreenEnabled ||
+                                      optionsState.vSyncEnabled != prevOptionsState.vSyncEnabled);
                 }, [](GUICheckBox* checkBox) {
-                    edgeSmoothEnabled = (checkBox->state == GUIButtonStatePressed);
-                    if(levelManager.gameStatus != noGame) loadDynamicShaderPrograms();
+                    optionsState.cubemapsEnabled = (checkBox->state == GUIButtonStatePressed);
+                    updateGraphicOptions();
                 }, [](GUICheckBox* checkBox) {
-                    vSyncEnabled = (checkBox->state == GUIButtonStatePressed);
+                    optionsState.edgeSmoothEnabled = (checkBox->state == GUIButtonStatePressed);
+                    updateGraphicOptions();
                 }, [](GUICheckBox* checkBox) {
-                    cubemapsEnabled = (checkBox->state == GUIButtonStatePressed);
-                    if(levelManager.gameStatus != noGame) loadDynamicShaderPrograms();
-                }, [](GUICheckBox* checkBox) {
-                    screenBlurFactor = (checkBox->state == GUIButtonStatePressed) ? 0.0 : -1.0;
-                    if(levelManager.gameStatus != noGame) loadDynamicShaderPrograms();
+                    optionsState.screenBlurFactor = (checkBox->state == GUIButtonStatePressed) ? 0.0 : -1.0;
+                    updateGraphicOptions();
                 }
             };
-            bool checkBoxActive[] = { fullScreenEnabled, edgeSmoothEnabled, vSyncEnabled, cubemapsEnabled, (screenBlurFactor > -1.0) };
-            const char* checkBoxLabels[] = { "fullScreenEnabled", "edgeSmoothEnabled", "vSyncEnabled", "cubemapsEnabled", "screenBlurEnabled" };
+            bool checkBoxActive[] = {
+                optionsState.fullScreenEnabled,
+                optionsState.vSyncEnabled,
+                optionsState.cubemapsEnabled,
+                optionsState.edgeSmoothEnabled,
+                (optionsState.screenBlurFactor > -1.0)
+            };
+            const char* checkBoxLabels[] = {
+                "fullScreenEnabled",
+                "vSyncEnabled",
+                "cubemapsEnabled",
+                "edgeSmoothEnabled",
+                "screenBlurEnabled"
+            };
             for(unsigned char i = 0; i < 5; i ++) {
                 label = new GUILabel();
                 label->posX = view->width*0.45;
@@ -184,31 +225,46 @@ void setMenu(MenuName menu) {
                 checkBox->posX = view->width*-0.52;
                 checkBox->posY = label->posY;
                 checkBox->onClick = onClick[i];
-                if(checkBoxActive[i]) checkBox->state = GUIButtonStatePressed;
+                if(i < 2 && levelManager.gameStatus != noGame)
+                    checkBox->state = GUIButtonStateDisabled;
+                else if(checkBoxActive[i])
+                    checkBox->state = GUIButtonStatePressed;
                 view->addChild(checkBox);
             }
             
             unsigned int sliderSteps[] = { 3, 3, 4, 4, 3 };
             std::function<void(GUISlider*)> onChangeGraphics[] = {
                 [](GUISlider* slider) {
-                    depthOfFieldQuality = slider->value*3.0;
-                    if(levelManager.gameStatus != noGame) loadDynamicShaderPrograms();
+                    optionsState.depthOfFieldQuality = slider->value*3.0;
+                    updateGraphicOptions();
                 }, [](GUISlider* slider) {
-                    bumpMappingQuality = slider->value*3.0;
-                    if(levelManager.gameStatus != noGame) loadDynamicShaderPrograms();
+                    optionsState.bumpMappingQuality = slider->value*3.0;
+                    updateGraphicOptions();
                 }, [](GUISlider* slider) {
-                    shadowQuality = slider->value*4.0;
-                    if(levelManager.gameStatus != noGame) loadDynamicShaderPrograms();
+                    optionsState.shadowQuality = slider->value*4.0;
+                    updateGraphicOptions();
                 }, [](GUISlider* slider) {
-                    ssaoQuality = slider->value*4.0;
-                    if(levelManager.gameStatus != noGame) loadDynamicShaderPrograms();
+                    optionsState.ssaoQuality = slider->value*4.0;
+                    updateGraphicOptions();
                 }, [](GUISlider* slider) {
-                    blendingQuality = slider->value*3.0;
-                    if(levelManager.gameStatus != noGame) loadDynamicShaderPrograms();
+                    optionsState.blendingQuality = slider->value*3.0;
+                    updateGraphicOptions();
                 }
             };
-            unsigned char sliderValuesGraphics[] = { depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, blendingQuality };
-            const char* sliderLabelsGraphics[] = { "depthOfFieldQuality", "bumpMappingQuality", "shadowQuality", "ssaoQuality", "blendingQuality" };
+            unsigned char sliderValuesGraphics[] = {
+                optionsState.depthOfFieldQuality,
+                optionsState.bumpMappingQuality,
+                optionsState.shadowQuality,
+                optionsState.ssaoQuality,
+                optionsState.blendingQuality
+            };
+            const char* sliderLabelsGraphics[] = {
+                "depthOfFieldQuality",
+                "bumpMappingQuality",
+                "shadowQuality",
+                "ssaoQuality",
+                "blendingQuality"
+            };
             for(unsigned char i = 0; i < 5; i ++) {
                 label = new GUILabel();
                 label->posX = view->width*0.45;
@@ -231,18 +287,27 @@ void setMenu(MenuName menu) {
             
             std::function<void(GUISlider*)> onChange[] = {
                 [](GUISlider* slider) {
-                    globalVolume = slider->value;
+                    optionsState.globalVolume = slider->value;
                 }, [](GUISlider* slider) {
-                    musicVolume = slider->value;
+                    optionsState.musicVolume = slider->value;
                 }, [](GUISlider* slider) {
-                    mouseSensitivity = slider->value*0.01F;
+                    optionsState.mouseSensitivity = slider->value*0.01F;
                 }, [](GUISlider* slider) {
-                    mouseSmoothing = 1.0F-slider->value;
+                    optionsState.mouseSmoothing = 1.0F-slider->value;
                 }
             };
-            float sliderValues[] = { globalVolume, musicVolume, mouseSensitivity*100.0F, 1.0F-mouseSmoothing };
-            const char* sliderLabels[] = { "soundGlobal", "soundMusic", "mouseSensitivity", "mouseSmoothing" };
-            
+            float sliderValues[] = {
+                optionsState.globalVolume,
+                optionsState.musicVolume,
+                optionsState.mouseSensitivity*100.0F,
+                1.0F-optionsState.mouseSmoothing
+            };
+            const char* sliderLabels[] = {
+                "soundGlobal",
+                "soundMusic",
+                "mouseSensitivity",
+                "mouseSmoothing"
+            };
             for(char m = 0; m < 4; m += 2) {
                 label = new GUILabel();
                 label->posX = currentScreenView->width*0.52;
@@ -380,19 +445,16 @@ void setMenu(MenuName menu) {
         } break;
         case inGameMenu: {
             GUILabel* label = new GUILabel();
-            label->text = std::string("FPS: --");
-            label->posX = currentScreenView->width*-0.77;
-            label->posY = currentScreenView->height*0.95;
-            label->width = currentScreenView->width*0.2;
-            label->color = Color4(1.0);
-            label->textAlign = GUITextAlign_Left;
-            label->sizeAlignment = GUISizeAlignment_Height;
-            currentScreenView->addChild(label);
-            
-            label = new GUILabel();
             label->text = std::string("+");
             label->color = Color4(1.0);
             currentScreenView->addChild(label);
+            
+            GUIView* view = new GUIView();
+            view->posX = currentScreenView->width*-0.5;
+            view->posY = currentScreenView->height*0.3;
+            view->width = currentScreenView->width*0.48;
+            view->height = currentScreenView->height*0.68;
+            currentScreenView->addChild(view);
         } break;
         case gameEscMenu: {
             std::function<void(GUIButton*)> onClick[] = {

@@ -290,7 +290,7 @@ void updateVideoMode() {
     screenSize[1] = videoInfo->current_h;
     screenSize[2] = [[NSScreen mainScreen] backingScaleFactor];
     
-    if(!fullScreenEnabled) {
+    if(!optionsState.fullScreenEnabled) {
         screenSize[0] *= screenSize[2];
         screenSize[1] *= screenSize[2];
     }
@@ -305,7 +305,7 @@ void updateVideoMode() {
     [window setTitle:@"Olypsum"];
     NSView* view = [[[window contentView] subviews] objectAtIndex:0];
     [view setWantsBestResolutionOpenGLSurface:true];
-    if(fullScreenEnabled) {
+    if(optionsState.fullScreenEnabled) {
         [window setStyleMask:0];
         [window setHasShadow:false];
         [window setFrame:NSRectFromCGRect(CGRectMake(0, 0, screenSize[0], screenSize[1])) display:false];

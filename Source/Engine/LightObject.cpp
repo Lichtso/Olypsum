@@ -66,17 +66,11 @@ void LightObject::setPhysicsShape(btCollisionShape* shape) {
 }
 
 bool LightObject::gameTick(bool shadowActive) {
-    if(!shadowActive) {
-        if(shadowMap)
-            delete shadowMap;
-        shadowMap = NULL;
-        return false;
-    }
+    if(!shadowActive) return false;
     if(!shadowMap) {
-        shadowMap = new ColorBuffer(min(1024U, mainFBO.maxSize), true, cubemapsEnabled && dynamic_cast<PositionalLight*>(this));
+        shadowMap = new ColorBuffer(min(1024U, mainFBO.maxSize), true, optionsState.cubemapsEnabled && dynamic_cast<PositionalLight*>(this));
         if(glGetError() == GL_OUT_OF_MEMORY) {
-            delete shadowMap;
-            shadowMap = NULL;
+            deleteShadowMap();
             return false;
         }
     }
@@ -124,6 +118,12 @@ rapidxml::xml_node<xmlUsedCharType>* LightObject::write(rapidxml::xml_document<x
     colorNode->value(doc.allocate_string(buffer));
     node->append_node(colorNode);
     return node;
+}
+
+void LightObject::deleteShadowMap() {
+    if(shadowMap)
+        delete shadowMap;
+    shadowMap = NULL;
 }
 
 
@@ -377,7 +377,7 @@ void PositionalLight::setBounds(bool omniDirectional, float range) {
 bool PositionalLight::gameTick(bool shadowActive) {
     shadowCam.gameTick();
     if(!LightObject::gameTick(shadowActive)) return true;
-    if(abs(shadowCam.fov-M_PI*2.0) < 0.001 && !shadowMapB && !cubemapsEnabled) {
+    if(abs(shadowCam.fov-M_PI*2.0) < 0.001 && !shadowMapB && !optionsState.cubemapsEnabled) {
         shadowMapB = new ColorBuffer(1024, true, false);
         if(glGetError() == GL_OUT_OF_MEMORY) {
             delete shadowMapB;
@@ -388,7 +388,7 @@ bool PositionalLight::gameTick(bool shadowActive) {
     
     Matrix4 viewMat = shadowCam.viewMat;
     glDisable(GL_BLEND);
-    if(cubemapsEnabled) {
+    if(optionsState.cubemapsEnabled) {
         float fov = shadowCam.fov;
         shadowCam.fov = M_PI_2;
         btTransform camMat = shadowCam.getTransformation();
@@ -462,7 +462,7 @@ void PositionalLight::draw() {
     currentShaderProgram->setUniformF("lCutoff", (abs(shadowCam.fov-M_PI*2.0) < 0.001) ? 1.0 : 0.0);
     currentShaderProgram->setUniformVec3("lPosition", shadowCam.getTransformation().getOrigin());
     currentShaderProgram->setUniformVec3("lDirection", shadowCam.getTransformation().getBasis().getColumn(2)*-1.0);
-    if(cubemapsEnabled)
+    if(optionsState.cubemapsEnabled)
         currentShaderProgram->setUniformVec2("shadowDepthTransform", (shadowCam.far+shadowCam.near)/(shadowCam.far-shadowCam.near)*0.5+0.5,
                                                                     -(shadowCam.far*shadowCam.near)/(shadowCam.far-shadowCam.near)*1.005);
     
@@ -471,6 +471,13 @@ void PositionalLight::draw() {
         lightParabolid.draw();
     else
         lightSphere.draw();
+}
+
+void PositionalLight::deleteShadowMap() {
+    LightObject::deleteShadowMap();
+    if(shadowMapB)
+        delete shadowMapB;
+    shadowMapB = NULL;
 }
 
 float PositionalLight::getPriority(btVector3 position) {

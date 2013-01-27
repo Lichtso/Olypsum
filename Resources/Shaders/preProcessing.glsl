@@ -39,13 +39,15 @@ void main() {
 #elif PROCESSING_TYPE == 2 //Screen Blur
 out vec3 colorOut;
 
-const float blurWidth = 2.0, blurInverse = 1.0/((blurWidth*2+1)*(blurWidth*2+1));
+#include random.glsl
+const int blurWidth = 10;
+const float blurInverse = 1.0/float(blurWidth);
 
 void main() {
+    int seed = genSeed();
     colorOut = vec3(0.0);
-	for(float y = -blurWidth; y <= blurWidth; y += 1.0)
-		for(float x = -blurWidth; x <= blurWidth; x += 1.0)
-			colorOut += texture(sampler0, gl_FragCoord.xy+vec2(x, y)*processingValue).rgb;
+	for(int i = 0; i < blurWidth; i ++)
+		colorOut += texture(sampler0, gl_FragCoord.xy+vec2rand(seed, vec2(processingValue))).rgb;
 	colorOut *= blurInverse;
 }
 

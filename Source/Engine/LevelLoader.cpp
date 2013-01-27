@@ -181,7 +181,7 @@ bool LevelLoader::loadContainer(std::string name) {
     }
     containerStack.insert(name);
     //Prepare object linking
-    objectLinkingScope = objectLinkingIndex.size();
+    unsigned int objectLinkingScopePrev = objectLinkingIndex.size();
     //Check for Level-node
     rapidxml::xml_node<xmlUsedCharType>* node = containerNode->first_node();
     if(strcmp(node->name(), "Level") == 0) {
@@ -217,6 +217,7 @@ bool LevelLoader::loadContainer(std::string name) {
         node = node->next_sibling("Container");
     }
     //Prepare object linking
+    objectLinkingScope = objectLinkingScopePrev;
     objectLinkingOffset = objectLinkingIndex.size();
     //Load objects
     node = containerNode->first_node("Objects");
@@ -278,6 +279,9 @@ bool LevelLoader::loadContainer(std::string name) {
 }
 
 bool LevelLoader::loadLevel() {
+    controlsMangager = new ControlsMangager();
+    std::unique_ptr<ControlsMangager> newControlsMangager(controlsMangager);
+    
     //Load CollisionShape index
     rapidxml::xml_document<xmlUsedCharType> doc;
     collisionShapesData = readXmlFile(doc, levelManager.levelPackage->path+'/'+"CollisionShapes.xml", false);
@@ -298,6 +302,6 @@ bool LevelLoader::loadLevel() {
     
     levelManager.gameStatus = localGame;
     setMenu(inGameMenu);
-    controlsMangager = new ControlsMangager();
+    newControlsMangager.release();
     return true;
 }

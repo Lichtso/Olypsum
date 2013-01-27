@@ -7,6 +7,7 @@
 //
 
 #include "Cam.h"
+#include "FileManager.h"
 
 Color4& Color4::operator=(const Color4& B) {
     r = B.r;
@@ -29,7 +30,7 @@ SDL_Color Color4::getSDL() {
     return B;
 }
 
-const char *seperatorString = "#separator\n", *parameterString = "#parameter ";
+const char *seperatorString = "#separator\n", *includeString = "#include ";
 
 ShaderProgram::ShaderProgram() {
     GLname = glCreateProgram();
@@ -45,69 +46,28 @@ ShaderProgram::~ShaderProgram() {
 bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::vector<const char*>& macros) {
 	unsigned int shaderId = glCreateShader(shaderType);
     
-    /*if(shaderType == GL_GEOMETRY_SHADER_EXT) {
-        char *parameter, *parameterEnd, *parameterKey, *parameterValue;
-        while(true) {
-            parameter = strstr(soucreCode, parameterString);
-            if(!parameter) break;
-            parameterKey = parameter+strlen(parameterString);
-            parameterEnd = strchr(parameterKey, ' ');
-            if(!parameterEnd) break;
-            *parameterEnd = 0;
-            parameterValue = parameterEnd+1;
-            parameterEnd = strchr(parameterValue, '\n');
-            if(!parameterEnd) break;
-            *parameterEnd = 0;
-            
-            if(strcmp(parameterKey, "GL_GEOMETRY_VERTICES_OUT") == 0) {
-                unsigned int count;
-                sscanf(parameterValue, "%u", &count);
-                glProgramParameteriEXT(GLname, GL_GEOMETRY_VERTICES_OUT_EXT, count);
-            }else if(strcmp(parameterKey, "GL_GEOMETRY_INPUT_TYPE") == 0) {
-                if(strcmp(parameterValue, "GL_TRIANGLES") == 0) {
-                    glProgramParameteriEXT(GLname, GL_GEOMETRY_INPUT_TYPE_EXT, GL_TRIANGLES);
-                }else if(strcmp(parameterValue, "GL_TRIANGLES_ADJACENCY") == 0) {
-                    glProgramParameteriEXT(GLname, GL_GEOMETRY_INPUT_TYPE_EXT, GL_TRIANGLES_ADJACENCY_EXT);
-                }else if(strcmp(parameterValue, "GL_LINES") == 0) {
-                    glProgramParameteriEXT(GLname, GL_GEOMETRY_INPUT_TYPE_EXT, GL_LINES);
-                }else if(strcmp(parameterValue, "GL_LINES_ADJACENCY") == 0) {
-                    glProgramParameteriEXT(GLname, GL_GEOMETRY_INPUT_TYPE_EXT, GL_LINES_ADJACENCY_EXT);
-                }else if(strcmp(parameterValue, "GL_POINTS") == 0) {
-                    glProgramParameteriEXT(GLname, GL_GEOMETRY_INPUT_TYPE_EXT, GL_POINTS);
-                }else{
-                    log(shader_log, std::string(soucreCode)+"\nThe shader does contain a illegal parameter value for key GL_GEOMETRY_INPUT_TYPE: "+parameterValue);
-                    return false;
-                }
-            }else if(strcmp(parameterKey, "GL_GEOMETRY_OUTPUT_TYPE") == 0) {
-                if(strcmp(parameterValue, "GL_TRIANGLE_STRIP") == 0) {
-                    glProgramParameteriEXT(GLname, GL_GEOMETRY_OUTPUT_TYPE_EXT, GL_TRIANGLE_STRIP);
-                }else if(strcmp(parameterValue, "GL_LINE_STRIP") == 0) {
-                    glProgramParameteriEXT(GLname, GL_GEOMETRY_OUTPUT_TYPE_EXT, GL_LINE_STRIP);
-                }else if(strcmp(parameterValue, "GL_POINTS") == 0) {
-                    glProgramParameteriEXT(GLname, GL_GEOMETRY_OUTPUT_TYPE_EXT, GL_POINTS);
-                }else{
-                    log(shader_log, std::string(soucreCode)+"\nThe shader does contain a illegal parameter value for key GL_GEOMETRY_OUTPUT_TYPE: "+parameterValue);
-                    return false;
-                }
-            }else{
-                log(shader_log, std::string(soucreCode)+"\nThe shader does contain a unknown parameter: "+parameterKey);
-                return false;
-            }
-            
-            while(parameter <= parameterEnd) {
-                *parameter = ' ';
-                parameter ++;
-            }
-        }
-    }*/
+    std::string soucre;
+    {
+        std::ostringstream soucreStream;
+        soucreStream << "#version 150\n";
+        for(unsigned int m = 0; m < macros.size(); m ++)
+            soucreStream << std::string("#define ")+macros[m]+"\n";
+        soucreStream << soucreCode;
+        soucre = soucreStream.str();
+    }
     
-    std::string soucreStr = "#version 150\n";
-    for(unsigned int m = 0; m < macros.size(); m ++)
-        soucreStr += std::string("#define ")+macros[m]+"\n";
+    size_t pos = 0;
+    while(true) {
+        size_t prevPos = pos = soucre.find(includeString, pos);
+        if(pos == std::string::npos) break;
+        pos += strlen(includeString);
+        unsigned int macroLength = soucre.find('\n', pos)-pos;
+        std::unique_ptr<char[]> data = readFile(std::string("Shaders/")+soucre.substr(pos, macroLength), true);
+        soucre.replace(prevPos, strlen(includeString)+macroLength, data.get());
+    }
     
-    soucreStr += soucreCode;
-    const GLchar* soucre = soucreStr.c_str();
-	glShaderSource(shaderId, 1, &soucre, NULL);
+    const GLchar* soucreStr = soucre.c_str();
+	glShaderSource(shaderId, 1, &soucreStr, NULL);
 	glCompileShader(shaderId);
 	int infoLogLength = 1024;
 	char infoLog[infoLogLength];
@@ -129,7 +89,7 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::v
             
             const char *pos, *begin = NULL, *end = NULL, *middle = NULL;
             unsigned int line = 0;
-            for(pos = soucreStr.c_str(); *pos != 0; pos ++) {
+            for(pos = soucre.c_str(); *pos != 0; pos ++) {
                 if(*pos != '\n') continue;
                 line ++;
                 if(!begin && line >= row-3) {
@@ -161,24 +121,9 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::v
 }
 
 bool ShaderProgram::loadShaderProgram(const char* fileName, std::vector<GLenum> shaderTypes, std::vector<const char*> macros) {
-    std::string url("Shaders/");
-    url += fileName;
-    url += ".glsl";
+    std::unique_ptr<char[]> data = readFile(std::string("Shaders/")+fileName+".glsl", true);
     
-    FILE *fp = fopen(url.c_str(), "rb");
-	if(!fp) {
-        log(shader_log, std::string("The file ")+"\n"+url.c_str()+" couldn't be found.");
-		return false;
-	}
-	fseek(fp, 0, SEEK_END);
-	long dataSize = ftell(fp);
-	rewind(fp);
-	char data[dataSize+1];
-	fread(data, 1, dataSize, fp);
-    fclose(fp);
-    data[dataSize] = 0;
-    
-    char* dataPos = data;
+    char* dataPos = data.get();
     for(GLenum shaderType: shaderTypes) {
         char* seperator = strstr(dataPos, seperatorString);
         if(seperator) {
@@ -337,9 +282,6 @@ void ShaderProgram::setUniformMatrix4(const char* name, const btTransform* mat, 
 
 btTransform modelMat;
 ShaderProgram *shaderPrograms[], *currentShaderProgram;
-float screenBlurFactor = -1.0, globalVolume = 0.5, musicVolume = 0.5, mouseSensitivity = 0.005, mouseSmoothing = 0.5;
-bool edgeSmoothEnabled = false, fullScreenEnabled = true, cubemapsEnabled = false, vSyncEnabled = true;
-unsigned char depthOfFieldQuality = 0, bumpMappingQuality = 1, shadowQuality = 1, ssaoQuality = 0, blendingQuality = 2, particleCalcTarget = 2;
 
 void loadStaticShaderPrograms() {
     std::vector<const char*> colorFragOut = { "colorOut" };
@@ -394,11 +336,11 @@ void loadDynamicShaderPrograms() {
     std::vector<const char*> lightFragsOut = { "diffuseOut", "specularOut" };
     std::vector<const char*> shaderProgramMacros;
     char depthOfFieldMacro[32], ssaoQualityMacro[32], blendingQualityMacro[32], bumpMappingMacro[32], shadowQualityMacro[32];
-    sprintf(depthOfFieldMacro, "DOF_QUALITY %d", depthOfFieldQuality);
-    sprintf(ssaoQualityMacro, "SSAO_QUALITY %d", ssaoQuality);
-    sprintf(blendingQualityMacro, "BLENDING_QUALITY %d", blendingQuality);
-    sprintf(bumpMappingMacro, "BUMP_MAPPING %d", bumpMappingQuality);
-    sprintf(shadowQualityMacro, "SHADOW_QUALITY %d", shadowQuality);
+    sprintf(depthOfFieldMacro, "DOF_QUALITY %d", optionsState.depthOfFieldQuality);
+    sprintf(ssaoQualityMacro, "SSAO_QUALITY %d", optionsState.ssaoQuality);
+    sprintf(blendingQualityMacro, "BLENDING_QUALITY %d", optionsState.blendingQuality);
+    sprintf(bumpMappingMacro, "BUMP_MAPPING %d", optionsState.bumpMappingQuality);
+    sprintf(shadowQualityMacro, "SHADOW_QUALITY %d", optionsState.shadowQuality);
     
     //G-Buffer Shaders
     
@@ -417,7 +359,7 @@ void loadDynamicShaderPrograms() {
         if(p % 8 < 4)
             macros.push_back("BUMP_MAPPING 0");
         else
-            macros.push_back(((p % 2 == 1 || p % 16 >= 8) && bumpMappingQuality > 1) ? "BUMP_MAPPING 1" : bumpMappingMacro);
+            macros.push_back(((p % 2 == 1 || p % 16 >= 8) && optionsState.bumpMappingQuality > 1) ? "BUMP_MAPPING 1" : bumpMappingMacro);
         
         if(p % 16 < 8)
             macros.push_back("BLENDING_QUALITY 0");
@@ -425,7 +367,7 @@ void loadDynamicShaderPrograms() {
             macros.push_back(blendingQualityMacro);
         
         shaderPrograms[solidGSP+p]->loadShaderProgram("gBuffer",
-                                                      (p % 8 < 4 || bumpMappingQuality == 0) ? shaderTypeVertexFragment : shaderTypeVertexFragmentGeometry,
+                                                      (p % 8 < 4 || optionsState.bumpMappingQuality == 0) ? shaderTypeVertexFragment : shaderTypeVertexFragmentGeometry,
                                                       macros);
         shaderPrograms[solidGSP+p]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[solidGSP+p]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
@@ -434,7 +376,7 @@ void loadDynamicShaderPrograms() {
             shaderPrograms[solidGSP+p]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
             shaderPrograms[solidGSP+p]->addAttribute(JOINT_ATTRIBUTE, "joints");
         }
-        shaderPrograms[solidGSP+p]->addFragDataLocations((p % 16 >= 8 && blendingQuality == 2) ? gBufferTransparentOut : gBufferOut);
+        shaderPrograms[solidGSP+p]->addFragDataLocations((p % 16 >= 8 && optionsState.blendingQuality == 2) ? gBufferTransparentOut : gBufferOut);
         shaderPrograms[solidGSP+p]->link();
     }
     
@@ -507,13 +449,13 @@ void loadDynamicShaderPrograms() {
     shaderPrograms[positionalLightSP]->addFragDataLocations(lightFragsOut);
     shaderPrograms[positionalLightSP]->link();
     
-    if(cubemapsEnabled) {
+    if(optionsState.cubemapsEnabled) {
         if(shaderPrograms[positionalShadowLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, { "LIGHT_TYPE 3", "SHADOWS_ACTIVE 3", shadowQualityMacro })) {
             shaderPrograms[positionalShadowLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
             shaderPrograms[positionalShadowLightSP]->addFragDataLocations(lightFragsOut);
             shaderPrograms[positionalShadowLightSP]->link();
         }else
-           cubemapsEnabled = false;
+           optionsState.cubemapsEnabled = false;
     }else{
         shaderPrograms[positionalShadowLightSP]->loadShaderProgram("deferredLight", shaderTypeVertexFragment, { "LIGHT_TYPE 3", "SHADOWS_ACTIVE 1", shadowQualityMacro });
         shaderPrograms[positionalShadowLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
@@ -528,7 +470,7 @@ void loadDynamicShaderPrograms() {
     
     //Post Effect Shaders
     
-    if(ssaoQuality) {
+    if(optionsState.ssaoQuality) {
         unsigned char samples = 32;
         float pSphere[samples*2];
         for(unsigned char i = 0; i < samples*2; i ++)
@@ -557,50 +499,50 @@ void loadDynamicShaderPrograms() {
         shaderPrograms[ssaoCombineSP]->link();
     }
     
-    if(blendingQuality > 0) {
+    if(optionsState.blendingQuality > 0) {
         shaderPrograms[deferredCombineTransparentSP]->loadShaderProgram("deferredShader", shaderTypeVertexFragment, { blendingQualityMacro, "SSAO_QUALITY 0" });
         shaderPrograms[deferredCombineTransparentSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[deferredCombineTransparentSP]->addFragDataLocations(colorFragOut);
         shaderPrograms[deferredCombineTransparentSP]->link();
     }
     
-    if(edgeSmoothEnabled) {
+    if(optionsState.edgeSmoothEnabled) {
         shaderPrograms[edgeSmoothSP]->loadShaderProgram("postProcessing", shaderTypeVertexFragment, { "PROCESSING_TYPE 1" });
         shaderPrograms[edgeSmoothSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[edgeSmoothSP]->addFragDataLocations(colorFragOut);
         shaderPrograms[edgeSmoothSP]->link();
     }
     
-    if(depthOfFieldQuality) {
+    if(optionsState.depthOfFieldQuality) {
         shaderPrograms[depthOfFieldSP]->loadShaderProgram("postProcessing", shaderTypeVertexFragment, { "PROCESSING_TYPE 2", depthOfFieldMacro });
         shaderPrograms[depthOfFieldSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[depthOfFieldSP]->addFragDataLocations(colorFragOut);
         shaderPrograms[depthOfFieldSP]->link();
     }
     
-    if(blendingQuality > 0) {
+    if(optionsState.blendingQuality > 0) {
         const char* varyings[] = { "vPosition", "vVelocity" };
-        if(particleCalcTarget == 2 && shaderPrograms[particleCalculateSP]->loadShaderProgram("particleCalc", shaderTypeVertex, { })) {
+        if(optionsState.particleCalcTarget == 2 && shaderPrograms[particleCalculateSP]->loadShaderProgram("particleCalc", shaderTypeVertex, { })) {
             shaderPrograms[particleCalculateSP]->addAttribute(POSITION_ATTRIBUTE, "position");
             shaderPrograms[particleCalculateSP]->addAttribute(VELOCITY_ATTRIBUTE, "velocity");
             shaderPrograms[particleCalculateSP]->setTransformFeedbackVaryings(2, varyings);
             shaderPrograms[particleCalculateSP]->link();
         }else
-           particleCalcTarget = 1;
+           optionsState.particleCalcTarget = 1;
         
         shaderPrograms[particleDrawSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { "TEXTURE_ANIMATION 0", blendingQualityMacro });
         shaderPrograms[particleDrawSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[particleDrawSP]->addAttribute(VELOCITY_ATTRIBUTE, "velocity");
-        shaderPrograms[particleDrawSP]->addFragDataLocations((blendingQuality == 2) ? gBufferTransparentOut : gBufferOut);
+        shaderPrograms[particleDrawSP]->addFragDataLocations((optionsState.blendingQuality == 2) ? gBufferTransparentOut : gBufferOut);
         shaderPrograms[particleDrawSP]->link();
         
         shaderPrograms[particleDrawAnimatedSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { "TEXTURE_ANIMATION 1", blendingQualityMacro });
         shaderPrograms[particleDrawAnimatedSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[particleDrawAnimatedSP]->addAttribute(VELOCITY_ATTRIBUTE, "velocity");
-        shaderPrograms[particleDrawAnimatedSP]->addFragDataLocations((blendingQuality == 2) ? gBufferTransparentOut : gBufferOut);
+        shaderPrograms[particleDrawAnimatedSP]->addFragDataLocations((optionsState.blendingQuality == 2) ? gBufferTransparentOut : gBufferOut);
         shaderPrograms[particleDrawAnimatedSP]->link();
     }else
-        particleCalcTarget = 0;
+        optionsState.particleCalcTarget = 0;
     
     mainFBO.init();
 }

@@ -77,11 +77,11 @@ ParticlesObject::ParticlesObject() :activeVAO(0), addParticles(0.0), systemLife(
 }
 
 void ParticlesObject::init() {
-    if(particleCalcTarget == 0) return;
-    GLenum target = (particleCalcTarget == 1) ? GL_DYNAMIC_DRAW : GL_STATIC_COPY;
+    if(optionsState.particleCalcTarget == 0) return;
+    GLenum target = (optionsState.particleCalcTarget == 1) ? GL_DYNAMIC_DRAW : GL_STATIC_COPY;
     
-    glGenVertexArrays(particleCalcTarget, &particlesVAO[0]);
-    glGenBuffers(particleCalcTarget, &particlesVBO[0]);
+    glGenVertexArrays(optionsState.particleCalcTarget, &particlesVAO[0]);
+    glGenBuffers(optionsState.particleCalcTarget, &particlesVBO[0]);
     
     glBindVertexArray(particlesVAO[0]);
     glBindBuffer(GL_ARRAY_BUFFER, particlesVBO[0]);
@@ -92,7 +92,7 @@ void ParticlesObject::init() {
     glVertexAttribPointer(VELOCITY_ATTRIBUTE, 4, GL_FLOAT, false, 8*sizeof(float), reinterpret_cast<float*>(4*sizeof(float)));
     glBindVertexArray(0);
     
-    if(particleCalcTarget == 2) {
+    if(optionsState.particleCalcTarget == 2) {
         glBindVertexArray(particlesVAO[1]);
         glBindBuffer(GL_ARRAY_BUFFER, particlesVBO[1]);
         glBufferData(GL_ARRAY_BUFFER, 8*sizeof(float)*maxParticles, 0, target);
@@ -158,7 +158,7 @@ ParticlesObject::~ParticlesObject() {
         body = NULL;
     }
     
-    if(particleCalcTarget == 1) {
+    if(optionsState.particleCalcTarget == 1) {
         delete [] (Particle*)particles;
         glDeleteVertexArrays(1, &particlesVAO[0]);
         glDeleteBuffers(1, &particlesVBO[0]);
@@ -184,7 +184,7 @@ btTransform ParticlesObject::getTransformation() {
 bool ParticlesObject::gameTick() {
     btVector3 position = getTransformation().getOrigin();
     
-    if(particleCalcTarget == 0) systemLife = 0.0;
+    if(optionsState.particleCalcTarget == 0) systemLife = 0.0;
     if(systemLife > -1.0) {
         systemLife -= animationFactor;
         if(systemLife <= 0.0) {
@@ -193,7 +193,7 @@ bool ParticlesObject::gameTick() {
         }
     }
     
-    if(particleCalcTarget == 1) {
+    if(optionsState.particleCalcTarget == 1) {
         if(systemLife == -1.0 || systemLife > lifeMax)
             for(; particlesCount < maxParticles; particlesCount ++) {
                 Particle* particle = &particles[particlesCount];
@@ -215,7 +215,7 @@ bool ParticlesObject::gameTick() {
             particles[p].pos += particles[p].dir*animationFactor;
             particles[p].dir += forceAux;
         }
-    }else if(particleCalcTarget == 2) {
+    }else if(optionsState.particleCalcTarget == 2) {
         shaderPrograms[particleCalculateSP]->use();
         currentShaderProgram->setUniformF("respawnParticles", (systemLife == -1.0 || systemLife > lifeMax) ? 1.0 : 0.0);
         currentShaderProgram->setUniformF("animationFactor", animationFactor);
@@ -259,7 +259,7 @@ void ParticlesObject::draw() {
     }
     
     glBindVertexArray(particlesVAO[activeVAO]);
-    if(particleCalcTarget == 1) {
+    if(optionsState.particleCalcTarget == 1) {
         unsigned int index;
         float* vertices = new float[particlesCount*8];
         for(unsigned int p = 0; p < particlesCount; p ++) {

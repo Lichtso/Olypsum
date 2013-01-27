@@ -207,7 +207,7 @@ void Cam::updateAudioListener() {
     btMatrix3x3 mat = transformation.getBasis();
     btVector3 up = mat.getColumn(1), front = mat.getColumn(2), pos = transformation.getOrigin();
     float orientation[] = { front.x(), front.y(), front.z(), up.x(), up.y(), up.z() };
-    alListenerf(AL_GAIN, globalVolume);
+    alListenerf(AL_GAIN, optionsState.globalVolume);
     alListenerfv(AL_ORIENTATION, orientation);
     alListener3f(AL_POSITION, pos.x(), pos.y(), pos.z());
     alListener3f(AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());

@@ -27,6 +27,7 @@ class LightObject : public DisplayObject {
     btTransform getTransformation();
     virtual bool gameTick(bool shadowActive);
     void draw();
+    virtual void deleteShadowMap();
     virtual float getPriority(btVector3 position) = 0;
     void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
@@ -66,6 +67,7 @@ class PositionalLight : public LightObject {
     void setBounds(bool omniDirectional, float range);
     bool gameTick(bool shadowActive);
     void draw();
+    void deleteShadowMap();
     float getPriority(btVector3 position);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };

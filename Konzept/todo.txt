@@ -1,6 +1,6 @@
 Implement btSoftBody
 Implement btRayCastVehicle
-Implement more PhysicLink types
+Error handle in Menu (open games)
 V8 scripts
 Use C++11 Multithreading
 Windows / Linux Support
@@ -11,7 +11,8 @@ Cube map soft shadows
 PCSS
 Fog
 Enviornment maping
+Magnetic Attraction PhysicLink
 
 Bugs:
+CCD NaN matrix
 Check memory leaks
-Change options while game is running

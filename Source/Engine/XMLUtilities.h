@@ -22,7 +22,7 @@
  @param logs Enables console logs if a error occurs
  @return A string with the raw content of the file to be deleted by the receiver
  */
-std::unique_ptr<char[]> readXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string filePath, bool logs);
+std::unique_ptr<char[]> readXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const std::string& filePath, bool logs);
 
 /*! Adds a rapidxml::xml_node with a "value" attribute to a rapidxml::xml_document
  @param doc A reference to the rapidxml::xml_document
@@ -38,7 +38,7 @@ void addXMLNode(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node
  @param logs Enables console logs if a error occurs
  @return Success
  */
-bool writeXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, std::string filePath, bool logs);
+bool writeXmlFile(rapidxml::xml_document<xmlUsedCharType>& doc, const std::string& filePath, bool logs);
 
 //! A utility used to parse XML and string value arrays
 template <class T>

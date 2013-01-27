@@ -137,11 +137,11 @@ void ObjectManager::gameTick() {
         graphicObject->gameTick();
     
     //Calculate ParticleSystems
-    if(particleCalcTarget == 2) glEnable(GL_RASTERIZER_DISCARD);
+    if(optionsState.particleCalcTarget == 2) glEnable(GL_RASTERIZER_DISCARD);
     foreach_e(particlesObjects, iterator) {
         (*iterator)->gameTick();
     }
-    if(particleCalcTarget == 2) glDisable(GL_RASTERIZER_DISCARD);
+    if(optionsState.particleCalcTarget == 2) glDisable(GL_RASTERIZER_DISCARD);
     
     //Calculate LightObjects
     LightPrioritySorter lightPrioritySorter;
@@ -252,7 +252,7 @@ void ObjectManager::drawFrame() {
     }
     
     //Push ParticlesObjects in transparentAccumulator
-    bool keepInColorBuffer = screenBlurFactor > 0.0 || edgeSmoothEnabled || depthOfFieldQuality;
+    bool keepInColorBuffer = optionsState.screenBlurFactor > 0.0 || optionsState.edgeSmoothEnabled || optionsState.depthOfFieldQuality;
     for(auto particlesObject : particlesObjects)
         if(particlesObject->inFrustum) {
             AccumulatedTransparent* transparent = new AccumulatedTransparent();
@@ -260,16 +260,6 @@ void ObjectManager::drawFrame() {
             transparent->mesh = NULL;
             objectManager.transparentAccumulator.push_back(transparent);
         }
-    
-    //Calculate Screen Blur
-    if(screenBlurFactor > -1.0) {
-        float speed = animationFactor*5.0;
-        if(currentMenu == inGameMenu) {
-            screenBlurFactor -= min(screenBlurFactor*speed, speed);
-            if(screenBlurFactor < 0.01) screenBlurFactor = 0.0;
-        }else
-            screenBlurFactor += min((2-screenBlurFactor)*speed, speed);
-    }
     
     //Illuminate not transparent
     illuminate();
@@ -292,7 +282,7 @@ void ObjectManager::drawFrame() {
             
             glDisable(GL_BLEND);
             glEnable(GL_DEPTH_TEST);
-            if(blendingQuality > 1) {
+            if(optionsState.blendingQuality > 1) {
                 glActiveTexture((transparent->mesh) ? GL_TEXTURE3 : GL_TEXTURE1);
                 glBindTexture(GL_TEXTURE_RECTANGLE, mainFBO.gBuffers[colorDBuffer]);
             }
@@ -314,7 +304,7 @@ void ObjectManager::drawFrame() {
             mainFBO.copyGBuffer(colorDBuffer, 0);
     }
     
-    if(ssaoQuality) {
+    if(optionsState.ssaoQuality) {
         glViewport(0, 0, screenSize[0] >> screenSize[2], screenSize[1] >> screenSize[2]);
         shaderPrograms[ssaoSP]->use();
         mainFBO.renderDeferred(true, inBuffersSSAO, 1, outBuffersSSAO, 1);
@@ -328,17 +318,17 @@ void ObjectManager::drawFrame() {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
     
-    if(screenBlurFactor > 0.0) {
+    if(optionsState.screenBlurFactor > 0.0) {
         shaderPrograms[blurSP]->use();
-        currentShaderProgram->setUniformF("processingValue", screenBlurFactor);
+        currentShaderProgram->setUniformF("processingValue", optionsState.screenBlurFactor);
         mainFBO.renderDeferred(true, inBuffersCombine, 1, outBuffersCombine, 0);
     }else{
-        if(edgeSmoothEnabled) {
+        if(optionsState.edgeSmoothEnabled) {
             shaderPrograms[edgeSmoothSP]->use();
-            mainFBO.renderDeferred(true, inBuffersPost, 2, outBuffersPost, (depthOfFieldQuality) ? 1 : 0);
+            mainFBO.renderDeferred(true, inBuffersPost, 2, outBuffersPost, (optionsState.depthOfFieldQuality) ? 1 : 0);
         }
         
-        if(depthOfFieldQuality) {
+        if(optionsState.depthOfFieldQuality) {
             shaderPrograms[depthOfFieldSP]->use();
             mainFBO.renderDeferred(true, inBuffersPost, 2, outBuffersPost, 0);
         }

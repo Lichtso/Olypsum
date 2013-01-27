@@ -36,14 +36,47 @@ enum logMessageType {
     script_log = 4
 };
 
+/*! Logs a message to console and stdout
+ @param type Type of the message
+ @param message Message to be loged
+ */
 void log(logMessageType type, std::string message);
+
+/*! Reads the content of a file
+ @param filePath The file to be read
+ @param logs Enables console logs if a error occurs
+ @return A string with the raw content of the file to be deleted by the receiver
+ */
+std::unique_ptr<char[]> readFile(const std::string& filePath, bool logs);
+
+/*! Writes content in a file
+ @param filePath The file to be written
+ @param content The content to be written
+ @param logs Enables console logs if a error occurs
+ @return A string with the raw content of the file to be deleted by the receiver
+ */
+bool writeFile(const std::string& filePath, const std::string& content, bool logs);
+
+//! Checks for a directory at a given path
 bool checkDir(std::string path);
+/*! Creates a directory at a given path
+ @return Success
+ */
 bool createDir(std::string path);
+/*! 
+ @param path Directory path
+ @param files std::vector to store the names of the children files
+ @return Success
+*/
 bool scanDir(std::string path, std::vector<std::string>& files);
+/*! Removes a directory at a given path
+ @return Success
+ */
 bool removeDir(std::string path);
 
 //! Converts a int into a std::string
 std::string stringOf(int value);
+std::string stringOf(unsigned int value);
 
 //! Converts a float into a std::string
 std::string stringOf(float value);

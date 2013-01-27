@@ -169,10 +169,10 @@ PhysicLink::PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
         btHingeConstraint* hinge = NULL;
         btSliderConstraint* slider = NULL;
         if(strcmp(attribute->value(), "hinge") == 0) {
-            btTransform transform = btTransform::getIdentity();
+            /*btTransform transform = btTransform::getIdentity();
             transform.setRotation(btQuaternion(M_PI_2, 0.0, 0.0));
             frameA *= transform;
-            frameB *= transform;
+            frameB *= transform;*/
             this->constraint = hinge = new btHingeConstraint(*a->getBody(), *b->getBody(), frameA, frameB, true);
         }else
             this->constraint = slider = new btSliderConstraint(*a->getBody(), *b->getBody(), frameA, frameB, true);
@@ -405,6 +405,48 @@ PhysicLink::PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
             
             parameterNode = parameterNode->next_sibling("Motor");
         }
+    }else if(strcmp(attribute->value(), "coneTwist") == 0) {
+        parameterNode = constraintNode->first_node("Frame");
+        if(!parameterNode) {
+            log(error_log, "Tried to construct ConeTwist-PhysicLink without first \"Frame\"-node.");
+            return;
+        }
+        btTransform frameA = readTransformationXML(parameterNode);
+        parameterNode = parameterNode->next_sibling("Frame");
+        if(!parameterNode) {
+            log(error_log, "Tried to construct ConeTwist-PhysicLink without second \"Frame\"-node.");
+            return;
+        }
+        btTransform frameB = readTransformationXML(parameterNode);
+        
+        btConeTwistConstraint* coneTwist;
+        this->constraint = coneTwist = new btConeTwistConstraint(*a->getBody(), *b->getBody(), frameA, frameB);
+        
+        parameterNode = constraintNode->first_node("AngularLimit");
+        if(parameterNode) {
+            float value;
+            attribute = parameterNode->first_attribute("radiusA");
+            if(!attribute) {
+                log(error_log, "Tried to construct ConeTwist-PhysicLink-AngularLimit without \"radiusA\"-attribute.");
+                return;
+            }
+            sscanf(attribute->value(), "%f", &value);
+            coneTwist->setLimit(5, value);
+            attribute = parameterNode->first_attribute("radiusB");
+            if(!attribute) {
+                log(error_log, "Tried to construct ConeTwist-PhysicLink-AngularLimit without \"radiusB\"-attribute.");
+                return;
+            }
+            sscanf(attribute->value(), "%f", &value);
+            coneTwist->setLimit(4, value);
+            attribute = parameterNode->first_attribute("twist");
+            if(!attribute) {
+                log(error_log, "Tried to construct ConeTwist-PhysicLink-AngularLimit without \"twist\"-attribute.");
+                return;
+            }
+            sscanf(attribute->value(), "%f", &value);
+            coneTwist->setLimit(3, value);
+        }
     }else{
         log(error_log, std::string("Tried to construct PhysicLink with invalid \"type\"-attribute: ")+attribute->value()+'.');
         return;
@@ -479,10 +521,12 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
                 angMotor = hinge->getEnableAngularMotor();
                 angMotorVelocity = hinge->getMotorTargetVelosity();
                 angMotorForce = hinge->getMaxMotorImpulse();
-                btTransform transform = btTransform::getIdentity();
+                /*btTransform transform = btTransform::getIdentity();
                 transform.setRotation(btQuaternion(-M_PI_2, 0.0, 0.0));
                 frameA = hinge->getFrameOffsetA()*transform;
-                frameB = hinge->getFrameOffsetB()*transform;
+                frameB = hinge->getFrameOffsetB()*transform;*/
+                frameA = slider->getFrameOffsetA();
+                frameB = slider->getFrameOffsetB();
             }else{
                 attribute->value("slider");
                 slider = static_cast<btSliderConstraint*>(constraint);
@@ -497,13 +541,11 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
             }
             parameterNode = doc.allocate_node(rapidxml::node_element);
             parameterNode->name("Frame");
-            btTransform transform = frameA;
-            parameterNode->append_node(writeTransformationXML(doc, transform));
+            parameterNode->append_node(writeTransformationXML(doc, frameA));
             constraintNode->append_node(parameterNode);
             parameterNode = doc.allocate_node(rapidxml::node_element);
             parameterNode->name("Frame");
-            transform = frameB;
-            parameterNode->append_node(writeTransformationXML(doc, transform));
+            parameterNode->append_node(writeTransformationXML(doc, frameB));
             constraintNode->append_node(parameterNode);
             if(angLimit) {
                 parameterNode = doc.allocate_node(rapidxml::node_element);
@@ -576,13 +618,11 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
             btGeneric6DofConstraint* dof6Constraint = static_cast<btGeneric6DofConstraint*>(constraint);
             parameterNode = doc.allocate_node(rapidxml::node_element);
             parameterNode->name("Frame");
-            btTransform transform = dof6Constraint->getFrameOffsetA();
-            parameterNode->append_node(writeTransformationXML(doc, transform));
+            parameterNode->append_node(writeTransformationXML(doc, dof6Constraint->getFrameOffsetA()));
             constraintNode->append_node(parameterNode);
             parameterNode = doc.allocate_node(rapidxml::node_element);
             parameterNode->name("Frame");
-            transform = dof6Constraint->getFrameOffsetB();
-            parameterNode->append_node(writeTransformationXML(doc, transform));
+            parameterNode->append_node(writeTransformationXML(doc, dof6Constraint->getFrameOffsetB()));
             constraintNode->append_node(parameterNode);
             btVector3 low, high, lowCompare(1.0, 1.0, 1.0), highCompare(-1.0, -1.0, -1.0);
             dof6Constraint->getAngularLowerLimit(low); lowCompare.setW(low.w());
@@ -702,11 +742,41 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
                     }
                 }
             }
-            } break;
-        case CONETWIST_CONSTRAINT_TYPE:
+        } break;
+        case CONETWIST_CONSTRAINT_TYPE: {
             attribute->value("coneTwist");
-            
-            break;
+            btConeTwistConstraint* coneTwistConstraint = static_cast<btConeTwistConstraint*>(constraint);
+            parameterNode = doc.allocate_node(rapidxml::node_element);
+            parameterNode->name("Frame");
+            btTransform transform = coneTwistConstraint->getFrameOffsetA();
+            parameterNode->append_node(writeTransformationXML(doc, transform));
+            constraintNode->append_node(parameterNode);
+            parameterNode = doc.allocate_node(rapidxml::node_element);
+            parameterNode->name("Frame");
+            transform = coneTwistConstraint->getFrameOffsetB();
+            parameterNode->append_node(writeTransformationXML(doc, transform));
+            constraintNode->append_node(parameterNode);
+            float radiusA = coneTwistConstraint->getSwingSpan1(),
+                  radiusB = coneTwistConstraint->getSwingSpan2(),
+                  twist = coneTwistConstraint->getTwistSpan();
+            if(radiusA != BT_LARGE_FLOAT || radiusB != BT_LARGE_FLOAT || twist != BT_LARGE_FLOAT) {
+                parameterNode = doc.allocate_node(rapidxml::node_element);
+                parameterNode->name("AngularLimit");
+                constraintNode->append_node(parameterNode);
+                attribute = doc.allocate_attribute();
+                attribute->name("radiusA");
+                attribute->value(doc.allocate_string(stringOf(radiusA).c_str()));
+                parameterNode->append_attribute(attribute);
+                attribute = doc.allocate_attribute();
+                attribute->name("radiusB");
+                attribute->value(doc.allocate_string(stringOf(radiusB).c_str()));
+                parameterNode->append_attribute(attribute);
+                attribute = doc.allocate_attribute();
+                attribute->name("twist");
+                attribute->value(doc.allocate_string(stringOf(twist).c_str()));
+                parameterNode->append_attribute(attribute);
+            }
+        } break;
         default:
             log(error_log, "Tried to save PhysicLink with invalid constraint type.");
             break;

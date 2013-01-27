@@ -27,6 +27,7 @@
 	<Entry key="shadowQuality">Shadow Quality</Entry>
 	<Entry key="ssaoQuality">SSAO Quality</Entry>
 	<Entry key="blendingQuality">Blending Quality</Entry>
+	<Entry key="restartNecessary">Restart necessary</Entry>
 	<Entry key="on">On</Entry>
 	<Entry key="off">Off</Entry>
 	<Entry key="cancel">Cancel</Entry>

@@ -38,13 +38,13 @@ void Mesh::draw(ModelObject* object) {
         shaderProgram = solidShadowSP;
         if(object->model->skeleton) shaderProgram += 1;
         if(material.diffuse && material.diffuse->depth > 1) shaderProgram += 2;
-        if(dynamic_cast<PositionalLight*>(objectManager.currentShadowLight) && !cubemapsEnabled) shaderProgram += 4;
+        if(dynamic_cast<PositionalLight*>(objectManager.currentShadowLight) && !optionsState.cubemapsEnabled) shaderProgram += 4;
     }else{
         shaderProgram = solidGSP;
         if(object->model->skeleton) shaderProgram += 1;
         if(material.diffuse && material.diffuse->depth > 1) shaderProgram += 2;
         if(material.heightMap) shaderProgram += 4;
-        if(material.transparent && blendingQuality > 0) shaderProgram += 8;
+        if(material.transparent && optionsState.blendingQuality > 0) shaderProgram += 8;
     }
     shaderPrograms[shaderProgram]->use();
     object->prepareShaderProgram(this);
@@ -806,7 +806,7 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
 
 void Model::draw(ModelObject* object) {
     for(unsigned int i = 0; i < meshes.size(); i ++) {
-        if(blendingQuality > 0 && !objectManager.currentShadowLight && meshes[i]->material.transparent) {
+        if(optionsState.blendingQuality > 0 && !objectManager.currentShadowLight && meshes[i]->material.transparent) {
             AccumulatedTransparent* transparent = new AccumulatedTransparent();
             transparent->object = object;
             transparent->mesh = meshes[i];

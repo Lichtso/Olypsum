@@ -22,6 +22,13 @@ void GUIView::addChild(GUIRect* child) {
     children.push_back(child);
 }
 
+int GUIView::getIndexOfChild(GUIRect* child) {
+    for(unsigned int i = 0; i < children.size(); i ++)
+        if(children[i] == child)
+            return i;
+    return -1;
+}
+
 void GUIView::removeChild(unsigned int index) {
     delete children[index];
     children.erase(children.begin()+index);
