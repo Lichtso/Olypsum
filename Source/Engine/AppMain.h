@@ -6,9 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Controls.h"
+#include "Script.h"
 #include "netLink-1.0.3/socket.h"
-#include <v8.h>
 
 #ifndef AppMain_h
 #define AppMain_h

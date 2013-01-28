@@ -87,6 +87,8 @@
 		11DA1F12162DEA03007D7E6C /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11DA1F0F162DEA03007D7E6C /* Matrix4.cpp */; };
 		11DA1F16162DEA18007D7E6C /* LightVolume.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11DA1F14162DEA18007D7E6C /* LightVolume.cpp */; };
 		11F1EEB8156FE49400F7275D /* ParticlesObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11F1EEB7156FE49400F7275D /* ParticlesObject.cpp */; };
+		11FE8AB216B5A3F400B682D0 /* ScriptContext.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11FE8AB016B5A3F400B682D0 /* ScriptContext.cpp */; };
+		11FE8AB516B719CE00B682D0 /* Script.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11FE8AB316B719CE00B682D0 /* Script.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -248,6 +250,10 @@
 		11DA1F15162DEA18007D7E6C /* LightVolume.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LightVolume.h; sourceTree = "<group>"; };
 		11F1EEB5156FE48B00F7275D /* ParticlesObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParticlesObject.h; sourceTree = "<group>"; };
 		11F1EEB7156FE49400F7275D /* ParticlesObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParticlesObject.cpp; sourceTree = "<group>"; };
+		11FE8AB016B5A3F400B682D0 /* ScriptContext.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptContext.cpp; sourceTree = "<group>"; };
+		11FE8AB116B5A3F400B682D0 /* ScriptContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptContext.h; sourceTree = "<group>"; };
+		11FE8AB316B719CE00B682D0 /* Script.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Script.cpp; sourceTree = "<group>"; };
+		11FE8AB416B719CE00B682D0 /* Script.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Script.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -421,6 +427,7 @@
 				1130ECBA15BC1CA600203C2E /* Menu.cpp */,
 				119F166E169DA12400033832 /* Controls.h */,
 				119F166D169DA12400033832 /* Controls.cpp */,
+				11FE8AAF16B5A3D900B682D0 /* Scripting */,
 				11A79B21153C2FE9002B9F0A /* AppMain.h */,
 				11A79B20153C2FE9002B9F0A /* AppMain.cpp */,
 				11A79B54153C2FE9002B9F0A /* macCompCode */,
@@ -494,6 +501,17 @@
 				11D74B4516270A65000EEB50 /* Shaders */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		11FE8AAF16B5A3D900B682D0 /* Scripting */ = {
+			isa = PBXGroup;
+			children = (
+				11FE8AB116B5A3F400B682D0 /* ScriptContext.h */,
+				11FE8AB016B5A3F400B682D0 /* ScriptContext.cpp */,
+				11FE8AB416B719CE00B682D0 /* Script.h */,
+				11FE8AB316B719CE00B682D0 /* Script.cpp */,
+			);
+			path = Scripting;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -610,6 +628,8 @@
 				111666E2169E11E300ECBDC9 /* socket_group.cc in Sources */,
 				111666E3169E11E300ECBDC9 /* util.cc in Sources */,
 				1115463916A0BA4200F27340 /* VertexArrayObject.cpp in Sources */,
+				11FE8AB216B5A3F400B682D0 /* ScriptContext.cpp in Sources */,
+				11FE8AB516B719CE00B682D0 /* Script.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

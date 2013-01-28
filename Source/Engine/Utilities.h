@@ -30,10 +30,10 @@
 
 enum logMessageType {
     info_log = 0,
-    warning_log = 1,
-    error_log = 2,
-    shader_log = 3,
-    script_log = 4
+    warning_log,
+    error_log,
+    shader_log,
+    script_log
 };
 
 /*! Logs a message to console and stdout

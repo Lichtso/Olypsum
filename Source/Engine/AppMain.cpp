@@ -186,7 +186,6 @@ void AppMain(int argc, char *argv[]) {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT);
         }else{
-            controlsMangager->gameTick();
             objectManager.gameTick();
             objectManager.drawFrame();
         }

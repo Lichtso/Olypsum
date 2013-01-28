@@ -6,7 +6,7 @@
 //
 //
 
-#include "Controls.h"
+#include "AppMain.h"
 
 LevelLoader::LevelLoader() :transformation(btTransform::getIdentity()) {
     
@@ -166,7 +166,7 @@ bool LevelLoader::loadContainer(std::string name) {
     if(!rawData)
         rawData = readXmlFile(doc, levelManager.levelPackage->path+"/Containers/"+name+".xml", false);
     if(!rawData) {
-        log(error_log, std::string("Could not find container by name: ")+name+'.');
+        levelManager.showErrorModal(localization.localizeString("packageError_ContainerMissing")+'\n'+name);
         return false;
     }
     rapidxml::xml_node<xmlUsedCharType>* containerNode = doc.first_node("Container");
@@ -279,14 +279,11 @@ bool LevelLoader::loadContainer(std::string name) {
 }
 
 bool LevelLoader::loadLevel() {
-    controlsMangager = new ControlsMangager();
-    std::unique_ptr<ControlsMangager> newControlsMangager(controlsMangager);
-    
     //Load CollisionShape index
     rapidxml::xml_document<xmlUsedCharType> doc;
     collisionShapesData = readXmlFile(doc, levelManager.levelPackage->path+'/'+"CollisionShapes.xml", false);
     if(!collisionShapesData) {
-        log(error_log, "Could not load package, because CollisionShapes.xml is missing.");
+        levelManager.showErrorModal(localization.localizeString("packageError_FilesMissing"));
         return false;
     }
     rapidxml::xml_node<xmlUsedCharType>* node = doc.first_node("CollisionShapes")->first_node();
@@ -296,12 +293,13 @@ bool LevelLoader::loadLevel() {
     }
     
     //Load root conatiner
-    objectManager.clear();
-    objectManager.initPhysics();
-    if(!loadContainer(levelManager.levelId)) return false;
+    objectManager.initGame();
+    if(!loadContainer(levelManager.levelId)) {
+        objectManager.clear();
+        return false;
+    }
     
     levelManager.gameStatus = localGame;
     setMenu(inGameMenu);
-    newControlsMangager.release();
     return true;
 }

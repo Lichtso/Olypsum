@@ -16,6 +16,38 @@ LevelManager::~LevelManager() {
     clear();
 }
 
+void LevelManager::showErrorModal(const std::string& error) {
+    currentMenu = modalMenu;
+    GUIFramedView* modalView = new GUIFramedView();
+    modalView->width = currentScreenView->width*0.4;
+    modalView->height = currentScreenView->height*0.4;
+    GUILabel* label = new GUILabel();
+    label->color = Color4(1, 0, 0);
+    label->posY = modalView->height*0.65;
+    label->text = localization.localizeString("error");
+    label->fontHeight = currentScreenView->height*0.14;
+    modalView->addChild(label);
+    label = new GUILabel();
+    label->width = modalView->width*0.9;
+    label->text = error;
+    label->fontHeight = currentScreenView->height*0.09;
+    modalView->addChild(label);
+    GUIButton* button = new GUIButton();
+    button->posY = modalView->height*-0.7;
+    button->width = currentScreenView->width*0.14;
+    button->sizeAlignment = GUISizeAlignment_Height;
+    modalView->addChild(button);
+    label = new GUILabel();
+    label->text = localization.localizeString("ok");
+    label->fontHeight = currentScreenView->height*0.1;
+    button->addChild(label);
+    button->onClick = [](GUIButton* button) {
+        currentScreenView->setModalView(NULL);
+        currentMenu = saveGamesMenu;
+    };
+    currentScreenView->setModalView(modalView);
+}
+
 void LevelManager::clear() {
     for(auto iterator: sharedCollisionShapes)
         delete iterator.second;
@@ -25,7 +57,8 @@ void LevelManager::clear() {
 void LevelManager::loadLevel(std::string nextLevelId) {
     levelId = nextLevelId;
     LevelLoader levelLoader;
-    levelLoader.loadLevel();
+    if(!levelLoader.loadLevel() && !currentScreenView->modalView)
+        showErrorModal(localization.localizeString("packageError_Corrupted"));
 }
 
 void LevelManager::saveLevel() {
@@ -50,25 +83,23 @@ void LevelManager::leaveGame() {
     fileManager.clear();
     fileManager.getPackage("Default");
     setMenu(mainMenu);
-    delete controlsMangager;
-    controlsMangager = NULL;
 }
 
 bool LevelManager::loadGame(std::string name) {
     std::string path = gameDataDir+"Saves/"+name+'/';
     if(!checkDir(path)) {
-        log(error_log, "Could not find a saved game by this name.");
+        showErrorModal(localization.localizeString("packageError_NotFound"));
         return false;
     }
     rapidxml::xml_document<xmlUsedCharType> doc;
     std::unique_ptr<char[]> fileData = readXmlFile(doc, gameDataDir+"Saves/"+name+'/'+"Status.xml", false);
     if(!fileData) {
-        log(error_log, "Could not load saved game, because Status.xml is missing.");
+        showErrorModal(localization.localizeString("packageError_FilesMissing"));
         return false;
     }
     rapidxml::xml_node<xmlUsedCharType>* statusNode = doc.first_node("Status");
     if(strcmp(statusNode->first_node("Version")->first_attribute("value")->value(), VERSION) != 0) {
-        log(error_log, "Could not load saved game, because its version is outdated.");
+        showErrorModal(localization.localizeString("packageError_Version"));
         return false;
     }
     saveGameName = name;
@@ -79,7 +110,7 @@ bool LevelManager::loadGame(std::string name) {
 
 bool LevelManager::newGame(std::string packageName, std::string name) {
     if(!createDir(gameDataDir+"Saves/"+name+'/')) {
-        log(error_log, "Could not create new game, because the name already exists.");
+        showErrorModal(localization.localizeString("packageError_Exists"));
         return false;
     }
     
@@ -96,7 +127,7 @@ bool LevelManager::newGame(std::string packageName, std::string name) {
 
 bool LevelManager::removeGame(std::string name) {
     if(!removeDir(gameDataDir+"Saves/"+name+'/')) {
-        log(error_log, "Could not remove a saved game by this name.");
+        showErrorModal(localization.localizeString("packageError_NotFound"));
         return false;
     }
     return true;

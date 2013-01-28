@@ -8,6 +8,7 @@
 	<Entry key="credits">Credits</Entry>
 	<Entry key="quitGame">Quit Game</Entry>
 	<Entry key="back">Back</Entry>
+	<Entry key="restart">Restart</Entry>
 	<Entry key="mainMenu">Main Menu</Entry>
 	<Entry key="graphics">Graphics</Entry>
 	<Entry key="language">Language</Entry>
@@ -27,12 +28,24 @@
 	<Entry key="shadowQuality">Shadow Quality</Entry>
 	<Entry key="ssaoQuality">SSAO Quality</Entry>
 	<Entry key="blendingQuality">Blending Quality</Entry>
-	<Entry key="restartNecessary">Restart necessary</Entry>
 	<Entry key="on">On</Entry>
 	<Entry key="off">Off</Entry>
+	<Entry key="info">Info</Entry>
+	<Entry key="warning">Warning</Entry>
+	<Entry key="error">Error</Entry>
 	<Entry key="cancel">Cancel</Entry>
 	<Entry key="ok">Ok</Entry>
 	<Entry key="name">Name</Entry>
 	<Entry key="newGame">New Game</Entry>
 	<Entry key="removeGame">Remove Game</Entry>
+	<Entry key="packageError_NotFound">Could not find saved game by this name.</Entry>
+	<Entry key="packageError_ContainerMissing">Could not find container by name:</Entry>
+	<Entry key="packageError_Exists">Could not create new game,
+because the name already exists.</Entry>
+	<Entry key="packageError_FilesMissing">Could not load saved game,
+because some files are is missing.</Entry>
+	<Entry key="packageError_Version">Could not load saved game,
+because its version is outdated.</Entry>
+	<Entry key="packageError_Corrupted">Could not load saved game,
+because it is corrupted.</Entry>
 </Localization>

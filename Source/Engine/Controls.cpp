@@ -93,6 +93,7 @@ void ControlsMangager::gameTick() {
                 view->addChild(label);
             }
             label->width = view->width;
+            label->fontHeight = currentScreenView->height*0.05;
             label->textAlign = GUITextAlign_Left;
             label->sizeAlignment = GUISizeAlignment_Height;
             label->color = Color4(1.0);
@@ -169,4 +170,4 @@ void ControlsMangager::gameTick() {
     mainCam->gameTick();
 }
 
-ControlsMangager* controlsMangager;
+std::unique_ptr<ControlsMangager> controlsMangager;

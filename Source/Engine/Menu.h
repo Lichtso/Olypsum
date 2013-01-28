@@ -21,15 +21,15 @@
 
 enum MenuName {
     loadingMenu = 0,
-    mainMenu = 1,
-    optionsMenu = 2,
-    languagesMenu = 3,
-    creditsMenu = 4,
-    inGameMenu = 5,
-    gameEscMenu = 6,
-    saveGamesMenu = 7,
-    newGameMenu = 8,
-    removeGameMenu = 9
+    mainMenu,
+    optionsMenu,
+    languagesMenu,
+    creditsMenu,
+    inGameMenu,
+    gameEscMenu,
+    saveGamesMenu,
+    newGameMenu,
+    modalMenu
 };
 
 void openExternURL(const char* str);

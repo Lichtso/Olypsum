@@ -312,8 +312,8 @@ void updateVideoMode() {
         [NSApp setPresentationOptions:NSApplicationPresentationHideDock | NSApplicationPresentationAutoHideMenuBar];
         screenSize[0] *= screenSize[2];
         screenSize[1] *= screenSize[2];
-    }else
-        [window setFrame:NSRectFromCGRect(CGRectMake(0, 0, videoInfo->current_w/2, videoInfo->current_h/2)) display:false];
+    }else if(screenSize[2] > 1)
+        [window setFrame:NSRectFromCGRect(CGRectMake(0, 0, videoInfo->current_w/screenSize[2], videoInfo->current_h/screenSize[2])) display:false];
     //NSRect rect = [window convertRectToScreen:NSMakeRect(0, 0, 1, 1)];
     [window becomeKeyWindow];
 }

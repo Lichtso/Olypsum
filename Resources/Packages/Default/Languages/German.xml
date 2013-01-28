@@ -8,6 +8,7 @@
 	<Entry key="credits">Danksagung</Entry>
 	<Entry key="quitGame">Beenden</Entry>
 	<Entry key="back">Zurück</Entry>
+	<Entry key="restart">Neustart</Entry>
 	<Entry key="mainMenu">Hauptmenü</Entry>
 	<Entry key="graphics">Grafik</Entry>
 	<Entry key="language">Sprache</Entry>
@@ -27,12 +28,25 @@
 	<Entry key="shadowQuality">Schattenqualität</Entry>
 	<Entry key="ssaoQuality">SSAO-Qualität</Entry>
 	<Entry key="blendingQuality">Mischungsqualität</Entry>
-	<Entry key="restartNecessary">Neustart erforderlich</Entry>
 	<Entry key="on">An</Entry>
 	<Entry key="off">Aus</Entry>
+	<Entry key="info">Info</Entry>
+	<Entry key="warning">Warnung</Entry>
+	<Entry key="error">Fehler</Entry>
 	<Entry key="cancel">Abbrechen</Entry>
 	<Entry key="ok">Ok</Entry>
 	<Entry key="name">Name</Entry>
 	<Entry key="newGame">Neues Spiel</Entry>
 	<Entry key="removeGame">Spiel löschen</Entry>
+	<Entry key="packageError_NotFound">Es konnte kein Spielstand mit
+diesem Namen gefunden werden.</Entry>
+	<Entry key="packageError_ContainerMissing">Dieser Kontainer konnte nicht gefunden werden:</Entry>
+	<Entry key="packageError_Exists">Es konnte kein neuen Spielstand mit diesem Namen
+angelegt werden, da dieser bereits existiert.</Entry>
+	<Entry key="packageError_FilesMissing">Der Spielstand konnte nicht geladen
+werden, weil einige Dateien fehlen.</Entry>
+	<Entry key="packageError_Version">Der Spielstand konnte nicht geladen
+werden, weil dessen Version zu alt ist.</Entry>
+	<Entry key="packageError_Corrupted">Der Spielstand konnte nicht geladen
+werden, da er beschädigt ist.</Entry>
 </Localization>

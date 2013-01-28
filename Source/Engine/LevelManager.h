@@ -24,6 +24,7 @@ class LevelManager {
     public:
     LevelManager();
     ~LevelManager();
+    void showErrorModal(const std::string& error);
     std::map<std::string, btCollisionShape*> sharedCollisionShapes; //!< All available collision shapes
     //std::map<std::string, v8::Handle> sharedScripts; //!< All available scripts
     FilePackage* levelPackage;

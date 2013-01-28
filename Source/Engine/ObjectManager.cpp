@@ -6,7 +6,7 @@
 //
 //
 
-#include "Controls.h"
+#include "AppMain.h"
 
 ALCdevice* soundDevice;
 ALCcontext* soundContext;
@@ -82,9 +82,11 @@ void ObjectManager::init() {
     log(info_log, std::string("OpenAL, sound output: ")+alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
 }
 
-void ObjectManager::initPhysics() {
-    physicsWorld = new btDiscreteDynamicsWorld(collisionDispatcher, broadphase, constraintSolver, collisionConfiguration);
+void ObjectManager::initGame() {
+    physicsWorld.reset(new btDiscreteDynamicsWorld(collisionDispatcher, broadphase, constraintSolver, collisionConfiguration));
     physicsWorld->setInternalTickCallback(calculatePhysicsTick);
+    controlsMangager.reset(new ControlsMangager());
+    scriptContext.reset(new ScriptContext());
 }
 
 void ObjectManager::clear() {
@@ -113,13 +115,14 @@ void ObjectManager::clear() {
         delete simpleObject;
     simpleObjects.clear();
     
-    if(physicsWorld) {
-        delete physicsWorld;
-        physicsWorld = NULL;
-    }
+    physicsWorld.reset();
+    controlsMangager.reset();
+    scriptContext.reset();
 }
 
 void ObjectManager::gameTick() {
+    controlsMangager->gameTick();
+    
     //Calculate Physics
     physicsWorld->stepSimulation(animationFactor, 4, 1.0/60.0); //Try to maintain 60 FPS
     

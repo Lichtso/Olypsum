@@ -31,6 +31,6 @@ class ControlsMangager {
     void gameTick();
 };
 
-extern ControlsMangager* controlsMangager;
+extern std::unique_ptr<ControlsMangager> controlsMangager;
 
 #endif

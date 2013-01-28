@@ -11,6 +11,17 @@
 
 OptionsState prevOptionsState;
 
+static void updateOptionBackButton(GUIButton* button) {
+    if((optionsState.fullScreenEnabled != prevOptionsState.fullScreenEnabled ||
+        optionsState.vSyncEnabled != prevOptionsState.vSyncEnabled)) {
+        button->buttonType = GUIButtonTypeDelete;
+        static_cast<GUILabel*>(button->children[0])->text = localization.localizeString("restart");
+    }else{
+        button->buttonType = GUIButtonTypeNormal;
+        static_cast<GUILabel*>(button->children[0])->text = localization.localizeString("back");
+    }
+}
+
 static void updateGraphicOptions() {
     if(levelManager.gameStatus == noGame) return;
     loadDynamicShaderPrograms();
@@ -29,6 +40,8 @@ static void leaveOptionsMenu(GUIButton* button) {
     updateGraphicOptions();
     setMenu((levelManager.gameStatus == noGame) ? mainMenu : gameEscMenu);
 }
+
+
 
 void handleMenuKeyUp(SDL_keysym* key) {
     if(key->sym == SDLK_ESCAPE) {
@@ -56,7 +69,7 @@ void handleMenuKeyUp(SDL_keysym* key) {
             case newGameMenu:
                 setMenu(saveGamesMenu);
                 break;
-            case removeGameMenu:
+            case modalMenu:
                 currentScreenView->setModalView(NULL);
                 currentMenu = saveGamesMenu;
                 break;
@@ -145,8 +158,18 @@ void setMenu(MenuName menu) {
             label->text = localization.localizeString("options");
             label->fontHeight = currentScreenView->height*0.2;
             currentScreenView->addChild(label);
+            label = new GUILabel();
+            label->posX = currentScreenView->width*-0.52;
+            label->posY = currentScreenView->height*0.72;
+            label->text = localization.localizeString("graphics");
+            label->fontHeight = currentScreenView->height*0.14;
+            currentScreenView->addChild(label);
+            GUIFramedView* view = new GUIFramedView();
+            view->width = currentScreenView->width*0.42;
+            view->height = currentScreenView->height*0.62;
+            view->posX = currentScreenView->width*-0.52;
+            currentScreenView->addChild(view);
             GUIButton* button = new GUIButton();
-            button->posX = currentScreenView->width*0.52;
             button->posY = currentScreenView->height*-0.8;
             button->onClick = leaveOptionsMenu;
             currentScreenView->addChild(button);
@@ -156,36 +179,15 @@ void setMenu(MenuName menu) {
             label->width = currentScreenView->width*0.14;
             label->sizeAlignment = GUISizeAlignment_Height;
             button->addChild(label);
-            label = new GUILabel();
-            label->posX = currentScreenView->width*-0.52;
-            label->posY = currentScreenView->height*0.72;
-            label->text = localization.localizeString("graphics");
-            label->fontHeight = currentScreenView->height*0.14;
-            currentScreenView->addChild(label);
-            label = new GUILabel();
-            label->posX = currentScreenView->width*-0.52;
-            label->posY = currentScreenView->height*-0.8;
-            label->text = localization.localizeString("restartNecessary");
-            label->color = Color4(1, 0, 0);
-            label->fontHeight = currentScreenView->height*0.14;
-            label->visible = false;
-            currentScreenView->addChild(label);
-            GUIFramedView* view = new GUIFramedView();
-            view->width = currentScreenView->width*0.42;
-            view->height = currentScreenView->height*0.62;
-            view->posX = currentScreenView->width*-0.52;
-            currentScreenView->addChild(view);
             
             prevOptionsState = optionsState;
             std::function<void(GUICheckBox*)> onClick[] = {
-                [label](GUICheckBox* checkBox) {
+                [button](GUICheckBox* checkBox) {
                     optionsState.fullScreenEnabled = (checkBox->state == GUIButtonStatePressed);
-                    label->visible = (optionsState.fullScreenEnabled != prevOptionsState.fullScreenEnabled ||
-                                      optionsState.vSyncEnabled != prevOptionsState.vSyncEnabled);
-                }, [label](GUICheckBox* checkBox) {
+                    updateOptionBackButton(button);
+                }, [button](GUICheckBox* checkBox) {
                     optionsState.vSyncEnabled = (checkBox->state == GUIButtonStatePressed);
-                    label->visible = (optionsState.fullScreenEnabled != prevOptionsState.fullScreenEnabled ||
-                                      optionsState.vSyncEnabled != prevOptionsState.vSyncEnabled);
+                    updateOptionBackButton(button);
                 }, [](GUICheckBox* checkBox) {
                     optionsState.cubemapsEnabled = (checkBox->state == GUIButtonStatePressed);
                     updateGraphicOptions();
@@ -530,13 +532,13 @@ void setMenu(MenuName menu) {
                 label->text = localization.localizeString("removeGame");
                 label->fontHeight = currentScreenView->height*0.1;
                 button->addChild(label);
-                button->onClick = [&menu, name](GUIButton* button) {
-                    currentMenu = removeGameMenu;
+                button->onClick = [name](GUIButton* button) {
+                    currentMenu = modalMenu;
                     GUIFramedView* modalView = new GUIFramedView();
                     modalView->width = currentScreenView->width*0.4;
                     modalView->height = currentScreenView->height*0.4;
                     GUILabel* label = new GUILabel();
-                    label->posY = modalView->height*0.75;
+                    label->posY = modalView->height*0.65;
                     label->text = localization.localizeString("removeGame");
                     label->fontHeight = currentScreenView->height*0.14;
                     modalView->addChild(label);
@@ -557,7 +559,7 @@ void setMenu(MenuName menu) {
                     label->text = localization.localizeString("cancel");
                     label->fontHeight = currentScreenView->height*0.1;
                     button->addChild(label);
-                    button->onClick = [&menu](GUIButton* button) {
+                    button->onClick = [](GUIButton* button) {
                         currentScreenView->setModalView(NULL);
                         currentMenu = saveGamesMenu;
                     };
@@ -566,12 +568,13 @@ void setMenu(MenuName menu) {
                     button->posY = modalView->height*-0.7;
                     button->width = currentScreenView->width*0.14;
                     button->sizeAlignment = GUISizeAlignment_Height;
+                    button->buttonType = GUIButtonTypeDelete;
                     modalView->addChild(button);
                     label = new GUILabel();
                     label->text = localization.localizeString("ok");
                     label->fontHeight = currentScreenView->height*0.1;
                     button->addChild(label);
-                    button->onClick = [&menu, name](GUIButton* button) {
+                    button->onClick = [name](GUIButton* button) {
                         levelManager.removeGame(name);
                         setMenu(saveGamesMenu);
                     };
@@ -670,6 +673,7 @@ void setMenu(MenuName menu) {
                 button->addChild(label);
                 button->onClick = onClick[i];
             }
+            button->buttonType = GUIButtonTypeAdd;
             button->state = GUIButtonStateDisabled;
             textField->onChange = [button](GUITextField* textField) {
                 std::string path = gameDataDir+"Saves/"+textField->label->text+'/';

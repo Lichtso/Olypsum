@@ -38,7 +38,7 @@ class ObjectManager {
     btCollisionDispatcher* collisionDispatcher; //!< The physics collision dispatcher
     btSequentialImpulseConstraintSolver* constraintSolver; //!< The physics constraint solver
     btBroadphaseInterface* broadphase; //!< The physics broadphase
-    btDiscreteDynamicsWorld* physicsWorld; //!< The physics world
+    std::unique_ptr<btDiscreteDynamicsWorld> physicsWorld; //!< The physics world
     
     ObjectManager();
     ~ObjectManager();
@@ -46,8 +46,8 @@ class ObjectManager {
     void init();
     //! Deletes all Objects and the physics world
     void clear();
-    //! Initializes the physics world
-    void initPhysics();
+    //! Initializes a new game
+    void initGame();
     //! Calculate a game tick
     void gameTick();
     //! Calculate the physics
