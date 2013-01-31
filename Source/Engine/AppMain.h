@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Script.h"
+#include "ScriptManager.h"
 #include "netLink-1.0.3/socket.h"
 
 #ifndef AppMain_h

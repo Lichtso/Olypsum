@@ -56,9 +56,9 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::v
         soucre = soucreStream.str();
     }
     
-    size_t pos = 0;
+    size_t pos = 0, prevPos;
     while(true) {
-        size_t prevPos = pos = soucre.find(includeString, pos);
+        pos = prevPos = soucre.find(includeString, pos);
         if(pos == std::string::npos) break;
         pos += strlen(includeString);
         unsigned int macroLength = soucre.find('\n', pos)-pos;

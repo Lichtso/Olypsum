@@ -24,6 +24,22 @@ GUILabel::~GUILabel() {
     lines.clear();
 }
 
+void GUILabel::addLine(unsigned int prevPos, unsigned int pos) {
+    GUILabelLine line;
+    line.text = text.substr(prevPos, pos-prevPos);
+    if(line.text.size() > 0) {
+        line.texture = font->renderStringToTexture(line.text.c_str(), color, true, line.content.width, line.content.height);
+        line.content.width = fontHeight*0.5/line.content.height*line.content.width;
+        width = fmax(width, line.content.width);
+    }else{
+        line.texture = NULL;
+        line.content.width = 0;
+    }
+    line.content.height = fontHeight>>1;
+    lines.push_back(line);
+    height += line.content.height;
+}
+
 void GUILabel::updateContent() {
     int prevWidth = width, prevHeight = height;
     width = height = 0;
@@ -32,26 +48,13 @@ void GUILabel::updateContent() {
         glDeleteTextures(1, &lines[i].texture);
     lines.clear();
     
-    const char *startPos = text.c_str(), *lastPos = startPos, *endPos = startPos+text.size();
-    for(const char* pos = startPos; pos < endPos; pos ++)
-        if(pos == endPos-1 || pos[0] == '\n') {
-            if(lastPos != startPos) lastPos ++;
-            if(pos == endPos-1) pos ++;
-            GUILabelLine line;
-            line.text = text.substr(lastPos-startPos, pos-lastPos);
-            if(line.text.size() > 0) {
-                line.texture = font->renderStringToTexture(line.text.c_str(), color, true, line.content.width, line.content.height);
-                line.content.width = fontHeight*0.5/line.content.height*line.content.width;
-                width = fmax(width, line.content.width);
-            }else{
-                line.texture = NULL;
-                line.content.width = 0;
-            }
-            line.content.height = fontHeight>>1;
-            lines.push_back(line);
-            height += line.content.height;
-            lastPos = pos;
+    unsigned int prevPos = 0, length = text.size();
+    for(unsigned int pos = 0; pos < length; pos ++)
+        if(text[pos] == '\n') {
+            addLine(prevPos, pos);
+            prevPos = pos+1;
         }
+    addLine(prevPos, length);
     
     if((sizeAlignment & GUISizeAlignment_Width) == 0) width = prevWidth;
     if((sizeAlignment & GUISizeAlignment_Height) == 0) height = prevHeight;

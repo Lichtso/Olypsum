@@ -298,6 +298,7 @@ bool LevelLoader::loadLevel() {
         objectManager.clear();
         return false;
     }
+    scriptManager->getScriptFile(levelManager.levelPackage, "Main");
     
     levelManager.gameStatus = localGame;
     setMenu(inGameMenu);

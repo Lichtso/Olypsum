@@ -6,15 +6,18 @@
 //
 //
 
-#include "Script.h"
+#include "ScriptManager.h"
+
+Script::Script() {
+    
+}
 
 Script::Script(const std::string& sourceCode, const std::string& name) {
     v8::HandleScope handleScope;
     v8::TryCatch tryCatch;
     v8::Handle<v8::Script> scriptLocal = v8::Script::Compile(v8::String::New(sourceCode.c_str()), v8::String::New(name.c_str()));
-    if(scriptContext->tryCatch(&tryCatch)) {
+    if(scriptManager->tryCatch(&tryCatch))
         script = v8::Persistent<v8::Script>::New(scriptLocal);
-    }
 }
 
 Script::~Script() {
@@ -26,20 +29,33 @@ v8::Handle<v8::Value> Script::run() {
     v8::HandleScope handleScope;
     v8::TryCatch tryCatch;
     v8::Handle<v8::Value> result = script->Run();
-    scriptContext->tryCatch(&tryCatch);
+    scriptManager->tryCatch(&tryCatch);
     return handleScope.Close(result);
 }
 
-std::shared_ptr<FilePackageResource> ScriptFile::load(FilePackage* filePackageB, const std::string& name) {
-    auto pointer = FilePackageResource::load(filePackageB, name);
+ScriptFile::~ScriptFile() {
+    exports.Dispose();
+}
+
+bool ScriptFile::load(FilePackage* filePackageB, const std::string& nameB) {
+    name = nameB+".js";
     std::string filePath = filePackageB->getPathOfFile("Scripts", name);
     std::unique_ptr<char[]> data = readFile(filePath, true);
+    if(!data) return false;
     v8::HandleScope handleScope;
     v8::TryCatch tryCatch;
-    v8::Handle<v8::Script> scriptLocal = v8::Script::Compile(v8::String::New(data.get()), v8::String::New(name.c_str()));
-    if(scriptContext->tryCatch(&tryCatch)) {
+    v8::Handle<v8::Context> context = v8::Context::New(NULL, scriptManager->globalTemplate);
+    context->Enter();
+    context->Global()->Set(v8::String::New("exports"), v8::Object::New());
+    
+    v8::Local<v8::Script> scriptLocal = v8::Script::Compile(v8::String::New(data.get()), v8::String::New(name.c_str()));
+    if(scriptManager->tryCatch(&tryCatch)) {
+        filePackage = filePackageB;
         script = v8::Persistent<v8::Script>::New(scriptLocal);
-        return pointer;
+        v8::Handle<v8::Object>::Cast(run());
+        v8::Local<v8::Value> objectLocal = context->Global()->Get(v8::String::New("exports"));
+        exports = v8::Persistent<v8::Object>::New(v8::Local<v8::Object>::Cast(objectLocal));
     }
-    return NULL;
+    
+    return !tryCatch.HasCaught();
 }

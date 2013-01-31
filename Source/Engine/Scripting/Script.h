@@ -6,7 +6,8 @@
 //
 //
 
-#include "ScriptContext.h"
+#include "Controls.h"
+#include <v8.h>
 
 #ifndef Script_h
 #define Script_h
@@ -21,10 +22,13 @@ class Script {
     v8::Handle<v8::Value> run();
 };
 
-class ScriptFile : public Script, FilePackageResource {
+class ScriptFile : public Script {
     public:
-    ScriptFile();
-    std::shared_ptr<FilePackageResource> load(FilePackage* filePackage, const std::string& name);
+    ~ScriptFile();
+    FilePackage* filePackage;
+    std::string name;
+    v8::Persistent<v8::Object> exports;
+    bool load(FilePackage* filePackage, const std::string& name);
 };
 
 #endif

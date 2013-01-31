@@ -26,6 +26,7 @@ struct GUILabelLine {
 };
 
 class GUILabel : public GUIRect {
+    void addLine(unsigned int prevPos, unsigned int pos);
     public:
     std::vector<GUILabelLine> lines;
     Color4 color;

@@ -23,6 +23,9 @@ ControlsMangager::~ControlsMangager() {
 void ControlsMangager::consoleAdd(const std::string& message, float duration) {
     ConsoleEntry entry;
     entry.message = message;
+    for(size_t i = 0; i < entry.message.size(); i ++)
+        if(entry.message[i] == 9)
+            entry.message = entry.message.replace(i, 1, "    ");
     entry.timeLeft = duration;
     consoleMessages.push_back(entry);
 }
@@ -36,14 +39,13 @@ void ControlsMangager::handleMouseDown(int mouseX, int mouseY, SDL_Event& event)
     
     if(rayCallback.hasHit()) {
         grabbedObject = static_cast<PhysicObject*>(rayCallback.m_collisionObject->getUserPointer());
-        //relGrabbPos = mainCam->getTransformation().inverse()(grabbedObject->getTransformation().getOrigin());
         relGrabbPos = btVector3(0.0, 0.0, -(mainCam->getTransformation().getOrigin()
                                           -grabbedObject->getTransformation().getOrigin()).length());
     }
 }
 
 void ControlsMangager::handleMouseUp(int mouseX, int mouseY, SDL_Event& event) {
-    //if(!keyState[SDLK_LALT])
+    if(!keyState[SDLK_LALT])
         grabbedObject = NULL;
 }
 
@@ -83,7 +85,7 @@ void ControlsMangager::gameTick() {
                 label = static_cast<GUILabel*>(view->children[i]);
                 label->color.a = fmin(1, consoleMessages[i].timeLeft);
                 float fallSpeed = posY-label->height;
-                fallSpeed = (fallSpeed-label->posY)*animationFactor*5.0;
+                fallSpeed = (fallSpeed-label->posY)*fmin(animationFactor*5.0, 0.5);
                 label->posY += (fallSpeed > 0.0 && fallSpeed < 1.0) ? 1.0 : fallSpeed;
                 posY -= label->height*2.2;
                 if(label->text == consoleMessages[i].message)
