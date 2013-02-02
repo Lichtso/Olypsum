@@ -124,11 +124,11 @@ void ObjectManager::gameTick() {
     controlsMangager->gameTick();
     
     //Calculate Physics
-    physicsWorld->stepSimulation(animationFactor, 4, 1.0/60.0); //Try to maintain 60 FPS
+    physicsWorld->stepSimulation(profiler.animationFactor, 4, 1.0/60.0); //Try to maintain 60 FPS
     
     //Calculate Decals
     for(auto iterator = decals.begin(); iterator != decals.end(); iterator ++) {
-        (*iterator)->life -= animationFactor;
+        (*iterator)->life -= profiler.animationFactor;
         if((*iterator)->life > 0.0) continue;
         delete *iterator;
         decals.erase(iterator);
@@ -341,5 +341,4 @@ void ObjectManager::drawFrame() {
     glEnable(GL_DEPTH_TEST);
 }
 
-float animationFactor;
 ObjectManager objectManager;

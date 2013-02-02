@@ -7,13 +7,11 @@
 //
 
 #include "AppMain.h"
-#include <sys/time.h>
 
 Uint8* keyState;
 SDLMod modKeyState;
 const float loadingScreenTime = 0.1;
 float timeInLastSec = 0.0, loadingScreen = loadingScreenTime;
-unsigned int currentFPS = 0, newFPS = 0;
 
 #ifndef __MAC_OS__
 void updateVideoMode() {
@@ -59,6 +57,8 @@ void AppMain(int argc, char *argv[]) {
     updateVideoMode();
     
     //Init OpenGL
+    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &optionsState.anisotropy);
+    optionsState.anisotropy = fmin(optionsState.anisotropy, pow(2.0, optionsState.surfaceQuality));
     char* glStr = NULL;
     glStr = (char*)glGetString(GL_VENDOR);
     log(info_log, std::string("OpenGL, vendor: ")+glStr);
@@ -102,8 +102,6 @@ void AppMain(int argc, char *argv[]) {
     
     SDL_Event event;
     SDL_PollEvent(&event);
-    timeval timeThen, timeNow;
-    gettimeofday(&timeThen, 0);
     while(true) {
         while(SDL_PollEvent(&event)) {
             if(!currentScreenView) break;
@@ -165,16 +163,16 @@ void AppMain(int argc, char *argv[]) {
         keyState = SDL_GetKeyState(NULL);
         modKeyState = SDL_GetModState();
         
-        /*if(currentMenu == inGameMenu && newFPS == 0) {
+        if(currentMenu == inGameMenu && profiler.isFirstFrameInSec()) {
             char str[64];
-            sprintf(str, "FPS: %d", currentFPS);
+            sprintf(str, "FPS: %d", profiler.FPS);
             if(controlsMangager)
                 controlsMangager->consoleAdd(str, 0.9);
-        }*/
+        }
         
         if(levelManager.gameStatus == noGame) {
             if(currentMenu == loadingMenu) {
-                loadingScreen -= animationFactor;
+                loadingScreen -= profiler.animationFactor;
                 GUIProgressBar* progressBar = static_cast<GUIProgressBar*>(currentScreenView->children[0]);
                 progressBar->value = 1.0-loadingScreen/loadingScreenTime;
                 if(loadingScreen <= 0.0)
@@ -186,27 +184,17 @@ void AppMain(int argc, char *argv[]) {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT);
         }else{
+            profiler.leaveSection("Rest");
             objectManager.gameTick();
+            profiler.leaveSection("Game Tick");
             objectManager.drawFrame();
+            profiler.leaveSection("Draw Frame");
         }
         if(currentScreenView) currentScreenView->draw();
-        
+        profiler.leaveSection("GUI Draw");
         SDL_GL_SwapBuffers();
-        
-        gettimeofday(&timeNow, 0);
-        animationFactor = timeNow.tv_sec - timeThen.tv_sec;
-        animationFactor += (timeNow.tv_usec - timeThen.tv_usec) / 1000000.0;
-        gettimeofday(&timeThen, 0);
-        
-        newFPS ++;
-        timeInLastSec += animationFactor;
-        if(timeInLastSec >= 1.0) {
-            timeInLastSec -= 1.0;
-            currentFPS = newFPS;
-            newFPS = 0;
-        }
-        
-        //usleep(1000);
+        profiler.leaveSection("Swap Buffers");
+        profiler.markFrame();
     }
 }
 

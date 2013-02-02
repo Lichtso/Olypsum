@@ -9,7 +9,7 @@
 #include <fstream>
 #include "rapidxml.hpp"
 #include "rapidxml_print.hpp"
-#include "Utilities.h"
+#include "Profiler.h"
 
 #ifndef XMLUtilities_h
 #define XMLUtilities_h
@@ -64,6 +64,10 @@ class XMLValueArray {
     //! Convertes data to a btVector3 and returns it
     btVector3 getVector3() {
         return btVector3(data[0], data[1], data[2]);
+    }
+    //! Convertes data to a btQuaternion and returns it
+    btQuaternion getQuaternion() {
+        return btQuaternion(data[0], data[1], data[2], data[3]);
     }
     /*! Parses a string of values separated by ' '
      @param dataStr The string to be parsed

@@ -49,6 +49,7 @@ ScriptManager::ScriptManager() {
     globalTemplate->Set(v8::String::New("log"), v8::FunctionTemplate::New(ScriptLog));
     globalTemplate->Set(v8::String::New("require"), v8::FunctionTemplate::New(ScriptRequire));
     scriptVector3.init(globalTemplate);
+    scriptMatrix4.init(globalTemplate);
 }
 
 ScriptManager::~ScriptManager() {

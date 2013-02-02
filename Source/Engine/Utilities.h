@@ -84,6 +84,9 @@ std::string stringOf(float value);
 //! Converts a btVector3 into a std::string
 std::string stringOf(btVector3& vec);
 
+//! Converts a btQuaternion into a std::string
+std::string stringOf(btQuaternion& rot);
+
 //! Converts a btTransform into a std::string
 std::string stringOf(btTransform& mat);
 

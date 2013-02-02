@@ -124,6 +124,8 @@ bool Texture::uploadTexture(GLenum textureTarget, GLenum format) {
         depth = 1;
         if(textureTarget != GL_TEXTURE_RECTANGLE)
             textureTarget = GL_TEXTURE_2D;
+        else
+            minFilter = GL_NEAREST;
     }
     
     glBindTexture(textureTarget, GLname);
@@ -131,8 +133,7 @@ bool Texture::uploadTexture(GLenum textureTarget, GLenum format) {
         glTexImage3D(textureTarget, 0, format, width, height, depth, 0, readFormat, GL_UNSIGNED_BYTE, surface->pixels);
     else
         glTexImage2D(textureTarget, 0, format, width, height, 0, readFormat, GL_UNSIGNED_BYTE, surface->pixels);
-    glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, (textureTarget == GL_TEXTURE_RECTANGLE) ? GL_NEAREST : minFilter);
-    glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, magFilter);
+    updateFilters(textureTarget);
     if(textureTarget != GL_TEXTURE_RECTANGLE)
         glGenerateMipmap(textureTarget);
     
@@ -147,16 +148,12 @@ bool Texture::uploadTexture(GLenum textureTarget, GLenum format) {
 
 bool Texture::uploadNormalMap(float processingValue) {
     if(!uploadTexture(GL_TEXTURE_RECTANGLE, GL_RED)) return false;
-    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     
     GLuint normalMap;
     glGenTextures(1, &normalMap);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, normalMap);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
     
     glViewport(0, 0, width, height);
     glBindFramebuffer(GL_FRAMEBUFFER, mainFBO.frameBuffer);
@@ -172,9 +169,11 @@ bool Texture::uploadNormalMap(float processingValue) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     unloadTexture();
-    glBindTexture(GL_TEXTURE_2D, normalMap);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    
     GLname = normalMap;
+    minFilter = GL_LINEAR_MIPMAP_LINEAR;
+    updateFilters();
+    glGenerateMipmap(GL_TEXTURE_2D);
     
     return true;
 }
@@ -182,6 +181,26 @@ bool Texture::uploadNormalMap(float processingValue) {
 void Texture::unloadTexture() {
     if(GLname) glDeleteTextures(1, &GLname);
     GLname = 0;
+}
+
+void Texture::updateFilters(GLenum textureTarget) {
+    if(textureTarget == 0) {
+        if(depth > 1)
+            textureTarget = GL_TEXTURE_2D_ARRAY;
+        else
+            textureTarget = GL_TEXTURE_2D;
+    }
+    glBindTexture(textureTarget, GLname);
+    if(textureTarget == GL_TEXTURE_RECTANGLE) {
+        glTexParameteri(textureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(textureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }else{
+        glTexParameteri(textureTarget, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(textureTarget, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameterf(textureTarget, GL_TEXTURE_MAX_ANISOTROPY, optionsState.anisotropy);
+    }
+    glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, minFilter);
+    glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, magFilter);
 }
 
 void Texture::use(GLuint targetIndex) {

@@ -823,6 +823,10 @@ btTransform TransformLink::AnimationEntry::Frame::interpolateTo(Frame* next, flo
     return transform;
 }
 
+TransformLink::AnimationEntry::AnimationEntry(bool loopB, float animationTimeB) :loop(loopB), animationTime(animationTimeB) {
+    
+}
+
 TransformLink::AnimationEntry::~AnimationEntry() {
     for(auto frame : frames)
         delete frame;
@@ -830,12 +834,17 @@ TransformLink::AnimationEntry::~AnimationEntry() {
 
 btTransform TransformLink::AnimationEntry::gameTick() {
     if(frames.size() == 0) return btTransform::getIdentity();
-    if(frames.size() == 1) return frames[0]->getTransform();
-    btTransform transform = frames[0]->interpolateTo(frames[1], animationTime);
-    animationTime += animationFactor;
-    if(animationTime > frames[0]->duration) {
-        animationTime -= frames[0]->duration;
+    Frame* currentFrame = frames[0];
+    if(frames.size() == 1) return currentFrame->getTransform();
+    btTransform transform = currentFrame->interpolateTo(frames[1], animationTime);
+    animationTime += profiler.animationFactor;
+    if(animationTime > currentFrame->duration) {
+        animationTime -= currentFrame->duration;
         frames.erase(frames.begin());
+        if(loop)
+            frames.push_back(currentFrame);
+        else
+            delete currentFrame;
     }
     return transform;
 }
@@ -843,7 +852,42 @@ btTransform TransformLink::AnimationEntry::gameTick() {
 rapidxml::xml_node<xmlUsedCharType>* TransformLink::AnimationEntry::write(rapidxml::xml_document<xmlUsedCharType>& doc) {
     rapidxml::xml_node<xmlUsedCharType>* entryNode = BaseEntry::write(doc);
     entryNode->first_attribute("type")->value("animation");
-    
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    attribute->name("loop");
+    attribute->value((loop) ? "true" : "false");
+    entryNode->append_attribute(attribute);
+    attribute = doc.allocate_attribute();
+    attribute->name("animationTime");
+    attribute->value(doc.allocate_string(stringOf(animationTime).c_str()));
+    entryNode->append_attribute(attribute);
+    rapidxml::xml_node<xmlUsedCharType>* framesNode = doc.allocate_node(rapidxml::node_element);
+    framesNode->name("Frames");
+    entryNode->append_node(framesNode);
+    for(auto frame : frames) {
+        rapidxml::xml_node<xmlUsedCharType>* frameNode = doc.allocate_node(rapidxml::node_element);
+        frameNode->name("Frame");
+        framesNode->append_node(frameNode);
+        attribute = doc.allocate_attribute();
+        attribute->name("acceleration");
+        std::stringstream ss;
+        ss << frame->accBegin;
+        ss << " ";
+        ss << frame->accEnd;
+        attribute->value(doc.allocate_string(ss.str().c_str()));
+        frameNode->append_attribute(attribute);
+        attribute = doc.allocate_attribute();
+        attribute->name("duration");
+        attribute->value(doc.allocate_string(stringOf(frame->duration).c_str()));
+        frameNode->append_attribute(attribute);
+        attribute = doc.allocate_attribute();
+        attribute->name("rotation");
+        attribute->value(doc.allocate_string(stringOf(frame->rotation).c_str()));
+        frameNode->append_attribute(attribute);
+        attribute = doc.allocate_attribute();
+        attribute->name("position");
+        attribute->value(doc.allocate_string(stringOf(frame->position).c_str()));
+        frameNode->append_attribute(attribute);
+    }
     return entryNode;
 }
 
@@ -869,7 +913,58 @@ TransformLink::TransformLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoa
         if(strcmp(attribute->value(), "transform") == 0) {
             transforms.push_back(new TransformEntry(readTransformationXML(entryNode)));
         }else if(strcmp(attribute->value(), "animation") == 0) {
-            printf("AnimationEntry\n");
+            attribute = entryNode->first_attribute("animationTime");
+            if(!attribute) {
+                log(error_log, "Tried to construct TransformLink-AnimationEntry without \"animationTime\"-attribute.");
+                return;
+            }
+            float animationTime;
+            sscanf(attribute->value(), "%f", &animationTime);
+            attribute = entryNode->first_attribute("loop");
+            if(!attribute) {
+                log(error_log, "Tried to construct TransformLink-AnimationEntry without \"loop\"-attribute.");
+                return;
+            }
+            rapidxml::xml_node<xmlUsedCharType>* framesNode = entryNode->first_node("Frames");
+            if(!framesNode) {
+                log(error_log, "Tried to construct TransformLink-AnimationEntry without \"Frames\"-node.");
+                return;
+            }
+            AnimationEntry* animationEntry = new AnimationEntry(strcmp(attribute->value(), "true") == 0, animationTime);
+            transforms.push_back(animationEntry);
+            rapidxml::xml_node<xmlUsedCharType>* frameNode = framesNode->first_node("Frame");
+            while(frameNode) {
+                XMLValueArray<float> vecData;
+                attribute = frameNode->first_attribute("rotation");
+                if(!attribute) {
+                    log(error_log, "Tried to construct TransformLink-AnimationEntry-Frame without \"rotation\"-attribute.");
+                    return;
+                }
+                vecData.readString(attribute->value(), "%f");
+                btQuaternion rot = vecData.getQuaternion();
+                attribute = frameNode->first_attribute("position");
+                if(!attribute) {
+                    log(error_log, "Tried to construct TransformLink-AnimationEntry-Frame without \"position\"-attribute.");
+                    return;
+                }
+                vecData.readString(attribute->value(), "%f");
+                btVector3 pos = vecData.getVector3();
+                attribute = frameNode->first_attribute("acceleration");
+                if(!attribute) {
+                    log(error_log, "Tried to construct TransformLink-AnimationEntry-Frame without \"acceleration\"-attribute.");
+                    return;
+                }
+                vecData.readString(attribute->value(), "%f");
+                attribute = frameNode->first_attribute("duration");
+                if(!attribute) {
+                    log(error_log, "Tried to construct TransformLink-AnimationEntry-Frame without \"duration\"-attribute.");
+                    return;
+                }
+                float duration;
+                sscanf(attribute->value(), "%f", &duration);
+                animationEntry->frames.push_back(new AnimationEntry::Frame(vecData.data[0], vecData.data[1], duration, rot, pos));
+                frameNode = frameNode->next_sibling("Frame");
+            }
         }else{
             log(error_log, std::string("Tried to TransformLink-Entry with invalid type: ")+attribute->value()+'.');
             return;

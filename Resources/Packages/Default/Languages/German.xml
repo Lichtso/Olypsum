@@ -24,7 +24,7 @@
 	<Entry key="screenBlurEnabled">Bildunschärfe</Entry>
 	<Entry key="depthOfFieldQuality">Tiefenunschärfe</Entry>
 	<Entry key="vSyncEnabled">V-Sync</Entry>
-	<Entry key="bumpMappingQuality">Oberflächenqualität</Entry>
+	<Entry key="surfaceQuality">Oberflächenqualität</Entry>
 	<Entry key="shadowQuality">Schattenqualität</Entry>
 	<Entry key="ssaoQuality">SSAO-Qualität</Entry>
 	<Entry key="blendingQuality">Mischungsqualität</Entry>

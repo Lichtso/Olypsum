@@ -194,7 +194,7 @@ bool Cam::gameTick() {
     else if(fov < M_PI)
         viewMat.perspective(fov, width/height, near, far);
     
-    velocity = (transformation.getOrigin()-prevPos)/animationFactor;
+    velocity = (transformation.getOrigin()-prevPos)/profiler.animationFactor;
     prevPos = transformation.getOrigin();
     return true;
 }

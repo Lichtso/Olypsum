@@ -130,9 +130,10 @@ class TransformLink : public BaseLink {
              */
             btTransform interpolateTo(Frame* next, float t);
         };
-        
+        bool loop; //!< True if the animation repeats its self
         float animationTime; //!< How many seconds is the current frame old
         std::vector<Frame*> frames; //!< The frames in this animation
+        AnimationEntry(bool loop = true, float animationTime = 0.0);
         ~AnimationEntry();
         btTransform gameTick();
         rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc);

@@ -12,6 +12,8 @@
 
 #ifndef Texture_h
 #define Texture_h
+#define GL_TEXTURE_MAX_ANISOTROPY 0x84FE
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY 0x84FF
 
 class FilePackage;
 
@@ -58,6 +60,8 @@ class Texture : public FilePackageResource {
     bool uploadNormalMap(float processingValue);
     //! Deletes the OpenGL texture (unload from VRAM)
     void unloadTexture();
+    //! Updates the OpenGL texture filters
+    void updateFilters(GLenum textureTarget = 0);
     /*! Sets the Texture as OpenGL 2D texture target
      @param targetIndex A index between 0 and x will be a texture target between GL_TEXTURE0 and GL_TEXTUREx
      */

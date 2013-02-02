@@ -240,7 +240,16 @@ void setMenu(MenuName menu) {
                     optionsState.depthOfFieldQuality = slider->value*3.0;
                     updateGraphicOptions();
                 }, [](GUISlider* slider) {
-                    optionsState.bumpMappingQuality = slider->value*3.0;
+                    optionsState.surfaceQuality = slider->value*3.0;
+                    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &optionsState.anisotropy);
+                    optionsState.anisotropy = fmin(optionsState.anisotropy, pow(2.0, optionsState.surfaceQuality));
+                    for(auto packageIterator : fileManager.filePackages)
+                        for(auto iterator : packageIterator.second->resources) {
+                            auto ptr = iterator.second.lock();
+                            Texture* texture = dynamic_cast<Texture*>(ptr.get());
+                            if(texture)
+                                texture->updateFilters();
+                        }
                     updateGraphicOptions();
                 }, [](GUISlider* slider) {
                     optionsState.shadowQuality = slider->value*4.0;
@@ -255,14 +264,14 @@ void setMenu(MenuName menu) {
             };
             unsigned char sliderValuesGraphics[] = {
                 optionsState.depthOfFieldQuality,
-                optionsState.bumpMappingQuality,
+                optionsState.surfaceQuality,
                 optionsState.shadowQuality,
                 optionsState.ssaoQuality,
                 optionsState.blendingQuality
             };
             const char* sliderLabelsGraphics[] = {
                 "depthOfFieldQuality",
-                "bumpMappingQuality",
+                "surfaceQuality",
                 "shadowQuality",
                 "ssaoQuality",
                 "blendingQuality"

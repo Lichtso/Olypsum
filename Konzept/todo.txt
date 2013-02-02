@@ -1,17 +1,17 @@
 Implement btSoftBody
 Implement btRayCastVehicle
-Error handle in Menu (open games)
-V8 scripts
+V8 API
 Use C++11 Multithreading
 Windows / Linux Support
 
 Not sure:
-Anisotropic filtering
 Cube map soft shadows
 PCSS
 Fog
+Light scattering
 Enviornment maping
 Magnetic Attraction PhysicLink
+Gear Rack PhysicLink
 
 Bugs:
 CCD NaN matrix

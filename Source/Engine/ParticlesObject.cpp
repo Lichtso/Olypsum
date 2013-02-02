@@ -186,7 +186,7 @@ bool ParticlesObject::gameTick() {
     
     if(optionsState.particleCalcTarget == 0) systemLife = 0.0;
     if(systemLife > -1.0) {
-        systemLife -= animationFactor;
+        systemLife -= profiler.animationFactor;
         if(systemLife <= 0.0) {
             remove();
             return false;
@@ -203,22 +203,22 @@ bool ParticlesObject::gameTick() {
                 particle->size = frand(sizeMin, sizeMax);
             }
         
-        btVector3 forceAux = force*animationFactor;
+        btVector3 forceAux = force*profiler.animationFactor;
         for(unsigned int p = 0; p < particlesCount; p ++) {
-            particles[p].life -= animationFactor;
+            particles[p].life -= profiler.animationFactor;
             if(particles[p].life <= 0.0) {
                 memcpy(&particles[p], &particles[p+1], sizeof(Particle)*(particlesCount-p-1));
                 particlesCount --;
                 p --;
                 continue;
             }
-            particles[p].pos += particles[p].dir*animationFactor;
+            particles[p].pos += particles[p].dir*profiler.animationFactor;
             particles[p].dir += forceAux;
         }
     }else if(optionsState.particleCalcTarget == 2) {
         shaderPrograms[particleCalculateSP]->use();
         currentShaderProgram->setUniformF("respawnParticles", (systemLife == -1.0 || systemLife > lifeMax) ? 1.0 : 0.0);
-        currentShaderProgram->setUniformF("animationFactor", animationFactor);
+        currentShaderProgram->setUniformF("animationFactor", profiler.animationFactor);
         currentShaderProgram->setUniformF("lifeCenter", (lifeMax+lifeMin)*0.5);
         currentShaderProgram->setUniformF("lifeRange", lifeMax-lifeMin);
         currentShaderProgram->setUniformF("sizeCenter", (sizeMax+sizeMin)*0.5);
@@ -227,7 +227,7 @@ bool ParticlesObject::gameTick() {
         currentShaderProgram->setUniformVec3("posRange", posMax-posMin);
         currentShaderProgram->setUniformVec3("dirCenter", (dirMax+dirMin)*0.5);
         currentShaderProgram->setUniformVec3("dirRange", dirMax-dirMin);
-        currentShaderProgram->setUniformVec3("velocityAdd", force*animationFactor);
+        currentShaderProgram->setUniformVec3("velocityAdd", force*profiler.animationFactor);
         
         glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, particlesVBO[!activeVAO]);
         glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, particlesVBO[!activeVAO]);
@@ -236,7 +236,7 @@ bool ParticlesObject::gameTick() {
         glDrawArrays(GL_POINTS, 0, particlesCount);
         glEndTransformFeedback();
         glBindVertexArray(0);
-        //glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, 0);
+        glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, 0);
         activeVAO = !activeVAO;
     }
     

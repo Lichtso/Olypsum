@@ -74,9 +74,10 @@ void ControlsMangager::gameTick() {
         int posY = view->height;
         for(int i = 0; i < consoleMessages.size(); i ++) {
             GUILabel* label;
-            consoleMessages[i].timeLeft -= animationFactor;
+            consoleMessages[i].timeLeft -= profiler.animationFactor;
             if(consoleMessages[i].timeLeft < 0.0) {
-                view->removeChild(i);
+                if(i < view->children.size())
+                    view->removeChild(i);
                 consoleMessages.erase(consoleMessages.begin()+i);
                 i --;
                 continue;
@@ -85,9 +86,9 @@ void ControlsMangager::gameTick() {
                 label = static_cast<GUILabel*>(view->children[i]);
                 label->color.a = fmin(1, consoleMessages[i].timeLeft);
                 float fallSpeed = posY-label->height;
-                fallSpeed = (fallSpeed-label->posY)*fmin(animationFactor*5.0, 0.5);
+                fallSpeed = (fallSpeed-label->posY)*fmin(profiler.animationFactor*5.0, 0.5);
                 label->posY += (fallSpeed > 0.0 && fallSpeed < 1.0) ? 1.0 : fallSpeed;
-                posY -= label->height*2.2;
+                posY -= label->height*2+label->fontHeight*0.2;
                 if(label->text == consoleMessages[i].message)
                     continue;
             }else{
@@ -95,7 +96,7 @@ void ControlsMangager::gameTick() {
                 view->addChild(label);
             }
             label->width = view->width;
-            label->fontHeight = currentScreenView->height*0.05;
+            label->fontHeight = currentScreenView->height*0.04;
             label->textAlign = GUITextAlign_Left;
             label->sizeAlignment = GUISizeAlignment_Height;
             label->color = Color4(1.0);
@@ -112,7 +113,7 @@ void ControlsMangager::gameTick() {
     
     //Calculate Screen Blur
     if(optionsState.screenBlurFactor > -1.0) {
-        float speed = animationFactor*20.0;
+        float speed = profiler.animationFactor*20.0;
         if(currentMenu == inGameMenu) {
             optionsState.screenBlurFactor -= min(optionsState.screenBlurFactor*speed, speed);
             if(optionsState.screenBlurFactor < 0.01) optionsState.screenBlurFactor = 0.0;
@@ -153,19 +154,19 @@ void ControlsMangager::gameTick() {
     }
     
     if(keyState[SDLK_w]) {
-        camMat.setOrigin(camMat.getOrigin()+camMat.getBasis().getColumn(2)*-5.0*animationFactor);
+        camMat.setOrigin(camMat.getOrigin()+camMat.getBasis().getColumn(2)*-5.0*profiler.animationFactor);
     }else if(keyState[SDLK_s]) {
-        camMat.setOrigin(camMat.getOrigin()+camMat.getBasis().getColumn(2)*5.0*animationFactor);
+        camMat.setOrigin(camMat.getOrigin()+camMat.getBasis().getColumn(2)*5.0*profiler.animationFactor);
     }
     if(keyState[SDLK_e]) {
-        camMat.setOrigin(camMat.getOrigin()+camMat.getBasis().getColumn(1)*-5.0*animationFactor);
+        camMat.setOrigin(camMat.getOrigin()+camMat.getBasis().getColumn(1)*-5.0*profiler.animationFactor);
     }else if(keyState[SDLK_q]) {
-        camMat.setOrigin(camMat.getOrigin()+camMat.getBasis().getColumn(1)*5.0*animationFactor);
+        camMat.setOrigin(camMat.getOrigin()+camMat.getBasis().getColumn(1)*5.0*profiler.animationFactor);
     }
     if(keyState[SDLK_a]) {
-        camMat.setOrigin(camMat.getOrigin()+camMat.getBasis().getColumn(0)*-5.0*animationFactor);
+        camMat.setOrigin(camMat.getOrigin()+camMat.getBasis().getColumn(0)*-5.0*profiler.animationFactor);
     }else if(keyState[SDLK_d]) {
-        camMat.setOrigin(camMat.getOrigin()+camMat.getBasis().getColumn(0)*5.0*animationFactor);
+        camMat.setOrigin(camMat.getOrigin()+camMat.getBasis().getColumn(0)*5.0*profiler.animationFactor);
     }
     
     mainCam->setTransformation(camMat);

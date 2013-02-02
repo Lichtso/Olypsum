@@ -20,13 +20,16 @@ class Matrix4 {
     union {
         struct {
             btVector3 x, y, z, w;
-        } data; //!< The transformation split up in 4 btVector3
+        }; //!< The transformation split up in 4 btVector3
+        btVector3 rows[4]; //!< The transformation split up in btVector3[4]
         btScalar values[16]; //!< The transformation split up in 16 btScalar
     };
     Matrix4();
     Matrix4(Matrix4 const &mat);
     Matrix4(btTransform const &mat);
     Matrix4(btScalar matData[16]);
+    //! Returns the colum of this Matrix4 at index
+    btVector3 getColum(unsigned char index);
     //! Converts this Matrix4 into a btTransform
     btTransform getBTMatrix();
     //! Converts this Matrix4 into a btMatrix3x3 (the w component is ignored)
@@ -47,8 +50,14 @@ class Matrix4 {
     Matrix4& operator*=(const Matrix4&);
     //! Overwrites the transformation with another Matrix4
     Matrix4& operator=(const Matrix4&);
+    //! Returns the product of this Matrix4 and a btVector3
+    btVector3 operator()(const btVector3&);
     //! Applies a scale to the transformation
     Matrix4& scale(btVector3 vec);
+    //! Applies a rotation to the transformation
+    Matrix4& rotate(btVector3 vec, btScalar angle);
+    //! Applies a translation to the transformation
+    Matrix4& translate(btVector3 vec);
     //! Applies a shift and a scale to the transformation by 0.5 to get a shadow map for example
     Matrix4& makeTextureMat();
     /*! Applies a perspective projection to the transformation

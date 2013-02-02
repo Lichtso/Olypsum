@@ -42,6 +42,7 @@
 		112672EC1699BCF1000BB805 /* HeightfieldTerrain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112672EA1699BCF0000BB805 /* HeightfieldTerrain.cpp */; };
 		112BF180162AFE8100CF0C0D /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112BF17E162AFE8100CF0C0D /* Object.cpp */; };
 		1130ECBB15BC1CA600203C2E /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1130ECBA15BC1CA600203C2E /* Menu.cpp */; };
+		11329D5A16BD8A2A000CC025 /* Profiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11329D5816BD8A29000CC025 /* Profiler.cpp */; };
 		114A0E6B169064E800D2CE9C /* LevelSaver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 114A0E69169064E800D2CE9C /* LevelSaver.cpp */; };
 		11648F6E153DEE63004CA74D /* FBO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11648F6D153DEE63004CA74D /* FBO.cpp */; };
 		118620481650165400A32518 /* ObjectManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118620461650165400A32518 /* ObjectManager.cpp */; };
@@ -163,6 +164,8 @@
 		112BF17E162AFE8100CF0C0D /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Object.cpp; sourceTree = "<group>"; };
 		112BF17F162AFE8100CF0C0D /* Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Object.h; sourceTree = "<group>"; };
 		1130ECBA15BC1CA600203C2E /* Menu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Menu.cpp; sourceTree = "<group>"; };
+		11329D5816BD8A29000CC025 /* Profiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Profiler.cpp; sourceTree = "<group>"; };
+		11329D5916BD8A2A000CC025 /* Profiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Profiler.h; sourceTree = "<group>"; };
 		114A0E69169064E800D2CE9C /* LevelSaver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelSaver.cpp; sourceTree = "<group>"; };
 		114A0E6A169064E800D2CE9C /* LevelSaver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LevelSaver.h; sourceTree = "<group>"; };
 		11648F6B153DEE0F004CA74D /* FBO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FBO.h; sourceTree = "<group>"; };
@@ -375,6 +378,8 @@
 			children = (
 				11A79B69153C2FE9002B9F0A /* Utilities.h */,
 				11A79B68153C2FE9002B9F0A /* Utilities.cpp */,
+				11329D5916BD8A2A000CC025 /* Profiler.h */,
+				11329D5816BD8A29000CC025 /* Profiler.cpp */,
 				111666C9169E11E300ECBDC9 /* netLink-1.0.3 */,
 				11A79B5D153C2FE9002B9F0A /* rapidxml-1.13 */,
 				11A907611629B27A00B16607 /* XMLUtilities.h */,
@@ -636,6 +641,7 @@
 				11FE8AB216B5A3F400B682D0 /* ScriptManager.cpp in Sources */,
 				11FE8AB516B719CE00B682D0 /* Script.cpp in Sources */,
 				11A6811F16B96CFC000E4029 /* ScriptLinearAlgebra.cpp in Sources */,
+				11329D5A16BD8A2A000CC025 /* Profiler.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

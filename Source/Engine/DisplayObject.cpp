@@ -125,7 +125,7 @@ bool ModelObject::gameTick() {
     unsigned int animatedMeshes = 0;
     for(unsigned int i = 0; i < model->meshes.size(); i ++)
         if(model->meshes[i]->material.diffuse->depth > 1)
-            textureAnimation[animatedMeshes ++] += animationFactor;
+            textureAnimation[animatedMeshes ++] += profiler.animationFactor;
     return true;
 }
 
@@ -470,7 +470,7 @@ void WaterObject::addWave(float duration, float ampitude, float length, float or
 
 bool WaterObject::gameTick() {
     for(unsigned int i = 0; i < waves.size(); i ++) {
-        waves[i].age += animationFactor;
+        waves[i].age += profiler.animationFactor;
         if(waves[i].age >= waves[i].duration) {
             waves.erase(waves.begin()+i);
             i --;

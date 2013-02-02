@@ -50,6 +50,17 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::v
     {
         std::ostringstream soucreStream;
         soucreStream << "#version 150\n";
+        switch(shaderType) {
+            case GL_VERTEX_SHADER:
+                soucreStream << "#define GL_VERTEX_SHADER\n";
+                break;
+            case GL_FRAGMENT_SHADER:
+                soucreStream << "#define GL_FRAGMENT_SHADER\n";
+                break;
+            case GL_GEOMETRY_SHADER:
+                soucreStream << "#define GL_GEOMETRY_SHADER\n";
+                break;
+        }
         for(unsigned int m = 0; m < macros.size(); m ++)
             soucreStream << std::string("#define ")+macros[m]+"\n";
         soucreStream << soucreCode;
@@ -339,7 +350,7 @@ void loadDynamicShaderPrograms() {
     sprintf(depthOfFieldMacro, "DOF_QUALITY %d", optionsState.depthOfFieldQuality);
     sprintf(ssaoQualityMacro, "SSAO_QUALITY %d", optionsState.ssaoQuality);
     sprintf(blendingQualityMacro, "BLENDING_QUALITY %d", optionsState.blendingQuality);
-    sprintf(bumpMappingMacro, "BUMP_MAPPING %d", optionsState.bumpMappingQuality);
+    sprintf(bumpMappingMacro, "BUMP_MAPPING %d", optionsState.surfaceQuality);
     sprintf(shadowQualityMacro, "SHADOW_QUALITY %d", optionsState.shadowQuality);
     
     //G-Buffer Shaders
@@ -359,7 +370,7 @@ void loadDynamicShaderPrograms() {
         if(p % 8 < 4)
             macros.push_back("BUMP_MAPPING 0");
         else
-            macros.push_back(((p % 2 == 1 || p % 16 >= 8) && optionsState.bumpMappingQuality > 1) ? "BUMP_MAPPING 1" : bumpMappingMacro);
+            macros.push_back(((p % 2 == 1 || p % 16 >= 8) && optionsState.surfaceQuality > 1) ? "BUMP_MAPPING 1" : bumpMappingMacro);
         
         if(p % 16 < 8)
             macros.push_back("BLENDING_QUALITY 0");
@@ -367,7 +378,7 @@ void loadDynamicShaderPrograms() {
             macros.push_back(blendingQualityMacro);
         
         shaderPrograms[solidGSP+p]->loadShaderProgram("gBuffer",
-                                                      (p % 8 < 4 || optionsState.bumpMappingQuality == 0) ? shaderTypeVertexFragment : shaderTypeVertexFragmentGeometry,
+                                                      (p % 8 < 4 || optionsState.surfaceQuality == 0) ? shaderTypeVertexFragment : shaderTypeVertexFragmentGeometry,
                                                       macros);
         shaderPrograms[solidGSP+p]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[solidGSP+p]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");

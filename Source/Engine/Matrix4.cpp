@@ -13,84 +13,92 @@ Matrix4::Matrix4() {
 }
 
 Matrix4::Matrix4(Matrix4 const &mat) {
-    data.x = mat.data.x;
-    data.y = mat.data.y;
-    data.z = mat.data.z;
-    data.w = mat.data.w;
+    x = mat.x;
+    y = mat.y;
+    z = mat.z;
+    w = mat.w;
 }
 
 Matrix4::Matrix4(btTransform const &mat) {
     btMatrix3x3 basis = mat.getBasis();
-    data.x = basis.getColumn(0);
-    data.y = basis.getColumn(1);
-    data.z = basis.getColumn(2);
-    data.w = mat.getOrigin();
-    data.w.setW(1.0);
+    x = basis.getColumn(0);
+    y = basis.getColumn(1);
+    z = basis.getColumn(2);
+    w = mat.getOrigin();
+    w.setW(1.0);
 }
 
 Matrix4::Matrix4(btScalar matData[16]) {
     memcpy(values, matData, sizeof(values));
 }
 
+btVector3 Matrix4::getColum(unsigned char index) {
+    btVector3 vec;
+    index *= 4;
+    vec.setX(values[index  ]);
+    vec.setY(values[index+1]);
+    vec.setZ(values[index+2]);
+    vec.setW(values[index+3]);
+    return vec;
+}
+
 btMatrix3x3 Matrix4::getNormalMatrix() {
-    return btMatrix3x3(data.x.normalized(), data.y.normalized(), data.z.normalized());
+    return btMatrix3x3(x.normalized(), y.normalized(), z.normalized());
 }
 
 btTransform Matrix4::getBTMatrix() {
     btTransform mat;
-    mat.setBasis(btMatrix3x3(data.x, data.y, data.z).transpose());
-    mat.setOrigin(data.w);
+    mat.setBasis(btMatrix3x3(x, y, z).transpose());
+    mat.setOrigin(w);
     return mat;
 }
 
 void Matrix4::getOpenGLMatrix(btScalar* matData) const {
-    matData[0] = data.x.x();
-    matData[1] = data.y.x();
-    matData[2] = data.z.x();
-    matData[3] = data.w.x();
-    matData[4] = data.x.y();
-    matData[5] = data.y.y();
-    matData[6] = data.z.y();
-    matData[7] = data.w.y();
-    matData[8] = data.x.z();
-    matData[9] = data.y.z();
-    matData[10] = data.z.z();
-    matData[11] = data.w.z();
-    matData[12] = data.x.w();
-    matData[13] = data.y.w();
-    matData[14] = data.z.w();
-    matData[15] = data.w.w();
-    //Matrix4 a = getTransposed();
-    //memcpy(matData, a.values, sizeof(values));
+    matData[0] = x.x();
+    matData[1] = y.x();
+    matData[2] = z.x();
+    matData[3] = w.x();
+    matData[4] = x.y();
+    matData[5] = y.y();
+    matData[6] = z.y();
+    matData[7] = w.y();
+    matData[8] = x.z();
+    matData[9] = y.z();
+    matData[10] = z.z();
+    matData[11] = w.z();
+    matData[12] = x.w();
+    matData[13] = y.w();
+    matData[14] = z.w();
+    matData[15] = w.w();
 }
 
 Matrix4& Matrix4::setIdentity() {
-    data.x = btVector3(1, 0, 0);
-    data.y = btVector3(0, 1, 0);
-    data.z = btVector3(0, 0, 1);
-    data.w = btVector3(0, 0, 0);
-    data.w.setW(1);
+    x = btVector3(1, 0, 0);
+    y = btVector3(0, 1, 0);
+    z = btVector3(0, 0, 1);
+    w = btVector3(0, 0, 0);
+    w.setW(1);
     return *this;
 }
 
 Matrix4 Matrix4::getTransposed() const {
     Matrix4 a;
-    a.data.x.setX(data.x.x());
-    a.data.x.setY(data.y.x());
-    a.data.x.setZ(data.z.x());
-    a.data.x.setW(data.w.x());
-    a.data.y.setX(data.x.y());
-    a.data.y.setY(data.y.y());
-    a.data.y.setZ(data.z.y());
-    a.data.y.setW(data.w.y());
-    a.data.z.setX(data.x.z());
-    a.data.z.setY(data.y.z());
-    a.data.z.setZ(data.z.z());
-    a.data.z.setW(data.w.z());
-    a.data.w.setX(data.x.w());
-    a.data.w.setY(data.y.w());
-    a.data.w.setZ(data.z.w());
-    a.data.w.setW(data.w.w());
+    a.x.setX(x.x());
+    a.x.setY(y.x());
+    a.x.setZ(z.x());
+    a.x.setW(w.x());
+    a.y.setX(x.y());
+    a.y.setY(y.y());
+    a.y.setZ(z.y());
+    a.y.setW(w.y());
+    a.z.setX(x.z());
+    a.z.setY(y.z());
+    a.z.setZ(z.z());
+    a.z.setW(w.z());
+    a.w.setX(x.w());
+    a.w.setY(y.w());
+    a.w.setZ(z.w());
+    a.w.setW(w.w());
     return a;
 }
 
@@ -237,11 +245,11 @@ Matrix4 Matrix4::operator*(const Matrix4& b) {
     __m128 a_line, b_line, r_line;
     for(char i = 0; i < 16; i += 4) {
         a_line = _mm_set1_ps(values[i]);
-        b_line = _mm_load_ps(b.values);
+        b_line = b.x.mVec128;
         r_line = _mm_mul_ps(b_line, a_line);
         for(char j = 1; j < 4; j ++) {
             a_line = _mm_set1_ps(values[i+j]);
-            b_line = _mm_load_ps(&b.values[j*4]);
+            b_line = b.rows[j].mVec128;
             r_line = _mm_add_ps(_mm_mul_ps(b_line, a_line), r_line);
         }
         _mm_store_ps(&a.values[i], r_line);
@@ -277,22 +285,76 @@ Matrix4& Matrix4::operator=(const Matrix4& mat) {
     return *this;
 }
 
+static inline btScalar dotVector4(const btVector3& a, const btVector3& b) {
+    return a.x()*b.x() + a.y()*b.y() + a.z()*b.z() + a.w()*b.w();
+}
+
+btVector3 Matrix4::operator()(const btVector3& vec) {
+    btVector3 resVec;
+#if defined (BT_USE_SSE)
+    //http://fastcpp.blogspot.de/2011/03/matrix-vector-multiplication-using-sse3.html
+    __m128 x = _mm_loadu_ps((const float*)&vec.m_floats);
+    //btVector3 colum = getColum(0);
+    __m128 A0 = getColum(0).mVec128; // _mm_loadu_ps((const float*)&colum.m_floats);
+    __m128 A1 = getColum(1).mVec128; // _mm_loadu_ps((const float*)&colum.m_floats);
+    __m128 A2 = getColum(2).mVec128; // _mm_loadu_ps((const float*)&colum.m_floats);
+    __m128 A3 = getColum(3).mVec128; // _mm_loadu_ps((const float*)&colum.m_floats);
+    __m128 m0 = _mm_mul_ps(A0, x);
+    __m128 m1 = _mm_mul_ps(A1, x);
+    __m128 m2 = _mm_mul_ps(A2, x);
+    __m128 m3 = _mm_mul_ps(A3, x);
+    __m128 sum_01 = _mm_hadd_ps(m0, m1);
+    __m128 sum_23 = _mm_hadd_ps(m2, m3);
+    resVec.mVec128 = _mm_hadd_ps(sum_01, sum_23);
+    //_mm_storeu_ps((float*)&resVec.m_floats, result);
+#else
+    resVec.setX(dotVector4(getColum(0), vec));
+    resVec.setY(dotVector4(getColum(1), vec));
+    resVec.setZ(dotVector4(getColum(2), vec));
+    resVec.setW(dotVector4(getColum(3), vec));
+#endif
+    return resVec;
+}
+
 Matrix4& Matrix4::scale(btVector3 vec) {
     Matrix4 a;
     a.setIdentity();
-    a.data.x.setX(vec.x());
-    a.data.y.setY(vec.y());
-    a.data.z.setZ(vec.z());
+    a.x.setX(vec.x());
+    a.y.setY(vec.y());
+    a.z.setZ(vec.z());
+    return (*this *= a);
+}
+
+Matrix4& Matrix4::rotate(btVector3 vec, btScalar angle) {
+    btScalar s = sin(angle), c = cos(angle), d = 1.0-c;
+    Matrix4 a;
+    a.setIdentity();
+    a.x.setX(vec.x()*vec.x()*d+c);
+    a.x.setY(vec.x()*vec.y()*d-vec.z()*s);
+    a.x.setZ(vec.x()*vec.z()*d+vec.y()*s);
+    a.y.setX(vec.y()*vec.x()*d+vec.z()*s);
+    a.y.setY(vec.y()*vec.y()*d+c);
+    a.y.setZ(vec.y()*vec.z()*d-vec.x()*s);
+    a.z.setX(vec.z()*vec.x()*d-vec.y()*s);
+    a.z.setY(vec.z()*vec.y()*d+vec.x()*s);
+    a.z.setZ(vec.z()*vec.z()*d+c);
+    return (*this *= a);
+}
+
+Matrix4& Matrix4::translate(btVector3 vec) {
+    Matrix4 a;
+    a.setIdentity();
+    a.w = vec;
     return (*this *= a);
 }
 
 Matrix4& Matrix4::makeTextureMat() {
     Matrix4 a;
     a.setIdentity();
-    a.data.x.setX(0.5);
-    a.data.y.setY(0.5);
-    a.data.w = btVector3(0.5, 0.5, 0.0);
-    a.data.w.setW(1.0);
+    a.x.setX(0.5);
+    a.y.setY(0.5);
+    a.w = btVector3(0.5, 0.5, 0.0);
+    a.w.setW(1.0);
     return (*this *= a);
 }
 
@@ -300,45 +362,45 @@ Matrix4& Matrix4::perspective(float fovy, float aspect, float n, float f) {
     float a = 1.0/tan(fovy*0.5);
     Matrix4 b;
     b.setIdentity();
-    b.data.x.setX(a/aspect);
-    b.data.y.setY(a);
-    b.data.z.setZ((n+f)/(n-f));
-    b.data.z.setW(-1.0);
-    b.data.w.setZ((2.0*n*f)/(n-f));
-    b.data.w.setW(0.0);
+    b.x.setX(a/aspect);
+    b.y.setY(a);
+    b.z.setZ((n+f)/(n-f));
+    b.z.setW(-1.0);
+    b.w.setZ((2.0*n*f)/(n-f));
+    b.w.setW(0.0);
     return (*this *= b);
 }
 
 Matrix4& Matrix4::frustum(float w, float h, float n, float f) {
     Matrix4 b;
     b.setIdentity();
-    b.data.x.setX(n/w);
-    b.data.y.setY(n/h);
-    b.data.z.setZ((n+f)/(n-f));
-    b.data.z.setW(-1.0);
-    b.data.w.setZ((2.0*n*f)/(n-f));
-    b.data.w.setW(0.0);
+    b.x.setX(n/w);
+    b.y.setY(n/h);
+    b.z.setZ((n+f)/(n-f));
+    b.z.setW(-1.0);
+    b.w.setZ((2.0*n*f)/(n-f));
+    b.w.setW(0.0);
     return (*this *= b);
 }
 
 Matrix4& Matrix4::ortho(float w, float h, float n, float f) {
     Matrix4 b;
     b.setIdentity();
-    b.data.x.setX(1.0/w);
-    b.data.y.setY(1.0/h);
-    b.data.z.setZ(2.0/(n-f));
-    b.data.w.setZ((n+f)/(n-f));
+    b.x.setX(1.0/w);
+    b.y.setY(1.0/h);
+    b.z.setZ(2.0/(n-f));
+    b.w.setZ((n+f)/(n-f));
     return (*this *= b);
 }
 
 std::string stringOf(Matrix4& mat) {
-    char buffer[64];
-    std::string str = "(";
+    std::ostringstream ss;
+    ss << "(";
     for(unsigned char i = 0; i < 16; i ++) {
-        if(i % 4 > 0) str += ", ";
-        sprintf(buffer, "%f", mat.values[i]);
-        str += buffer;
-        if(i % 4 == 3 && i < 15) str += ",\n ";
+        if(i % 4 > 0) ss << " ";
+        ss << mat.values[i];
+        if(i % 4 == 3 && i < 15) ss << ",\n ";
     }
-    return str+")";
+    ss << ")";
+    return ss.str();
 }

@@ -140,6 +140,12 @@ std::string stringOf(btVector3& vec) {
     return buffer;
 }
 
+std::string stringOf(btQuaternion& rot) {
+    char buffer[128];
+    sprintf(buffer, "%g %g %g %g", rot.x(), rot.y(), rot.z(), rot.w());
+    return buffer;
+}
+
 std::string stringOf(btTransform& mat) {
     btScalar values[16];
     mat.getOpenGLMatrix(values);

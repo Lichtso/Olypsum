@@ -122,7 +122,7 @@ void OptionsState::loadOptions() {
         optionsState.cubemapsEnabled = readOptionBool(optionGroup->first_node("CubemapsEnabled"));
         optionsState.vSyncEnabled = readOptionBool(optionGroup->first_node("VSyncEnabled"));
         optionsState.depthOfFieldQuality = readOptionValue<unsigned int>(optionGroup->first_node("DepthOfFieldQuality"), "%d");
-        optionsState.bumpMappingQuality = readOptionValue<unsigned int>(optionGroup->first_node("BumpMappingQuality"), "%d");
+        optionsState.surfaceQuality = readOptionValue<unsigned int>(optionGroup->first_node("SurfaceQuality"), "%d");
         optionsState.shadowQuality = readOptionValue<unsigned int>(optionGroup->first_node("ShadowQuality"), "%d");
         optionsState.ssaoQuality = readOptionValue<unsigned int>(optionGroup->first_node("SsaoQuality"), "%d");
         optionsState.blendingQuality = readOptionValue<unsigned int>(optionGroup->first_node("BlendingQuality"), "%d");
@@ -156,8 +156,8 @@ void OptionsState::saveOptions() {
     addXMLNode(doc, optionGroup, "VSyncEnabled", (optionsState.vSyncEnabled) ? "true" : "false");
     sprintf(&str[0], "%d", optionsState.depthOfFieldQuality);
     addXMLNode(doc, optionGroup, "DepthOfFieldQuality", &str[0]);
-    sprintf(&str[4], "%d", optionsState.bumpMappingQuality);
-    addXMLNode(doc, optionGroup, "BumpMappingQuality", &str[4]);
+    sprintf(&str[4], "%d", optionsState.surfaceQuality);
+    addXMLNode(doc, optionGroup, "SurfaceQuality", &str[4]);
     sprintf(&str[8], "%d", optionsState.shadowQuality);
     addXMLNode(doc, optionGroup, "ShadowQuality", &str[8]);
     sprintf(&str[12], "%d", optionsState.ssaoQuality);

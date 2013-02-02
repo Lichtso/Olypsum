@@ -55,8 +55,8 @@ class FilePackage {
 
 //! This class manages all FilePackages
 class FileManager {
-    std::map<std::string, FilePackage*> filePackages; //!< All FilePackages that are loaded
     public:
+    std::map<std::string, FilePackage*> filePackages; //!< All FilePackages that are loaded
     ~FileManager();
     //! Deletes all FilePackages
     void clear();
@@ -73,9 +73,22 @@ class FileManager {
 //! This class manages the options
 class OptionsState {
     public:
-    float screenBlurFactor, globalVolume, musicVolume, mouseSensitivity, mouseSmoothing; //! Float settings
-    bool edgeSmoothEnabled, fullScreenEnabled, cubemapsEnabled, vSyncEnabled; //! Boolean settings
-    unsigned char depthOfFieldQuality, bumpMappingQuality, shadowQuality, ssaoQuality, blendingQuality, particleCalcTarget; //! Integer settings
+    float anisotropy = 1.0,
+          screenBlurFactor = -1.0,
+          globalVolume = 0.5,
+          musicVolume = 0.5,
+          mouseSensitivity = 0.005,
+          mouseSmoothing = 0.5;
+    bool edgeSmoothEnabled = false,
+         fullScreenEnabled = true,
+         cubemapsEnabled = false,
+         vSyncEnabled = true;
+    unsigned char depthOfFieldQuality = 0,
+                  surfaceQuality = 1,
+                  shadowQuality = 1,
+                  ssaoQuality = 0,
+                  blendingQuality = 2,
+                  particleCalcTarget = 2;
     //! Loads the game options
     void loadOptions();
     //! Saves the game options

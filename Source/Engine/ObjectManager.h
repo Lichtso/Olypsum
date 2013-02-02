@@ -60,7 +60,6 @@ class ObjectManager {
     void drawFrame();
 };
 
-extern float animationFactor;
 extern ObjectManager objectManager;
 
 #endif

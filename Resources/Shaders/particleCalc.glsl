@@ -19,7 +19,7 @@ out vec4 vVelocity;
 void main() {
     vPosition.w = position.w-animationFactor;
     if(vPosition.w <= 0.0 && respawnParticles == 1.0) {
-        int seed = gl_VertexID*int(1000*animationFactor);
+        int seed = genSeed();
         vPosition.xyz = vec3rand(seed, posRange)+posCenter;
         vPosition.w = frand(seed, lifeRange)+lifeCenter;
         vVelocity.xyz = normalize(vec3rand(seed, dirRange)+dirCenter)*length(dirRange)*0.5;
