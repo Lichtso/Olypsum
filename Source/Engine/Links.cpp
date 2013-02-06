@@ -869,10 +869,8 @@ rapidxml::xml_node<xmlUsedCharType>* TransformLink::AnimationEntry::write(rapidx
         framesNode->append_node(frameNode);
         attribute = doc.allocate_attribute();
         attribute->name("acceleration");
-        std::stringstream ss;
-        ss << frame->accBegin;
-        ss << " ";
-        ss << frame->accEnd;
+        std::ostringstream ss;
+        ss << frame->accBegin << " " << frame->accEnd;
         attribute->value(doc.allocate_string(ss.str().c_str()));
         frameNode->append_attribute(attribute);
         attribute = doc.allocate_attribute();

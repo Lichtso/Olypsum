@@ -44,8 +44,8 @@ class FBO {
     ~FBO();
     //! Initialize
     void init();
-    //! Copies the content from the g-buffer source to the g-buffer destination
-    void copyGBuffer(unsigned char source, unsigned char destination);
+    //! Copies the content from the buffer source to the buffer destination
+    void copyBuffer(GLuint source, GLuint destination);
     /*! Prepares the g-buffers to be rendered in
      @param transparent True if this method is called by renderTransparentInDeferredBuffers()
      */
@@ -60,6 +60,12 @@ class FBO {
      @param outBuffersCount The count of outBuffers elements which will be used
      */
     void renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned char inBuffersCount, unsigned char* outBuffers, unsigned char outBuffersCount);
+    /*! Prepares a ColorBuffer to be rendered in and the g-buffers to be read out
+     @param inBuffers A array of g-buffer indecies to be used as textures. The index of each element will also be its texture target index
+     @param inBuffersCount The count of inBuffers elements which will be used
+     @param renderTarget The buffer to be used as render target
+     */
+    void renderDeferred(unsigned char* inBuffers, unsigned char inBuffersCount, GLuint renderTarget);
     /*! Prepares a ColorBuffer to be rendered in
      @param colorBuffer The ColorBuffer used as rendering target
      @param textureTarget The texture target used to bind the ColorBuffer

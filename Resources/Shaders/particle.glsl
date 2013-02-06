@@ -48,11 +48,7 @@ void main() {
     colorOut.rgb *= colorOut.a;
     #if BLENDING_QUALITY > 1 //Background lookup
     vec3 backgroundColor = (1.0-colorOut.a) * texture(sampler1, gl_FragCoord.xy).rgb;
-    #if BLENDING_QUALITY == 2 //Correct Blending
     specularOut = backgroundColor;
-    #elif BLENDING_QUALITY == 3 //Mixed Blending
-    colorOut.rgb += backgroundColor;
-    #endif //Mixed Blending
     #endif //Background lookup
 }
 

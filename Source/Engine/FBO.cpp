@@ -129,18 +129,18 @@ void FBO::init() {
     vao.drawType = GL_TRIANGLE_FAN;
 }
 
-void FBO::copyGBuffer(unsigned char source, unsigned char destination) {
+void FBO::copyBuffer(GLuint source, GLuint destination) {
     if(source == 0)
         glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     else{
         glBindFramebuffer(GL_READ_FRAMEBUFFER, frameBuffer);
-        glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, gBuffers[source], 0);
+        glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, source, 0);
     }
     if(destination == 0)
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     else{
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_RECTANGLE, gBuffers[destination], 0);
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_RECTANGLE, destination, 0);
     }
     glReadBuffer((source == 0) ? GL_BACK : GL_COLOR_ATTACHMENT0);
     glDrawBuffer((destination == 0) ? GL_BACK : GL_COLOR_ATTACHMENT1);
@@ -165,12 +165,12 @@ void FBO::renderInDeferredBuffers(bool transparent) {
     
     if(transparent) {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, gBuffers[transparentDBuffer], 0);
-        for(unsigned char o = 1; o < ((optionsState.blendingQuality == 2) ? 5 : 4); o ++)
+        for(unsigned char o = 1; o < ((optionsState.blendingQuality > 1) ? 5 : 4); o ++)
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+o, GL_TEXTURE_RECTANGLE, gBuffers[colorDBuffer+o], 0);
         
         glDrawBuffers(1, drawBuffers);
         glClear(GL_COLOR_BUFFER_BIT);
-        glDrawBuffers((optionsState.blendingQuality == 2) ? 5 : 4, drawBuffers);
+        glDrawBuffers((optionsState.blendingQuality > 1) ? 5 : 4, drawBuffers);
     }else{
         glClear(GL_DEPTH_BUFFER_BIT);
         for(unsigned char o = 0; o < 4; o ++)
@@ -189,9 +189,7 @@ void FBO::combineTransparent() {
 }
 
 void FBO::renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned char inBuffersCount, unsigned char* outBuffers, unsigned char outBuffersCount) {
-    if(outBuffersCount == 0) {
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }else{
+    if(outBuffersCount) {
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
         GLenum drawBuffers[outBuffersCount];
         for(unsigned char o = 0; o < outBuffersCount; o ++) {
@@ -199,7 +197,8 @@ void FBO::renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned cha
             glFramebufferTexture2D(GL_FRAMEBUFFER, drawBuffers[o], GL_TEXTURE_RECTANGLE, gBuffers[outBuffers[o]], 0);
         }
         glDrawBuffers(outBuffersCount, drawBuffers);
-    }
+    }else
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
     
     for(unsigned char i = 0; i < inBuffersCount; i ++) {
         glActiveTexture(GL_TEXTURE0+i);
@@ -207,6 +206,24 @@ void FBO::renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned cha
     }
     
     if(!fillScreen) return;
+    modelMat.setIdentity();
+    currentShaderProgram->setUniformMatrix4("modelViewMat", &modelMat);
+    vao.draw();
+}
+
+void FBO::renderDeferred(unsigned char* inBuffers, unsigned char inBuffersCount, GLuint outBuffer) {
+    if(outBuffer) {
+        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, outBuffer, 0);
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+    }else
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
+    for(unsigned char i = 0; i < inBuffersCount; i ++) {
+        glActiveTexture(GL_TEXTURE0+i);
+        glBindTexture(GL_TEXTURE_RECTANGLE, gBuffers[inBuffers[i]]);
+    }
+    
     modelMat.setIdentity();
     currentShaderProgram->setUniformMatrix4("modelViewMat", &modelMat);
     vao.draw();

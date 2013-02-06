@@ -52,7 +52,7 @@ out vec3 colorOut;
 const float blurWidth = float(DOF_QUALITY), blurInverse = 1.0/((blurWidth*2+1)*(blurWidth*2+1));
 
 void main() {
-	float factor = max(0.0, texture(sampler0, gl_FragCoord.xy).x-0.75)*10.0;
+	float factor = clamp(texture(sampler0, gl_FragCoord.xy).x*3.0-1.8, 0.0, 3.0);
     colorOut = vec3(0.0);
 	for(float x = -blurWidth; x <= blurWidth; x ++)
         for(float y = -blurWidth; y <= blurWidth; y ++)

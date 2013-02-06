@@ -43,17 +43,19 @@ void Profiler::markFrame() {
         lastSec -= 1.0;
         FPS = newFPS;
         newFPS = 0;
-        /*
-        printf("Profile (%d FPS, %f):\n", FPS, animationFactor);
+        
+        std::ostringstream ss;
+        ss << "Profile (" << FPS << " FPS)\n";
         foreach_e(sections, iterator) {
             if(iterator->second.secAverage == 0) {
                 sections.erase(iterator);
                 continue;
             }
-            printf("%s: %f\n", iterator->first, iterator->second.secAverage/FPS);
+            ss << iterator->first << ": " << (iterator->second.secAverage/FPS) << "\n";
             iterator->second.secAverage = 0;
         }
-        printf("\n");*/
+        ss << "\n";
+        //printf("%s", ss.str().c_str());
     }
     
     //usleep(1000);

@@ -30,6 +30,7 @@ uniform sampler2DShadow sampler4;
 #elif SHADOWS_ACTIVE == 3
 uniform samplerCubeShadow sampler3;
 uniform vec2 shadowDepthTransform;
+uniform vec3 shadowReflector[6];
 #endif
 uniform mat4 lShadowMat;
 
@@ -54,12 +55,12 @@ float shadowLookup2D(sampler2DShadow sampler, vec3 coord) {
 }
 #elif SHADOW_QUALITY > 1
 float shadowLookup2D(sampler2DShadow sampler, vec3 coord) {
-    float intensity = 0.0;
+    float shadowSum = 0.0;
 	const float blurSize = float(SHADOW_QUALITY)-1.0, blurSum = (blurSize*2.0+1.0)*(blurSize*2.0+1.0);
 	for(float y = -blurSize; y <= blurSize; y += 1.0)
 		for(float x = -blurSize; x <= blurSize; x += 1.0)
-			intensity += texture(sampler, vec3(coord.xy+vec2(x, y)*blurBias, coord.z));
-    return intensity / blurSum;
+			shadowSum += texture(sampler, vec3(coord.xy+vec2(x, y)*blurBias, coord.z));
+    return shadowSum/blurSum;
 }
 #endif
 
@@ -110,8 +111,26 @@ void main() {
     #endif
     #else //Cubemap
     shadowCoord.w = max(max(abs(shadowCoord.x), abs(shadowCoord.y)), abs(shadowCoord.z));
+    #if SHADOW_QUALITY == 1
     shadowCoord.w = (shadowDepthTransform.x + shadowDepthTransform.y/shadowCoord.w);
     intensity = (1.0-intensity)*texture(sampler3, shadowCoord);
+    #elif SHADOW_QUALITY > 1 //Soft Shadows
+    int sideIndex = 0;
+    if(abs(shadowCoord.y) == shadowCoord.w)
+        sideIndex = 2;
+    else if(abs(shadowCoord.z) == shadowCoord.w)
+        sideIndex = 4;
+    shadowCoord.w = (shadowDepthTransform.x + shadowDepthTransform.y/shadowCoord.w);
+    shadowCoord.xyz = normalize(shadowCoord.xyz);
+    vec3 rightVec = shadowReflector[sideIndex+1]*blurBias*2.0;
+    vec3 upVec = shadowReflector[sideIndex]*blurBias*2.0;
+    float shadowSum = 0.0;
+	const float blurSize = float(SHADOW_QUALITY)-1.0, blurSum = (blurSize*2.0+1.0)*(blurSize*2.0+1.0);
+	for(float y = -blurSize; y <= blurSize; y += 1.0)
+		for(float x = -blurSize; x <= blurSize; x += 1.0)
+			shadowSum += texture(sampler3, vec4(shadowCoord.xyz+rightVec*x+upVec*y, shadowCoord.w));
+    intensity = (1.0-intensity)*(shadowSum/blurSum);
+    #endif //Soft Shadows
     #endif //Cubemap
     #endif //Positional light
     #else //Shadows disabled

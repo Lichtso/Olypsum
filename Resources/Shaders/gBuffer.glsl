@@ -194,15 +194,10 @@ void main() {
     texture(sampler2, vTexCoord); //Place holder
     #endif //No refraction
     vec3 backgroundColor = (1.0-colorOut.a) * texture(sampler3, gl_FragCoord.xy+(viewNormalMat*normalOut).xy*10.0).rgb;
+    specularOut = backgroundColor;
     #endif //Background lookup
     
     colorOut.rgb *= colorOut.a;
-    #if BLENDING_QUALITY == 2 //Correct Blending
-    specularOut = backgroundColor;
-    #elif BLENDING_QUALITY == 3 //Mixed Blending
-    colorOut.rgb += backgroundColor;
-    #endif //Mixed Blending
-    
     #endif //Transparent
 }
 

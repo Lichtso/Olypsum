@@ -187,8 +187,6 @@ void AppMain(int argc, char *argv[]) {
             profiler.leaveSection("Rest");
             objectManager.gameTick();
             profiler.leaveSection("Game Tick");
-            objectManager.drawFrame();
-            profiler.leaveSection("Draw Frame");
         }
         if(currentScreenView) currentScreenView->draw();
         profiler.leaveSection("GUI Draw");

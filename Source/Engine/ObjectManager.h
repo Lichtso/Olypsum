@@ -56,8 +56,10 @@ class ObjectManager {
     void drawScene();
     //! Renders all LightObjects
     void illuminate();
-    //! Renders a graphics frame
-    void drawFrame();
+    /*! Renders a graphics frame
+     * @param renderTarget The buffer to be used as render traget
+     */
+    void drawFrame(GLuint renderTarget);
 };
 
 extern ObjectManager objectManager;

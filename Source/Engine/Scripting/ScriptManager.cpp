@@ -78,13 +78,9 @@ bool ScriptManager::tryCatch(v8::TryCatch* tryCatch) {
     }else{
         std::ostringstream stream;
         stream << stdStringOf(v8::String::Utf8Value(message->GetScriptResourceName()));
-        stream << ':';
-        stream << message->GetLineNumber();
-        stream << ": ";
-        stream << stdStringOf(v8::String::Utf8Value(tryCatch->Exception()));
-        stream << '\n';
-        stream << stdStringOf(v8::String::Utf8Value(message->GetSourceLine()));
-        stream << '\n';
+        stream << ':' << message->GetLineNumber() << ": ";
+        stream << stdStringOf(v8::String::Utf8Value(tryCatch->Exception())) << '\n';
+        stream << stdStringOf(v8::String::Utf8Value(message->GetSourceLine())) << '\n';
         int start = message->GetStartColumn(), end = message->GetEndColumn();
         for(int i = 0; i < start; i ++)
             stream << ' ';

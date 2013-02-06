@@ -465,6 +465,14 @@ void loadDynamicShaderPrograms() {
             shaderPrograms[positionalShadowLightSP]->addAttribute(POSITION_ATTRIBUTE, "position");
             shaderPrograms[positionalShadowLightSP]->addFragDataLocations(lightFragsOut);
             shaderPrograms[positionalShadowLightSP]->link();
+            shaderPrograms[positionalShadowLightSP]->use();
+            
+            float shadowReflector[] = {
+                0, 1, 0, 0, 0, 1,
+                1, 0, 0, 0, 0, 1,
+                0, 1, 0, 1, 0, 0
+            };
+            glUniform3fv(glGetUniformLocation(shaderPrograms[positionalShadowLightSP]->GLname, "shadowReflector"), 6, shadowReflector);
         }else
            optionsState.cubemapsEnabled = false;
     }else{
@@ -482,6 +490,14 @@ void loadDynamicShaderPrograms() {
     //Post Effect Shaders
     
     if(optionsState.ssaoQuality) {
+        char scaleMacro[32];
+        sprintf(scaleMacro, "SSAO_SCALE %f", screenSize[2]*2.0);
+        shaderPrograms[ssaoSP]->loadShaderProgram("ssao", shaderTypeVertexFragment, { ssaoQualityMacro, scaleMacro });
+        shaderPrograms[ssaoSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+        shaderPrograms[ssaoSP]->addFragDataLocations(colorFragOut);
+        shaderPrograms[ssaoSP]->link();
+        shaderPrograms[ssaoSP]->use();
+        
         unsigned char samples = 32;
         float pSphere[samples*2];
         for(unsigned char i = 0; i < samples*2; i ++)
@@ -493,15 +509,6 @@ void loadDynamicShaderPrograms() {
             pSphere[i*2  ] = vec.x();
             pSphere[i*2+1] = vec.y();
         }
-        
-        char scaleMacro[32];
-        sprintf(scaleMacro, "SSAO_SCALE %f", screenSize[2]*2.0);
-        
-        shaderPrograms[ssaoSP]->loadShaderProgram("ssao", shaderTypeVertexFragment, { ssaoQualityMacro, scaleMacro });
-        shaderPrograms[ssaoSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-        shaderPrograms[ssaoSP]->addFragDataLocations(colorFragOut);
-        shaderPrograms[ssaoSP]->link();
-        shaderPrograms[ssaoSP]->use();
         glUniform2fv(glGetUniformLocation(shaderPrograms[ssaoSP]->GLname, "pSphere"), samples, pSphere);
         
         shaderPrograms[ssaoCombineSP]->loadShaderProgram("preProcessing", shaderTypeVertexFragment, { "PROCESSING_TYPE 4", ssaoQualityMacro, scaleMacro });

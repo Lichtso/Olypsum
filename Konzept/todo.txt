@@ -5,7 +5,6 @@ Use C++11 Multithreading
 Windows / Linux Support
 
 Not sure:
-Cube map soft shadows
 PCSS
 Fog
 Light scattering
