@@ -7,8 +7,8 @@ Windows / Linux Support
 Not sure:
 PCSS
 Fog
-Light scattering
-Enviornment maping
+Enviornment maping / Reflections
+Light scattering / HDRR
 Magnetic Attraction PhysicLink
 Gear Rack PhysicLink
 

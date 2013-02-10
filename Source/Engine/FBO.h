@@ -47,25 +47,17 @@ class FBO {
     //! Copies the content from the buffer source to the buffer destination
     void copyBuffer(GLuint source, GLuint destination);
     /*! Prepares the g-buffers to be rendered in
-     @param transparent True if this method is called by renderTransparentInDeferredBuffers()
+     @param colorBuffer The buffer used to store the color
      */
-    void renderInDeferredBuffers(bool transparent);
-    // Uses the deferredCombineTransparentSP to combine the actual transparent frame with the color buffer
-    void combineTransparent();
-    /*! Prepares the g-buffers to be rendered in and read out
+    void renderInGBuffers(GLuint colorBuffer);
+    /*! Prepares buffers to be rendered in and read out
      @param fillScreen If true this method will render the entire screen else it will only prepare the g-buffers
-     @param inBuffers A array of g-buffer indecies to be used as textures. The index of each element will also be its texture target index
+     @param inBuffers A array of buffers to be used as textures. The index of each element will also be its texture target index
      @param inBuffersCount The count of inBuffers elements which will be used
-     @param outBuffers A array of g-buffer indecies to be used as rendering targets
+     @param outBuffers A array of buffers to be used as rendering targets
      @param outBuffersCount The count of outBuffers elements which will be used
      */
-    void renderDeferred(bool fillScreen, unsigned char* inBuffers, unsigned char inBuffersCount, unsigned char* outBuffers, unsigned char outBuffersCount);
-    /*! Prepares a ColorBuffer to be rendered in and the g-buffers to be read out
-     @param inBuffers A array of g-buffer indecies to be used as textures. The index of each element will also be its texture target index
-     @param inBuffersCount The count of inBuffers elements which will be used
-     @param renderTarget The buffer to be used as render target
-     */
-    void renderDeferred(unsigned char* inBuffers, unsigned char inBuffersCount, GLuint renderTarget);
+    void renderInBuffers(bool fillScreen, GLuint* inBuffers, unsigned char inBuffersCount, GLuint* outBuffers, unsigned char outBuffersCount);
     /*! Prepares a ColorBuffer to be rendered in
      @param colorBuffer The ColorBuffer used as rendering target
      @param textureTarget The texture target used to bind the ColorBuffer

@@ -551,13 +551,13 @@ void loadDynamicShaderPrograms() {
         shaderPrograms[particleDrawSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { "TEXTURE_ANIMATION 0", blendingQualityMacro });
         shaderPrograms[particleDrawSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[particleDrawSP]->addAttribute(VELOCITY_ATTRIBUTE, "velocity");
-        shaderPrograms[particleDrawSP]->addFragDataLocations((optionsState.blendingQuality == 2) ? gBufferTransparentOut : gBufferOut);
+        shaderPrograms[particleDrawSP]->addFragDataLocations((optionsState.blendingQuality > 1) ? gBufferTransparentOut : gBufferOut);
         shaderPrograms[particleDrawSP]->link();
         
         shaderPrograms[particleDrawAnimatedSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { "TEXTURE_ANIMATION 1", blendingQualityMacro });
         shaderPrograms[particleDrawAnimatedSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[particleDrawAnimatedSP]->addAttribute(VELOCITY_ATTRIBUTE, "velocity");
-        shaderPrograms[particleDrawAnimatedSP]->addFragDataLocations((optionsState.blendingQuality == 2) ? gBufferTransparentOut : gBufferOut);
+        shaderPrograms[particleDrawAnimatedSP]->addFragDataLocations((optionsState.blendingQuality > 1) ? gBufferTransparentOut : gBufferOut);
         shaderPrograms[particleDrawAnimatedSP]->link();
     }else
         optionsState.particleCalcTarget = 0;

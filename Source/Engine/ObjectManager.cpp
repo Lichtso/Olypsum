@@ -10,11 +10,7 @@
 
 ALCdevice* soundDevice;
 ALCcontext* soundContext;
-
 VertexArrayObject decalVAO;
-unsigned char inBuffersSSAO[] = { depthDBuffer, ssaoDBuffer }, outBuffersSSAO[] = { ssaoDBuffer };
-unsigned char inBuffersCombine[] = { colorDBuffer, diffuseDBuffer, specularDBuffer, materialDBuffer };
-unsigned char inBuffersPost[] = { depthDBuffer, colorDBuffer }, outBuffer[] = { colorDBuffer };
 
 //! @cond
 class LightPrioritySorter {
@@ -184,6 +180,14 @@ void ObjectManager::illuminate() {
 
 
 void ObjectManager::drawFrame(GLuint renderTarget) {
+    GLuint buffersCombine[] = {
+        (renderTarget) ? renderTarget : mainFBO.gBuffers[colorDBuffer],
+        mainFBO.gBuffers[diffuseDBuffer],
+        mainFBO.gBuffers[specularDBuffer],
+        mainFBO.gBuffers[materialDBuffer],
+        0
+    };
+    mainFBO.renderInGBuffers(buffersCombine[0]);
     drawScene();
     
     //Draw Decals
@@ -211,27 +215,27 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
     //Draw non transparent
     illuminate();
     shaderPrograms[deferredCombineSP]->use();
-    if(transparentAccumulator.size() > 0)
-        mainFBO.renderDeferred(true, inBuffersCombine, 4, outBuffer, 1);
-    else
-        mainFBO.renderDeferred(inBuffersCombine, 4, renderTarget);
+    mainFBO.renderInBuffers(true, buffersCombine, 4, buffersCombine, (renderTarget || transparentAccumulator.size() > 0) ? 1 : 0);
     
     //Draw transparent
     if(transparentAccumulator.size() > 0) {
+        buffersCombine[4] = buffersCombine[0];
+        buffersCombine[0] = mainFBO.gBuffers[transparentDBuffer];
+        
         btVector3 camMatPos = currentCam->getTransformation().getOrigin();
         std::sort(transparentAccumulator.begin(), transparentAccumulator.end(), [&camMatPos](AccumulatedTransparent* a, AccumulatedTransparent* b){
             return (a->object->getTransformation().getOrigin()-camMatPos).length() > (b->object->getTransformation().getOrigin()-camMatPos).length();
         });
         
         for(unsigned int i = 0; i < transparentAccumulator.size(); i ++) {
-            AccumulatedTransparent* transparent = transparentAccumulator[i];
-            mainFBO.renderInDeferredBuffers(true);
-            
+            mainFBO.renderInGBuffers(buffersCombine[0]);
             glDisable(GL_BLEND);
             glEnable(GL_DEPTH_TEST);
+            
+            AccumulatedTransparent* transparent = transparentAccumulator[i];
             if(optionsState.blendingQuality > 1) {
                 glActiveTexture((transparent->mesh) ? GL_TEXTURE3 : GL_TEXTURE1);
-                glBindTexture(GL_TEXTURE_RECTANGLE, mainFBO.gBuffers[colorDBuffer]);
+                glBindTexture(GL_TEXTURE_RECTANGLE, buffersCombine[4]);
             }
             
             if(transparent->mesh) {
@@ -241,12 +245,16 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
                 glDepthMask(GL_FALSE);
                 static_cast<ParticlesObject*>(transparent->object)->draw();
             }
-            
             delete transparent;
-            mainFBO.combineTransparent();
+            
+            illuminate();
+            shaderPrograms[deferredCombineTransparentSP]->use();
+            mainFBO.renderInBuffers(true,
+                                    buffersCombine, (optionsState.blendingQuality == 1) ? 5 : 4,
+                                    &buffersCombine[4], 1);
         }
-        
-        mainFBO.copyBuffer(mainFBO.gBuffers[colorDBuffer], renderTarget);
+        if(!renderTarget)
+            mainFBO.copyBuffer(buffersCombine[4], 0);
     }
 }
 
@@ -261,13 +269,7 @@ void ObjectManager::gameTick() {
         lightObjects[i]->gameTick(i < maxShadows);
     currentShadowLight = NULL;
     
-    //Calculate SimpleObjects
-    foreach_e(simpleObjects, iterator)
-    (*iterator)->gameTick();
-    
-    mainFBO.renderInDeferredBuffers(false);
-    mainCam->use();
-    currentCam->updateAudioListener();
+    profiler.leaveSection("Calculate shadows");
     
     //Push ParticlesObjects in transparentAccumulator
     for(auto particlesObject : particlesObjects)
@@ -279,38 +281,58 @@ void ObjectManager::gameTick() {
         }
     
     //Draw not transparent
+    mainCam->use();
+    currentCam->updateAudioListener();
+    
     bool keepInColorBuffer = optionsState.screenBlurFactor > 0.0 || optionsState.edgeSmoothEnabled || optionsState.depthOfFieldQuality;
     drawFrame((keepInColorBuffer) ? mainFBO.gBuffers[colorDBuffer] : 0);
     transparentAccumulator.clear();
     
+    profiler.leaveSection("Draw top frame");
+    
     //Apply post effect shaders
     if(optionsState.ssaoQuality) {
+        GLuint buffersSSAO[] = {
+            mainFBO.gBuffers[depthDBuffer],
+            mainFBO.gBuffers[ssaoDBuffer]
+        };
+        
         glViewport(0, 0, screenSize[0] >> screenSize[2], screenSize[1] >> screenSize[2]);
         shaderPrograms[ssaoSP]->use();
-        mainFBO.renderDeferred(true, inBuffersSSAO, 1, outBuffersSSAO, 1);
+        mainFBO.renderInBuffers(true, buffersSSAO, 1, &buffersSSAO[1], 1);
         glViewport(0, 0, screenSize[0], screenSize[1]);
         
         glEnable(GL_BLEND);
         glBlendFunc(GL_DST_COLOR, GL_ZERO);
         shaderPrograms[ssaoCombineSP]->use();
-        mainFBO.renderDeferred(true, inBuffersSSAO, 2, outBuffer, (keepInColorBuffer) ? 1 : 0);
+        mainFBO.renderInBuffers(true, buffersSSAO, 2, &mainFBO.gBuffers[colorDBuffer], (keepInColorBuffer) ? 1 : 0);
         glDisable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        
+        profiler.leaveSection("Apply SSAO");
     }
+    
+    GLuint buffersPostRenderer[] = {
+        mainFBO.gBuffers[depthDBuffer],
+        mainFBO.gBuffers[colorDBuffer]
+    };
     
     if(optionsState.screenBlurFactor > 0.0) {
         shaderPrograms[blurSP]->use();
         currentShaderProgram->setUniformF("processingValue", optionsState.screenBlurFactor);
-        mainFBO.renderDeferred(true, inBuffersCombine, 1, outBuffer, 0);
+        mainFBO.renderInBuffers(true, &buffersPostRenderer[1], 1, 0, 0);
+        profiler.leaveSection("Apply screen blur");
     }else{
         if(optionsState.edgeSmoothEnabled) {
             shaderPrograms[edgeSmoothSP]->use();
-            mainFBO.renderDeferred(true, inBuffersPost, 2, outBuffer, (optionsState.depthOfFieldQuality) ? 1 : 0);
+            mainFBO.renderInBuffers(true, buffersPostRenderer, 2, &buffersPostRenderer[1], (optionsState.depthOfFieldQuality) ? 1 : 0);
+            profiler.leaveSection("Apply edge smooth");
         }
         
         if(optionsState.depthOfFieldQuality) {
             shaderPrograms[depthOfFieldSP]->use();
-            mainFBO.renderDeferred(true, inBuffersPost, 2, outBuffer, 0);
+            mainFBO.renderInBuffers(true, buffersPostRenderer, 2, 0, 0);
+            profiler.leaveSection("Apply depth of field");
         }
     }
     
@@ -320,6 +342,7 @@ void ObjectManager::gameTick() {
     //Calculate Physics
     controlsMangager->gameTick();
     physicsWorld->stepSimulation(profiler.animationFactor, 4, 1.0/60.0); //Try to maintain 60 FPS
+    profiler.leaveSection("Calculate physics");
     
     //Calculate Decals
     for(auto iterator = decals.begin(); iterator != decals.end(); iterator ++) {
@@ -334,11 +357,17 @@ void ObjectManager::gameTick() {
     for(auto graphicObject : graphicObjects)
         graphicObject->gameTick();
     
+    //Calculate SimpleObjects
+    foreach_e(simpleObjects, iterator)
+    (*iterator)->gameTick();
+    profiler.leaveSection("Calculate objects");
+    
     //Calculate ParticleSystems
     if(optionsState.particleCalcTarget == 2) glEnable(GL_RASTERIZER_DISCARD);
     foreach_e(particlesObjects, iterator)
     (*iterator)->gameTick();
     if(optionsState.particleCalcTarget == 2) glDisable(GL_RASTERIZER_DISCARD);
+    profiler.leaveSection("Calculate particle systems");
 }
 
 ObjectManager objectManager;

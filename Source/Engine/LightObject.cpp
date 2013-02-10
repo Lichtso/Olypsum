@@ -18,8 +18,6 @@ LightSphereVolume lightSphere(1, sphereAccuracyX, sphereAccuracyY);
 LightParabolidVolume lightCone(1, coneAccuracy, 0);
 LightParabolidVolume lightParabolid(1, sphereAccuracyX, parabolidAccuracyY);
 
-unsigned char inBuffers[] = { positionDBuffer, normalDBuffer, materialDBuffer, transparentDBuffer }, outBuffers[] = { diffuseDBuffer, specularDBuffer };
-
 void initLightVolumes() {
     lightBox.init();
     lightSphere.init();
@@ -90,7 +88,15 @@ void LightObject::draw() {
         glFrontFace(GL_CCW);
     }
     
-    mainFBO.renderDeferred(false, inBuffers, sizeof(inBuffers)/sizeof(unsigned char), outBuffers, sizeof(outBuffers)/sizeof(unsigned char));
+    GLuint buffersLight[] = {
+        mainFBO.gBuffers[positionDBuffer],
+        mainFBO.gBuffers[normalDBuffer],
+        mainFBO.gBuffers[materialDBuffer],
+        //mainFBO.gBuffers[transparentDBuffer],
+        mainFBO.gBuffers[diffuseDBuffer],
+        mainFBO.gBuffers[specularDBuffer]
+    };
+    mainFBO.renderInBuffers(false, buffersLight, 3, &buffersLight[3], 2);
 }
 
 void LightObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {

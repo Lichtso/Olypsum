@@ -193,8 +193,7 @@ void main() {
     #if BUMP_MAPPING == 0 //No refraction
     texture(sampler2, vTexCoord); //Place holder
     #endif //No refraction
-    vec3 backgroundColor = (1.0-colorOut.a) * texture(sampler3, gl_FragCoord.xy+(viewNormalMat*normalOut).xy*10.0).rgb;
-    specularOut = backgroundColor;
+    specularOut = (1.0-colorOut.a) * texture(sampler3, gl_FragCoord.xy+(viewNormalMat*normalOut).xy*10.0).rgb;
     #endif //Background lookup
     
     colorOut.rgb *= colorOut.a;
