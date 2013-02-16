@@ -141,7 +141,7 @@ void HeightfieldTerrain::draw() {
     
     if(objectManager.currentShadowLight) {
         unsigned int shaderProgram = solidShadowSP;
-        if(dynamic_cast<PositionalLight*>(objectManager.currentShadowLight) && !optionsState.cubemapsEnabled) shaderProgram += 4;
+        if(objectManager.currentShadowIsParabolid) shaderProgram += 4;
         shaderPrograms[shaderProgram]->use();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);

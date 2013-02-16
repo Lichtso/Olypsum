@@ -22,6 +22,8 @@ enum CollisionMask {
 //! Camera used to render the scene
 class Cam : public SimpleObject {
     btVector3 prevPos, velocity;
+    //Returns a temporary Matrix4 which might differ from the transformation in reflection frames
+    Matrix4 getCamMatrix();
     public:
     Matrix4 viewMat; //!< Projection matrix used for OpenGL
     float fov, //!< Field of view, = 0 : Ortho, < 90 : Perspective, = 90 : Parabolid, = 180 : Sphere
@@ -45,10 +47,8 @@ class Cam : public SimpleObject {
      @return A new ray
      */
     Ray3 getRayAt(float x, float y);
-    /*! Sets the DisplayObject::inFrustum flag for each DisplayObject which is in the frustum of this Cam
-     @param filterMask Each DisplayObject with a matching CollisionMask will be proceeded
-     */
-    void doFrustumCulling(short int filterMask);
+    //! Sets the DisplayObject::inFrustum flag for each DisplayObject which is in the frustum of this Cam
+    void doFrustumCulling();
     /*! Tests if a DisplayObject is behind the near plane of this cam. Used by the engine to cull LightVolumes.
      @param node The btDbvtProxy of the DisplayObject to be tested
      @see LightObject
@@ -62,8 +62,8 @@ class Cam : public SimpleObject {
     bool gameTick();
     //! Sets this Cam as the currentCam
     void use();
-    //! Updates the OpenAL listener
-    void updateAudioListener();
+    //! Recalculates the frustum of this Cam
+    void updateFrustum();
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 

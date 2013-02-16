@@ -166,7 +166,7 @@ void FBO::renderInGBuffers(GLuint colorBuffer) {
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, colorBuffer, 0);
     if(colorBuffer == gBuffers[transparentDBuffer]) {
         for(unsigned char o = 0; o < ((optionsState.blendingQuality > 1) ? 4 : 3); o ++)
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_RECTANGLE, gBuffers[materialDBuffer+o], 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1+o, GL_TEXTURE_RECTANGLE, gBuffers[materialDBuffer+o], 0);
         
         glDrawBuffers(1, drawBuffers);
         glClear(GL_COLOR_BUFFER_BIT);

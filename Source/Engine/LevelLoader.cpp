@@ -197,6 +197,11 @@ bool LevelLoader::loadContainer(std::string name) {
         XMLValueArray<float> vecData;
         vecData.readString(attribute->value(), "%f");
         objectManager.physicsWorld->setGravity(vecData.getVector3());
+        attribute = node->first_attribute("ambient");
+        if(attribute) {
+            vecData.readString(attribute->value(), "%f");
+            objectManager.sceneAmbient = vecData.getVector3();
+        }
         node = node->next_sibling();
     }else if(containerStack.size() == 1) {
         log(error_log, "Root container does not begin with a \"Level\"-node.");
@@ -298,6 +303,7 @@ bool LevelLoader::loadLevel() {
         objectManager.clear();
         return false;
     }
+    objectManager.updateRendererSettings();
     scriptManager->getScriptFile(levelManager.levelPackage, "Main");
     
     levelManager.gameStatus = localGame;

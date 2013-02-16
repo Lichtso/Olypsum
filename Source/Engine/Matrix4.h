@@ -52,6 +52,8 @@ class Matrix4 {
     Matrix4& operator=(const Matrix4&);
     //! Returns the product of this Matrix4 and a btVector3
     btVector3 operator()(const btVector3&);
+    //! Applies a reflection to the transformation
+    Matrix4& reflect(btVector3 vec);
     //! Applies a scale to the transformation
     Matrix4& scale(btVector3 vec);
     //! Applies a rotation to the transformation

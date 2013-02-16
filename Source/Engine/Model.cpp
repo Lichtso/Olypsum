@@ -38,7 +38,7 @@ void Mesh::draw(ModelObject* object) {
         shaderProgram = solidShadowSP;
         if(object->model->skeleton) shaderProgram += 1;
         if(material.diffuse && material.diffuse->depth > 1) shaderProgram += 2;
-        if(dynamic_cast<PositionalLight*>(objectManager.currentShadowLight) && !optionsState.cubemapsEnabled) shaderProgram += 4;
+        if(objectManager.currentShadowIsParabolid) shaderProgram += 4;
     }else{
         shaderProgram = solidGSP;
         if(object->model->skeleton) shaderProgram += 1;
@@ -216,6 +216,8 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
             id = dataAttribute->value();
             Mesh::Material material;
             material.transparent = false;
+            material.reflectorNormal = btVector3(0.0, 0.0, 0.0);
+            material.reflectorDistance = 0.0;
             meshNode = geometry->first_node("profile_COMMON");
             if(!meshNode) goto endParsingXML;
             std::map<std::string, std::string> surfaceURLs, samplerURLs;
@@ -273,6 +275,16 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
                         float value;
                         sscanf(dataNode->value(), "%f", &value);
                         if(value > 1.0) material.transparent = true;
+                    }
+                }
+                if((dataNode = source->first_node("reflection"))) {
+                    dataNode = dataNode->first_node();
+                    if(dataNode) {
+                        XMLValueArray<float> value;
+                        value.readString(dataNode->value(), "%f");
+                        material.reflectorNormal = value.getVector3();
+                        material.reflectorDistance = value.data[3];
+                        //material.transparent = true;
                     }
                 }
                 if((dataNode = source->first_node("diffuse"))) {
@@ -806,13 +818,14 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
 
 void Model::draw(ModelObject* object) {
     for(unsigned int i = 0; i < meshes.size(); i ++) {
+        //if(meshes[i]->material.reflectorNormal != btVector3(0.0, 0.0, 0.0))
+        //    continue;
         if(optionsState.blendingQuality > 0 && !objectManager.currentShadowLight && meshes[i]->material.transparent) {
             AccumulatedTransparent* transparent = new AccumulatedTransparent();
             transparent->object = object;
             transparent->mesh = meshes[i];
             objectManager.transparentAccumulator.push_back(transparent);
-            continue;
-        }
-        meshes[i]->draw(object);
+        }else
+            meshes[i]->draw(object);
     }
 }

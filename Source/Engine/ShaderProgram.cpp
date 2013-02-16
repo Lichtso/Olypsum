@@ -387,7 +387,7 @@ void loadDynamicShaderPrograms() {
             shaderPrograms[solidGSP+p]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
             shaderPrograms[solidGSP+p]->addAttribute(JOINT_ATTRIBUTE, "joints");
         }
-        shaderPrograms[solidGSP+p]->addFragDataLocations((p % 16 >= 8 && optionsState.blendingQuality == 2) ? gBufferTransparentOut : gBufferOut);
+        shaderPrograms[solidGSP+p]->addFragDataLocations((p % 16 >= 8 && optionsState.blendingQuality > 1) ? gBufferTransparentOut : gBufferOut);
         shaderPrograms[solidGSP+p]->link();
     }
     

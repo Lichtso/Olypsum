@@ -1,5 +1,5 @@
 <Container>
-	<Level gravity="0.0 -9.81 0.0" />
+	<Level gravity="0.0 -9.81 0.0" ambient="0.1 0.1 0.1" />
 	<Container src="woodenBox">
 		<Translate>4.0 -3.0 0.0</Translate>
 	</Container>

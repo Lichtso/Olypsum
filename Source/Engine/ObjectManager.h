@@ -26,13 +26,16 @@ class Decal {
 //! This class manages all objects in the scene
 class ObjectManager {
     public:
+    bool currentShadowIsParabolid; //!< True if the active light during a shadow map generation is a PositionalLight
     LightObject* currentShadowLight; //!< The active light during a shadow map generation
-    std::vector<LightObject*> lightObjects; //!< All light sources of the scene
+    
     std::vector<AccumulatedTransparent*> transparentAccumulator; //!< Stores the transparent objects for deferred rendering
+    std::vector<LightObject*> lightObjects; //!< All light sources of the scene
     std::set<Decal*> decals; //!< All Decals in the scene
     std::set<GraphicObject*> graphicObjects; //!< All GraphicObjects (without ParticlesObjects) in the scene
     std::set<ParticlesObject*> particlesObjects; //! All ParticlesObjects in the scene
     std::set<SimpleObject*> simpleObjects; //! All Cams and SoundSourceObjects in the scene
+    btVector3 sceneAmbient; //! Ambient light color
     
     btDefaultCollisionConfiguration* collisionConfiguration; //!< The physics collision configuration
     btCollisionDispatcher* collisionDispatcher; //!< The physics collision dispatcher
@@ -60,6 +63,8 @@ class ObjectManager {
      * @param renderTarget The buffer to be used as render traget
      */
     void drawFrame(GLuint renderTarget);
+    //! Updates the scenes renderer settings
+    void updateRendererSettings();
 };
 
 extern ObjectManager objectManager;

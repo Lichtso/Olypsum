@@ -20,6 +20,8 @@ class Mesh {
     //! Surface material of a Mesh used for OpenGL
     struct Material {
         bool transparent; //!< Is this Model transparent
+        btVector3 reflectorNormal; //!< (0, 0, 0) if this mesh does not reflect
+        float reflectorDistance; //!< Distance of the reflection plane relative to the origin of the model
         std::shared_ptr<Texture> diffuse, //!< The diffuse texture
                                  effectMap, //!< The specular texture (optional)
                                  heightMap; //!< The highmap (optional)

@@ -101,9 +101,10 @@ void setColor(vec2 texCoord) {
     #if TEXTURE_ANIMATION == 0 //2D texture
     colorOut = texture(sampler0, texCoord); //Color
     #else //3D texture
-    colorOut = texture(sampler0, vec3(texCoord.xy, texCoordAnimZ.x))*texCoordAnimF.x
-                +texture(sampler0, vec3(texCoord.xy, texCoordAnimZ.y))*texCoordAnimF.y; //Color
+    colorOut = texture(sampler0, vec3(texCoord, texCoordAnimZ.x))*texCoordAnimF.x
+                +texture(sampler0, vec3(texCoord, texCoordAnimZ.y))*texCoordAnimF.y; //Color
     #endif
+    materialOut = texture(sampler1, texCoord).rgb;
     if(colorOut.a < 0.0039) discard;
     //colorOut.a = 0.5;
 }
@@ -132,7 +133,6 @@ void main() {
     
     #if BUMP_MAPPING <= 1 || BLENDING_QUALITY > 0
     setColor(vTexCoord);
-    materialOut = texture(sampler1, vTexCoord).rgb;
     #endif
     normalOut = normalize(vNormal);
     positionOut = vPosition;
@@ -165,7 +165,6 @@ void main() {
     vec3 bumpMap = texture(sampler2, texCoord.xy).xyz;
     bumpMap.xy = bumpMap.xy*2.0-vec2(1.0);
     normalOut = mat3(vTangent, vBitangent, normalOut)*bumpMap;
-	materialOut = texture(sampler1, texCoord.xy).rgb;
     #endif //Parallax
     
     #else //Transparent

@@ -103,7 +103,8 @@ void ControlsMangager::gameTick() {
             label->text = consoleMessages[i].message;
             label->updateContent();
             label->posX = 0.0;
-            label->posY = -view->height*2.0;
+            label->posY = posY-label->height;
+            posY -= label->height*2+label->fontHeight*0.2;
         }
         
         for(int i = consoleMessages.size(); i < view->children.size(); i ++)

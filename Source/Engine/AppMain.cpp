@@ -77,13 +77,11 @@ void AppMain(int argc, char *argv[]) {
     
     //Init Cams
     mainCam = new Cam();
-    mainCam->gameTick();
-    mainCam->use();
     guiCam = new Cam();
     guiCam->fov = 0.0;
     guiCam->near = -1.0;
     guiCam->far = 1.0;
-    guiCam->gameTick();
+    guiCam->updateFrustum();
     
     //Init Resources
     mainFont = new TextFont();
@@ -167,7 +165,7 @@ void AppMain(int argc, char *argv[]) {
             char str[64];
             sprintf(str, "FPS: %d", profiler.FPS);
             if(controlsMangager)
-                controlsMangager->consoleAdd(str, 0.9);
+                controlsMangager->consoleAdd(str, 1.0);
         }
         
         if(levelManager.gameStatus == noGame) {

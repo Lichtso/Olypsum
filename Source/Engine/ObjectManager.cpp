@@ -28,7 +28,6 @@ static void calculatePhysicsTick(btDynamicsWorld* world, btScalar timeStep) {
 
 ObjectManager::ObjectManager() {
     currentShadowLight = NULL;
-    physicsWorld = NULL;
     collisionConfiguration = new btDefaultCollisionConfiguration();
     collisionDispatcher = new btCollisionDispatcher(collisionConfiguration);
     constraintSolver = new btSequentialImpulseConstraintSolver();
@@ -78,15 +77,9 @@ void ObjectManager::init() {
     log(info_log, std::string("OpenAL, sound output: ")+alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
 }
 
-void ObjectManager::initGame() {
-    physicsWorld.reset(new btDiscreteDynamicsWorld(collisionDispatcher, broadphase, constraintSolver, collisionConfiguration));
-    physicsWorld->setInternalTickCallback(calculatePhysicsTick);
-    controlsMangager.reset(new ControlsMangager());
-    scriptManager.reset(new ScriptManager());
-}
-
 void ObjectManager::clear() {
     currentShadowLight = NULL;
+    
     for(unsigned int i = 0; i < lightObjects.size(); i ++)
         delete lightObjects[i];
     lightObjects.clear();
@@ -116,146 +109,12 @@ void ObjectManager::clear() {
     scriptManager.reset();
 }
 
-void ObjectManager::physicsTick() {
-    unsigned int numManifolds = collisionDispatcher->getNumManifolds();
-    
-    //printf(str, "Collisions: %d", numManifolds);
-    
-	for(unsigned int i = 0; i < numManifolds; i ++) {
-		btPersistentManifold* contactManifold = collisionDispatcher->getManifoldByIndexInternal(i);
-        if(contactManifold->getNumContacts() == 0) continue;
-        
-		const btCollisionObject *objectA = static_cast<const btCollisionObject*>(contactManifold->getBody0()),
-                                *objectB = static_cast<const btCollisionObject*>(contactManifold->getBody1());
-        PhysicObject *userObjectA = static_cast<PhysicObject*>(objectA->getUserPointer()),
-                     *userObjectB = static_cast<PhysicObject*>(objectB->getUserPointer());
-        
-        //printf("%p %p (%p %p) %d\n", objectA, objectB, userObjectA, userObjectB, contactManifold->getNumContacts());
-        
-        userObjectA->handleCollision(contactManifold, userObjectB);
-        userObjectB->handleCollision(contactManifold, userObjectA);
-	}
-    
-    for(auto graphicObject : graphicObjects)
-        graphicObject->physicsTick();
-}
-
-void ObjectManager::drawScene() {
-    //Reset Frustum Flags
-    for(auto graphicObject : graphicObjects)
-        graphicObject->inFrustum = false;
-    
-    //Calculate Frustum Culling
-    if(currentShadowLight)
-        currentCam->doFrustumCulling(CollisionMask_Static | CollisionMask_Object);
-    else{
-        for(auto particlesObject : particlesObjects)
-            particlesObject->inFrustum = false;
-        
-        for(unsigned int i = 0; i < lightObjects.size(); i ++)
-            lightObjects[i]->inFrustum = false;
-        currentCam->doFrustumCulling(CollisionMask_Light | CollisionMask_Static | CollisionMask_Object);
-    }
-    
-    //Draw GraphicObjects
-    glDisable(GL_BLEND);
-    for(auto graphicObject : graphicObjects)
-        if(graphicObject->inFrustum)
-            graphicObject->draw();
-    glEnable(GL_BLEND);
-}
-
-void ObjectManager::illuminate() {
-    glDepthMask(GL_FALSE);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE);
-    for(unsigned int i = 0; i < lightObjects.size(); i ++)
-        if(lightObjects[i]->inFrustum)
-            lightObjects[i]->draw();
-    glFrontFace(GL_CCW);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glDisable(GL_DEPTH_TEST);
-    glDisable(GL_BLEND);
-}
-
-
-void ObjectManager::drawFrame(GLuint renderTarget) {
-    GLuint buffersCombine[] = {
-        (renderTarget) ? renderTarget : mainFBO.gBuffers[colorDBuffer],
-        mainFBO.gBuffers[diffuseDBuffer],
-        mainFBO.gBuffers[specularDBuffer],
-        mainFBO.gBuffers[materialDBuffer],
-        0
-    };
-    mainFBO.renderInGBuffers(buffersCombine[0]);
-    drawScene();
-    
-    //Draw Decals
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    for(auto decal : decals) {
-        modelMat = decal->transformation;
-        
-        if(decal->diffuse)
-            decal->diffuse->use(0);
-        
-        if(decal->heightMap) {
-            decal->heightMap->use(2);
-            shaderPrograms[solidBumpGSP]->use();
-        }else{
-            glActiveTexture(GL_TEXTURE2);
-            glBindTexture(GL_TEXTURE_2D, 0);
-            shaderPrograms[solidGSP]->use();
-        }
-        
-        currentShaderProgram->setUniformF("discardDensity", min(1.0F, decal->life));
-        decalVAO.draw();
-    }
-    
-    //Draw non transparent
-    illuminate();
-    shaderPrograms[deferredCombineSP]->use();
-    mainFBO.renderInBuffers(true, buffersCombine, 4, buffersCombine, (renderTarget || transparentAccumulator.size() > 0) ? 1 : 0);
-    
-    //Draw transparent
-    if(transparentAccumulator.size() > 0) {
-        buffersCombine[4] = buffersCombine[0];
-        buffersCombine[0] = mainFBO.gBuffers[transparentDBuffer];
-        
-        btVector3 camMatPos = currentCam->getTransformation().getOrigin();
-        std::sort(transparentAccumulator.begin(), transparentAccumulator.end(), [&camMatPos](AccumulatedTransparent* a, AccumulatedTransparent* b){
-            return (a->object->getTransformation().getOrigin()-camMatPos).length() > (b->object->getTransformation().getOrigin()-camMatPos).length();
-        });
-        
-        for(unsigned int i = 0; i < transparentAccumulator.size(); i ++) {
-            mainFBO.renderInGBuffers(buffersCombine[0]);
-            glDisable(GL_BLEND);
-            glEnable(GL_DEPTH_TEST);
-            
-            AccumulatedTransparent* transparent = transparentAccumulator[i];
-            if(optionsState.blendingQuality > 1) {
-                glActiveTexture((transparent->mesh) ? GL_TEXTURE3 : GL_TEXTURE1);
-                glBindTexture(GL_TEXTURE_RECTANGLE, buffersCombine[4]);
-            }
-            
-            if(transparent->mesh) {
-                glDepthMask(GL_TRUE);
-                static_cast<ModelObject*>(transparent->object)->drawAccumulatedMesh(transparent->mesh);
-            }else{
-                glDepthMask(GL_FALSE);
-                static_cast<ParticlesObject*>(transparent->object)->draw();
-            }
-            delete transparent;
-            
-            illuminate();
-            shaderPrograms[deferredCombineTransparentSP]->use();
-            mainFBO.renderInBuffers(true,
-                                    buffersCombine, (optionsState.blendingQuality == 1) ? 5 : 4,
-                                    &buffersCombine[4], 1);
-        }
-        if(!renderTarget)
-            mainFBO.copyBuffer(buffersCombine[4], 0);
-    }
+void ObjectManager::initGame() {
+    physicsWorld.reset(new btDiscreteDynamicsWorld(collisionDispatcher, broadphase, constraintSolver, collisionConfiguration));
+    physicsWorld->setInternalTickCallback(calculatePhysicsTick);
+    controlsMangager.reset(new ControlsMangager());
+    scriptManager.reset(new ScriptManager());
+    sceneAmbient = btVector3(0.1, 0.1, 0.1);
 }
 
 void ObjectManager::gameTick() {
@@ -267,26 +126,15 @@ void ObjectManager::gameTick() {
     unsigned int maxShadows = 3;
     for(unsigned int i = 0; i < lightObjects.size(); i ++)
         lightObjects[i]->gameTick(i < maxShadows);
+    
     currentShadowLight = NULL;
-    
+    currentShadowIsParabolid = false;
     profiler.leaveSection("Calculate shadows");
-    
-    //Push ParticlesObjects in transparentAccumulator
-    for(auto particlesObject : particlesObjects)
-        if(particlesObject->inFrustum) {
-            AccumulatedTransparent* transparent = new AccumulatedTransparent();
-            transparent->object = particlesObject;
-            transparent->mesh = NULL;
-            objectManager.transparentAccumulator.push_back(transparent);
-        }
     
     //Draw not transparent
     mainCam->use();
-    currentCam->updateAudioListener();
-    
     bool keepInColorBuffer = optionsState.screenBlurFactor > 0.0 || optionsState.edgeSmoothEnabled || optionsState.depthOfFieldQuality;
     drawFrame((keepInColorBuffer) ? mainFBO.gBuffers[colorDBuffer] : 0);
-    transparentAccumulator.clear();
     
     profiler.leaveSection("Draw top frame");
     
@@ -368,6 +216,166 @@ void ObjectManager::gameTick() {
     (*iterator)->gameTick();
     if(optionsState.particleCalcTarget == 2) glDisable(GL_RASTERIZER_DISCARD);
     profiler.leaveSection("Calculate particle systems");
+}
+
+void ObjectManager::physicsTick() {
+    unsigned int numManifolds = collisionDispatcher->getNumManifolds();
+    
+    //printf(str, "Collisions: %d", numManifolds);
+    
+	for(unsigned int i = 0; i < numManifolds; i ++) {
+		btPersistentManifold* contactManifold = collisionDispatcher->getManifoldByIndexInternal(i);
+        if(contactManifold->getNumContacts() == 0) continue;
+        
+		const btCollisionObject *objectA = static_cast<const btCollisionObject*>(contactManifold->getBody0()),
+        *objectB = static_cast<const btCollisionObject*>(contactManifold->getBody1());
+        PhysicObject *userObjectA = static_cast<PhysicObject*>(objectA->getUserPointer()),
+        *userObjectB = static_cast<PhysicObject*>(objectB->getUserPointer());
+        
+        //printf("%p %p (%p %p) %d\n", objectA, objectB, userObjectA, userObjectB, contactManifold->getNumContacts());
+        
+        userObjectA->handleCollision(contactManifold, userObjectB);
+        userObjectB->handleCollision(contactManifold, userObjectA);
+	}
+    
+    for(auto graphicObject : graphicObjects)
+        graphicObject->physicsTick();
+}
+
+void ObjectManager::drawScene() {
+    //Calculate Frustum Culling
+    currentCam->doFrustumCulling();
+    
+    //Draw GraphicObjects
+    glDisable(GL_BLEND);
+    for(auto graphicObject : graphicObjects)
+        if(graphicObject->inFrustum)
+            graphicObject->draw();
+    glEnable(GL_BLEND);
+}
+
+void ObjectManager::illuminate() {
+    glDepthMask(GL_FALSE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE);
+    for(unsigned int i = 0; i < lightObjects.size(); i ++)
+        if(lightObjects[i]->inFrustum)
+            lightObjects[i]->draw();
+    glFrontFace(GL_CCW);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+}
+
+void ObjectManager::drawFrame(GLuint renderTarget) {
+    GLuint buffersCombine[] = {
+        mainFBO.gBuffers[diffuseDBuffer],
+        mainFBO.gBuffers[materialDBuffer],
+        (renderTarget) ? renderTarget : mainFBO.gBuffers[colorDBuffer],
+        mainFBO.gBuffers[specularDBuffer],
+        0
+    };
+    
+    /* Render Mirrors
+    for(auto graphicObject : graphicObjects) {
+        ModelObject* modelObject = dynamic_cast<ModelObject*>(graphicObject);
+        if(!modelObject)
+            continue;
+        for(Mesh* mesh : modelObject->model->meshes)
+            if(mesh->material.reflectorNormal != btVector3(0.0, 0.0, 0.0)) {
+                btTransform objectTransform = modelObject->getTransformation();
+                
+            }
+    }*/
+    
+    //Draw non transparent
+    mainFBO.renderInGBuffers(buffersCombine[2]);
+    currentCam->updateFrustum();
+    drawScene();
+    
+    //Draw Decals
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    for(auto decal : decals) {
+        modelMat = decal->transformation;
+        
+        if(decal->diffuse)
+            decal->diffuse->use(0);
+        
+        if(decal->heightMap) {
+            decal->heightMap->use(2);
+            shaderPrograms[solidBumpGSP]->use();
+        }else{
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            shaderPrograms[solidGSP]->use();
+        }
+        
+        currentShaderProgram->setUniformF("discardDensity", min(1.0F, decal->life));
+        decalVAO.draw();
+    }
+    
+    //Push ParticlesObjects in transparentAccumulator
+    for(auto particlesObject : particlesObjects)
+        if(particlesObject->inFrustum) {
+            AccumulatedTransparent* transparent = new AccumulatedTransparent();
+            transparent->object = particlesObject;
+            transparent->mesh = NULL;
+            transparentAccumulator.push_back(transparent);
+        }
+    
+    //Illuminate non transparent
+    illuminate();
+    shaderPrograms[deferredCombineSP]->use();
+    mainFBO.renderInBuffers(true, buffersCombine, 4, &buffersCombine[2], (renderTarget || transparentAccumulator.size() > 0) ? 1 : 0);
+    
+    //Draw transparent
+    if(transparentAccumulator.size() > 0) {
+        buffersCombine[4] = buffersCombine[2];
+        buffersCombine[2] = mainFBO.gBuffers[transparentDBuffer];
+        
+        btVector3 camMatPos = currentCam->getTransformation().getOrigin();
+        std::sort(transparentAccumulator.begin(), transparentAccumulator.end(), [&camMatPos](AccumulatedTransparent* a, AccumulatedTransparent* b){
+            return (a->object->getTransformation().getOrigin()-camMatPos).length() > (b->object->getTransformation().getOrigin()-camMatPos).length();
+        });
+        
+        for(unsigned int i = 0; i < transparentAccumulator.size(); i ++) {
+            mainFBO.renderInGBuffers(buffersCombine[2]);
+            glDisable(GL_BLEND);
+            glEnable(GL_DEPTH_TEST);
+            
+            AccumulatedTransparent* transparent = transparentAccumulator[i];
+            if(optionsState.blendingQuality > 1) {
+                glActiveTexture((transparent->mesh) ? GL_TEXTURE3 : GL_TEXTURE1);
+                glBindTexture(GL_TEXTURE_RECTANGLE, buffersCombine[4]);
+            }
+            
+            if(transparent->mesh) {
+                glDepthMask(GL_TRUE);
+                static_cast<ModelObject*>(transparent->object)->drawAccumulatedMesh(transparent->mesh);
+            }else{
+                glDepthMask(GL_FALSE);
+                static_cast<ParticlesObject*>(transparent->object)->draw();
+            }
+            delete transparent;
+            
+            illuminate();
+            shaderPrograms[deferredCombineTransparentSP]->use();
+            mainFBO.renderInBuffers(true,
+                                    buffersCombine, (optionsState.blendingQuality == 1) ? 5 : 4,
+                                    &buffersCombine[4], 1);
+        }
+        if(!renderTarget)
+            mainFBO.copyBuffer(buffersCombine[4], 0);
+    }
+    transparentAccumulator.clear();
+}
+
+void ObjectManager::updateRendererSettings() {
+    shaderPrograms[deferredCombineSP]->use();
+    shaderPrograms[deferredCombineSP]->setUniformVec3("sceneAmbient", sceneAmbient);
+    shaderPrograms[deferredCombineTransparentSP]->use();
+    shaderPrograms[deferredCombineTransparentSP]->setUniformVec3("sceneAmbient", sceneAmbient);
 }
 
 ObjectManager objectManager;

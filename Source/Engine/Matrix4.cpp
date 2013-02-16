@@ -316,6 +316,21 @@ btVector3 Matrix4::operator()(const btVector3& vec) {
     return resVec;
 }
 
+Matrix4& Matrix4::reflect(btVector3 vec) {
+    Matrix4 a;
+    a.setIdentity();
+    a.x.setX(1.0-2*vec.x()*vec.x());
+    a.x.setY(-2.0*vec.x()*vec.y());
+    a.x.setZ(-2.0*vec.x()*vec.z());
+    a.y.setX(-2*vec.y()*vec.x());
+    a.y.setY(1.0-2.0*vec.y()*vec.y());
+    a.y.setZ(-2.0*vec.y()*vec.z());
+    a.z.setX(-2*vec.z()*vec.x());
+    a.z.setY(-2.0*vec.z()*vec.y());
+    a.z.setZ(1.0-2.0*vec.z()*vec.z());
+    return (*this *= a);
+}
+
 Matrix4& Matrix4::scale(btVector3 vec) {
     Matrix4 a;
     a.setIdentity();

@@ -64,6 +64,7 @@ void LightObject::setPhysicsShape(btCollisionShape* shape) {
 }
 
 bool LightObject::gameTick(bool shadowActive) {
+    shadowCam.updateFrustum();
     if(!shadowActive) return false;
     if(!shadowMap) {
         shadowMap = new ColorBuffer(min(1024U, mainFBO.maxSize), true, optionsState.cubemapsEnabled && dynamic_cast<PositionalLight*>(this));
@@ -169,8 +170,8 @@ void DirectionalLight::setBounds(float width, float height, float range) {
 }
 
 bool DirectionalLight::gameTick(bool shadowActive) {
-    shadowCam.gameTick();
     if(!LightObject::gameTick(shadowActive)) return true;
+    objectManager.currentShadowIsParabolid = false;
     shadowCam.use();
     
     glDisable(GL_BLEND);
@@ -264,8 +265,8 @@ void SpotLight::setBounds(float cutoff, float range) {
 }
 
 bool SpotLight::gameTick(bool shadowActive) {
-    shadowCam.gameTick();
     if(!LightObject::gameTick(shadowActive)) return true;
+    objectManager.currentShadowIsParabolid = false;
     shadowCam.use();
     
     glDisable(GL_BLEND);
@@ -381,7 +382,6 @@ void PositionalLight::setBounds(bool omniDirectional, float range) {
 }
 
 bool PositionalLight::gameTick(bool shadowActive) {
-    shadowCam.gameTick();
     if(!LightObject::gameTick(shadowActive)) return true;
     if(abs(shadowCam.fov-M_PI*2.0) < 0.001 && !shadowMapB && !optionsState.cubemapsEnabled) {
         shadowMapB = new ColorBuffer(1024, true, false);
@@ -395,6 +395,7 @@ bool PositionalLight::gameTick(bool shadowActive) {
     Matrix4 viewMat = shadowCam.viewMat;
     glDisable(GL_BLEND);
     if(optionsState.cubemapsEnabled) {
+        objectManager.currentShadowIsParabolid = false;
         float fov = shadowCam.fov;
         shadowCam.fov = M_PI_2;
         btTransform camMat = shadowCam.getTransformation();
@@ -423,7 +424,7 @@ bool PositionalLight::gameTick(bool shadowActive) {
             btTransform rotTransform = btTransform::getIdentity();
             rotTransform.setRotation(rotation);
             shadowCam.setTransformation(camMat * rotTransform);
-            shadowCam.gameTick();
+            shadowCam.updateFrustum();
             mainFBO.renderInTexture(shadowMap, side);
             objectManager.drawScene();
         }
@@ -431,6 +432,7 @@ bool PositionalLight::gameTick(bool shadowActive) {
         shadowCam.viewMat = viewMat;
         shadowCam.fov = fov;
     }else{
+        objectManager.currentShadowIsParabolid = true;
         shaderPrograms[solidParabolidShadowSP]->use();
         shaderPrograms[solidParabolidShadowSP]->setUniformF("lRange", shadowCam.far);
         shaderPrograms[skeletalParabolidShadowSP]->use();

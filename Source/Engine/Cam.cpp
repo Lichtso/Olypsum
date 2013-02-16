@@ -73,6 +73,18 @@ Cam::~Cam() {
         currentCam = NULL;
 }
 
+Matrix4 Cam::getCamMatrix() {
+    /*if(objectManager.currentReflective) {
+        Matrix4 mat = transformation;
+        btVector3 translation = objectManager.currentReflective->normal*objectManager.currentReflective->distance;
+        mat.translate(translation*-1.0);
+        mat.reflect(objectManager.currentReflective->normal);
+        mat.translate(translation);
+        return mat;
+    }else*/
+        return Matrix4(transformation);
+}
+
 void Cam::remove() {
     objectManager.simpleObjects.erase(this);
     BaseObject::remove();
@@ -101,22 +113,37 @@ Ray3 Cam::getRayAt(float x, float y) {
     return ray;
 }
 
-void Cam::doFrustumCulling(short int filterMask) {
+void Cam::doFrustumCulling() {
+    short int filterMask = CollisionMask_Static | CollisionMask_Object;
+    
+    for(auto graphicObject : objectManager.graphicObjects)
+        graphicObject->inFrustum = false;
+    
+    if(!objectManager.currentShadowLight) {
+        for(auto particlesObject : objectManager.particlesObjects)
+            particlesObject->inFrustum = false;
+        
+        for(unsigned int i = 0; i < objectManager.lightObjects.size(); i ++)
+            objectManager.lightObjects[i]->inFrustum = false;
+        
+        filterMask |= CollisionMask_Light;
+    }
+    
     btDbvtBroadphase* broadphase = static_cast<btDbvtBroadphase*>(objectManager.broadphase);
     btVector3* planes_n = new btVector3[6];
     btScalar planes_o[6];
-    btVector3 origin = transformation.getOrigin();
+    btTransform mat = getCamMatrix().getBTMatrix();
     
-    planes_n[0] = -transformation.getBasis().getColumn(2);
-    planes_n[1] = -planes_n[0];
-    planes_o[1] = -planes_n[1].dot(origin+planes_n[0]*far);
+    planes_n[1] = mat.getBasis().getColumn(2);
+    planes_o[1] = -planes_n[1].dot(mat.getOrigin()-planes_n[1]*far);
+    planes_n[0] = -planes_n[1];
     
     if(fov < M_PI) {
         Ray3 rayLT = getRayAt(-1, -1),
              rayLB = getRayAt(-1, 1),
              rayRT = getRayAt(1, -1),
              rayRB = getRayAt(1, 1);
-        planes_o[0] = -planes_n[0].dot(origin+planes_n[0]*near);
+        planes_o[0] = -planes_n[0].dot(mat.getOrigin()+planes_n[0]*near);
         planes_n[2] = (rayLB.direction).cross(rayLT.direction).normalize();
         planes_o[2] = -planes_n[2].dot(rayLB.origin);
         planes_n[3] = (rayRT.direction).cross(rayRB.direction).normalize();
@@ -125,19 +152,54 @@ void Cam::doFrustumCulling(short int filterMask) {
         planes_o[4] = -planes_n[4].dot(rayRT.origin);
         planes_n[5] = (rayRB.direction).cross(rayLB.direction).normalize();
         planes_o[5] = -planes_n[5].dot(rayLB.origin);
+        /*
+        if(objectManager.currentReflective) {
+            planes_n[0] = objectManager.currentReflective->normal;
+            planes_o[0] = -planes_n[0].dot(objectManager.currentReflective->normal*objectManager.currentReflective->distance);
+            btDbvtProxy* proxy = static_cast<btDbvtProxy*>(objectManager.currentReflective->object->getBody()->getBroadphaseHandle());
+            btVector3 points[8] = {
+                btVector3(proxy->m_aabbMin.x(), proxy->m_aabbMin.y(), proxy->m_aabbMin.z()),
+                btVector3(proxy->m_aabbMax.x(), proxy->m_aabbMin.y(), proxy->m_aabbMin.z()),
+                btVector3(proxy->m_aabbMin.x(), proxy->m_aabbMax.y(), proxy->m_aabbMin.z()),
+                btVector3(proxy->m_aabbMax.x(), proxy->m_aabbMax.y(), proxy->m_aabbMin.z()),
+                btVector3(proxy->m_aabbMin.x(), proxy->m_aabbMin.y(), proxy->m_aabbMax.z()),
+                btVector3(proxy->m_aabbMax.x(), proxy->m_aabbMin.y(), proxy->m_aabbMax.z()),
+                btVector3(proxy->m_aabbMin.x(), proxy->m_aabbMax.y(), proxy->m_aabbMax.z()),
+                btVector3(proxy->m_aabbMax.x(), proxy->m_aabbMax.y(), proxy->m_aabbMax.z())
+            };
+            btVector3 axes[4] = {
+                -mat.getBasis().getColumn(1),
+                mat.getBasis().getColumn(1),
+                -mat.getBasis().getColumn(0),
+                mat.getBasis().getColumn(0)
+            };
+            for(char plane = 0; plane < 4; plane ++) {
+                float bestFactor = -2.0;
+                planes_n[plane+2] = btVector3(0.0, 0.0, 0.0);
+                for(char i = 0; i < 8; i ++) {
+                    btVector3 normal = axes[plane].cross(points[i]-mat.getOrigin()).normalized();
+                    float factor = axes[(plane+2)%4].dot(normal);
+                    if(factor > bestFactor) {
+                        bestFactor = factor;
+                        planes_n[plane+2] = normal;
+                    }
+                }
+                planes_o[plane+2] = -planes_n[plane+2].dot(mat.getOrigin());
+            }
+        }*/
     }else{
         if(abs(fov-M_PI) < 0.001)
-            planes_o[0] = -planes_n[0].dot(origin);
+            planes_o[0] = -planes_n[0].dot(mat.getOrigin());
         else
-            planes_o[0] = -planes_n[0].dot(origin-planes_n[0]*far);
-        planes_n[2] = transformation.getBasis().getColumn(0);
-        planes_o[2] = -planes_n[2].dot(origin-planes_n[2]*far);
+            planes_o[0] = -planes_n[0].dot(mat.getOrigin()-planes_n[0]*far);
+        planes_n[2] = mat.getBasis().getColumn(0);
+        planes_o[2] = -planes_n[2].dot(mat.getOrigin()-planes_n[2]*far);
         planes_n[3] = -planes_n[2];
-        planes_o[3] = -planes_n[3].dot(origin-planes_n[3]*far);
-        planes_n[4] = transformation.getBasis().getColumn(1);
-        planes_o[4] = -planes_n[4].dot(origin-planes_n[4]*far);
+        planes_o[3] = -planes_n[3].dot(mat.getOrigin()-planes_n[3]*far);
+        planes_n[4] = mat.getBasis().getColumn(1);
+        planes_o[4] = -planes_n[4].dot(mat.getOrigin()-planes_n[4]*far);
         planes_n[5] = -planes_n[4];
-        planes_o[5] = -planes_n[5].dot(origin-planes_n[5]*far);
+        planes_o[5] = -planes_n[5].dot(mat.getOrigin()-planes_n[5]*far);
     }
     
     FrustumCullingCallback fCC(filterMask);
@@ -187,23 +249,8 @@ void Cam::drawDebugFrustum(Color4 color) {
 }
 
 bool Cam::gameTick() {
-    viewMat = Matrix4(transformation).getInverse();
-    
-    if(fov == 0.0)
-        viewMat.ortho(width, height, near, far);
-    else if(fov < M_PI)
-        viewMat.perspective(fov, width/height, near, far);
-    
     velocity = (transformation.getOrigin()-prevPos)/profiler.animationFactor;
     prevPos = transformation.getOrigin();
-    return true;
-}
-
-void Cam::use() {
-    currentCam = this;
-}
-
-void Cam::updateAudioListener() {
     btMatrix3x3 mat = transformation.getBasis();
     btVector3 up = mat.getColumn(1), front = mat.getColumn(2), pos = transformation.getOrigin();
     float orientation[] = { front.x(), front.y(), front.z(), up.x(), up.y(), up.z() };
@@ -211,6 +258,20 @@ void Cam::updateAudioListener() {
     alListenerfv(AL_ORIENTATION, orientation);
     alListener3f(AL_POSITION, pos.x(), pos.y(), pos.z());
     alListener3f(AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());
+    return true;
+}
+
+void Cam::use() {
+    currentCam = this;
+}
+
+void Cam::updateFrustum() {
+    viewMat = getCamMatrix().getInverse();
+    
+    if(fov == 0.0)
+        viewMat.ortho(width, height, near, far);
+    else if(fov < M_PI)
+        viewMat.perspective(fov, width/height, near, far);
 }
 
 rapidxml::xml_node<xmlUsedCharType>* Cam::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {

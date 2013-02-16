@@ -28,6 +28,9 @@
         </newparam>
         <technique sid="common">
           <phong>
+            <reflection>
+              <vector>1.0 0.0 0.0 10.0</vector>
+            </reflection>
             <emission>
               <color sid="emission">0 0 0 1</color>
             </emission>
