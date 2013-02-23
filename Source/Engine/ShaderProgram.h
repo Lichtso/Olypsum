@@ -83,9 +83,9 @@ class ShaderProgram {
     //! Sets a float[3] uniform
     void setUniformVec3(const char* name, btVector3 value);
     //! Sets a 3x3 matrix uniform
-    void setUniformMatrix3(const char* name, const btMatrix3x3* mat);
+    void setUniformMatrix3(const char* name, const btMatrix3x3* mat, bool transpose = true);
     //! Sets a 3x3 matrix uniform
-    void setUniformMatrix3(const char* name, const btTransform* mat);
+    void setUniformMatrix3(const char* name, const btTransform* mat, bool transpose = true);
     //! Sets a 4x4 matrix uniform
     void setUniformMatrix4(const char* name, const Matrix4* mat);
     //! Sets a 4x4 matrix uniform

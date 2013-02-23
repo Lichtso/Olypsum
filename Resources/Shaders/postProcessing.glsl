@@ -12,7 +12,7 @@ uniform mat4 modelViewMat;
 void main() {
     gl_Position = vec4(position, 1.0)*modelViewMat;
     #if PROCESSING_TYPE == 3
-    vTexCoord = (textureMat*vec3(position.xy, 1.0)).xy;
+    vTexCoord = (vec3(position.xy, 1.0)*textureMat).xy;
     #elif PROCESSING_TYPE == 4
     vPosition = (vec4(position, 1.0)*modelMat).xyz;
     #endif

@@ -81,7 +81,7 @@ void AppMain(int argc, char *argv[]) {
     guiCam->fov = 0.0;
     guiCam->near = -1.0;
     guiCam->far = 1.0;
-    guiCam->updateFrustum();
+    guiCam->updateViewMat();
     
     //Init Resources
     mainFont = new TextFont();

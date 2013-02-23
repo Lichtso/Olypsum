@@ -255,7 +255,7 @@ void ParticlesObject::draw() {
     currentShaderProgram->setUniformF("lifeInvMax", (float)texture->depth/lifeMax);
     if(transformAligned) {
         btMatrix3x3 viewNormalMat = getTransformation().getBasis();
-        currentShaderProgram->setUniformMatrix3("viewNormalMat", &viewNormalMat);
+        currentShaderProgram->setUniformMatrix3("viewNormalMat", &viewNormalMat, false);
     }
     
     glBindVertexArray(particlesVAO[activeVAO]);

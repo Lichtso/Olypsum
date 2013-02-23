@@ -19,9 +19,8 @@ class Mesh {
     VertexArrayObject vao; //!< VertexArrayObject used for OpenGL
     //! Surface material of a Mesh used for OpenGL
     struct Material {
-        bool transparent; //!< Is this Model transparent
-        btVector3 reflectorNormal; //!< (0, 0, 0) if this mesh does not reflect
-        float reflectorDistance; //!< Distance of the reflection plane relative to the origin of the model
+        bool transparent = false; //!< Is this Model transparent
+        float reflectivity = 0.0; //!< Reflectivity <0.0 : Plane Mirror, ==0.0 : No Mirror, >0.0 : Environment Mirror
         std::shared_ptr<Texture> diffuse, //!< The diffuse texture
                                  effectMap, //!< The specular texture (optional)
                                  heightMap; //!< The highmap (optional)

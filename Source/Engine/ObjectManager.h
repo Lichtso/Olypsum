@@ -28,6 +28,7 @@ class ObjectManager {
     public:
     bool currentShadowIsParabolid; //!< True if the active light during a shadow map generation is a PositionalLight
     LightObject* currentShadowLight; //!< The active light during a shadow map generation
+    Reflective* currentReflective; //!< The active reflector during a reflection of the scene
     
     std::vector<AccumulatedTransparent*> transparentAccumulator; //!< Stores the transparent objects for deferred rendering
     std::vector<LightObject*> lightObjects; //!< All light sources of the scene
@@ -55,8 +56,8 @@ class ObjectManager {
     void gameTick();
     //! Calculate the physics
     void physicsTick();
-    //! Renders the scene without LightObjects
-    void drawScene();
+    //! Renders the scene for the shadow maps of LightObjects
+    void drawShadowCasters();
     //! Renders all LightObjects
     void illuminate();
     /*! Renders a graphics frame

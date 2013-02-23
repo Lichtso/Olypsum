@@ -1,6 +1,7 @@
 <CollisionShapes>
 	<Cylinder id="cylinder0" width="0.5" height="0.5" length="0.5"/>
 	<Box id="box0" width="0.5" height="0.5" length="0.5"/>
+	<Box id="mirrorBox" width="0.1" height="5.0" length="8.0"/>
 	<Box id="manBox" width="1.0" height="1.0" length="0.25"/>
 	<Sphere id="sphere0" radius="0.5"/>
 	<Capsule id="capsule0" radius="0.5" length="0.5" direction="y"/>

@@ -124,7 +124,7 @@ bool ModelObject::gameTick() {
     }
     unsigned int animatedMeshes = 0;
     for(unsigned int i = 0; i < model->meshes.size(); i ++)
-        if(model->meshes[i]->material.diffuse->depth > 1)
+        if(model->meshes[i]->material.diffuse && model->meshes[i]->material.diffuse->depth > 1)
             textureAnimation[animatedMeshes ++] += profiler.animationFactor;
     return true;
 }
@@ -176,7 +176,7 @@ void ModelObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
     
     unsigned int animatedMeshes = 0;
     for(unsigned int i = 0; i < model->meshes.size(); i ++)
-        if(model->meshes[i]->material.diffuse->depth > 1)
+        if(model->meshes[i]->material.diffuse && model->meshes[i]->material.diffuse->depth > 1)
             animatedMeshes ++;
     if(animatedMeshes > 0)
         textureAnimation = new float[animatedMeshes];
@@ -244,6 +244,33 @@ rapidxml::xml_node<xmlUsedCharType>* ModelObject::write(rapidxml::xml_document<x
         node->append_node(skeletonPoseNode);
     }
     return node;
+}
+
+
+
+Reflective::Reflective(ModelObject* objectB, Mesh* meshB) :object(objectB), mesh(meshB) {
+    
+}
+
+Reflective::~Reflective() {
+    objectManager.currentReflective = NULL;
+}
+
+PlaneReflective::PlaneReflective(ModelObject* objectB, Mesh* meshB) :Reflective(objectB, meshB) {
+    
+}
+
+bool PlaneReflective::init() {
+    btBoxShape* shape = dynamic_cast<btBoxShape*>(object->getBody()->getCollisionShape());
+    if(!shape) return true;
+    
+    btTransform transform = object->getTransformation();
+    normal = transform.getBasis().getColumn(shape->getHalfExtentsWithoutMargin().minAxis());
+    distance = -normal.dot(transform.getOrigin());
+    
+    if(normal.dot(currentCam->getTransformation().getOrigin()) < distance) return true;
+    objectManager.currentReflective = this;
+    return false;
 }
 
 

@@ -20,6 +20,10 @@ Mesh::Mesh() {
 }
 
 void Mesh::draw(ModelObject* object) {
+    if(!material.diffuse) {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
     if(material.effectMap)
         material.effectMap->use(1);
     else{
@@ -215,9 +219,6 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
             if(!dataAttribute) goto endParsingXML;
             id = dataAttribute->value();
             Mesh::Material material;
-            material.transparent = false;
-            material.reflectorNormal = btVector3(0.0, 0.0, 0.0);
-            material.reflectorDistance = 0.0;
             meshNode = geometry->first_node("profile_COMMON");
             if(!meshNode) goto endParsingXML;
             std::map<std::string, std::string> surfaceURLs, samplerURLs;
@@ -269,23 +270,24 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
                 while(source->first_node("technique"))
                     source = source->first_node("technique");
                 
-                if((dataNode = source->first_node("index_of_refraction"))) {
+                if((dataNode = source->first_node("transparent")) && dataNode->first_node()) {
+                    material.transparent = true;
+                }else if((dataNode = source->first_node("transparency"))) {
                     dataNode = dataNode->first_node();
                     if(dataNode) {
                         float value;
                         sscanf(dataNode->value(), "%f", &value);
-                        if(value > 1.0) material.transparent = true;
+                        if(value < 1.0) material.transparent = true;
                     }
                 }
-                if((dataNode = source->first_node("reflection"))) {
+                if((dataNode = source->first_node("reflective"))) {
                     dataNode = dataNode->first_node();
-                    if(dataNode) {
-                        XMLValueArray<float> value;
-                        value.readString(dataNode->value(), "%f");
-                        material.reflectorNormal = value.getVector3();
-                        material.reflectorDistance = value.data[3];
-                        //material.transparent = true;
-                    }
+                    if(dataNode)
+                        material.reflectivity = -1.0;
+                }else if((dataNode = source->first_node("reflectivity"))) {
+                    dataNode = dataNode->first_node();
+                    if(dataNode)
+                        sscanf(dataNode->value(), "%f", &material.reflectivity);
                 }
                 if((dataNode = source->first_node("diffuse"))) {
                     std::string url = readTextureURL(samplerURLs, dataNode);
@@ -818,8 +820,8 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
 
 void Model::draw(ModelObject* object) {
     for(unsigned int i = 0; i < meshes.size(); i ++) {
-        //if(meshes[i]->material.reflectorNormal != btVector3(0.0, 0.0, 0.0))
-        //    continue;
+        if(meshes[i]->material.reflectivity != 0.0)
+            continue;
         if(optionsState.blendingQuality > 0 && !objectManager.currentShadowLight && meshes[i]->material.transparent) {
             AccumulatedTransparent* transparent = new AccumulatedTransparent();
             transparent->object = object;

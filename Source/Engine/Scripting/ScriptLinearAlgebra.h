@@ -15,6 +15,7 @@ class ScriptVector3 {
     v8::Persistent<v8::FunctionTemplate> functionTemplate;
     static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
     static v8::Handle<v8::Value> toString(const v8::Arguments& args);
+    static v8::Handle<v8::Value> toJSON(const v8::Arguments& args);
     static v8::Handle<v8::Value> IndexedPropertyGetter(uint32_t index, const v8::AccessorInfo &info);
     static v8::Handle<v8::Value> IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
     static v8::Handle<v8::Value> GetSum(const v8::Arguments& args);
@@ -44,6 +45,7 @@ class ScriptMatrix4 {
     static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
     static void Destructor(v8::Persistent<v8::Value> value, void* data);
     static v8::Handle<v8::Value> toString(const v8::Arguments& args);
+    static v8::Handle<v8::Value> toJSON(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetInverse(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetProduct(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetTransformedVector(const v8::Arguments& args);

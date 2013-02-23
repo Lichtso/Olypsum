@@ -75,6 +75,31 @@ class ModelObject : public GraphicObject {
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
+//! A reflective ModelObject
+/*!
+ A reflective ModelObject which is stored by the engine to be rendered at the beginning of the graphics frame
+ 
+ @warning Don't use it directly
+ */
+class Reflective {
+    protected:
+    Reflective(ModelObject* objectB, Mesh* meshB);
+    virtual ~Reflective();
+    public:
+    ModelObject* object;
+    Mesh* mesh;
+};
+
+//! A Reflective mirroring at a given plane
+class PlaneReflective : public Reflective {
+    public:
+    btVector3 normal;
+    btScalar distance;
+    PlaneReflective(ModelObject* object, Mesh* mesh);
+    //! Initializes the Reflective and returns true if initialization fails
+    bool init();
+};
+
 //! A GraphicObject with a soft-physics-body
 /*!
  TODO: This class is not implemented yet.

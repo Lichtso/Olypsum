@@ -30,9 +30,11 @@ class Matrix4 {
     Matrix4(btScalar matData[16]);
     //! Returns the colum of this Matrix4 at index
     btVector3 getColum(unsigned char index);
-    //! Converts this Matrix4 into a btTransform
-    btTransform getBTMatrix();
     //! Converts this Matrix4 into a btMatrix3x3 (the w component is ignored)
+    btMatrix3x3 getBTMatrix3x3();
+    //! Converts this Matrix4 into a btTransform
+    btTransform getBTTransform();
+    //! Converts this Matrix4 into a normalized btMatrix3x3 (the w component is ignored)
     btMatrix3x3 getNormalMatrix();
     //! Converts this Matrix4 into a float[16]
     void getOpenGLMatrix(float* matData) const;

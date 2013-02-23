@@ -9,7 +9,8 @@
 #include "ObjectManager.h"
 #include "FileManager.h"
 
-ColorBuffer::ColorBuffer(unsigned int sizeB, bool shadowMapB, bool cubeMapB) :size(sizeB), shadowMap(shadowMapB), cubeMap(cubeMapB) {
+ColorBuffer::ColorBuffer(bool shadowMapB, bool cubeMapB, unsigned int widthB, unsigned int heightB)
+    :shadowMap(shadowMapB), cubeMap(cubeMapB), width(widthB), height(heightB) {
     glGenTextures(1, &texture);
     
     GLenum textureTarget = (cubeMap) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
@@ -25,15 +26,15 @@ ColorBuffer::ColorBuffer(unsigned int sizeB, bool shadowMapB, bool cubeMapB) :si
         glTexParameteri(textureTarget, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
         if(cubeMap) {
             for(GLenum side = GL_TEXTURE_CUBE_MAP_POSITIVE_X; side <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; side ++)
-                glTexImage2D(side, 0, GL_DEPTH_COMPONENT16, size, size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+                glTexImage2D(side, 0, GL_DEPTH_COMPONENT16, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
         }else
-            glTexImage2D(textureTarget, 0, GL_DEPTH_COMPONENT16, size, size, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+            glTexImage2D(textureTarget, 0, GL_DEPTH_COMPONENT16, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     }else{
         if(cubeMap) {
             for(GLenum side = GL_TEXTURE_CUBE_MAP_POSITIVE_X; side <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; side ++)
-                glTexImage2D(side, 0, GL_RGB, size, size, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+                glTexImage2D(side, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
         }else
-            glTexImage2D(textureTarget, 0, GL_RGB, size, size, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+            glTexImage2D(textureTarget, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     }
 }
 
@@ -205,7 +206,7 @@ void FBO::renderInBuffers(bool fillScreen, GLuint* inBuffers, unsigned char inBu
 }
 
 void FBO::renderInTexture(ColorBuffer* colorBuffer, GLenum textureTarget) {
-    glViewport(0, 0, colorBuffer->size, colorBuffer->size);
+    glViewport(0, 0, colorBuffer->width, colorBuffer->height);
     
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
     if(colorBuffer->shadowMap) {

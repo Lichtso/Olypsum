@@ -54,6 +54,16 @@ v8::Handle<v8::Value> ScriptVector3::toString(const v8::Arguments& args) {
     return handleScope.Close(v8::String::New(stringOf(vec).c_str()));
 }
 
+v8::Handle<v8::Value> ScriptVector3::toJSON(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    btVector3 vec = getVector3(args.This());
+    v8::Local<v8::Array> array = v8::Array::New(3);
+    array->Set(0, v8::Number::New(vec.x()));
+    array->Set(1, v8::Number::New(vec.y()));
+    array->Set(2, v8::Number::New(vec.z()));
+    return handleScope.Close(array);
+}
+
 v8::Handle<v8::Value> ScriptVector3::IndexedPropertyGetter(uint32_t index, const v8::AccessorInfo &info) {
     v8::HandleScope handleScope;
     if(index > 2)
@@ -216,6 +226,7 @@ ScriptVector3::ScriptVector3() {
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->SetIndexedPropertyHandler(IndexedPropertyGetter, IndexedPropertySetter);
     objectTemplate->Set(v8::String::New("toString"), v8::FunctionTemplate::New(toString));
+    objectTemplate->Set(v8::String::New("toJSON"), v8::FunctionTemplate::New(toJSON));
     objectTemplate->Set(v8::String::New("getSum"), v8::FunctionTemplate::New(GetSum));
     objectTemplate->Set(v8::String::New("getDiff"), v8::FunctionTemplate::New(GetDifference));
     objectTemplate->Set(v8::String::New("getProduct"), v8::FunctionTemplate::New(GetProduct));
@@ -260,8 +271,8 @@ v8::Handle<v8::Value> ScriptMatrix4::Constructor(const v8::Arguments& args) {
     
     v8::Persistent<v8::Object> object = v8::Persistent<v8::Object>::New(args.This());
     object.MakeWeak(NULL, &Destructor);
-    object->SetIndexedPropertiesToExternalArrayData(matrix.get(), v8::kExternalFloatArray, sizeof(Matrix4));
-    object->SetInternalField(0, v8::Local<v8::External>(v8::External::New(matrix.release())));
+    object->SetIndexedPropertiesToExternalArrayData(matrix.get(), v8::kExternalFloatArray, 16);
+    object->SetInternalField(0, v8::External::New(matrix.release()));
     v8::V8::AdjustAmountOfExternalAllocatedMemory(sizeof(Matrix4));
     return object;
 }
@@ -278,8 +289,17 @@ void ScriptMatrix4::Destructor(v8::Persistent<v8::Value> value, void* data) {
 
 v8::Handle<v8::Value> ScriptMatrix4::toString(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    Matrix4 mat = getMatrix4(args.This());
+    Matrix4& mat = getMatrix4(args.This());
     return handleScope.Close(v8::String::New(stringOf(mat).c_str()));
+}
+
+v8::Handle<v8::Value> ScriptMatrix4::toJSON(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    Matrix4& mat = getMatrix4(args.This());
+    v8::Local<v8::Array> array = v8::Array::New(16);
+    for(char i = 0; i < 16; i ++)
+        array->Set(i, v8::Number::New(mat.values[i]));
+    return handleScope.Close(array);
 }
 
 v8::Handle<v8::Value> ScriptMatrix4::GetInverse(const v8::Arguments& args) {
@@ -388,6 +408,7 @@ ScriptMatrix4::ScriptMatrix4() {
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->Set(v8::String::New("toString"), v8::FunctionTemplate::New(toString));
+    objectTemplate->Set(v8::String::New("toJSON"), v8::FunctionTemplate::New(toJSON));
     objectTemplate->Set(v8::String::New("getInverse"), v8::FunctionTemplate::New(GetInverse));
     objectTemplate->Set(v8::String::New("getProduct"), v8::FunctionTemplate::New(GetProduct));
     objectTemplate->Set(v8::String::New("getTransformed"), v8::FunctionTemplate::New(GetTransformedVector));

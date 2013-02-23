@@ -242,8 +242,7 @@ void ObjectManager::physicsTick() {
         graphicObject->physicsTick();
 }
 
-void ObjectManager::drawScene() {
-    //Calculate Frustum Culling
+void ObjectManager::drawShadowCasters() {
     currentCam->doFrustumCulling();
     
     //Draw GraphicObjects
@@ -251,7 +250,7 @@ void ObjectManager::drawScene() {
     for(auto graphicObject : graphicObjects)
         if(graphicObject->inFrustum)
             graphicObject->draw();
-    glEnable(GL_BLEND);
+    //glEnable(GL_BLEND);
 }
 
 void ObjectManager::illuminate() {
@@ -268,6 +267,29 @@ void ObjectManager::illuminate() {
 }
 
 void ObjectManager::drawFrame(GLuint renderTarget) {
+    //Render Mirrors
+    if(!currentReflective)
+        for(auto graphicObject : graphicObjects) {
+            ModelObject* modelObject = dynamic_cast<ModelObject*>(graphicObject);
+            if(!modelObject)
+                continue;
+            for(Mesh* mesh : modelObject->model->meshes)
+                if(mesh->material.reflectivity == 0.0) {
+                    continue;
+                }else if(mesh->material.reflectivity == -1.0) {
+                    PlaneReflective reflective(modelObject, mesh);
+                    if(reflective.init()) continue;
+                    drawFrame(mainFBO.gBuffers[colorDBuffer]);
+                    //reflective.object->drawAccumulatedMesh(reflective.mesh);
+                }else{
+                    //Environment Mapping
+                }
+        }
+    
+    if(currentCam->doFrustumCulling())
+        return;
+    
+    //Draw non transparent
     GLuint buffersCombine[] = {
         mainFBO.gBuffers[diffuseDBuffer],
         mainFBO.gBuffers[materialDBuffer],
@@ -275,23 +297,14 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
         mainFBO.gBuffers[specularDBuffer],
         0
     };
-    
-    /* Render Mirrors
-    for(auto graphicObject : graphicObjects) {
-        ModelObject* modelObject = dynamic_cast<ModelObject*>(graphicObject);
-        if(!modelObject)
-            continue;
-        for(Mesh* mesh : modelObject->model->meshes)
-            if(mesh->material.reflectorNormal != btVector3(0.0, 0.0, 0.0)) {
-                btTransform objectTransform = modelObject->getTransformation();
-                
-            }
-    }*/
-    
-    //Draw non transparent
     mainFBO.renderInGBuffers(buffersCombine[2]);
-    currentCam->updateFrustum();
-    drawScene();
+    currentCam->updateViewMat();
+    
+    //Draw GraphicObjects
+    glDisable(GL_BLEND);
+    for(auto graphicObject : graphicObjects)
+        if(graphicObject->inFrustum)
+            graphicObject->draw();
     
     //Draw Decals
     glActiveTexture(GL_TEXTURE1);

@@ -43,12 +43,16 @@ btVector3 Matrix4::getColum(unsigned char index) {
 }
 
 btMatrix3x3 Matrix4::getNormalMatrix() {
-    return btMatrix3x3(x.normalized(), y.normalized(), z.normalized());
+    return btMatrix3x3(x.normalized(), y.normalized(), z.normalized()).transpose();
 }
 
-btTransform Matrix4::getBTMatrix() {
+btMatrix3x3 Matrix4::getBTMatrix3x3() {
+    return btMatrix3x3(x, y, z).transpose();
+}
+
+btTransform Matrix4::getBTTransform() {
     btTransform mat;
-    mat.setBasis(btMatrix3x3(x, y, z).transpose());
+    mat.setBasis(getBTMatrix3x3());
     mat.setOrigin(w);
     return mat;
 }

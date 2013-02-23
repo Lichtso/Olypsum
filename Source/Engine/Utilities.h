@@ -17,6 +17,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <v8.h>
 
 #ifndef Utilities_h
 #define Utilities_h

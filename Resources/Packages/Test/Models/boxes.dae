@@ -61,9 +61,9 @@
             <shininess>
               <float sid="shininess">50</float>
             </shininess>
-            <index_of_refraction>
-              <float sid="index_of_refraction">2.0</float>
-            </index_of_refraction>
+            <transparency>
+              <float>0.0</float>
+            </transparency>
           </phong>
         </technique>
       </profile_COMMON>

@@ -58,9 +58,6 @@
             <shininess>
               <float sid="shininess">50</float>
             </shininess>
-            <index_of_refraction>
-              <float sid="index_of_refraction">1</float>
-            </index_of_refraction>
           </phong>
           <extra>
             <technique profile="FCOLLADA">

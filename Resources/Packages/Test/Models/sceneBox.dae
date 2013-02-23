@@ -28,9 +28,6 @@
         </newparam>
         <technique sid="common">
           <phong>
-            <reflection>
-              <vector>1.0 0.0 0.0 10.0</vector>
-            </reflection>
             <emission>
               <color sid="emission">0 0 0 1</color>
             </emission>
@@ -46,9 +43,6 @@
             <shininess>
               <float sid="shininess">50</float>
             </shininess>
-            <index_of_refraction>
-              <float sid="index_of_refraction">1</float>
-            </index_of_refraction>
           </phong>
         </technique>
       </profile_COMMON>

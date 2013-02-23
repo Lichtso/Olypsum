@@ -200,7 +200,7 @@ void ShaderProgram::use () {
         setUniformMatrix4("viewMat", &currentCam->viewMat);
         if(checkUniformExistence("viewNormalMat")) {
             btMatrix3x3 viewNormalMat = currentCam->getTransformation().getBasis();
-            setUniformMatrix3("viewNormalMat", &viewNormalMat);
+            setUniformMatrix3("viewNormalMat", &viewNormalMat, false);
         }
         if(checkUniformExistence("modelViewMat")) {
             Matrix4 projectionMat = Matrix4(modelMat) * currentCam->viewMat;
@@ -238,7 +238,7 @@ void ShaderProgram::setUniformVec3(const char* name, btVector3 value) {
     glUniform3f(getUniformLocation(name), value.x(), value.y(), value.z());
 }
 
-void ShaderProgram::setUniformMatrix3(const char* name, const btMatrix3x3* mat) {
+void ShaderProgram::setUniformMatrix3(const char* name, const btMatrix3x3* mat, bool transpose) {
     GLint location = getUniformLocation(name);
     if(location < 0) return;
     btScalar matData[16];
@@ -249,10 +249,10 @@ void ShaderProgram::setUniformMatrix3(const char* name, const btMatrix3x3* mat) 
     matData[6] = matData[8];
     matData[7] = matData[9];
     matData[8] = matData[10];
-    glUniformMatrix3fv(location, 1, false, matData);
+    glUniformMatrix3fv(location, 1, transpose, matData);
 }
 
-void ShaderProgram::setUniformMatrix3(const char* name, const btTransform* mat) {
+void ShaderProgram::setUniformMatrix3(const char* name, const btTransform* mat, bool transpose) {
     GLint location = getUniformLocation(name);
     if(location < 0) return;
     btScalar matData[16];
@@ -263,7 +263,7 @@ void ShaderProgram::setUniformMatrix3(const char* name, const btTransform* mat) 
     matData[6] = mat->getOrigin().x();
     matData[7] = mat->getOrigin().y();
     matData[8] = 1.0;
-    glUniformMatrix3fv(location, 1, false, matData);
+    glUniformMatrix3fv(location, 1, transpose, matData);
 }
 
 void ShaderProgram::setUniformMatrix4(const char* name, const Matrix4* mat) {

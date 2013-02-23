@@ -16,7 +16,7 @@
 
 //! A off screen texture used for background rendering
 struct ColorBuffer {
-    unsigned int size; //!< The width and height in pixels
+    unsigned int width, height; //!< The width and height in pixels
     bool shadowMap, //!< Is it used as a shadow map
          cubeMap; //!< Is it a cube map (has 6 sides)
     GLuint texture; //!< The OpenGL identifier
@@ -25,7 +25,7 @@ struct ColorBuffer {
      @param shadowMap True if it is a shadow map
      @param cubeMap True if it is a cube map
      */
-    ColorBuffer(unsigned int size, bool shadowMap, bool cubeMap);
+    ColorBuffer(bool shadowMapB, bool cubeMapB, unsigned int width, unsigned int height);
     ~ColorBuffer();
     void use(GLuint targetIndex);
     void mipmapTexture();

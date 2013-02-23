@@ -7,7 +7,6 @@
 //
 
 #include "Controls.h"
-#include <v8.h>
 
 #ifndef Script_h
 #define Script_h
