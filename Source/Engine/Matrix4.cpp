@@ -363,7 +363,9 @@ Matrix4& Matrix4::rotate(btVector3 vec, btScalar angle) {
 Matrix4& Matrix4::translate(btVector3 vec) {
     Matrix4 a;
     a.setIdentity();
-    a.w = vec;
+    a.w.setX(vec.x());
+    a.w.setY(vec.y());
+    a.w.setZ(vec.z());
     return (*this *= a);
 }
 

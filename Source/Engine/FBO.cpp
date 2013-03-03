@@ -8,12 +8,13 @@
 
 #include "ObjectManager.h"
 #include "FileManager.h"
+#define GL_COMPARE_R_TO_TEXTURE 0x884E
 
 ColorBuffer::ColorBuffer(bool shadowMapB, bool cubeMapB, unsigned int widthB, unsigned int heightB)
     :shadowMap(shadowMapB), cubeMap(cubeMapB), width(widthB), height(heightB) {
     glGenTextures(1, &texture);
     
-    GLenum textureTarget = (cubeMap) ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D;
+    GLenum textureTarget = (cubeMap) ? GL_TEXTURE_CUBE_MAP : ((width == height) ? GL_TEXTURE_2D : GL_TEXTURE_RECTANGLE);
     glBindTexture(textureTarget, texture);
     glTexParameteri(textureTarget, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(textureTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -22,7 +23,7 @@ ColorBuffer::ColorBuffer(bool shadowMapB, bool cubeMapB, unsigned int widthB, un
     glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
     if(shadowMap) {
-        glTexParameteri(textureTarget, GL_TEXTURE_COMPARE_MODE, 0x884E); //GL_COMPARE_R_TO_TEXTURE
+        glTexParameteri(textureTarget, GL_TEXTURE_COMPARE_MODE,  GL_COMPARE_R_TO_TEXTURE);
         glTexParameteri(textureTarget, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
         if(cubeMap) {
             for(GLenum side = GL_TEXTURE_CUBE_MAP_POSITIVE_X; side <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; side ++)
@@ -165,21 +166,15 @@ void FBO::renderInGBuffers(GLuint colorBuffer) {
     glClear(GL_COLOR_BUFFER_BIT);
     
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, colorBuffer, 0);
+    for(unsigned char o = 0; o < 4; o ++)
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1+o, GL_TEXTURE_RECTANGLE, gBuffers[materialDBuffer+o], 0);
     if(colorBuffer == gBuffers[transparentDBuffer]) {
-        for(unsigned char o = 0; o < ((optionsState.blendingQuality > 1) ? 4 : 3); o ++)
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1+o, GL_TEXTURE_RECTANGLE, gBuffers[materialDBuffer+o], 0);
-        
         glDrawBuffers(1, drawBuffers);
         glClear(GL_COLOR_BUFFER_BIT);
-        
-        glDrawBuffers((optionsState.blendingQuality > 1) ? 5 : 4, drawBuffers);
     }else{
-        for(unsigned char o = 0; o < 3; o ++)
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1+o, GL_TEXTURE_RECTANGLE, gBuffers[materialDBuffer+o], 0);
-        
-        glDrawBuffers(4, drawBuffers);
         glClear(GL_DEPTH_BUFFER_BIT);
     }
+    glDrawBuffers(5, drawBuffers);
 }
 
 void FBO::renderInBuffers(bool fillScreen, GLuint* inBuffers, unsigned char inBuffersCount, GLuint* outBuffers, unsigned char outBuffersCount) {

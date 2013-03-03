@@ -58,12 +58,14 @@ layout(triangle_strip, max_vertices = 4) out;
 
 uniform mat4 modelViewMat;
 uniform mat3 viewNormalMat;
+uniform vec4 clipPlane[1];
 in vec3 gPosition[1];
 in vec2 gLife[1];
 in float gSize[1];
 out vec3 vPosition;
 out vec4 vTexCoord;
 out vec3 vNormal;
+out float gl_ClipDistance[1];
 
 void main() {
     float size = gSize[0];
@@ -74,23 +76,27 @@ void main() {
     vPosition = gPosition[0]-rightVec+upVec;
     gl_Position = vec4(vPosition.xyz, 1.0)*modelViewMat;
 	vTexCoord = vec4(0.0, 0.0, gLife[0]);
+    gl_ClipDistance[0] = dot(vec4(vPosition.xyz, 1.0), clipPlane[0]);
 	EmitVertex();
     
     vNormal = viewNormalMat[2]-viewNormalMat[0]-viewNormalMat[1];
     vPosition = gPosition[0]-rightVec-upVec;
     gl_Position = vec4(vPosition.xyz, 1.0)*modelViewMat;
 	vTexCoord = vec4(0.0, 1.0, gLife[0]);
+    gl_ClipDistance[0] = dot(vec4(vPosition.xyz, 1.0), clipPlane[0]);
 	EmitVertex();
     
     vNormal = viewNormalMat[2]+viewNormalMat[0]+viewNormalMat[1];
     vPosition = gPosition[0]+rightVec+upVec;
     gl_Position = vec4(vPosition.xyz, 1.0)*modelViewMat;
 	vTexCoord = vec4(1.0, 0.0, gLife[0]);
+    gl_ClipDistance[0] = dot(vec4(vPosition.xyz, 1.0), clipPlane[0]);
 	EmitVertex();
     
     vNormal = viewNormalMat[2]+viewNormalMat[0]-viewNormalMat[1];
     vPosition = gPosition[0]+rightVec-upVec;
     gl_Position = vec4(vPosition.xyz, 1.0)*modelViewMat;
 	vTexCoord = vec4(1.0, 1.0, gLife[0]);
+    gl_ClipDistance[0] = dot(vec4(vPosition.xyz, 1.0), clipPlane[0]);
 	EmitVertex();
 }

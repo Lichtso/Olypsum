@@ -84,8 +84,9 @@ class ModelObject : public GraphicObject {
 class Reflective {
     protected:
     Reflective(ModelObject* objectB, Mesh* meshB);
-    virtual ~Reflective();
     public:
+    virtual ~Reflective();
+    ColorBuffer* buffer;
     ModelObject* object;
     Mesh* mesh;
 };
@@ -93,11 +94,10 @@ class Reflective {
 //! A Reflective mirroring at a given plane
 class PlaneReflective : public Reflective {
     public:
-    btVector3 normal;
-    btScalar distance;
+    btVector3 plane;
     PlaneReflective(ModelObject* object, Mesh* mesh);
-    //! Initializes the Reflective and returns true if initialization fails
-    bool init();
+    //! Recalculates the reflection in a tick, returns false if it is out of view
+    bool gameTick();
 };
 
 //! A GraphicObject with a soft-physics-body

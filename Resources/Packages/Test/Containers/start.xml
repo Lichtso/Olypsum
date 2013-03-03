@@ -15,8 +15,8 @@
 			<PhysicsBody collisionShape="worldBox" mass="0.0" />
 		</RigidObject>
 		<RigidObject>
-			<Model src="woodenBox.dae" />
-			<PhysicsBody collisionShape="box0" mass="0.0" />
+			<Model src="mirror.dae" />
+			<PhysicsBody collisionShape="mirrorBox" mass="0.0" />
 		</RigidObject>
 		<RigidObject>
 			<Rotate>1.0 0.0 0.0 70.0</Rotate>

@@ -22,6 +22,9 @@ void GraphicObject::remove() {
 ModelObject::~ModelObject() {
     if(skeletonPose) delete [] skeletonPose;
     if(textureAnimation) delete [] textureAnimation;
+    for(unsigned int i = 0; i < model->meshes.size(); i ++)
+        if(model->meshes[i]->material.reflectivity != 0)
+            objectManager.reflectiveAccumulator.erase(this);
 }
 
 void ModelObject::setupBones(BaseObject* object, Bone* bone) {
@@ -248,29 +251,39 @@ rapidxml::xml_node<xmlUsedCharType>* ModelObject::write(rapidxml::xml_document<x
 
 
 
-Reflective::Reflective(ModelObject* objectB, Mesh* meshB) :object(objectB), mesh(meshB) {
+Reflective::Reflective(ModelObject* objectB, Mesh* meshB) :object(objectB), mesh(meshB), buffer(NULL) {
     
 }
 
 Reflective::~Reflective() {
-    objectManager.currentReflective = NULL;
+    if(buffer)
+        delete buffer;
 }
 
 PlaneReflective::PlaneReflective(ModelObject* objectB, Mesh* meshB) :Reflective(objectB, meshB) {
     
 }
 
-bool PlaneReflective::init() {
+bool PlaneReflective::gameTick() {
     btBoxShape* shape = dynamic_cast<btBoxShape*>(object->getBody()->getCollisionShape());
-    if(!shape) return true;
+    if(!shape) return false;
     
     btTransform transform = object->getTransformation();
-    normal = transform.getBasis().getColumn(shape->getHalfExtentsWithoutMargin().minAxis());
-    distance = -normal.dot(transform.getOrigin());
+    plane = transform.getBasis().getColumn(shape->getHalfExtentsWithoutMargin().minAxis());
+    plane.setW(-plane.dot(transform.getOrigin()));
+    if(plane.dot(currentCam->getTransformation().getOrigin()) < plane.w()) return false;
     
-    if(normal.dot(currentCam->getTransformation().getOrigin()) < distance) return true;
+    if(!buffer)
+        buffer = new ColorBuffer(false, false, screenSize[0], screenSize[1]);
     objectManager.currentReflective = this;
-    return false;
+    
+    if(currentCam->doFrustumCulling())
+        return false;
+    
+    glEnable(GL_CLIP_DISTANCE0);
+    objectManager.drawFrame(buffer->texture);
+    glDisable(GL_CLIP_DISTANCE0);
+    return true;
 }
 
 
@@ -398,7 +411,7 @@ bool RigidObject::gameTick() {
 }
 
 void RigidObject::draw() {
-    modelMat = getTransformation();
+    //modelMat = getTransformation();
     
     //TODO: Debug drawing
     /*btBoxShape* boxShape = dynamic_cast<btBoxShape*>(body->getCollisionShape());

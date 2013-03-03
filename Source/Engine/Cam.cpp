@@ -8,7 +8,6 @@
 
 #include <OpenAL/al.h>
 #include "LevelManager.h"
-#include "Controls.h" //TODO: Debug
 
 //! @cond
 struct SingleHitCallback : btDbvt::ICollide {
@@ -73,23 +72,22 @@ Cam::~Cam() {
         currentCam = NULL;
 }
 
+void Cam::remove() {
+    objectManager.simpleObjects.erase(this);
+    BaseObject::remove();
+}
+
 Matrix4 Cam::getCamMatrix() {
     PlaneReflective* planeReflective = dynamic_cast<PlaneReflective*>(objectManager.currentReflective);
     if(planeReflective) {
         Matrix4 mat = transformation;
-        btVector3 translation = planeReflective->normal*planeReflective->distance;
+        btVector3 translation = planeReflective->plane*planeReflective->plane.w();
         mat.translate(translation*-1.0);
-        mat.reflect(planeReflective->normal);
+        mat.reflect(planeReflective->plane);
         mat.translate(translation);
-        //printf("%s | %s\n", stringOf(transformation).c_str(), stringOf(mat).c_str());
         return mat;
     }else
         return Matrix4(transformation);
-}
-
-void Cam::remove() {
-    objectManager.simpleObjects.erase(this);
-    BaseObject::remove();
 }
 
 Ray3 Cam::getRelativeRayAt(float x, float y) {
@@ -116,41 +114,47 @@ Ray3 Cam::getRayAt(float x, float y) {
 
 bool Cam::doFrustumCulling() {
     Matrix4 virtualMat = getCamMatrix();
-    btMatrix3x3 virtualMatBasis = virtualMat.getBTMatrix3x3();
     btVector3 planes_n[6];
     btScalar planes_o[6];
-    planes_n[1] = virtualMatBasis.getColumn(2);
+    planes_n[1] = virtualMat.z;
     planes_o[1] = -planes_n[1].dot(virtualMat.w-planes_n[1]*far);
     planes_n[0] = -planes_n[1];
     
     if(fov < M_PI) {
         planes_o[0] = -planes_n[0].dot(virtualMat.w+planes_n[0]*near);
+        PlaneReflective* planeReflective = dynamic_cast<PlaneReflective*>(objectManager.currentReflective);
         
         if(fov > 0.0) { //Perspective
+            btMatrix3x3 virtualMatBasis = virtualMat.getBTMatrix3x3();
             Ray3 leftRay = getRelativeRayAt(-1, 0),
                 rightRay = getRelativeRayAt(1, 0),
                    upRay = getRelativeRayAt(0, -1),
                bottomRay = getRelativeRayAt(0, 1);
-            planes_n[2] = -virtualMatBasis.getColumn(1).cross(virtualMatBasis*leftRay.direction.normalize()).normalize();
-            planes_n[3] =  virtualMatBasis.getColumn(1).cross(virtualMatBasis*rightRay.direction.normalize()).normalize();
-            planes_n[4] = -virtualMatBasis.getColumn(0).cross(virtualMatBasis*upRay.direction.normalize()).normalize();
-            planes_n[5] =  virtualMatBasis.getColumn(0).cross(virtualMatBasis*bottomRay.direction.normalize()).normalize();
+            planes_n[2] = -virtualMat.y.cross(virtualMatBasis*leftRay.direction.normalize()).normalize();
+            planes_n[3] =  virtualMat.y.cross(virtualMatBasis*rightRay.direction.normalize()).normalize();
+            planes_n[4] = -virtualMat.x.cross(virtualMatBasis*upRay.direction.normalize()).normalize();
+            planes_n[5] =  virtualMat.x.cross(virtualMatBasis*bottomRay.direction.normalize()).normalize();
+            if(planeReflective)
+                for(char i = 2; i < 6; i ++)
+                    planes_n[i] *= -1.0;
             planes_o[2] = -planes_n[2].dot(virtualMat.w);
             planes_o[3] = -planes_n[3].dot(virtualMat.w);
             planes_o[4] = -planes_n[4].dot(virtualMat.w);
             planes_o[5] = -planes_n[5].dot(virtualMat.w);
         }else{ //Ortho
-            planes_n[2] =  virtualMatBasis.getColumn(0);
+            planes_n[2] =  virtualMat.x;
             planes_n[3] = -planes_n[2];
-            planes_n[5] =  virtualMatBasis.getColumn(1);
+            planes_n[5] =  virtualMat.y;
             planes_n[4] = -planes_n[5];
+            if(planeReflective)
+                for(char i = 2; i < 6; i ++)
+                    planes_n[i] *= -1.0;
             planes_o[2] = -planes_n[2].dot(virtualMat.w-planes_n[2]*width);
             planes_o[3] = -planes_n[3].dot(virtualMat.w-planes_n[3]*width);
             planes_o[4] = -planes_n[4].dot(virtualMat.w-planes_n[4]*height);
             planes_o[5] = -planes_n[5].dot(virtualMat.w-planes_n[5]*height);
         }
         
-        PlaneReflective* planeReflective = dynamic_cast<PlaneReflective*>(objectManager.currentReflective);
         if(planeReflective) {
             btTransform objectTransform = objectManager.currentReflective->object->getTransformation();
             btBoxShape* shape = static_cast<btBoxShape*>(objectManager.currentReflective->object->getBody()->getCollisionShape());
@@ -160,10 +164,10 @@ bool Cam::doFrustumCulling() {
                 points[i] = objectTransform(points[i]);
             }
             btVector3 axes[4] = {
-                -virtualMatBasis.getColumn(1),
-                 virtualMatBasis.getColumn(1),
-                -virtualMatBasis.getColumn(0),
-                 virtualMatBasis.getColumn(0)
+                 virtualMat.y,
+                -virtualMat.y,
+                 virtualMat.x,
+                -virtualMat.x
             };
             
             if(fov > 0.0) { //Perspective
@@ -213,19 +217,19 @@ bool Cam::doFrustumCulling() {
                 }
             
             //Set mirror plane as front plane
-            planes_n[0] = planeReflective->normal;
-            planes_o[0] = -planes_n[0].dot(planeReflective->normal*planeReflective->distance);
+            planes_n[0] = planeReflective->plane;
+            planes_o[0] = -planes_n[0].dot(planeReflective->plane*planeReflective->plane.w());
         }
     }else{
         if(abs(fov-M_PI) < 0.001)
             planes_o[0] = -planes_n[0].dot(virtualMat.w);
         else
             planes_o[0] = -planes_n[0].dot(virtualMat.w-planes_n[0]*far);
-        planes_n[2] = virtualMatBasis.getColumn(0);
+        planes_n[2] = virtualMat.x;
         planes_o[2] = -planes_n[2].dot(virtualMat.w-planes_n[2]*far);
         planes_n[3] = -planes_n[2];
         planes_o[3] = -planes_n[3].dot(virtualMat.w-planes_n[3]*far);
-        planes_n[4] = virtualMatBasis.getColumn(1);
+        planes_n[4] = virtualMat.y;
         planes_o[4] = -planes_n[4].dot(virtualMat.w-planes_n[4]*far);
         planes_n[5] = -planes_n[4];
         planes_o[5] = -planes_n[5].dot(virtualMat.w-planes_n[5]*far);
@@ -254,14 +258,15 @@ bool Cam::doFrustumCulling() {
 }
 
 bool Cam::testInverseNearPlaneHit(btDbvtProxy* node) {
+    Matrix4 virtualMat = getCamMatrix();
     btVector3 planes_n[1];
     btScalar planes_o[1];
     
-    planes_n[0] = transformation.getBasis().getColumn(2);
+    planes_n[0] = (dynamic_cast<PlaneReflective*>(objectManager.currentReflective)) ? -virtualMat.z : virtualMat.z;
     if(fov < M_PI)
-        planes_o[0] = -planes_n[0].dot(transformation.getOrigin()-planes_n[0]*near);
+        planes_o[0] = -planes_n[0].dot(virtualMat.w-planes_n[0]*near);
     else
-        planes_o[0] = -planes_n[0].dot(transformation.getOrigin());
+        planes_o[0] = -planes_n[0].dot(virtualMat.w);
     
     SingleHitCallback fCC;
     btDbvt::collideKDOP(node->leaf, planes_n, planes_o, 1, fCC);

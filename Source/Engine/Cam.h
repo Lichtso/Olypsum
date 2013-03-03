@@ -22,8 +22,6 @@ enum CollisionMask {
 //! Camera used to render the scene
 class Cam : public SimpleObject {
     btVector3 prevPos, velocity;
-    //Returns a temporary Matrix4 which might differ from the transformation in reflection frames
-    Matrix4 getCamMatrix();
     public:
     Matrix4 viewMat; //!< Projection matrix used for OpenGL
     float fov, //!< Field of view, = 0 : Ortho, < 90 : Perspective, = 90 : Parabolid, = 180 : Sphere
@@ -35,6 +33,8 @@ class Cam : public SimpleObject {
     Cam(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     ~Cam();
     void remove();
+    //Returns a temporary Matrix4 which might differ from the transformation in reflection frames
+    Matrix4 getCamMatrix();
     /*! Calculates a ray shot from this Cam in local space
      @param x from -1.0 to 1.0
      @param y from -1.0 to 1.0

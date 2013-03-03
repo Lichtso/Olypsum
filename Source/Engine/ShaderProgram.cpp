@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Cam.h"
+#include "ObjectManager.h"
 #include "FileManager.h"
 
 Color4& Color4::operator=(const Color4& B) {
@@ -196,10 +196,11 @@ void ShaderProgram::use () {
         setUniformMatrix3("normalMat", &normalMat);
     }
     if(currentCam) {
-        setUniformVec3("camPos", currentCam->getTransformation().getOrigin());
+        Matrix4 transform = currentCam->getCamMatrix();
+        setUniformVec3("camPos", transform.w);
         setUniformMatrix4("viewMat", &currentCam->viewMat);
         if(checkUniformExistence("viewNormalMat")) {
-            btMatrix3x3 viewNormalMat = currentCam->getTransformation().getBasis();
+            btMatrix3x3 viewNormalMat = transform.getBTMatrix3x3();
             setUniformMatrix3("viewNormalMat", &viewNormalMat, false);
         }
         if(checkUniformExistence("modelViewMat")) {
@@ -207,6 +208,9 @@ void ShaderProgram::use () {
             setUniformMatrix4("modelViewMat", &projectionMat);
         }
     }
+    PlaneReflective* planeReflective = dynamic_cast<PlaneReflective*>(objectManager.currentReflective);
+    if(planeReflective && checkUniformExistence("clipPlane[0]"))
+        setUniformVec4("clipPlane[0]", planeReflective->plane);
 }
 
 GLint ShaderProgram::getUniformLocation(const char* name) {
@@ -236,6 +240,10 @@ void ShaderProgram::setUniformVec2(const char* name, btScalar x, btScalar y) {
 
 void ShaderProgram::setUniformVec3(const char* name, btVector3 value) {
     glUniform3f(getUniformLocation(name), value.x(), value.y(), value.z());
+}
+
+void ShaderProgram::setUniformVec4(const char* name, btVector3 value) {
+    glUniform4f(getUniformLocation(name), value.x(), value.y(), value.z(), value.w());
 }
 
 void ShaderProgram::setUniformMatrix3(const char* name, const btMatrix3x3* mat, bool transpose) {

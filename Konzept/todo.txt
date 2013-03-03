@@ -1,15 +1,17 @@
+Reflection Shader Programs
+Make objects destructible using discardDensity
 Implement btSoftBody
 Implement btRayCastVehicle
 V8 API
 Animation File Format
-Extern JS- and WebGL-based Editor
+Leap Motion
 Use C++11 Multithreading
 Windows / Linux Support
 
 Not sure:
 PCSS
 Fog
-Enviornment maping / Reflections
+Enviornment maping
 Light scattering / HDRR
 Magnetic Attraction PhysicLink
 Gear Rack PhysicLink

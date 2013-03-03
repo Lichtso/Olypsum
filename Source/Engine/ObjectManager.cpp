@@ -267,29 +267,49 @@ void ObjectManager::illuminate() {
 }
 
 void ObjectManager::drawFrame(GLuint renderTarget) {
-    //Render Mirrors
-    if(!currentReflective)
-        for(auto graphicObject : graphicObjects) {
-            ModelObject* modelObject = dynamic_cast<ModelObject*>(graphicObject);
-            if(!modelObject)
-                continue;
-            for(Mesh* mesh : modelObject->model->meshes)
-                if(mesh->material.reflectivity == 0.0) {
-                    continue;
-                }else if(mesh->material.reflectivity == -1.0) {
-                    PlaneReflective reflective(modelObject, mesh);
-                    if(reflective.init()) continue;
-                    drawFrame(mainFBO.gBuffers[colorDBuffer]);
-                    //reflective.object->drawAccumulatedMesh(reflective.mesh);
-                }else{
-                    //Environment Mapping
-                }
-        }
+    PlaneReflective* planeReflective = dynamic_cast<PlaneReflective*>(objectManager.currentReflective);
     
-    if(currentCam->doFrustumCulling())
-        return;
+    //Render Mirrors
+    if(optionsState.blendingQuality > 2) {
+        if(!currentReflective) {
+            for(auto graphicObject : graphicObjects) {
+                ModelObject* modelObject = dynamic_cast<ModelObject*>(graphicObject);
+                if(!modelObject)
+                    continue;
+                for(Mesh* mesh : modelObject->model->meshes)
+                    if(mesh->material.reflectivity == 0.0) {
+                        continue;
+                    }else if(mesh->material.reflectivity == -1.0) {
+                        auto iterator = reflectiveAccumulator.find(modelObject);
+                        
+                        if(iterator == reflectiveAccumulator.end()) {
+                            PlaneReflective* reflective = new PlaneReflective(modelObject, mesh);
+                            if(reflective->gameTick())
+                                reflectiveAccumulator[modelObject] = reflective;
+                        }else if(!static_cast<PlaneReflective*>(iterator->second)->gameTick()) {
+                            delete iterator->second;
+                            reflectiveAccumulator.erase(iterator);
+                        }
+                        break;
+                    }else{
+                        //Environment Mapping
+                        break;
+                    }
+            }
+            currentReflective = NULL;
+            currentCam->doFrustumCulling();
+        }
+    }else
+        currentCam->doFrustumCulling();
+    
+    if(planeReflective && profiler.isFirstFrameInSec())
+        controlsMangager->consoleAdd("currentReflective", 1.0);
     
     //Draw non transparent
+    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);
+    glFrontFace((planeReflective) ? GL_CW : GL_CCW);
     GLuint buffersCombine[] = {
         mainFBO.gBuffers[diffuseDBuffer],
         mainFBO.gBuffers[materialDBuffer],
@@ -300,8 +320,16 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
     mainFBO.renderInGBuffers(buffersCombine[2]);
     currentCam->updateViewMat();
     
+    //Push ParticlesObjects in transparentAccumulator
+    for(auto particlesObject : particlesObjects)
+        if(particlesObject->inFrustum) {
+            AccumulatedTransparent* transparent = new AccumulatedTransparent();
+            transparent->object = particlesObject;
+            transparent->mesh = NULL;
+            transparentAccumulator.push_back(transparent);
+        }
+    
     //Draw GraphicObjects
-    glDisable(GL_BLEND);
     for(auto graphicObject : graphicObjects)
         if(graphicObject->inFrustum)
             graphicObject->draw();
@@ -328,15 +356,6 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
         decalVAO.draw();
     }
     
-    //Push ParticlesObjects in transparentAccumulator
-    for(auto particlesObject : particlesObjects)
-        if(particlesObject->inFrustum) {
-            AccumulatedTransparent* transparent = new AccumulatedTransparent();
-            transparent->object = particlesObject;
-            transparent->mesh = NULL;
-            transparentAccumulator.push_back(transparent);
-        }
-    
     //Illuminate non transparent
     illuminate();
     shaderPrograms[deferredCombineSP]->use();
@@ -348,7 +367,7 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
         buffersCombine[2] = mainFBO.gBuffers[transparentDBuffer];
         
         btVector3 camMatPos = currentCam->getTransformation().getOrigin();
-        std::sort(transparentAccumulator.begin(), transparentAccumulator.end(), [&camMatPos](AccumulatedTransparent* a, AccumulatedTransparent* b){
+        std::sort(transparentAccumulator.begin(), transparentAccumulator.end(), [&camMatPos](AccumulatedTransparent* a, AccumulatedTransparent* b) {
             return (a->object->getTransformation().getOrigin()-camMatPos).length() > (b->object->getTransformation().getOrigin()-camMatPos).length();
         });
         
@@ -365,9 +384,11 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
             
             if(transparent->mesh) {
                 glDepthMask(GL_TRUE);
+                glFrontFace((planeReflective) ? GL_CW : GL_CCW);
                 static_cast<ModelObject*>(transparent->object)->drawAccumulatedMesh(transparent->mesh);
             }else{
                 glDepthMask(GL_FALSE);
+                glFrontFace(GL_CCW);
                 static_cast<ParticlesObject*>(transparent->object)->draw();
             }
             delete transparent;

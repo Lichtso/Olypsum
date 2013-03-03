@@ -24,18 +24,33 @@ void Mesh::draw(ModelObject* object) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+    
     if(material.effectMap)
         material.effectMap->use(1);
     else{
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+    
     if(material.heightMap)
         material.heightMap->use(2);
     else{
         glActiveTexture(GL_TEXTURE2);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+    
+    bool reflection = false;
+    glActiveTexture(GL_TEXTURE3);
+    if(!objectManager.currentShadowLight && !objectManager.currentReflective &&
+       material.reflectivity != 0.0 && optionsState.blendingQuality > 2) {
+        auto iterator = objectManager.reflectiveAccumulator.find(object);
+        if(iterator != objectManager.reflectiveAccumulator.end()) {
+            glBindTexture(GL_TEXTURE_RECTANGLE, iterator->second->buffer->texture);
+            reflection = true;
+        }
+    }
+    if(!reflection)
+        glBindTexture(GL_TEXTURE_RECTANGLE, 0);
     
     unsigned int shaderProgram;
     if(objectManager.currentShadowLight) {
@@ -49,6 +64,7 @@ void Mesh::draw(ModelObject* object) {
         if(material.diffuse && material.diffuse->depth > 1) shaderProgram += 2;
         if(material.heightMap) shaderProgram += 4;
         if(material.transparent && optionsState.blendingQuality > 0) shaderProgram += 8;
+        //if(reflection) shaderProgram += 16;
     }
     shaderPrograms[shaderProgram]->use();
     object->prepareShaderProgram(this);
@@ -820,8 +836,8 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
 
 void Model::draw(ModelObject* object) {
     for(unsigned int i = 0; i < meshes.size(); i ++) {
-        if(meshes[i]->material.reflectivity != 0.0)
-            continue;
+        //if(meshes[i]->material.reflectivity != 0.0 && objectManager.currentReflective)
+        //    continue;
         if(optionsState.blendingQuality > 0 && !objectManager.currentShadowLight && meshes[i]->material.transparent) {
             AccumulatedTransparent* transparent = new AccumulatedTransparent();
             transparent->object = object;

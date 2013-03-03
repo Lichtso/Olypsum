@@ -82,12 +82,13 @@ void LightObject::draw() {
     currentShaderProgram->setUniformF("lInvRange", 1.0/shadowCam.far);
     currentShaderProgram->setUniformVec3("lColor", color.getVector());
     
+    bool reflection = dynamic_cast<PlaneReflective*>(objectManager.currentReflective);
     if(currentCam->testInverseNearPlaneHit(static_cast<btDbvtProxy*>(body->getBroadphaseHandle()))) { //PART IN FRUSTUM
         glDisable(GL_DEPTH_TEST);
-        glFrontFace(GL_CW);
+        glFrontFace((reflection) ? GL_CCW : GL_CW);
     }else{ //ALL IN FRUSTUM
         glEnable(GL_DEPTH_TEST);
-        glFrontFace(GL_CCW);
+        glFrontFace((reflection) ? GL_CW : GL_CCW);
     }
     
     GLuint buffersLight[] = {

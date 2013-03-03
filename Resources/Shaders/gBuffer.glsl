@@ -12,6 +12,7 @@ uniform mat4 modelViewMat;
 uniform mat4 modelMat;
 uniform mat3 normalMat;
 #endif
+uniform vec4 clipPlane[1];
 
 #if BUMP_MAPPING > 0
 out vec3 gPosition;
@@ -21,6 +22,7 @@ out vec3 gNormal;
 out vec3 vPosition;
 out vec2 vTexCoord;
 out vec3 vNormal;
+out float gl_ClipDistance[1];
 #endif
 
 void main() {
@@ -39,6 +41,7 @@ void main() {
     vPosition = pos.xyz/pos.w;
     vNormal = normalize((vec4(normal, 0.0) * mat).xyz);
     vTexCoord = texCoord;
+    gl_ClipDistance[0] = dot(vec4(vPosition, 1.0), clipPlane[0]);
     #endif
     #else
     gl_Position = vec4(position, 1.0)*modelViewMat;
@@ -50,6 +53,7 @@ void main() {
 	vPosition = (vec4(position, 1.0)*modelMat).xyz;
     vNormal = normal*normalMat;
     vTexCoord = texCoord;
+    gl_ClipDistance[0] = dot(vec4(vPosition, 1.0), clipPlane[0]);
     #endif
     #endif
 }
@@ -106,7 +110,6 @@ void setColor(vec2 texCoord) {
     #endif
     materialOut = texture(sampler1, texCoord).rgb;
     if(colorOut.a < 0.0039) discard;
-    //colorOut.a = 0.5;
 }
 
 #if BUMP_MAPPING == 3
@@ -204,6 +207,7 @@ void main() {
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 3) out;
 
+uniform vec4 clipPlane[1];
 in vec3 gPosition[3];
 in vec2 gTexCoord[3];
 in vec3 gNormal[3];
@@ -212,6 +216,7 @@ out vec2 vTexCoord;
 out vec3 vNormal;
 out vec3 vTangent;
 out vec3 vBitangent;
+out float gl_ClipDistance[1];
 
 void main() {
 	vec3 posBA = gPosition[1]-gPosition[0], posCA = gPosition[2]-gPosition[0];
@@ -221,6 +226,7 @@ void main() {
     
     for(int i = 0; i < 3; i ++) {
 		gl_Position = gl_in[i].gl_Position;
+        gl_ClipDistance[0] = dot(vec4(gPosition[i], 1.0), clipPlane[0]);
 		vPosition = gPosition[i];
 		vTexCoord = gTexCoord[i];
 		vNormal = gNormal[i];

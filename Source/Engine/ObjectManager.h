@@ -30,6 +30,7 @@ class ObjectManager {
     LightObject* currentShadowLight; //!< The active light during a shadow map generation
     Reflective* currentReflective; //!< The active reflector during a reflection of the scene
     
+    std::map<ModelObject*, Reflective*> reflectiveAccumulator; //!< Stores the mirrors for deferred rendering
     std::vector<AccumulatedTransparent*> transparentAccumulator; //!< Stores the transparent objects for deferred rendering
     std::vector<LightObject*> lightObjects; //!< All light sources of the scene
     std::set<Decal*> decals; //!< All Decals in the scene
