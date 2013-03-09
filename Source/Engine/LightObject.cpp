@@ -439,6 +439,7 @@ bool PositionalLight::gameTick(bool shadowActive) {
         shadowCam.viewMat = viewMat;
         shadowCam.fov = fov;
     }else{
+        glEnable(GL_CLIP_DISTANCE0);
         objectManager.currentShadowIsParabolid = true;
         shaderPrograms[solidParabolidShadowSP]->use();
         shaderPrograms[solidParabolidShadowSP]->setUniformF("lRange", shadowCam.far);
@@ -452,6 +453,7 @@ bool PositionalLight::gameTick(bool shadowActive) {
             objectManager.drawShadowCasters();
             shadowCam.viewMat = viewMat;
         }
+        glDisable(GL_CLIP_DISTANCE0);
     }
     //glEnable(GL_BLEND);
     return true;

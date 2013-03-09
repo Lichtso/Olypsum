@@ -19,13 +19,12 @@ class Mesh {
     VertexArrayObject vao; //!< VertexArrayObject used for OpenGL
     //! Surface material of a Mesh used for OpenGL
     struct Material {
-        bool transparent = false; //!< Is this Model transparent
-        float reflectivity = 0.0; //!< Reflectivity <0.0 : Plane Mirror, ==0.0 : No Mirror, >0.0 : Environment Mirror
+        float reflectivity = 0.0, //!< Reflectivity <0.0 : Plane Mirror, ==0.0 : No Mirror, >0.0 : Environment Mirror
+              refraction = 0.0; //!< Refraction <=0.0 Non transparent, 0.0-1.0 : transparent, >1.0 : water
         std::shared_ptr<Texture> diffuse, //!< The diffuse texture
                                  effectMap, //!< The specular texture (optional)
                                  heightMap; //!< The highmap (optional)
     } material;
-    Mesh();
     /*! Used by the engine to render this Mesh
      @param object The parent ModelObject which is used to render the Model of this Mesh
      */

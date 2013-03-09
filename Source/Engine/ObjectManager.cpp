@@ -125,7 +125,8 @@ void ObjectManager::gameTick() {
     
     unsigned int maxShadows = 3;
     for(unsigned int i = 0; i < lightObjects.size(); i ++)
-        lightObjects[i]->gameTick(i < maxShadows);
+        if(!lightObjects[i]->gameTick(i < maxShadows))
+            i --;
     
     currentShadowLight = NULL;
     currentShadowIsParabolid = false;
@@ -202,18 +203,18 @@ void ObjectManager::gameTick() {
     }
     
     //Calculate GraphicObjects
-    for(auto graphicObject : graphicObjects)
-        graphicObject->gameTick();
+    foreach_e(graphicObjects, iterator)
+        (*iterator)->gameTick();
     
     //Calculate SimpleObjects
     foreach_e(simpleObjects, iterator)
-    (*iterator)->gameTick();
+        (*iterator)->gameTick();
     profiler.leaveSection("Calculate objects");
     
     //Calculate ParticleSystems
     if(optionsState.particleCalcTarget == 2) glEnable(GL_RASTERIZER_DISCARD);
     foreach_e(particlesObjects, iterator)
-    (*iterator)->gameTick();
+        (*iterator)->gameTick();
     if(optionsState.particleCalcTarget == 2) glDisable(GL_RASTERIZER_DISCARD);
     profiler.leaveSection("Calculate particle systems");
 }
@@ -302,9 +303,6 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
     }else
         currentCam->doFrustumCulling();
     
-    if(planeReflective && profiler.isFirstFrameInSec())
-        controlsMangager->consoleAdd("currentReflective", 1.0);
-    
     //Draw non transparent
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
@@ -312,12 +310,11 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
     glFrontFace((planeReflective) ? GL_CW : GL_CCW);
     GLuint buffersCombine[] = {
         mainFBO.gBuffers[diffuseDBuffer],
-        mainFBO.gBuffers[materialDBuffer],
         (renderTarget) ? renderTarget : mainFBO.gBuffers[colorDBuffer],
         mainFBO.gBuffers[specularDBuffer],
         0
     };
-    mainFBO.renderInGBuffers(buffersCombine[2]);
+    mainFBO.renderInGBuffers(buffersCombine[1]);
     currentCam->updateViewMat();
     
     //Push ParticlesObjects in transparentAccumulator
@@ -359,12 +356,12 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
     //Illuminate non transparent
     illuminate();
     shaderPrograms[deferredCombineSP]->use();
-    mainFBO.renderInBuffers(true, buffersCombine, 4, &buffersCombine[2], (renderTarget || transparentAccumulator.size() > 0) ? 1 : 0);
+    mainFBO.renderInBuffers(true, buffersCombine, 3, &buffersCombine[1], (renderTarget || transparentAccumulator.size() > 0) ? 1 : 0);
     
     //Draw transparent
     if(transparentAccumulator.size() > 0) {
-        buffersCombine[4] = buffersCombine[2];
-        buffersCombine[2] = mainFBO.gBuffers[transparentDBuffer];
+        buffersCombine[3] = buffersCombine[1];
+        buffersCombine[1] = mainFBO.gBuffers[transparentDBuffer];
         
         btVector3 camMatPos = currentCam->getTransformation().getOrigin();
         std::sort(transparentAccumulator.begin(), transparentAccumulator.end(), [&camMatPos](AccumulatedTransparent* a, AccumulatedTransparent* b) {
@@ -372,14 +369,14 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
         });
         
         for(unsigned int i = 0; i < transparentAccumulator.size(); i ++) {
-            mainFBO.renderInGBuffers(buffersCombine[2]);
+            mainFBO.renderInGBuffers(buffersCombine[1]);
             glDisable(GL_BLEND);
             glEnable(GL_DEPTH_TEST);
             
             AccumulatedTransparent* transparent = transparentAccumulator[i];
             if(optionsState.blendingQuality > 1) {
                 glActiveTexture((transparent->mesh) ? GL_TEXTURE3 : GL_TEXTURE1);
-                glBindTexture(GL_TEXTURE_RECTANGLE, buffersCombine[4]);
+                glBindTexture(GL_TEXTURE_RECTANGLE, buffersCombine[3]);
             }
             
             if(transparent->mesh) {
@@ -396,11 +393,11 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
             illuminate();
             shaderPrograms[deferredCombineTransparentSP]->use();
             mainFBO.renderInBuffers(true,
-                                    buffersCombine, (optionsState.blendingQuality == 1) ? 5 : 4,
-                                    &buffersCombine[4], 1);
+                                    buffersCombine, (optionsState.blendingQuality == 1) ? 4 : 3,
+                                    &buffersCombine[3], 1);
         }
         if(!renderTarget)
-            mainFBO.copyBuffer(buffersCombine[4], 0);
+            mainFBO.copyBuffer(buffersCombine[3], 0);
     }
     transparentAccumulator.clear();
 }

@@ -29,6 +29,7 @@ out vec3 colorOut;
 out vec3 materialOut;
 out vec3 normalOut;
 out vec3 positionOut;
+out vec3 specularOut;
 
 uniform sampler2DArray sampler0;
 uniform sampler2DArray sampler1;
@@ -47,4 +48,5 @@ void main() {
     
     normalOut = normalize(vNormal); //Normal
 	positionOut = vPosition; //Position
+    specularOut = vec3(0.0); //Emission
 }

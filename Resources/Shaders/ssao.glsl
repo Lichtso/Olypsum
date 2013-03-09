@@ -21,7 +21,7 @@ void main() {
 	float depth = texture(sampler0, gl_FragCoord.xy*SSAO_SCALE).x;
 	colorOut = 0.0;
 	for(int i = 0; i < SAMPLES; i ++) {
-        vec2 ray = reflect(pSphere[i], normalize(vec2rand(seed, vec2(1.0))))*sampleRadius;
+        vec2 ray = reflect(pSphere[i], normalize(vec2SeedRand(seed, vec2(1.0))))*sampleRadius;
 		float sampleDepth = texture(sampler0, gl_FragCoord.xy*SSAO_SCALE+ray.xy).x;
 		float occlusion = distanceScale * max(depth-sampleDepth, 0.0);
         colorOut += 1.0 / (1.0 + occlusion * occlusion * 0.5);

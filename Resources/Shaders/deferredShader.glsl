@@ -11,25 +11,23 @@ uniform sampler2DRect sampler0;
 uniform sampler2DRect sampler1;
 uniform sampler2DRect sampler2;
 uniform sampler2DRect sampler3;
-uniform sampler2DRect sampler4;
 uniform vec3 sceneAmbient;
 
 void main() {
     colorOut = texture(sampler0, gl_FragCoord.xy).rgb; //Diffuse Light
     colorOut += sceneAmbient; //Ambient Light
-    colorOut += vec3(texture(sampler1, gl_FragCoord.xy).b); //Material Light Emission
     
     #if BLENDING_QUALITY > 0
-    vec4 color = texture(sampler2, gl_FragCoord.xy);
+    vec4 color = texture(sampler1, gl_FragCoord.xy);
     if(color.a == 0.0) discard;
     colorOut *= color.rgb; //Material Diffuse Color
     #else
-    colorOut *= texture(sampler2, gl_FragCoord.xy).rgb; //Material Diffuse Color
+    colorOut *= texture(sampler1, gl_FragCoord.xy).rgb; //Material Diffuse Color
     #endif
     
-    colorOut += texture(sampler3, gl_FragCoord.xy).rgb; //Specular Light
+    colorOut += texture(sampler2, gl_FragCoord.xy).rgb; //Specular Light
     
     #if BLENDING_QUALITY == 1
-    colorOut += texture(sampler4, gl_FragCoord.xy).rgb*(1.0-color.a);
+    colorOut += texture(sampler3, gl_FragCoord.xy).rgb*(1.0-color.a);
     #endif
 }

@@ -47,7 +47,7 @@ void main() {
     int seed = genSeed();
     colorOut = vec3(0.0);
 	for(int i = 0; i < blurWidth; i ++)
-		colorOut += texture(sampler0, gl_FragCoord.xy+vec2rand(seed, vec2(processingValue))).rgb;
+		colorOut += texture(sampler0, gl_FragCoord.xy+vec2SeedRand(seed, vec2(processingValue))).rgb;
 	colorOut *= blurInverse;
 }
 

@@ -55,13 +55,14 @@ class GraphicObject : public DisplayObject {
  */
 class ModelObject : public GraphicObject {
     btTransform* skeletonPose;
-    float* textureAnimation;
+    float integrity, //! Health <= 0.0: destroyed
+         *textureAnimation; //!< Animation time for each mesh;
     void setupBones(BaseObject* object, Bone* bone);
     void writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver,
                     rapidxml::xml_node<xmlUsedCharType>* node, BoneObject *object);
     void updateSkeletonPose(BaseObject* object, Bone* bone);
     protected:
-    ModelObject() :skeletonPose(NULL), textureAnimation(NULL) { };
+    ModelObject() :skeletonPose(NULL), textureAnimation(NULL), integrity(1.0) { };
     public:
     ~ModelObject();
     std::shared_ptr<Model> model;
@@ -89,6 +90,8 @@ class Reflective {
     ColorBuffer* buffer;
     ModelObject* object;
     Mesh* mesh;
+    //! Recalculates the reflection in a tick, returns false if it is out of view
+    virtual bool gameTick() = 0;
 };
 
 //! A Reflective mirroring at a given plane
@@ -96,7 +99,13 @@ class PlaneReflective : public Reflective {
     public:
     btVector3 plane;
     PlaneReflective(ModelObject* object, Mesh* mesh);
-    //! Recalculates the reflection in a tick, returns false if it is out of view
+    bool gameTick();
+};
+
+//! A Reflective mirroring the environment using a cube map
+class EnvironmentReflective : public Reflective {
+    public:
+    EnvironmentReflective(ModelObject* object, Mesh* mesh);
     bool gameTick();
 };
 
@@ -149,42 +158,6 @@ class RigidObject : public ModelObject {
     }
     bool gameTick();
     void draw();
-    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
-};
-
-#define MAX_WAVES 4
-
-//! A ModelObject to display water like effects
-/*!
- A ModelObject to display water like effects
- TODO: Not tested yet.
- */
-class WaterObject : public ModelObject {
-    public:
-    float waveSpeed;
-    //! A wave in a WaterObject
-    struct Wave {
-        float length, //! The length of the wave
-              age, //! The time in seconds until the wave will be deleted
-              duration, //! The life duration in seconds
-              ampitude, //! The height of the wave
-              originX, //! The s coord of the center
-              originY; //! The t coord of the center
-    };
-    std::vector<Wave> waves; //!< The waves on the surface of this WaterObject
-    WaterObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    ~WaterObject();
-    bool gameTick();
-    void draw();
-    void prepareShaderProgram(Mesh* mesh);
-    /*! Adds a wave to the surface
-     @param duration The time in seconds until the wave will be deleted
-     @param ampitude The height of the wave
-     @param length The length of the wave
-     @param originX The s coord of the center
-     @param originY The t coord of the center
-     */
-    void addWave(float duration, float ampitude, float length, float originX, float originY);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 

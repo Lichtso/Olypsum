@@ -82,9 +82,9 @@ Matrix4 Cam::getCamMatrix() {
     if(planeReflective) {
         Matrix4 mat = transformation;
         btVector3 translation = planeReflective->plane*planeReflective->plane.w();
-        mat.translate(translation*-1.0);
-        mat.reflect(planeReflective->plane);
         mat.translate(translation);
+        mat.reflect(planeReflective->plane);
+        mat.translate(translation*-1.0);
         return mat;
     }else
         return Matrix4(transformation);

@@ -14,11 +14,6 @@
 #define jointsPerVertex 3
 #define maxJointsCount 64
 
-Mesh::Mesh() {
-    material.transparent = false;
-    material.diffuse = material.effectMap = material.heightMap = NULL;
-}
-
 void Mesh::draw(ModelObject* object) {
     if(!material.diffuse) {
         glActiveTexture(GL_TEXTURE0);
@@ -39,19 +34,6 @@ void Mesh::draw(ModelObject* object) {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
     
-    bool reflection = false;
-    glActiveTexture(GL_TEXTURE3);
-    if(!objectManager.currentShadowLight && !objectManager.currentReflective &&
-       material.reflectivity != 0.0 && optionsState.blendingQuality > 2) {
-        auto iterator = objectManager.reflectiveAccumulator.find(object);
-        if(iterator != objectManager.reflectiveAccumulator.end()) {
-            glBindTexture(GL_TEXTURE_RECTANGLE, iterator->second->buffer->texture);
-            reflection = true;
-        }
-    }
-    if(!reflection)
-        glBindTexture(GL_TEXTURE_RECTANGLE, 0);
-    
     unsigned int shaderProgram;
     if(objectManager.currentShadowLight) {
         shaderProgram = solidShadowSP;
@@ -63,12 +45,32 @@ void Mesh::draw(ModelObject* object) {
         if(object->model->skeleton) shaderProgram += 1;
         if(material.diffuse && material.diffuse->depth > 1) shaderProgram += 2;
         if(material.heightMap) shaderProgram += 4;
-        if(material.transparent && optionsState.blendingQuality > 0) shaderProgram += 8;
-        //if(reflection) shaderProgram += 16;
+        if(material.refraction > 0.0 && optionsState.blendingQuality > 0) shaderProgram += 8;
+        
+        GLenum reflectionType = 0;
+        if(material.reflectivity < 0.0) {
+            reflectionType = GL_TEXTURE_RECTANGLE;
+            shaderProgram += 16;
+        }else if(material.reflectivity > 0.0) {
+            reflectionType = GL_TEXTURE_CUBE_MAP;
+            shaderProgram += 32;
+        }
+        glActiveTexture(GL_TEXTURE4);
+        if(reflectionType != 0) {
+            if(!objectManager.currentReflective && optionsState.blendingQuality > 2) {
+                auto iterator = objectManager.reflectiveAccumulator.find(object);
+                if(iterator != objectManager.reflectiveAccumulator.end())
+                    glBindTexture(reflectionType, iterator->second->buffer->texture);
+            }else
+                glBindTexture(reflectionType, 0);
+        }
+        
+        if(material.refraction > 1.0 && shaderProgram == solidAnimatedGlassMirrorGSP)
+            shaderProgram = waterGSP;
     }
+    
     shaderPrograms[shaderProgram]->use();
     object->prepareShaderProgram(this);
-    
     vao.draw();
 }
 
@@ -287,30 +289,25 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
                     source = source->first_node("technique");
                 
                 if((dataNode = source->first_node("transparent")) && dataNode->first_node()) {
-                    material.transparent = true;
-                }else if((dataNode = source->first_node("transparency"))) {
-                    dataNode = dataNode->first_node();
-                    if(dataNode) {
-                        float value;
-                        sscanf(dataNode->value(), "%f", &value);
-                        if(value < 1.0) material.transparent = true;
-                    }
+                    material.refraction = 1.0;
+                }else if((dataNode = source->first_node("transparency")) && dataNode->first_node()) {
+                    material.refraction = 1.0;
                 }
-                if((dataNode = source->first_node("reflective"))) {
-                    dataNode = dataNode->first_node();
-                    if(dataNode)
-                        material.reflectivity = -1.0;
-                }else if((dataNode = source->first_node("reflectivity"))) {
-                    dataNode = dataNode->first_node();
-                    if(dataNode)
-                        sscanf(dataNode->value(), "%f", &material.reflectivity);
+                if((dataNode = source->first_node("reflective")) && dataNode->first_node()) {
+                    material.reflectivity = -1.0;
+                }else if((dataNode = source->first_node("reflectivity")) && dataNode->first_node()) {
+                    material.reflectivity = 1.0;
+                }
+                if((dataNode = source->first_node("index_of_refraction")) && dataNode->first_node()) {
+                    material.refraction = 2.0;
+                    material.reflectivity = -1.0;
                 }
                 if((dataNode = source->first_node("diffuse"))) {
                     std::string url = readTextureURL(samplerURLs, dataNode);
                     if(url.size() > 0) {
                         material.diffuse = filePackage->getResource<Texture>(url);
                         material.diffuse->setAnimationFrames(readTextureFrames(dataNode->first_node("texture")));
-                        material.diffuse->uploadTexture(GL_TEXTURE_2D_ARRAY, (material.transparent) ? GL_COMPRESSED_RGBA : GL_COMPRESSED_RGB);
+                        material.diffuse->uploadTexture(GL_TEXTURE_2D_ARRAY, (material.refraction > 0.0) ? GL_COMPRESSED_RGBA : GL_COMPRESSED_RGB);
                     }
                 }
                 if((dataNode = source->first_node("specular"))) {
@@ -836,9 +833,7 @@ std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, cons
 
 void Model::draw(ModelObject* object) {
     for(unsigned int i = 0; i < meshes.size(); i ++) {
-        //if(meshes[i]->material.reflectivity != 0.0 && objectManager.currentReflective)
-        //    continue;
-        if(optionsState.blendingQuality > 0 && !objectManager.currentShadowLight && meshes[i]->material.transparent) {
+        if(optionsState.blendingQuality > 0 && !objectManager.currentShadowLight && meshes[i]->material.refraction > 0.0) {
             AccumulatedTransparent* transparent = new AccumulatedTransparent();
             transparent->object = object;
             transparent->mesh = meshes[i];

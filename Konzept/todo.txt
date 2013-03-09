@@ -1,5 +1,3 @@
-Reflection Shader Programs
-Make objects destructible using discardDensity
 Implement btSoftBody
 Implement btRayCastVehicle
 V8 API

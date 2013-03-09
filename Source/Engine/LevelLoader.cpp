@@ -249,8 +249,6 @@ bool LevelLoader::loadContainer(std::string name) {
                 new SoundSourceObject(node, this);
             }else if(strcmp(node->name(), "HeightfieldTerrain") == 0) {
                 new HeightfieldTerrain(node, this);
-            }else if(strcmp(node->name(), "WaterObject") == 0) {
-                new WaterObject(node, this);
             }else if(strcmp(node->name(), "Cam") == 0) {
                 new Cam(node, this);
             }else{

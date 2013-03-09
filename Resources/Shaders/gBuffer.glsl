@@ -22,7 +22,6 @@ out vec3 gNormal;
 out vec3 vPosition;
 out vec2 vTexCoord;
 out vec3 vNormal;
-out float gl_ClipDistance[1];
 #endif
 
 void main() {
@@ -85,31 +84,28 @@ uniform sampler2DArray sampler0;
 uniform sampler2D sampler1;
 uniform sampler2D sampler2;
 uniform sampler2DRect sampler3;
+#if REFLECTION_TYPE == 1
+uniform sampler2DRect sampler4;
+#elif REFLECTION_TYPE == 2
+uniform samplerCube sampler4;
+#endif
+
 uniform float discardDensity;
 uniform vec3 camPos;
 uniform mat3 viewNormalMat;
 
-#if BLENDING_QUALITY > 0 && BUMP_MAPPING == 2
-const int maxWaves = 4;
-uniform float waveLen[maxWaves];
-uniform float waveAge[maxWaves];
-uniform float waveAmp[maxWaves];
-uniform vec2 waveOri[maxWaves];
-#endif
-
-float random(vec2 co) {
-    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
-}
+#include random.glsl
 
 void setColor(vec2 texCoord) {
     #if TEXTURE_ANIMATION == 0 //2D texture
     colorOut = texture(sampler0, texCoord); //Color
     #else //3D texture
     colorOut = texture(sampler0, vec3(texCoord, texCoordAnimZ.x))*texCoordAnimF.x
-                +texture(sampler0, vec3(texCoord, texCoordAnimZ.y))*texCoordAnimF.y; //Color
+              +texture(sampler0, vec3(texCoord, texCoordAnimZ.y))*texCoordAnimF.y; //Color
     #endif
-    materialOut = texture(sampler1, texCoord).rgb;
     if(colorOut.a < 0.0039) discard;
+    materialOut = texture(sampler1, texCoord).rgb; //Material
+    specularOut = colorOut.rgb*materialOut.b; //Emission
 }
 
 #if BUMP_MAPPING == 3
@@ -132,23 +128,16 @@ void BinaryParallax(inout vec3 texCoord, vec3 viewVec) {
 #endif
 
 void main() {
-    if(random(gl_FragCoord.xy) > discardDensity) discard;
+    if(vec1Vec2Rand(vTexCoord.st) > discardDensity) discard;
     
-    #if BUMP_MAPPING <= 1 || BLENDING_QUALITY > 0
+    #if BUMP_MAPPING != 2 && BUMP_MAPPING != 3 //No parallax
     setColor(vTexCoord);
-    #endif
-    normalOut = normalize(vNormal);
-    positionOut = vPosition;
-    
-    #if BLENDING_QUALITY == 0 //Solid
-    
-    #if BUMP_MAPPING == 1 //Normal mapping
-    vec3 bumpMap = texture(sampler2, vTexCoord).xyz;
-    bumpMap.xy = bumpMap.xy*2.0-vec2(1.0);
-    normalOut = mat3(vTangent, vBitangent, normalOut)*bumpMap;
-    #elif BUMP_MAPPING > 1 //Parallax
+    #endif //No parallax
     
     vec3 viewVec = normalize(camPos-vPosition);
+    normalOut = normalize(vNormal);
+    
+    #if BUMP_MAPPING >= 2 && BUMP_MAPPING <= 3 //Parallax
     #if BUMP_MAPPING == 2 //Parallax simple
     viewVec.xy = vec2(dot(viewVec, vTangent), dot(viewVec, vBitangent));
     vec2 texCoord = vTexCoord-viewVec.xy*texture(sampler2, vTexCoord).a*0.07;
@@ -161,45 +150,56 @@ void main() {
     vec3 texCoord = vec3(vTexCoord, 0.0);
     LinearParallax(texCoord, viewVec, steps);
 	BinaryParallax(texCoord, viewVec);
-    #endif
+    #endif //Parallax occlusion
     setColor(texCoord.xy);
     //if(abs(texCoord.x-0.5) > 0.5 || abs(texCoord.y-0.5) > 0.5) discard;
     gl_FragDepth = gl_FragCoord.z+length(texCoord.xy-vTexCoord)*0.05; //Depth
-    vec3 bumpMap = texture(sampler2, texCoord.xy).xyz;
-    bumpMap.xy = bumpMap.xy*2.0-vec2(1.0);
-    normalOut = mat3(vTangent, vBitangent, normalOut)*bumpMap;
+    vec3 modelNormal = texture(sampler2, texCoord.xy).xyz;
+    normalOut.xy = modelNormal.xy*2.0-vec2(1.0);
     #endif //Parallax
     
-    #else //Transparent
+    #if BUMP_MAPPING > 0
+    #if BUMP_MAPPING == 1 //Normal mapping
+    vec3 modelNormal = texture(sampler2, vTexCoord).xyz;
+    modelNormal.xy = modelNormal.xy*2.0-vec2(1.0);
+    #elif BUMP_MAPPING == 4 //Normal noise (water)
+    vec3 modelNormal;
+    modelNormal.x = vec1Vec3Noise(vec3(vTexCoord.s, vTexCoord.t, texCoordAnimZ.x));
+    modelNormal.y = vec1Vec3Noise(vec3(vTexCoord.s+22454.0, vTexCoord.t+6314.0, texCoordAnimZ.x+1373.0));
+    modelNormal = normalize(vec3(modelNormal.xy, 1.0));
+    #endif
+    normalOut = mat3(vTangent, vBitangent, normalOut) * modelNormal;
+    #endif
+    positionOut = vPosition;
     
-    #if BUMP_MAPPING == 1 //Glass refraction
-    vec3 bumpMap = texture(sampler2, vTexCoord).xyz;
-    bumpMap.xy = bumpMap.xy*2.0-vec2(1.0);
-    normalOut = mat3(vTangent, vBitangent, normalOut)*bumpMap;
-    #elif BUMP_MAPPING == 2 //Water waves refraction
-    vec3 bumpMap = vec3(0.0);
-    for(int i = 0; i < maxWaves; i ++) {
-        //if(waveAmp[i] <= 0.0) continue; //UNKNOWN PERFORMANCE USE
-        vec2 diff = waveOri[i]-vTexCoord;
-        float len = length(diff);
-        diff /= len;
-        len = sin(clamp(len*waveLen[i]-waveAge[i], 0.0, M_PI*2.0))*0.5+0.5;
-        bumpMap.xy += diff*len*waveAmp[i];
-        bumpMap.xy -= diff*(1.0-len)*waveAmp[i];
-    }
-    bumpMap.z = 1.0;
-    normalOut = mat3(vTangent, vBitangent, normalOut)*normalize(bumpMap);
-    #endif //Water waves
-    
-    #if BLENDING_QUALITY > 1 //Background lookup
-    #if BUMP_MAPPING == 0 //No refraction
+    #if BUMP_MAPPING == 0 || BUMP_MAPPING == 4 //No normal mapping
     texture(sampler2, vTexCoord); //Place holder
-    #endif //No refraction
-    specularOut = (1.0-colorOut.a) * texture(sampler3, gl_FragCoord.xy+(viewNormalMat*normalOut).xy*10.0).rgb;
-    #endif //Background lookup
+    #endif
     
-    colorOut.rgb *= colorOut.a;
+    #if BLENDING_QUALITY == 0 //No transparent
+    texture(sampler3, gl_FragCoord.xy); //Place holder
+    #elif BLENDING_QUALITY > 1 //Transparent
+    #if BUMP_MAPPING == 0 //No normal mapping
+    specularOut += (1.0-colorOut.a) * texture(sampler3, gl_FragCoord.xy).rgb;
+    #else //Normal mapping
+    specularOut += (1.0-colorOut.a) * texture(sampler3, gl_FragCoord.xy+modelNormal.xy*20.0).rgb;
+    #endif //Normal mapping
     #endif //Transparent
+    
+    #if REFLECTION_TYPE == 1 //Plane Reflection
+    #if BUMP_MAPPING == 0 //No normal mapping
+    specularOut += materialOut.r * texture(sampler4, gl_FragCoord.xy).rgb;
+    #else //Normal mapping
+    specularOut += materialOut.r * texture(sampler4, gl_FragCoord.xy-modelNormal.xy*50.0).rgb;
+    #endif //Normal mapping
+    #elif REFLECTION_TYPE == 2 //Environment Reflection
+    //specularOut += materialOut.r * texture(sampler4, reflect(normalOut, viewVec)).rgb;
+    specularOut += texture(sampler4, normalOut).rgb;
+    #endif //Environment Reflection
+    
+    #if REFLECTION_TYPE > 0 || BLENDING_QUALITY > 0
+    colorOut.rgb *= min(colorOut.a, 1.0-materialOut.r);
+    #endif //Reflection
 }
 
 #separator
@@ -216,7 +216,6 @@ out vec2 vTexCoord;
 out vec3 vNormal;
 out vec3 vTangent;
 out vec3 vBitangent;
-out float gl_ClipDistance[1];
 
 void main() {
 	vec3 posBA = gPosition[1]-gPosition[0], posCA = gPosition[2]-gPosition[0];

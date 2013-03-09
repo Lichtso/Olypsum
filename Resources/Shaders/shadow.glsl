@@ -12,7 +12,6 @@ uniform mat4 modelViewMat;
 
 #if PARABOLID == 1
 uniform float lRange;
-out float vClip;
 #endif
 out vec2 vTexCoord;
 
@@ -31,7 +30,7 @@ void main() {
     gl_Position.xyz /= gl_Position.w;
     gl_Position.w = 1.0;
     gl_Position.z *= -1.0;
-    vClip = gl_Position.z+0.05;
+    gl_ClipDistance[0] = gl_Position.z+0.05;
     float len = length(gl_Position.xyz);
     gl_Position.xy /= len + gl_Position.z;
     gl_Position.z = len / lRange;
@@ -52,14 +51,9 @@ uniform sampler2DArray sampler0;
 uniform float paraboloidRange;
 uniform float discardDensity;
 
-#if PARABOLID == 1
-in float vClip;
-#endif
 in vec2 vTexCoord;
 
-float random(vec2 co) {
-    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
-}
+#include random.glsl
 
 void main() {
     #if TEXTURE_ANIMATION == 0 //2D texture
@@ -68,9 +62,5 @@ void main() {
     float alpha = texture(sampler0, vec3(vTexCoord.xy, texCoordAnimZ.x+0.5)).a;
     #endif
     
-    #if PARABOLID == 1
-    if(alpha < 0.1 || vClip < 0.0 || random(gl_FragCoord.xy) > discardDensity) discard;
-    #else
-    if(alpha < 0.1 || random(gl_FragCoord.xy) > discardDensity) discard;
-    #endif
+    if(alpha < 0.1 || vec1Vec2Rand(vTexCoord.st) > discardDensity) discard;
 }

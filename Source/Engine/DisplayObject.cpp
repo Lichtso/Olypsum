@@ -129,6 +129,13 @@ bool ModelObject::gameTick() {
     for(unsigned int i = 0; i < model->meshes.size(); i ++)
         if(model->meshes[i]->material.diffuse && model->meshes[i]->material.diffuse->depth > 1)
             textureAnimation[animatedMeshes ++] += profiler.animationFactor;
+    if(integrity <= 0.0) {
+        integrity -= profiler.animationFactor;
+        if(integrity < -1.0) {
+            remove();
+            return false;
+        }
+    }
     return true;
 }
 
@@ -163,7 +170,7 @@ void ModelObject::prepareShaderProgram(Mesh* mesh) {
             mesh->material.diffuse->use(0);
     }
     
-    currentShaderProgram->setUniformF("discardDensity", 1.0);
+    currentShaderProgram->setUniformF("discardDensity", clamp(integrity+1.0F, 0.0F, 1.0F));
     if(skeletonPose)
         currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose, model->skeleton->bones.size());
 }
@@ -183,8 +190,7 @@ void ModelObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
             animatedMeshes ++;
     if(animatedMeshes > 0)
         textureAnimation = new float[animatedMeshes];
-    parameterNode = node->first_node("TextureAnimation");
-    if(parameterNode) {
+    if((parameterNode = node->first_node("TextureAnimation"))) {
         XMLValueArray<float> animationTime;
         animationTime.readString(parameterNode->value(), "%f");
         if(animationTime.count != animatedMeshes) {
@@ -194,12 +200,14 @@ void ModelObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
         memcpy(textureAnimation, animationTime.data, animationTime.count*sizeof(float));
     }
     
+    if((parameterNode = node->first_node("Integrity")))
+        sscanf(parameterNode->value(), "%f", &integrity);
+    
     if(model->skeleton) {
         skeletonPose = new btTransform[model->skeleton->bones.size()];
         setupBones(this, model->skeleton->rootBone);
     }
-    parameterNode = node->first_node("SkeletonPose");
-    if(parameterNode) {
+    if((parameterNode = node->first_node("SkeletonPose"))) {
         parameterNode = parameterNode->first_node();
         while(parameterNode) {
             rapidxml::xml_attribute<xmlUsedCharType>* attribute = parameterNode->first_attribute("path");
@@ -238,6 +246,12 @@ rapidxml::xml_node<xmlUsedCharType>* ModelObject::write(rapidxml::xml_document<x
             }
         textureAnimationNode->value(doc.allocate_string(data.str().c_str()));
         node->append_node(textureAnimationNode);
+    }
+    if(integrity != 1.0) {
+        rapidxml::xml_node<xmlUsedCharType>* integrityNode = doc.allocate_node(rapidxml::node_element);
+        integrityNode->name("Integrity");
+        integrityNode->value(doc.allocate_string(stringOf(integrity).c_str()));
+        node->append_node(integrityNode);
     }
     if(skeletonPose) {
         rapidxml::xml_node<xmlUsedCharType>* skeletonPoseNode = doc.allocate_node(rapidxml::node_element);
@@ -404,18 +418,16 @@ btTransform RigidObject::getTransformation() {
 
 bool RigidObject::gameTick() {
     if(model)
-        ModelObject::gameTick();
+        return ModelObject::gameTick();
     else
-        BaseObject::gameTick();
-    return true;
+        return BaseObject::gameTick();
 }
 
 void RigidObject::draw() {
-    //modelMat = getTransformation();
-    
     //TODO: Debug drawing
     /*btBoxShape* boxShape = dynamic_cast<btBoxShape*>(body->getCollisionShape());
     if(boxShape) {
+        modelMat = getTransformation();
         LightBoxVolume bV(boxShape->getHalfExtentsWithoutMargin());
         bV.init();
         bV.drawDebug(Color4(1.0, 1.0, 0.0, 1.0));
@@ -482,70 +494,5 @@ rapidxml::xml_node<xmlUsedCharType>* RigidObject::write(rapidxml::xml_document<x
         parameterNode->append_attribute(attribute);
     }
     
-    return node;
-}
-
-
-
-WaterObject::WaterObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :waveSpeed(0.05) {
-    ModelObject::init(node, levelLoader);
-    PhysicObject::init(node, levelLoader);
-}
-
-WaterObject::~WaterObject() {
-    
-}
-
-void WaterObject::addWave(float duration, float ampitude, float length, float originX, float originY) {
-    if(waves.size() >= MAX_WAVES) return;
-    Wave wave;
-    wave.age = 0.0;
-    wave.duration = duration;
-    wave.ampitude = ampitude;
-    wave.length = length;
-    wave.originX = originX;
-    wave.originY = originY;
-    waves.push_back(wave);
-}
-
-bool WaterObject::gameTick() {
-    for(unsigned int i = 0; i < waves.size(); i ++) {
-        waves[i].age += profiler.animationFactor;
-        if(waves[i].age >= waves[i].duration) {
-            waves.erase(waves.begin()+i);
-            i --;
-        }
-    }
-    return BaseObject::gameTick();
-}
-
-void WaterObject::prepareShaderProgram(Mesh* mesh) {
-    shaderPrograms[waterAnimatedGSP]->use();
-    char str[64];
-    for(unsigned int i = 0; i < MAX_WAVES; i ++) {
-        bool active = (i < waves.size());
-        sprintf(str, "waveLen[%d]", i);
-        currentShaderProgram->setUniformF(str, active ? (1.0/waves[i].length) : 0.0);
-        sprintf(str, "waveAge[%d]", i);
-        currentShaderProgram->setUniformF(str, active ? waves[i].age/waves[i].length*waveSpeed-M_PI*2.0 : 0.0);
-        sprintf(str, "waveAmp[%d]", i);
-        currentShaderProgram->setUniformF(str, active ? waves[i].ampitude*(1.0-waves[i].age/waves[i].duration) : 0.0);
-        sprintf(str, "waveOri[%d]", i);
-        if(active)
-            currentShaderProgram->setUniformVec2(str, waves[i].originX, waves[i].originY);
-        else
-            currentShaderProgram->setUniformVec2(str, 0.0, 0.0);
-    }
-    currentShaderProgram->setUniformF("discardDensity", 1.0);
-}
-
-void WaterObject::draw() {
-    if(!objectManager.currentShadowLight)
-        ModelObject::draw();
-}
-
-rapidxml::xml_node<xmlUsedCharType>* WaterObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
-    rapidxml::xml_node<xmlUsedCharType>* node = ModelObject::write(doc, levelSaver);
-    node->name("WaterObject");
     return node;
 }

@@ -28,17 +28,7 @@
         <geometry id="ID2">
             <mesh>
                 <source id="ID5">
-                    <float_array id="ID8" count="12">0.0 8.0 5.0 0.0 -8.0 -5.0 0.0 -8.0 5.0 0.0 8.0 -5.0</float_array>
-                    <technique_common>
-                        <accessor count="4" source="#ID8" stride="3">
-                            <param name="X" type="float" />
-                            <param name="Y" type="float" />
-                            <param name="Z" type="float" />
-                        </accessor>
-                    </technique_common>
-                </source>
-                <source id="ID6">
-                    <float_array id="ID9" count="12">-1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0</float_array>
+                    <float_array id="ID9" count="12">0.0 8.0 5.0 0.0 -8.0 -5.0 0.0 -8.0 5.0 0.0 8.0 -5.0</float_array>
                     <technique_common>
                         <accessor count="4" source="#ID9" stride="3">
                             <param name="X" type="float" />
@@ -47,12 +37,32 @@
                         </accessor>
                     </technique_common>
                 </source>
-                <vertices id="ID7">
+                <source id="ID6">
+                    <float_array id="ID10" count="12">-1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0 -1.0 0.0 0.0</float_array>
+                    <technique_common>
+                        <accessor count="4" source="#ID10" stride="3">
+                            <param name="X" type="float" />
+                            <param name="Y" type="float" />
+                            <param name="Z" type="float" />
+                        </accessor>
+                    </technique_common>
+                </source>
+                <source id="ID7">
+                    <float_array id="ID11" count="8">20.0 20.0 0.0 0.0 0.0 20.0 20.0 0.0</float_array>
+                    <technique_common>
+                        <accessor count="4" source="#ID11" stride="2">
+                            <param name="X" type="float" />
+                            <param name="Y" type="float" />
+                        </accessor>
+                    </technique_common>
+                </source>
+                <vertices id="ID8">
                     <input semantic="POSITION" source="#ID5" />
                     <input semantic="NORMAL" source="#ID6" />
+                    <input semantic="TEXCOORD" source="#ID7" />
                 </vertices>
                 <triangles count="2" material="Material2">
-                    <input offset="0" semantic="VERTEX" source="#ID7" />
+                    <input offset="0" semantic="VERTEX" source="#ID8" />
                     <p>0 1 2 0 3 1</p>
                 </triangles>
             </mesh>
@@ -71,6 +81,12 @@
                     <reflective>
                         <color sid="reflective">0 0 0 1</color>
                     </reflective>
+                    <index_of_refraction>
+                        <float sid="index_of_refraction">2</float>
+                    </index_of_refraction>
+                    <transparent>
+                        <color sid="transparent">0 0 0 1</color>
+                    </transparent>
                     <emission>
                       <color sid="emission">0 0 0 1</color>
                     </emission>

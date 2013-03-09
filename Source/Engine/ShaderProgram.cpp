@@ -351,7 +351,7 @@ void loadDynamicShaderPrograms() {
     
     std::vector<const char*> colorFragOut = { "colorOut" };
     std::vector<const char*> gBufferOut = { "colorOut", "materialOut", "normalOut", "positionOut" };
-    std::vector<const char*> gBufferTransparentOut = { "colorOut", "materialOut", "normalOut", "positionOut", "specularOut" };
+    std::vector<const char*> gBufferFiveOut = { "colorOut", "materialOut", "normalOut", "positionOut", "specularOut" };
     std::vector<const char*> lightFragsOut = { "diffuseOut", "specularOut" };
     std::vector<const char*> shaderProgramMacros;
     char depthOfFieldMacro[32], ssaoQualityMacro[32], blendingQualityMacro[32], bumpMappingMacro[32], shadowQualityMacro[32];
@@ -363,9 +363,10 @@ void loadDynamicShaderPrograms() {
     
     //G-Buffer Shaders
     
-    for(unsigned int p = 0; p < 16; p ++) {
+    for(unsigned int p = 0; p < 48; p ++) {
         std::vector<const char*> macros;
-        if(p % 2 == 0)
+        
+        if(p % 2 < 1)
             macros.push_back("SKELETAL_ANIMATION 0");
         else
             macros.push_back("SKELETAL_ANIMATION 1");
@@ -385,6 +386,18 @@ void loadDynamicShaderPrograms() {
         else
             macros.push_back(blendingQualityMacro);
         
+        switch(p / 16) {
+            case 0:
+            macros.push_back("REFLECTION_TYPE 0");
+            break;
+            case 1:
+            macros.push_back("REFLECTION_TYPE 1");
+            break;
+            case 2:
+            macros.push_back("REFLECTION_TYPE 2");
+            break;
+        }
+        
         shaderPrograms[solidGSP+p]->loadShaderProgram("gBuffer",
                                                       (p % 8 < 4 || optionsState.surfaceQuality == 0) ? shaderTypeVertexFragment : shaderTypeVertexFragmentGeometry,
                                                       macros);
@@ -395,21 +408,22 @@ void loadDynamicShaderPrograms() {
             shaderPrograms[solidGSP+p]->addAttribute(WEIGHT_ATTRIBUTE, "weights");
             shaderPrograms[solidGSP+p]->addAttribute(JOINT_ATTRIBUTE, "joints");
         }
-        shaderPrograms[solidGSP+p]->addFragDataLocations((p % 16 >= 8 && optionsState.blendingQuality > 1) ? gBufferTransparentOut : gBufferOut);
+        //shaderPrograms[solidGSP+p]->addFragDataLocations((p < 8 || optionsState.blendingQuality < 2) ? gBufferOut : gBufferFiveOut);
+        shaderPrograms[solidGSP+p]->addFragDataLocations(gBufferFiveOut);
         shaderPrograms[solidGSP+p]->link();
     }
     
-    shaderPrograms[waterAnimatedGSP]->loadShaderProgram("gBuffer", shaderTypeVertexFragmentGeometry, { "SKELETAL_ANIMATION 0", blendingQualityMacro, "BUMP_MAPPING 2", "TEXTURE_ANIMATION 1" });
-    shaderPrograms[waterAnimatedGSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[waterAnimatedGSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
-    shaderPrograms[waterAnimatedGSP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
-    shaderPrograms[waterAnimatedGSP]->addFragDataLocations(gBufferOut);
-    shaderPrograms[waterAnimatedGSP]->link();
+    shaderPrograms[waterGSP]->loadShaderProgram("gBuffer", shaderTypeVertexFragmentGeometry, { "SKELETAL_ANIMATION 0", blendingQualityMacro, "BUMP_MAPPING 4", "TEXTURE_ANIMATION 1", "REFLECTION_TYPE 1" });
+    shaderPrograms[waterGSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[waterGSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");
+    shaderPrograms[waterGSP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
+    shaderPrograms[waterGSP]->addFragDataLocations(gBufferFiveOut);
+    shaderPrograms[waterGSP]->link();
     
     shaderPrograms[terrainGSP]->loadShaderProgram("gBufferTerrain", shaderTypeVertexFragment, { });
     shaderPrograms[terrainGSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[terrainGSP]->addAttribute(NORMAL_ATTRIBUTE, "normal");
-    shaderPrograms[terrainGSP]->addFragDataLocations(gBufferOut);
+    shaderPrograms[terrainGSP]->addFragDataLocations(gBufferFiveOut);
     shaderPrograms[terrainGSP]->link();
     
     //Shadow Map Generators
@@ -559,13 +573,13 @@ void loadDynamicShaderPrograms() {
         shaderPrograms[particleDrawSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { "TEXTURE_ANIMATION 0", blendingQualityMacro });
         shaderPrograms[particleDrawSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[particleDrawSP]->addAttribute(VELOCITY_ATTRIBUTE, "velocity");
-        shaderPrograms[particleDrawSP]->addFragDataLocations((optionsState.blendingQuality > 1) ? gBufferTransparentOut : gBufferOut);
+        shaderPrograms[particleDrawSP]->addFragDataLocations((optionsState.blendingQuality > 1) ? gBufferFiveOut : gBufferOut);
         shaderPrograms[particleDrawSP]->link();
         
         shaderPrograms[particleDrawAnimatedSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { "TEXTURE_ANIMATION 1", blendingQualityMacro });
         shaderPrograms[particleDrawAnimatedSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[particleDrawAnimatedSP]->addAttribute(VELOCITY_ATTRIBUTE, "velocity");
-        shaderPrograms[particleDrawAnimatedSP]->addFragDataLocations((optionsState.blendingQuality > 1) ? gBufferTransparentOut : gBufferOut);
+        shaderPrograms[particleDrawAnimatedSP]->addFragDataLocations((optionsState.blendingQuality > 1) ? gBufferFiveOut : gBufferOut);
         shaderPrograms[particleDrawAnimatedSP]->link();
     }else
         optionsState.particleCalcTarget = 0;
