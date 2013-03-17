@@ -133,11 +133,20 @@ void main() {
     #if BUMP_MAPPING != 2 && BUMP_MAPPING != 3 //No parallax
     setColor(vTexCoord);
     #endif //No parallax
-    
     vec3 viewVec = normalize(camPos-vPosition);
-    normalOut = normalize(vNormal);
+    normalOut = normalize(vNormal); //Normal
+    positionOut = vPosition; //Position
     
-    #if BUMP_MAPPING >= 2 && BUMP_MAPPING <= 3 //Parallax
+    #if BUMP_MAPPING > 0
+    #if BUMP_MAPPING == 1 //Normal mapping
+    vec3 modelNormal = texture(sampler2, vTexCoord).xyz;
+    modelNormal.xy = modelNormal.xy*2.0-vec2(1.0);
+    #elif BUMP_MAPPING == 4 //Normal noise (water)
+    vec3 modelNormal;
+    modelNormal.x = vec1Vec3Noise(vec3(vTexCoord.s, vTexCoord.t, texCoordAnimZ.x));
+    modelNormal.y = vec1Vec3Noise(vec3(vTexCoord.s+22454.0, vTexCoord.t+6314.0, texCoordAnimZ.x+1373.0));
+    modelNormal = normalize(vec3(modelNormal.xy, 1.0));
+    #else //Parallax
     #if BUMP_MAPPING == 2 //Parallax simple
     viewVec.xy = vec2(dot(viewVec, vTangent), dot(viewVec, vBitangent));
     vec2 texCoord = vTexCoord-viewVec.xy*texture(sampler2, vTexCoord).a*0.07;
@@ -152,25 +161,13 @@ void main() {
 	BinaryParallax(texCoord, viewVec);
     #endif //Parallax occlusion
     setColor(texCoord.xy);
-    //if(abs(texCoord.x-0.5) > 0.5 || abs(texCoord.y-0.5) > 0.5) discard;
-    gl_FragDepth = gl_FragCoord.z+length(texCoord.xy-vTexCoord)*0.05; //Depth
+    //positionOut += ; //Position
+    //gl_FragDepth = ; //Depth
     vec3 modelNormal = texture(sampler2, texCoord.xy).xyz;
-    normalOut.xy = modelNormal.xy*2.0-vec2(1.0);
-    #endif //Parallax
-    
-    #if BUMP_MAPPING > 0
-    #if BUMP_MAPPING == 1 //Normal mapping
-    vec3 modelNormal = texture(sampler2, vTexCoord).xyz;
     modelNormal.xy = modelNormal.xy*2.0-vec2(1.0);
-    #elif BUMP_MAPPING == 4 //Normal noise (water)
-    vec3 modelNormal;
-    modelNormal.x = vec1Vec3Noise(vec3(vTexCoord.s, vTexCoord.t, texCoordAnimZ.x));
-    modelNormal.y = vec1Vec3Noise(vec3(vTexCoord.s+22454.0, vTexCoord.t+6314.0, texCoordAnimZ.x+1373.0));
-    modelNormal = normalize(vec3(modelNormal.xy, 1.0));
+    #endif //Parallax
+    normalOut = mat3(vTangent, vBitangent, normalOut) * modelNormal; //Normal
     #endif
-    normalOut = mat3(vTangent, vBitangent, normalOut) * modelNormal;
-    #endif
-    positionOut = vPosition;
     
     #if BUMP_MAPPING == 0 || BUMP_MAPPING == 4 //No normal mapping
     texture(sampler2, vTexCoord); //Place holder

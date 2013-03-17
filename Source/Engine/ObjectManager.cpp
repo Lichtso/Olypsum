@@ -74,7 +74,7 @@ void ObjectManager::init() {
     soundContext = alcCreateContext(soundDevice, NULL);
     alcMakeContextCurrent(soundContext);
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
-    log(info_log, std::string("OpenAL, sound output: ")+alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
+    log(info_log, std::string("OpenAL sound output: ")+alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
 }
 
 void ObjectManager::clear() {
@@ -114,6 +114,7 @@ void ObjectManager::initGame() {
     physicsWorld->setInternalTickCallback(calculatePhysicsTick);
     controlsMangager.reset(new ControlsMangager());
     scriptManager.reset(new ScriptManager());
+    scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
     sceneAmbient = btVector3(0.1, 0.1, 0.1);
 }
 
@@ -136,7 +137,6 @@ void ObjectManager::gameTick() {
     mainCam->use();
     bool keepInColorBuffer = optionsState.screenBlurFactor > 0.0 || optionsState.edgeSmoothEnabled || optionsState.depthOfFieldQuality;
     drawFrame((keepInColorBuffer) ? mainFBO.gBuffers[colorDBuffer] : 0);
-    
     profiler.leaveSection("Draw top frame");
     
     //Apply post effect shaders
@@ -187,6 +187,7 @@ void ObjectManager::gameTick() {
     
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
+    profiler.leaveSection("Draw post effects");
     
     //Calculate Physics
     controlsMangager->gameTick();
@@ -217,6 +218,10 @@ void ObjectManager::gameTick() {
         (*iterator)->gameTick();
     if(optionsState.particleCalcTarget == 2) glDisable(GL_RASTERIZER_DISCARD);
     profiler.leaveSection("Calculate particle systems");
+    
+    scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
+                                        "ongametick", false, { });
+    profiler.leaveSection("Execute script: ongametick()");
 }
 
 void ObjectManager::physicsTick() {
@@ -239,8 +244,8 @@ void ObjectManager::physicsTick() {
         userObjectB->handleCollision(contactManifold, userObjectA);
 	}
     
-    for(auto graphicObject : graphicObjects)
-        graphicObject->physicsTick();
+    scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
+                                        "onphysicstick", false, { });
 }
 
 void ObjectManager::drawShadowCasters() {

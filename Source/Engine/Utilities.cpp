@@ -34,6 +34,16 @@ void log(logMessageType type, std::string message) {
         controlsMangager->consoleAdd(message);
 }
 
+int getFileSize(const std::string& filePath) {
+    std::ifstream file;
+    file.open(filePath.c_str());
+    if(!file.is_open())
+        return -1;
+    unsigned int fileSize = file.tellg();
+    file.close();
+    return fileSize;
+}
+
 std::unique_ptr<char[]> readFile(const std::string& filePath, bool logs) {
     std::ifstream file;
     file.open(filePath.c_str(), std::ios::ate);

@@ -47,19 +47,24 @@ Cam::Cam() :fov(70.0/180.0*M_PI), near(1.0), far(100000.0), width(screenSize[0]/
 Cam::Cam(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :width(screenSize[0]/2), height(screenSize[1]/2) {
     BaseObject::init(node, levelLoader);
     
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("fov");
+    rapidxml::xml_node<xmlUsedCharType>* boundsNode = node->first_node("Bounds");
+    if(!boundsNode) {
+        log(error_log, "Tried to construct Cam without \"Bounds\"-node.");
+        return;
+    }
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = boundsNode->first_attribute("fov");
     if(!attribute) {
         log(error_log, "Tried to construct Cam without \"fov\"-attribute.");
         return;
     }
     sscanf(attribute->value(), "%f", &fov);
-    attribute = node->first_attribute("near");
+    attribute = boundsNode->first_attribute("near");
     if(!attribute) {
         log(error_log, "Tried to construct Cam without \"near\"-attribute.");
         return;
     }
     sscanf(attribute->value(), "%f", &near);
-    attribute = node->first_attribute("far");
+    attribute = boundsNode->first_attribute("far");
     if(!attribute) {
         log(error_log, "Tried to construct Cam without \"far\"-attribute.");
         return;
@@ -327,18 +332,22 @@ void Cam::updateViewMat() {
 rapidxml::xml_node<xmlUsedCharType>* Cam::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
     rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
     node->name("Cam");
+    
+    rapidxml::xml_node<xmlUsedCharType>* boundsNode = doc.allocate_node(rapidxml::node_element);
+    boundsNode->name("Bounds");
+    node->append_node(boundsNode);
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
     attribute->name("fov");
     attribute->value(doc.allocate_string(stringOf(fov).c_str()));
-    node->append_attribute(attribute);
+    boundsNode->append_attribute(attribute);
     attribute = doc.allocate_attribute();
     attribute->name("near");
     attribute->value(doc.allocate_string(stringOf(near).c_str()));
-    node->append_attribute(attribute);
+    boundsNode->append_attribute(attribute);
     attribute = doc.allocate_attribute();
     attribute->name("far");
     attribute->value(doc.allocate_string(stringOf(far).c_str()));
-    node->append_attribute(attribute);
+    boundsNode->append_attribute(attribute);
     return node;
 }
 

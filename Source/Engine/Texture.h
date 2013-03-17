@@ -54,8 +54,12 @@ class Texture : public FilePackageResource {
     void loadRandom();
     //! Deletes the SDL_Surface of the Texture (unload from RAM)
     void unloadImage();
+    //! Calculates the GL format of the surface
+    GLenum getSurfacesGLFormat();
     //! Uploads the SDL_Surface into the VRAM
     bool uploadTexture(GLenum textureTarget, GLenum format);
+    //! Generates and uploades a mipmap into the VRAM from a existing SDL_Surface
+    void uploadMipMap(GLenum textureTarget, GLenum format);
     //! Generates and uploades a normal map into the VRAM from a existing SDL_Surface
     bool uploadNormalMap(float processingValue);
     //! Deletes the OpenGL texture (unload from VRAM)

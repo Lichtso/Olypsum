@@ -6,7 +6,7 @@
 //
 //
 
-#include "LevelManager.h"
+#include "AppMain.h"
 
 bool BaseObject::gameTick() {
     for(auto link : links)
@@ -16,6 +16,8 @@ bool BaseObject::gameTick() {
 }
 
 void BaseObject::remove() {
+    if(!scriptInstance.IsEmpty())
+        scriptInstance.Dispose();
     delete this;
 }
 
@@ -29,6 +31,24 @@ void BaseObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
     setTransformation(readTransformtion(node, levelLoader));
 }
 
+void BaseObject::initScriptInstance(rapidxml::xml_node<xmlUsedCharType>* node) {
+    v8::HandleScope handleScope;
+    scriptInstance = v8::Persistent<v8::Object>::New(scriptBaseObject.newInstance(this));
+    node = node->first_node("Script");
+    if(!node) return;
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("package");
+    FilePackage* levelPack = levelManager.levelPackage;
+    if(attribute)
+        levelPack = fileManager.getPackage(attribute->value());
+    attribute = node->first_attribute("src");
+    if(!attribute) {
+        log(error_log, "Tried to construct resource without \"src\"-attribute.");
+        return;
+    }
+    scriptFile = scriptManager->getScriptFile(levelPack, attribute->value());
+    scriptManager->callFunctionOfScript(scriptFile, "onload", true, { scriptInstance });
+}
+
 btTransform BaseObject::readTransformtion(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
     return levelLoader->transformation * readTransformationXML(node);
 }
@@ -38,6 +58,21 @@ rapidxml::xml_node<xmlUsedCharType>* BaseObject::write(rapidxml::xml_document<xm
     node->name("BaseObject");
     btTransform transform = getTransformation();
     node->append_node(writeTransformationXML(doc, transform));
+    if(scriptFile) {
+        rapidxml::xml_node<xmlUsedCharType>* scriptNode = doc.allocate_node(rapidxml::node_element);
+        scriptNode->name("Script");
+        node->append_node(scriptNode);
+        rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+        if(scriptFile->filePackage != levelManager.levelPackage) {
+            attribute->name("package");
+            attribute->value(doc.allocate_string(scriptFile->filePackage->name.c_str()));
+            scriptNode->append_attribute(attribute);
+            attribute = doc.allocate_attribute();
+        }
+        attribute->name("src");
+        attribute->value(doc.allocate_string(scriptFile->name.c_str()));
+        scriptNode->append_attribute(attribute);
+    }
     levelSaver->pushObject(this);
     return node;
 }
@@ -116,6 +151,10 @@ void PhysicObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* 
     body->setUserPointer(this);
     body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
     objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Zone, CollisionMask_Object);
+}
+
+void PhysicObject::handleCollision(btPersistentManifold* contactManifold, PhysicObject* b) {
+    scriptManager->callFunctionOfScript(scriptFile, "oncollision", true, { scriptInstance, b->scriptInstance });
 }
 
 btCollisionShape* PhysicObject::readCollisionShape(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {

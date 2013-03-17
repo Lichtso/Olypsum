@@ -10,7 +10,7 @@
 
 Uint8* keyState;
 SDLMod modKeyState;
-const float loadingScreenTime = 0.1;
+const float loadingScreenTime = 1.0;
 float timeInLastSec = 0.0, loadingScreen = loadingScreenTime;
 
 #ifndef __MAC_OS__
@@ -57,18 +57,27 @@ void AppMain(int argc, char *argv[]) {
     updateVideoMode();
     
     //Init OpenGL
+    {
+        char* glStr = NULL;
+        GLint glMajorVersion, glMinorVersion;
+        glStr = (char*)glGetString(GL_VENDOR);
+        log(info_log, std::string("OpenGL vendor: ")+glStr);
+        glStr = (char*)glGetString(GL_RENDERER);
+        log(info_log, std::string("OpenGL renderer: ")+glStr);
+        glStr = (char*)glGetString(GL_VERSION);
+        log(info_log, std::string("OpenGL driver: ")+glStr);
+        glGetIntegerv(GL_MAJOR_VERSION, &glMajorVersion);
+        glGetIntegerv(GL_MINOR_VERSION, &glMinorVersion);
+        log(info_log, std::string("OpenGL version: ")+stringOf(glMajorVersion)+"."+stringOf(glMinorVersion));
+        if(glMajorVersion < 3 || (glMajorVersion == 3 && glMinorVersion < 2)) {
+            log(error_log, std::string("OpenGL version 3.2 is required, Quit.")+glStr);
+            exit(5);
+        }
+        //glStr = (char*)glGetString(GL_EXTENSIONS);
+        //log(info_log, std::string("OpenGL, extensions: ")+glStr);
+    }
     glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &optionsState.anisotropy);
     optionsState.anisotropy = fmin(optionsState.anisotropy, pow(2.0, optionsState.surfaceQuality));
-    char* glStr = NULL;
-    glStr = (char*)glGetString(GL_VENDOR);
-    log(info_log, std::string("OpenGL, vendor: ")+glStr);
-    glStr = (char*)glGetString(GL_RENDERER);
-    log(info_log, std::string("OpenGL, renderer: ")+glStr);
-    glStr = (char*)glGetString(GL_VERSION);
-    log(info_log, std::string("OpenGL, version: ")+glStr);
-    //glStr = (char*)glGetString(GL_EXTENSIONS);
-    //log(info_log, std::string("OpenGL, extensions: ")+glStr);
-    
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
@@ -92,14 +101,10 @@ void AppMain(int argc, char *argv[]) {
     italicFont->loadTTF("font_italic");
     initLightVolumes();
     objectManager.init();
-    
-    //Load Shader Programs
     loadStaticShaderPrograms();
     setMenu(loadingMenu);
-    loadDynamicShaderPrograms();
     
     SDL_Event event;
-    SDL_PollEvent(&event);
     while(true) {
         while(SDL_PollEvent(&event)) {
             if(!currentScreenView) break;
@@ -169,18 +174,20 @@ void AppMain(int argc, char *argv[]) {
         }
         
         if(levelManager.gameStatus == noGame) {
+            glClearColor(1, 1, 1, 1);
+            glViewport(0, 0, screenSize[0], screenSize[1]);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            glClear(GL_COLOR_BUFFER_BIT);
+            
             if(currentMenu == loadingMenu) {
+                if(loadingScreen == loadingScreenTime)
+                    loadDynamicShaderPrograms();
                 loadingScreen -= profiler.animationFactor;
                 GUIProgressBar* progressBar = static_cast<GUIProgressBar*>(currentScreenView->children[0]);
                 progressBar->value = 1.0-loadingScreen/loadingScreenTime;
                 if(loadingScreen <= 0.0)
                     setMenu(mainMenu);
             }
-            
-            glClearColor(1, 1, 1, 1);
-            glViewport(0, 0, screenSize[0], screenSize[1]);
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glClear(GL_COLOR_BUFFER_BIT);
         }else{
             profiler.leaveSection("Rest");
             objectManager.gameTick();

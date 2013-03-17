@@ -8,7 +8,6 @@
 
 #include "ObjectManager.h"
 #include "FileManager.h"
-#define GL_COMPARE_R_TO_TEXTURE 0x884E
 
 ColorBuffer::ColorBuffer(bool shadowMapB, bool cubeMapB, unsigned int widthB, unsigned int heightB)
     :shadowMap(shadowMapB), cubeMap(cubeMapB), width(widthB), height(heightB) {
@@ -23,7 +22,7 @@ ColorBuffer::ColorBuffer(bool shadowMapB, bool cubeMapB, unsigned int widthB, un
     glTexParameteri(textureTarget, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
     if(shadowMap) {
-        glTexParameteri(textureTarget, GL_TEXTURE_COMPARE_MODE,  GL_COMPARE_R_TO_TEXTURE);
+        glTexParameteri(textureTarget, GL_TEXTURE_COMPARE_MODE,  GL_COMPARE_REF_TO_TEXTURE);
         glTexParameteri(textureTarget, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
         if(cubeMap) {
             for(GLenum side = GL_TEXTURE_CUBE_MAP_POSITIVE_X; side <= GL_TEXTURE_CUBE_MAP_NEGATIVE_Z; side ++)

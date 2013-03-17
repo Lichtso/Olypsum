@@ -6,7 +6,7 @@
 //
 //
 
-#include "LevelManager.h"
+#include "AppMain.h"
 
 LevelSaver::LevelSaver() :objectCounter(0) {
     
@@ -42,6 +42,8 @@ void LevelSaver::pushObject(BaseObject* object) {
 }
 
 bool LevelSaver::saveLevel() {
+    v8::HandleScope handleScope;
+    
     rapidxml::xml_document<xmlUsedCharType> doc;
     rapidxml::xml_node<xmlUsedCharType>* container = doc.allocate_node(rapidxml::node_element);
     container->name("Container");
@@ -51,12 +53,25 @@ bool LevelSaver::saveLevel() {
     rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
     node->name("Level");
     container->append_node(node);
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
-    attribute->name("gravity");
+    rapidxml::xml_node<xmlUsedCharType>* property = doc.allocate_node(rapidxml::node_element);
+    property->name("Gravity");
     btVector3 gravity = objectManager.physicsWorld->getGravity();
-    std::string gravityStr = stringOf(gravity);
-    attribute->value(gravityStr.c_str());
-    node->append_attribute(attribute);
+    property->value(doc.allocate_string(stringOf(gravity).c_str()));
+    node->append_node(property);
+    property = doc.allocate_node(rapidxml::node_element);
+    property->name("Ambient");
+    property->value(doc.allocate_string(stringOf(objectManager.sceneAmbient).c_str()));
+    node->append_node(property);
+    
+    v8::Handle<v8::Value> scritData = scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
+                                                                          "saveLocalData", false, { });
+    if(!scritData.IsEmpty() && scritData->IsString()) {
+        property = doc.allocate_node(rapidxml::node_element);
+        property->name("Data");
+        v8::String::Utf8Value dataStr(scritData);
+        property->value(doc.allocate_string(*dataStr));
+        node->append_node(property);
+    }
     
     //Save objects
     node = doc.allocate_node(rapidxml::node_element);

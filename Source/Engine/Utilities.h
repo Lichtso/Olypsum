@@ -43,10 +43,16 @@ enum logMessageType {
  */
 void log(logMessageType type, std::string message);
 
+/*! Reads the size of a file
+ @param filePath The file to be read
+ @return file size in bytes or -1 if file does not exist
+ */
+int getFileSize(const std::string& filePath);
+
 /*! Reads the content of a file
  @param filePath The file to be read
  @param logs Enables console logs if a error occurs
- @return A string with the raw content of the file to be deleted by the receiver
+ @return A string with the raw content of the file
  */
 std::unique_ptr<char[]> readFile(const std::string& filePath, bool logs);
 
@@ -54,7 +60,7 @@ std::unique_ptr<char[]> readFile(const std::string& filePath, bool logs);
  @param filePath The file to be written
  @param content The content to be written
  @param logs Enables console logs if a error occurs
- @return A string with the raw content of the file to be deleted by the receiver
+ @return Success
  */
 bool writeFile(const std::string& filePath, const std::string& content, bool logs);
 

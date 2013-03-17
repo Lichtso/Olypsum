@@ -84,7 +84,7 @@ void setMenu(MenuName menu) {
     
     if(levelManager.gameStatus == noGame && menu != loadingMenu) {
         GUIImage* image = new GUIImage();
-        image->texture = fileManager.getPackage("Default")->getResource<Texture>("background.png");
+        image->texture = fileManager.getPackage("Default")->getResource<Texture>("background.jpg");
         image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
         image->sizeAlignment = GUISizeAlignment_Height;
         image->width = currentScreenView->width;
@@ -111,10 +111,6 @@ void setMenu(MenuName menu) {
             label->posY = currentScreenView->height*-0.5;
             label->fontHeight = currentScreenView->height*0.16;
             currentScreenView->addChild(label);
-            
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            currentScreenView->draw();
-            SDL_GL_SwapBuffers();
         } break;
         case mainMenu: {
             GUIFramedView* view = new GUIFramedView();
@@ -353,7 +349,7 @@ void setMenu(MenuName menu) {
             }
             
             button = new GUIButton();
-            button->posX = currentScreenView->width*0.52;
+            button->posX = currentScreenView->width*0.32;
             button->posY = currentScreenView->height*-0.48;
             button->onClick = [](GUIButton* button) {
                 setMenu(languagesMenu);
@@ -362,7 +358,22 @@ void setMenu(MenuName menu) {
             label = new GUILabel();
             label->text = localization.localizeString("language");
             label->fontHeight = currentScreenView->height*0.1;
-            label->width = currentScreenView->width*0.2;
+            label->width = currentScreenView->width*0.15;
+            label->sizeAlignment = GUISizeAlignment_Height;
+            button->addChild(label);
+            
+            button = new GUIButton();
+            button->posX = currentScreenView->width*0.72;
+            button->posY = currentScreenView->height*-0.48;
+            button->onClick = [](GUIButton* button) {
+                //setMenu(leapMotionMenu);
+            };
+            button->state = GUIButtonStateDisabled;
+            currentScreenView->addChild(button);
+            label = new GUILabel();
+            label->text = localization.localizeString("leapMotion");
+            label->fontHeight = currentScreenView->height*0.1;
+            label->width = currentScreenView->width*0.15;
             label->sizeAlignment = GUISizeAlignment_Height;
             button->addChild(label);
         } break;
@@ -448,7 +459,7 @@ void setMenu(MenuName menu) {
             button->addChild(label);
             
             label = new GUILabel();
-            label->text = std::string("Programming: Alexander Meißner\nMental Support: Noah Hummel");
+            label->text = std::string("Core Software: Alexander Meißner\nSupporting Software: Noah Hummel");
             label->width = currentScreenView->width*0.8;
             label->fontHeight = currentScreenView->height*0.1;
             label->sizeAlignment = GUISizeAlignment_Height;
@@ -476,6 +487,7 @@ void setMenu(MenuName menu) {
                 }, [](GUIButton* button) {
                     levelManager.leaveGame();
                 }, [](GUIButton* button) {
+                    levelManager.clear();
                     AppTerminate();
                 }
             };

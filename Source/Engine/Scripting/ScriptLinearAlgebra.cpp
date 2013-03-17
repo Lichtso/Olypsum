@@ -50,13 +50,13 @@ v8::Handle<v8::Value> ScriptVector3::Constructor(const v8::Arguments& args) {
 
 v8::Handle<v8::Value> ScriptVector3::toString(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    btVector3 vec = getVector3(args.This());
+    btVector3 vec = getDataOfInstance(args.This());
     return handleScope.Close(v8::String::New(stringOf(vec).c_str()));
 }
 
 v8::Handle<v8::Value> ScriptVector3::toJSON(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    btVector3 vec = getVector3(args.This());
+    btVector3 vec = getDataOfInstance(args.This());
     v8::Local<v8::Array> array = v8::Array::New(3);
     array->Set(0, v8::Number::New(vec.x()));
     array->Set(1, v8::Number::New(vec.y()));
@@ -83,77 +83,77 @@ v8::Handle<v8::Value> ScriptVector3::IndexedPropertySetter(uint32_t index, v8::L
 
 v8::Handle<v8::Value> ScriptVector3::GetSum(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptVector3.isVector3(args[0]))
+    if(args.Length() != 1 || !scriptVector3.isCorrectInstance(args[0]))
         return v8::ThrowException(v8::String::New("Vector3 getSum: Invalid argument"));
-    btVector3 vec = getVector3(args.This());
-    vec += getVector3(args[0]);
-    return handleScope.Close(scriptVector3.newVector3(vec));
+    btVector3 vec = getDataOfInstance(args.This());
+    vec += getDataOfInstance(args[0]);
+    return handleScope.Close(scriptVector3.newInstance(vec));
 }
 
 v8::Handle<v8::Value> ScriptVector3::GetDifference(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptVector3.isVector3(args[0]))
+    if(args.Length() != 1 || !scriptVector3.isCorrectInstance(args[0]))
         return v8::ThrowException(v8::String::New("Vector3 getDiff: Invalid argument"));
-    btVector3 vec = getVector3(args.This());
-    vec -= getVector3(args[0]);
-    return handleScope.Close(scriptVector3.newVector3(vec));
+    btVector3 vec = getDataOfInstance(args.This());
+    vec -= getDataOfInstance(args[0]);
+    return handleScope.Close(scriptVector3.newInstance(vec));
 }
 
 v8::Handle<v8::Value> ScriptVector3::GetProduct(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() != 1 || !args[0]->IsNumber())
         return v8::ThrowException(v8::String::New("Vector3 getProduct: Invalid argument"));
-    btVector3 vec = getVector3(args.This())*args[0]->NumberValue();
-    return handleScope.Close(scriptVector3.newVector3(vec));
+    btVector3 vec = getDataOfInstance(args.This())*args[0]->NumberValue();
+    return handleScope.Close(scriptVector3.newInstance(vec));
 }
 
 v8::Handle<v8::Value> ScriptVector3::GetDotProduct(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptVector3.isVector3(args[0]))
+    if(args.Length() != 1 || !scriptVector3.isCorrectInstance(args[0]))
         return v8::ThrowException(v8::String::New("Vector3 getDotProduct: Invalid argument"));
-    btVector3 vecA = getVector3(args.This()),
-              vecB = getVector3(args[0]);
+    btVector3 vecA = getDataOfInstance(args.This()),
+              vecB = getDataOfInstance(args[0]);
     return handleScope.Close(v8::Number::New(vecA.dot(vecB)));
 }
 
 v8::Handle<v8::Value> ScriptVector3::GetCrossProduct(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptVector3.isVector3(args[0]))
+    if(args.Length() != 1 || !scriptVector3.isCorrectInstance(args[0]))
         return v8::ThrowException(v8::String::New("Vector3 getCrossProduct: Invalid argument"));
-    btVector3 vecA = getVector3(args.This()),
-              vecB = getVector3(args[0]);
-    return handleScope.Close(scriptVector3.newVector3(vecA.cross(vecB)));
+    btVector3 vecA = getDataOfInstance(args.This()),
+              vecB = getDataOfInstance(args[0]);
+    return handleScope.Close(scriptVector3.newInstance(vecA.cross(vecB)));
 }
 
 v8::Handle<v8::Value> ScriptVector3::GetLength(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    btVector3 vec = getVector3(args.This());
+    btVector3 vec = getDataOfInstance(args.This());
     return handleScope.Close(v8::Number::New(vec.length()));
 }
 
 v8::Handle<v8::Value> ScriptVector3::GetNormalized(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    btVector3 vec = getVector3(args.This()).normalized();
-    return handleScope.Close(scriptVector3.newVector3(vec));
+    btVector3 vec = getDataOfInstance(args.This()).normalized();
+    return handleScope.Close(scriptVector3.newInstance(vec));
 }
 
 v8::Handle<v8::Value> ScriptVector3::Sum(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptVector3.isVector3(args[0]))
+    if(args.Length() != 1 || !scriptVector3.isCorrectInstance(args[0]))
         return v8::ThrowException(v8::String::New("Vector3 add: Invalid argument"));
-    btVector3 vec = getVector3(args.This());
-    vec += getVector3(args[0]);
-    setVector3(args.This(), vec);
+    btVector3 vec = getDataOfInstance(args.This());
+    vec += getDataOfInstance(args[0]);
+    setDataToInstance(args.This(), vec);
     return handleScope.Close(args.This());
 }
 
 v8::Handle<v8::Value> ScriptVector3::Subtract(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptVector3.isVector3(args[0]))
+    if(args.Length() != 1 || !scriptVector3.isCorrectInstance(args[0]))
         return v8::ThrowException(v8::String::New("Vector3 sub: Invalid argument"));
-    btVector3 vec = getVector3(args.This());
-    vec -= getVector3(args[0]);
-    setVector3(args.This(), vec);
+    btVector3 vec = getDataOfInstance(args.This());
+    vec -= getDataOfInstance(args[0]);
+    setDataToInstance(args.This(), vec);
     return handleScope.Close(args.This());
 }
 
@@ -161,29 +161,29 @@ v8::Handle<v8::Value> ScriptVector3::Multiply(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() != 1 || !args[0]->IsNumber())
         return v8::ThrowException(v8::String::New("Vector3 mult: Invalid argument"));
-    btVector3 vec = getVector3(args.This())*args[0]->NumberValue();
-    setVector3(args.This(), vec);
+    btVector3 vec = getDataOfInstance(args.This())*args[0]->NumberValue();
+    setDataToInstance(args.This(), vec);
     return handleScope.Close(args.This());
 }
 
 v8::Handle<v8::Value> ScriptVector3::CrossProduct(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptVector3.isVector3(args[0]))
+    if(args.Length() != 1 || !scriptVector3.isCorrectInstance(args[0]))
         return v8::ThrowException(v8::String::New("Vector3 crossProduct: Invalid argument"));
-    btVector3 vecA = getVector3(args.This()),
-              vecB = getVector3(args[0]);
-    setVector3(args.This(), vecA.cross(vecB));
+    btVector3 vecA = getDataOfInstance(args.This()),
+              vecB = getDataOfInstance(args[0]);
+    setDataToInstance(args.This(), vecA.cross(vecB));
     return handleScope.Close(args.This());
 }
 
 v8::Handle<v8::Value> ScriptVector3::Normalize(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    btVector3 vec = getVector3(args.This()).normalized();
-    setVector3(args.This(), vec);
+    btVector3 vec = getDataOfInstance(args.This()).normalized();
+    setDataToInstance(args.This(), vec);
     return handleScope.Close(args.This());
 }
 
-btVector3 ScriptVector3::getVector3(const v8::Local<v8::Value>& value) {
+btVector3 ScriptVector3::getDataOfInstance(const v8::Local<v8::Value>& value) {
     v8::HandleScope handleScope;
     v8::Local<v8::Object> object = v8::Local<v8::Object>::Cast(value);
     return btVector3(object->GetRealNamedProperty(v8::String::New("x"))->NumberValue(),
@@ -191,7 +191,7 @@ btVector3 ScriptVector3::getVector3(const v8::Local<v8::Value>& value) {
                      object->GetRealNamedProperty(v8::String::New("z"))->NumberValue());
 }
 
-void ScriptVector3::setVector3(const v8::Local<v8::Value>& value, const btVector3& vec) {
+void ScriptVector3::setDataToInstance(const v8::Local<v8::Value>& value, const btVector3& vec) {
     v8::HandleScope handleScope;
     v8::Local<v8::Object> object = v8::Local<v8::Object>::Cast(value);
     object->Set(v8::String::New("x"), v8::Number::New(vec.x()));
@@ -199,23 +199,15 @@ void ScriptVector3::setVector3(const v8::Local<v8::Value>& value, const btVector
     object->Set(v8::String::New("z"), v8::Number::New(vec.z()));
 }
 
-v8::Local<v8::Object> ScriptVector3::newVector3(const btVector3& vec) {
+v8::Local<v8::Object> ScriptVector3::newInstance(const btVector3& vec) {
     v8::HandleScope handleScope;
     v8::Local<v8::Object> object = functionTemplate->GetFunction()->NewInstance();
-    setVector3(object, vec);
+    setDataToInstance(object, vec);
     return handleScope.Close(object);
 }
 
-bool ScriptVector3::isVector3(const v8::Local<v8::Value>& object) {
+ScriptVector3::ScriptVector3() :ScriptClass("Vector3", Constructor) {
     v8::HandleScope handleScope;
-    if(!object->IsObject()) return false;
-    return v8::Local<v8::Object>::Cast(object)->GetConstructor() == functionTemplate->GetFunction();
-}
-
-ScriptVector3::ScriptVector3() {
-    v8::HandleScope handleScope;
-    functionTemplate = v8::Persistent<v8::FunctionTemplate>::New(v8::FunctionTemplate::New(Constructor));
-    functionTemplate->SetClassName(v8::String::New("Vector3"));
     
     v8::Local<v8::ObjectTemplate> instanceTemplate = functionTemplate->InstanceTemplate();
     instanceTemplate->SetInternalFieldCount(0);
@@ -239,14 +231,6 @@ ScriptVector3::ScriptVector3() {
     objectTemplate->Set(v8::String::New("mult"), v8::FunctionTemplate::New(Multiply));
     objectTemplate->Set(v8::String::New("cross"), v8::FunctionTemplate::New(CrossProduct));
     objectTemplate->Set(v8::String::New("normalize"), v8::FunctionTemplate::New(Normalize));
-}
-
-ScriptVector3::~ScriptVector3() {
-    functionTemplate.Dispose();
-}
-
-void ScriptVector3::init(const v8::Persistent<v8::ObjectTemplate>& globalTemplate) {
-    globalTemplate->Set(v8::String::New("Vector3"), functionTemplate);
 }
 
 
@@ -280,7 +264,7 @@ v8::Handle<v8::Value> ScriptMatrix4::Constructor(const v8::Arguments& args) {
 void ScriptMatrix4::Destructor(v8::Persistent<v8::Value> value, void* data) {
     v8::HandleScope handleScope;
     v8::Persistent<v8::Object> object = v8::Persistent<v8::Object>::Cast(value);
-    Matrix4* matrixPtr = &getMatrix4(*object);
+    Matrix4* matrixPtr = &getDataOfInstance(*object);
     v8::V8::AdjustAmountOfExternalAllocatedMemory(-sizeof(Matrix4));
     object.ClearWeak();
     object.Dispose();
@@ -289,13 +273,13 @@ void ScriptMatrix4::Destructor(v8::Persistent<v8::Value> value, void* data) {
 
 v8::Handle<v8::Value> ScriptMatrix4::toString(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    Matrix4& mat = getMatrix4(args.This());
+    Matrix4& mat = getDataOfInstance(args.This());
     return handleScope.Close(v8::String::New(stringOf(mat).c_str()));
 }
 
 v8::Handle<v8::Value> ScriptMatrix4::toJSON(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    Matrix4& mat = getMatrix4(args.This());
+    Matrix4& mat = getDataOfInstance(args.This());
     v8::Local<v8::Array> array = v8::Array::New(16);
     for(char i = 0; i < 16; i ++)
         array->Set(i, v8::Number::New(mat.values[i]));
@@ -304,104 +288,96 @@ v8::Handle<v8::Value> ScriptMatrix4::toJSON(const v8::Arguments& args) {
 
 v8::Handle<v8::Value> ScriptMatrix4::GetInverse(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    Matrix4 mat = getMatrix4(args.This()).getInverse();
-    return handleScope.Close(scriptMatrix4.newMatrix4(mat));
+    Matrix4 mat = getDataOfInstance(args.This()).getInverse();
+    return handleScope.Close(scriptMatrix4.newInstance(mat));
 }
 
 v8::Handle<v8::Value> ScriptMatrix4::GetProduct(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptMatrix4.isMatrix4(args[0]))
+    if(args.Length() != 1 || !scriptMatrix4.isCorrectInstance(args[0]))
         return v8::ThrowException(v8::String::New("Matrix4 getProduct: Invalid argument"));
-    Matrix4 mat = getMatrix4(args.This()) * getMatrix4(args[0]);
-    return handleScope.Close(scriptMatrix4.newMatrix4(mat));
+    Matrix4 mat = getDataOfInstance(args.This()) * getDataOfInstance(args[0]);
+    return handleScope.Close(scriptMatrix4.newInstance(mat));
 }
 
 v8::Handle<v8::Value> ScriptMatrix4::GetTransformedVector(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptVector3.isVector3(args[0]))
+    if(args.Length() != 1 || !scriptVector3.isCorrectInstance(args[0]))
         return v8::ThrowException(v8::String::New("Matrix4 getTransformed: Invalid argument"));
-    Matrix4& mat = getMatrix4(args.This());
-    btVector3 vec = ScriptVector3::getVector3(args[0]);
+    Matrix4& mat = getDataOfInstance(args.This());
+    btVector3 vec = ScriptVector3::getDataOfInstance(args[0]);
     vec.setW(1.0);
-    return handleScope.Close(scriptVector3.newVector3(mat(vec)));
+    return handleScope.Close(scriptVector3.newInstance(mat(vec)));
 }
 
 v8::Handle<v8::Value> ScriptMatrix4::Multiply(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptMatrix4.isMatrix4(args[0]))
+    if(args.Length() != 1 || !scriptMatrix4.isCorrectInstance(args[0]))
         return v8::ThrowException(v8::String::New("Matrix4 mult: Invalid argument"));
-    Matrix4& mat = getMatrix4(args.This());
-    mat *= getMatrix4(args[0]);
+    Matrix4& mat = getDataOfInstance(args.This());
+    mat *= getDataOfInstance(args[0]);
     return handleScope.Close(args.This());
 }
 
 v8::Handle<v8::Value> ScriptMatrix4::Scale(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptVector3.isVector3(args[0]))
+    if(args.Length() != 1 || !scriptVector3.isCorrectInstance(args[0]))
         return v8::ThrowException(v8::String::New("Matrix4 scale: Invalid argument"));
-    Matrix4& mat = getMatrix4(args.This());
-    mat.scale(ScriptVector3::getVector3(args[0]));
+    Matrix4& mat = getDataOfInstance(args.This());
+    mat.scale(ScriptVector3::getDataOfInstance(args[0]));
     return handleScope.Close(args.This());
 }
 
 v8::Handle<v8::Value> ScriptMatrix4::Rotate(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() != 2 || !scriptVector3.isVector3(args[0]) || !args[1]->IsNumber())
+    if(args.Length() != 2 || !scriptVector3.isCorrectInstance(args[0]) || !args[1]->IsNumber())
         return v8::ThrowException(v8::String::New("Matrix4 rotate: Invalid argument"));
-    Matrix4& mat = getMatrix4(args.This());
-    mat.rotate(ScriptVector3::getVector3(args[0]), args[1]->NumberValue());
+    Matrix4& mat = getDataOfInstance(args.This());
+    mat.rotate(ScriptVector3::getDataOfInstance(args[0]), args[1]->NumberValue());
     return handleScope.Close(args.This());
 }
 
 v8::Handle<v8::Value> ScriptMatrix4::Translate(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptVector3.isVector3(args[0]))
+    if(args.Length() != 1 || !scriptVector3.isCorrectInstance(args[0]))
         return v8::ThrowException(v8::String::New("Matrix4 translate: Invalid argument"));
-    Matrix4& mat = getMatrix4(args.This());
-    mat.translate(ScriptVector3::getVector3(args[0]));
+    Matrix4& mat = getDataOfInstance(args.This());
+    mat.translate(ScriptVector3::getDataOfInstance(args[0]));
     return handleScope.Close(args.This());
 }
 
 v8::Handle<v8::Value> ScriptMatrix4::TransformVector(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptVector3.isVector3(args[0]))
+    if(args.Length() != 1 || !scriptVector3.isCorrectInstance(args[0]))
         return v8::ThrowException(v8::String::New("Matrix4 transform: Invalid argument"));
-    Matrix4& mat = getMatrix4(args.This());
-    btVector3 vec = ScriptVector3::getVector3(args[0]);
+    Matrix4& mat = getDataOfInstance(args.This());
+    btVector3 vec = ScriptVector3::getDataOfInstance(args[0]);
     vec.setW(1.0);
-    ScriptVector3::setVector3(args[0], mat(vec));
+    ScriptVector3::setDataToInstance(args[0], mat(vec));
     return handleScope.Close(args[0]);
 }
 
-Matrix4& ScriptMatrix4::getMatrix4(const v8::Local<v8::Value>& value) {
+Matrix4& ScriptMatrix4::getDataOfInstance(const v8::Local<v8::Value>& value) {
     v8::HandleScope handleScope;
     v8::Local<v8::Object> object = v8::Local<v8::Object>::Cast(value);
     return *static_cast<Matrix4*>(object->GetIndexedPropertiesExternalArrayData());
 }
 
-void ScriptMatrix4::setMatrix4(const v8::Local<v8::Value>& value, const Matrix4& mat) {
+void ScriptMatrix4::setDataToInstance(const v8::Local<v8::Value>& value, const Matrix4& mat) {
     v8::HandleScope handleScope;
     v8::Local<v8::Object> object = v8::Local<v8::Object>::Cast(value);
-    getMatrix4(object) = mat;
+    getDataOfInstance(object) = mat;
 }
 
-v8::Local<v8::Object> ScriptMatrix4::newMatrix4(const Matrix4& mat) {
+v8::Local<v8::Object> ScriptMatrix4::newInstance(const Matrix4& mat) {
     v8::HandleScope handleScope;
     v8::Local<v8::Object> object = functionTemplate->GetFunction()->NewInstance();
-    setMatrix4(object, mat);
+    setDataToInstance(object, mat);
     return handleScope.Close(object);
 }
 
-bool ScriptMatrix4::isMatrix4(const v8::Local<v8::Value>& object) {
+ScriptMatrix4::ScriptMatrix4() :ScriptClass("Matrix4", Constructor) {
     v8::HandleScope handleScope;
-    if(!object->IsObject()) return false;
-    return v8::Local<v8::Object>::Cast(object)->GetConstructor() == functionTemplate->GetFunction();
-}
-
-ScriptMatrix4::ScriptMatrix4() {
-    v8::HandleScope handleScope;
-    functionTemplate = v8::Persistent<v8::FunctionTemplate>::New(v8::FunctionTemplate::New(Constructor));
-    functionTemplate->SetClassName(v8::String::New("Matrix4"));
     
     v8::Local<v8::ObjectTemplate> instanceTemplate = functionTemplate->InstanceTemplate();
     instanceTemplate->SetInternalFieldCount(1);
@@ -417,14 +393,6 @@ ScriptMatrix4::ScriptMatrix4() {
     objectTemplate->Set(v8::String::New("rotate"), v8::FunctionTemplate::New(Rotate));
     objectTemplate->Set(v8::String::New("translate"), v8::FunctionTemplate::New(Translate));
     objectTemplate->Set(v8::String::New("transform"), v8::FunctionTemplate::New(TransformVector));
-}
-
-ScriptMatrix4::~ScriptMatrix4() {
-    functionTemplate.Dispose();
-}
-
-void ScriptMatrix4::init(const v8::Persistent<v8::ObjectTemplate>& globalTemplate) {
-    globalTemplate->Set(v8::String::New("Matrix4"), functionTemplate);
 }
 
 

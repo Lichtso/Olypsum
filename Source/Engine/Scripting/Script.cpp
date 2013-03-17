@@ -38,8 +38,8 @@ ScriptFile::~ScriptFile() {
 }
 
 bool ScriptFile::load(FilePackage* filePackageB, const std::string& nameB) {
-    name = nameB+".js";
-    std::string filePath = filePackageB->getPathOfFile("Scripts", name);
+    name = nameB;
+    std::string filePath = filePackageB->getPathOfFile("Scripts", name+".js");
     std::unique_ptr<char[]> data = readFile(filePath, true);
     if(!data) return false;
     v8::HandleScope handleScope;
@@ -58,4 +58,24 @@ bool ScriptFile::load(FilePackage* filePackageB, const std::string& nameB) {
     }
     
     return !tryCatch.HasCaught();
+}
+
+ScriptClass::ScriptClass(const char* nameB, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args)) :name(nameB) {
+    v8::HandleScope handleScope;
+    functionTemplate = v8::Persistent<v8::FunctionTemplate>::New(v8::FunctionTemplate::New(constructor));
+    functionTemplate->SetClassName(v8::String::New(name));
+}
+
+ScriptClass::~ScriptClass() {
+    functionTemplate.Dispose();
+}
+
+bool ScriptClass::isCorrectInstance(const v8::Local<v8::Value>& object) {
+    v8::HandleScope handleScope;
+    if(!object->IsObject()) return false;
+    return v8::Local<v8::Object>::Cast(object)->GetConstructor() == functionTemplate->GetFunction();
+}
+
+void ScriptClass::init(const v8::Persistent<v8::ObjectTemplate>& globalTemplate) {
+    globalTemplate->Set(v8::String::New(name), functionTemplate);
 }

@@ -12,8 +12,7 @@ v8::Handle<v8::Value> ScriptManager::ScriptLog(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() == 0)
         return v8::ThrowException(v8::String::New("log(): To less arguments"));
-    v8::String::Utf8Value message(args[0]->ToString());
-    log(script_log, stdStringOf(message));
+    log(script_log, stdStringOf(args[0]->ToString()));
     return v8::Undefined();
 }
 
@@ -35,11 +34,13 @@ v8::Handle<v8::Value> ScriptManager::ScriptRequire(const v8::Arguments& args) {
     return handleScope.Close(script->exports);
 }
 
-const char* ScriptManager::cStringOf(const v8::String::Utf8Value& value) {
+const char* ScriptManager::cStringOf(v8::Handle<v8::String> string) {
+    v8::String::Utf8Value value(string);
     return *value ? *value : "<string conversion failed>";
 }
 
-std::string ScriptManager::stdStringOf(const v8::String::Utf8Value& value) {
+std::string ScriptManager::stdStringOf(v8::Handle<v8::String> string) {
+    v8::String::Utf8Value value(string);
     return std::string(*value ? *value : "<string conversion failed>");
 }
 
@@ -50,6 +51,7 @@ ScriptManager::ScriptManager() {
     globalTemplate->Set(v8::String::New("require"), v8::FunctionTemplate::New(ScriptRequire));
     scriptVector3.init(globalTemplate);
     scriptMatrix4.init(globalTemplate);
+    scriptBaseObject.init(globalTemplate);
 }
 
 ScriptManager::~ScriptManager() {
@@ -68,6 +70,17 @@ ScriptFile* ScriptManager::getScriptFile(FilePackage* filePackage, const std::st
     return script;
 }
 
+v8::Handle<v8::Value> ScriptManager::callFunctionOfScript(ScriptFile* script, const char* functionName, bool recvFirstArg, std::vector<v8::Handle<v8::Value>> args) {
+    if(!script) return v8::Undefined();
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast(script->exports->GetRealNamedProperty(v8::String::New(functionName)));
+    if(function.IsEmpty() || !function->IsFunction()) return v8::Undefined();
+    if(recvFirstArg && args.size() > 0 && !args[0].IsEmpty() && args[0]->IsObject())
+        return function->CallAsFunction(v8::Handle<v8::Object>::Cast(args[0]), args.size()-1, &args[1]);
+    else
+        return function->CallAsFunction(script->exports, args.size(), &args[0]);
+}
+
 bool ScriptManager::tryCatch(v8::TryCatch* tryCatch) {
     if(!tryCatch->HasCaught()) return true;
     
@@ -77,19 +90,18 @@ bool ScriptManager::tryCatch(v8::TryCatch* tryCatch) {
         log(script_log, *v8::String::Utf8Value(tryCatch->StackTrace()));
     }else{
         std::ostringstream stream;
-        stream << stdStringOf(v8::String::Utf8Value(message->GetScriptResourceName()));
+        stream << stdStringOf(message->GetScriptResourceName()->ToString());
         stream << ':' << message->GetLineNumber() << ": ";
-        stream << stdStringOf(v8::String::Utf8Value(tryCatch->Exception())) << '\n';
-        stream << stdStringOf(v8::String::Utf8Value(message->GetSourceLine())) << '\n';
+        stream << stdStringOf(tryCatch->Exception()->ToString()) << '\n';
+        stream << stdStringOf(message->GetSourceLine()) << '\n';
         int start = message->GetStartColumn(), end = message->GetEndColumn();
         for(int i = 0; i < start; i ++)
             stream << ' ';
         for (int i = start; i < end; i ++)
             stream << '^';
         stream << '\n';
-        v8::String::Utf8Value stackTrace(tryCatch->StackTrace());
-        if(stackTrace.length() > 0)
-            stream << stdStringOf(stackTrace);
+        if(!tryCatch->StackTrace().IsEmpty())
+            stream << stdStringOf(tryCatch->StackTrace()->ToString());
         log(script_log, stream.str());
     }
     return false;

@@ -1,5 +1,8 @@
 <Container>
-	<Level gravity="0.0 -9.81 0.0" ambient="0.1 0.1 0.1" />
+	<Level>
+		<Gravity>0.0 -9.81 0.0</Gravity>
+		<Ambient>0.1 0.1 0.1</Ambient>
+	</Level>
 	<Container src="woodenBox">
 		<Translate>4.0 -3.0 0.0</Translate>
 	</Container>
@@ -29,7 +32,7 @@
 			<Color>1.0 1.0 1.0</Color>
 			<Bounds omniDirectional="true" range="15.0" />
 		</LightObject>
-		<ParticlesObject particles="50" force="0.0 0.0 0.0">
+		<ParticlesObject particles="50">
 			<Translate>0.0 1.5 0.0</Translate>
 			<Texture src="flash.png" />
 			<PhysicsBody collisionShape="box0" />
@@ -38,9 +41,11 @@
 			<SpawnBox min="-0.2 0.0 -0.2" max="0.2 0.0 0.2" />
 			<Velocity min="-0.2 0.3 -0.2" max="0.2 1.2 0.2" />
 		</ParticlesObject>
-		<HeightfieldTerrain size="10.0 4.0 10.0" textureScale="10.0 10.0">
+		<HeightfieldTerrain>
 			<Diffuse src="terrainDiffuse.png" />
 			<HeightsMap src="terrainMap.png" />
+			<Bounds>10.0 4.0 10.0</Bounds>
+			<TextureScale>10.0 10.0</TextureScale>
 		</HeightfieldTerrain>
 	</Objects>
 	<Links>

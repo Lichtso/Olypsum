@@ -11,6 +11,7 @@
 #ifndef Object_h
 #define Object_h
 
+class ScriptFile;
 class Skeleton;
 class BaseLink;
 class LevelLoader;
@@ -24,9 +25,11 @@ class LevelSaver;
  */
 class BaseObject {
     protected:
-    BaseObject() { };
+    BaseObject() :scriptFile(NULL) { };
     public:
     virtual ~BaseObject();
+    ScriptFile* scriptFile; //!< The script file to be called on events
+    v8::Persistent<v8::Object> scriptInstance; //!< The script representation of this BaseObject
     std::map<std::string, BaseLink*> links; //!< A map of LinkObject and names to connect BaseObject to others
     /*! Used to update the transfomation of this object
      @param transformation The new transformation
@@ -44,6 +47,8 @@ class BaseObject {
     virtual void remove();
     //! Initialize from rapidxml::xml_node
     void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    //! Initializes BaseObject::scriptInstance
+    virtual void initScriptInstance(rapidxml::xml_node<xmlUsedCharType>* node);
     //! Reads the transformation from a rapidxml::xml_node
     static btTransform readTransformtion(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     //! Writes its self to rapidxml::xml_node and returns it
@@ -113,10 +118,8 @@ class PhysicObject : public BaseObject {
     virtual btTransform getTransformation() {
         return body->getWorldTransform();
     }
-    //! Is called by the engine to prepare the next physics frame
-    virtual void physicsTick() { };
     //! Is called by the engine if a collision to another PhysicObject has been detected
-    virtual void handleCollision(btPersistentManifold* contactManifold, PhysicObject* b) { };
+    virtual void handleCollision(btPersistentManifold* contactManifold, PhysicObject* b);
     //! Getter method for the physics body, child classes will upcast their bodies
     btCollisionObject* getBody() {
         return body;

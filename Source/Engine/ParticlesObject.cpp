@@ -125,20 +125,15 @@ ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, Leve
     sscanf(attribute->value(), "%d", &maxParticles);
     init();
     
-    attribute = node->first_attribute("force");
-    if(!attribute) {
-        log(error_log, "Tried to construct ParticlesObject without \"force\"-attribute.");
-        return;
-    }
-    XMLValueArray<float> vecData;
-    vecData.readString(attribute->value(), "%f");
-    force = vecData.getVector3();
+    rapidxml::xml_node<xmlUsedCharType>* property = node->first_node("Force");
+    if(property) {
+        XMLValueArray<float> vecData;
+        vecData.readString(property->value(), "%f");
+        force = vecData.getVector3();
+    }else
+        force = btVector3(0.0, 0.0, 0.0);
     
-    attribute = node->first_attribute("transformAligned");
-    if(attribute)
-        if(strcmp(attribute->value(), "true") == 0)
-            transformAligned = true;
-    
+    transformAligned = node->first_node("TransformAligned");
     body->setWorldTransform(BaseObject::readTransformtion(node, levelLoader));
     body->setCollisionShape(PhysicObject::readCollisionShape(node->first_node("PhysicsBody"), levelLoader));
     objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Light, 0);
@@ -289,15 +284,15 @@ rapidxml::xml_node<xmlUsedCharType>* ParticlesObject::write(rapidxml::xml_docume
     attribute->name("particles");
     attribute->value(doc.allocate_string(stringOf((int)maxParticles).c_str()));
     node->append_attribute(attribute);
-    attribute = doc.allocate_attribute();
-    attribute->name("force");
-    attribute->value(doc.allocate_string(stringOf(force).c_str()));
-    node->append_attribute(attribute);
+    
+    rapidxml::xml_node<xmlUsedCharType>* property = doc.allocate_node(rapidxml::node_element);
+    property->name("Force");
+    property->value(doc.allocate_string(stringOf(force).c_str()));
+    node->append_node(property);
     if(transformAligned) {
-        attribute = doc.allocate_attribute();
-        attribute->name("transformAligned");
-        attribute->value("true");
-        node->append_attribute(attribute);
+        property = doc.allocate_node(rapidxml::node_element);
+        property->name("TransformAligned");
+        node->append_node(property);
     }
     
     node->append_node(writeBoundsNode(doc, "Life", lifeMin, lifeMax));

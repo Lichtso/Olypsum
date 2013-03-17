@@ -72,15 +72,15 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
         }
     }
     
-    attribute = node->first_attribute("size");
-    if(!attribute) {
-        log(error_log, "Tried to construct HeightfieldTerrain without \"size\"-attribute.");
+    rapidxml::xml_node<xmlUsedCharType>* property = node->first_node("Bounds");
+    if(!property) {
+        log(error_log, "Tried to construct HeightfieldTerrain without \"Bounds\"-node.");
         return;
     }
+    XMLValueArray<float> vecData;
+    vecData.readString(property->value(), "%f");
     btHeightfieldTerrainShape* collisionShape = new btHeightfieldTerrainShape(width, length, heights, 1.0/255.0,
                                                                               0.0, 1.0, 1, PHY_FLOAT, false);
-    XMLValueArray<float> vecData;
-    vecData.readString(attribute->value(), "%f");
     collisionShape->setLocalScaling(vecData.getVector3()*btVector3(2.0/width, 2.0, 2.0/length));
     
     body = new btCollisionObject();
@@ -89,12 +89,12 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
     body->setUserPointer(this);
     objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Static, CollisionMask_Object);
     
-    attribute = node->first_attribute("textureScale");
-    if(!attribute) {
-        log(error_log, "Tried to construct HeightfieldTerrain without \"textureScale\"-attribute.");
+    property = node->first_node("TextureScale");
+    if(!property) {
+        log(error_log, "Tried to construct HeightfieldTerrain without \"TextureScale\"-node.");
         return;
     }
-    vecData.readString(attribute->value(), "%f");
+    vecData.readString(property->value(), "%f");
     textureScale.setX(vecData.data[0]);
     textureScale.setY(vecData.data[1]);
     textureScale.setZ(diffuse->depth);
@@ -204,19 +204,19 @@ rapidxml::xml_node<xmlUsedCharType>* HeightfieldTerrain::write(rapidxml::xml_doc
     rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
     node->name("HeightfieldTerrain");
     
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
-    attribute->name("size");
+    rapidxml::xml_node<xmlUsedCharType>* property = doc.allocate_node(rapidxml::node_element);
+    property->name("Bounds");
     btHeightfieldTerrainShape* collisionShape = static_cast<btHeightfieldTerrainShape*>(body->getCollisionShape());
     btVector3 size = collisionShape->getLocalScaling() * btVector3(width*0.5, 0.5, length*0.5);
-    attribute->value(doc.allocate_string(stringOf(size).c_str()));
-    node->append_attribute(attribute);
+    property->value(doc.allocate_string(stringOf(size).c_str()));
+    node->append_node(property);
     
-    attribute = doc.allocate_attribute();
-    attribute->name("textureScale");
+    property = doc.allocate_node(rapidxml::node_element);
+    property->name("TextureScale");
     char buffer[64];
     sprintf(buffer, "%f %f", textureScale.x(), textureScale.y());
-    attribute->value(doc.allocate_string(buffer));
-    node->append_attribute(attribute);
+    property->value(doc.allocate_string(buffer));
+    node->append_node(property);
     
     node->append_node(fileManager.writeResource(doc, "Diffuse", diffuse));
     if(effectMap)
@@ -235,7 +235,7 @@ rapidxml::xml_node<xmlUsedCharType>* HeightfieldTerrain::write(rapidxml::xml_doc
     heightsNode->value(doc.allocate_string(data.str().c_str()));
     node->append_node(heightsNode);
     
-    attribute = doc.allocate_attribute();
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
     attribute->name("width");
     sprintf(buffer, "%d", width);
     attribute->value(doc.allocate_string(buffer));

@@ -33,6 +33,7 @@ std::shared_ptr<FilePackageResource> Texture::load(FilePackage* filePackageB, co
     
     switch(surface->format->BitsPerPixel) {
         case 8:
+        case 16:
         case 24:
         case 32:
             break;
@@ -84,27 +85,26 @@ void Texture::unloadImage() {
     surface = NULL;
 }
 
-bool Texture::uploadTexture(GLenum textureTarget, GLenum format) {
-    if(!surface) return false;
-    
-    if(!GLname) glGenTextures(1, &GLname);
-    if(!GLname) return false;
-    
-    GLenum readFormat;
+GLenum Texture::getSurfacesGLFormat() {
     switch(surface->format->BitsPerPixel) {
         case 8:
-            readFormat = GL_RED;
-            break;
+            return GL_RED;
+        case 16:
+            return GL_RG;
         case 24:
-            readFormat = GL_BGR;
-            break;
+            return GL_BGR;
         case 32:
-            readFormat = GL_BGRA;
-            break;
+            return GL_BGRA;
         default:
-            log(error_log, "Couldn't load texture to VRAM.\nUnsupported bit-depth.");
-            return false;
+            log(error_log, "Unsupported bit-depth of texture.");
+            return GL_NONE;
     }
+}
+
+bool Texture::uploadTexture(GLenum textureTarget, GLenum format) {
+    if(!surface) return false;
+    if(!GLname) glGenTextures(1, &GLname);
+    if(!GLname) return false;
     
     if(surface->format->palette) {
         log(error_log, "Couldn't load texture to VRAM.\nTexture uses a color palette.");
@@ -130,12 +130,14 @@ bool Texture::uploadTexture(GLenum textureTarget, GLenum format) {
     
     glBindTexture(textureTarget, GLname);
     if(textureTarget == GL_TEXTURE_2D_ARRAY)
-        glTexImage3D(textureTarget, 0, format, width, height, depth, 0, readFormat, GL_UNSIGNED_BYTE, surface->pixels);
+        glTexImage3D(textureTarget, 0, format, width, height, depth, 0, getSurfacesGLFormat(), GL_UNSIGNED_BYTE, surface->pixels);
     else
-        glTexImage2D(textureTarget, 0, format, width, height, 0, readFormat, GL_UNSIGNED_BYTE, surface->pixels);
-    updateFilters(textureTarget);
+        glTexImage2D(textureTarget, 0, format, width, height, 0, getSurfacesGLFormat(), GL_UNSIGNED_BYTE, surface->pixels);
+        
     if(textureTarget != GL_TEXTURE_RECTANGLE)
         glGenerateMipmap(textureTarget);
+    
+    updateFilters(textureTarget);
     
     GLint compressed;
     glGetTexLevelParameteriv(textureTarget, 0, GL_TEXTURE_COMPRESSED, &compressed);
@@ -144,6 +146,38 @@ bool Texture::uploadTexture(GLenum textureTarget, GLenum format) {
     
     unloadImage();
     return true;
+}
+
+#define pixelAt(x, y) pixels[((y)*levelW*2+(x))*chanels+c]
+
+void Texture::uploadMipMap(GLenum textureTarget, GLenum format) {
+    GLenum readFormat = getSurfacesGLFormat();
+    unsigned int levelW = width, levelH = height*depth;
+    unsigned char chanels = surface->format->BytesPerPixel, *pixels = static_cast<unsigned char*>(surface->pixels);
+    
+    for(unsigned int level = 1; true; level ++) {
+        levelW >>= 1;
+        levelH >>= 1;
+        
+        for(unsigned int y = 0; y < levelH; y ++)
+            for(unsigned int x = 0; x < levelW; x ++)
+                for(unsigned int c = 0; c < chanels; c ++) {
+                    unsigned int dX = x << 1, dY = y << 1;
+                    unsigned short pixel = pixelAt(dX, dY)+
+                                           pixelAt(dX+1, dY)+
+                                           pixelAt(dX, dY+1)+
+                                           pixelAt(dX+1, dY+1);
+                    pixels[(y*levelW+x)*chanels+c] = pixel >> 2;
+                }
+        
+        if(textureTarget == GL_TEXTURE_2D_ARRAY)
+            glTexImage3D(textureTarget, level, format, levelW, levelH/depth, depth, 0, readFormat, GL_UNSIGNED_BYTE, surface->pixels);
+        else
+            glTexImage2D(textureTarget, level, format, levelW, levelH, 0, readFormat, GL_UNSIGNED_BYTE, surface->pixels);
+        
+        if(levelW <= 1 || levelH <= 1)
+            break;
+    }
 }
 
 bool Texture::uploadNormalMap(float processingValue) {

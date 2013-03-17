@@ -304,7 +304,8 @@ void updateVideoMode() {
     NSWindow* window = [[NSApp windows] objectAtIndex:0];
     [window setTitle:@"Olypsum"];
     NSView* view = [[[window contentView] subviews] objectAtIndex:0];
-    [view setWantsBestResolutionOpenGLSurface:true];
+    if(screenSize[2] > 1)
+        [view setWantsBestResolutionOpenGLSurface:true];
     if(optionsState.fullScreenEnabled) {
         [window setStyleMask:0];
         [window setHasShadow:false];

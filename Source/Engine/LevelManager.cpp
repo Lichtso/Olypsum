@@ -6,14 +6,10 @@
 //
 //
 
-#include "Controls.h"
+#include "AppMain.h"
 
 LevelManager::LevelManager() {
     
-}
-
-LevelManager::~LevelManager() {
-    clear();
 }
 
 void LevelManager::showErrorModal(const std::string& error) {
@@ -49,9 +45,20 @@ void LevelManager::showErrorModal(const std::string& error) {
 }
 
 void LevelManager::clear() {
+    if(scriptManager)
+        scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
+                                            "onleave", false, { });
+    levelId = "";
+    saveGameName = "";
+    levelPackage = NULL;
+    gameStatus = noGame;
     for(auto iterator: sharedCollisionShapes)
         delete iterator.second;
     sharedCollisionShapes.clear();
+    objectManager.clear();
+    fileManager.clear();
+    fileManager.getPackage("Default");
+    setMenu(mainMenu);
 }
 
 void LevelManager::loadLevel(std::string nextLevelId) {
@@ -73,16 +80,7 @@ void LevelManager::saveLevel() {
 
 void LevelManager::leaveGame() {
     saveLevel();
-    
-    levelId = "";
-    saveGameName = "";
-    levelPackage = NULL;
-    gameStatus = noGame;
-    objectManager.clear();
     clear();
-    fileManager.clear();
-    fileManager.getPackage("Default");
-    setMenu(mainMenu);
 }
 
 bool LevelManager::loadGame(std::string name) {
