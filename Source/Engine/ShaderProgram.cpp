@@ -513,7 +513,7 @@ void loadDynamicShaderPrograms() {
     
     if(optionsState.ssaoQuality) {
         char scaleMacro[32];
-        sprintf(scaleMacro, "SSAO_SCALE %f", screenSize[2]*2.0);
+        sprintf(scaleMacro, "SSAO_SCALE %f", prevOptionsState.videoScale*2.0);
         shaderPrograms[ssaoSP]->loadShaderProgram("ssao", shaderTypeVertexFragment, { ssaoQualityMacro, scaleMacro });
         shaderPrograms[ssaoSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[ssaoSP]->addFragDataLocations(colorFragOut);

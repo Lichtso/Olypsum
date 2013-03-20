@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUIRoundedRect.h"
+#include "GUIView.h"
 
 void GUIDrawableRect::drawOnScreen(btVector3 parentTransform, int posX, int posY, GUIClipRect &parentClipRect) {
     GUIClipRect clipRect;
@@ -40,8 +40,8 @@ GUIRoundedRect::GUIRoundedRect() {
     texture = 0;
     transposed = false;
     roundedCorners = (GUICorners) (GUITopLeftCorner | GUITopRightCorner | GUIBottomLeftCorner | GUIBottomRightCorner);
-    innerShadow = -screenSize[0]*0.006;
-    cornerRadius = screenSize[0]*0.01;
+    innerShadow = -currentScreenView->width*0.012;
+    cornerRadius = currentScreenView->width*0.02;
     width = height = 100;
     topColor = Color4(0.9);
     bottomColor = Color4(1.0);

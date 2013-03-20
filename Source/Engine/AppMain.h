@@ -13,8 +13,8 @@
 #define AppMain_h
 
 extern Uint8* keyState;
-extern SDLMod modKeyState;
 
+const SDL_VideoInfo* updateVideoModeInternal(bool& fullScreen);
 void updateVideoMode();
 void AppMain(int argc, char *argv[]);
 void AppTerminate();

@@ -126,8 +126,8 @@ GUIScreenView::GUIScreenView() {
 }
 
 bool GUIScreenView::getLimSize(GUIClipRect& clipRect) {
-    width = screenSize[0] >> 1;
-    height = screenSize[1] >> 1;
+    width = prevOptionsState.videoWidth >> 1;
+    height = prevOptionsState.videoHeight >> 1;
     clipRect.minPosX = -width;
     clipRect.minPosY = -height;
     clipRect.maxPosX = width;
@@ -136,8 +136,8 @@ bool GUIScreenView::getLimSize(GUIClipRect& clipRect) {
 }
 
 void GUIScreenView::updateContent() {
-    width = screenSize[0] >> 1;
-    height = screenSize[1] >> 1;
+    width = prevOptionsState.videoWidth >> 1;
+    height = prevOptionsState.videoHeight >> 1;
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->updateContent();
 }

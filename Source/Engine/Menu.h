@@ -23,6 +23,7 @@ enum MenuName {
     loadingMenu = 0,
     mainMenu,
     optionsMenu,
+    videoResolutionMenu,
     languagesMenu,
     creditsMenu,
     inGameMenu,

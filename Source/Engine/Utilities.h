@@ -128,7 +128,7 @@ inline btVector3 vec3rand(btVector3 min, btVector3 max) {
     return btVector3(frand(min.x(), max.x()), frand(min.y(), max.y()), frand(min.z(), max.z()));
 }
 
-extern int screenSize[3];
+extern unsigned int screenSize[3];
 extern std::string resourcesDir, gameDataDir, parentDir;
 
 #endif

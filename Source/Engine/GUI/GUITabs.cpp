@@ -34,21 +34,16 @@ void GUITabs::updateContent() {
         button->sizeAlignment = GUISizeAlignment_All;
         button->updateContent();
         if(orientation & GUIOrientation_Vertical) {
-            widthAux = max(widthAux, button->width);
-            heightAux += button->height;
+            widthAux = max(widthAux, button->width*2);
+            heightAux += button->height*2-1;
         }else{
-            widthAux += button->width;
-            heightAux = max(heightAux, button->height);
+            widthAux += button->width*2-1;
+            heightAux = max(heightAux, button->height*2);
         }
     }
     
-    if(orientation & GUIOrientation_Vertical)
-        widthAux -= ceil(children.size() / 2.0) - 1;
-    else
-        heightAux -= ceil(children.size() / 2.0) - 1;
-    
-    if(sizeAlignment & GUISizeAlignment_Width) width = widthAux;
-    if(sizeAlignment & GUISizeAlignment_Height) height = heightAux;
+    if(sizeAlignment & GUISizeAlignment_Width) width = ceil(0.5*widthAux)+1;
+    if(sizeAlignment & GUISizeAlignment_Height) height = ceil(0.5*heightAux)+1;
     
     int posCounter = 0;
     for(unsigned int i = 0; i < children.size(); i ++) {
@@ -59,7 +54,7 @@ void GUITabs::updateContent() {
         
         if(orientation & GUIOrientation_Vertical) {
             button->width = width;
-            if(!(sizeAlignment & GUISizeAlignment_Height)) button->height = floor(height/(float)children.size())+(i%2);
+            if(!(sizeAlignment & GUISizeAlignment_Height)) button->height = floor((float)height/children.size())+(i%2);
             button->posX = 0;
             button->posY = height-posCounter-button->height;
             

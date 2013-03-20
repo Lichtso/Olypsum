@@ -118,7 +118,6 @@ void OptionsState::loadOptions() {
         rapidxml::xml_node<xmlUsedCharType>* optionGroup = options->first_node("Graphics");
         optionsState.screenBlurFactor = (readOptionBool(optionGroup->first_node("ScreenBlurEnabled"))) ? 0.0 : -1.0;
         optionsState.edgeSmoothEnabled = readOptionBool(optionGroup->first_node("EdgeSmoothEnabled"));
-        optionsState.fullScreenEnabled = readOptionBool(optionGroup->first_node("FullScreenEnabled"));
         optionsState.cubemapsEnabled = readOptionBool(optionGroup->first_node("CubemapsEnabled"));
         optionsState.vSyncEnabled = readOptionBool(optionGroup->first_node("VSyncEnabled"));
         optionsState.depthOfFieldQuality = readOptionValue<unsigned int>(optionGroup->first_node("DepthOfFieldQuality"), "%d");
@@ -126,6 +125,12 @@ void OptionsState::loadOptions() {
         optionsState.shadowQuality = readOptionValue<unsigned int>(optionGroup->first_node("ShadowQuality"), "%d");
         optionsState.ssaoQuality = readOptionValue<unsigned int>(optionGroup->first_node("SsaoQuality"), "%d");
         optionsState.blendingQuality = readOptionValue<unsigned int>(optionGroup->first_node("BlendingQuality"), "%d");
+        if(optionGroup->first_node("VideoWidth"))
+            optionsState.videoWidth = readOptionValue<unsigned int>(optionGroup->first_node("VideoWidth"), "%d");
+        if(optionGroup->first_node("VideoHeight"))
+            optionsState.videoHeight = readOptionValue<unsigned int>(optionGroup->first_node("VideoHeight"), "%d");
+        if(optionGroup->first_node("VideoScale"))
+            optionsState.videoScale = readOptionValue<unsigned int>(optionGroup->first_node("VideoScale"), "%d");
         optionGroup = options->first_node("Sound");
         optionsState.globalVolume = readOptionValue<float>(optionGroup->first_node("globalVolume"), "%f");
         optionsState.musicVolume = readOptionValue<float>(optionGroup->first_node("musicVolume"), "%f");
@@ -133,12 +138,13 @@ void OptionsState::loadOptions() {
         optionsState.mouseSensitivity = readOptionValue<float>(optionGroup->first_node("mouseSensitivity"), "%f");
         optionsState.mouseSmoothing = readOptionValue<float>(optionGroup->first_node("mouseSmoothing"), "%f");
     }else saveOptions();
+    prevOptionsState = optionsState;
     
     fileManager.getPackage("Default");
 }
 
 void OptionsState::saveOptions() {
-    char str[56];
+    char str[76];
     rapidxml::xml_document<xmlUsedCharType> doc;
     rapidxml::xml_node<xmlUsedCharType>* options = doc.allocate_node(rapidxml::node_element);
     options->name("Options");
@@ -151,38 +157,50 @@ void OptionsState::saveOptions() {
     options->append_node(optionGroup);
     addXMLNode(doc, optionGroup, "ScreenBlurEnabled", (optionsState.screenBlurFactor > -1.0) ? "true" : "false");
     addXMLNode(doc, optionGroup, "EdgeSmoothEnabled", (optionsState.edgeSmoothEnabled) ? "true" : "false");
-    addXMLNode(doc, optionGroup, "FullScreenEnabled", (optionsState.fullScreenEnabled) ? "true" : "false");
     addXMLNode(doc, optionGroup, "CubemapsEnabled", (optionsState.cubemapsEnabled) ? "true" : "false");
     addXMLNode(doc, optionGroup, "VSyncEnabled", (optionsState.vSyncEnabled) ? "true" : "false");
-    sprintf(&str[0], "%d", optionsState.depthOfFieldQuality);
-    addXMLNode(doc, optionGroup, "DepthOfFieldQuality", &str[0]);
-    sprintf(&str[4], "%d", optionsState.surfaceQuality);
-    addXMLNode(doc, optionGroup, "SurfaceQuality", &str[4]);
-    sprintf(&str[8], "%d", optionsState.shadowQuality);
-    addXMLNode(doc, optionGroup, "ShadowQuality", &str[8]);
-    sprintf(&str[12], "%d", optionsState.ssaoQuality);
-    addXMLNode(doc, optionGroup, "SsaoQuality", &str[12]);
-    sprintf(&str[16], "%d", optionsState.blendingQuality);
-    addXMLNode(doc, optionGroup, "BlendingQuality", &str[16]);
+    
+    if(optionsState.videoWidth/optionsState.videoScale != screenSize[0] ||
+       optionsState.videoHeight/optionsState.videoScale != screenSize[1]) {
+        sprintf(&str[0], "%d", optionsState.videoWidth/optionsState.videoScale);
+        addXMLNode(doc, optionGroup, "VideoWidth", &str[0]);
+        sprintf(&str[8], "%d", optionsState.videoHeight/optionsState.videoScale);
+        addXMLNode(doc, optionGroup, "VideoHeight", &str[8]);
+    }
+    if(optionsState.videoScale > 1) {
+        sprintf(&str[16], "%d", optionsState.videoScale);
+        addXMLNode(doc, optionGroup, "VideoScale", &str[16]);
+    }
+    
+    sprintf(&str[20], "%d", optionsState.depthOfFieldQuality);
+    addXMLNode(doc, optionGroup, "DepthOfFieldQuality", &str[20]);
+    sprintf(&str[24], "%d", optionsState.surfaceQuality);
+    addXMLNode(doc, optionGroup, "SurfaceQuality", &str[24]);
+    sprintf(&str[28], "%d", optionsState.shadowQuality);
+    addXMLNode(doc, optionGroup, "ShadowQuality", &str[28]);
+    sprintf(&str[32], "%d", optionsState.ssaoQuality);
+    addXMLNode(doc, optionGroup, "SsaoQuality", &str[32]);
+    sprintf(&str[36], "%d", optionsState.blendingQuality);
+    addXMLNode(doc, optionGroup, "BlendingQuality", &str[36]);
     
     optionGroup = doc.allocate_node(rapidxml::node_element);
     optionGroup->name("Sound");
     options->append_node(optionGroup);
-    sprintf(&str[24], "%1.5f", optionsState.globalVolume);
-    addXMLNode(doc, optionGroup, "globalVolume", &str[24]);
-    sprintf(&str[32], "%1.5f", optionsState.musicVolume);
-    addXMLNode(doc, optionGroup, "musicVolume", &str[32]);
+    sprintf(&str[44], "%1.5f", optionsState.globalVolume);
+    addXMLNode(doc, optionGroup, "globalVolume", &str[44]);
+    sprintf(&str[52], "%1.5f", optionsState.musicVolume);
+    addXMLNode(doc, optionGroup, "musicVolume", &str[52]);
     
     optionGroup = doc.allocate_node(rapidxml::node_element);
     optionGroup->name("Mouse");
     options->append_node(optionGroup);
-    sprintf(&str[40], "%1.5f", optionsState.mouseSensitivity);
-    addXMLNode(doc, optionGroup, "mouseSensitivity", &str[40]);
-    sprintf(&str[48], "%1.5f", optionsState.mouseSmoothing);
-    addXMLNode(doc, optionGroup, "mouseSmoothing", &str[48]);
+    sprintf(&str[60], "%1.5f", optionsState.mouseSensitivity);
+    addXMLNode(doc, optionGroup, "mouseSensitivity", &str[60]);
+    sprintf(&str[68], "%1.5f", optionsState.mouseSmoothing);
+    addXMLNode(doc, optionGroup, "mouseSmoothing", &str[68]);
     
     writeXmlFile(doc, gameDataDir+"Options.xml", true);
 }
 
 FileManager fileManager;
-OptionsState optionsState;
+OptionsState optionsState, prevOptionsState;

@@ -7,6 +7,7 @@
 //
 
 #include <SDL/SDL.h>
+#include "FileManager.h"
 #include "GUIClipRect.h"
 
 #ifndef GUIRect_h

@@ -6,7 +6,6 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Texture.h"
 #include "GUIRect.h"
 #include "GUIRoundedRect.h"
 

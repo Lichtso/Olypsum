@@ -20,7 +20,7 @@ class GUIScrollView : public GUIFramedView {
     int getBarPosY();
     public:
     bool hideSliderX, hideSliderY;
-    int scrollPosX, scrollPosY, scrollWidth, scrollHeight;
+    int scrollPosX, scrollPosY, contentWidth, contentHeight;
     GUIScrollView();
     void updateContent();
     void draw(btVector3 transform, GUIClipRect& parentClipRect);

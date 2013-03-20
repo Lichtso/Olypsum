@@ -40,11 +40,11 @@ struct FrustumCullingCallback : btDbvt::ICollide {
 
 
 
-Cam::Cam() :fov(70.0/180.0*M_PI), near(1.0), far(100000.0), width(screenSize[0]/2), height(screenSize[1]/2) {
+Cam::Cam() :fov(70.0/180.0*M_PI), near(1.0), far(100000.0), width(prevOptionsState.videoWidth>>1), height(prevOptionsState.videoHeight>>1) {
     setTransformation(btTransform::getIdentity());
 }
 
-Cam::Cam(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :width(screenSize[0]/2), height(screenSize[1]/2) {
+Cam::Cam(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :width(prevOptionsState.videoWidth>>1), height(prevOptionsState.videoHeight>>1) {
     BaseObject::init(node, levelLoader);
     
     rapidxml::xml_node<xmlUsedCharType>* boundsNode = node->first_node("Bounds");

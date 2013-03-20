@@ -9,10 +9,9 @@
 #include "Menu.h"
 #include "AppMain.h"
 
-OptionsState prevOptionsState;
-
 static void updateOptionBackButton(GUIButton* button) {
-    if((optionsState.fullScreenEnabled != prevOptionsState.fullScreenEnabled ||
+    if((optionsState.videoWidth != prevOptionsState.videoWidth ||
+        optionsState.videoHeight != prevOptionsState.videoHeight ||
         optionsState.vSyncEnabled != prevOptionsState.vSyncEnabled)) {
         button->buttonType = GUIButtonTypeDelete;
         static_cast<GUILabel*>(button->children[0])->text = localization.localizeString("restart");
@@ -34,11 +33,63 @@ static void updateGraphicOptions() {
 
 static void leaveOptionsMenu(GUIButton* button) {
     optionsState.saveOptions();
-    if(optionsState.fullScreenEnabled != prevOptionsState.fullScreenEnabled ||
+    if(optionsState.videoWidth != prevOptionsState.videoWidth ||
+       optionsState.videoHeight != prevOptionsState.videoHeight ||
        optionsState.vSyncEnabled != prevOptionsState.vSyncEnabled)
         AppTerminate();
     updateGraphicOptions();
     setMenu((levelManager.gameStatus == noGame) ? mainMenu : gameEscMenu);
+}
+
+struct Resolution {
+    unsigned int width = 0, height = 0, scale = 1;
+};
+
+static void getAvailableResolutions(std::vector<Resolution>& resolutions) {
+    bool addFullScreen = true;
+    
+    rapidxml::xml_document<xmlUsedCharType> doc;
+    rapidxml::xml_node<xmlUsedCharType> *resolutionsNode, *entryNode;
+    rapidxml::xml_attribute<xmlUsedCharType> *attribute;
+    std::string filePath = fileManager.getPackage("Default")->path+"Resolutions.xml";
+    std::unique_ptr<char[]> fileData = readXmlFile(doc, filePath.c_str(), false);
+    if(fileData) {
+        resolutionsNode = doc.first_node("Resolutions");
+        if(resolutionsNode) {
+            entryNode = resolutionsNode->first_node("Entry");
+            while(entryNode) {
+                Resolution res;
+                attribute = entryNode->first_attribute("width");
+                if(attribute)
+                    sscanf(attribute->value(), "%d", &res.width);
+                attribute = entryNode->first_attribute("height");
+                if(attribute)
+                    sscanf(attribute->value(), "%d", &res.height);
+                if(addFullScreen && res.width == screenSize[0] && res.height == screenSize[1])
+                    addFullScreen = false;
+                if(res.width <= screenSize[0] && res.height <= screenSize[1])
+                    resolutions.push_back(res);
+                entryNode = entryNode->next_sibling("Entry");
+            }
+        }
+    }
+    
+    if(addFullScreen) {
+        Resolution res;
+        res.width = screenSize[0];
+        res.height = screenSize[1];
+        resolutions.push_back(res);
+    }
+    
+    unsigned int resolutionCount = resolutions.size();
+    if(screenSize[2] > 1)
+        for(unsigned int i = 0; i < resolutionCount; i ++) {
+            Resolution res;
+            res.scale = screenSize[2];
+            res.width = resolutions[i].width * res.scale;
+            res.height = resolutions[i].height * res.scale;
+            resolutions.push_back(res);
+        }
 }
 
 
@@ -53,6 +104,7 @@ void handleMenuKeyUp(SDL_keysym* key) {
             case optionsMenu:
                 leaveOptionsMenu(NULL);
                 break;
+            case videoResolutionMenu:
             case languagesMenu:
                 setMenu(optionsMenu);
                 break;
@@ -86,8 +138,13 @@ void setMenu(MenuName menu) {
         GUIImage* image = new GUIImage();
         image->texture = fileManager.getPackage("Default")->getResource<Texture>("background.jpg");
         image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
-        image->sizeAlignment = GUISizeAlignment_Height;
-        image->width = currentScreenView->width;
+        if((float)image->texture->width/image->texture->height <= (float)currentScreenView->width/currentScreenView->height) {
+            image->sizeAlignment = GUISizeAlignment_Height;
+            image->width = currentScreenView->width;
+        }else{
+            image->sizeAlignment = GUISizeAlignment_Width;
+            image->height = currentScreenView->height;
+        }
         image->updateContent();
         currentScreenView->addChild(image);
     }
@@ -115,7 +172,7 @@ void setMenu(MenuName menu) {
         case mainMenu: {
             GUIFramedView* view = new GUIFramedView();
             view->width = currentScreenView->width*0.2;
-            view->height = currentScreenView->width*0.27;
+            view->height = currentScreenView->height*0.42;
             view->posX = currentScreenView->width*-0.72;
             currentScreenView->addChild(view);
             
@@ -125,6 +182,7 @@ void setMenu(MenuName menu) {
                 }, [](GUIButton* button) {
                     
                 }, [](GUIButton* button) {
+                    prevOptionsState = optionsState;
                     setMenu(optionsMenu);
                 }, [](GUIButton* button) {
                     setMenu(creditsMenu);
@@ -160,31 +218,42 @@ void setMenu(MenuName menu) {
             label->text = localization.localizeString("graphics");
             label->fontHeight = currentScreenView->height*0.14;
             currentScreenView->addChild(label);
-            GUIFramedView* view = new GUIFramedView();
-            view->width = currentScreenView->width*0.42;
-            view->height = currentScreenView->height*0.62;
-            view->posX = currentScreenView->width*-0.52;
-            currentScreenView->addChild(view);
             GUIButton* button = new GUIButton();
             button->posY = currentScreenView->height*-0.8;
             button->onClick = leaveOptionsMenu;
             currentScreenView->addChild(button);
             label = new GUILabel();
-            label->text = localization.localizeString("back");
             label->fontHeight = currentScreenView->height*0.1;
             label->width = currentScreenView->width*0.14;
             label->sizeAlignment = GUISizeAlignment_Height;
             button->addChild(label);
+            updateOptionBackButton(button);
             
-            prevOptionsState = optionsState;
+            GUIFramedView* view = new GUIFramedView();
+            view->width = currentScreenView->width*0.42;
+            view->height = currentScreenView->height*0.62;
+            view->posX = currentScreenView->width*-0.52;
+            currentScreenView->addChild(view);
+            
+            button = new GUIButton();
+            button->posX = view->width*-0.52;
+            button->posY = currentScreenView->height*(0.06);
+            button->onClick = [](GUIButton* button) {
+                setMenu(videoResolutionMenu);
+            };
+            if(levelManager.gameStatus != noGame)
+                button->state = GUIButtonStateDisabled;
+            view->addChild(button);
+            label = new GUILabel();
+            label->text = stringOf(optionsState.videoWidth)+" x "+stringOf(optionsState.videoHeight);
+            if(optionsState.videoScale > 1) label->text += " ("+localization.localizeString("retina")+")";
+            label->fontHeight = currentScreenView->height*0.05;
+            label->width = currentScreenView->width*0.15;
+            label->sizeAlignment = GUISizeAlignment_Height;
+            button->addChild(label);
+            
             std::function<void(GUICheckBox*)> onClick[] = {
-                [button](GUICheckBox* checkBox) {
-                    optionsState.fullScreenEnabled = (checkBox->state == GUIButtonStatePressed);
-                    updateOptionBackButton(button);
-                }, [button](GUICheckBox* checkBox) {
-                    optionsState.vSyncEnabled = (checkBox->state == GUIButtonStatePressed);
-                    updateOptionBackButton(button);
-                }, [](GUICheckBox* checkBox) {
+                [](GUICheckBox* checkBox) {
                     optionsState.cubemapsEnabled = (checkBox->state == GUIButtonStatePressed);
                     updateGraphicOptions();
                 }, [](GUICheckBox* checkBox) {
@@ -193,21 +262,23 @@ void setMenu(MenuName menu) {
                 }, [](GUICheckBox* checkBox) {
                     optionsState.screenBlurFactor = (checkBox->state == GUIButtonStatePressed) ? 0.0 : -1.0;
                     updateGraphicOptions();
+                }, [button](GUICheckBox* checkBox) {
+                    optionsState.vSyncEnabled = (checkBox->state == GUIButtonStatePressed);
+                    updateOptionBackButton(button);
                 }
             };
             bool checkBoxActive[] = {
-                optionsState.fullScreenEnabled,
-                optionsState.vSyncEnabled,
                 optionsState.cubemapsEnabled,
                 optionsState.edgeSmoothEnabled,
-                (optionsState.screenBlurFactor > -1.0)
+                (optionsState.screenBlurFactor > -1.0),
+                optionsState.vSyncEnabled
             };
             const char* checkBoxLabels[] = {
-                "fullScreenEnabled",
-                "vSyncEnabled",
                 "cubemapsEnabled",
                 "edgeSmoothEnabled",
-                "screenBlurEnabled"
+                "screenBlurEnabled",
+                "vSyncEnabled",
+                "videoResolution"
             };
             for(unsigned char i = 0; i < 5; i ++) {
                 label = new GUILabel();
@@ -219,11 +290,12 @@ void setMenu(MenuName menu) {
                 label->textAlign = GUITextAlign_Left;
                 label->sizeAlignment = GUISizeAlignment_Height;
                 view->addChild(label);
+                if(i == 4) continue;
                 GUICheckBox* checkBox = new GUICheckBox();
                 checkBox->posX = view->width*-0.52;
                 checkBox->posY = label->posY;
                 checkBox->onClick = onClick[i];
-                if(i < 2 && levelManager.gameStatus != noGame)
+                if(i == 3 && levelManager.gameStatus != noGame)
                     checkBox->state = GUIButtonStateDisabled;
                 else if(checkBoxActive[i])
                     checkBox->state = GUIButtonStatePressed;
@@ -377,6 +449,67 @@ void setMenu(MenuName menu) {
             label->sizeAlignment = GUISizeAlignment_Height;
             button->addChild(label);
         } break;
+        case videoResolutionMenu: {
+            GUILabel* label = new GUILabel();
+            label->posY = currentScreenView->height*0.88;
+            label->text = localization.localizeString("videoResolution");
+            label->fontHeight = currentScreenView->height*0.2;
+            currentScreenView->addChild(label);
+            GUIButton* button = new GUIButton();
+            button->posY = currentScreenView->height*-0.8;
+            button->onClick = [](GUIButton* button) {
+                setMenu(optionsMenu);
+            };
+            currentScreenView->addChild(button);
+            label = new GUILabel();
+            label->text = localization.localizeString("back");
+            label->fontHeight = currentScreenView->height*0.1;
+            label->width = currentScreenView->width*0.14;
+            label->sizeAlignment = GUISizeAlignment_Height;
+            button->addChild(label);
+            
+            std::vector<Resolution> resolutions;
+            getAvailableResolutions(resolutions);
+            
+            GUIScrollView* view = new GUIScrollView();
+            view->width = currentScreenView->width*0.3;
+            view->height = currentScreenView->height*0.6;
+            currentScreenView->addChild(view);
+            GUITabs* tabs = new GUITabs();
+            tabs->deactivatable = false;
+            tabs->width = currentScreenView->width*0.2;
+            tabs->sizeAlignment = GUISizeAlignment_Height;
+            tabs->orientation = GUIOrientation_Vertical;
+            tabs->onChange = [](GUITabs* tabs) {
+                std::vector<Resolution> resolutions;
+                getAvailableResolutions(resolutions);
+                optionsState.videoWidth = resolutions[tabs->selectedIndex].width;
+                optionsState.videoHeight = resolutions[tabs->selectedIndex].height;
+                optionsState.videoScale = resolutions[tabs->selectedIndex].scale;
+            };
+            for(unsigned char i = 0; i < resolutions.size(); i ++) {
+                GUIButton* button = new GUIButton();
+                label = new GUILabel();
+                if(resolutions[i].width == screenSize[0]*resolutions[i].scale &&
+                   resolutions[i].height == screenSize[1]*resolutions[i].scale)
+                    label->text = localization.localizeString("fullScreen");
+                else
+                    label->text = stringOf(resolutions[i].width)+" x "+stringOf(resolutions[i].height);
+                if(resolutions[i].scale > 1) label->text += " ("+localization.localizeString("retina")+")";
+                label->fontHeight = currentScreenView->height*0.06;
+                button->addChild(label);
+                tabs->addChild(button);
+                if(resolutions[i].width == optionsState.videoWidth &&
+                   resolutions[i].height == optionsState.videoHeight &&
+                   resolutions[i].scale == optionsState.videoScale) {
+                    tabs->selectedIndex = i;
+                    tabs->updateContent();
+                }
+            }
+            view->addChild(tabs);
+            tabs->posY = view->height-tabs->height;
+            view->contentHeight = tabs->height*2;
+        } break;
         case languagesMenu: {
             GUILabel* label = new GUILabel();
             label->posY = currentScreenView->height*0.88;
@@ -398,6 +531,10 @@ void setMenu(MenuName menu) {
             
             std::vector<std::string> languages;
             localization.getLocalizableLanguages(languages);
+            GUIScrollView* view = new GUIScrollView();
+            view->width = currentScreenView->width*0.3;
+            view->height = currentScreenView->height*0.6;
+            currentScreenView->addChild(view);
             GUITabs* tabs = new GUITabs();
             tabs->deactivatable = false;
             tabs->width = currentScreenView->width*0.2;
@@ -410,7 +547,6 @@ void setMenu(MenuName menu) {
                 localization.selected = languages[tabs->selectedIndex];
                 localization.loadLocalization(resourcesDir+"Packages/Default/Languages/"+localization.selected+".xml");
             };
-            currentScreenView->addChild(tabs);
             for(unsigned char i = 0; i < languages.size(); i ++) {
                 GUIButton* button = new GUIButton();
                 label = new GUILabel();
@@ -423,6 +559,9 @@ void setMenu(MenuName menu) {
                     tabs->updateContent();
                 }
             }
+            view->addChild(tabs);
+            tabs->posY = view->height-tabs->height;
+            view->contentHeight = tabs->height*2;
         } break;
         case creditsMenu: {
             GUILabel* label = new GUILabel();
@@ -602,7 +741,7 @@ void setMenu(MenuName menu) {
                     currentScreenView->setModalView(modalView);
                 };
             }
-            scrollView->scrollHeight = (files.size()*0.25-1.0)*scrollView->height;
+            scrollView->contentHeight = files.size()*0.25*scrollView->height;
             
             std::function<void(GUIButton*)> onClick[] = {
                 [](GUIButton* button) {
@@ -636,7 +775,7 @@ void setMenu(MenuName menu) {
             scrollView->posX = 0.0;
             scrollView->posY = currentScreenView->height*0.1;
             scrollView->width = currentScreenView->width*0.9;
-            scrollView->height = currentScreenView->height*0.7;
+            scrollView->height = currentScreenView->height*0.6;
             currentScreenView->addChild(scrollView);
             GUITabs* buttonList = new GUITabs();
             buttonList->deactivatable = false;
@@ -660,9 +799,8 @@ void setMenu(MenuName menu) {
                 button->addChild(label);
                 buttonList->addChild(button);
             }
-            buttonList->posY = fmax((buttonList->height-scrollView->height), 0.0);
-            scrollView->scrollWidth = 0;
-            scrollView->scrollHeight = buttonList->height+buttonList->posY;
+            buttonList->posY = scrollView->height-buttonList->height;
+            scrollView->contentHeight = buttonList->height*2;
             scrollView->addChild(buttonList);
             
             GUITextField* textField = new GUITextField();

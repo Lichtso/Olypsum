@@ -16,5 +16,4 @@ Magnetic Attraction PhysicLink
 Gear Rack PhysicLink
 
 Bugs:
-CCD NaN matrix
 Check memory leaks

@@ -77,7 +77,7 @@ void GUITextField::removeFirstResponderStatus() {
 void GUITextField::updateContent() {
     content.width = width;
     content.height = height;
-    content.cornerRadius = screenSize[0]*0.007;
+    content.cornerRadius = currentScreenView->width*0.014;
     if(highlighted) {
         content.borderColor = Color4(0.31, 0.51, 1.0);
     }else{

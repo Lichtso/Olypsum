@@ -171,5 +171,5 @@ std::string stringOf(btTransform& mat) {
     return ss.str();
 }
 
-int screenSize[3];
+unsigned int screenSize[3];
 std::string resourcesDir, gameDataDir, parentDir;

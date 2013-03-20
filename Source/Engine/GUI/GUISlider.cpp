@@ -6,10 +6,11 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#include "GUIView.h"
 #include "GUISlider.h"
 
-#define barHeight (screenSize[0]*0.005)
-#define sliderRadius (screenSize[0]*0.01)
+#define barHeight (currentScreenView->width*0.01)
+#define sliderRadius (currentScreenView->width*0.02)
 
 GUISlider::GUISlider() {
     type = GUIType_Silder;

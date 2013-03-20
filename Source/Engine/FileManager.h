@@ -80,9 +80,11 @@ class OptionsState {
           mouseSensitivity = 0.005,
           mouseSmoothing = 0.5;
     bool edgeSmoothEnabled = false,
-         fullScreenEnabled = true,
          cubemapsEnabled = false,
          vSyncEnabled = true;
+    unsigned int videoWidth = 65535,
+                 videoHeight = 65535,
+                 videoScale = 1;
     unsigned char depthOfFieldQuality = 0,
                   surfaceQuality = 1,
                   shadowQuality = 1,
@@ -96,6 +98,6 @@ class OptionsState {
 };
 
 extern FileManager fileManager;
-extern OptionsState optionsState;
+extern OptionsState optionsState, prevOptionsState;
 
 #endif

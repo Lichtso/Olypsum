@@ -280,22 +280,17 @@ int sdlMacMain(int argc, char **argv) {
 }
 
 void updateVideoMode() {
-    const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
-    if(!videoInfo) {
-        log(error_log, "Coudn't get video information, Quit.");
-        exit(3);
-    }
-    
-    screenSize[0] = videoInfo->current_w;
-    screenSize[1] = videoInfo->current_h;
+    bool fullScreen;
     screenSize[2] = [[NSScreen mainScreen] backingScaleFactor];
+    const SDL_VideoInfo* videoInfo = updateVideoModeInternal(fullScreen);
+    unsigned int width = prevOptionsState.videoWidth, height = prevOptionsState.videoHeight;
     
-    if(!optionsState.fullScreenEnabled) {
-        screenSize[0] *= screenSize[2];
-        screenSize[1] *= screenSize[2];
+    if(fullScreen) {
+        width /= prevOptionsState.videoScale;
+        height /= prevOptionsState.videoScale;
     }
     
-    SDL_Surface* screen = SDL_SetVideoMode(screenSize[0], screenSize[1], videoInfo->vfmt->BitsPerPixel, SDL_OPENGL);
+    SDL_Surface* screen = SDL_SetVideoMode(width, height, videoInfo->vfmt->BitsPerPixel, SDL_OPENGL);
     if(!screen) {
         log(error_log, "Coudn't set video mode, Quit.");
         exit(4);
@@ -304,17 +299,18 @@ void updateVideoMode() {
     NSWindow* window = [[NSApp windows] objectAtIndex:0];
     [window setTitle:@"Olypsum"];
     NSView* view = [[[window contentView] subviews] objectAtIndex:0];
-    if(screenSize[2] > 1)
+    if(prevOptionsState.videoScale > 1)
         [view setWantsBestResolutionOpenGLSurface:true];
-    if(optionsState.fullScreenEnabled) {
+    if(fullScreen) {
         [window setStyleMask:0];
         [window setHasShadow:false];
-        [window setFrame:NSRectFromCGRect(CGRectMake(0, 0, screenSize[0], screenSize[1])) display:false];
+        [window setFrame:NSRectFromCGRect(CGRectMake(0, 0, width, height)) display:false];
         [NSApp setPresentationOptions:NSApplicationPresentationHideDock | NSApplicationPresentationAutoHideMenuBar];
-        screenSize[0] *= screenSize[2];
-        screenSize[1] *= screenSize[2];
-    }else if(screenSize[2] > 1)
-        [window setFrame:NSRectFromCGRect(CGRectMake(0, 0, videoInfo->current_w/screenSize[2], videoInfo->current_h/screenSize[2])) display:false];
+    }else
+        [window setFrame:NSRectFromCGRect(CGRectMake((screenSize[0]-prevOptionsState.videoWidth/prevOptionsState.videoScale)>>1,
+                                                     (screenSize[1]-prevOptionsState.videoHeight/prevOptionsState.videoScale)>>1,
+                                                     prevOptionsState.videoWidth/prevOptionsState.videoScale,
+                                                     prevOptionsState.videoHeight/prevOptionsState.videoScale)) display:false];
     //NSRect rect = [window convertRectToScreen:NSMakeRect(0, 0, 1, 1)];
     [window becomeKeyWindow];
 }

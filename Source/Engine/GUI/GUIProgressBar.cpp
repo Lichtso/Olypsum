@@ -6,14 +6,15 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#include "GUIView.h"
 #include "GUIProgressBar.h"
 
 GUIProgressBar::GUIProgressBar() {
     type = GUIType_ProgressBar;
     value = 0.5;
     orientation = GUIOrientation_Horizontal;
-    width = screenSize[0]*0.1;
-    height = screenSize[0]*0.005;
+    width = currentScreenView->width*0.2;
+    height = currentScreenView->width*0.01;
 }
 
 void GUIProgressBar::updateContent() {
@@ -27,7 +28,7 @@ void GUIProgressBar::updateContent() {
     }
     
     barL.innerShadow = barR.innerShadow = 0;
-    barL.cornerRadius = barR.cornerRadius = screenSize[0]*0.005;
+    barL.cornerRadius = barR.cornerRadius = currentScreenView->width*0.01;
     barL.borderColor = barR.borderColor = Color4(0.63);
     barL.topColor = Color4(0.4, 0.98, 0.75);
     barL.bottomColor = Color4(0.04, 0.59, 0.2);

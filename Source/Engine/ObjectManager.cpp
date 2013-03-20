@@ -146,10 +146,10 @@ void ObjectManager::gameTick() {
             mainFBO.gBuffers[ssaoDBuffer]
         };
         
-        glViewport(0, 0, screenSize[0] >> screenSize[2], screenSize[1] >> screenSize[2]);
+        glViewport(0, 0, prevOptionsState.videoWidth / prevOptionsState.videoScale, prevOptionsState.videoHeight / prevOptionsState.videoScale);
         shaderPrograms[ssaoSP]->use();
         mainFBO.renderInBuffers(true, buffersSSAO, 1, &buffersSSAO[1], 1);
-        glViewport(0, 0, screenSize[0], screenSize[1]);
+        glViewport(0, 0, prevOptionsState.videoWidth, prevOptionsState.videoHeight);
         
         glEnable(GL_BLEND);
         glBlendFunc(GL_DST_COLOR, GL_ZERO);

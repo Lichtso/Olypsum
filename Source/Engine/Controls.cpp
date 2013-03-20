@@ -50,10 +50,10 @@ void ControlsMangager::handleMouseUp(int mouseX, int mouseY, SDL_Event& event) {
 }
 
 void ControlsMangager::handleMouseMove(int mouseX, int mouseY, SDL_Event& event) {
-    mouseX -= screenSize[0]/2;
-    mouseY -= screenSize[1]/2;
+    mouseX -= currentScreenView->width;
+    mouseY -= currentScreenView->height;
     if(mouseX == 0.0 && mouseY == 0.0) return;
-    SDL_WarpMouse(screenSize[0]/screenSize[2]/2, screenSize[1]/screenSize[2]/2);
+    SDL_WarpMouse(currentScreenView->width / prevOptionsState.videoScale, currentScreenView->height / prevOptionsState.videoScale);
     
     rotVelocity.setX(rotVelocity.x()-optionsState.mouseSensitivity*mouseX);
     rotVelocity.setY(rotVelocity.y()-optionsState.mouseSensitivity*mouseY);
