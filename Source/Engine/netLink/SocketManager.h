@@ -1,6 +1,7 @@
 /*
     NetLink Sockets: Networking C++ library
     Copyright 2012 Pedro Francisco Pareja Ruiz (PedroPareja@Gmail.com)
+    Copyright 2013 Alexander Meißner (lichtso@gamefortec.net)
 
     This file is part of NetLink Sockets.
 
@@ -19,20 +20,24 @@
 
 */
 
-#ifndef __NL_UTIL
-#define __NL_UTIL
+#ifndef NL_SOCKET_GROUP
+#define NL_SOCKET_GROUP
 
-#include "core.h"
+#include "Socket.h"
 
 NL_NAMESPACE
 
-    int iMax(int a, int b);
-    unsigned uMax(unsigned a, unsigned b);
-
-    unsigned getTime();
+class SocketManager {
+    public:
+    std::set<Socket*> sockets;
+    std::function<bool(SocketManager* group, Socket* serverSocket, Socket* socket)> onAcceptRequest;
+    std::function<void(SocketManager* group, Socket* socket, SocketRecvStatus prev)> onStateChanged;
+    std::function<void(SocketManager* group, Socket* socket)> onDisconnect;
+    std::function<void(SocketManager* group, Socket* socket)> onReceive;
+    ~SocketManager();
+    void listen(double sec = 0.0);
+};
 
 NL_NAMESPACE_END
-
-#include "util.inline.h"
 
 #endif

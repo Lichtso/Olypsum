@@ -7,19 +7,15 @@
 //
 
 #include "Profiler.h"
-#include <sys/time.h>
 
 Profiler::Profiler() :lastSec(0), newFPS(0), FPS(0) {
-    gettimeofday(&lastFrame, 0);
-    lastSection = lastFrame;
+    lastSection = lastFrame = getTime();
 }
 
 void Profiler::leaveSection(const char* name) {
-    timeval now;
-    gettimeofday(&now, 0);
-    float time = now.tv_sec - lastSection.tv_sec;
-    time += (now.tv_usec - lastSection.tv_usec) / 1000000.0;
+    double now = getTime(), time = now-lastSection;
     lastSection = now;
+    
     auto iterator = sections.find(name);
     if(iterator == sections.end())
         sections[name] = Section();
@@ -30,12 +26,9 @@ void Profiler::leaveSection(const char* name) {
 }
 
 void Profiler::markFrame() {
-    timeval now;
-    gettimeofday(&now, 0);
-    animationFactor = now.tv_sec - lastFrame.tv_sec;
-    animationFactor += (now.tv_usec - lastFrame.tv_usec) / 1000000.0;
-    lastFrame = now;
-    lastSection = now;
+    double now = getTime();
+    animationFactor = now-lastFrame;
+    lastSection = lastFrame = now;
     
     newFPS ++;
     lastSec += animationFactor;

@@ -18,6 +18,7 @@
 			<PhysicsBody collisionShape="worldBox" mass="0.0" />
 		</RigidObject>
 		<RigidObject>
+			<Script src="Class" />
 			<Model src="woodenBox.dae" />
 			<PhysicsBody collisionShape="box0" mass="0.0" />
 		</RigidObject>

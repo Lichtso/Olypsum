@@ -34,6 +34,26 @@ v8::Handle<v8::Value> ScriptManager::ScriptRequire(const v8::Arguments& args) {
     return handleScope.Close(script->exports);
 }
 
+v8::Handle<v8::Value> ScriptManager::ScriptSaveLevel(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    if(args.Length() < 2)
+        return v8::ThrowException(v8::String::New("saveLevel(): To less arguments"));
+    std::string localData = (args[0]->IsString()) ? stdStringOf(args[0]->ToString()) : "",
+                globalData = (args[1]->IsString()) ? stdStringOf(args[1]->ToString()) : "";
+    return v8::Boolean::New(levelManager.saveLevel(localData, globalData));
+}
+
+v8::Handle<v8::Value> ScriptManager::ScriptGetLevel(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    return v8::String::New(levelManager.levelId.c_str());
+}
+
+void ScriptManager::ScriptSetLevel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsString())
+        v8::ThrowException(v8::String::New("levelID=: Invalid argument"));
+    levelManager.loadLevel(stdStringOf(value->ToString()));
+}
+
 const char* ScriptManager::cStringOf(v8::Handle<v8::String> string) {
     v8::String::Utf8Value value(string);
     return *value ? *value : "<string conversion failed>";
@@ -44,11 +64,19 @@ std::string ScriptManager::stdStringOf(v8::Handle<v8::String> string) {
     return std::string(*value ? *value : "<string conversion failed>");
 }
 
+v8::Handle<v8::Value> ScriptManager::readCdataXMLNode(rapidxml::xml_node<xmlUsedCharType>* node) {
+    if(!node || !(node = node->first_node()) || node->type() != rapidxml::node_cdata)
+        return v8::Undefined();
+    return v8::String::New(node->value());
+}
+
 ScriptManager::ScriptManager() {
     v8::HandleScope handleScope;
     globalTemplate = v8::Persistent<v8::ObjectTemplate>::New(v8::ObjectTemplate::New());
     globalTemplate->Set(v8::String::New("log"), v8::FunctionTemplate::New(ScriptLog));
     globalTemplate->Set(v8::String::New("require"), v8::FunctionTemplate::New(ScriptRequire));
+    globalTemplate->Set(v8::String::New("saveLevel"), v8::FunctionTemplate::New(ScriptSaveLevel));
+    globalTemplate->SetAccessor(v8::String::New("levelID"), ScriptGetLevel, ScriptSetLevel);
     scriptVector3.init(globalTemplate);
     scriptMatrix4.init(globalTemplate);
     scriptBaseObject.init(globalTemplate);

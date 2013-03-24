@@ -81,15 +81,9 @@ static NSString *getApplicationName(void)
     createDir(companyDir);
     createDir(gameDataDir);
     
-    NSURL* parentURL = [[NSBundle mainBundle] resourceURL];
-    for(unsigned int i = 0; i < 3; i ++)
-        parentURL = [parentURL URLByDeletingLastPathComponent];
     NSString* resourceURL = [[NSBundle mainBundle] resourcePath];
-    
-    unsigned long length = max([[parentURL path] length], [resourceURL length])+1;
+    unsigned long length = [resourceURL length]+1;
     char buffer[length];
-    [[parentURL path] getCString:buffer maxLength:length encoding:NSASCIIStringEncoding];
-    parentDir = std::string(buffer);
     [resourceURL getCString:buffer maxLength:length encoding:NSASCIIStringEncoding];
     resourcesDir = std::string(buffer)+'/';
     chdir(resourcesDir.c_str());

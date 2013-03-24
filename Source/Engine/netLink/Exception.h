@@ -1,6 +1,7 @@
 /*
     NetLink Sockets: Networking C++ library
     Copyright 2012 Pedro Francisco Pareja Ruiz (PedroPareja@Gmail.com)
+    Copyright 2013 Alexander Meißner (lichtso@gamefortec.net)
 
     This file is part of NetLink Sockets.
 
@@ -19,55 +20,40 @@
 
 */
 
+#ifndef __NL_EXCEPTION
+#define __NL_EXCEPTION
 
-#ifndef __NL_SMART_BUFFER
-#define __NL_SMART_BUFFER
-
-#include <stdlib.h>
-
-#include "core.h"
-#include "util.h"
-#include "socket.h"
-
+#include "Core.h"
 
 NL_NAMESPACE
 
-
-/**
-* @class SmartBuffer smart_buffer.h netlink/smart_buffer.h
-*
-* Smart Buffer Class
-*
-* Buffer class to retrieve data of unknown size easily from a Socket
-*/
-
-
-class SmartBuffer {
-
-    private:
-
-        void*   _buffer;
-        size_t  _usedSize;
-        size_t  _allocSize;
-        double  _reallocRatio;
-
+class Exception {
     public:
-
-        SmartBuffer(size_t allocSize = DEFAULT_SMARTBUFFER_SIZE, double reallocRatio = DEFAULT_SMARTBUFFER_REALLOC_RATIO);
-        ~SmartBuffer();
-
-        const void* operator*() const;
-        const char* operator[](size_t index) const;
-
-        const void* buffer() const;
-        size_t size() const;
-
-        void read(Socket* socket);
-
-        void clear();
+    enum CODE {
+        BAD_PROTOCOL,
+        BAD_IP_VER,
+        ERROR_INIT,
+        ERROR_SET_ADDR_INFO,
+        ERROR_GET_ADDR_INFO,
+        ERROR_SET_SOCK_OPT,
+        ERROR_CAN_NOT_LISTEN,
+        ERROR_CONNECT_SOCKET,
+        ERROR_SEND,
+        ERROR_READ,
+        ERROR_IOCTL,
+        ERROR_SELECT,
+        ERROR_ALLOC,
+        EXPECTED_TCP_CLIENT,
+        EXPECTED_TCP_SERVER,
+        EXPECTED_UDP_PEER,
+        EXPECTED_NON_SERVER,
+        EXPECTED_HOST_TO,
+        OUT_OF_RANGE
+    } code;
+    std::string msg;
+    int nativeErrorCode;
+    Exception(CODE _code, const std::string& _msg, int _nativeErrorCode = 0): code(_code), msg(_msg), nativeErrorCode(_nativeErrorCode) {}
 };
-
-#include "smart_buffer.inline.h"
 
 NL_NAMESPACE_END
 

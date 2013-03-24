@@ -303,11 +303,13 @@ void setMenu(MenuName menu) {
             }
             
             unsigned int sliderSteps[] = { 3, 3, 4, 4, 3 };
-            std::function<void(GUISlider*)> onChangeGraphics[] = {
-                [](GUISlider* slider) {
+            std::function<void(GUISlider*, bool)> onChangeGraphics[] = {
+                [](GUISlider* slider, bool dragging) {
+                    if(dragging) return;
                     optionsState.depthOfFieldQuality = slider->value*3.0;
                     updateGraphicOptions();
-                }, [](GUISlider* slider) {
+                }, [](GUISlider* slider, bool dragging) {
+                    if(dragging) return;
                     optionsState.surfaceQuality = slider->value*3.0;
                     glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &optionsState.anisotropy);
                     optionsState.anisotropy = fmin(optionsState.anisotropy, pow(2.0, optionsState.surfaceQuality));
@@ -319,13 +321,16 @@ void setMenu(MenuName menu) {
                                 texture->updateFilters();
                         }
                     updateGraphicOptions();
-                }, [](GUISlider* slider) {
+                }, [](GUISlider* slider, bool dragging) {
+                    if(dragging) return;
                     optionsState.shadowQuality = slider->value*4.0;
                     updateGraphicOptions();
-                }, [](GUISlider* slider) {
+                }, [](GUISlider* slider, bool dragging) {
+                    if(dragging) return;
                     optionsState.ssaoQuality = slider->value*4.0;
                     updateGraphicOptions();
-                }, [](GUISlider* slider) {
+                }, [](GUISlider* slider, bool dragging) {
+                    if(dragging) return;
                     optionsState.blendingQuality = slider->value*3.0;
                     updateGraphicOptions();
                 }
@@ -364,14 +369,14 @@ void setMenu(MenuName menu) {
                 view->addChild(slider);
             }
             
-            std::function<void(GUISlider*)> onChange[] = {
-                [](GUISlider* slider) {
+            std::function<void(GUISlider*, bool)> onChange[] = {
+                [](GUISlider* slider, bool dragging) {
                     optionsState.globalVolume = slider->value;
-                }, [](GUISlider* slider) {
+                }, [](GUISlider* slider, bool dragging) {
                     optionsState.musicVolume = slider->value;
-                }, [](GUISlider* slider) {
+                }, [](GUISlider* slider, bool dragging) {
                     optionsState.mouseSensitivity = slider->value*0.01F;
-                }, [](GUISlider* slider) {
+                }, [](GUISlider* slider, bool dragging) {
                     optionsState.mouseSmoothing = 1.0F-slider->value;
                 }
             };
@@ -624,7 +629,7 @@ void setMenu(MenuName menu) {
                 }, [](GUIButton* button) {
                     setMenu(optionsMenu);
                 }, [](GUIButton* button) {
-                    levelManager.leaveGame();
+                    levelManager.clear();
                 }, [](GUIButton* button) {
                     levelManager.clear();
                     AppTerminate();

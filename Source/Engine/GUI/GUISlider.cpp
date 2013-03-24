@@ -126,10 +126,20 @@ bool GUISlider::handleMouseDown(int mouseX, int mouseY) {
 }
 
 bool GUISlider::handleMouseUp(int mouseX, int mouseY) {
-    mouseDragPos = -1;
-    if(steps) value = roundf(value*(float)steps)/(float)steps;
+    if(!visible) return false;
     
-    if(onChange) onChange(this);
+    if(mouseDragPos != -1) {
+        if(steps) {
+            value = roundf(value*(float)steps)/(float)steps;
+            if(onChange) onChange(this, false);
+        }
+        
+        if(!handleMouseDown(mouseX, mouseY))
+            updateContent();
+        
+        mouseDragPos = -1;
+    }
+    
     return false;
 }
 
@@ -155,7 +165,7 @@ void GUISlider::handleMouseMove(int mouseX, int mouseY) {
     if(value < 0.0) value = 0.0;
     else if(value > 1.0) value = 1.0;
     
-    if(onChanging) onChanging(this);
+    if(onChange) onChange(this, true);
 }
 
 bool GUISlider::handleMouseWheel(int mouseX, int mouseY, float delta) {
@@ -167,7 +177,6 @@ bool GUISlider::handleMouseWheel(int mouseX, int mouseY, float delta) {
     if(steps) value = roundf(value*(float)steps)/(float)steps;
     handleMouseMove(mouseX, mouseY);
     
-    if(onChanging) onChanging(this);
-    if(onChange) onChange(this);
+    if(onChange) onChange(this, false);
     return true;
 }

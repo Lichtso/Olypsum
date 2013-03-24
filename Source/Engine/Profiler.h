@@ -12,7 +12,7 @@
 #define Profiler_h
 
 class Profiler {
-    timeval lastFrame, lastSection;
+    double lastFrame, lastSection;
     unsigned int newFPS;
     float lastSec;
     public:

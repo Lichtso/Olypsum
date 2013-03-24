@@ -38,12 +38,9 @@ bool LevelLoader::loadContainer(std::string name) {
     v8::HandleScope handleScope;
     rapidxml::xml_document<xmlUsedCharType> doc;
     
-    bool isContainerFresh = false;
     std::unique_ptr<char[]> rawData = readXmlFile(doc, gameDataDir+"Saves/"+levelManager.saveGameName+"/Containers/"+name+".xml", false);
-    if(!rawData) {
+    if(!rawData)
         rawData = readXmlFile(doc, levelManager.levelPackage->path+"/Containers/"+name+".xml", false);
-        isContainerFresh = true;
-    }
     if(!rawData) {
         levelManager.showErrorModal(localization.localizeString("packageError_ContainerMissing")+'\n'+name);
         return false;
@@ -165,21 +162,24 @@ bool LevelLoader::loadContainer(std::string name) {
     //Pop the container from the stack
     containerStack.erase(name);
     
-    //Execute onload() when all is loaded
+    //Update status file
     if(levelNode) {
-        v8::Handle<v8::Value> scriptData;
-        if((node = levelNode->first_node("Data")))
-            scriptData = v8::String::New(node->value());
-        else
-            scriptData = v8::Undefined();
+        v8::Handle<v8::Value> localData = scriptManager->readCdataXMLNode(levelNode);
+        doc.clear();
+        std::string statusFilePath = gameDataDir+"Saves/"+levelManager.saveGameName+"/Status.xml";
+        std::unique_ptr<char[]> fileData = readXmlFile(doc, statusFilePath, true);
+        doc.first_node("Status")->first_node("Level")->first_attribute("value")->value(name.c_str());
+        v8::Handle<v8::Value> globalData = scriptManager->readCdataXMLNode(doc.first_node("Status"));
+        if(!writeXmlFile(doc, statusFilePath, true))
+            return false;
+        levelManager.levelId = name;
         scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
-                                            "onload", false, { v8::Boolean::New(isContainerFresh), scriptData });
+                                            "onload", false, { localData, globalData });
     }
-    
     return true;
 }
 
-bool LevelLoader::loadLevel() {
+bool LevelLoader::loadLevel(std::string levelId) {
     //Load CollisionShapes
     rapidxml::xml_document<xmlUsedCharType> doc;
     std::unique_ptr<char[]> collisionShapesData = readXmlFile(doc, levelManager.levelPackage->path+'/'+"CollisionShapes.xml", false);
@@ -292,11 +292,12 @@ bool LevelLoader::loadLevel() {
     
     //Load root conatiner
     objectManager.initGame();
-    if(!loadContainer(levelManager.levelId)) {
+    if(!loadContainer(levelId)) {
         objectManager.clear();
         return false;
     }
     
+    //Update gameStatus and start the game
     objectManager.updateRendererSettings();
     levelManager.gameStatus = localGame;
     setMenu(inGameMenu);

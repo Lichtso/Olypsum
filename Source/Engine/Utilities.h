@@ -6,28 +6,22 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include <BulletCollision/btBulletCollisionCommon.h>
-#include <BulletDynamics/btBulletDynamicsCommon.h>
-#include <BulletSoftBody/btSoftBody.h>
 #include <math.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <map>
-#include <set>
-#include <vector>
-#include <string>
-#include <sstream>
+
+#include <BulletCollision/btBulletCollisionCommon.h>
+#include <BulletDynamics/btBulletDynamicsCommon.h>
+#include <BulletSoftBody/btSoftBody.h>
 #include <v8.h>
+#include "netLink/netLink.h"
 
 #ifndef Utilities_h
 #define Utilities_h
 
 #define VERSION "0.0.1"
-
-#define foreach_e(c,i) for(auto end##i = (c).end(), next##i = (c).begin(), \
-                            i = (next##i==end##i)?end##i:next##i++; \
-                            i != next##i; \
-                            i = (next##i==end##i)?end##i:next##i++)
 
 enum logMessageType {
     info_log = 0,
@@ -128,7 +122,10 @@ inline btVector3 vec3rand(btVector3 min, btVector3 max) {
     return btVector3(frand(min.x(), max.x()), frand(min.y(), max.y()), frand(min.z(), max.z()));
 }
 
+//! System time in seconds
+double getTime();
+
 extern unsigned int screenSize[3];
-extern std::string resourcesDir, gameDataDir, parentDir;
+extern std::string resourcesDir, gameDataDir;
 
 #endif

@@ -44,22 +44,6 @@ const SDL_VideoInfo* updateVideoModeInternal(bool& fullScreen) {
     return videoInfo;
 }
 
-#ifndef __MAC_OS__
-void updateVideoMode() {
-    bool fullScreen;
-    screenSize[2] = 1;
-    const SDL_VideoInfo* videoInfo = updateVideoModeInternal(fullScreen);
-    SDL_Surface* screen = SDL_SetVideoMode(optionsState.videoWidth,
-                                           optionsState.videoHeight,
-                                           videoInfo->vfmt->BitsPerPixel,
-                                           (fullScreen) ? SDL_OPENGL | SDL_FULLSCREEN : SDL_OPENGL);
-    if(!screen) {
-        log(error_log, "Coudn't set video mode, Quit.");
-        exit(4);
-    }
-}
-#endif
-
 void AppMain(int argc, char *argv[]) {
     optionsState.loadOptions();
     
@@ -72,7 +56,7 @@ void AppMain(int argc, char *argv[]) {
         log(error_log, "Coudn't init TTF lib, Quit.");
         exit(2);
     }
-    SDL_EnableUNICODE(1);;
+    SDL_EnableUNICODE(1);
     updateVideoMode();
     
     //Init OpenGL

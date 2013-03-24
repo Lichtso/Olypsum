@@ -1,5 +1,5 @@
 //
-//  main.m
+//  main.mm
 //  Olypsum
 //
 //  Created by Alexander Meißner on 20.02.12.

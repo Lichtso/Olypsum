@@ -61,29 +61,21 @@ void LevelManager::clear() {
     setMenu(mainMenu);
 }
 
-void LevelManager::loadLevel(std::string nextLevelId) {
-    levelId = nextLevelId;
+bool LevelManager::loadLevel(const std::string& nextLevelId) {
     LevelLoader levelLoader;
-    if(!levelLoader.loadLevel() && !currentScreenView->modalView)
+    if(levelLoader.loadLevel(nextLevelId))
+        return true;
+    if(!currentScreenView->modalView)
         showErrorModal(localization.localizeString("packageError_Corrupted"));
+    return false;
 }
 
-void LevelManager::saveLevel() {
-    rapidxml::xml_document<xmlUsedCharType> doc;
-    std::unique_ptr<char[]> fileData = readXmlFile(doc, gameDataDir+"Saves/"+saveGameName+'/'+"Status.xml", false);
-    doc.first_node("Status")->first_node("Level")->first_attribute("value")->value(levelId.c_str());
-    writeXmlFile(doc, gameDataDir+"Saves/"+saveGameName+'/'+"Status.xml", true);
-    
+bool LevelManager::saveLevel(const std::string& localData, const std::string& globalData) {
     LevelSaver levelSaver;
-    levelSaver.saveLevel();
+    return levelSaver.saveLevel(localData, globalData);
 }
 
-void LevelManager::leaveGame() {
-    saveLevel();
-    clear();
-}
-
-bool LevelManager::loadGame(std::string name) {
+bool LevelManager::loadGame(const std::string& name) {
     std::string path = gameDataDir+"Saves/"+name+'/';
     if(!checkDir(path)) {
         showErrorModal(localization.localizeString("packageError_NotFound"));
@@ -106,7 +98,7 @@ bool LevelManager::loadGame(std::string name) {
     return true;
 }
 
-bool LevelManager::newGame(std::string packageName, std::string name) {
+bool LevelManager::newGame(const std::string& packageName, const std::string& name) {
     if(!createDir(gameDataDir+"Saves/"+name+'/')) {
         showErrorModal(localization.localizeString("packageError_Exists"));
         return false;
@@ -119,11 +111,11 @@ bool LevelManager::newGame(std::string packageName, std::string name) {
     addXMLNode(doc, statusNode, "Version", VERSION);
     addXMLNode(doc, statusNode, "Package", packageName.c_str());
     addXMLNode(doc, statusNode, "Level", "start");
-    writeXmlFile(doc, gameDataDir+"Saves/"+name+'/'+"Status.xml", true);
+    writeXmlFile(doc, gameDataDir+"Saves/"+name+"/Status.xml", true);
     return loadGame(name);
 }
 
-bool LevelManager::removeGame(std::string name) {
+bool LevelManager::removeGame(const std::string& name) {
     if(!removeDir(gameDataDir+"Saves/"+name+'/')) {
         showErrorModal(localization.localizeString("packageError_NotFound"));
         return false;

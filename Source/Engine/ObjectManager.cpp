@@ -110,6 +110,7 @@ void ObjectManager::clear() {
 }
 
 void ObjectManager::initGame() {
+    clear();
     physicsWorld.reset(new btDiscreteDynamicsWorld(collisionDispatcher, broadphase, constraintSolver, collisionConfiguration));
     physicsWorld->setInternalTickCallback(calculatePhysicsTick);
     controlsMangager.reset(new ControlsMangager());

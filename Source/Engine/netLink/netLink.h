@@ -1,6 +1,7 @@
 /*
     NetLink Sockets: Networking C++ library
     Copyright 2012 Pedro Francisco Pareja Ruiz (PedroPareja@Gmail.com)
+    Copyright 2013 Alexander Meißner (lichtso@gamefortec.net)
 
     This file is part of NetLink Sockets.
 
@@ -19,27 +20,9 @@
 
 */
 
+#ifndef __NET_LINK
+#define __NET_LINK
 
-#include "util.h"
+#include "SocketManager.h"
 
-
-unsigned NL_NAMESPACE_NAME::getTime() {
-
-    #ifdef OS_WIN32
-
-        SYSTEMTIME now;
-        GetSystemTime(&now);
-        unsigned milisec = now.wHour *3600*1000 + now.wMinute *60*1000 + now.wSecond *1000 + now.wMilliseconds;
-        return(milisec);
-
-    #else
-
-        struct timeval now;
-        gettimeofday(&now, NULL);
-        unsigned milisec = now.tv_sec * 1000 + now.tv_usec / 1000.0;
-        return(milisec);
-
-    #endif
-
-}
-
+#endif

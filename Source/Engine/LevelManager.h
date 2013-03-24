@@ -31,12 +31,11 @@ class LevelManager {
     GameStatusName gameStatus = noGame;
     //! Deletes all shared objects
     void clear();
-    void loadLevel(std::string levelId);
-    void saveLevel();
-    void leaveGame();
-    bool loadGame(std::string name);
-    bool newGame(std::string packageName, std::string name);
-    bool removeGame(std::string name);
+    bool loadLevel(const std::string& levelId);
+    bool saveLevel(const std::string& localData, const std::string& globalData);
+    bool loadGame(const std::string& name);
+    bool newGame(const std::string& packageName, const std::string& name);
+    bool removeGame(const std::string& name);
 };
 
 extern LevelManager levelManager;

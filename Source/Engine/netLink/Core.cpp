@@ -1,6 +1,7 @@
 /*
     NetLink Sockets: Networking C++ library
     Copyright 2012 Pedro Francisco Pareja Ruiz (PedroPareja@Gmail.com)
+    Copyright 2013 Alexander Meißner (lichtso@gamefortec.net)
 
     This file is part of NetLink Sockets.
 
@@ -19,17 +20,20 @@
 
 */
 
+#include "Core.h"
 
+NL_NAMESPACE
 
-inline int NL_NAMESPACE_NAME::iMax(int a, int b) {
+void init() {
 
-    return (a>b)?a:b;
+	#ifdef OS_WIN32
+
+		WSADATA wsaData;
+		if (WSAStartup(MAKEWORD(2,0), &wsaData) != 0)
+			throw Exception(Exception::ERROR_INIT, "Library inicialization failed");
+
+	#endif
 }
 
-inline unsigned NL_NAMESPACE_NAME::uMax(unsigned a, unsigned b) {
-
-    return (a>b)?a:b;
-}
-
-
+NL_NAMESPACE_END
 

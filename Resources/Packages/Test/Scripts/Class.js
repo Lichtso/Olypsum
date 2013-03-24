@@ -1,9 +1,12 @@
-exports.onload = function() {
-	log('Hello, World!');
-	log(this);
+exports.onload = function(data) {
+	log([this, data]);
 	return true;
 };
 
-exports.oncollision = function(b) {
-	log('oncollision: '+b);
+exports.onsave = function() {
+	return "ObjectData";
+};
+
+exports.oncollision = function(otherObject) {
+	log('oncollision: '+otherObject);
 };

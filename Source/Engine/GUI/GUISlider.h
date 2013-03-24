@@ -22,8 +22,7 @@ class GUISlider : public GUIRect {
     unsigned int steps;
     bool enabled;
     GUIOrientation orientation;
-    std::function<void(GUISlider*)> onChanging;
-    std::function<void(GUISlider*)> onChange;
+    std::function<void(GUISlider*, bool)> onChange;
     GUISlider();
     void updateContent();
     void draw(btVector3 transform, GUIClipRect& parentClipRect);

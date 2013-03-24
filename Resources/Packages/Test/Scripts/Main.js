@@ -1,7 +1,7 @@
-exports.onload = function(newGame, data) {
-
+exports.onload = function(localData, globalData) {
+	log([levelID, localData, globalData]);
 };
 
-exports.saveLocalData = function() {
-
+exports.onleave = function() {
+	saveLevel("LocalData", null);
 };

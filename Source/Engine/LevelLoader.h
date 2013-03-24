@@ -22,7 +22,7 @@ class LevelLoader {
     BaseObject* getObjectLinking(const char* id);
     void pushObject(BaseObject* object);
     bool loadContainer(std::string name);
-    bool loadLevel();
+    bool loadLevel(std::string levelId);
 };
 
 #endif

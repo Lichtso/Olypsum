@@ -34,19 +34,19 @@ void BaseObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
 void BaseObject::initScriptInstance(rapidxml::xml_node<xmlUsedCharType>* node) {
     v8::HandleScope handleScope;
     scriptInstance = v8::Persistent<v8::Object>::New(scriptBaseObject.newInstance(this));
-    node = node->first_node("Script");
-    if(!node) return;
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("package");
+    rapidxml::xml_node<xmlUsedCharType>* scriptNode = node->first_node("Script");
+    if(!scriptNode) return;
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = scriptNode->first_attribute("package");
     FilePackage* levelPack = levelManager.levelPackage;
     if(attribute)
         levelPack = fileManager.getPackage(attribute->value());
-    attribute = node->first_attribute("src");
+    attribute = scriptNode->first_attribute("src");
     if(!attribute) {
         log(error_log, "Tried to construct resource without \"src\"-attribute.");
         return;
     }
     scriptFile = scriptManager->getScriptFile(levelPack, attribute->value());
-    scriptManager->callFunctionOfScript(scriptFile, "onload", true, { scriptInstance });
+    scriptManager->callFunctionOfScript(scriptFile, "onload", true, { scriptInstance, scriptManager->readCdataXMLNode(node) });
 }
 
 btTransform BaseObject::readTransformtion(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
@@ -56,10 +56,17 @@ btTransform BaseObject::readTransformtion(rapidxml::xml_node<xmlUsedCharType>* n
 rapidxml::xml_node<xmlUsedCharType>* BaseObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
     rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
     node->name("BaseObject");
-    btTransform transform = getTransformation();
-    node->append_node(writeTransformationXML(doc, transform));
     if(scriptFile) {
-        rapidxml::xml_node<xmlUsedCharType>* scriptNode = doc.allocate_node(rapidxml::node_element);
+        rapidxml::xml_node<xmlUsedCharType>* scriptNode;
+        v8::Handle<v8::Value> scritData = scriptManager->callFunctionOfScript(scriptFile, "onsave", true, { scriptInstance });
+        if(!scritData.IsEmpty() && scritData->IsString()) {
+            v8::String::Utf8Value dataStr(scritData);
+            scriptNode = doc.allocate_node(rapidxml::node_cdata);
+            node->append_node(scriptNode);
+            scriptNode->value(doc.allocate_string(*dataStr));
+        }
+        
+        scriptNode = doc.allocate_node(rapidxml::node_element);
         scriptNode->name("Script");
         node->append_node(scriptNode);
         rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
@@ -73,6 +80,8 @@ rapidxml::xml_node<xmlUsedCharType>* BaseObject::write(rapidxml::xml_document<xm
         attribute->value(doc.allocate_string(scriptFile->name.c_str()));
         scriptNode->append_attribute(attribute);
     }
+    btTransform transform = getTransformation();
+    node->append_node(writeTransformationXML(doc, transform));
     levelSaver->pushObject(this);
     return node;
 }

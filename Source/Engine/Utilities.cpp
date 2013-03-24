@@ -171,5 +171,17 @@ std::string stringOf(btTransform& mat) {
     return ss.str();
 }
 
+double getTime() {
+#ifdef OS_WIN32
+    SYSTEMTIME now;
+    GetSystemTime(&now);
+    return now.wHour*3600.0 + now.wMinute*60.0 + now.wSecond + now.wMilliseconds/1000.0;
+#else
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    return now.tv_sec + now.tv_usec/1000000.0;
+#endif
+}
+
 unsigned int screenSize[3];
-std::string resourcesDir, gameDataDir, parentDir;
+std::string resourcesDir, gameDataDir;
