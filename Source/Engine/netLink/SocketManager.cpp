@@ -57,6 +57,8 @@ void SocketManager::listen(double secLeft) {
         bool isInReadfds = FD_ISSET((*iterator)->handle, &readfds);
         
         switch((*iterator)->type) {
+            case NONE:
+                throw Exception(Exception::ERROR_SELECT, "SocketGroup::listen: Invalid socket");
             case TCP_SERVER:
                 if(isInReadfds && onAcceptRequest) {
                     Socket* serversClient = (*iterator)->accept();
@@ -69,22 +71,22 @@ void SocketManager::listen(double secLeft) {
             case TCP_CLIENT:
                 if(FD_ISSET((*iterator)->handle, &exceptfds)) {
                     if(onDisconnect) onDisconnect(this, *iterator);
-                    sockets.erase(iterator);
                     delete *iterator;
+                    sockets.erase(iterator);
                     continue;
                 }
             case TCP_SERVERS_CLIENT:
                 if(isInReadfds && (*iterator)->showmanyc() <= 0) {
                     if(onDisconnect) onDisconnect(this, *iterator);
-                    sockets.erase(iterator);
                     delete *iterator;
+                    sockets.erase(iterator);
                     continue;
                 }
             case UDP_PEER:
                 if(isInReadfds && onReceive)
                     onReceive(this, *iterator);
                 
-                SocketRecvStatus prev = (SocketRecvStatus) (*iterator)->recvStatus;
+                SocketSendStatus prev = (SocketSendStatus) (*iterator)->recvStatus;
                 (*iterator)->recvStatus = (FD_ISSET((*iterator)->handle, &writefds)) ? SOCKET_STATUS_OPEN : SOCKET_STATUS_BUSY;
                 if(onStateChanged && (*iterator)->recvStatus != prev)
                     onStateChanged(this, *iterator, prev);

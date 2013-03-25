@@ -47,8 +47,7 @@ class Exception {
         EXPECTED_TCP_SERVER,
         EXPECTED_UDP_PEER,
         EXPECTED_NON_SERVER,
-        EXPECTED_HOST_TO,
-        OUT_OF_RANGE
+        EXPECTED_HOST_TO
     } code;
     std::string msg;
     int nativeErrorCode;

@@ -31,7 +31,7 @@ class SocketManager {
     public:
     std::set<Socket*> sockets;
     std::function<bool(SocketManager* group, Socket* serverSocket, Socket* socket)> onAcceptRequest;
-    std::function<void(SocketManager* group, Socket* socket, SocketRecvStatus prev)> onStateChanged;
+    std::function<void(SocketManager* group, Socket* socket, SocketSendStatus prev)> onStateChanged;
     std::function<void(SocketManager* group, Socket* socket)> onDisconnect;
     std::function<void(SocketManager* group, Socket* socket)> onReceive;
     ~SocketManager();

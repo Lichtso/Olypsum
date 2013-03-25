@@ -30,12 +30,12 @@ NL_NAMESPACE
 static void close(int handle) {
     closesocket(handle);
 }
-
-/*static void freeaddrinfo(PADDRINFOA addrInfo) {
+/*
+static void freeaddrinfo(PADDRINFOA addrInfo) {
     ::freeaddrinfo(addrInfo);
-}*/
+}
 
-static const char *inet_ntop(int af, const void *src, char *dst, socklen_t cnt) {
+static const char* inet_ntop(int af, const void *src, char *dst, socklen_t cnt) {
     if(af == AF_INET) {
         struct sockaddr_in in;
         memset(&in, 0, sizeof(in));
@@ -53,15 +53,8 @@ static const char *inet_ntop(int af, const void *src, char *dst, socklen_t cnt) 
     }
     return NULL;
 }
-
+*/
 #endif
-
-struct AddrinfoDestructor {
-    AddrinfoDestructor() { };
-    void operator() (struct addrinfo* res) const {
-        freeaddrinfo(res);
-    };
-};
 
 static int getSocketErrorCode() {
     #ifdef OS_WIN32
@@ -85,7 +78,7 @@ static void getSocketInfoFromStorage(struct sockaddr_storage* storage, std::stri
     host = buffer;
 }
 
-static void getSocketInfoFromHandler(int handle, std::string& host, unsigned int& port) {
+static void getSocketInfoFromHandle(int handle, std::string& host, unsigned int& port) {
     struct sockaddr_storage storage;
     #ifdef OS_WIN32
         int size = sizeof(&storage);
@@ -94,7 +87,7 @@ static void getSocketInfoFromHandler(int handle, std::string& host, unsigned int
     #endif
     
     if(getsockname(handle, (struct sockaddr*)&storage, &size) != 0)
-        throw Exception(Exception::ERROR_GET_ADDR_INFO, "Socket::(static)getLocalPort: error getting socket info", getSocketErrorCode());
+        throw Exception(Exception::ERROR_GET_ADDR_INFO, "Socket:: error getting socket info", getSocketErrorCode());
     
     getSocketInfoFromStorage(&storage, host, port);
 }
@@ -109,25 +102,80 @@ static void checkReadError(const std::string& functionName) {
     #endif
 }
 
-
-
-void Socket::setBlockingMode(bool blocking) {
-    int result = -1;
+std::unique_ptr<struct addrinfo, Socket::AddrinfoDestructor> Socket::getSocketInfoFor(const char* host, unsigned int port, bool wildcardAddress) {
+    struct addrinfo conf, *res;
+    memset(&conf, 0, sizeof(conf));
+    conf.ai_flags = AI_V4MAPPED;
+    conf.ai_family = AF_UNSPEC;
     
-    #ifdef OS_WIN32
-    u_long non_blocking = !blocking;
-    result = ioctlsocket(handle, FIONBIO, &non_blocking);
-    if(result != 0)
-        throw Exception(Exception::ERROR_IOCTL, "Socket::blocking: ioctl error", getSocketErrorCode());
-    #else
-    int flags = fcntl(handle, F_GETFL);
-    if(blocking)
-        result = fcntl(handle, F_SETFL, flags & ~O_NONBLOCK);
-    else
-        result = fcntl(handle, F_SETFL, flags | O_NONBLOCK);
-    if(result == -1)
-        throw Exception(Exception::ERROR_IOCTL, "Socket::blocking: ioctl error", getSocketErrorCode());
-    #endif
+    if(wildcardAddress)
+        conf.ai_flags |= AI_PASSIVE;
+    
+    switch(type) {
+        case TCP_CLIENT:
+        case TCP_SERVER:
+            conf.ai_socktype = SOCK_STREAM;
+        break;
+        case UDP_PEER:
+            conf.ai_socktype = SOCK_DGRAM;
+        break;
+        default:
+            throw Exception(Exception::BAD_PROTOCOL, "Socket::initSocket: bad protocol");
+    }
+    
+    /*
+    switch(ipVer) {
+        case IP4:
+            conf.ai_family = AF_INET;
+        break;
+        case IP6:
+            conf.ai_family = AF_INET6;
+        break;
+        case ANY:
+            conf.ai_family = AF_UNSPEC;
+        break;
+        default:
+            throw Exception(Exception::BAD_IP_VER, "Socket::initSocket: bad ip version parameter");
+    }*/
+    
+    char portStr[10];
+    snprintf(portStr, 10, "%u", port);
+    int status = getaddrinfo(host, portStr, &conf, &res);
+    
+    if(status != 0) {
+        std::string errorMsg = "Socket::initSocket: Error setting addrInfo: ";
+        #ifndef _MSC_VER
+        errorMsg += gai_strerror(status);
+        #endif
+        
+        throw Exception(Exception::ERROR_SET_ADDR_INFO, errorMsg, getSocketErrorCode());
+    }
+    
+    return std::unique_ptr<struct addrinfo, Socket::AddrinfoDestructor>(res, AddrinfoDestructor());
+}
+
+void Socket::setMulticastGroup(struct sockaddr_storage* addr, bool join) {
+    if(ipVer == IP4) {
+        auto sin = reinterpret_cast<struct sockaddr_in*>(addr)->sin_addr;
+        if((ntohl(sin.s_addr) & 0xF0000000) == 0xE0000000) {
+            struct ip_mreq mreq;
+            mreq.imr_multiaddr = sin;
+            mreq.imr_interface.s_addr = INADDR_ANY;
+            
+            if(setsockopt(handle, IPPROTO_IP, (join) ? IP_ADD_MEMBERSHIP : IP_DROP_MEMBERSHIP, &mreq, sizeof(mreq)) == -1)
+                throw Exception(Exception::ERROR_SET_SOCK_OPT, "Socket::setMulticastGroup: Error establishing socket options", getSocketErrorCode());
+        }
+    }else{
+        auto sin = reinterpret_cast<struct sockaddr_in6*>(addr)->sin6_addr;
+        if(sin.__u6_addr.__u6_addr8[0] == 0xFF) {
+            struct ipv6_mreq mreq;
+            mreq.ipv6mr_multiaddr = sin;
+            mreq.ipv6mr_interface = 0;
+            
+            if(setsockopt(handle, IPPROTO_IPV6, (join) ? IPV6_JOIN_GROUP : IPV6_LEAVE_GROUP, &mreq, sizeof(ipv6_mreq)) == -1)
+                throw Exception(Exception::ERROR_SET_SOCK_OPT, "Socket::setMulticastGroup: Error establishing socket options", getSocketErrorCode());
+        }
+    }
 }
 
 unsigned int Socket::read(char* buffer, unsigned int size) {
@@ -152,6 +200,7 @@ unsigned int Socket::read(char* buffer, unsigned int size) {
             if(status == -1) checkReadError("read");
             return status;
         }
+        case NONE:
         case TCP_SERVER:
             throw Exception(Exception::EXPECTED_NON_SERVER, "Socket::send: Expected client or peer socket");
     }
@@ -160,40 +209,14 @@ unsigned int Socket::read(char* buffer, unsigned int size) {
 unsigned int Socket::write(const char* buffer, unsigned int size) {
     switch(type) {
         case UDP_PEER: {
-            struct addrinfo conf, *res;
-            memset(&conf, 0, sizeof(conf));
-            conf.ai_socktype = SOCK_DGRAM;
-            
-            switch(ipVer) {
-                case IP4:
-                    conf.ai_family = AF_INET;
-                    break;
-                case IP6:
-                    conf.ai_family = AF_INET6;
-                    break;
-                default:
-                    throw Exception(Exception::BAD_IP_VER, "Socket::sendTo: bad ip version.");
-            }
-            
-            char portStr[10];
-            snprintf(portStr, 10, "%u", portRemote);
-            int status = getaddrinfo(hostRemote.c_str(), portStr, &conf, &res);
-            std::unique_ptr<struct addrinfo, AddrinfoDestructor> addrInfoReleaser(res, AddrinfoDestructor());
-            
-            if(status != 0) {
-                std::string errorMsg = "Socket::sendTo: error setting addrInfo: ";
-                #ifndef _MSC_VER
-                errorMsg += gai_strerror(status);
-                #endif
-                throw Exception(Exception::ERROR_SET_ADDR_INFO, "Socket::sendTo: error setting addr info", getSocketErrorCode());
-            }
+            auto res = getSocketInfoFor(hostRemote.c_str(), portRemote, false);
             
             size_t sentBytes = 0;
             while(sentBytes < size) {
                 int status = ::sendto(handle, (const char*)buffer + sentBytes, size - sentBytes, 0, res->ai_addr, res->ai_addrlen);
                 
                 if(status == -1)
-                    throw Exception(Exception::ERROR_SEND, "Socket::sendTo: could not send the data", getSocketErrorCode());
+                    throw Exception(Exception::ERROR_SEND, "Error sending data", getSocketErrorCode());
                 
                 sentBytes += status;
             }
@@ -212,6 +235,7 @@ unsigned int Socket::write(const char* buffer, unsigned int size) {
             }
             return sentBytes;
         }
+        case NONE:
         case TCP_SERVER:
             throw Exception(Exception::EXPECTED_NON_SERVER, "Socket::send: Expected client or peer socket");
     }
@@ -254,92 +278,59 @@ Socket::int_type Socket::overflow(int_type c) {
 
 
 void Socket::initSocket(bool blockingConnect) {
-    struct addrinfo conf, *res;
-    memset(&conf, 0, sizeof(conf));
-
-    if(type != TCP_CLIENT)
-        conf.ai_flags = AI_PASSIVE;
-
-    switch(type) {
-        case TCP_CLIENT:
-        case TCP_SERVER:
-            conf.ai_socktype = SOCK_STREAM;
-        break;
-        case UDP_PEER:
-            conf.ai_socktype = SOCK_DGRAM;
-        break;
-        default:
-            throw Exception(Exception::BAD_PROTOCOL, "Socket::initSocket: bad protocol");
-    }
-
-    switch(ipVer) {
-        case IP4:
-            conf.ai_family = AF_INET;
-        break;
-        case IP6:
-            conf.ai_family = AF_INET6;
-        break;
-        case ANY:
-            conf.ai_family = AF_UNSPEC;
-        break;
-        default:
-            throw Exception(Exception::BAD_IP_VER, "Socket::initSocket: bad ip version parameter");
-    }
-
-    char portStr[10];
-    const char* host;
+    #ifdef OS_WIN32
+    char yes = 1;
+    #else
+    int yes = 1;
+    #endif
+    
+    std::unique_ptr<struct addrinfo, Socket::AddrinfoDestructor> res;
     
     if(type == TCP_CLIENT) {
-        host = hostRemote.c_str();
-        snprintf(portStr, 10, "%u", portRemote);
+        res = getSocketInfoFor(hostRemote.c_str(), portRemote, false);
     }else{
+        const char* host;
         if(!hostLocal.compare("") || !hostLocal.compare("*"))
             host = NULL;
         else
             host = hostLocal.c_str();
-        snprintf(portStr, 10, "%u", portLocal);
-    }
-
-    int status = getaddrinfo(host, portStr, &conf, &res);
-    std::unique_ptr<struct addrinfo, AddrinfoDestructor> addrInfoReleaser(res, AddrinfoDestructor());
-    
-    if(status != 0) {
-        std::string errorMsg = "Socket::initSocket: Error setting addrInfo: ";
-
-		#ifndef _MSC_VER
-        errorMsg += gai_strerror(status);
-		#endif
-
-        throw Exception(Exception::ERROR_SET_ADDR_INFO, errorMsg, getSocketErrorCode());
+        res = getSocketInfoFor(host, portLocal, true);
     }
     
-    while(res) {
-        handle = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    struct addrinfo* nextAddr = res.get();
+    while(nextAddr) {
+        handle = socket(nextAddr->ai_family, nextAddr->ai_socktype, nextAddr->ai_protocol);
         if(handle == -1) {
-            res = res->ai_next;
+            nextAddr = nextAddr->ai_next;
             continue;
         }
+        
         setBlockingMode(blockingConnect);
+        if(setsockopt(handle, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(decltype(yes))) == -1)
+            throw Exception(Exception::ERROR_SET_SOCK_OPT, "Socket::initSocket: Error establishing socket options");
+        
+        switch(nextAddr->ai_family) {
+            case AF_INET:
+                ipVer = IP4;
+            break;
+            case AF_INET6:
+                ipVer = IP6;
+            break;
+        }
         
         switch(type) {
+            case NONE:
+            case TCP_SERVERS_CLIENT:
+                throw Exception(Exception::ERROR_CONNECT_SOCKET, "Socket::initSocket: unknown socket type");
             case TCP_CLIENT:
-                if(connect(handle, res->ai_addr, res->ai_addrlen) == -1 && (blockingConnect || getSocketErrorCode() != EINPROGRESS)) {
+                if(connect(handle, nextAddr->ai_addr, nextAddr->ai_addrlen) == -1 && (blockingConnect || getSocketErrorCode() != EINPROGRESS)) {
                     close(handle);
                     handle = -1;
                 }else if(blockingConnect)
                     recvStatus = SOCKET_STATUS_OPEN;
             break;
             case TCP_SERVER: {
-                #ifdef OS_WIN32
-                    char yes = 1;
-                #else
-                    int yes = 1;
-                #endif
-                
-                if(setsockopt(handle, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1)
-                    throw Exception(Exception::ERROR_SET_SOCK_OPT, "Socket::initSocket: Error establishing socket options");
-                
-                if(bind(handle, res->ai_addr, res->ai_addrlen) == -1) {
+                if(bind(handle, nextAddr->ai_addr, nextAddr->ai_addrlen) == -1) {
                     close(handle);
                     handle = -1;
                 }
@@ -347,42 +338,31 @@ void Socket::initSocket(bool blockingConnect) {
                 if(listen(handle, recvStatus) == -1)
                     throw Exception(Exception::ERROR_CAN_NOT_LISTEN, "Socket::initSocket: could not start listening", getSocketErrorCode());
             } break;
-            case TCP_SERVERS_CLIENT:
-                throw Exception(Exception::ERROR_CONNECT_SOCKET, "Socket::initSocket: TCP_SERVERS_CLIENT can not 'initSocket'");
-            case UDP_PEER:
-                if(bind(handle, res->ai_addr, res->ai_addrlen) == -1) {
+            case UDP_PEER: {
+                if(bind(handle, nextAddr->ai_addr, nextAddr->ai_addrlen) == -1) {
                     close(handle);
                     handle = -1;
                 }
                 
+                setMulticastGroup(reinterpret_cast<sockaddr_storage*>(nextAddr->ai_addr), true);
+                
                 recvStatus = SOCKET_STATUS_OPEN;
-            break;
+            } break;
         }
         if(handle == -1) {
-            res = res->ai_next;
+            nextAddr = nextAddr->ai_next;
             continue;
         }
         
         if(blockingConnect)
             setBlockingMode(false);
-        if(ipVer == ANY)
-            switch(res->ai_family) {
-                case AF_INET:
-                    ipVer = IP4;
-                break;
-                case AF_INET6:
-                    ipVer = IP6;
-                break;
-            }
-        
         break;
     }
-
+    
     if(handle == -1)
         throw Exception(Exception::ERROR_CONNECT_SOCKET, "Socket::initSocket: error in socket connection/bind", getSocketErrorCode());
 
-    if(!hostLocal.size() || !portLocal)
-        getSocketInfoFromHandler(handle, hostLocal, portLocal);
+    getSocketInfoFromHandle(handle, hostLocal, portLocal);
 }
 
 Socket::Socket(int _handle, const std::string& _hostLocal, unsigned _portLocal,
@@ -494,6 +474,36 @@ void Socket::setWriteBufferSize(std::streamsize n) {
     if(n == 0) return;
     char* writeBuffer = new char[n];
     setp(writeBuffer, writeBuffer+n);
+}
+
+void Socket::setBlockingMode(bool blocking) {
+    int result = -1;
+    
+    #ifdef OS_WIN32
+    u_long non_blocking = !blocking;
+    result = ioctlsocket(handle, FIONBIO, &non_blocking);
+    if(result != 0)
+        throw Exception(Exception::ERROR_IOCTL, "Socket::blocking: ioctl error", getSocketErrorCode());
+    #else
+    int flags = fcntl(handle, F_GETFL);
+    if(blocking)
+        result = fcntl(handle, F_SETFL, flags & ~O_NONBLOCK);
+    else
+        result = fcntl(handle, F_SETFL, flags | O_NONBLOCK);
+    if(result == -1)
+        throw Exception(Exception::ERROR_IOCTL, "Socket::blocking: ioctl error", getSocketErrorCode());
+    #endif
+}
+
+void Socket::setMulticastGroup(const std::string& address, bool join) {
+    if(type != UDP_PEER)
+        throw Exception(Exception::EXPECTED_UDP_PEER, "Socket::setMulticastGroup: Expected UDP_PEER socket");
+    
+    struct sockaddr_storage addr;
+    if(inet_pton((ipVer == IP4) ? AF_INET : AF_INET6, address.c_str(), &addr) == -1)
+        throw Exception(Exception::ERROR_GET_ADDR_INFO, "Socket:: error getting socket info", getSocketErrorCode());
+    
+    setMulticastGroup(&addr, join);
 }
 
 Socket* Socket::accept() {

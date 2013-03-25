@@ -73,19 +73,20 @@ NL_NAMESPACE
 void init();
 
 enum IPVer {
+    ANY,
     IP4,
-    IP6,
-    ANY
+    IP6
 };
 
 enum SocketType {
+    NONE,
     TCP_CLIENT,
     TCP_SERVER,
     TCP_SERVERS_CLIENT,
     UDP_PEER
 };
 
-enum SocketRecvStatus {
+enum SocketSendStatus {
     SOCKET_STATUS_OPEN,
     SOCKET_STATUS_NOT_CONNECTED,
     SOCKET_STATUS_BUSY

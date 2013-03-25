@@ -31,7 +31,15 @@ NL_NAMESPACE
 class Socket : public std::streambuf {
     unsigned int readIntermediateSize = 0;
     
-    void setBlockingMode(bool blocking);
+    struct AddrinfoDestructor {
+        AddrinfoDestructor() { };
+        void operator() (struct addrinfo* res) const {
+            freeaddrinfo(res);
+        };
+    };
+    std::unique_ptr<struct addrinfo, AddrinfoDestructor> getSocketInfoFor(const char* host, unsigned int port, bool wildcardAddress);
+    
+    void setMulticastGroup(struct sockaddr_storage* addr, bool join);
     unsigned int read(char* buffer, unsigned int size);
     unsigned int write(const char* buffer, unsigned int size);
     int sync();
@@ -44,7 +52,7 @@ class Socket : public std::streambuf {
     
     public:
     IPVer ipVer = ANY;
-    SocketType type;
+    SocketType type = NONE;
     std::string hostLocal, hostRemote;
     int handle = -1;
     unsigned int recvStatus = SOCKET_STATUS_NOT_CONNECTED, //! Or listen queue size if socket is TCP_SERVER
@@ -65,8 +73,11 @@ class Socket : public std::streambuf {
     std::streamsize getWriteBufferSize();
     void setReadBufferSize(std::streamsize n);
     void setWriteBufferSize(std::streamsize n);
-    void disconnect();
+    
+    void setBlockingMode(bool blocking);
+    void setMulticastGroup(const std::string& address, bool join);
     Socket* accept();
+    void disconnect();
 };
 
 NL_NAMESPACE_END
