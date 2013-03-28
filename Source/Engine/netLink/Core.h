@@ -1,7 +1,7 @@
 /*
     NetLink Sockets: Networking C++ library
     Copyright 2012 Pedro Francisco Pareja Ruiz (PedroPareja@Gmail.com)
-    Copyright 2013 Alexander Meißner (lichtso@gamefortec.net)
+    Modified 2013 Alexander Meißner (lichtso@gamefortec.net)
 
     This file is part of NetLink Sockets.
 
@@ -72,24 +72,33 @@ NL_NAMESPACE
 
 void init();
 
+/*! Defines the version of IP.
+ @enum IPVer
+ */
 enum IPVer {
     ANY,
-    IP4,
-    IP6
+    IPv4,
+    IPv6
 };
 
+/*! Defines the nature of a socket.
+ @enum SocketType
+ */
 enum SocketType {
-    NONE,
-    TCP_CLIENT,
-    TCP_SERVER,
-    TCP_SERVERS_CLIENT,
-    UDP_PEER
+    NONE, //!< No type defined
+    TCP_CLIENT, //!< TCP socket connecting to a server
+    TCP_SERVER, //!< TCP socket waiting for TCP_CLIENT to connect
+    TCP_SERVERS_CLIENT, //!< TCP socket to represent a TCP_CLIENT connection at the TCP_SERVER
+    UDP_PEER //!< UDP socket
 };
 
+/*! Defines the send status of a socket.
+ @enum SocketSendStatus
+ */
 enum SocketSendStatus {
-    SOCKET_STATUS_OPEN,
-    SOCKET_STATUS_NOT_CONNECTED,
-    SOCKET_STATUS_BUSY
+    SOCKET_STATUS_OPEN, //!< Socket is connected and can send data
+    SOCKET_STATUS_BUSY, //!< Socket is connected but can not send data (at the moment)
+    SOCKET_STATUS_NOT_CONNECTED //!< Socket is not even connected and can not send data
 };
 
 NL_NAMESPACE_END

@@ -1,7 +1,7 @@
 /*
     NetLink Sockets: Networking C++ library
     Copyright 2012 Pedro Francisco Pareja Ruiz (PedroPareja@Gmail.com)
-    Copyright 2013 Alexander Meißner (lichtso@gamefortec.net)
+    Modified 2013 Alexander Meißner (lichtso@gamefortec.net)
 
     This file is part of NetLink Sockets.
 
@@ -20,9 +20,4 @@
 
 */
 
-#ifndef __NET_LINK
-#define __NET_LINK
-
 #include "SocketManager.h"
-
-#endif

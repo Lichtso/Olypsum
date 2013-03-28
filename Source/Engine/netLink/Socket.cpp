@@ -1,7 +1,7 @@
 /*
     NetLink Sockets: Networking C++ library
     Copyright 2012 Pedro Francisco Pareja Ruiz (PedroPareja@Gmail.com)
-    Copyright 2013 Alexander Meißner (lichtso@gamefortec.net)
+    Modified 2013 Alexander Meißner (lichtso@gamefortec.net)
 
     This file is part of NetLink Sockets.
 
@@ -87,18 +87,18 @@ static void getSocketInfoFromHandle(int handle, std::string& host, unsigned int&
     #endif
     
     if(getsockname(handle, (struct sockaddr*)&storage, &size) != 0)
-        throw Exception(Exception::ERROR_GET_ADDR_INFO, "Socket:: error getting socket info", getSocketErrorCode());
+        throw Exception(Exception::ERROR_GET_SOCK_NAME, getSocketErrorCode());
     
     getSocketInfoFromStorage(&storage, host, port);
 }
 
-static void checkReadError(const std::string& functionName) {
+static void checkReadError() {
     #ifdef OS_WIN32
         if(WSAGetLastError() != WSAEWOULDBLOCK)
-            throw Exception(Exception::ERROR_READ, std::string("Socket::") + functionName + ": error detected", getSocketErrorCode());
+            throw Exception(Exception::ERROR_READ, getSocketErrorCode());
     #else
         if(errno != EAGAIN && errno != EWOULDBLOCK)
-            throw Exception(Exception::ERROR_READ, std::string("Socket::") + functionName + ": error detected", getSocketErrorCode());
+            throw Exception(Exception::ERROR_READ, getSocketErrorCode());
     #endif
 }
 
@@ -120,42 +120,21 @@ std::unique_ptr<struct addrinfo, Socket::AddrinfoDestructor> Socket::getSocketIn
             conf.ai_socktype = SOCK_DGRAM;
         break;
         default:
-            throw Exception(Exception::BAD_PROTOCOL, "Socket::initSocket: bad protocol");
+            throw Exception(Exception::BAD_PROTOCOL);
     }
-    
-    /*
-    switch(ipVer) {
-        case IP4:
-            conf.ai_family = AF_INET;
-        break;
-        case IP6:
-            conf.ai_family = AF_INET6;
-        break;
-        case ANY:
-            conf.ai_family = AF_UNSPEC;
-        break;
-        default:
-            throw Exception(Exception::BAD_IP_VER, "Socket::initSocket: bad ip version parameter");
-    }*/
     
     char portStr[10];
     snprintf(portStr, 10, "%u", port);
     int status = getaddrinfo(host, portStr, &conf, &res);
     
-    if(status != 0) {
-        std::string errorMsg = "Socket::initSocket: Error setting addrInfo: ";
-        #ifndef _MSC_VER
-        errorMsg += gai_strerror(status);
-        #endif
-        
-        throw Exception(Exception::ERROR_SET_ADDR_INFO, errorMsg, getSocketErrorCode());
-    }
+    if(status != 0)
+        throw Exception(Exception::ERROR_RESOLVING_ADDRESS, getSocketErrorCode());
     
     return std::unique_ptr<struct addrinfo, Socket::AddrinfoDestructor>(res, AddrinfoDestructor());
 }
 
 void Socket::setMulticastGroup(struct sockaddr_storage* addr, bool join) {
-    if(ipVer == IP4) {
+    if(ipVer == IPv4) {
         auto sin = reinterpret_cast<struct sockaddr_in*>(addr)->sin_addr;
         if((ntohl(sin.s_addr) & 0xF0000000) == 0xE0000000) {
             struct ip_mreq mreq;
@@ -163,7 +142,7 @@ void Socket::setMulticastGroup(struct sockaddr_storage* addr, bool join) {
             mreq.imr_interface.s_addr = INADDR_ANY;
             
             if(setsockopt(handle, IPPROTO_IP, (join) ? IP_ADD_MEMBERSHIP : IP_DROP_MEMBERSHIP, &mreq, sizeof(mreq)) == -1)
-                throw Exception(Exception::ERROR_SET_SOCK_OPT, "Socket::setMulticastGroup: Error establishing socket options", getSocketErrorCode());
+                throw Exception(Exception::ERROR_SET_SOCK_OPT, getSocketErrorCode());
         }
     }else{
         auto sin = reinterpret_cast<struct sockaddr_in6*>(addr)->sin6_addr;
@@ -173,12 +152,24 @@ void Socket::setMulticastGroup(struct sockaddr_storage* addr, bool join) {
             mreq.ipv6mr_interface = 0;
             
             if(setsockopt(handle, IPPROTO_IPV6, (join) ? IPV6_JOIN_GROUP : IPV6_LEAVE_GROUP, &mreq, sizeof(ipv6_mreq)) == -1)
-                throw Exception(Exception::ERROR_SET_SOCK_OPT, "Socket::setMulticastGroup: Error establishing socket options", getSocketErrorCode());
+                throw Exception(Exception::ERROR_SET_SOCK_OPT, getSocketErrorCode());
         }
     }
 }
 
-unsigned int Socket::read(char* buffer, unsigned int size) {
+Socket::int_type Socket::refillInputIntermediate() {
+    if(!inputIntermediateSize) //No read intermediate buffer
+        return traits_type::eof();
+    try {
+        std::streamsize readBytes = xsgetn(eback(), std::min(showmanyc(), (std::streamsize)inputIntermediateSize));
+        setg(eback(), eback(), eback()+readBytes);
+        return (readBytes) ? *eback() : traits_type::eof();
+    }catch (Exception err) {
+        return traits_type::eof();
+    }
+}
+
+std::streamsize Socket::xsgetn(char_type* buffer, std::streamsize size) {
     switch(type) {
         case UDP_PEER: {
             struct sockaddr_storage remoteAddr;
@@ -188,7 +179,7 @@ unsigned int Socket::read(char* buffer, unsigned int size) {
             if(status == -1) {
                 portRemote = 0;
                 hostRemote = "";
-                checkReadError("readFrom");
+                checkReadError();
             }else
                 getSocketInfoFromStorage(&remoteAddr, hostRemote, portRemote);
             
@@ -197,16 +188,18 @@ unsigned int Socket::read(char* buffer, unsigned int size) {
         case TCP_CLIENT:
         case TCP_SERVERS_CLIENT: {
             int status = recv(handle, buffer, size, 0);
-            if(status == -1) checkReadError("read");
+            if(status == -1)
+                checkReadError();
+            
             return status;
         }
         case NONE:
         case TCP_SERVER:
-            throw Exception(Exception::EXPECTED_NON_SERVER, "Socket::send: Expected client or peer socket");
+            throw Exception(Exception::BAD_TYPE);
     }
 }
 
-unsigned int Socket::write(const char* buffer, unsigned int size) {
+std::streamsize Socket::xsputn(const char_type* buffer, std::streamsize size) {
     switch(type) {
         case UDP_PEER: {
             auto res = getSocketInfoFor(hostRemote.c_str(), portRemote, false);
@@ -216,7 +209,7 @@ unsigned int Socket::write(const char* buffer, unsigned int size) {
                 int status = ::sendto(handle, (const char*)buffer + sentBytes, size - sentBytes, 0, res->ai_addr, res->ai_addrlen);
                 
                 if(status == -1)
-                    throw Exception(Exception::ERROR_SEND, "Error sending data", getSocketErrorCode());
+                    throw Exception(Exception::ERROR_SEND, getSocketErrorCode());
                 
                 sentBytes += status;
             }
@@ -229,7 +222,7 @@ unsigned int Socket::write(const char* buffer, unsigned int size) {
                 int status = ::send(handle, (const char*)buffer + sentBytes, size - sentBytes, 0);
                 
                 if(status == -1)
-                    throw Exception(Exception::ERROR_SEND, "Error sending data", getSocketErrorCode());
+                    throw Exception(Exception::ERROR_SEND, getSocketErrorCode());
                 
                 sentBytes += status;
             }
@@ -237,17 +230,17 @@ unsigned int Socket::write(const char* buffer, unsigned int size) {
         }
         case NONE:
         case TCP_SERVER:
-            throw Exception(Exception::EXPECTED_NON_SERVER, "Socket::send: Expected client or peer socket");
+            throw Exception(Exception::BAD_TYPE);
     }
 }
 
 int Socket::sync() {
-    if(!getWriteBufferSize()) //No write intermediate buffer
+    if(!getOutputBufferSize()) //No write intermediate buffer
         return -1;
     if(pptr() == pbase()) //Allready in sync
         return 0;
     try {
-        write(pbase(), pptr()-pbase());
+        xsputn(pbase(), pptr()-pbase());
         setp(pbase(), epptr());
         return 0;
     }catch (Exception err) {
@@ -256,15 +249,9 @@ int Socket::sync() {
 }
 
 Socket::int_type Socket::underflow() {
-    if(!readIntermediateSize) //No read intermediate buffer
+    if(type == UDP_PEER) //UDP uses packets not streams
         return traits_type::eof();
-    try {
-        std::streamsize readBytes = read(eback(), std::min(showmanyc(), (std::streamsize)readIntermediateSize));
-        setg(eback(), eback(), eback()+readBytes);
-        return (readBytes) ? *eback() : traits_type::eof();
-    }catch (Exception err) {
-        return traits_type::eof();
-    }
+    return refillInputIntermediate();
 }
 
 Socket::int_type Socket::overflow(int_type c) {
@@ -307,21 +294,21 @@ void Socket::initSocket(bool blockingConnect) {
         
         setBlockingMode(blockingConnect);
         if(setsockopt(handle, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(decltype(yes))) == -1)
-            throw Exception(Exception::ERROR_SET_SOCK_OPT, "Socket::initSocket: Error establishing socket options");
+            throw Exception(Exception::ERROR_SET_SOCK_OPT, getSocketErrorCode());
         
         switch(nextAddr->ai_family) {
             case AF_INET:
-                ipVer = IP4;
+                ipVer = IPv4;
             break;
             case AF_INET6:
-                ipVer = IP6;
+                ipVer = IPv6;
             break;
         }
         
         switch(type) {
             case NONE:
             case TCP_SERVERS_CLIENT:
-                throw Exception(Exception::ERROR_CONNECT_SOCKET, "Socket::initSocket: unknown socket type");
+                throw Exception(Exception::BAD_TYPE);
             case TCP_CLIENT:
                 if(connect(handle, nextAddr->ai_addr, nextAddr->ai_addrlen) == -1 && (blockingConnect || getSocketErrorCode() != EINPROGRESS)) {
                     close(handle);
@@ -336,7 +323,7 @@ void Socket::initSocket(bool blockingConnect) {
                 }
                 
                 if(listen(handle, recvStatus) == -1)
-                    throw Exception(Exception::ERROR_CAN_NOT_LISTEN, "Socket::initSocket: could not start listening", getSocketErrorCode());
+                    throw Exception(Exception::ERROR_INIT, getSocketErrorCode());
             } break;
             case UDP_PEER: {
                 if(bind(handle, nextAddr->ai_addr, nextAddr->ai_addrlen) == -1) {
@@ -360,7 +347,7 @@ void Socket::initSocket(bool blockingConnect) {
     }
     
     if(handle == -1)
-        throw Exception(Exception::ERROR_CONNECT_SOCKET, "Socket::initSocket: error in socket connection/bind", getSocketErrorCode());
+        throw Exception(Exception::ERROR_INIT, getSocketErrorCode());
 
     getSocketInfoFromHandle(handle, hostLocal, portLocal);
 }
@@ -396,10 +383,6 @@ void Socket::initAsUdpPeer(const std::string& _hostLocal, unsigned _portLocal) {
 }
 
 Socket::~Socket() {
-    if(type != TCP_SERVER) {
-        setReadBufferSize(0);
-        setWriteBufferSize(0);
-    }
     disconnect();
 }
 
@@ -415,7 +398,7 @@ std::streamsize Socket::showmanyc() {
     #endif
     
     if(status)
-        throw Exception(Exception::ERROR_IOCTL, "Socket::nextReadSize: error ioctl", getSocketErrorCode());
+        throw Exception(Exception::ERROR_IOCTL, getSocketErrorCode());
     
     return result;
 }
@@ -426,52 +409,58 @@ std::streamsize Socket::in_avail() {
 }
 
 std::streamsize Socket::sgetn(Socket::char_type* buffer, std::streamsize size) {
-    if(readIntermediateSize) //Read intermediate buffer
-        return xsgetn(buffer, size);
+    if(inputIntermediateSize) { //Read intermediate buffer
+        if(type == UDP_PEER) {
+            unsigned int readFromBuffer = std::min(egptr()-gptr(), size);
+            memcpy(buffer, gptr(), readFromBuffer);
+            return size-readFromBuffer;
+        }else
+            return std::streambuf::xsgetn(buffer, size);
+    }
     
     try {
-        return read(buffer, std::min(size, showmanyc()));
+        return xsgetn(buffer, std::min(size, showmanyc()));
     }catch (Exception err) {
         return 0;
     }
 }
 
 std::streamsize Socket::sputn(const Socket::char_type* buffer, std::streamsize size) {
-    if(getWriteBufferSize()) //Write intermediate buffer
-        return xsputn(buffer, size);
+    if(getOutputBufferSize()) //Write intermediate buffer
+        return std::streambuf::xsputn(buffer, size);
     
     try {
-        return write(buffer, size);
+        return xsputn(buffer, size);
     }catch (Exception err) {
         return 0;
     }
 }
 
-std::streamsize Socket::getReadBufferSize() {
-    return readIntermediateSize;
+std::streamsize Socket::getInputBufferSize() {
+    return inputIntermediateSize;
 }
 
-std::streamsize Socket::getWriteBufferSize() {
+std::streamsize Socket::getOutputBufferSize() {
     return epptr()-pbase();
 }
 
-void Socket::setReadBufferSize(std::streamsize n) {
-    if(type == TCP_SERVER)
-        throw Exception(Exception::EXPECTED_NON_SERVER, "Socket::send: Expected client or peer socket");
-    
+void Socket::setInputBufferSize(std::streamsize n) {
     if(eback()) delete [] eback();
     if(n == 0) return;
+    if(type == TCP_SERVER)
+        throw Exception(Exception::BAD_TYPE);
+    
     char* readBuffer = new char[n];
     setg(readBuffer, readBuffer, readBuffer);
-    readIntermediateSize = n;
+    inputIntermediateSize = n;
 }
 
-void Socket::setWriteBufferSize(std::streamsize n) {
-    if(type == TCP_SERVER)
-        throw Exception(Exception::EXPECTED_NON_SERVER, "Socket::send: Expected client or peer socket");
-    
+void Socket::setOutputBufferSize(std::streamsize n) {
     if(pbase()) delete [] pbase();
     if(n == 0) return;
+    if(type == TCP_SERVER)
+        throw Exception(Exception::BAD_TYPE);
+    
     char* writeBuffer = new char[n];
     setp(writeBuffer, writeBuffer+n);
 }
@@ -483,7 +472,7 @@ void Socket::setBlockingMode(bool blocking) {
     u_long non_blocking = !blocking;
     result = ioctlsocket(handle, FIONBIO, &non_blocking);
     if(result != 0)
-        throw Exception(Exception::ERROR_IOCTL, "Socket::blocking: ioctl error", getSocketErrorCode());
+        throw Exception(Exception::ERROR_IOCTL, getSocketErrorCode());
     #else
     int flags = fcntl(handle, F_GETFL);
     if(blocking)
@@ -491,24 +480,30 @@ void Socket::setBlockingMode(bool blocking) {
     else
         result = fcntl(handle, F_SETFL, flags | O_NONBLOCK);
     if(result == -1)
-        throw Exception(Exception::ERROR_IOCTL, "Socket::blocking: ioctl error", getSocketErrorCode());
+        throw Exception(Exception::ERROR_IOCTL, getSocketErrorCode());
     #endif
 }
 
 void Socket::setMulticastGroup(const std::string& address, bool join) {
     if(type != UDP_PEER)
-        throw Exception(Exception::EXPECTED_UDP_PEER, "Socket::setMulticastGroup: Expected UDP_PEER socket");
+        throw Exception(Exception::BAD_TYPE);
     
     struct sockaddr_storage addr;
-    if(inet_pton((ipVer == IP4) ? AF_INET : AF_INET6, address.c_str(), &addr) == -1)
-        throw Exception(Exception::ERROR_GET_ADDR_INFO, "Socket:: error getting socket info", getSocketErrorCode());
+    if(inet_pton((ipVer == IPv4) ? AF_INET : AF_INET6, address.c_str(), &addr) == -1)
+        throw Exception(Exception::ERROR_RESOLVING_ADDRESS, getSocketErrorCode());
     
     setMulticastGroup(&addr, join);
 }
 
+std::streamsize Socket::advanceToNextPacket() {
+    if(type != UDP_PEER)
+        throw Exception(Exception::BAD_TYPE);
+    return (refillInputIntermediate() == traits_type::eof()) ? 0 : egptr()-eback();
+}
+
 Socket* Socket::accept() {
     if(type != TCP_SERVER)
-        throw Exception(Exception::EXPECTED_TCP_SERVER, "Socket::accept: only TCP_SERVER can accept connections");
+        throw Exception(Exception::BAD_TYPE);
     
     struct sockaddr_storage remoteAddr;
     #ifdef OS_WIN32
@@ -524,6 +519,8 @@ Socket* Socket::accept() {
 }
 
 void Socket::disconnect() {
+    setInputBufferSize(0);
+    setOutputBufferSize(0);
     if(handle == -1) return;
     close(handle);
     handle = -1;

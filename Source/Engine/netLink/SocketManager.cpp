@@ -1,7 +1,7 @@
 /*
     NetLink Sockets: Networking C++ library
     Copyright 2012 Pedro Francisco Pareja Ruiz (PedroPareja@Gmail.com)
-    Copyright 2013 Alexander Meißner (lichtso@gamefortec.net)
+    Modified 2013 Alexander Meißner (lichtso@gamefortec.net)
 
     This file is part of NetLink Sockets.
 
@@ -51,21 +51,21 @@ void SocketManager::listen(double secLeft) {
     int status = select(maxHandle + 1, &readfds, &writefds, &exceptfds, &timeout);
     
     if(status == -1)
-        throw Exception(Exception::ERROR_SELECT, "SocketGroup::listen: could not perform socket select");
+        throw Exception(Exception::ERROR_SELECT);
     
     foreach_e(sockets, iterator) {
         bool isInReadfds = FD_ISSET((*iterator)->handle, &readfds);
         
         switch((*iterator)->type) {
             case NONE:
-                throw Exception(Exception::ERROR_SELECT, "SocketGroup::listen: Invalid socket");
+                throw Exception(Exception::BAD_TYPE);
             case TCP_SERVER:
                 if(isInReadfds && onAcceptRequest) {
-                    Socket* serversClient = (*iterator)->accept();
-                    if(onAcceptRequest(this, *iterator, serversClient))
-                        sockets.insert(serversClient);
+                    Socket* newSocket = (*iterator)->accept();
+                    if(onAcceptRequest(this, *iterator, newSocket))
+                        sockets.insert(newSocket);
                     else
-                        delete serversClient;
+                        delete newSocket;
                 }
             continue;
             case TCP_CLIENT:

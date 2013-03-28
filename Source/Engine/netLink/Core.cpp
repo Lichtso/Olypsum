@@ -1,7 +1,7 @@
 /*
     NetLink Sockets: Networking C++ library
     Copyright 2012 Pedro Francisco Pareja Ruiz (PedroPareja@Gmail.com)
-    Copyright 2013 Alexander Meißner (lichtso@gamefortec.net)
+    Modified 2013 Alexander Meißner (lichtso@gamefortec.net)
 
     This file is part of NetLink Sockets.
 
@@ -25,14 +25,12 @@
 NL_NAMESPACE
 
 void init() {
+#ifdef OS_WIN32
+    WSADATA wsaData;
+    if(WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
+        throw Exception(Exception::ERROR_INIT);
 
-	#ifdef OS_WIN32
-
-		WSADATA wsaData;
-		if (WSAStartup(MAKEWORD(2,0), &wsaData) != 0)
-			throw Exception(Exception::ERROR_INIT, "Library inicialization failed");
-
-	#endif
+#endif
 }
 
 NL_NAMESPACE_END
