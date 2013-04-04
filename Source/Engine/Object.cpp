@@ -31,22 +31,11 @@ void BaseObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
     setTransformation(readTransformtion(node, levelLoader));
 }
 
-void BaseObject::initScriptInstance(rapidxml::xml_node<xmlUsedCharType>* node) {
+void BaseObject::newScriptInstance() {
     v8::HandleScope handleScope;
-    scriptInstance = v8::Persistent<v8::Object>::New(scriptBaseObject.newInstance(this));
-    rapidxml::xml_node<xmlUsedCharType>* scriptNode = node->first_node("Script");
-    if(!scriptNode) return;
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = scriptNode->first_attribute("package");
-    FilePackage* levelPack = levelManager.levelPackage;
-    if(attribute)
-        levelPack = fileManager.getPackage(attribute->value());
-    attribute = scriptNode->first_attribute("src");
-    if(!attribute) {
-        log(error_log, "Tried to construct resource without \"src\"-attribute.");
-        return;
-    }
-    scriptFile = scriptManager->getScriptFile(levelPack, attribute->value());
-    scriptManager->callFunctionOfScript(scriptFile, "onload", true, { scriptInstance, scriptManager->readCdataXMLNode(node) });
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    v8::Local<v8::Object> instance = scriptBaseObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    scriptInstance = v8::Persistent<v8::Object>::New(instance);
 }
 
 btTransform BaseObject::readTransformtion(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
@@ -65,20 +54,7 @@ rapidxml::xml_node<xmlUsedCharType>* BaseObject::write(rapidxml::xml_document<xm
             node->append_node(scriptNode);
             scriptNode->value(doc.allocate_string(*dataStr));
         }
-        
-        scriptNode = doc.allocate_node(rapidxml::node_element);
-        scriptNode->name("Script");
-        node->append_node(scriptNode);
-        rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
-        if(scriptFile->filePackage != levelManager.levelPackage) {
-            attribute->name("package");
-            attribute->value(doc.allocate_string(scriptFile->filePackage->name.c_str()));
-            scriptNode->append_attribute(attribute);
-            attribute = doc.allocate_attribute();
-        }
-        attribute->name("src");
-        attribute->value(doc.allocate_string(scriptFile->name.c_str()));
-        scriptNode->append_attribute(attribute);
+        node->append_node(fileManager.writeResource(doc, "Script", scriptFile->filePackage, scriptFile->name));
     }
     btTransform transform = getTransformation();
     node->append_node(writeTransformationXML(doc, transform));
@@ -162,6 +138,13 @@ void PhysicObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* 
     objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Zone, CollisionMask_Object);
 }
 
+void PhysicObject::newScriptInstance() {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    v8::Local<v8::Object> instance = scriptPhysicObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+}
+
 void PhysicObject::handleCollision(btPersistentManifold* contactManifold, PhysicObject* b) {
     scriptManager->callFunctionOfScript(scriptFile, "oncollision", true, { scriptInstance, b->scriptInstance });
 }
@@ -176,7 +159,7 @@ btCollisionShape* PhysicObject::readCollisionShape(rapidxml::xml_node<xmlUsedCha
         log(error_log, "Tried to construct PhysicObject without \"collisionShape\"-attribute.");
         return NULL;
     }
-    btCollisionShape* shape = levelLoader->getCollisionShape(attribute->value());
+    btCollisionShape* shape = levelManager.getCollisionShape(attribute->value());
     if(!shape) {
         log(error_log, std::string("Tried to construct PhysicObject with invalid \"collisionShape\"-attribute: ")+attribute->value()+'.');
         return NULL;

@@ -8,5 +8,6 @@ exports.onsave = function() {
 };
 
 exports.oncollision = function(otherObject) {
-	log('oncollision: '+otherObject);
+	//var result = Intersection.sphereIntersection(this.transformation.w, 15.0, 0xFFFF);
+	//log('oncollision: '+result.length);
 };

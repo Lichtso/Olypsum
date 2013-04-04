@@ -39,11 +39,14 @@
 		1130ECBB15BC1CA600203C2E /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1130ECBA15BC1CA600203C2E /* Menu.cpp */; };
 		11329D5A16BD8A2A000CC025 /* Profiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11329D5816BD8A29000CC025 /* Profiler.cpp */; };
 		114A0E6B169064E800D2CE9C /* LevelSaver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 114A0E69169064E800D2CE9C /* LevelSaver.cpp */; };
+		11511420170C1A0E00F77236 /* ScriptIntersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */; };
+		11511422170CBE6700F77236 /* libNetLink.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11511421170CBE6700F77236 /* libNetLink.a */; };
 		11648F6E153DEE63004CA74D /* FBO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11648F6D153DEE63004CA74D /* FBO.cpp */; };
 		117CBA9C16EBDC6800307B94 /* ScriptObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 117CBA9A16EBDC6800307B94 /* ScriptObject.cpp */; };
 		118620481650165400A32518 /* ObjectManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118620461650165400A32518 /* ObjectManager.cpp */; };
 		118B60621573E2E8004C132E /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118B60611573E2E8004C132E /* Audio.cpp */; };
 		119F166F169DA12400033832 /* Controls.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 119F166D169DA12400033832 /* Controls.cpp */; };
+		11A3255517089E2100B038D2 /* Network.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A3255317089E2100B038D2 /* Network.cpp */; };
 		11A6811F16B96CFC000E4029 /* ScriptLinearAlgebra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A6811D16B96CFC000E4029 /* ScriptLinearAlgebra.cpp */; };
 		11A6812416B9B2B5000E4029 /* libv8.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A6812316B9B2B5000E4029 /* libv8.dylib */; };
 		11A6812516B9B2BA000E4029 /* libv8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 11A6812316B9B2B5000E4029 /* libv8.dylib */; };
@@ -85,9 +88,6 @@
 		11DA1F11162DEA03007D7E6C /* Ray3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11DA1F0D162DEA03007D7E6C /* Ray3.cpp */; };
 		11DA1F12162DEA03007D7E6C /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11DA1F0F162DEA03007D7E6C /* Matrix4.cpp */; };
 		11DA1F16162DEA18007D7E6C /* LightVolume.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11DA1F14162DEA18007D7E6C /* LightVolume.cpp */; };
-		11E3172F16FE510E0094020F /* Core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11E3172616FE510E0094020F /* Core.cpp */; };
-		11E3173016FE510E0094020F /* Socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11E3172A16FE510E0094020F /* Socket.cpp */; };
-		11E3173116FE510E0094020F /* SocketManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11E3172C16FE510E0094020F /* SocketManager.cpp */; };
 		11F1EEB8156FE49400F7275D /* ParticlesObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11F1EEB7156FE49400F7275D /* ParticlesObject.cpp */; };
 		11FE8AB216B5A3F400B682D0 /* ScriptManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11FE8AB016B5A3F400B682D0 /* ScriptManager.cpp */; };
 		11FE8AB516B719CE00B682D0 /* Script.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11FE8AB316B719CE00B682D0 /* Script.cpp */; };
@@ -149,6 +149,9 @@
 		11329D5916BD8A2A000CC025 /* Profiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Profiler.h; sourceTree = "<group>"; };
 		114A0E69169064E800D2CE9C /* LevelSaver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelSaver.cpp; sourceTree = "<group>"; };
 		114A0E6A169064E800D2CE9C /* LevelSaver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LevelSaver.h; sourceTree = "<group>"; };
+		1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptIntersection.cpp; sourceTree = "<group>"; };
+		1151141F170C1A0E00F77236 /* ScriptIntersection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptIntersection.h; sourceTree = "<group>"; };
+		11511421170CBE6700F77236 /* libNetLink.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libNetLink.a; path = Libraries/netLink/out/libNetLink.a; sourceTree = "<group>"; };
 		11648F6B153DEE0F004CA74D /* FBO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FBO.h; sourceTree = "<group>"; };
 		11648F6D153DEE63004CA74D /* FBO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FBO.cpp; sourceTree = "<group>"; };
 		117CBA9A16EBDC6800307B94 /* ScriptObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptObject.cpp; sourceTree = "<group>"; };
@@ -159,6 +162,8 @@
 		118B60611573E2E8004C132E /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Audio.cpp; sourceTree = "<group>"; };
 		119F166D169DA12400033832 /* Controls.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Controls.cpp; sourceTree = "<group>"; };
 		119F166E169DA12400033832 /* Controls.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controls.h; sourceTree = "<group>"; };
+		11A3255317089E2100B038D2 /* Network.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Network.cpp; sourceTree = "<group>"; };
+		11A3255417089E2100B038D2 /* Network.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Network.h; sourceTree = "<group>"; };
 		11A6811D16B96CFC000E4029 /* ScriptLinearAlgebra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptLinearAlgebra.cpp; sourceTree = "<group>"; };
 		11A6811E16B96CFC000E4029 /* ScriptLinearAlgebra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptLinearAlgebra.h; sourceTree = "<group>"; };
 		11A6812316B9B2B5000E4029 /* libv8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libv8.dylib; path = Libraries/v8/out/x64.release/libv8.dylib; sourceTree = "<group>"; };
@@ -238,14 +243,6 @@
 		11DA1F10162DEA03007D7E6C /* Matrix4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Matrix4.h; sourceTree = "<group>"; };
 		11DA1F14162DEA18007D7E6C /* LightVolume.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LightVolume.cpp; sourceTree = "<group>"; };
 		11DA1F15162DEA18007D7E6C /* LightVolume.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LightVolume.h; sourceTree = "<group>"; };
-		11E3172616FE510E0094020F /* Core.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Core.cpp; sourceTree = "<group>"; };
-		11E3172716FE510E0094020F /* Core.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Core.h; sourceTree = "<group>"; };
-		11E3172816FE510E0094020F /* Exception.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Exception.h; sourceTree = "<group>"; };
-		11E3172916FE510E0094020F /* netLink.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = netLink.h; sourceTree = "<group>"; };
-		11E3172A16FE510E0094020F /* Socket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Socket.cpp; sourceTree = "<group>"; };
-		11E3172B16FE510E0094020F /* Socket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Socket.h; sourceTree = "<group>"; };
-		11E3172C16FE510E0094020F /* SocketManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SocketManager.cpp; sourceTree = "<group>"; };
-		11E3172D16FE510E0094020F /* SocketManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SocketManager.h; sourceTree = "<group>"; };
 		11F1EEB5156FE48B00F7275D /* ParticlesObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParticlesObject.h; sourceTree = "<group>"; };
 		11F1EEB7156FE49400F7275D /* ParticlesObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParticlesObject.cpp; sourceTree = "<group>"; };
 		11FE8AB016B5A3F400B682D0 /* ScriptManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptManager.cpp; sourceTree = "<group>"; };
@@ -274,6 +271,7 @@
 				1118254414F2559B00F198A7 /* OpenAL.framework in Frameworks */,
 				1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */,
 				1118251B14F2553A00F198A7 /* Cocoa.framework in Frameworks */,
+				11511422170CBE6700F77236 /* libNetLink.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -301,6 +299,7 @@
 		1118251914F2553A00F198A7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				11511421170CBE6700F77236 /* libNetLink.a */,
 				11A6812316B9B2B5000E4029 /* libv8.dylib */,
 				1114B86E16A8933200B1CD41 /* Ogg.framework */,
 				1114B86F16A8933200B1CD41 /* Vorbis.framework */,
@@ -342,9 +341,10 @@
 		11A79B1F153C2FE9002B9F0A /* Engine */ = {
 			isa = PBXGroup;
 			children = (
-				11E3172516FE510E0094020F /* netLink */,
 				11A79B69153C2FE9002B9F0A /* Utilities.h */,
 				11A79B68153C2FE9002B9F0A /* Utilities.cpp */,
+				11A3255417089E2100B038D2 /* Network.h */,
+				11A3255317089E2100B038D2 /* Network.cpp */,
 				11329D5916BD8A2A000CC025 /* Profiler.h */,
 				11329D5816BD8A29000CC025 /* Profiler.cpp */,
 				11A79B5D153C2FE9002B9F0A /* rapidxml-1.13 */,
@@ -478,21 +478,6 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
-		11E3172516FE510E0094020F /* netLink */ = {
-			isa = PBXGroup;
-			children = (
-				11E3172716FE510E0094020F /* Core.h */,
-				11E3172616FE510E0094020F /* Core.cpp */,
-				11E3172816FE510E0094020F /* Exception.h */,
-				11E3172B16FE510E0094020F /* Socket.h */,
-				11E3172A16FE510E0094020F /* Socket.cpp */,
-				11E3172D16FE510E0094020F /* SocketManager.h */,
-				11E3172C16FE510E0094020F /* SocketManager.cpp */,
-				11E3172916FE510E0094020F /* netLink.h */,
-			);
-			path = netLink;
-			sourceTree = "<group>";
-		};
 		11FE8AAF16B5A3D900B682D0 /* Scripting */ = {
 			isa = PBXGroup;
 			children = (
@@ -502,6 +487,8 @@
 				11A6811D16B96CFC000E4029 /* ScriptLinearAlgebra.cpp */,
 				117CBA9B16EBDC6800307B94 /* ScriptObject.h */,
 				117CBA9A16EBDC6800307B94 /* ScriptObject.cpp */,
+				1151141F170C1A0E00F77236 /* ScriptIntersection.h */,
+				1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */,
 				11FE8AB116B5A3F400B682D0 /* ScriptManager.h */,
 				11FE8AB016B5A3F400B682D0 /* ScriptManager.cpp */,
 			);
@@ -623,9 +610,8 @@
 				11329D5A16BD8A2A000CC025 /* Profiler.cpp in Sources */,
 				117CBA9C16EBDC6800307B94 /* ScriptObject.cpp in Sources */,
 				11AD22DB16FCE77200B9FB12 /* main.cpp in Sources */,
-				11E3172F16FE510E0094020F /* Core.cpp in Sources */,
-				11E3173016FE510E0094020F /* Socket.cpp in Sources */,
-				11E3173116FE510E0094020F /* SocketManager.cpp in Sources */,
+				11A3255517089E2100B038D2 /* Network.cpp in Sources */,
+				11511420170C1A0E00F77236 /* ScriptIntersection.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -718,13 +704,16 @@
 					__MAC_OS__,
 				);
 				HEADER_SEARCH_PATHS = (
-					/usr/local/include,
-					"\"$(SRCROOT)/Libraries/v8/include",
+					/usr/include,
+					"$(SRCROOT)/Libraries/v8/include/**",
+					"$(SRCROOT)/Libraries/netLink/include/**",
 				);
 				INFOPLIST_FILE = Source/Engine/macCompCode/Info.plist;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/Libraries/v8/out/x64.release\"",
+					"\"$(SRCROOT)/Libraries/netLink\"",
+					"\"$(SRCROOT)/Libraries/netLink/out\"",
 				);
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -747,13 +736,16 @@
 					__MAC_OS__,
 				);
 				HEADER_SEARCH_PATHS = (
-					/usr/local/include,
-					"\"$(SRCROOT)/Libraries/v8/include",
+					/usr/include,
+					"$(SRCROOT)/Libraries/v8/include/**",
+					"$(SRCROOT)/Libraries/netLink/include/**",
 				);
 				INFOPLIST_FILE = Source/Engine/macCompCode/Info.plist;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/Libraries/v8/out/x64.release\"",
+					"\"$(SRCROOT)/Libraries/netLink\"",
+					"\"$(SRCROOT)/Libraries/netLink/out\"",
 				);
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

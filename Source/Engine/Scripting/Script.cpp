@@ -60,6 +60,8 @@ bool ScriptFile::load(FilePackage* filePackageB, const std::string& nameB) {
     return !tryCatch.HasCaught();
 }
 
+
+
 ScriptClass::ScriptClass(const char* nameB, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args)) :name(nameB) {
     v8::HandleScope handleScope;
     functionTemplate = v8::Persistent<v8::FunctionTemplate>::New(v8::FunctionTemplate::New(constructor));
@@ -73,7 +75,8 @@ ScriptClass::~ScriptClass() {
 bool ScriptClass::isCorrectInstance(const v8::Local<v8::Value>& object) {
     v8::HandleScope handleScope;
     if(!object->IsObject()) return false;
-    return v8::Local<v8::Object>::Cast(object)->GetConstructor() == functionTemplate->GetFunction();
+    return functionTemplate->HasInstance(object);
+    //return v8::Local<v8::Object>::Cast(object)->GetConstructor() == functionTemplate->GetFunction();
 }
 
 void ScriptClass::init(const v8::Persistent<v8::ObjectTemplate>& globalTemplate) {

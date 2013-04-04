@@ -9,6 +9,13 @@
 #include "Menu.h"
 #include "AppMain.h"
 
+const float loadingScreenTime = 1.0;
+float loadingScreen = loadingScreenTime;
+
+struct Resolution {
+    unsigned int width = 0, height = 0, scale = 1;
+};
+
 static void updateOptionBackButton(GUIButton* button) {
     if((optionsState.videoWidth != prevOptionsState.videoWidth ||
         optionsState.videoHeight != prevOptionsState.videoHeight ||
@@ -38,12 +45,8 @@ static void leaveOptionsMenu(GUIButton* button) {
        optionsState.vSyncEnabled != prevOptionsState.vSyncEnabled)
         AppTerminate();
     updateGraphicOptions();
-    setMenu((levelManager.gameStatus == noGame) ? mainMenu : gameEscMenu);
+    menu.setMenu((levelManager.gameStatus == noGame) ? Menu::Name::main : Menu::Name::gameEsc);
 }
-
-struct Resolution {
-    unsigned int width = 0, height = 0, scale = 1;
-};
 
 static void getAvailableResolutions(std::vector<Resolution>& resolutions) {
     bool addFullScreen = true;
@@ -94,47 +97,61 @@ static void getAvailableResolutions(std::vector<Resolution>& resolutions) {
 
 
 
-void handleMenuKeyUp(SDL_keysym* key) {
+void Menu::handleKeyUp(SDL_keysym* key) {
     if(key->sym == SDLK_ESCAPE) {
-        switch(currentMenu) {
-            case loadingMenu:
-            case mainMenu:
+        switch(current) {
+            case loading:
+            case main:
                 AppTerminate();
                 break;
-            case optionsMenu:
+            case options:
                 leaveOptionsMenu(NULL);
                 break;
-            case videoResolutionMenu:
-            case languagesMenu:
-                setMenu(optionsMenu);
+            case videoResolution:
+            case languages:
+                setMenu(options);
                 break;
-            case creditsMenu:
-            case saveGamesMenu:
-                setMenu(mainMenu);
+            case multiplayer:
+                networkManager.setLocalScan(false);
+            case credits:
+            case saveGames:
+                setMenu(main);
                 break;
-            case inGameMenu:
-                setMenu(gameEscMenu);
+            case inGame:
+                setMenu(gameEsc);
                 break;
-            case gameEscMenu:
-                setMenu(inGameMenu);
+            case gameEsc:
+                setMenu(inGame);
                 break;
-            case newGameMenu:
-                setMenu(saveGamesMenu);
-                break;
-            case modalMenu:
-                currentScreenView->setModalView(NULL);
-                currentMenu = saveGamesMenu;
+            case newGame:
+                setMenu(saveGames);
                 break;
         }
     }
 }
 
-void setMenu(MenuName menu) {
-    currentMenu = menu;
+void Menu::gameTick() {
+    switch(current) {
+        case loading: {
+            if(loadingScreen == loadingScreenTime)
+                loadDynamicShaderPrograms();
+            loadingScreen -= profiler.animationFactor;
+            GUIProgressBar* progressBar = static_cast<GUIProgressBar*>(currentScreenView->children[0]);
+            progressBar->value = 1.0-loadingScreen/loadingScreenTime;
+            if(loadingScreen <= 0.0)
+                setMenu(main);
+        } break;
+        default:
+            break;
+    }
+}
+
+void Menu::setMenu(Name menu) {
+    current = menu;
     if(currentScreenView) delete currentScreenView;
     currentScreenView = new GUIScreenView();
     
-    if(levelManager.gameStatus == noGame && menu != loadingMenu) {
+    if(levelManager.gameStatus == noGame && menu != loading) {
         GUIImage* image = new GUIImage();
         image->texture = fileManager.getPackage("Default")->getResource<Texture>("background.jpg");
         image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
@@ -150,7 +167,7 @@ void setMenu(MenuName menu) {
     }
     
     switch(menu) {
-        case loadingMenu: {
+        case loading: {
             GUIProgressBar* progressBar = new GUIProgressBar();
             progressBar->posY = currentScreenView->height*-0.7;
             currentScreenView->addChild(progressBar);
@@ -169,7 +186,7 @@ void setMenu(MenuName menu) {
             label->fontHeight = currentScreenView->height*0.16;
             currentScreenView->addChild(label);
         } break;
-        case mainMenu: {
+        case main: {
             GUIFramedView* view = new GUIFramedView();
             view->width = currentScreenView->width*0.2;
             view->height = currentScreenView->height*0.42;
@@ -177,15 +194,15 @@ void setMenu(MenuName menu) {
             currentScreenView->addChild(view);
             
             std::function<void(GUIButton*)> onClick[] = {
-                [](GUIButton* button) {
-                    setMenu(saveGamesMenu);
-                }, [](GUIButton* button) {
-                    
-                }, [](GUIButton* button) {
+                [this](GUIButton* button) {
+                    setMenu(saveGames);
+                }, [this](GUIButton* button) {
+                    setMenu(multiplayer);
+                }, [this](GUIButton* button) {
                     prevOptionsState = optionsState;
-                    setMenu(optionsMenu);
-                }, [](GUIButton* button) {
-                    setMenu(creditsMenu);
+                    setMenu(options);
+                }, [this](GUIButton* button) {
+                    setMenu(credits);
                 }, [](GUIButton* button) {
                     AppTerminate();
                 }
@@ -194,7 +211,7 @@ void setMenu(MenuName menu) {
             for(unsigned char i = 0; i < 5; i ++) {
                 GUIButton* button = new GUIButton();
                 button->posY = currentScreenView->height*(0.32-0.16*i);
-                if(i == 1) button->state = GUIButtonStateDisabled; //Multiplayer is not implemented yet
+                //if(i == 1) button->state = GUIButtonStateDisabled; //Multiplayer is not implemented yet
                 button->onClick = onClick[i];
                 view->addChild(button);
                 GUILabel* label = new GUILabel();
@@ -206,7 +223,7 @@ void setMenu(MenuName menu) {
                 button->addChild(label);
             }
         } break;
-        case optionsMenu: {
+        case options: {
             GUILabel* label = new GUILabel();
             label->posY = currentScreenView->height*0.88;
             label->text = localization.localizeString("options");
@@ -238,8 +255,8 @@ void setMenu(MenuName menu) {
             button = new GUIButton();
             button->posX = view->width*-0.52;
             button->posY = currentScreenView->height*(0.06);
-            button->onClick = [](GUIButton* button) {
-                setMenu(videoResolutionMenu);
+            button->onClick = [this](GUIButton* button) {
+                setMenu(videoResolution);
             };
             if(levelManager.gameStatus != noGame)
                 button->state = GUIButtonStateDisabled;
@@ -428,8 +445,8 @@ void setMenu(MenuName menu) {
             button = new GUIButton();
             button->posX = currentScreenView->width*0.32;
             button->posY = currentScreenView->height*-0.48;
-            button->onClick = [](GUIButton* button) {
-                setMenu(languagesMenu);
+            button->onClick = [this](GUIButton* button) {
+                setMenu(languages);
             };
             currentScreenView->addChild(button);
             label = new GUILabel();
@@ -454,7 +471,7 @@ void setMenu(MenuName menu) {
             label->sizeAlignment = GUISizeAlignment_Height;
             button->addChild(label);
         } break;
-        case videoResolutionMenu: {
+        case videoResolution: {
             GUILabel* label = new GUILabel();
             label->posY = currentScreenView->height*0.88;
             label->text = localization.localizeString("videoResolution");
@@ -462,8 +479,8 @@ void setMenu(MenuName menu) {
             currentScreenView->addChild(label);
             GUIButton* button = new GUIButton();
             button->posY = currentScreenView->height*-0.8;
-            button->onClick = [](GUIButton* button) {
-                setMenu(optionsMenu);
+            button->onClick = [this](GUIButton* button) {
+                setMenu(options);
             };
             currentScreenView->addChild(button);
             label = new GUILabel();
@@ -515,7 +532,7 @@ void setMenu(MenuName menu) {
             tabs->posY = view->height-tabs->height;
             view->contentHeight = tabs->height*2;
         } break;
-        case languagesMenu: {
+        case languages: {
             GUILabel* label = new GUILabel();
             label->posY = currentScreenView->height*0.88;
             label->text = localization.localizeString("language");
@@ -523,8 +540,8 @@ void setMenu(MenuName menu) {
             currentScreenView->addChild(label);
             GUIButton* button = new GUIButton();
             button->posY = currentScreenView->height*-0.8;
-            button->onClick = [](GUIButton* button) {
-                setMenu(optionsMenu);
+            button->onClick = [this](GUIButton* button) {
+                setMenu(options);
             };
             currentScreenView->addChild(button);
             label = new GUILabel();
@@ -568,7 +585,7 @@ void setMenu(MenuName menu) {
             tabs->posY = view->height-tabs->height;
             view->contentHeight = tabs->height*2;
         } break;
-        case creditsMenu: {
+        case credits: {
             GUILabel* label = new GUILabel();
             label->posY = currentScreenView->height*0.88;
             label->text = localization.localizeString("credits");
@@ -578,8 +595,8 @@ void setMenu(MenuName menu) {
             GUIButton* button = new GUIButton();
             button->posX = currentScreenView->width*-0.4;
             button->posY = currentScreenView->height*-0.8;
-            button->onClick = [](GUIButton* button) {
-                setMenu(mainMenu);
+            button->onClick = [this](GUIButton* button) {
+                setMenu(main);
             };
             currentScreenView->addChild(button);
             label = new GUILabel();
@@ -609,7 +626,7 @@ void setMenu(MenuName menu) {
             label->sizeAlignment = GUISizeAlignment_Height;
             currentScreenView->addChild(label);
         } break;
-        case inGameMenu: {
+        case inGame: {
             GUILabel* label = new GUILabel();
             label->text = std::string("+");
             label->color = Color4(1.0);
@@ -622,12 +639,12 @@ void setMenu(MenuName menu) {
             view->height = currentScreenView->height*0.68;
             currentScreenView->addChild(view);
         } break;
-        case gameEscMenu: {
+        case gameEsc: {
             std::function<void(GUIButton*)> onClick[] = {
-                [](GUIButton* button) {
-                    setMenu(inGameMenu);
-                }, [](GUIButton* button) {
-                    setMenu(optionsMenu);
+                [this](GUIButton* button) {
+                    setMenu(inGame);
+                }, [this](GUIButton* button) {
+                    setMenu(options);
                 }, [](GUIButton* button) {
                     levelManager.clear();
                 }, [](GUIButton* button) {
@@ -650,7 +667,7 @@ void setMenu(MenuName menu) {
                 currentScreenView->addChild(button);
             }
         } break;
-        case saveGamesMenu: {
+        case saveGames: {
             GUILabel* label = new GUILabel();
             label->posY = currentScreenView->height*0.88;
             label->text = localization.localizeString("saveGames");
@@ -697,8 +714,7 @@ void setMenu(MenuName menu) {
                 label->text = localization.localizeString("removeGame");
                 label->fontHeight = currentScreenView->height*0.1;
                 button->addChild(label);
-                button->onClick = [name](GUIButton* button) {
-                    currentMenu = modalMenu;
+                button->onClick = [this, name](GUIButton* button) {
                     GUIFramedView* modalView = new GUIFramedView();
                     modalView->width = currentScreenView->width*0.4;
                     modalView->height = currentScreenView->height*0.4;
@@ -726,7 +742,6 @@ void setMenu(MenuName menu) {
                     button->addChild(label);
                     button->onClick = [](GUIButton* button) {
                         currentScreenView->setModalView(NULL);
-                        currentMenu = saveGamesMenu;
                     };
                     button = new GUIButton();
                     button->posX = modalView->width*0.55;
@@ -739,9 +754,9 @@ void setMenu(MenuName menu) {
                     label->text = localization.localizeString("ok");
                     label->fontHeight = currentScreenView->height*0.1;
                     button->addChild(label);
-                    button->onClick = [name](GUIButton* button) {
+                    button->onClick = [this, name](GUIButton* button) {
                         levelManager.removeGame(name);
-                        setMenu(saveGamesMenu);
+                        setMenu(saveGames);
                     };
                     currentScreenView->setModalView(modalView);
                 };
@@ -749,10 +764,10 @@ void setMenu(MenuName menu) {
             scrollView->contentHeight = files.size()*0.25*scrollView->height;
             
             std::function<void(GUIButton*)> onClick[] = {
-                [](GUIButton* button) {
-                    setMenu(mainMenu);
-                }, [](GUIButton* button) {
-                    setMenu(newGameMenu);
+                [this](GUIButton* button) {
+                    setMenu(main);
+                }, [this](GUIButton* button) {
+                    setMenu(newGame);
                 }
             };
             const char* buttonLabels[] = { "back", "newGame" };
@@ -770,7 +785,7 @@ void setMenu(MenuName menu) {
                 button->onClick = onClick[i];
             }
         } break;
-        case newGameMenu: {
+        case newGame: {
             GUILabel* label = new GUILabel();
             label->posY = currentScreenView->height*0.88;
             label->text = localization.localizeString("newGame");
@@ -817,8 +832,8 @@ void setMenu(MenuName menu) {
             textField->label->text = localization.localizeString("newGame");
             currentScreenView->addChild(textField);
             std::function<void(GUIButton*)> onClick[] = {
-                [](GUIButton* button) {
-                    setMenu(saveGamesMenu);
+                [this](GUIButton* button) {
+                    setMenu(saveGames);
                 }, [&menu, files, buttonList, textField](GUIButton* button) {
                     levelManager.newGame(files[buttonList->selectedIndex], textField->label->text);
                 }
@@ -845,6 +860,35 @@ void setMenu(MenuName menu) {
                 button->updateContent();
             };
         } break;
+        case multiplayer: {
+            GUILabel* label = new GUILabel();
+            label->posY = currentScreenView->height*0.88;
+            label->text = localization.localizeString("multiplayer");
+            label->fontHeight = currentScreenView->height*0.2;
+            currentScreenView->addChild(label);
+            
+            GUIButton* button = new GUIButton();
+            button->posY = currentScreenView->height*-0.8;
+            button->onClick = [this](GUIButton* button) {
+                networkManager.setLocalScan(false);
+                setMenu(main);
+            };
+            currentScreenView->addChild(button);
+            label = new GUILabel();
+            label->text = localization.localizeString("back");
+            label->fontHeight = currentScreenView->height*0.1;
+            label->width = currentScreenView->width*0.14;
+            label->sizeAlignment = GUISizeAlignment_Height;
+            button->addChild(label);
+            
+            GUIScrollView* view = new GUIScrollView();
+            view->width = currentScreenView->width*0.7;
+            view->height = currentScreenView->height*0.6;
+            view->content.innerShadow = view->content.cornerRadius * 0.5;
+            currentScreenView->addChild(view);
+            
+            networkManager.setLocalScan(true);
+        } break;
         default:
             log(error_log, "Tried to call setMenu() with invalid menu id.");
             break;
@@ -853,4 +897,4 @@ void setMenu(MenuName menu) {
     currentScreenView->updateContent();
 }
 
-MenuName currentMenu;
+Menu menu;

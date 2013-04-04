@@ -19,25 +19,29 @@
 #ifndef Menu_h
 #define Menu_h
 
-enum MenuName {
-    loadingMenu = 0,
-    mainMenu,
-    optionsMenu,
-    videoResolutionMenu,
-    languagesMenu,
-    creditsMenu,
-    inGameMenu,
-    gameEscMenu,
-    saveGamesMenu,
-    newGameMenu,
-    modalMenu
-};
-
 void openExternURL(const char* str);
 
-void handleMenuKeyUp(SDL_keysym* key);
-void setMenu(MenuName menu);
+class Menu {
+    public:
+    enum Name {
+        loading = 0,
+        main,
+        options,
+        videoResolution,
+        languages,
+        credits,
+        inGame,
+        gameEsc,
+        saveGames,
+        newGame,
+        multiplayer
+    } current;
+    
+    void handleKeyUp(SDL_keysym* key);
+    void gameTick();
+    void setMenu(Name menu);
+};
 
-extern MenuName currentMenu;
+extern Menu menu;
 
 #endif

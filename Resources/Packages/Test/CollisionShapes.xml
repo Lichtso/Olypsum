@@ -1,16 +1,16 @@
 <CollisionShapes>
-	<Cylinder id="cylinder0" width="0.5" height="0.5" length="0.5"/>
-	<Box id="box0" width="0.5" height="0.5" length="0.5"/>
-	<Box id="mirrorBox" width="0.1" height="5.0" length="8.0"/>
-	<Box id="manBox" width="1.0" height="1.0" length="0.25"/>
+	<Cylinder id="cylinder0" size="0.5 0.5 0.5"/>
+	<Box id="box0" size="0.5 0.5 0.5"/>
+	<Box id="mirrorBox" size="0.1 5.0 8.0"/>
+	<Box id="manBox" size="1.0 1.0 0.25"/>
 	<Sphere id="sphere0" radius="0.5"/>
 	<Capsule id="capsule0" radius="0.5" length="0.5" direction="y"/>
 	<Cone id="cone0" radius="0.5" length="0.5" direction="y"/>
 	<SphereCompound id="sphereCompound0">
-		<Sphere x="-0.5" y="-0.5" z="-0.5" radius="0.5"/>
-		<Sphere x="0.5" y="-0.5" z="-0.5" radius="0.5"/>
-		<Sphere x="0.0" y="-0.5" z="0.5" radius="0.5"/>
-		<Sphere x="0.0" y="0.5" z="0.0" radius="0.5"/>
+		<Sphere position="-0.5 -0.5 -0.5" radius="0.5"/>
+		<Sphere position="0.5 -0.5 -0.5" radius="0.5"/>
+		<Sphere position="0.0 -0.5 0.5" radius="0.5"/>
+		<Sphere position="0.0 0.5 0.0" radius="0.5"/>
 	</SphereCompound>
 	<VertexCloud id="vertexCloud0" vertexCount="4">-0.5 -0.5 -0.5 0.5 -0.5 -0.5 0.0 -0.5 0.5 0.0 0.5 0.0</VertexCloud>
 	<StaticPlane id="staticPlane" distance="0.0">0.0 1.0 0.0</StaticPlane>

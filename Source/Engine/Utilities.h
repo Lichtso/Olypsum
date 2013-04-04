@@ -16,7 +16,7 @@
 #include <BulletDynamics/btBulletDynamicsCommon.h>
 #include <BulletSoftBody/btSoftBody.h>
 #include <v8.h>
-#include "netLink/netLink.h"
+#include <netLink.h>
 
 #ifndef Utilities_h
 #define Utilities_h

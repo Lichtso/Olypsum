@@ -6,8 +6,39 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Ray3.h"
+#include "ObjectManager.h"
 
 Ray3::Ray3(btVector3 originB, btVector3 directionB) :origin(originB), direction(directionB) {
     
+}
+
+unsigned int Ray3::hitTestNearest(short filterMask, BaseObject*& object, btVector3& point, btVector3& normal) {
+    btCollisionWorld::ClosestRayResultCallback rayCallback(origin, origin+direction);
+    rayCallback.m_collisionFilterGroup = 0xFFFF;
+    rayCallback.m_collisionFilterMask = filterMask;
+    objectManager.physicsWorld->rayTest(rayCallback.m_rayFromWorld, rayCallback.m_rayToWorld, rayCallback);
+    if(rayCallback.hasHit()) {
+        point = rayCallback.m_hitPointWorld;
+        normal = rayCallback.m_hitNormalWorld;
+    }
+    btCollisionObject* co = const_cast<btCollisionObject*>(rayCallback.m_collisionObject);
+    if(co) {
+        object = static_cast<BaseObject*>(co->getUserPointer());
+        return (object) ? 1 : 0;
+    }else
+        return 0;
+}
+
+unsigned int Ray3::hitTestAll(short filterMask, std::vector<BaseObject*>& objects, std::vector<btVector3>& points, std::vector<btVector3>& normals) {
+    btCollisionWorld::AllHitsRayResultCallback rayCallback(origin, origin+direction);
+    rayCallback.m_collisionFilterGroup = 0xFFFF;
+    rayCallback.m_collisionFilterMask = filterMask;
+    objectManager.physicsWorld->rayTest(rayCallback.m_rayFromWorld, rayCallback.m_rayToWorld, rayCallback);
+    
+    for(unsigned int i = 0; i < rayCallback.m_collisionObjects.size(); i ++) {
+        objects.push_back(static_cast<BaseObject*>(rayCallback.m_collisionObjects[i]->getUserPointer()));
+        points.push_back(rayCallback.m_hitPointWorld[i]);
+        normals.push_back(rayCallback.m_hitNormalWorld[i]);
+    }
+    return rayCallback.m_collisionObjects.size();
 }

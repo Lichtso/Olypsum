@@ -32,13 +32,11 @@ void ControlsMangager::consoleAdd(const std::string& message, float duration) {
 
 void ControlsMangager::handleMouseDown(int mouseX, int mouseY, SDL_Event& event) {
     btTransform transform = mainCam->getTransformation();
-    btCollisionWorld::ClosestRayResultCallback rayCallback(transform.getOrigin(), transform.getOrigin()-transform.getBasis().getColumn(2)*100.0);
-    rayCallback.m_collisionFilterGroup = 0xFFFF;
-    rayCallback.m_collisionFilterMask = CollisionMask_Object;
-    objectManager.physicsWorld->rayTest(rayCallback.m_rayFromWorld, rayCallback.m_rayToWorld, rayCallback);
-    
-    if(rayCallback.hasHit()) {
-        grabbedObject = static_cast<PhysicObject*>(rayCallback.m_collisionObject->getUserPointer());
+    Ray3 ray(transform.getOrigin(), transform.getBasis().getColumn(2)*-100.0);
+    BaseObject* object;
+    btVector3 point, normal;
+    if(ray.hitTestNearest(CollisionMask_Object, object, point, normal) > 0) {
+        grabbedObject = static_cast<PhysicObject*>(object);
         relGrabbPos = btVector3(0.0, 0.0, -(mainCam->getTransformation().getOrigin()
                                           -grabbedObject->getTransformation().getOrigin()).length());
     }
@@ -68,7 +66,7 @@ void ControlsMangager::handleMouseWheel(int mouseX, int mouseY, float delta) {
 
 void ControlsMangager::gameTick() {
     //Update GUI
-    if(currentMenu == inGameMenu) {
+    if(menu.current == Menu::Name::inGame) {
         SDL_ShowCursor(0);
         GUIView* view = static_cast<GUIView*>(currentScreenView->children[1]);
         int posY = view->height;
@@ -115,7 +113,7 @@ void ControlsMangager::gameTick() {
     //Calculate Screen Blur
     if(optionsState.screenBlurFactor > -1.0) {
         float speed = profiler.animationFactor*20.0;
-        if(currentMenu == inGameMenu) {
+        if(menu.current == Menu::Name::inGame) {
             optionsState.screenBlurFactor -= min(optionsState.screenBlurFactor*speed, speed);
             if(optionsState.screenBlurFactor < 0.01) optionsState.screenBlurFactor = 0.0;
         }else
@@ -134,7 +132,7 @@ void ControlsMangager::gameTick() {
             velocity *= 1.0/speed;
             speed = fminf(speed*5.0, 10.0F);
             
-            if(currentMenu == inGameMenu && keyState[SDLK_LALT])
+            if(menu.current == Menu::Name::inGame && keyState[SDLK_LALT])
                 body->setAngularVelocity(mainCam->getTransformation().getBasis() * btVector3(addRot.y(), addRot.x(), 0.0) * -10.0);
             else
                 body->setAngularVelocity(btVector3(0.0, 0.0, 0.0));
@@ -143,7 +141,7 @@ void ControlsMangager::gameTick() {
         }
     }
     
-    if(currentMenu != inGameMenu) return;
+    if(menu.current != Menu::Name::inGame) return;
     
     //Update Cam
     if(!keyState[SDLK_LALT]) {

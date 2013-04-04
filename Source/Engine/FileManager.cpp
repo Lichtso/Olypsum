@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "FileManager.h"
-#include "ShaderProgram.h"
+#include "LevelManager.h"
+//#include "ShaderProgram.h"
 
 std::shared_ptr<FilePackageResource> FilePackageResource::load(FilePackage* filePackageB, const std::string& nameB) {
     filePackage = filePackageB;
@@ -63,7 +63,7 @@ void FileManager::clear() {
     filePackages.clear();
 }
 
-FilePackage* FileManager::getPackage(const char* name) {
+FilePackage* FileManager::getPackage(const std::string& name) {
     std::map<std::string, FilePackage*>::iterator iterator = filePackages.find(name);
     if(iterator == filePackages.end()) {
         FilePackage* package = new FilePackage(name);
@@ -77,13 +77,50 @@ FilePackage* FileManager::getPackage(const char* name) {
     return iterator->second;
 }
 
-void FileManager::unloadPackage(const char* nameStr) {
-    std::string name;
-    if(nameStr) name = nameStr;
+void FileManager::unloadPackage(const std::string& name) {
     std::map<std::string, FilePackage*>::iterator iterator = filePackages.find(name);
     if(iterator == filePackages.end()) return;
     delete iterator->second;
     filePackages.erase(iterator);
+}
+
+bool FileManager::readResource(const std::string& path, FilePackage*& filePackage, std::string& name) {
+    if(path.compare(0, 3, "../") == 0) {
+        unsigned int seperation = name.find('/', 3);
+        filePackage = getPackage(name.substr(3, seperation));
+        if(!filePackage) return false;
+        name = name.substr(seperation);
+    }else{
+        filePackage = levelManager.levelPackage;
+        name = path;
+    }
+    return true;
+}
+
+bool FileManager::readResource(rapidxml::xml_node<xmlUsedCharType>* node, FilePackage*& filePackage, std::string& name) {
+    if(!node) return false;
+    
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("src");
+    if(!attribute) {
+        log(error_log, "Tried to construct resource without \"src\"-attribute.");
+        return false;
+    }
+    
+    return readResource(attribute->value(), filePackage, name);
+}
+
+rapidxml::xml_node<xmlUsedCharType>* FileManager::writeResource(rapidxml::xml_document<xmlUsedCharType>& doc, const char* nodeName,
+                                                                FilePackage* filePackage, std::string path) {
+    rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
+    node->name(nodeName);
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute;
+    attribute = doc.allocate_attribute();
+    attribute->name("src");
+    if(filePackage != levelManager.levelPackage)
+        path = std::string("../")+filePackage->name+'/'+path;
+    attribute->value(doc.allocate_string(path.c_str()));
+    node->append_attribute(attribute);
+    return node;
 }
 
 

@@ -286,6 +286,41 @@ v8::Handle<v8::Value> ScriptMatrix4::toJSON(const v8::Arguments& args) {
     return handleScope.Close(array);
 }
 
+v8::Handle<v8::Value> ScriptMatrix4::GetRow(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    Matrix4 mat = getDataOfInstance(info.This());
+    const char* propertyStr = scriptManager->cStringOf(property);
+    if(strcmp(propertyStr, "w") == 0) {
+        return handleScope.Close(scriptVector3.newInstance(mat.w));
+    }else if(strcmp(propertyStr, "x") == 0) {
+        return handleScope.Close(scriptVector3.newInstance(mat.x));
+    }else if(strcmp(propertyStr, "y") == 0) {
+        return handleScope.Close(scriptVector3.newInstance(mat.y));
+    }else if(strcmp(propertyStr, "z") == 0) {
+        return handleScope.Close(scriptVector3.newInstance(mat.z));
+    }else
+        return v8::ThrowException(v8::String::New("Matrix4 x/y/z/w: Invalid property"));
+}
+
+void ScriptMatrix4::SetRow(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!scriptVector3.isCorrectInstance(value))
+        v8::ThrowException(v8::String::New("Matrix4 x/y/z/w: Invalid argument"));
+    
+    Matrix4 mat = getDataOfInstance(info.This());
+    const char* propertyStr = scriptManager->cStringOf(property);
+    if(strcmp(propertyStr, "w") == 0) {
+        mat.w = scriptVector3.getDataOfInstance(value);
+    }else if(strcmp(propertyStr, "x") == 0) {
+        mat.x = scriptVector3.getDataOfInstance(value);
+    }else if(strcmp(propertyStr, "y") == 0) {
+        mat.y = scriptVector3.getDataOfInstance(value);
+    }else if(strcmp(propertyStr, "z") == 0) {
+        mat.z = scriptVector3.getDataOfInstance(value);
+    }else
+        v8::ThrowException(v8::String::New("Matrix4 x/y/z/w: Invalid property"));
+}
+
 v8::Handle<v8::Value> ScriptMatrix4::GetInverse(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     Matrix4 mat = getDataOfInstance(args.This()).getInverse();
@@ -385,6 +420,10 @@ ScriptMatrix4::ScriptMatrix4() :ScriptClass("Matrix4", Constructor) {
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->Set(v8::String::New("toString"), v8::FunctionTemplate::New(toString));
     objectTemplate->Set(v8::String::New("toJSON"), v8::FunctionTemplate::New(toJSON));
+    objectTemplate->SetAccessor(v8::String::New("x"), GetRow, SetRow);
+    objectTemplate->SetAccessor(v8::String::New("y"), GetRow, SetRow);
+    objectTemplate->SetAccessor(v8::String::New("z"), GetRow, SetRow);
+    objectTemplate->SetAccessor(v8::String::New("w"), GetRow, SetRow);
     objectTemplate->Set(v8::String::New("getInverse"), v8::FunctionTemplate::New(GetInverse));
     objectTemplate->Set(v8::String::New("getProduct"), v8::FunctionTemplate::New(GetProduct));
     objectTemplate->Set(v8::String::New("getTransformed"), v8::FunctionTemplate::New(GetTransformedVector));

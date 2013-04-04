@@ -32,10 +32,10 @@ class ScriptFile : public Script {
 
 class ScriptClass {
     protected:
-    const char* name;
-    v8::Persistent<v8::FunctionTemplate> functionTemplate;
     ScriptClass(const char* name, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args));
     public:
+    const char* name;
+    v8::Persistent<v8::FunctionTemplate> functionTemplate;
     virtual ~ScriptClass();
     bool isCorrectInstance(const v8::Local<v8::Value>& object);
     void init(const v8::Persistent<v8::ObjectTemplate>& globalTemplate);

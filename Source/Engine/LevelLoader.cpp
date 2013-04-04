@@ -12,13 +12,6 @@ LevelLoader::LevelLoader() :transformation(btTransform::getIdentity()) {
     
 }
 
-btCollisionShape* LevelLoader::getCollisionShape(std::string name) {
-    btCollisionShape* shape = levelManager.sharedCollisionShapes[name];
-    if(shape) return shape;
-    log(error_log, std::string("Couldn't find collision shape with id ")+name+'.');
-    return NULL;
-}
-
 BaseObject* LevelLoader::getObjectLinking(const char* id) {
     unsigned int offset;
     sscanf(id, "%d", &offset);
@@ -135,7 +128,15 @@ bool LevelLoader::loadContainer(std::string name) {
                 log(error_log, std::string("Tried to construct invalid Object: ")+node->name()+'.');
                 return false;
             }
-            object->initScriptInstance(node);
+            
+            object->newScriptInstance();
+            FilePackage* filePackage;
+            std::string name;
+            if(fileManager.readResource(node->first_node("Script"), filePackage, name)) {
+                object->scriptFile = scriptManager->getScriptFile(filePackage, name);
+                scriptManager->callFunctionOfScript(object->scriptFile, "onload", true, { object->scriptInstance, scriptManager->readCdataXMLNode(node) });
+            }
+            
             node = node->next_sibling();
         }
     }
@@ -193,14 +194,13 @@ bool LevelLoader::loadLevel(std::string levelId) {
         btCollisionShape* shape;
         const char* name = node->first_attribute("id")->value();
         if(strcmp(node->name(), "Cylinder") == 0 || strcmp(node->name(), "Box") == 0) {
-            btScalar x, y, z;
-            sscanf(node->first_attribute("width")->value(), "%f", &x);
-            sscanf(node->first_attribute("height")->value(), "%f", &y);
-            sscanf(node->first_attribute("length")->value(), "%f", &z);
+            XMLValueArray<float> vecData;
+            vecData.readString(node->first_attribute("size")->value(), "%f");
+            
             if(strcmp(node->name(), "Cylinder") == 0)
-                shape = new btCylinderShape(btVector3(x, y, z));
+                shape = new btCylinderShape(vecData.getVector3());
             else
-                shape = new btBoxShape(btVector3(x, y, z));
+                shape = new btBoxShape(vecData.getVector3());
         }else if(strcmp(node->name(), "Sphere") == 0) {
             float radius;
             sscanf(node->first_attribute("radius")->value(), "%f", &radius);
@@ -242,13 +242,9 @@ bool LevelLoader::loadLevel(std::string levelId) {
             count = 0;
             childNode = node->first_node("Sphere");
             while(childNode) {
-                float aux;
-                sscanf(childNode->first_attribute("x")->value(), "%f", &aux);
-                positions[count].setX(aux);
-                sscanf(childNode->first_attribute("y")->value(), "%f", &aux);
-                positions[count].setY(aux);
-                sscanf(childNode->first_attribute("z")->value(), "%f", &aux);
-                positions[count].setZ(aux);
+                XMLValueArray<float> vecData;
+                vecData.readString(childNode->first_attribute("position")->value(), "%f");
+                positions[count] = vecData.getVector3();
                 sscanf(childNode->first_attribute("radius")->value(), "%f", &radi[count]);
                 count ++;
                 childNode = childNode->next_sibling("Sphere");
@@ -258,7 +254,7 @@ bool LevelLoader::loadLevel(std::string levelId) {
             btCompoundShape* compoundShape = new btCompoundShape();
             rapidxml::xml_node<xmlUsedCharType>* childNode = node->first_node("Child");
             while(childNode) {
-                btCollisionShape* childShape = getCollisionShape(childNode->first_attribute("collisionShape")->value());
+                btCollisionShape* childShape = levelManager.getCollisionShape(childNode->first_attribute("collisionShape")->value());
                 if(!childShape) {
                     log(error_log, std::string("Found compound collision shape (")+name+") with an invalid child.");
                     return NULL;
@@ -300,6 +296,6 @@ bool LevelLoader::loadLevel(std::string levelId) {
     //Update gameStatus and start the game
     objectManager.updateRendererSettings();
     levelManager.gameStatus = localGame;
-    setMenu(inGameMenu);
+    menu.setMenu(Menu::Name::inGame);
     return true;
 }

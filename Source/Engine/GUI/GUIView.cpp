@@ -175,6 +175,7 @@ void GUIScreenView::draw() {
     }
     
     glEnable(GL_DEPTH_TEST);
+    profiler.leaveSection("GUI Draw");
 }
 
 bool GUIScreenView::handleMouseDown(int mouseX, int mouseY) {

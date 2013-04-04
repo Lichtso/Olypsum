@@ -13,7 +13,6 @@ LevelManager::LevelManager() {
 }
 
 void LevelManager::showErrorModal(const std::string& error) {
-    currentMenu = modalMenu;
     GUIFramedView* modalView = new GUIFramedView();
     modalView->width = currentScreenView->width*0.4;
     modalView->height = currentScreenView->height*0.4;
@@ -39,9 +38,22 @@ void LevelManager::showErrorModal(const std::string& error) {
     button->addChild(label);
     button->onClick = [](GUIButton* button) {
         currentScreenView->setModalView(NULL);
-        currentMenu = saveGamesMenu;
     };
     currentScreenView->setModalView(modalView);
+}
+
+btCollisionShape* LevelManager::getCollisionShape(const std::string& name) {
+    btCollisionShape* shape = levelManager.sharedCollisionShapes[name];
+    if(shape) return shape;
+    log(error_log, std::string("Couldn't find collision shape with id ")+name+'.');
+    return NULL;
+}
+
+std::string LevelManager::getCollisionShapeName(btCollisionShape* shape) {
+    for(auto iterator : sharedCollisionShapes)
+        if(iterator.second == shape)
+            return iterator.first;
+    return "";
 }
 
 void LevelManager::clear() {
@@ -58,7 +70,7 @@ void LevelManager::clear() {
     objectManager.clear();
     fileManager.clear();
     fileManager.getPackage("Default");
-    setMenu(mainMenu);
+    menu.setMenu(Menu::Name::main);
 }
 
 bool LevelManager::loadLevel(const std::string& nextLevelId) {

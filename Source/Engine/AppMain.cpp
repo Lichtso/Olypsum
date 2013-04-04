@@ -8,10 +8,6 @@
 
 #include "AppMain.h"
 
-Uint8* keyState;
-const float loadingScreenTime = 1.0;
-float timeInLastSec = 0.0, loadingScreen = loadingScreenTime;
-
 const SDL_VideoInfo* updateVideoModeInternal(bool& fullScreen) {
     const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
     if(!videoInfo) {
@@ -46,6 +42,7 @@ const SDL_VideoInfo* updateVideoModeInternal(bool& fullScreen) {
 
 void AppMain(int argc, char *argv[]) {
     optionsState.loadOptions();
+    networkManager.init();
     
     //Init SDL
     if(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) < 0) {
@@ -121,7 +118,7 @@ void AppMain(int argc, char *argv[]) {
     initLightVolumes();
     objectManager.init();
     loadStaticShaderPrograms();
-    setMenu(loadingMenu);
+    menu.setMenu(Menu::Name::loading);
     
     SDL_Event event;
     while(true) {
@@ -129,8 +126,8 @@ void AppMain(int argc, char *argv[]) {
             if(!currentScreenView) break;
             switch(event.type) {
                 case SDL_ACTIVEEVENT:
-                    if(!event.active.gain && currentMenu == inGameMenu)
-                        setMenu(gameEscMenu);
+                    if(!event.active.gain && menu.current == Menu::Name::inGame)
+                        menu.setMenu(Menu::Name::gameEsc);
                 break;
                 case SDL_KEYDOWN:
                     if(currentScreenView->handleKeyDown(&event.key.keysym))
@@ -139,7 +136,7 @@ void AppMain(int argc, char *argv[]) {
                 case SDL_KEYUP:
                     if(currentScreenView->handleKeyUp(&event.key.keysym))
                         break;
-                    handleMenuKeyUp(&event.key.keysym);
+                    menu.handleKeyUp(&event.key.keysym);
                 break;
                 case SDL_MOUSEBUTTONDOWN:
                     event.button.x *= prevOptionsState.videoScale;
@@ -149,14 +146,14 @@ void AppMain(int argc, char *argv[]) {
                             currentScreenView->handleMouseDown(event.button.x, event.button.y);
                         case SDL_BUTTON_MIDDLE:
                         case SDL_BUTTON_RIGHT:
-                            if(controlsMangager && currentMenu == inGameMenu)
+                            if(controlsMangager && menu.current == Menu::Name::inGame)
                                 controlsMangager->handleMouseDown(event.button.x, event.button.y, event);
                             break;
                         case SDL_BUTTON_WHEELDOWN:
                         case SDL_BUTTON_WHEELUP:
                             float delta = (event.button.button == SDL_BUTTON_WHEELDOWN) ? -1.0 : 1.0;
                             if(!currentScreenView->handleMouseWheel(event.button.x, event.button.y, delta)
-                               && controlsMangager && currentMenu == inGameMenu)
+                               && controlsMangager && menu.current == Menu::Name::inGame)
                                 controlsMangager->handleMouseWheel(event.button.x, event.button.y, delta);
                             break;
                     }
@@ -165,14 +162,14 @@ void AppMain(int argc, char *argv[]) {
                     if(event.button.button == SDL_BUTTON_WHEELDOWN || event.button.button == SDL_BUTTON_WHEELUP) break;
                     event.button.x *= prevOptionsState.videoScale;
                     event.button.y *= prevOptionsState.videoScale;
-                    if(!currentScreenView->handleMouseUp(event.button.x, event.button.y) && controlsMangager && currentMenu == inGameMenu)
+                    if(!currentScreenView->handleMouseUp(event.button.x, event.button.y) && controlsMangager && menu.current == Menu::Name::inGame)
                         controlsMangager->handleMouseUp(event.button.x, event.button.y, event);
                 break;
                 case SDL_MOUSEMOTION:
                     event.button.x *= prevOptionsState.videoScale;
                     event.button.y *= prevOptionsState.videoScale;
                     currentScreenView->handleMouseMove(event.button.x, event.button.y);
-                    if(controlsMangager && currentMenu == inGameMenu)
+                    if(controlsMangager && menu.current == Menu::Name::inGame)
                         controlsMangager->handleMouseMove(event.button.x, event.button.y, event);
                 break;
                 case SDL_QUIT:
@@ -185,11 +182,10 @@ void AppMain(int argc, char *argv[]) {
         keyState = SDL_GetKeyState(NULL);
         //modKeyState = SDL_GetModState();
         
-        if(currentMenu == inGameMenu && profiler.isFirstFrameInSec()) {
+        if(menu.current == Menu::Name::inGame && profiler.isFirstFrameInSec() && controlsMangager) {
             char str[64];
             sprintf(str, "FPS: %d", profiler.FPS);
-            if(controlsMangager)
-                controlsMangager->consoleAdd(str, 1.0);
+            controlsMangager->consoleAdd(str, 1.0);
         }
         
         if(levelManager.gameStatus == noGame) {
@@ -197,22 +193,13 @@ void AppMain(int argc, char *argv[]) {
             glViewport(0, 0, prevOptionsState.videoWidth, prevOptionsState.videoHeight);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT);
-            
-            if(currentMenu == loadingMenu) {
-                if(loadingScreen == loadingScreenTime)
-                    loadDynamicShaderPrograms();
-                loadingScreen -= profiler.animationFactor;
-                GUIProgressBar* progressBar = static_cast<GUIProgressBar*>(currentScreenView->children[0]);
-                progressBar->value = 1.0-loadingScreen/loadingScreenTime;
-                if(loadingScreen <= 0.0)
-                    setMenu(mainMenu);
-            }
+            menu.gameTick();
         }else{
             profiler.leaveSection("Rest");
             objectManager.gameTick();
         }
         if(currentScreenView) currentScreenView->draw();
-        profiler.leaveSection("GUI Draw");
+        networkManager.gameTick();
         SDL_GL_SwapBuffers();
         profiler.leaveSection("Swap Buffers");
         profiler.markFrame();
@@ -224,3 +211,5 @@ void AppTerminate() {
     SDL_Quit();
     exit(0);
 }
+
+Uint8* keyState;

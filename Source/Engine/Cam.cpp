@@ -21,15 +21,15 @@ struct SingleHitCallback : btDbvt::ICollide {
 };
 
 struct FrustumCullingCallback : btDbvt::ICollide {
-    short int m_collisionFilterMask;
+    short int filterMask;
     
-    FrustumCullingCallback(short int filterMask) : m_collisionFilterMask(filterMask) {
+    FrustumCullingCallback(short int _filterMask) : filterMask(_filterMask) {
         
     }
     
     void Process(const btDbvtNode* leaf) {
         btBroadphaseProxy* proxy = static_cast<btBroadphaseProxy*>(leaf->data);
-        if((proxy->m_collisionFilterGroup & m_collisionFilterMask) == 0) return;
+        if((proxy->m_collisionFilterGroup & filterMask) == 0) return;
         
         btCollisionObject* co = static_cast<btCollisionObject*>(proxy->m_clientObject);
         GraphicObject* go = static_cast<GraphicObject*>(co->getUserPointer());

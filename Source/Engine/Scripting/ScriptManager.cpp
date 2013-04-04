@@ -79,7 +79,9 @@ ScriptManager::ScriptManager() {
     globalTemplate->SetAccessor(v8::String::New("levelID"), ScriptGetLevel, ScriptSetLevel);
     scriptVector3.init(globalTemplate);
     scriptMatrix4.init(globalTemplate);
+    scriptIntersection.init(globalTemplate);
     scriptBaseObject.init(globalTemplate);
+    scriptPhysicObject.init(globalTemplate);
 }
 
 ScriptManager::~ScriptManager() {

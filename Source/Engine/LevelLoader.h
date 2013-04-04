@@ -18,7 +18,6 @@ class LevelLoader {
     public:
     btTransform transformation;
     LevelLoader();
-    btCollisionShape* getCollisionShape(std::string name);
     BaseObject* getObjectLinking(const char* id);
     void pushObject(BaseObject* object);
     bool loadContainer(std::string name);

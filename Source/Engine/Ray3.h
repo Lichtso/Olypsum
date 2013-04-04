@@ -6,11 +6,12 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include <BulletDynamics/btBulletDynamicsCommon.h>
-#include <BulletSoftBody/btSoftBody.h>
+#include "Utilities.h"
 
 #ifndef Ray3_h
 #define Ray3_h
+
+class BaseObject;
 
 //! A ray with a origin and a direction
 class Ray3 {
@@ -23,6 +24,10 @@ class Ray3 {
      @param direction The direction of the Ray3
      */
     Ray3(btVector3 origin, btVector3 direction);
+    //! Performs a hit test against physics world and returns the neares hit point, normal and object on Success else NULL
+    unsigned int hitTestNearest(short filterMask, BaseObject*& object, btVector3& point, btVector3& normal);
+    //! Performs a hit test against physics world and returns the count of hits on Success else 0
+    unsigned int hitTestAll(short filterMask, std::vector<BaseObject*>& objects, std::vector<btVector3>& points, std::vector<btVector3>& normals);
 };
 
 #endif

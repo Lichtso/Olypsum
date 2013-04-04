@@ -55,70 +55,6 @@ void ModelObject::updateSkeletonPose(BaseObject* object, Bone* bone) {
         updateSkeletonPose(object->links[childBone->name]->getOther(object), childBone);
 }
 
-/* Not OpenGL 3.2 compatible
-void ModelObject::drawBonePose(BaseObject* object, Bone* bone, float axesSize, float linesSize, float textSize) {
-    btTransform transform = object->getTransformation(), inverseTransform = transform.inverse();
-    btVector3* childrenPos = (linesSize > 0.0) ? new btVector3[bone->children.size()] : NULL;
-    for(unsigned int i = 0; i < bone->children.size(); i ++) {
-        BaseObject* childObject = object->links[bone->children[i]->name]->getOther(object);
-        drawBonePose(childObject, bone->children[i], axesSize, linesSize, textSize);
-        if(linesSize > 0.0) childrenPos[i] = inverseTransform(modelMat.getOrigin());
-    }
-    
-    if(textSize > 0.0)
-        mainFont->renderStringToScreen(bone->name.c_str(), transform.getOrigin(), 0.02, Color4(1.0), false);
-    modelMat = transform;
-    shaderPrograms[colorSP]->use();
-    
-    float* vertices;
-    {
-        unsigned int verticesCount = 36+12*bone->children.size();
-        if(axesSize > 0.0) verticesCount += 36;
-        if(linesSize > 0.0) verticesCount += 12*bone->children.size();
-        vertices = (verticesCount) ? new float[verticesCount] : NULL;
-    }
-    currentShaderProgram->setAttribute(POSITION_ATTRIBUTE, 3, sizeof(float)*6, vertices);
-    currentShaderProgram->setAttribute(COLOR_ATTRIBUTE, 3, sizeof(float)*6, &vertices[3]);
-    
-    if(axesSize > 0.0) {
-        for(unsigned int i = 0; i < 6; i ++) {
-            vertices[i*6  ] = (i == 1) ? axesSize : 0.0;
-            vertices[i*6+1] = (i == 3) ? axesSize : 0.0;
-            vertices[i*6+2] = (i == 5) ? axesSize : 0.0;
-            vertices[i*6+3] = (i < 2) ? 1.0 : 0.0;
-            vertices[i*6+4] = (i == 2 || i == 3) ? 1.0 : 0.0;
-            vertices[i*6+5] = (i >= 4) ? 1.0 : 0.0;
-        }
-        glDrawArrays(GL_LINES, 0, 6);
-    }
-    
-    if(linesSize > 0.0) {
-        for(unsigned int i = 0; i < bone->children.size(); i ++) {
-            btVector3 pos = childrenPos[i];
-            vertices[i*12] = 0.0;
-            vertices[i*12+1] = 0.0;
-            vertices[i*12+2] = 0.0;
-            vertices[i*12+3] = 1.0;
-            vertices[i*12+4] = 1.0;
-            vertices[i*12+5] = 1.0;
-            vertices[i*12+6] = pos.x();
-            vertices[i*12+7] = pos.y();
-            vertices[i*12+8] = pos.z();
-            vertices[i*12+9] = 0.5;
-            vertices[i*12+10] = 0.5;
-            vertices[i*12+11] = 0.5;
-        }
-        glLineWidth(linesSize);
-        glDrawArrays(GL_LINES, 0, bone->children.size()*2);
-        glLineWidth(1);
-        delete [] childrenPos;
-    }
-    
-    if(vertices) delete [] vertices;
-    glDisableVertexAttribArray(POSITION_ATTRIBUTE);
-    glDisableVertexAttribArray(COLOR_ATTRIBUTE);
-}*/
-
 bool ModelObject::gameTick() {
     BaseObject::gameTick();
     if(model->skeleton) {
@@ -148,12 +84,6 @@ void ModelObject::drawAccumulatedMesh(Mesh* mesh) {
     modelMat = getTransformation();
     mesh->draw(this);
 }
-
-/* Not OpenGL 3.2 compatible
-void ModelObject::drawSkeletonPose(float axesSize, float linesSize, float textSize) {
-    Bone* rootBone = model->skeleton->rootBone;
-    drawBonePose(links[rootBone->name]->getOther(this), rootBone, axesSize, linesSize, textSize);
-}*/
 
 void ModelObject::prepareShaderProgram(Mesh* mesh) {
     if(mesh->material.diffuse) {

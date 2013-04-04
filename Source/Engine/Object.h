@@ -47,8 +47,8 @@ class BaseObject {
     virtual void remove();
     //! Initialize from rapidxml::xml_node
     void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    //! Initializes BaseObject::scriptInstance
-    virtual void initScriptInstance(rapidxml::xml_node<xmlUsedCharType>* node);
+    //! Allocates a new BaseObject::scriptInstance (overwritten by child classes)
+    virtual void newScriptInstance();
     //! Reads the transformation from a rapidxml::xml_node
     static btTransform readTransformtion(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     //! Writes its self to rapidxml::xml_node and returns it
@@ -118,6 +118,7 @@ class PhysicObject : public BaseObject {
     virtual btTransform getTransformation() {
         return body->getWorldTransform();
     }
+    void newScriptInstance();
     //! Is called by the engine if a collision to another PhysicObject has been detected
     virtual void handleCollision(btPersistentManifold* contactManifold, PhysicObject* b);
     //! Getter method for the physics body, child classes will upcast their bodies

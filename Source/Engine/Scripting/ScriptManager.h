@@ -6,7 +6,7 @@
 //
 //
 
-#include "ScriptObject.h"
+#include "ScriptIntersection.h"
 
 #ifndef ScriptManager_h
 #define ScriptManager_h
