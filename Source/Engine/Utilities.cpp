@@ -30,8 +30,8 @@ void log(logMessageType type, std::string message) {
     
     message = typeStr+message;
     printf("%s\n", message.c_str());
-    if(controlsMangager)
-        controlsMangager->consoleAdd(message);
+    if(levelManager.gameStatus != noGame)
+        menu.consoleAdd(message);
 }
 
 int getFileSize(const std::string& filePath) {

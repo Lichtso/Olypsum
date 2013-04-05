@@ -77,73 +77,78 @@ float SoundTrack::getLength() {
 
 
 
-SoundSourceObject::SoundSourceObject(SoundTrack* soundTrackB) :soundTrack(soundTrackB), mode(SoundSource_disposable), velocity(btVector3(0, 0, 0)) {
+SoundSource::SoundSource(SoundTrack* soundTrackB) :soundTrack(soundTrackB), mode(SoundSource_disposable), velocity(btVector3(0, 0, 0)) {
     objectManager.simpleObjects.insert(this);
     alGenSources(1, &ALname);
     alSourcei(ALname, AL_BUFFER, soundTrack->ALname);
     play();
 }
 
-SoundSourceObject::SoundSourceObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :mode(SoundSource_looping), velocity(btVector3(0, 0, 0)) {
+SoundSource::SoundSource(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :mode(SoundSource_looping), velocity(btVector3(0, 0, 0)) {
     objectManager.simpleObjects.insert(this);
     alGenSources(1, &ALname);
     BaseObject::init(node, levelLoader);
     
-    node = node->first_node("SoundTrack");
-    if(!node) {
-        log(error_log, "Tried to construct SoundSourceObject without \"SoundTrack\"-node.");
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("SoundTrack");
+    if(!parameterNode) {
+        log(error_log, "Tried to construct SoundSource without \"SoundTrack\"-node.");
         return;
     }
-    setSoundTrack(fileManager.initResource<SoundTrack>(node));
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = parameterNode->first_attribute("src");
+    if(!attribute) {
+        log(error_log, "Found \"SoundTrack\"-node without \"src\"-attribute.");
+        return;
+    }
+    setSoundTrack(fileManager.initResource<SoundTrack>(attribute->value()));
     play();
 }
 
-SoundSourceObject::~SoundSourceObject() {
+SoundSource::~SoundSource() {
     alDeleteSources(1, &ALname);
 }
 
-void SoundSourceObject::remove() {
+void SoundSource::remove() {
     objectManager.simpleObjects.erase(this);
     BaseObject::remove();
 }
 
-void SoundSourceObject::setSoundTrack(std::shared_ptr<SoundTrack> soundTrackB) {
+void SoundSource::setSoundTrack(std::shared_ptr<SoundTrack> soundTrackB) {
     soundTrack = soundTrackB;
     alSourcei(ALname, AL_BUFFER, soundTrack->ALname);
 }
 
-void SoundSourceObject::play() {
+void SoundSource::play() {
     if(!soundTrack || !soundTrack->ALname) return;
     alSourcei(ALname, AL_LOOPING, mode == SoundSource_looping);
     alSourcePlay(ALname);
 }
 
-void SoundSourceObject::pause() {
+void SoundSource::pause() {
     alSourcePause(ALname);
 }
 
-void SoundSourceObject::stop() {
+void SoundSource::stop() {
     alSourceStop(ALname);
 }
 
-bool SoundSourceObject::isPlaying() {
+bool SoundSource::isPlaying() {
     if(!soundTrack) return false;
     ALint state;
     alGetSourcei(ALname, AL_SOURCE_STATE, &state);
     return (state == AL_PLAYING);
 }
 
-void SoundSourceObject::setTimeOffset(float timeOffset) {
+void SoundSource::setTimeOffset(float timeOffset) {
     alSourcef(ALname, AL_SEC_OFFSET, timeOffset);
 }
 
-float SoundSourceObject::getTimeOffset() {
+float SoundSource::getTimeOffset() {
     ALfloat timeOffset;
     alGetSourcef(ALname, AL_SEC_OFFSET, &timeOffset);
     return timeOffset;
 }
 
-bool SoundSourceObject::gameTick() {
+bool SoundSource::gameTick() {
     if(mode == SoundSource_disposable && !isPlaying()) {
         remove();
         return false;
@@ -160,9 +165,9 @@ bool SoundSourceObject::gameTick() {
     return true;
 }
 
-rapidxml::xml_node<xmlUsedCharType>* SoundSourceObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+rapidxml::xml_node<xmlUsedCharType>* SoundSource::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
     rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
-    node->name("SoundSourceObject");
+    node->name("SoundSource");
     node->append_node(fileManager.writeResource(doc, "SoundTrack", soundTrack));
     return node;
 }

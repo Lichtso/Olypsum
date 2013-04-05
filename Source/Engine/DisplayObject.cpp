@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Menu.h"
+#include "ScriptDisplayObject.h"
 
 GraphicObject::GraphicObject() {
     objectManager.graphicObjects.insert(this);
@@ -20,11 +20,7 @@ void GraphicObject::remove() {
 
 
 ModelObject::~ModelObject() {
-    if(skeletonPose) delete [] skeletonPose;
-    if(textureAnimation) delete [] textureAnimation;
-    for(unsigned int i = 0; i < model->meshes.size(); i ++)
-        if(model->meshes[i]->material.reflectivity != 0)
-            objectManager.reflectiveAccumulator.erase(this);
+    setModel(NULL);
 }
 
 void ModelObject::setupBones(BaseObject* object, Bone* bone) {
@@ -55,16 +51,23 @@ void ModelObject::updateSkeletonPose(BaseObject* object, Bone* bone) {
         updateSkeletonPose(object->links[childBone->name]->getOther(object), childBone);
 }
 
+void ModelObject::newScriptInstance() {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    v8::Local<v8::Object> instance = scriptModelObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+}
+
 bool ModelObject::gameTick() {
     BaseObject::gameTick();
+    if(!model) return false;
     if(model->skeleton) {
         Bone* rootBone = model->skeleton->rootBone;
         updateSkeletonPose(links[rootBone->name]->getOther(this), rootBone);
     }
-    unsigned int animatedMeshes = 0;
-    for(unsigned int i = 0; i < model->meshes.size(); i ++)
-        if(model->meshes[i]->material.diffuse && model->meshes[i]->material.diffuse->depth > 1)
-            textureAnimation[animatedMeshes ++] += profiler.animationFactor;
+    for(unsigned int i = 0; i < textureAnimation.size(); i ++)
+        if(textureAnimation[i ++] >= 0.0)
+            textureAnimation[i ++] += profiler.animationFactor;
     if(integrity <= 0.0) {
         integrity -= profiler.animationFactor;
         if(integrity < -1.0) {
@@ -75,7 +78,33 @@ bool ModelObject::gameTick() {
     return true;
 }
 
+void ModelObject::setModel(std::shared_ptr<Model> _model) {
+    if(model) {
+        for(unsigned int i = 0; i < model->meshes.size(); i ++)
+            if(model->meshes[i]->material.reflectivity != 0)
+                objectManager.reflectiveAccumulator.erase(this);
+        foreach_e(links, link)
+            if(dynamic_cast<TransformLink*>(link->second))
+                link->second->remove(this, link);
+    }
+    textureAnimation.clear();
+    if(skeletonPose) delete [] skeletonPose;
+    
+    model = _model;
+    if(!model) return;
+    
+    for(unsigned int i = 0; i < model->meshes.size(); i ++)
+        if(model->meshes[i]->material.diffuse && model->meshes[i]->material.diffuse->depth > 1)
+            textureAnimation.push_back(0.0);
+    
+    if(model->skeleton) {
+        skeletonPose = new btTransform[model->skeleton->bones.size()];
+        setupBones(this, model->skeleton->rootBone);
+    }
+}
+
 void ModelObject::draw() {
+    if(!model) return;
     modelMat = getTransformation();
     model->draw(this);
 }
@@ -112,35 +141,28 @@ void ModelObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
         log(error_log, "Tried to construct ModelObject without \"Model\"-node.");
         return;
     }
-    model = fileManager.initResource<Model>(parameterNode);
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = parameterNode->first_attribute("src");
+    if(!attribute) {
+        log(error_log, "Found \"Model\"-node without \"src\"-attribute.");
+        return;
+    }
+    setModel(fileManager.initResource<Model>(attribute->value()));
     
-    unsigned int animatedMeshes = 0;
-    for(unsigned int i = 0; i < model->meshes.size(); i ++)
-        if(model->meshes[i]->material.diffuse && model->meshes[i]->material.diffuse->depth > 1)
-            animatedMeshes ++;
-    if(animatedMeshes > 0)
-        textureAnimation = new float[animatedMeshes];
     if((parameterNode = node->first_node("TextureAnimation"))) {
         XMLValueArray<float> animationTime;
         animationTime.readString(parameterNode->value(), "%f");
-        if(animationTime.count != animatedMeshes) {
+        if(animationTime.count != textureAnimation.size()) {
             log(error_log, "Tried to construct ModelObject with invalid \"TextureAnimation\"-node.");
             return;
         }
-        memcpy(textureAnimation, animationTime.data, animationTime.count*sizeof(float));
+        for(unsigned int i = 0; i < textureAnimation.size(); i ++)
+            textureAnimation[i] = animationTime.data[i];
     }
     
-    if((parameterNode = node->first_node("Integrity")))
-        sscanf(parameterNode->value(), "%f", &integrity);
-    
-    if(model->skeleton) {
-        skeletonPose = new btTransform[model->skeleton->bones.size()];
-        setupBones(this, model->skeleton->rootBone);
-    }
     if((parameterNode = node->first_node("SkeletonPose"))) {
         parameterNode = parameterNode->first_node();
         while(parameterNode) {
-            rapidxml::xml_attribute<xmlUsedCharType>* attribute = parameterNode->first_attribute("path");
+            attribute = parameterNode->first_attribute("path");
             if(!attribute) {
                 log(error_log, "Tried to construct BoneObject without \"path\"-attribute.");
                 return;
@@ -155,6 +177,9 @@ void ModelObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
             parameterNode = parameterNode->next_sibling();
         }
     }
+    
+    if((parameterNode = node->first_node("Integrity")))
+        sscanf(parameterNode->value(), "%f", &integrity);
 }
 
 rapidxml::xml_node<xmlUsedCharType>* ModelObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
@@ -164,16 +189,14 @@ rapidxml::xml_node<xmlUsedCharType>* ModelObject::write(rapidxml::xml_document<x
         return node;
     }
     node->append_node(fileManager.writeResource(doc, "Model", model));
-    if(textureAnimation) {
+    if(textureAnimation.size() > 0) {
         rapidxml::xml_node<xmlUsedCharType>* textureAnimationNode = doc.allocate_node(rapidxml::node_element);
         textureAnimationNode->name("TextureAnimation");
         std::ostringstream data;
-        unsigned int animatedMeshes = 0;
-        for(unsigned int i = 0; i < model->meshes.size(); i ++)
-            if(model->meshes[i]->material.diffuse->depth > 1) {
-                if(animatedMeshes > 0) data << " ";
-                data << textureAnimation[animatedMeshes ++];
-            }
+        for(unsigned int i = 0; i < textureAnimation.size(); i ++) {
+            if(i > 0) data << " ";
+            data << textureAnimation[i];
+        }
         textureAnimationNode->value(doc.allocate_string(data.str().c_str()));
         node->append_node(textureAnimationNode);
     }
@@ -304,20 +327,21 @@ RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
     }
     parameterNode = node->first_node("Damping");
     if(parameterNode) {
-        float linear, angular;
+        float value;
         attribute = parameterNode->first_attribute("linear");
         if(!attribute) {
             log(error_log, "Tried to construct RigidObject-Damping without \"linear\"-attribute.");
             return;
         }
-        sscanf(attribute->value(), "%f", &linear);
+        sscanf(attribute->value(), "%f", &value);
+        body->setLinearDamping(value);
         attribute = parameterNode->first_attribute("angular");
         if(!attribute) {
             log(error_log, "Tried to construct RigidObject-Damping without \"angular\"-attribute.");
             return;
         }
-        sscanf(attribute->value(), "%f", &angular);
-        body->setDamping(linear, angular);
+        sscanf(attribute->value(), "%f", &value);
+        body->setAngularDamping(value);
     }
 }
 
@@ -346,25 +370,11 @@ btTransform RigidObject::getTransformation() {
     return motionState->transformation;
 }
 
-bool RigidObject::gameTick() {
-    if(model)
-        return ModelObject::gameTick();
-    else
-        return BaseObject::gameTick();
-}
-
-void RigidObject::draw() {
-    //TODO: Debug drawing
-    /*btBoxShape* boxShape = dynamic_cast<btBoxShape*>(body->getCollisionShape());
-    if(boxShape) {
-        modelMat = getTransformation();
-        LightBoxVolume bV(boxShape->getHalfExtentsWithoutMargin());
-        bV.init();
-        bV.drawDebug(Color4(1.0, 1.0, 0.0, 1.0));
-    }*/
-    
-    if(model)
-        ModelObject::draw();
+void RigidObject::newScriptInstance() {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    v8::Local<v8::Object> instance = scriptRigidObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    scriptInstance = v8::Persistent<v8::Object>::New(instance);
 }
 
 rapidxml::xml_node<xmlUsedCharType>* RigidObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {

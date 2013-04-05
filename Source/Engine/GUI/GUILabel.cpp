@@ -24,10 +24,10 @@ GUILabel::~GUILabel() {
     lines.clear();
 }
 
-void GUILabel::addLine(unsigned int prevPos, unsigned int pos) {
+void GUILabel::addSegment(std::string text) {
     GUILabelLine line;
-    line.text = text.substr(prevPos, pos-prevPos);
-    if(line.text.size() > 0) {
+    if(text.size() > 0) {
+        line.text = text;
         line.texture = font->renderStringToTexture(line.text.c_str(), color, true, line.content.width, line.content.height);
         line.content.width = fontHeight*0.5/line.content.height*line.content.width;
         width = fmax(width, line.content.width);
@@ -38,6 +38,17 @@ void GUILabel::addLine(unsigned int prevPos, unsigned int pos) {
     line.content.height = fontHeight>>1;
     lines.push_back(line);
     height += line.content.height;
+}
+
+void GUILabel::addLine(unsigned int warpWidth, std::string text) {
+    if(sizeAlignment & GUISizeAlignment_Width)
+        return addSegment(text);
+    
+    while(text.size() > 0) {
+        unsigned int length = getCharCountThatFitsIn(warpWidth, text);
+        addSegment(text.substr(0, length));
+        text = text.substr(length);
+    }
 }
 
 void GUILabel::updateContent() {
@@ -51,10 +62,10 @@ void GUILabel::updateContent() {
     unsigned int prevPos = 0, length = text.size();
     for(unsigned int pos = 0; pos < length; pos ++)
         if(text[pos] == '\n') {
-            addLine(prevPos, pos);
+            addLine(prevWidth, text.substr(prevPos, pos-prevPos));
             prevPos = pos+1;
         }
-    addLine(prevPos, length);
+    addLine(prevWidth, text.substr(prevPos, length-prevPos));
     
     if((sizeAlignment & GUISizeAlignment_Width) == 0) width = prevWidth;
     if((sizeAlignment & GUISizeAlignment_Height) == 0) height = prevHeight;
@@ -122,8 +133,24 @@ void GUILabel::getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int&
     std::string str = line->text.substr(0, charIndex);
     int height;
     TTF_SizeUTF8(font->ttf, str.c_str(), &posX, &height);
-    posX = (float)fontHeight/height*posX+line->posX-line->content.width;
+    posX = 0.5*font->size/fontHeight*posX+line->posX-line->content.width;
     return;
+}
+
+unsigned int GUILabel::getCharCountThatFitsIn(unsigned int warpWidth, const std::string& text) {
+    int l = text.size()/2, w, h;
+    warpWidth *= 2.0*font->size/fontHeight;
+    for(unsigned int size = l; size >= 1; size >>= 1) {
+        std::string segment = text.substr(0, l);
+        TTF_SizeUTF8(font->ttf, segment.c_str(), &w, &h);
+        if(w > warpWidth)
+            l -= size;
+        else
+            l += size;
+        if(l > text.size())
+            return text.size();
+    }
+    return l;
 }
 
 unsigned char getNextCharSize(const char* str) {

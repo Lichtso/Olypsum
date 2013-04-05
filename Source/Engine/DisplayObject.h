@@ -55,18 +55,22 @@ class GraphicObject : public DisplayObject {
  */
 class ModelObject : public GraphicObject {
     btTransform* skeletonPose;
-    float integrity, //! Health <= 0.0: destroyed
-         *textureAnimation; //!< Animation time for each mesh;
     void setupBones(BaseObject* object, Bone* bone);
     void writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver,
                     rapidxml::xml_node<xmlUsedCharType>* node, BoneObject *object);
     void updateSkeletonPose(BaseObject* object, Bone* bone);
     protected:
-    ModelObject() :skeletonPose(NULL), textureAnimation(NULL), integrity(1.0) { };
+    ModelObject() :skeletonPose(NULL), integrity(1.0) { };
     public:
     ~ModelObject();
-    std::shared_ptr<Model> model;
+    void newScriptInstance();
     bool gameTick();
+    float integrity; //! Health <= 0.0: destroyed
+    std::vector<float> textureAnimation; //!< Animation time for each mesh;
+    std::shared_ptr<Model> model;
+    //! Overwrites the model and cleans the textureAnimation
+    void setModel(std::shared_ptr<Model> model);
+    //! Draws the entire model with all meshes
     void draw();
     //! Draws a single mesh
     void drawAccumulatedMesh(Mesh* mesh);
@@ -156,8 +160,7 @@ class RigidObject : public ModelObject {
     btRigidBody* getBody() {
         return static_cast<btRigidBody*>(body);
     }
-    bool gameTick();
-    void draw();
+    void newScriptInstance();
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 

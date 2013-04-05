@@ -26,7 +26,8 @@ struct GUILabelLine {
 };
 
 class GUILabel : public GUIRect {
-    void addLine(unsigned int prevPos, unsigned int pos);
+    void addSegment(std::string text);
+    void addLine(unsigned int warpWidth, std::string text);
     public:
     std::vector<GUILabelLine> lines;
     Color4 color;
@@ -40,6 +41,7 @@ class GUILabel : public GUIRect {
     void updateContent();
     void draw(btVector3 transform, GUIClipRect& parentClipRect);
     void getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int& posX, int& posY);
+    unsigned int getCharCountThatFitsIn(unsigned int width, const std::string& text);
 };
 
 unsigned char getNextCharSize(const char* str);

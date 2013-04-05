@@ -169,8 +169,12 @@ void AppMain(int argc, char *argv[]) {
                     event.button.x *= prevOptionsState.videoScale;
                     event.button.y *= prevOptionsState.videoScale;
                     currentScreenView->handleMouseMove(event.button.x, event.button.y);
-                    if(controlsMangager && menu.current == Menu::Name::inGame)
+                    if(controlsMangager && menu.current == Menu::Name::inGame) {
                         controlsMangager->handleMouseMove(event.button.x, event.button.y, event);
+                        v8::HandleScope handleScope;
+                        scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
+                                                            "onmousemove", false, { v8::Integer::New(event.button.x), v8::Integer::New(event.button.y) });
+                    }
                 break;
                 case SDL_QUIT:
                     AppTerminate();
@@ -185,7 +189,7 @@ void AppMain(int argc, char *argv[]) {
         if(menu.current == Menu::Name::inGame && profiler.isFirstFrameInSec() && controlsMangager) {
             char str[64];
             sprintf(str, "FPS: %d", profiler.FPS);
-            controlsMangager->consoleAdd(str, 1.0);
+            menu.consoleAdd(str, 1.0);
         }
         
         if(levelManager.gameStatus == noGame) {
@@ -193,12 +197,13 @@ void AppMain(int argc, char *argv[]) {
             glViewport(0, 0, prevOptionsState.videoWidth, prevOptionsState.videoHeight);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT);
-            menu.gameTick();
         }else{
             profiler.leaveSection("Rest");
             objectManager.gameTick();
         }
-        if(currentScreenView) currentScreenView->draw();
+        menu.gameTick();
+        //if(currentScreenView)
+            currentScreenView->draw();
         networkManager.gameTick();
         SDL_GL_SwapBuffers();
         profiler.leaveSection("Swap Buffers");

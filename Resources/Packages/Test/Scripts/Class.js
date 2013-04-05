@@ -9,5 +9,6 @@ exports.onsave = function() {
 
 exports.oncollision = function(otherObject) {
 	//var result = Intersection.sphereIntersection(this.transformation.w, 15.0, 0xFFFF);
-	//log('oncollision: '+result.length);
+	//log(result);
+	//otherObject.applyLinearImpulse(otherObject.transformation.w.getDiff(this.transformation.w).mult(10.0));
 };

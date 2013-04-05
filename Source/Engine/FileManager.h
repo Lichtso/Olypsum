@@ -66,17 +66,16 @@ class FileManager {
     void unloadPackage(const std::string& name);
     //! Reads a resources path
     bool readResource(const std::string& path, FilePackage*& filePackage, std::string& name);
-    //! Reads a resources path from rapidxml::xml_node
-    bool readResource(rapidxml::xml_node<xmlUsedCharType>* node, FilePackage*& filePackage, std::string& name);
-    //! Writes a resource to rapidxml::xml_node and returns the written node (without name)
+    //! Reads a resources path
+    std::string getResourcePath(FilePackage* filePackage, std::string name);
+    //Writes a resource to rapidxml::xml_node and returns it
     rapidxml::xml_node<xmlUsedCharType>* writeResource(rapidxml::xml_document<xmlUsedCharType>& doc, const char* nodeName,
-                                                       FilePackage* filePackage, std::string path);
-    //! Initialize a resource from rapidxml::xml_node
-    template <class T>
-    std::shared_ptr<T> initResource(rapidxml::xml_node<xmlUsedCharType>* node) {
+                                                       FilePackage* filePackage, const std::string& name);
+    //! Initialize a resource from path
+    template <class T> std::shared_ptr<T> initResource(const std::string path) {
         FilePackage* filePackage;
         std::string name;
-        if(!readResource(node, filePackage, name)) {
+        if(!readResource(path, filePackage, name)) {
             log(error_log, "Couldn't initialize resource.");
             return NULL;
         }
@@ -91,7 +90,7 @@ class FileManager {
         }
         return NULL;
     }
-    //Finds a resource by searching through all FilePackages
+    //Writes a resource to rapidxml::xml_node and returns it
     template <class T> rapidxml::xml_node<xmlUsedCharType>* writeResource(rapidxml::xml_document<xmlUsedCharType>& doc,
                                                                           const char* nodeName, std::shared_ptr<T>& resource) {
         std::string name;

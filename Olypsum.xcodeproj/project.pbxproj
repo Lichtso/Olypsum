@@ -38,9 +38,11 @@
 		112BF180162AFE8100CF0C0D /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112BF17E162AFE8100CF0C0D /* Object.cpp */; };
 		1130ECBB15BC1CA600203C2E /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1130ECBA15BC1CA600203C2E /* Menu.cpp */; };
 		11329D5A16BD8A2A000CC025 /* Profiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11329D5816BD8A29000CC025 /* Profiler.cpp */; };
+		1145E3C5170ECEBB00480189 /* ScriptHeightfieldTerrain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1145E3C3170ECEBB00480189 /* ScriptHeightfieldTerrain.cpp */; };
 		114A0E6B169064E800D2CE9C /* LevelSaver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 114A0E69169064E800D2CE9C /* LevelSaver.cpp */; };
 		11511420170C1A0E00F77236 /* ScriptIntersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */; };
 		11511422170CBE6700F77236 /* libNetLink.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11511421170CBE6700F77236 /* libNetLink.a */; };
+		11511425170D9B7C00F77236 /* ScriptDisplayObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11511423170D9B7B00F77236 /* ScriptDisplayObject.cpp */; };
 		11648F6E153DEE63004CA74D /* FBO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11648F6D153DEE63004CA74D /* FBO.cpp */; };
 		117CBA9C16EBDC6800307B94 /* ScriptObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 117CBA9A16EBDC6800307B94 /* ScriptObject.cpp */; };
 		118620481650165400A32518 /* ObjectManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118620461650165400A32518 /* ObjectManager.cpp */; };
@@ -147,11 +149,15 @@
 		1130ECBA15BC1CA600203C2E /* Menu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Menu.cpp; sourceTree = "<group>"; };
 		11329D5816BD8A29000CC025 /* Profiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Profiler.cpp; sourceTree = "<group>"; };
 		11329D5916BD8A2A000CC025 /* Profiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Profiler.h; sourceTree = "<group>"; };
+		1145E3C3170ECEBB00480189 /* ScriptHeightfieldTerrain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptHeightfieldTerrain.cpp; sourceTree = "<group>"; };
+		1145E3C4170ECEBB00480189 /* ScriptHeightfieldTerrain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptHeightfieldTerrain.h; sourceTree = "<group>"; };
 		114A0E69169064E800D2CE9C /* LevelSaver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelSaver.cpp; sourceTree = "<group>"; };
 		114A0E6A169064E800D2CE9C /* LevelSaver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LevelSaver.h; sourceTree = "<group>"; };
 		1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptIntersection.cpp; sourceTree = "<group>"; };
 		1151141F170C1A0E00F77236 /* ScriptIntersection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptIntersection.h; sourceTree = "<group>"; };
 		11511421170CBE6700F77236 /* libNetLink.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libNetLink.a; path = Libraries/netLink/out/libNetLink.a; sourceTree = "<group>"; };
+		11511423170D9B7B00F77236 /* ScriptDisplayObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptDisplayObject.cpp; sourceTree = "<group>"; };
+		11511424170D9B7C00F77236 /* ScriptDisplayObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptDisplayObject.h; sourceTree = "<group>"; };
 		11648F6B153DEE0F004CA74D /* FBO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FBO.h; sourceTree = "<group>"; };
 		11648F6D153DEE63004CA74D /* FBO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FBO.cpp; sourceTree = "<group>"; };
 		117CBA9A16EBDC6800307B94 /* ScriptObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptObject.cpp; sourceTree = "<group>"; };
@@ -487,6 +493,10 @@
 				11A6811D16B96CFC000E4029 /* ScriptLinearAlgebra.cpp */,
 				117CBA9B16EBDC6800307B94 /* ScriptObject.h */,
 				117CBA9A16EBDC6800307B94 /* ScriptObject.cpp */,
+				11511424170D9B7C00F77236 /* ScriptDisplayObject.h */,
+				11511423170D9B7B00F77236 /* ScriptDisplayObject.cpp */,
+				1145E3C4170ECEBB00480189 /* ScriptHeightfieldTerrain.h */,
+				1145E3C3170ECEBB00480189 /* ScriptHeightfieldTerrain.cpp */,
 				1151141F170C1A0E00F77236 /* ScriptIntersection.h */,
 				1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */,
 				11FE8AB116B5A3F400B682D0 /* ScriptManager.h */,
@@ -612,6 +622,8 @@
 				11AD22DB16FCE77200B9FB12 /* main.cpp in Sources */,
 				11A3255517089E2100B038D2 /* Network.cpp in Sources */,
 				11511420170C1A0E00F77236 /* ScriptIntersection.cpp in Sources */,
+				11511425170D9B7C00F77236 /* ScriptDisplayObject.cpp in Sources */,
+				1145E3C5170ECEBB00480189 /* ScriptHeightfieldTerrain.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

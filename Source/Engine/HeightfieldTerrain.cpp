@@ -6,13 +6,22 @@
 //
 //
 
-#include "LevelManager.h"
+#include "ScriptHeightfieldTerrain.h"
 
 HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoader *levelLoader) :heights(NULL) {
     levelLoader->pushObject(this);
     
-    diffuse = fileManager.initResource<Texture>(node->first_node("Diffuse"));
-    if(!diffuse) return;
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Diffuse");
+    if(!parameterNode) {
+        log(error_log, "Tried to construct HeightfieldTerrain without \"Diffuse\"-node.");
+        return;
+    }
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = parameterNode->first_attribute("src");
+    if(!attribute) {
+        log(error_log, "Found \"Diffuse\"-node without \"src\"-attribute.");
+        return;
+    }
+    diffuse = fileManager.initResource<Texture>(attribute->value());
     diffuse->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGB);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     if(diffuse->depth <= 1) {
@@ -20,9 +29,14 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
         return;
     }
     
-    rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("EffectMap");
+    parameterNode = node->first_node("EffectMap");
     if(parameterNode) {
-        effectMap = fileManager.initResource<Texture>(parameterNode);
+        attribute = parameterNode->first_attribute("src");
+        if(!attribute) {
+            log(error_log, "Found \"EffectMap\"-node without \"src\"-attribute.");
+            return;
+        }
+        effectMap = fileManager.initResource<Texture>(attribute->value());
         effectMap->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGB);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         if(effectMap->depth <= 1) {
@@ -32,9 +46,13 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
     }
     
     parameterNode = node->first_node("HeightsMap");
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute;
     if(parameterNode) {
-        std::shared_ptr<Texture> heightMap = fileManager.initResource<Texture>(parameterNode);
+        attribute = parameterNode->first_attribute("src");
+        if(!attribute) {
+            log(error_log, "Found \"HeightsMap\"-node without \"src\"-attribute.");
+            return;
+        }
+        std::shared_ptr<Texture> heightMap = fileManager.initResource<Texture>(attribute->value());
         if(!heightMap) return;
         width = heightMap->width;
         length = heightMap->height;
@@ -72,13 +90,13 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
         }
     }
     
-    rapidxml::xml_node<xmlUsedCharType>* property = node->first_node("Bounds");
-    if(!property) {
+    parameterNode = node->first_node("Bounds");
+    if(!parameterNode) {
         log(error_log, "Tried to construct HeightfieldTerrain without \"Bounds\"-node.");
         return;
     }
     XMLValueArray<float> vecData;
-    vecData.readString(property->value(), "%f");
+    vecData.readString(parameterNode->value(), "%f");
     btHeightfieldTerrainShape* collisionShape = new btHeightfieldTerrainShape(width, length, heights, 1.0/255.0,
                                                                               0.0, 1.0, 1, PHY_FLOAT, false);
     collisionShape->setLocalScaling(vecData.getVector3()*btVector3(2.0/width, 2.0, 2.0/length));
@@ -89,12 +107,12 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
     body->setUserPointer(this);
     objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Static, CollisionMask_Object);
     
-    property = node->first_node("TextureScale");
-    if(!property) {
+    parameterNode = node->first_node("TextureScale");
+    if(!parameterNode) {
         log(error_log, "Tried to construct HeightfieldTerrain without \"TextureScale\"-node.");
         return;
     }
-    vecData.readString(property->value(), "%f");
+    vecData.readString(parameterNode->value(), "%f");
     textureScale.setX(vecData.data[0]);
     textureScale.setY(vecData.data[1]);
     textureScale.setZ(diffuse->depth);
@@ -127,6 +145,14 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
 
 HeightfieldTerrain::~HeightfieldTerrain() {
     if(heights) delete [] heights;
+}
+
+void HeightfieldTerrain::newScriptInstance() {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    v8::Local<v8::Object> instance = scriptHeightfieldTerrain.functionTemplate->GetFunction()->NewInstance(1, &external);
+    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+    scriptInstance->SetIndexedPropertiesToExternalArrayData(heights, v8::kExternalFloatArray, width*length);
 }
 
 void HeightfieldTerrain::draw() {
@@ -204,19 +230,19 @@ rapidxml::xml_node<xmlUsedCharType>* HeightfieldTerrain::write(rapidxml::xml_doc
     rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
     node->name("HeightfieldTerrain");
     
-    rapidxml::xml_node<xmlUsedCharType>* property = doc.allocate_node(rapidxml::node_element);
-    property->name("Bounds");
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode = doc.allocate_node(rapidxml::node_element);
+    parameterNode->name("Bounds");
     btHeightfieldTerrainShape* collisionShape = static_cast<btHeightfieldTerrainShape*>(body->getCollisionShape());
     btVector3 size = collisionShape->getLocalScaling() * btVector3(width*0.5, 0.5, length*0.5);
-    property->value(doc.allocate_string(stringOf(size).c_str()));
-    node->append_node(property);
+    parameterNode->value(doc.allocate_string(stringOf(size).c_str()));
+    node->append_node(parameterNode);
     
-    property = doc.allocate_node(rapidxml::node_element);
-    property->name("TextureScale");
+    parameterNode = doc.allocate_node(rapidxml::node_element);
+    parameterNode->name("TextureScale");
     char buffer[64];
     sprintf(buffer, "%f %f", textureScale.x(), textureScale.y());
-    property->value(doc.allocate_string(buffer));
-    node->append_node(property);
+    parameterNode->value(doc.allocate_string(buffer));
+    node->append_node(parameterNode);
     
     node->append_node(fileManager.writeResource(doc, "Diffuse", diffuse));
     if(effectMap)

@@ -146,7 +146,23 @@ void PhysicObject::newScriptInstance() {
 }
 
 void PhysicObject::handleCollision(btPersistentManifold* contactManifold, PhysicObject* b) {
-    scriptManager->callFunctionOfScript(scriptFile, "oncollision", true, { scriptInstance, b->scriptInstance });
+    if(!scriptManager->checkFunctionOfScript(scriptFile, "oncollision")) return;
+    
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Array> pointsA = v8::Array::New(contactManifold->getNumContacts()),
+                          pointsB = v8::Array::New(contactManifold->getNumContacts()),
+                          distances = v8::Array::New(contactManifold->getNumContacts()),
+                          impulses = v8::Array::New(contactManifold->getNumContacts());
+    
+    for(unsigned int i = 0; i < contactManifold->getNumContacts(); i ++) {
+        btManifoldPoint point = contactManifold->getContactPoint(i);
+        pointsA->Set(i, scriptVector3.newInstance(point.getPositionWorldOnA()));
+        pointsB->Set(i, scriptVector3.newInstance(point.getPositionWorldOnB()));
+        distances->Set(i, v8::Number::New(point.getDistance()));
+        impulses->Set(i, v8::Number::New(point.getAppliedImpulse()));
+    }
+    
+    scriptManager->callFunctionOfScript(scriptFile, "oncollision", true, { scriptInstance, b->scriptInstance, pointsA, pointsB, distances, impulses });
 }
 
 btCollisionShape* PhysicObject::readCollisionShape(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {

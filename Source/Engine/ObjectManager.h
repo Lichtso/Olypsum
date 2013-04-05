@@ -36,7 +36,7 @@ class ObjectManager {
     std::set<Decal*> decals; //!< All Decals in the scene
     std::set<GraphicObject*> graphicObjects; //!< All GraphicObjects (without ParticlesObjects) in the scene
     std::set<ParticlesObject*> particlesObjects; //! All ParticlesObjects in the scene
-    std::set<SimpleObject*> simpleObjects; //! All Cams and SoundSourceObjects in the scene
+    std::set<SimpleObject*> simpleObjects; //! All Cams and SoundSources in the scene
     btVector3 sceneAmbient; //! Ambient light color
     
     btDefaultCollisionConfiguration* collisionConfiguration; //!< The physics collision configuration

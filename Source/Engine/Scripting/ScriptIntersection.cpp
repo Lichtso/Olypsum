@@ -13,6 +13,20 @@ v8::Handle<v8::Value> ScriptIntersection::Constructor(const v8::Arguments &args)
     return v8::ThrowException(v8::String::New("Intersection Constructor: Class can't be instantiated"));
 }
 
+v8::Handle<v8::Value> ScriptIntersection::GetMouseRay(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    if(args.Length() < 2)
+        return v8::ThrowException(v8::String::New("getMouseRay(): To less arguments"));
+    if(!args[0]->IsNumber() || !args[1]->IsNumber())
+        return v8::ThrowException(v8::String::New("getMouseRay(): Invalid argument"));
+    Ray3 ray = mainCam->getRayAt(args[0]->NumberValue(), args[1]->NumberValue());
+    
+    v8::Handle<v8::Object> result = v8::Object::New();
+    result->Set(v8::String::New("origin"), scriptVector3.newInstance(ray.origin));
+    result->Set(v8::String::New("direction"), scriptVector3.newInstance(ray.direction));
+    return handleScope.Close(result);
+}
+
 v8::Handle<v8::Value> ScriptIntersection::RayCast(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 4)
@@ -141,6 +155,7 @@ v8::Handle<v8::Value> ScriptIntersection::SphereIntersection(const v8::Arguments
 ScriptIntersection::ScriptIntersection() :ScriptClass("Intersection", Constructor) {
     v8::HandleScope handleScope;
     
+    functionTemplate->Set(v8::String::New("getMouseRay"), v8::FunctionTemplate::New(GetMouseRay));
     functionTemplate->Set(v8::String::New("rayCast"), v8::FunctionTemplate::New(RayCast));
     functionTemplate->Set(v8::String::New("aabbIntersection"), v8::FunctionTemplate::New(AABBIntersection));
     functionTemplate->Set(v8::String::New("sphereIntersection"), v8::FunctionTemplate::New(SphereIntersection));

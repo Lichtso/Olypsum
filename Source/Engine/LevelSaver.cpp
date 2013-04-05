@@ -53,21 +53,21 @@ bool LevelSaver::saveLevel(const std::string& localData, const std::string& glob
     rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
     node->name("Level");
     container->append_node(node);
-    rapidxml::xml_node<xmlUsedCharType>* property;
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode;
     if(localData.size() > 0) {
-        property = doc.allocate_node(rapidxml::node_cdata);
-        node->append_node(property);
-        property->value(doc.allocate_string(localData.c_str()));
+        parameterNode = doc.allocate_node(rapidxml::node_cdata);
+        node->append_node(parameterNode);
+        parameterNode->value(doc.allocate_string(localData.c_str()));
     }
-    property = doc.allocate_node(rapidxml::node_element);
-    property->name("Gravity");
+    parameterNode = doc.allocate_node(rapidxml::node_element);
+    parameterNode->name("Gravity");
     btVector3 gravity = objectManager.physicsWorld->getGravity();
-    property->value(doc.allocate_string(stringOf(gravity).c_str()));
-    node->append_node(property);
-    property = doc.allocate_node(rapidxml::node_element);
-    property->name("Ambient");
-    property->value(doc.allocate_string(stringOf(objectManager.sceneAmbient).c_str()));
-    node->append_node(property);
+    parameterNode->value(doc.allocate_string(stringOf(gravity).c_str()));
+    node->append_node(parameterNode);
+    parameterNode = doc.allocate_node(rapidxml::node_element);
+    parameterNode->name("Ambient");
+    parameterNode->value(doc.allocate_string(stringOf(objectManager.sceneAmbient).c_str()));
+    node->append_node(parameterNode);
     
     //Save objects
     node = doc.allocate_node(rapidxml::node_element);
@@ -103,16 +103,16 @@ bool LevelSaver::saveLevel(const std::string& localData, const std::string& glob
     std::unique_ptr<char[]> fileData = readXmlFile(doc, statusFilePath, true);
     node = doc.first_node("Status");
     node->first_node("Level")->first_attribute("value")->value(levelManager.levelId.c_str());
-    property = node->first_node();
-    if(property->type() != rapidxml::node_cdata)
-        property = NULL;
+    parameterNode = node->first_node();
+    if(parameterNode->type() != rapidxml::node_cdata)
+        parameterNode = NULL;
     if(globalData.size() > 0) {
-        if(!property) {
-            property = doc.allocate_node(rapidxml::node_cdata);
-            node->prepend_node(property);
+        if(!parameterNode) {
+            parameterNode = doc.allocate_node(rapidxml::node_cdata);
+            node->prepend_node(parameterNode);
         }
-        property->value(doc.allocate_string(globalData.c_str()));
-    }else if(property)
-        node->remove_node(property);
+        parameterNode->value(doc.allocate_string(globalData.c_str()));
+    }else if(parameterNode)
+        node->remove_node(parameterNode);
     return writeXmlFile(doc, statusFilePath, true);
 }

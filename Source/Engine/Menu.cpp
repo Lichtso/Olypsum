@@ -97,6 +97,16 @@ static void getAvailableResolutions(std::vector<Resolution>& resolutions) {
 
 
 
+void Menu::consoleAdd(const std::string& message, float duration) {
+    ConsoleEntry entry;
+    entry.message = message;
+    for(size_t i = 0; i < entry.message.size(); i ++)
+        if(entry.message[i] == 9)
+            entry.message = entry.message.replace(i, 1, "    ");
+    entry.timeLeft = duration;
+    consoleMessages.push_back(entry);
+}
+
 void Menu::handleKeyUp(SDL_keysym* key) {
     if(key->sym == SDLK_ESCAPE) {
         switch(current) {
@@ -131,6 +141,15 @@ void Menu::handleKeyUp(SDL_keysym* key) {
 }
 
 void Menu::gameTick() {
+    if(optionsState.screenBlurFactor > -1.0) {
+        float speed = profiler.animationFactor*20.0;
+        if(menu.current == inGame) {
+            optionsState.screenBlurFactor -= min(optionsState.screenBlurFactor*speed, speed);
+            if(optionsState.screenBlurFactor < 0.01) optionsState.screenBlurFactor = 0.0;
+        }else
+            optionsState.screenBlurFactor += min((10-optionsState.screenBlurFactor)*speed, speed);
+    }
+    
     switch(current) {
         case loading: {
             if(loadingScreen == loadingScreenTime)
@@ -141,7 +160,51 @@ void Menu::gameTick() {
             if(loadingScreen <= 0.0)
                 setMenu(main);
         } break;
+        case inGame: {
+            GUIView* view = static_cast<GUIView*>(currentScreenView->children[1]);
+            int posY = view->height;
+            for(int i = 0; i < consoleMessages.size(); i ++) {
+                GUILabel* label;
+                consoleMessages[i].timeLeft -= profiler.animationFactor;
+                if(consoleMessages[i].timeLeft < 0.0) {
+                    if(i < view->children.size())
+                        view->removeChild(i);
+                    consoleMessages.erase(consoleMessages.begin()+i);
+                    i --;
+                    continue;
+                }
+                if(i < view->children.size()) {
+                    label = static_cast<GUILabel*>(view->children[i]);
+                    label->color.a = fmin(1, consoleMessages[i].timeLeft);
+                    float fallSpeed = posY-label->height;
+                    fallSpeed = (fallSpeed-label->posY)*fmin(profiler.animationFactor*5.0, 0.5);
+                    label->posY += (fallSpeed > 0.0 && fallSpeed < 1.0) ? 1.0 : fallSpeed;
+                    posY -= label->height*2+label->fontHeight*0.2;
+                    if(label->text == consoleMessages[i].message)
+                        continue;
+                }else{
+                    label = new GUILabel();
+                    view->addChild(label);
+                }
+                label->width = view->width;
+                label->fontHeight = currentScreenView->height*0.04;
+                label->textAlign = GUITextAlign_Left;
+                label->sizeAlignment = GUISizeAlignment_Height;
+                label->color = Color4(1.0);
+                label->text = consoleMessages[i].message;
+                label->updateContent();
+                label->posX = 0.0;
+                label->posY = posY-label->height;
+                posY -= label->height*2+label->fontHeight*0.2;
+            }
+            
+            for(int i = consoleMessages.size(); i < view->children.size(); i ++)
+                view->removeChild(i);
+            
+            SDL_ShowCursor(0);
+        } break;
         default:
+            SDL_ShowCursor(1);
             break;
     }
 }

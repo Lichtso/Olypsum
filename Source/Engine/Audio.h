@@ -16,7 +16,7 @@
 
 //! A SoundTrack used for audio playback
 /*!
- A FilePackageResource which can be loaded form a OGG-file and can be played by a SoundSourceObject.
+ A FilePackageResource which can be loaded form a OGG-file and can be played by a SoundSource.
  */
 class SoundTrack : public FilePackageResource {
     public:
@@ -37,24 +37,24 @@ class SoundTrack : public FilePackageResource {
 
 //! A SimpleObject used for audio playback
 /*!
- A SimpleObject which can be loaded form a OGG-file and can be played by a SoundSourceObject.
+ A SimpleObject which can be loaded form a OGG-file and can be played by a SoundSource.
  */
-class SoundSourceObject : public SimpleObject {
+class SoundSource : public SimpleObject {
     btVector3 prevPosition, velocity; //!< Used by the engine to calculate the Doppler effect
     public:
-    ALuint ALname; //!< The OpenAL identifier of this SoundSourceObject
+    ALuint ALname; //!< The OpenAL identifier of this SoundSource
     std::shared_ptr<SoundTrack> soundTrack; //!< The SoundTrack used for audio playback
     //! The playback state
     enum {
         SoundSource_looping, //!< Restart playing if the SoundTrack reaches its end
         SoundSource_hold, //!< Stops playing if the SoundTrack reaches its end
-        SoundSource_disposable //!< Deletes this SoundSourceObject if the SoundTrack reaches its end
+        SoundSource_disposable //!< Deletes this SoundSource if the SoundTrack reaches its end
     } mode;
-    SoundSourceObject(SoundTrack* soundTrack);
-    SoundSourceObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    ~SoundSourceObject();
+    SoundSource(SoundTrack* soundTrack);
+    SoundSource(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    ~SoundSource();
     void remove();
-    /*! Adds a SoundTrack to this SoundSourceObject
+    /*! Adds a SoundTrack to this SoundSource
      @param soundTrack The new SoundTrack
      */
     void setSoundTrack(std::shared_ptr<SoundTrack> soundTrack);
@@ -65,7 +65,7 @@ class SoundSourceObject : public SimpleObject {
     //! Stops playing the SoundTrack and resets the current playback position
     void stop();
     /*!
-     @return Is this SoundSourceObject currently playing
+     @return Is this SoundSource currently playing
      */
     bool isPlaying();
     /*! Sets the playback position

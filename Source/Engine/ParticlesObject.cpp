@@ -125,10 +125,10 @@ ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, Leve
     sscanf(attribute->value(), "%d", &maxParticles);
     init();
     
-    rapidxml::xml_node<xmlUsedCharType>* property = node->first_node("Force");
-    if(property) {
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Force");
+    if(parameterNode) {
         XMLValueArray<float> vecData;
-        vecData.readString(property->value(), "%f");
+        vecData.readString(parameterNode->value(), "%f");
         force = vecData.getVector3();
     }else
         force = btVector3(0.0, 0.0, 0.0);
@@ -142,7 +142,17 @@ ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, Leve
     if(!readBoundsNode(node, "SpawnBox", posMin, posMax)) return;
     if(!readBoundsNode(node, "Velocity", dirMin, dirMax)) return;
     
-    texture = fileManager.initResource<Texture>(node->first_node("Texture"));
+    parameterNode = node->first_node("Texture");
+    if(!parameterNode) {
+        log(error_log, "Tried to construct ParticlesObject without \"Texture\"-node.");
+        return;
+    }
+    attribute = parameterNode->first_attribute("src");
+    if(!attribute) {
+        log(error_log, "Found \"Texture\"-node without \"src\"-attribute.");
+        return;
+    }
+    texture = fileManager.initResource<Texture>(attribute->value());
     texture->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGB);
 }
 
@@ -285,14 +295,14 @@ rapidxml::xml_node<xmlUsedCharType>* ParticlesObject::write(rapidxml::xml_docume
     attribute->value(doc.allocate_string(stringOf((int)maxParticles).c_str()));
     node->append_attribute(attribute);
     
-    rapidxml::xml_node<xmlUsedCharType>* property = doc.allocate_node(rapidxml::node_element);
-    property->name("Force");
-    property->value(doc.allocate_string(stringOf(force).c_str()));
-    node->append_node(property);
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode = doc.allocate_node(rapidxml::node_element);
+    parameterNode->name("Force");
+    parameterNode->value(doc.allocate_string(stringOf(force).c_str()));
+    node->append_node(parameterNode);
     if(transformAligned) {
-        property = doc.allocate_node(rapidxml::node_element);
-        property->name("TransformAligned");
-        node->append_node(property);
+        parameterNode = doc.allocate_node(rapidxml::node_element);
+        parameterNode->name("TransformAligned");
+        node->append_node(parameterNode);
     }
     
     node->append_node(writeBoundsNode(doc, "Life", lifeMin, lifeMax));

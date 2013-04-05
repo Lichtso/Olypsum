@@ -59,17 +59,17 @@ bool LevelLoader::loadContainer(std::string name) {
             log(error_log, "Found a \"Level\"-node in a child container.");
             return false;
         }
-        rapidxml::xml_node<xmlUsedCharType>* property = levelNode->first_node("Gravity");
-        if(!property) {
+        rapidxml::xml_node<xmlUsedCharType>* parameterNode = levelNode->first_node("Gravity");
+        if(!parameterNode) {
             log(error_log, "Tried to construct Level without \"Gravity\"-node.");
             return false;
         }
         XMLValueArray<float> vecData;
-        vecData.readString(property->value(), "%f");
+        vecData.readString(parameterNode->value(), "%f");
         objectManager.physicsWorld->setGravity(vecData.getVector3());
-        property = levelNode->first_node("Ambient");
-        if(property) {
-            vecData.readString(property->value(), "%f");
+        parameterNode = levelNode->first_node("Ambient");
+        if(parameterNode) {
+            vecData.readString(parameterNode->value(), "%f");
             objectManager.sceneAmbient = vecData.getVector3();
         }
     }else if(containerStack.size() == 1) {
@@ -78,9 +78,10 @@ bool LevelLoader::loadContainer(std::string name) {
     }
     
     //Load containers
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute;
     rapidxml::xml_node<xmlUsedCharType>* node = containerNode->first_node("Container");
     while(node) {
-        rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("src");
+        attribute = node->first_attribute("src");
         if(!attribute) {
             log(error_log, "Tried to construct Container without \"src\"-attribute.");
             return false;
@@ -105,7 +106,7 @@ bool LevelLoader::loadContainer(std::string name) {
             if(strcmp(node->name(), "RigidObject") == 0) {
                 object = new RigidObject(node, this);
             }else if(strcmp(node->name(), "LightObject") == 0) {
-                rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("type");
+                attribute = node->first_attribute("type");
                 if(!attribute) {
                     log(error_log, "Tried to construct LightObject without \"type\"-attribute.");
                     return false;
@@ -118,8 +119,8 @@ bool LevelLoader::loadContainer(std::string name) {
                     object = new DirectionalLight(node, this);
             }else if(strcmp(node->name(), "ParticlesObject") == 0) {
                 object = new ParticlesObject(node, this);
-            }else if(strcmp(node->name(), "SoundSourceObject") == 0) {
-                object = new SoundSourceObject(node, this);
+            }else if(strcmp(node->name(), "SoundSource") == 0) {
+                object = new SoundSource(node, this);
             }else if(strcmp(node->name(), "HeightfieldTerrain") == 0) {
                 object = new HeightfieldTerrain(node, this);
             }else if(strcmp(node->name(), "Cam") == 0) {
@@ -130,11 +131,18 @@ bool LevelLoader::loadContainer(std::string name) {
             }
             
             object->newScriptInstance();
-            FilePackage* filePackage;
-            std::string name;
-            if(fileManager.readResource(node->first_node("Script"), filePackage, name)) {
-                object->scriptFile = scriptManager->getScriptFile(filePackage, name);
-                scriptManager->callFunctionOfScript(object->scriptFile, "onload", true, { object->scriptInstance, scriptManager->readCdataXMLNode(node) });
+            rapidxml::xml_node<xmlUsedCharType>* scriptNode = node->first_node("Script");
+            if(scriptNode) {
+                attribute = scriptNode->first_attribute("src");
+                if(attribute) {
+                    FilePackage* filePackage;
+                    std::string name;
+                    if(fileManager.readResource(attribute->value(), filePackage, name)) {
+                        object->scriptFile = scriptManager->getScriptFile(filePackage, name);
+                        scriptManager->callFunctionOfScript(object->scriptFile, "onload", true, { object->scriptInstance, scriptManager->readCdataXMLNode(node) });
+                    }
+                }else
+                    log(error_log, "Tried to construct resource without \"src\"-attribute.");
             }
             
             node = node->next_sibling();
@@ -287,15 +295,16 @@ bool LevelLoader::loadLevel(std::string levelId) {
     }
     
     //Load root conatiner
+    levelManager.gameStatus = localGame;
     objectManager.initGame();
     if(!loadContainer(levelId)) {
         objectManager.clear();
+        levelManager.gameStatus = noGame;
         return false;
     }
     
     //Update gameStatus and start the game
     objectManager.updateRendererSettings();
-    levelManager.gameStatus = localGame;
     menu.setMenu(Menu::Name::inGame);
     return true;
 }

@@ -36,7 +36,13 @@ class Menu {
         newGame,
         multiplayer
     } current;
+    struct ConsoleEntry {
+        std::string message;
+        float timeLeft;
+    };
+    std::vector<ConsoleEntry> consoleMessages;
     
+    void consoleAdd(const std::string& message, float duration = 10.0);
     void handleKeyUp(SDL_keysym* key);
     void gameTick();
     void setMenu(Name menu);

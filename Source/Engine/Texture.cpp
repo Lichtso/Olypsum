@@ -248,10 +248,10 @@ void Texture::use(GLuint targetIndex) {
 void Texture::use(GLuint targetIndex, float& animationTime) {
     glActiveTexture(GL_TEXTURE0+targetIndex);
     if(depth > 1) {
-        float texCoordZ = -1.0, timeSum = 0.0;
+        float texCoordZ = -1.0, timeSum = 0.0, absAnimationTime = fabs(animationTime);
         for(unsigned int i = 0; i < depth; i ++) {
-            if(texCoordZ == -1.0 && timeSum+frames[i].duration > animationTime) {
-                texCoordZ = (animationTime-timeSum)/frames[i].duration;
+            if(texCoordZ == -1.0 && timeSum+frames[i].duration > absAnimationTime) {
+                texCoordZ = (absAnimationTime-timeSum)/frames[i].duration;
                 float t2 = texCoordZ*texCoordZ, t3 = t2*texCoordZ;
                 texCoordZ = 3.0*t2-2.0*t3+(t3-2.0*t2+texCoordZ)*frames[i].accBegin+(t3-t2)*frames[i].accEnd;
                 currentShaderProgram->setUniformVec2("texCoordAnimF", 1.0-texCoordZ, texCoordZ);
@@ -260,9 +260,9 @@ void Texture::use(GLuint targetIndex, float& animationTime) {
             }
             timeSum += frames[i].duration;
         }
-        if(timeSum <= animationTime)
+        if(animationTime > timeSum)
             animationTime -= timeSum;
-        else if(animationTime < 0.0)
+        else if(animationTime < -timeSum)
             animationTime += timeSum;
         glBindTexture(GL_TEXTURE_2D_ARRAY, GLname);
     }else

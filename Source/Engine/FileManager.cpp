@@ -97,28 +97,21 @@ bool FileManager::readResource(const std::string& path, FilePackage*& filePackag
     return true;
 }
 
-bool FileManager::readResource(rapidxml::xml_node<xmlUsedCharType>* node, FilePackage*& filePackage, std::string& name) {
-    if(!node) return false;
-    
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("src");
-    if(!attribute) {
-        log(error_log, "Tried to construct resource without \"src\"-attribute.");
-        return false;
-    }
-    
-    return readResource(attribute->value(), filePackage, name);
+std::string FileManager::getResourcePath(FilePackage* filePackage, std::string name) {
+    if(filePackage == levelManager.levelPackage)
+        return name;
+    else
+        return std::string("../")+filePackage->name+'/'+name;
 }
 
 rapidxml::xml_node<xmlUsedCharType>* FileManager::writeResource(rapidxml::xml_document<xmlUsedCharType>& doc, const char* nodeName,
-                                                                FilePackage* filePackage, std::string path) {
+                                                                FilePackage* filePackage, const std::string& name) {
     rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
     node->name(nodeName);
     rapidxml::xml_attribute<xmlUsedCharType>* attribute;
     attribute = doc.allocate_attribute();
     attribute->name("src");
-    if(filePackage != levelManager.levelPackage)
-        path = std::string("../")+filePackage->name+'/'+path;
-    attribute->value(doc.allocate_string(path.c_str()));
+    attribute->value(doc.allocate_string(getResourcePath(filePackage, name).c_str()));
     node->append_attribute(attribute);
     return node;
 }

@@ -82,6 +82,9 @@ ScriptManager::ScriptManager() {
     scriptIntersection.init(globalTemplate);
     scriptBaseObject.init(globalTemplate);
     scriptPhysicObject.init(globalTemplate);
+    scriptModelObject.init(globalTemplate);
+    scriptRigidObject.init(globalTemplate);
+    scriptHeightfieldTerrain.init(globalTemplate);
 }
 
 ScriptManager::~ScriptManager() {
@@ -98,6 +101,13 @@ ScriptFile* ScriptManager::getScriptFile(FilePackage* filePackage, const std::st
     script->load(filePackage, name);
     loadedScripts[name] = script;
     return script;
+}
+
+bool ScriptManager::checkFunctionOfScript(ScriptFile* script, const char* functionName) {
+    if(!script) return false;
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast(script->exports->GetRealNamedProperty(v8::String::New(functionName)));
+    return (!function.IsEmpty() && function->IsFunction());
 }
 
 v8::Handle<v8::Value> ScriptManager::callFunctionOfScript(ScriptFile* script, const char* functionName, bool recvFirstArg, std::vector<v8::Handle<v8::Value>> args) {
