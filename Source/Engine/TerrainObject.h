@@ -1,5 +1,5 @@
 //
-//  HeightfieldTerrain.h
+//  TerrainObject.h
 //  Olypsum
 //
 //  Created by Alexander Meißner on 06.01.13.
@@ -16,7 +16,7 @@
  Used to make a terrain.
  This class manages its own collision shape and drawing
  */
-class HeightfieldTerrain : public GraphicObject {
+class TerrainObject : public GraphicObject {
     VertexArrayObject vao; //!< VertexArrayObject used for OpenGL
     //! Internally used by updateModel()
     btVector3 getVertexAt(float* vertices, unsigned int x, unsigned int y);
@@ -27,8 +27,8 @@ class HeightfieldTerrain : public GraphicObject {
     effectMap; //!< The specular texture
     unsigned int width, length, bitDepth;
     float* heights;
-    HeightfieldTerrain(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    ~HeightfieldTerrain();
+    TerrainObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    ~TerrainObject();
     void newScriptInstance();
     void draw();
     void updateModel();

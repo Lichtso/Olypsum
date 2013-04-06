@@ -7,7 +7,7 @@
 //
 
 #include <SDL_ttf/SDL_ttf.h>
-#include "Cam.h"
+#include "CamObject.h"
 
 #ifndef TextFont_h
 #define TextFont_h

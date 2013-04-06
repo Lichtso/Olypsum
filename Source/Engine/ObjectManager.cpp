@@ -105,15 +105,14 @@ void ObjectManager::clear() {
     simpleObjects.clear();
     
     physicsWorld.reset();
-    controlsMangager.reset();
     scriptManager.reset();
+    mainCam = NULL;
 }
 
 void ObjectManager::initGame() {
     clear();
     physicsWorld.reset(new btDiscreteDynamicsWorld(collisionDispatcher, broadphase, constraintSolver, collisionConfiguration));
     physicsWorld->setInternalTickCallback(calculatePhysicsTick);
-    controlsMangager.reset(new ControlsMangager());
     scriptManager.reset(new ScriptManager());
     scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
     sceneAmbient = btVector3(0.1, 0.1, 0.1);
@@ -122,7 +121,7 @@ void ObjectManager::initGame() {
 void ObjectManager::gameTick() {
     //Calculate LightObjects
     LightPrioritySorter lightPrioritySorter;
-    lightPrioritySorter.position = currentCam->getTransformation().getOrigin();
+    lightPrioritySorter.position = mainCam->getTransformation().getOrigin();
     std::sort(lightObjects.begin(), lightObjects.end(), lightPrioritySorter);
     
     unsigned int maxShadows = 3;
@@ -191,7 +190,6 @@ void ObjectManager::gameTick() {
     profiler.leaveSection("Draw post effects");
     
     //Calculate Physics
-    controlsMangager->gameTick();
     physicsWorld->stepSimulation(profiler.animationFactor, 4, 1.0/60.0); //Try to maintain 60 FPS
     profiler.leaveSection("Calculate physics");
     

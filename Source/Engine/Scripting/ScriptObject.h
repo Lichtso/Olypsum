@@ -13,7 +13,7 @@
 
 class ScriptBaseObject : public ScriptClass {
     static v8::Handle<v8::Value> GetTransformation(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetTransformation(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> SetTransformation(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetScriptClass(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetLinkNames(const v8::Arguments& args);

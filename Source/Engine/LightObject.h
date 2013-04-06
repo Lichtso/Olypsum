@@ -20,7 +20,7 @@ class LightObject : public DisplayObject {
     void setPhysicsShape(btCollisionShape* shape);
     LightObject();
     public:
-    Cam shadowCam;
+    CamObject shadowCam;
     Color4 color;
     ~LightObject();
     void remove();

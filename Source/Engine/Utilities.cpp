@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Controls.h"
+#include "Menu.h"
 
 void log(logMessageType type, std::string message) {
     std::string typeStr;

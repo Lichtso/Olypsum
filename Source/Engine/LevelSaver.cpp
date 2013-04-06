@@ -54,11 +54,8 @@ bool LevelSaver::saveLevel(const std::string& localData, const std::string& glob
     node->name("Level");
     container->append_node(node);
     rapidxml::xml_node<xmlUsedCharType>* parameterNode;
-    if(localData.size() > 0) {
-        parameterNode = doc.allocate_node(rapidxml::node_cdata);
-        node->append_node(parameterNode);
-        parameterNode->value(doc.allocate_string(localData.c_str()));
-    }
+    if(localData.size() > 0)
+        node->append_node(scriptManager->writeCdataXMLNode(doc, localData));
     parameterNode = doc.allocate_node(rapidxml::node_element);
     parameterNode->name("Gravity");
     btVector3 gravity = objectManager.physicsWorld->getGravity();
@@ -103,16 +100,10 @@ bool LevelSaver::saveLevel(const std::string& localData, const std::string& glob
     std::unique_ptr<char[]> fileData = readXmlFile(doc, statusFilePath, true);
     node = doc.first_node("Status");
     node->first_node("Level")->first_attribute("value")->value(levelManager.levelId.c_str());
-    parameterNode = node->first_node();
-    if(parameterNode->type() != rapidxml::node_cdata)
-        parameterNode = NULL;
-    if(globalData.size() > 0) {
-        if(!parameterNode) {
-            parameterNode = doc.allocate_node(rapidxml::node_cdata);
-            node->prepend_node(parameterNode);
-        }
-        parameterNode->value(doc.allocate_string(globalData.c_str()));
-    }else if(parameterNode)
+    parameterNode = node->first_node("Data");
+    if(parameterNode)
         node->remove_node(parameterNode);
+    if(globalData.size() > 0)
+        node->append_node(scriptManager->writeCdataXMLNode(doc, globalData));
     return writeXmlFile(doc, statusFilePath, true);
 }

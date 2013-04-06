@@ -101,8 +101,7 @@ void AppMain(int argc, char *argv[]) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     //Init Cams
-    mainCam = new Cam();
-    guiCam = new Cam();
+    guiCam = new CamObject();
     guiCam->fov = 0.0;
     guiCam->near = -1.0;
     guiCam->far = 1.0;
@@ -126,55 +125,33 @@ void AppMain(int argc, char *argv[]) {
             if(!currentScreenView) break;
             switch(event.type) {
                 case SDL_ACTIVEEVENT:
-                    if(!event.active.gain && menu.current == Menu::Name::inGame)
-                        menu.setMenu(Menu::Name::gameEsc);
+                    menu.handleActiveEvent(event.active.gain);
                 break;
                 case SDL_KEYDOWN:
-                    if(currentScreenView->handleKeyDown(&event.key.keysym))
-                        break;
+                    menu.handleKeyDown(event);
                 break;
                 case SDL_KEYUP:
-                    if(currentScreenView->handleKeyUp(&event.key.keysym))
-                        break;
-                    menu.handleKeyUp(&event.key.keysym);
+                    menu.handleKeyUp(event);
                 break;
                 case SDL_MOUSEBUTTONDOWN:
-                    event.button.x *= prevOptionsState.videoScale;
-                    event.button.y *= prevOptionsState.videoScale;
                     switch(event.button.button) {
                         case SDL_BUTTON_LEFT:
-                            currentScreenView->handleMouseDown(event.button.x, event.button.y);
                         case SDL_BUTTON_MIDDLE:
                         case SDL_BUTTON_RIGHT:
-                            if(controlsMangager && menu.current == Menu::Name::inGame)
-                                controlsMangager->handleMouseDown(event.button.x, event.button.y, event);
+                            menu.handleMouseDown(event);
                             break;
                         case SDL_BUTTON_WHEELDOWN:
                         case SDL_BUTTON_WHEELUP:
-                            float delta = (event.button.button == SDL_BUTTON_WHEELDOWN) ? -1.0 : 1.0;
-                            if(!currentScreenView->handleMouseWheel(event.button.x, event.button.y, delta)
-                               && controlsMangager && menu.current == Menu::Name::inGame)
-                                controlsMangager->handleMouseWheel(event.button.x, event.button.y, delta);
+                            menu.handleMouseWheel(event);
                             break;
                     }
                 break;
                 case SDL_MOUSEBUTTONUP:
                     if(event.button.button == SDL_BUTTON_WHEELDOWN || event.button.button == SDL_BUTTON_WHEELUP) break;
-                    event.button.x *= prevOptionsState.videoScale;
-                    event.button.y *= prevOptionsState.videoScale;
-                    if(!currentScreenView->handleMouseUp(event.button.x, event.button.y) && controlsMangager && menu.current == Menu::Name::inGame)
-                        controlsMangager->handleMouseUp(event.button.x, event.button.y, event);
+                    menu.handleMouseUp(event);
                 break;
                 case SDL_MOUSEMOTION:
-                    event.button.x *= prevOptionsState.videoScale;
-                    event.button.y *= prevOptionsState.videoScale;
-                    currentScreenView->handleMouseMove(event.button.x, event.button.y);
-                    if(controlsMangager && menu.current == Menu::Name::inGame) {
-                        controlsMangager->handleMouseMove(event.button.x, event.button.y, event);
-                        v8::HandleScope handleScope;
-                        scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
-                                                            "onmousemove", false, { v8::Integer::New(event.button.x), v8::Integer::New(event.button.y) });
-                    }
+                    menu.handleMouseMove(event);
                 break;
                 case SDL_QUIT:
                     AppTerminate();
@@ -186,7 +163,7 @@ void AppMain(int argc, char *argv[]) {
         keyState = SDL_GetKeyState(NULL);
         //modKeyState = SDL_GetModState();
         
-        if(menu.current == Menu::Name::inGame && profiler.isFirstFrameInSec() && controlsMangager) {
+        if(menu.current == Menu::Name::inGame && profiler.isFirstFrameInSec()) {
             char str[64];
             sprintf(str, "FPS: %d", profiler.FPS);
             menu.consoleAdd(str, 1.0);

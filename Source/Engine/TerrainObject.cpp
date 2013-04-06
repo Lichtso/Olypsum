@@ -1,19 +1,19 @@
 //
-//  HeightfieldTerrain.cpp
+//  TerrainObject.cpp
 //  Olypsum
 //
 //  Created by Alexander Meißner on 06.01.13.
 //
 //
 
-#include "ScriptHeightfieldTerrain.h"
+#include "ScriptDisplayObject.h"
 
-HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoader *levelLoader) :heights(NULL) {
+TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelLoader) :heights(NULL) {
     levelLoader->pushObject(this);
     
     rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Diffuse");
     if(!parameterNode) {
-        log(error_log, "Tried to construct HeightfieldTerrain without \"Diffuse\"-node.");
+        log(error_log, "Tried to construct TerrainObject without \"Diffuse\"-node.");
         return;
     }
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = parameterNode->first_attribute("src");
@@ -25,7 +25,7 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
     diffuse->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGB);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     if(diffuse->depth <= 1) {
-        log(error_log, "Tried to construct HeightfieldTerrain with invalid \"EffectMap\" texture.");
+        log(error_log, "Tried to construct TerrainObject with invalid \"EffectMap\" texture.");
         return;
     }
     
@@ -40,7 +40,7 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
         effectMap->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGB);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         if(effectMap->depth <= 1) {
-            log(error_log, "Tried to construct HeightfieldTerrain with invalid \"EffectMap\" texture.");
+            log(error_log, "Tried to construct TerrainObject with invalid \"EffectMap\" texture.");
             return;
         }
     }
@@ -65,18 +65,18 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
     }else{
         parameterNode = node->first_node("Heights");
         if(!parameterNode) {
-            log(error_log, "Tried to construct HeightfieldTerrain without \"Heights\"-node.");
+            log(error_log, "Tried to construct TerrainObject without \"Heights\"-node.");
             return;
         }
         attribute = parameterNode->first_attribute("width");
         if(!attribute) {
-            log(error_log, "Tried to construct HeightfieldTerrain without \"width\"-attribute.");
+            log(error_log, "Tried to construct TerrainObject without \"width\"-attribute.");
             return;
         }
         sscanf(attribute->value(), "%d", &width);
         attribute = parameterNode->first_attribute("length");
         if(!attribute) {
-            log(error_log, "Tried to construct HeightfieldTerrain without \"length\"-attribute.");
+            log(error_log, "Tried to construct TerrainObject without \"length\"-attribute.");
             return;
         }
         sscanf(attribute->value(), "%d", &length);
@@ -92,7 +92,7 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
     
     parameterNode = node->first_node("Bounds");
     if(!parameterNode) {
-        log(error_log, "Tried to construct HeightfieldTerrain without \"Bounds\"-node.");
+        log(error_log, "Tried to construct TerrainObject without \"Bounds\"-node.");
         return;
     }
     XMLValueArray<float> vecData;
@@ -109,7 +109,7 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
     
     parameterNode = node->first_node("TextureScale");
     if(!parameterNode) {
-        log(error_log, "Tried to construct HeightfieldTerrain without \"TextureScale\"-node.");
+        log(error_log, "Tried to construct TerrainObject without \"TextureScale\"-node.");
         return;
     }
     vecData.readString(parameterNode->value(), "%f");
@@ -143,19 +143,19 @@ HeightfieldTerrain::HeightfieldTerrain(rapidxml::xml_node<char> *node, LevelLoad
     updateModel();
 }
 
-HeightfieldTerrain::~HeightfieldTerrain() {
+TerrainObject::~TerrainObject() {
     if(heights) delete [] heights;
 }
 
-void HeightfieldTerrain::newScriptInstance() {
+void TerrainObject::newScriptInstance() {
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);
-    v8::Local<v8::Object> instance = scriptHeightfieldTerrain.functionTemplate->GetFunction()->NewInstance(1, &external);
+    v8::Local<v8::Object> instance = scriptTerrainObject.functionTemplate->GetFunction()->NewInstance(1, &external);
     scriptInstance = v8::Persistent<v8::Object>::New(instance);
     scriptInstance->SetIndexedPropertiesToExternalArrayData(heights, v8::kExternalFloatArray, width*length);
 }
 
-void HeightfieldTerrain::draw() {
+void TerrainObject::draw() {
     btVector3 size = body->getCollisionShape()->getLocalScaling();
     size *= btVector3(width, 1.0, length);
     modelMat.setIdentity();
@@ -186,12 +186,12 @@ void HeightfieldTerrain::draw() {
     vao.draw();
 }
 
-btVector3 HeightfieldTerrain::getVertexAt(float* vertices, unsigned int x, unsigned int y) {
+btVector3 TerrainObject::getVertexAt(float* vertices, unsigned int x, unsigned int y) {
     unsigned int index = (y*width+x)*6;
     return btVector3(vertices[index], vertices[index+1], vertices[index+2]);
 }
 
-void HeightfieldTerrain::updateModel() {
+void TerrainObject::updateModel() {
     unsigned int index = 0, verticesCount = width * length * 6;
     float* vertices = new float[verticesCount];
     //Generate Positions
@@ -226,9 +226,9 @@ void HeightfieldTerrain::updateModel() {
     delete [] vertices;
 }
 
-rapidxml::xml_node<xmlUsedCharType>* HeightfieldTerrain::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+rapidxml::xml_node<xmlUsedCharType>* TerrainObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
     rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
-    node->name("HeightfieldTerrain");
+    node->name("TerrainObject");
     
     rapidxml::xml_node<xmlUsedCharType>* parameterNode = doc.allocate_node(rapidxml::node_element);
     parameterNode->name("Bounds");

@@ -28,17 +28,18 @@ class ScriptRigidObject : public ScriptModelObject {
     static v8::Handle<v8::Value> GetMass(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void SetMass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetAngularVelocity(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetAngularVelocity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> SetAngularVelocity(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetLinearVelocity(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetLinearVelocity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> SetLinearVelocity(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetAngularFactor(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetAngularFactor(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> SetAngularFactor(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetLinearFactor(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetLinearFactor(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> SetLinearFactor(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetAngularDamping(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void SetAngularDamping(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetLinearDamping(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void SetLinearDamping(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> SetTransformation(const v8::Arguments& args);
     static v8::Handle<v8::Value> ApplyImpulseAtPoint(const v8::Arguments& args);
     static v8::Handle<v8::Value> ApplyAngularImpulse(const v8::Arguments& args);
     static v8::Handle<v8::Value> ApplyLinearImpulse(const v8::Arguments& args);
@@ -46,7 +47,18 @@ class ScriptRigidObject : public ScriptModelObject {
     ScriptRigidObject();
 };
 
+class ScriptTerrainObject : public ScriptPhysicObject {
+    static v8::Handle<v8::Value> GetWidth(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> GetLength(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> GetBitDepth(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static void SetBitDepth(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> UpdateModel(const v8::Arguments& args);
+    public:
+    ScriptTerrainObject();
+};
+
 extern ScriptModelObject scriptModelObject;
 extern ScriptRigidObject scriptRigidObject;
+extern ScriptTerrainObject scriptTerrainObject;
 
 #endif

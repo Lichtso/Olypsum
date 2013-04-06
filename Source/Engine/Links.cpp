@@ -179,44 +179,44 @@ PhysicLink::PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
         
         parameterNode = constraintNode->first_node("AngularLimit");
         if(parameterNode) {
-            float low, high;
-            attribute = parameterNode->first_attribute("low");
+            float min, max;
+            attribute = parameterNode->first_attribute("min");
             if(!attribute) {
-                log(error_log, "Tried to construct Hinge/Slider-PhysicLink-AngularLimit without \"low\"-attribute.");
+                log(error_log, "Tried to construct Hinge/Slider-PhysicLink-AngularLimit without \"min\"-attribute.");
                 return;
             }
-            sscanf(attribute->value(), "%f", &low);
-            attribute = parameterNode->first_attribute("high");
+            sscanf(attribute->value(), "%f", &min);
+            attribute = parameterNode->first_attribute("max");
             if(!attribute) {
-                log(error_log, "Tried to construct Hinge/Slider-PhysicLink-AngularLimit without \"high\"-attribute.");
+                log(error_log, "Tried to construct Hinge/Slider-PhysicLink-AngularLimit without \"max\"-attribute.");
                 return;
             }
-            sscanf(attribute->value(), "%f", &high);
+            sscanf(attribute->value(), "%f", &max);
             if(hinge)
-                hinge->setLimit(low, high);
+                hinge->setLimit(min, max);
             else{
-                slider->setLowerAngLimit(low);
-                slider->setUpperAngLimit(high);
+                slider->setLowerAngLimit(min);
+                slider->setUpperAngLimit(max);
             }
         }
         
         parameterNode = constraintNode->first_node("LinearLimit");
         if(parameterNode && slider) {
-            float low, high;
-            attribute = parameterNode->first_attribute("low");
+            float min, max;
+            attribute = parameterNode->first_attribute("min");
             if(!attribute) {
-                log(error_log, "Tried to construct Slider-PhysicLink-LinearLimit without \"low\"-attribute.");
+                log(error_log, "Tried to construct Slider-PhysicLink-LinearLimit without \"min\"-attribute.");
                 return;
             }
-            sscanf(attribute->value(), "%f", &low);
-            attribute = parameterNode->first_attribute("high");
+            sscanf(attribute->value(), "%f", &min);
+            attribute = parameterNode->first_attribute("max");
             if(!attribute) {
-                log(error_log, "Tried to construct Slider-PhysicLink-LinearLimit without \"high\"-attribute.");
+                log(error_log, "Tried to construct Slider-PhysicLink-LinearLimit without \"max\"-attribute.");
                 return;
             }
-            sscanf(attribute->value(), "%f", &high);
-            slider->setLowerLinLimit(low);
-            slider->setUpperLinLimit(high);
+            sscanf(attribute->value(), "%f", &max);
+            slider->setLowerLinLimit(min);
+            slider->setUpperLinLimit(max);
         }
         
         parameterNode = constraintNode->first_node("AngularMotor");
@@ -326,16 +326,16 @@ PhysicLink::PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
         
         parameterNode = constraintNode->first_node("AngularLimit");
         if(parameterNode) {
-            attribute = parameterNode->first_attribute("low");
+            attribute = parameterNode->first_attribute("min");
             if(!attribute) {
-                log(error_log, "Tried to construct DOF6-PhysicLink-AngularLimit without \"low\"-attribute.");
+                log(error_log, "Tried to construct DOF6-PhysicLink-AngularLimit without \"min\"-attribute.");
                 return;
             }
             vecData.readString(attribute->value(), "%f");
             dof6->setAngularLowerLimit(vecData.getVector3());
-            attribute = parameterNode->first_attribute("high");
+            attribute = parameterNode->first_attribute("max");
             if(!attribute) {
-                log(error_log, "Tried to construct DOF6-PhysicLink-AngularLimit without \"high\"-attribute.");
+                log(error_log, "Tried to construct DOF6-PhysicLink-AngularLimit without \"max\"-attribute.");
                 return;
             }
             vecData.readString(attribute->value(), "%f");
@@ -344,16 +344,16 @@ PhysicLink::PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
         
         parameterNode = constraintNode->first_node("LinearLimit");
         if(parameterNode) {
-            attribute = parameterNode->first_attribute("low");
+            attribute = parameterNode->first_attribute("min");
             if(!attribute) {
-                log(error_log, "Tried to construct DOF6-PhysicLink-LinearLimit without \"low\"-attribute.");
+                log(error_log, "Tried to construct DOF6-PhysicLink-LinearLimit without \"min\"-attribute.");
                 return;
             }
             vecData.readString(attribute->value(), "%f");
             dof6->setLinearLowerLimit(vecData.getVector3());
-            attribute = parameterNode->first_attribute("high");
+            attribute = parameterNode->first_attribute("max");
             if(!attribute) {
-                log(error_log, "Tried to construct DOF6-PhysicLink-LinearLimit without \"high\"-attribute.");
+                log(error_log, "Tried to construct DOF6-PhysicLink-LinearLimit without \"max\"-attribute.");
                 return;
             }
             vecData.readString(attribute->value(), "%f");
@@ -511,13 +511,13 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
             btSliderConstraint* slider = NULL;
             bool angLimit, angMotor;
             btTransform frameA, frameB;
-            float lowAngLim, highAngLim, angMotorVelocity, angMotorForce;
+            float minAngLim, maxAngLim, angMotorVelocity, angMotorForce;
             if(constraint->getConstraintType() == HINGE_CONSTRAINT_TYPE) {
                 attribute->value("hinge");
                 hinge = static_cast<btHingeConstraint*>(constraint);
-                lowAngLim = hinge->getLowerLimit();
-                highAngLim = hinge->getUpperLimit();
-                angLimit = lowAngLim != 1.0 || highAngLim != -1.0;
+                minAngLim = hinge->getLowerLimit();
+                maxAngLim = hinge->getUpperLimit();
+                angLimit = minAngLim != 1.0 || maxAngLim != -1.0;
                 angMotor = hinge->getEnableAngularMotor();
                 angMotorVelocity = hinge->getMotorTargetVelosity();
                 angMotorForce = hinge->getMaxMotorImpulse();
@@ -530,9 +530,9 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
             }else{
                 attribute->value("slider");
                 slider = static_cast<btSliderConstraint*>(constraint);
-                lowAngLim = slider->getLowerAngLimit();
-                highAngLim = slider->getUpperAngLimit();
-                angLimit = lowAngLim != 0.0 || highAngLim != 0.0;
+                minAngLim = slider->getLowerAngLimit();
+                maxAngLim = slider->getUpperAngLimit();
+                angLimit = minAngLim != 0.0 || maxAngLim != 0.0;
                 angMotor = slider->getPoweredAngMotor();
                 angMotorVelocity = slider->getTargetAngMotorVelocity();
                 angMotorForce = slider->getMaxAngMotorForce();
@@ -552,12 +552,12 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
                 parameterNode->name("AngularLimit");
                 constraintNode->append_node(parameterNode);
                 attribute = doc.allocate_attribute();
-                attribute->name("low");
-                attribute->value(doc.allocate_string(stringOf(lowAngLim).c_str()));
+                attribute->name("min");
+                attribute->value(doc.allocate_string(stringOf(minAngLim).c_str()));
                 parameterNode->append_attribute(attribute);
                 attribute = doc.allocate_attribute();
-                attribute->name("high");
-                attribute->value(doc.allocate_string(stringOf(highAngLim).c_str()));
+                attribute->name("max");
+                attribute->value(doc.allocate_string(stringOf(maxAngLim).c_str()));
                 parameterNode->append_attribute(attribute);
             }
             if(angMotor || angMotorVelocity != 0.0 || angMotorForce != 0.0) {
@@ -583,11 +583,11 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
                     parameterNode->name("LinearLimit");
                     constraintNode->append_node(parameterNode);
                     attribute = doc.allocate_attribute();
-                    attribute->name("low");
+                    attribute->name("min");
                     attribute->value(doc.allocate_string(stringOf(slider->getLowerLinLimit()).c_str()));
                     parameterNode->append_attribute(attribute);
                     attribute = doc.allocate_attribute();
-                    attribute->name("high");
+                    attribute->name("max");
                     attribute->value(doc.allocate_string(stringOf(slider->getUpperLinLimit()).c_str()));
                     parameterNode->append_attribute(attribute);
                 }
@@ -624,35 +624,35 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
             parameterNode->name("Frame");
             parameterNode->append_node(writeTransformationXML(doc, dof6Constraint->getFrameOffsetB()));
             constraintNode->append_node(parameterNode);
-            btVector3 low, high, lowCompare(1.0, 1.0, 1.0), highCompare(-1.0, -1.0, -1.0);
-            dof6Constraint->getAngularLowerLimit(low); lowCompare.setW(low.w());
-            dof6Constraint->getAngularUpperLimit(high); highCompare.setW(high.w());
-            if(low != lowCompare || high != highCompare) {
+            btVector3 min, max, lowCompare(1.0, 1.0, 1.0), highCompare(-1.0, -1.0, -1.0);
+            dof6Constraint->getAngularLowerLimit(min); lowCompare.setW(min.w());
+            dof6Constraint->getAngularUpperLimit(max); highCompare.setW(max.w());
+            if(min != lowCompare || max != highCompare) {
                 parameterNode = doc.allocate_node(rapidxml::node_element);
                 parameterNode->name("AngularLimit");
                 constraintNode->append_node(parameterNode);
                 attribute = doc.allocate_attribute();
-                attribute->name("low");
-                attribute->value(doc.allocate_string(stringOf(low).c_str()));
+                attribute->name("min");
+                attribute->value(doc.allocate_string(stringOf(min).c_str()));
                 parameterNode->append_attribute(attribute);
                 attribute = doc.allocate_attribute();
-                attribute->name("high");
-                attribute->value(doc.allocate_string(stringOf(high).c_str()));
+                attribute->name("max");
+                attribute->value(doc.allocate_string(stringOf(max).c_str()));
                 parameterNode->append_attribute(attribute);
             }
-            dof6Constraint->getLinearLowerLimit(low); lowCompare.setW(low.w());
-            dof6Constraint->getLinearUpperLimit(high); highCompare.setW(high.w());
-            if(low != lowCompare || high != highCompare) {
+            dof6Constraint->getLinearLowerLimit(min); lowCompare.setW(min.w());
+            dof6Constraint->getLinearUpperLimit(max); highCompare.setW(max.w());
+            if(min != lowCompare || max != highCompare) {
                 parameterNode = doc.allocate_node(rapidxml::node_element);
                 parameterNode->name("LinearLimit");
                 constraintNode->append_node(parameterNode);
                 attribute = doc.allocate_attribute();
-                attribute->name("low");
-                attribute->value(doc.allocate_string(stringOf(low).c_str()));
+                attribute->name("min");
+                attribute->value(doc.allocate_string(stringOf(min).c_str()));
                 parameterNode->append_attribute(attribute);
                 attribute = doc.allocate_attribute();
-                attribute->name("high");
-                attribute->value(doc.allocate_string(stringOf(high).c_str()));
+                attribute->name("max");
+                attribute->value(doc.allocate_string(stringOf(max).c_str()));
                 parameterNode->append_attribute(attribute);
             }
             for(char index = 0; index < 3; index ++) {

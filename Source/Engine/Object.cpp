@@ -46,14 +46,9 @@ rapidxml::xml_node<xmlUsedCharType>* BaseObject::write(rapidxml::xml_document<xm
     rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
     node->name("BaseObject");
     if(scriptFile) {
-        rapidxml::xml_node<xmlUsedCharType>* scriptNode;
         v8::Handle<v8::Value> scritData = scriptManager->callFunctionOfScript(scriptFile, "onsave", true, { scriptInstance });
-        if(!scritData.IsEmpty() && scritData->IsString()) {
-            v8::String::Utf8Value dataStr(scritData);
-            scriptNode = doc.allocate_node(rapidxml::node_cdata);
-            node->append_node(scriptNode);
-            scriptNode->value(doc.allocate_string(*dataStr));
-        }
+        if(!scritData.IsEmpty() && scritData->IsString())
+            scriptManager->writeCdataXMLNode(doc, scriptManager->stdStringOf(scritData->ToString()));
         node->append_node(fileManager.writeResource(doc, "Script", scriptFile->filePackage, scriptFile->name));
     }
     btTransform transform = getTransformation();

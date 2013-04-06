@@ -1,13 +1,12 @@
 //
-//  Cam.cpp
+//  CamObject.cpp
 //  Olypsum
 //
 //  Created by Alexander Meißner on 21.02.12.
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include <OpenAL/al.h>
-#include "LevelManager.h"
+#include "ScriptSimpleObject.h"
 
 //! @cond
 struct SingleHitCallback : btDbvt::ICollide {
@@ -40,11 +39,13 @@ struct FrustumCullingCallback : btDbvt::ICollide {
 
 
 
-Cam::Cam() :fov(70.0/180.0*M_PI), near(1.0), far(100000.0), width(prevOptionsState.videoWidth>>1), height(prevOptionsState.videoHeight>>1) {
+CamObject::CamObject() :fov(90.0/180.0*M_PI), near(1.0), far(10000.0), width(prevOptionsState.videoWidth>>1), height(prevOptionsState.videoHeight>>1) {
     setTransformation(btTransform::getIdentity());
 }
 
-Cam::Cam(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :width(prevOptionsState.videoWidth>>1), height(prevOptionsState.videoHeight>>1) {
+CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader)
+    :width(prevOptionsState.videoWidth>>1), height(prevOptionsState.videoHeight>>1) {
+    objectManager.simpleObjects.insert(this);
     BaseObject::init(node, levelLoader);
     
     rapidxml::xml_node<xmlUsedCharType>* boundsNode = node->first_node("Bounds");
@@ -70,19 +71,21 @@ Cam::Cam(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :w
         return;
     }
     sscanf(attribute->value(), "%f", &far);
+    
+    if(!mainCam) mainCam = this;
 }
 
-Cam::~Cam() {
-    if(currentCam == this)
-        currentCam = NULL;
+CamObject::~CamObject() {
+    if(mainCam == this) mainCam = NULL;
+    if(currentCam == this) currentCam = NULL;
 }
 
-void Cam::remove() {
+void CamObject::remove() {
     objectManager.simpleObjects.erase(this);
     BaseObject::remove();
 }
 
-Matrix4 Cam::getCamMatrix() {
+Matrix4 CamObject::getCamMatrix() {
     PlaneReflective* planeReflective = dynamic_cast<PlaneReflective*>(objectManager.currentReflective);
     if(planeReflective) {
         Matrix4 mat = transformation;
@@ -95,7 +98,7 @@ Matrix4 Cam::getCamMatrix() {
         return Matrix4(transformation);
 }
 
-Ray3 Cam::getRelativeRayAt(float x, float y) {
+Ray3 CamObject::getRelativeRayAt(float x, float y) {
     Ray3 ray;
     if(fov > 0.0) { //Perspective
         float aux = tan(fov*0.5);
@@ -110,14 +113,14 @@ Ray3 Cam::getRelativeRayAt(float x, float y) {
     return ray;
 }
 
-Ray3 Cam::getRayAt(float x, float y) {
+Ray3 CamObject::getRayAt(float x, float y) {
     Ray3 ray = getRelativeRayAt(x, y);
     ray.origin = transformation(ray.origin);
     ray.direction = transformation.getBasis()*ray.direction;
     return ray;
 }
 
-bool Cam::doFrustumCulling() {
+bool CamObject::doFrustumCulling() {
     Matrix4 virtualMat = getCamMatrix();
     btVector3 planes_n[6];
     btScalar planes_o[6];
@@ -262,7 +265,7 @@ bool Cam::doFrustumCulling() {
     return false;
 }
 
-bool Cam::testInverseNearPlaneHit(btDbvtProxy* node) {
+bool CamObject::testInverseNearPlaneHit(btDbvtProxy* node) {
     Matrix4 virtualMat = getCamMatrix();
     btVector3 planes_n[1];
     btScalar planes_o[1];
@@ -278,7 +281,7 @@ bool Cam::testInverseNearPlaneHit(btDbvtProxy* node) {
     return fCC.hit;
 }
 
-void Cam::drawDebugFrustum(Color4 color) {
+void CamObject::drawDebugFrustum(Color4 color) {
     if(fov < M_PI) {
         Ray3 bounds[] = {
             getRayAt(-1, -1), getRayAt(-1, 1),
@@ -303,7 +306,7 @@ void Cam::drawDebugFrustum(Color4 color) {
     }
 }
 
-bool Cam::gameTick() {
+bool CamObject::gameTick() {
     velocity = (transformation.getOrigin()-prevPos)/profiler.animationFactor;
     prevPos = transformation.getOrigin();
     btMatrix3x3 mat = transformation.getBasis();
@@ -316,11 +319,18 @@ bool Cam::gameTick() {
     return true;
 }
 
-void Cam::use() {
+void CamObject::newScriptInstance() {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    v8::Local<v8::Object> instance = scriptCamObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+}
+
+void CamObject::use() {
     currentCam = this;
 }
 
-void Cam::updateViewMat() {
+void CamObject::updateViewMat() {
     viewMat = getCamMatrix().getInverse();
     
     if(fov == 0.0) //Ortho
@@ -329,9 +339,9 @@ void Cam::updateViewMat() {
         viewMat.perspective(fov, width/height, near, far);
 }
 
-rapidxml::xml_node<xmlUsedCharType>* Cam::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+rapidxml::xml_node<xmlUsedCharType>* CamObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
     rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
-    node->name("Cam");
+    node->name("CamObject");
     
     rapidxml::xml_node<xmlUsedCharType>* boundsNode = doc.allocate_node(rapidxml::node_element);
     boundsNode->name("Bounds");
@@ -351,4 +361,4 @@ rapidxml::xml_node<xmlUsedCharType>* Cam::write(rapidxml::xml_document<xmlUsedCh
     return node;
 }
 
-Cam *mainCam, *guiCam, *currentCam;
+CamObject *mainCam, *guiCam, *currentCam;

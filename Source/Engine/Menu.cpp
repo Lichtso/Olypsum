@@ -107,36 +107,103 @@ void Menu::consoleAdd(const std::string& message, float duration) {
     consoleMessages.push_back(entry);
 }
 
-void Menu::handleKeyUp(SDL_keysym* key) {
-    if(key->sym == SDLK_ESCAPE) {
+void Menu::handleActiveEvent(bool active) {
+    if(!active && menu.current == Menu::Name::inGame)
+        menu.setMenu(Menu::Name::gameEsc);
+}
+
+void Menu::handleMouseDown(SDL_Event& event) {
+    event.button.x *= prevOptionsState.videoScale;
+    event.button.y *= prevOptionsState.videoScale;
+    
+    if((event.button.button == SDL_BUTTON_LEFT && currentScreenView->handleMouseDown(event.button.x, event.button.y))
+       || menu.current != inGame) return;
+    
+    v8::HandleScope handleScope;
+    scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
+                                                                    "onmousedown", false, { });
+}
+
+void Menu::handleMouseUp(SDL_Event& event) {
+    event.button.x *= prevOptionsState.videoScale;
+    event.button.y *= prevOptionsState.videoScale;
+    if(currentScreenView->handleMouseUp(event.button.x, event.button.y) || menu.current != inGame) return;
+    
+    v8::HandleScope handleScope;
+    scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
+                                        "onmouseup", false, { });
+}
+
+void Menu::handleMouseMove(SDL_Event& event) {
+    event.button.x *= prevOptionsState.videoScale;
+    event.button.y *= prevOptionsState.videoScale;
+    currentScreenView->handleMouseMove(event.button.x, event.button.y);
+    if(menu.current != inGame) return;
+    
+    int mouseX = event.button.x-currentScreenView->width;
+    int mouseY = event.button.y-currentScreenView->height;
+    if(mouseX == 0 && mouseY == 0) return;
+    
+    SDL_WarpMouse(currentScreenView->width / prevOptionsState.videoScale, currentScreenView->height / prevOptionsState.videoScale);
+    mouseVelocityX -= optionsState.mouseSensitivity*mouseX;
+    mouseVelocityY -= optionsState.mouseSensitivity*mouseY;
+}
+
+void Menu::handleMouseWheel(SDL_Event& event) {
+    event.button.x *= prevOptionsState.videoScale;
+    event.button.y *= prevOptionsState.videoScale;
+    float delta = (event.button.button == SDL_BUTTON_WHEELDOWN) ? -1.0 : 1.0;
+    if(currentScreenView->handleMouseWheel(event.button.x, event.button.y, delta) || menu.current != inGame) return;
+    v8::HandleScope handleScope;
+    scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
+                                        "onmousewheel", false, { v8::Number::New(delta) });
+}
+
+void Menu::handleKeyDown(SDL_Event& event) {
+    if(currentScreenView->handleKeyDown(&event.key.keysym) || menu.current != inGame) return;
+    v8::HandleScope handleScope;
+    scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
+                                        "onkeydown", false, { v8::Integer::New(event.key.keysym.sym) });
+}
+
+void Menu::handleKeyUp(SDL_Event& event) {
+    if(currentScreenView->handleKeyUp(&event.key.keysym)) return;
+    
+    if(event.key.keysym.sym == SDLK_ESCAPE) {
         switch(current) {
             case loading:
             case main:
                 AppTerminate();
-                break;
+                return;
             case options:
                 leaveOptionsMenu(NULL);
-                break;
+                return;
             case videoResolution:
             case languages:
                 setMenu(options);
-                break;
+                return;
             case multiplayer:
                 networkManager.setLocalScan(false);
             case credits:
             case saveGames:
                 setMenu(main);
-                break;
+                return;
             case inGame:
                 setMenu(gameEsc);
-                break;
+                return;
             case gameEsc:
                 setMenu(inGame);
-                break;
+                return;
             case newGame:
                 setMenu(saveGames);
-                break;
+                return;
         }
+    }
+    
+    if(menu.current == inGame) {
+        v8::HandleScope handleScope;
+        scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
+                                            "onkeyup", false, { v8::Integer::New(event.key.keysym.sym) });
     }
 }
 
@@ -200,6 +267,11 @@ void Menu::gameTick() {
             
             for(int i = consoleMessages.size(); i < view->children.size(); i ++)
                 view->removeChild(i);
+            
+            mouseMotionX = optionsState.mouseSmoothing*mouseVelocityX;
+            mouseMotionY = optionsState.mouseSmoothing*mouseVelocityY;
+            mouseVelocityX -= mouseMotionX;
+            mouseVelocityY -= mouseMotionY;
             
             SDL_ShowCursor(0);
         } break;
@@ -455,16 +527,16 @@ void Menu::setMenu(Name menu) {
                 }, [](GUISlider* slider, bool dragging) {
                     optionsState.musicVolume = slider->value;
                 }, [](GUISlider* slider, bool dragging) {
-                    optionsState.mouseSensitivity = slider->value*0.01F;
+                    optionsState.mouseSensitivity = slider->value*5.0F;
                 }, [](GUISlider* slider, bool dragging) {
-                    optionsState.mouseSmoothing = 1.0F-slider->value;
+                    optionsState.mouseSmoothing = 1.01F-slider->value;
                 }
             };
             float sliderValues[] = {
                 optionsState.globalVolume,
                 optionsState.musicVolume,
-                optionsState.mouseSensitivity*100.0F,
-                1.0F-optionsState.mouseSmoothing
+                optionsState.mouseSensitivity*0.2F,
+                1.01F-optionsState.mouseSmoothing
             };
             const char* sliderLabels[] = {
                 "soundGlobal",

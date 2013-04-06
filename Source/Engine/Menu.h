@@ -22,6 +22,7 @@
 void openExternURL(const char* str);
 
 class Menu {
+    float mouseVelocityX = 0.0, mouseVelocityY = 0.0;
     public:
     enum Name {
         loading = 0,
@@ -41,9 +42,16 @@ class Menu {
         float timeLeft;
     };
     std::vector<ConsoleEntry> consoleMessages;
+    float mouseMotionX = 0.0, mouseMotionY = 0.0;
     
     void consoleAdd(const std::string& message, float duration = 10.0);
-    void handleKeyUp(SDL_keysym* key);
+    void handleActiveEvent(bool active);
+    void handleMouseDown(SDL_Event& event);
+    void handleMouseUp(SDL_Event& event);
+    void handleMouseMove(SDL_Event& event);
+    void handleMouseWheel(SDL_Event& event);
+    void handleKeyDown(SDL_Event& event);
+    void handleKeyUp(SDL_Event& event);
     void gameTick();
     void setMenu(Name menu);
 };

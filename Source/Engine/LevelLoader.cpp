@@ -119,12 +119,12 @@ bool LevelLoader::loadContainer(std::string name) {
                     object = new DirectionalLight(node, this);
             }else if(strcmp(node->name(), "ParticlesObject") == 0) {
                 object = new ParticlesObject(node, this);
-            }else if(strcmp(node->name(), "SoundSource") == 0) {
-                object = new SoundSource(node, this);
-            }else if(strcmp(node->name(), "HeightfieldTerrain") == 0) {
-                object = new HeightfieldTerrain(node, this);
-            }else if(strcmp(node->name(), "Cam") == 0) {
-                object = new Cam(node, this);
+            }else if(strcmp(node->name(), "SoundObject") == 0) {
+                object = new SoundObject(node, this);
+            }else if(strcmp(node->name(), "TerrainObject") == 0) {
+                object = new TerrainObject(node, this);
+            }else if(strcmp(node->name(), "CamObject") == 0) {
+                object = new CamObject(node, this);
             }else{
                 log(error_log, std::string("Tried to construct invalid Object: ")+node->name()+'.');
                 return false;
@@ -184,6 +184,10 @@ bool LevelLoader::loadContainer(std::string name) {
         levelManager.levelId = name;
         scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
                                             "onload", false, { localData, globalData });
+        if(!mainCam) {
+            log(error_log, "No CamObject was set as mainCam.");
+            return false;
+        }
     }
     return true;
 }
@@ -236,7 +240,7 @@ bool LevelLoader::loadLevel(std::string levelId) {
                     shape = new btConeShapeZ(radius, length);
             }else{
                 log(error_log, std::string("Found collision shape (")+name+") with an unknown direction: "+direction+'.');
-                return NULL;
+                return false;
             }
         }else if(strcmp(node->name(), "SphereCompound") == 0) {
             unsigned int count = 0;
@@ -265,7 +269,7 @@ bool LevelLoader::loadLevel(std::string levelId) {
                 btCollisionShape* childShape = levelManager.getCollisionShape(childNode->first_attribute("collisionShape")->value());
                 if(!childShape) {
                     log(error_log, std::string("Found compound collision shape (")+name+") with an invalid child.");
-                    return NULL;
+                    return false;
                 }
                 btTransform transformation = readTransformationXML(childNode);
                 compoundShape->addChildShape(transformation, childShape);

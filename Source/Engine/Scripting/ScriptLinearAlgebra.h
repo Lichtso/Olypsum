@@ -17,6 +17,7 @@ class ScriptVector3 : public ScriptClass {
     static v8::Handle<v8::Value> toJSON(const v8::Arguments& args);
     static v8::Handle<v8::Value> IndexedPropertyGetter(uint32_t index, const v8::AccessorInfo &info);
     static v8::Handle<v8::Value> IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
+    static v8::Handle<v8::Value> GetAngle(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetSum(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetDifference(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetProduct(const v8::Arguments& args);
@@ -24,6 +25,7 @@ class ScriptVector3 : public ScriptClass {
     static v8::Handle<v8::Value> GetCrossProduct(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetLength(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetNormalized(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetInterpolation(const v8::Arguments& args);
     static v8::Handle<v8::Value> Sum(const v8::Arguments& args);
     static v8::Handle<v8::Value> Subtract(const v8::Arguments& args);
     static v8::Handle<v8::Value> Multiply(const v8::Arguments& args);
@@ -36,29 +38,68 @@ class ScriptVector3 : public ScriptClass {
     ScriptVector3();
 };
 
+class ScriptQuaternion : public ScriptClass {
+    static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
+    static v8::Handle<v8::Value> toString(const v8::Arguments& args);
+    static v8::Handle<v8::Value> toJSON(const v8::Arguments& args);
+    static v8::Handle<v8::Value> IndexedPropertyGetter(uint32_t index, const v8::AccessorInfo &info);
+    static v8::Handle<v8::Value> IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
+    static v8::Handle<v8::Value> GetAngle(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetAxis(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetInverse(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetSum(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetDifference(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetProduct(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetDotProduct(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetLength(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetNormalized(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetInterpolation(const v8::Arguments& args);
+    static v8::Handle<v8::Value> SetRotation(const v8::Arguments& args);
+    static v8::Handle<v8::Value> SetEuler(const v8::Arguments& args);
+    static v8::Handle<v8::Value> Sum(const v8::Arguments& args);
+    static v8::Handle<v8::Value> Subtract(const v8::Arguments& args);
+    static v8::Handle<v8::Value> Multiply(const v8::Arguments& args);
+    static v8::Handle<v8::Value> Normalize(const v8::Arguments& args);
+    public:
+    static btQuaternion getDataOfInstance(const v8::Local<v8::Value>& object);
+    static void setDataToInstance(const v8::Local<v8::Value>& object, const btQuaternion& quaternion);
+    v8::Local<v8::Object> newInstance(const btQuaternion& quaternion);
+    ScriptQuaternion();
+};
+
 class ScriptMatrix4 : public ScriptClass {
     static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
     static void Destructor(v8::Persistent<v8::Value> value, void* data);
     static v8::Handle<v8::Value> toString(const v8::Arguments& args);
     static v8::Handle<v8::Value> toJSON(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetRow(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetRow(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> GetRowX(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> SetRowX(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetRowY(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> SetRowY(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetRowZ(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> SetRowZ(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetRowW(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> SetRowW(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetRotation(const v8::Arguments& args);
+    static v8::Handle<v8::Value> SetRotation(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetEuler(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetInverse(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetProduct(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetRotatedVector(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetTransformedVector(const v8::Arguments& args);
     static v8::Handle<v8::Value> Multiply(const v8::Arguments& args);
     static v8::Handle<v8::Value> Scale(const v8::Arguments& args);
     static v8::Handle<v8::Value> Rotate(const v8::Arguments& args);
     static v8::Handle<v8::Value> Translate(const v8::Arguments& args);
-    static v8::Handle<v8::Value> TransformVector(const v8::Arguments& args);
     public:
-    static Matrix4& getDataOfInstance(const v8::Local<v8::Value>& object);
+    static Matrix4* getDataOfInstance(const v8::Local<v8::Value>& object);
     static void setDataToInstance(const v8::Local<v8::Value>& object, const Matrix4& mat);
     v8::Local<v8::Object> newInstance(const Matrix4& mat);
     ScriptMatrix4();
 };
 
 extern ScriptVector3 scriptVector3;
+extern ScriptQuaternion scriptQuaternion;
 extern ScriptMatrix4 scriptMatrix4;
 
 #endif

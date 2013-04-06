@@ -19,6 +19,14 @@ Matrix4::Matrix4(Matrix4 const &mat) {
     w = mat.w;
 }
 
+Matrix4::Matrix4(btMatrix3x3 const &basis) {
+    x = basis.getColumn(0);
+    y = basis.getColumn(1);
+    z = basis.getColumn(2);
+    w = btVector3(0.0, 0.0, 0.0);
+    w.setW(1.0);
+}
+
 Matrix4::Matrix4(btTransform const &mat) {
     btMatrix3x3 basis = mat.getBasis();
     x = basis.getColumn(0);
@@ -34,11 +42,10 @@ Matrix4::Matrix4(btScalar matData[16]) {
 
 btVector3 Matrix4::getColum(unsigned char index) {
     btVector3 vec;
-    index *= 4;
     vec.setX(values[index  ]);
-    vec.setY(values[index+1]);
-    vec.setZ(values[index+2]);
-    vec.setW(values[index+3]);
+    vec.setY(values[index+4]);
+    vec.setZ(values[index+8]);
+    vec.setW(values[index+12]);
     return vec;
 }
 
@@ -320,7 +327,7 @@ btVector3 Matrix4::operator()(const btVector3& vec) {
     return resVec;
 }
 
-Matrix4& Matrix4::reflect(btVector3 vec) {
+Matrix4& Matrix4::reflect(const btVector3& vec) {
     Matrix4 a;
     a.setIdentity();
     a.x.setX(1.0-2*vec.x()*vec.x());
@@ -335,7 +342,7 @@ Matrix4& Matrix4::reflect(btVector3 vec) {
     return (*this *= a);
 }
 
-Matrix4& Matrix4::scale(btVector3 vec) {
+Matrix4& Matrix4::scale(const btVector3& vec) {
     Matrix4 a;
     a.setIdentity();
     a.x.setX(vec.x());
@@ -344,7 +351,14 @@ Matrix4& Matrix4::scale(btVector3 vec) {
     return (*this *= a);
 }
 
-Matrix4& Matrix4::rotate(btVector3 vec, btScalar angle) {
+Matrix4& Matrix4::rotate(const btQuaternion& quaternion) {
+    btMatrix3x3 mat;
+    mat.setRotation(quaternion);
+    Matrix4 a(mat);
+    return (*this *= a);
+}
+
+Matrix4& Matrix4::rotate(const btVector3& vec, btScalar angle) {
     btScalar s = sin(angle), c = cos(angle), d = 1.0-c;
     Matrix4 a;
     a.setIdentity();
@@ -360,7 +374,7 @@ Matrix4& Matrix4::rotate(btVector3 vec, btScalar angle) {
     return (*this *= a);
 }
 
-Matrix4& Matrix4::translate(btVector3 vec) {
+Matrix4& Matrix4::translate(const btVector3& vec) {
     Matrix4 a;
     a.setIdentity();
     a.w.setX(vec.x());

@@ -1,5 +1,5 @@
 //
-//  Cam.h
+//  CamObject.h
 //  Olypsum
 //
 //  Created by Alexander Meißner on 21.02.12.
@@ -9,8 +9,8 @@
 #include "Ray3.h"
 #include "ShaderProgram.h"
 
-#ifndef Cam_h
-#define Cam_h
+#ifndef CamObject_h
+#define CamObject_h
 
 enum CollisionMask {
     CollisionMask_Light = 1,
@@ -20,7 +20,7 @@ enum CollisionMask {
 };
 
 //! Camera used to render the scene
-class Cam : public SimpleObject {
+class CamObject : public SimpleObject {
     btVector3 prevPos, velocity;
     public:
     Matrix4 viewMat; //!< Projection matrix used for OpenGL
@@ -29,9 +29,9 @@ class Cam : public SimpleObject {
           far, //!< Distance of the far plane if fov < 90 else the radius of the parabolid or sphere
           width, //!< Width of the view used if fov < 90
           height;//!< Height of the view used if fov < 90
-    Cam();
-    Cam(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    ~Cam();
+    CamObject();
+    CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    ~CamObject();
     void remove();
     //Returns a temporary Matrix4 which might differ from the transformation in reflection frames
     Matrix4 getCamMatrix();
@@ -62,6 +62,7 @@ class Cam : public SimpleObject {
      */
     void drawDebugFrustum(Color4 color);
     bool gameTick();
+    void newScriptInstance();
     //! Sets this Cam as the currentCam
     void use();
     //! Recalculates the viewMat of this Cam
@@ -69,6 +70,6 @@ class Cam : public SimpleObject {
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
-extern Cam *mainCam, *guiCam, *currentCam;
+extern CamObject *mainCam, *guiCam, *currentCam;
 
 #endif

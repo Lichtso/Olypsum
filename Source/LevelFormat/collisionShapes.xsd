@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:include schemaLocation="types.xsd"/>
+	<xsd:element name="CollisionShapes">
+        <xsd:complexType>
+            <xsd:choice>
+                <xsd:element name="Cylinder" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="id" type="xsd:string"/>
+                        <xsd:attribute name="size" type="Vector3"/>
+                    </xsd:complexType>
+                </xsd:element>
+                <xsd:element name="Box" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="id" type="xsd:string"/>
+                        <xsd:attribute name="size" type="Vector3"/>
+                    </xsd:complexType>
+                </xsd:element>
+                <xsd:element name="Sphere" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="id" type="xsd:string"/>
+                        <xsd:attribute name="radius" type="PositiveScalar"/>
+                    </xsd:complexType>
+                </xsd:element>
+                <xsd:element name="Capsule" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="id" type="xsd:string"/>
+                        <xsd:attribute name="radius" type="PositiveScalar"/>
+                        <xsd:attribute name="length" type="PositiveScalar"/>
+                        <xsd:attribute name="direction" type="AxisName"/>
+                    </xsd:complexType>
+                </xsd:element>
+                <xsd:element name="Cone" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="id" type="xsd:string"/>
+                        <xsd:attribute name="radius" type="PositiveScalar"/>
+                        <xsd:attribute name="length" type="PositiveScalar"/>
+                        <xsd:attribute name="direction" type="AxisName"/>
+                    </xsd:complexType>
+                </xsd:element>
+                <xsd:element name="SphereCompound" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:element name="Sphere" minOccurs="1" maxOccurs="unbounded">
+                                <xsd:complexType>
+                                    <xsd:attribute name="position" type="Vector3"/>
+                                    <xsd:attribute name="radius" type="PositiveScalar"/>
+                                </xsd:complexType>
+                            </xsd:element>
+                        </xsd:sequence>
+                        <xsd:attribute name="id" type="xsd:string"/>
+                    </xsd:complexType>
+                </xsd:element>
+                <xsd:element name="Compound" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:element name="Child" minOccurs="1" maxOccurs="unbounded">
+                                <xsd:complexType>
+                                    <xsd:sequence>
+                                        <xsd:group ref="Transformation"/>
+                                    </xsd:sequence>
+                                    <xsd:attribute name="collisionShape" type="xsd:string"/>
+                                </xsd:complexType>
+                            </xsd:element>
+                        </xsd:sequence>
+                        <xsd:attribute name="id" type="xsd:string"/>
+                    </xsd:complexType>
+                </xsd:element>
+                <xsd:element name="VertexCloud" type="ScalarList" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="id" type="xsd:string"/>
+                        <xsd:attribute name="vertexCount" type="xsd:positiveInteger"/>
+                    </xsd:complexType>
+                </xsd:element>
+                <xsd:element name="StaticPlane" type="Vector3" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="id" type="xsd:string"/>
+                        <xsd:attribute name="distance" type="xsd:decimal"/>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:choice>
+        </xsd:complexType>
+	</xsd:element>
+</xsd:schema>

@@ -16,7 +16,7 @@
 
 //! A SoundTrack used for audio playback
 /*!
- A FilePackageResource which can be loaded form a OGG-file and can be played by a SoundSource.
+ A FilePackageResource which can be loaded form a OGG-file and can be played by a SoundObject.
  */
 class SoundTrack : public FilePackageResource {
     public:
@@ -37,24 +37,24 @@ class SoundTrack : public FilePackageResource {
 
 //! A SimpleObject used for audio playback
 /*!
- A SimpleObject which can be loaded form a OGG-file and can be played by a SoundSource.
+ A SimpleObject which can be loaded form a OGG-file and can be played by a SoundObject.
  */
-class SoundSource : public SimpleObject {
+class SoundObject : public SimpleObject {
     btVector3 prevPosition, velocity; //!< Used by the engine to calculate the Doppler effect
     public:
-    ALuint ALname; //!< The OpenAL identifier of this SoundSource
+    ALuint ALname; //!< The OpenAL identifier of this SoundObject
     std::shared_ptr<SoundTrack> soundTrack; //!< The SoundTrack used for audio playback
     //! The playback state
     enum {
-        SoundSource_looping, //!< Restart playing if the SoundTrack reaches its end
-        SoundSource_hold, //!< Stops playing if the SoundTrack reaches its end
-        SoundSource_disposable //!< Deletes this SoundSource if the SoundTrack reaches its end
+        SoundObject_looping, //!< Restart playing if the SoundTrack reaches its end
+        SoundObject_hold, //!< Stops playing if the SoundTrack reaches its end
+        SoundObject_disposable //!< Deletes this SoundObject if the SoundTrack reaches its end
     } mode;
-    SoundSource(SoundTrack* soundTrack);
-    SoundSource(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    ~SoundSource();
+    SoundObject(SoundTrack* soundTrack);
+    SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    ~SoundObject();
     void remove();
-    /*! Adds a SoundTrack to this SoundSource
+    /*! Adds a SoundTrack to this SoundObject
      @param soundTrack The new SoundTrack
      */
     void setSoundTrack(std::shared_ptr<SoundTrack> soundTrack);
@@ -65,7 +65,7 @@ class SoundSource : public SimpleObject {
     //! Stops playing the SoundTrack and resets the current playback position
     void stop();
     /*!
-     @return Is this SoundSource currently playing
+     @return Is this SoundObject currently playing
      */
     bool isPlaying();
     /*! Sets the playback position

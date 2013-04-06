@@ -113,6 +113,10 @@ void GUILabel::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     shaderPrograms[spriteSP]->setUniformF("alpha", 1.0);
 }
 
+bool GUILabel::handleMouseDown(int mouseX, int mouseY) {
+    return false;
+}
+
 void GUILabel::getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int& posX, int& posY) {
     if(lineIndex >= lines.size()) {
         posY = 0;

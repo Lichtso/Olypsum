@@ -34,11 +34,11 @@
 		1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254114F2559600F198A7 /* OpenGL.framework */; };
 		1118254414F2559B00F198A7 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254314F2559B00F198A7 /* OpenAL.framework */; };
 		112672E91699BBFD000BB805 /* Links.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112672E71699BBFD000BB805 /* Links.cpp */; };
-		112672EC1699BCF1000BB805 /* HeightfieldTerrain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112672EA1699BCF0000BB805 /* HeightfieldTerrain.cpp */; };
+		112672EC1699BCF1000BB805 /* TerrainObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112672EA1699BCF0000BB805 /* TerrainObject.cpp */; };
 		112BF180162AFE8100CF0C0D /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112BF17E162AFE8100CF0C0D /* Object.cpp */; };
 		1130ECBB15BC1CA600203C2E /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1130ECBA15BC1CA600203C2E /* Menu.cpp */; };
 		11329D5A16BD8A2A000CC025 /* Profiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11329D5816BD8A29000CC025 /* Profiler.cpp */; };
-		1145E3C5170ECEBB00480189 /* ScriptHeightfieldTerrain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1145E3C3170ECEBB00480189 /* ScriptHeightfieldTerrain.cpp */; };
+		1145E3C5170ECEBB00480189 /* ScriptSimpleObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1145E3C3170ECEBB00480189 /* ScriptSimpleObject.cpp */; };
 		114A0E6B169064E800D2CE9C /* LevelSaver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 114A0E69169064E800D2CE9C /* LevelSaver.cpp */; };
 		11511420170C1A0E00F77236 /* ScriptIntersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */; };
 		11511422170CBE6700F77236 /* libNetLink.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11511421170CBE6700F77236 /* libNetLink.a */; };
@@ -47,13 +47,12 @@
 		117CBA9C16EBDC6800307B94 /* ScriptObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 117CBA9A16EBDC6800307B94 /* ScriptObject.cpp */; };
 		118620481650165400A32518 /* ObjectManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118620461650165400A32518 /* ObjectManager.cpp */; };
 		118B60621573E2E8004C132E /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118B60611573E2E8004C132E /* Audio.cpp */; };
-		119F166F169DA12400033832 /* Controls.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 119F166D169DA12400033832 /* Controls.cpp */; };
 		11A3255517089E2100B038D2 /* Network.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A3255317089E2100B038D2 /* Network.cpp */; };
 		11A6811F16B96CFC000E4029 /* ScriptLinearAlgebra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A6811D16B96CFC000E4029 /* ScriptLinearAlgebra.cpp */; };
 		11A6812416B9B2B5000E4029 /* libv8.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A6812316B9B2B5000E4029 /* libv8.dylib */; };
 		11A6812516B9B2BA000E4029 /* libv8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 11A6812316B9B2B5000E4029 /* libv8.dylib */; };
 		11A79B6A153C2FE9002B9F0A /* AppMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B20153C2FE9002B9F0A /* AppMain.cpp */; };
-		11A79B6B153C2FE9002B9F0A /* Cam.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B22153C2FE9002B9F0A /* Cam.cpp */; };
+		11A79B6B153C2FE9002B9F0A /* CamObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B22153C2FE9002B9F0A /* CamObject.cpp */; };
 		11A79B6C153C2FE9002B9F0A /* FileManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B24153C2FE9002B9F0A /* FileManager.cpp */; };
 		11A79B6D153C2FE9002B9F0A /* GUIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B27153C2FE9002B9F0A /* GUIButton.cpp */; };
 		11A79B6E153C2FE9002B9F0A /* GUIButtonList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B29153C2FE9002B9F0A /* GUIButtonList.cpp */; };
@@ -142,15 +141,15 @@
 		1118254314F2559B00F198A7 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 		112672E71699BBFD000BB805 /* Links.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Links.cpp; sourceTree = "<group>"; };
 		112672E81699BBFD000BB805 /* Links.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Links.h; sourceTree = "<group>"; };
-		112672EA1699BCF0000BB805 /* HeightfieldTerrain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HeightfieldTerrain.cpp; sourceTree = "<group>"; };
-		112672EB1699BCF0000BB805 /* HeightfieldTerrain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HeightfieldTerrain.h; sourceTree = "<group>"; };
+		112672EA1699BCF0000BB805 /* TerrainObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TerrainObject.cpp; sourceTree = "<group>"; };
+		112672EB1699BCF0000BB805 /* TerrainObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TerrainObject.h; sourceTree = "<group>"; };
 		112BF17E162AFE8100CF0C0D /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Object.cpp; sourceTree = "<group>"; };
 		112BF17F162AFE8100CF0C0D /* Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Object.h; sourceTree = "<group>"; };
 		1130ECBA15BC1CA600203C2E /* Menu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Menu.cpp; sourceTree = "<group>"; };
 		11329D5816BD8A29000CC025 /* Profiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Profiler.cpp; sourceTree = "<group>"; };
 		11329D5916BD8A2A000CC025 /* Profiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Profiler.h; sourceTree = "<group>"; };
-		1145E3C3170ECEBB00480189 /* ScriptHeightfieldTerrain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptHeightfieldTerrain.cpp; sourceTree = "<group>"; };
-		1145E3C4170ECEBB00480189 /* ScriptHeightfieldTerrain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptHeightfieldTerrain.h; sourceTree = "<group>"; };
+		1145E3C3170ECEBB00480189 /* ScriptSimpleObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptSimpleObject.cpp; sourceTree = "<group>"; };
+		1145E3C4170ECEBB00480189 /* ScriptSimpleObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptSimpleObject.h; sourceTree = "<group>"; };
 		114A0E69169064E800D2CE9C /* LevelSaver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelSaver.cpp; sourceTree = "<group>"; };
 		114A0E6A169064E800D2CE9C /* LevelSaver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LevelSaver.h; sourceTree = "<group>"; };
 		1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptIntersection.cpp; sourceTree = "<group>"; };
@@ -166,8 +165,6 @@
 		118620471650165400A32518 /* ObjectManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectManager.h; sourceTree = "<group>"; };
 		118B60601573E2DF004C132E /* Audio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Audio.h; sourceTree = "<group>"; };
 		118B60611573E2E8004C132E /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Audio.cpp; sourceTree = "<group>"; };
-		119F166D169DA12400033832 /* Controls.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Controls.cpp; sourceTree = "<group>"; };
-		119F166E169DA12400033832 /* Controls.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controls.h; sourceTree = "<group>"; };
 		11A3255317089E2100B038D2 /* Network.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Network.cpp; sourceTree = "<group>"; };
 		11A3255417089E2100B038D2 /* Network.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Network.h; sourceTree = "<group>"; };
 		11A6811D16B96CFC000E4029 /* ScriptLinearAlgebra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptLinearAlgebra.cpp; sourceTree = "<group>"; };
@@ -175,8 +172,8 @@
 		11A6812316B9B2B5000E4029 /* libv8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libv8.dylib; path = Libraries/v8/out/x64.release/libv8.dylib; sourceTree = "<group>"; };
 		11A79B20153C2FE9002B9F0A /* AppMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppMain.cpp; sourceTree = "<group>"; };
 		11A79B21153C2FE9002B9F0A /* AppMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppMain.h; sourceTree = "<group>"; };
-		11A79B22153C2FE9002B9F0A /* Cam.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Cam.cpp; sourceTree = "<group>"; };
-		11A79B23153C2FE9002B9F0A /* Cam.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Cam.h; sourceTree = "<group>"; };
+		11A79B22153C2FE9002B9F0A /* CamObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CamObject.cpp; sourceTree = "<group>"; };
+		11A79B23153C2FE9002B9F0A /* CamObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CamObject.h; sourceTree = "<group>"; };
 		11A79B24153C2FE9002B9F0A /* FileManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileManager.cpp; sourceTree = "<group>"; };
 		11A79B25153C2FE9002B9F0A /* FileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileManager.h; sourceTree = "<group>"; };
 		11A79B27153C2FE9002B9F0A /* GUIButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIButton.cpp; sourceTree = "<group>"; };
@@ -372,14 +369,14 @@
 				112672E71699BBFD000BB805 /* Links.cpp */,
 				11A79B63153C2FE9002B9F0A /* ShaderProgram.h */,
 				11A79B62153C2FE9002B9F0A /* ShaderProgram.cpp */,
-				11A79B23153C2FE9002B9F0A /* Cam.h */,
-				11A79B22153C2FE9002B9F0A /* Cam.cpp */,
+				11A79B23153C2FE9002B9F0A /* CamObject.h */,
+				11A79B22153C2FE9002B9F0A /* CamObject.cpp */,
 				11A79B5C153C2FE9002B9F0A /* Model.h */,
 				11A79B5B153C2FE9002B9F0A /* Model.cpp */,
 				11B2626E15E28DF6002C638D /* DisplayObject.h */,
 				11B2626D15E28DF6002C638D /* DisplayObject.cpp */,
-				112672EB1699BCF0000BB805 /* HeightfieldTerrain.h */,
-				112672EA1699BCF0000BB805 /* HeightfieldTerrain.cpp */,
+				112672EB1699BCF0000BB805 /* TerrainObject.h */,
+				112672EA1699BCF0000BB805 /* TerrainObject.cpp */,
 				118B60601573E2DF004C132E /* Audio.h */,
 				118B60611573E2E8004C132E /* Audio.cpp */,
 				11F1EEB5156FE48B00F7275D /* ParticlesObject.h */,
@@ -405,8 +402,6 @@
 				11C238D71613164C009D6F9C /* LevelManager.cpp */,
 				11BB4D1E15BC818E0094A73B /* Menu.h */,
 				1130ECBA15BC1CA600203C2E /* Menu.cpp */,
-				119F166E169DA12400033832 /* Controls.h */,
-				119F166D169DA12400033832 /* Controls.cpp */,
 				11FE8AAF16B5A3D900B682D0 /* Scripting */,
 				11A79B21153C2FE9002B9F0A /* AppMain.h */,
 				11A79B20153C2FE9002B9F0A /* AppMain.cpp */,
@@ -495,8 +490,8 @@
 				117CBA9A16EBDC6800307B94 /* ScriptObject.cpp */,
 				11511424170D9B7C00F77236 /* ScriptDisplayObject.h */,
 				11511423170D9B7B00F77236 /* ScriptDisplayObject.cpp */,
-				1145E3C4170ECEBB00480189 /* ScriptHeightfieldTerrain.h */,
-				1145E3C3170ECEBB00480189 /* ScriptHeightfieldTerrain.cpp */,
+				1145E3C4170ECEBB00480189 /* ScriptSimpleObject.h */,
+				1145E3C3170ECEBB00480189 /* ScriptSimpleObject.cpp */,
 				1151141F170C1A0E00F77236 /* ScriptIntersection.h */,
 				1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */,
 				11FE8AB116B5A3F400B682D0 /* ScriptManager.h */,
@@ -572,7 +567,7 @@
 			files = (
 				11A9075F1629B19000B16607 /* Utilities.cpp in Sources */,
 				11A79B6A153C2FE9002B9F0A /* AppMain.cpp in Sources */,
-				11A79B6B153C2FE9002B9F0A /* Cam.cpp in Sources */,
+				11A79B6B153C2FE9002B9F0A /* CamObject.cpp in Sources */,
 				11A79B6C153C2FE9002B9F0A /* FileManager.cpp in Sources */,
 				11A79B6D153C2FE9002B9F0A /* GUIButton.cpp in Sources */,
 				11A79B6E153C2FE9002B9F0A /* GUIButtonList.cpp in Sources */,
@@ -611,8 +606,7 @@
 				118620481650165400A32518 /* ObjectManager.cpp in Sources */,
 				114A0E6B169064E800D2CE9C /* LevelSaver.cpp in Sources */,
 				112672E91699BBFD000BB805 /* Links.cpp in Sources */,
-				112672EC1699BCF1000BB805 /* HeightfieldTerrain.cpp in Sources */,
-				119F166F169DA12400033832 /* Controls.cpp in Sources */,
+				112672EC1699BCF1000BB805 /* TerrainObject.cpp in Sources */,
 				1115463916A0BA4200F27340 /* VertexArrayObject.cpp in Sources */,
 				11FE8AB216B5A3F400B682D0 /* ScriptManager.cpp in Sources */,
 				11FE8AB516B719CE00B682D0 /* Script.cpp in Sources */,
@@ -623,7 +617,7 @@
 				11A3255517089E2100B038D2 /* Network.cpp in Sources */,
 				11511420170C1A0E00F77236 /* ScriptIntersection.cpp in Sources */,
 				11511425170D9B7C00F77236 /* ScriptDisplayObject.cpp in Sources */,
-				1145E3C5170ECEBB00480189 /* ScriptHeightfieldTerrain.cpp in Sources */,
+				1145E3C5170ECEBB00480189 /* ScriptSimpleObject.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

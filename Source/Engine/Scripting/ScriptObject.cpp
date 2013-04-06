@@ -25,12 +25,13 @@ v8::Handle<v8::Value> ScriptBaseObject::GetTransformation(v8::Local<v8::String> 
     return handleScope.Close(scriptMatrix4.newInstance(transformation));
 }
 
-void ScriptBaseObject::SetTransformation(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+v8::Handle<v8::Value> ScriptBaseObject::SetTransformation(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(!scriptMatrix4.isCorrectInstance(value))
-        v8::ThrowException(v8::String::New("BaseObject transform=: Invalid argument"));
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(info.This());
-    objectPtr->setTransformation(scriptMatrix4.getDataOfInstance(value).getBTTransform());
+    if(args.Length() != 1 || !scriptMatrix4.isCorrectInstance(args[0]))
+        return v8::ThrowException(v8::String::New("BaseObject setTransformation(): Invalid argument"));
+    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
+    objectPtr->setTransformation(scriptMatrix4.getDataOfInstance(args[0])->getBTTransform());
+    return args.This();
 }
 
 v8::Handle<v8::Value> ScriptBaseObject::GetScriptClass(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
@@ -44,8 +45,7 @@ v8::Handle<v8::Value> ScriptBaseObject::GetScriptClass(v8::Local<v8::String> pro
 
 void ScriptBaseObject::SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    if(!value->IsString())
-        v8::ThrowException(v8::String::New("BaseObject scriptClass=: Invalid argument"));
+    if(!value->IsString()) return;
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(info.This());
     FilePackage* filePackage;
     std::string name;
@@ -86,7 +86,8 @@ ScriptBaseObject::ScriptBaseObject() :ScriptBaseObject("BaseObject") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->SetAccessor(v8::String::New("transformation"), GetTransformation, SetTransformation);
+    objectTemplate->SetAccessor(v8::String::New("transformation"), GetTransformation);
+    objectTemplate->Set(v8::String::New("setTransformation"), v8::FunctionTemplate::New(SetTransformation));
     objectTemplate->SetAccessor(v8::String::New("scriptClass"), GetScriptClass, SetScriptClass);
     objectTemplate->Set(v8::String::New("getLinkNames"), v8::FunctionTemplate::New(GetLinkNames));
     objectTemplate->Set(v8::String::New("getLinkedObject"), v8::FunctionTemplate::New(GetLinkedObject));
@@ -104,14 +105,10 @@ v8::Handle<v8::Value> ScriptPhysicObject::GetCollisionShape(v8::Local<v8::String
 
 void ScriptPhysicObject::SetCollisionShape(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    if(!value->IsString())
-        v8::ThrowException(v8::String::New("BaseObject collisionShape=: Invalid argument"));
+    if(!value->IsString()) return;
     btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(info.This())->getBody();
     btCollisionShape* shape = levelManager.getCollisionShape(scriptManager->stdStringOf(value->ToString()));
-    if(shape)
-        physicBody->setCollisionShape(shape);
-    else
-        v8::ThrowException(v8::String::New("BaseObject collisionShape=: Invalid name"));
+    if(shape) physicBody->setCollisionShape(shape);
 }
 
 v8::Handle<v8::Value> ScriptPhysicObject::GetCollisionShapeInfo(const v8::Arguments& args) {
