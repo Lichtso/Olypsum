@@ -25,12 +25,26 @@ class ScriptCamObject : public ScriptBaseObject {
     static v8::Handle<v8::Value> GetViewRay(const v8::Arguments& args);
     static v8::Handle<v8::Value> SetMainCam(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetMainCam(const v8::Arguments& args);
-    protected:
-    ScriptCamObject(const char* name);
     public:
     ScriptCamObject();
 };
 
+class ScriptSoundObject : public ScriptBaseObject {
+    static v8::Handle<v8::Value> GetSoundTrack(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static void SetSoundTrack(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> GetTimeOffset(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static void SetTimeOffset(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> GetVolume(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static void SetVolume(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> GetPlaying(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static void SetPlaying(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> GetMode(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static void SetMode(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    public:
+    ScriptSoundObject();
+};
+
 extern ScriptCamObject scriptCamObject;
+extern ScriptSoundObject scriptSoundObject;
 
 #endif

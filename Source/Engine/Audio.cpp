@@ -77,14 +77,14 @@ float SoundTrack::getLength() {
 
 
 
-SoundObject::SoundObject(SoundTrack* soundTrackB) :soundTrack(soundTrackB), mode(SoundObject_disposable), velocity(btVector3(0, 0, 0)) {
+SoundObject::SoundObject(SoundTrack* soundTrackB, Mode _mode) :soundTrack(soundTrackB), mode(_mode), velocity(btVector3(0, 0, 0)) {
     objectManager.simpleObjects.insert(this);
     alGenSources(1, &ALname);
     alSourcei(ALname, AL_BUFFER, soundTrack->ALname);
-    play();
+    setPlaying(true);
 }
 
-SoundObject::SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :mode(SoundObject_looping), velocity(btVector3(0, 0, 0)) {
+SoundObject::SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :velocity(btVector3(0, 0, 0)) {
     objectManager.simpleObjects.insert(this);
     alGenSources(1, &ALname);
     BaseObject::init(node, levelLoader);
@@ -100,7 +100,54 @@ SoundObject::SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
         return;
     }
     setSoundTrack(fileManager.initResource<SoundTrack>(attribute->value()));
-    play();
+    
+    parameterNode = node->first_node("Mode");
+    if(!parameterNode) {
+        log(error_log, "Tried to construct SoundObject without \"Mode\"-node.");
+        return;
+    }
+    attribute = parameterNode->first_attribute("value");
+    if(!attribute) {
+        log(error_log, "Found \"Mode\"-node without \"value\"-attribute.");
+        return;
+    }
+    if(strcmp(attribute->value(), "looping") == 0)
+        mode = Looping;
+    else if(strcmp(attribute->value(), "hold") == 0)
+        mode = Hold;
+    else if(strcmp(attribute->value(), "dispose") == 0)
+        mode = Dispose;
+    else{
+        log(error_log, "Found \"Mode\"-node with invalid \"value\"-attribute.");
+        return;
+    }
+    
+    parameterNode = node->first_node("Volume");
+    if(parameterNode) {
+        attribute = parameterNode->first_attribute("value");
+        if(!attribute) {
+            log(error_log, "Found \"Volume\"-node without \"value\"-attribute.");
+            return;
+        }
+        float volume;
+        sscanf(attribute->value(), "%f", &volume);
+        setVolume(volume);
+    }
+    
+    if(node->first_node("IsPlaying"))
+        setPlaying(true);
+    
+    parameterNode = node->first_node("TimeOffset");
+    if(parameterNode) {
+        attribute = parameterNode->first_attribute("value");
+        if(!attribute) {
+            log(error_log, "Found \"TimeOffset\"-node without \"value\"-attribute.");
+            return;
+        }
+        float time;
+        sscanf(attribute->value(), "%f", &time);
+        setTimeOffset(time);
+    }
 }
 
 SoundObject::~SoundObject() {
@@ -117,21 +164,17 @@ void SoundObject::setSoundTrack(std::shared_ptr<SoundTrack> soundTrackB) {
     alSourcei(ALname, AL_BUFFER, soundTrack->ALname);
 }
 
-void SoundObject::play() {
+void SoundObject::setPlaying(bool playing) {
     if(!soundTrack || !soundTrack->ALname) return;
-    alSourcei(ALname, AL_LOOPING, mode == SoundObject_looping);
-    alSourcePlay(ALname);
+    alSourcei(ALname, AL_LOOPING, mode == Looping);
+    if(playing)
+        alSourcePlay(ALname);
+    else
+        alSourcePause(ALname);
+    //alSourceStop(ALname);
 }
 
-void SoundObject::pause() {
-    alSourcePause(ALname);
-}
-
-void SoundObject::stop() {
-    alSourceStop(ALname);
-}
-
-bool SoundObject::isPlaying() {
+bool SoundObject::getPlaying() {
     if(!soundTrack) return false;
     ALint state;
     alGetSourcei(ALname, AL_SOURCE_STATE, &state);
@@ -148,8 +191,18 @@ float SoundObject::getTimeOffset() {
     return timeOffset;
 }
 
+void SoundObject::setVolume(float volume) {
+    alSourcef(ALname, AL_GAIN, volume);
+}
+
+float SoundObject::getVolume() {
+    ALfloat volume;
+    alGetSourcef(ALname, AL_GAIN, &volume);
+    return volume;
+}
+
 bool SoundObject::gameTick() {
-    if(mode == SoundObject_disposable && !isPlaying()) {
+    if(mode == Dispose && !getPlaying()) {
         remove();
         return false;
     }
@@ -167,7 +220,54 @@ bool SoundObject::gameTick() {
 
 rapidxml::xml_node<xmlUsedCharType>* SoundObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
     rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
+    
     node->name("SoundObject");
     node->append_node(fileManager.writeResource(doc, "SoundTrack", soundTrack));
+    
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode = doc.allocate_node(rapidxml::node_element);
+    parameterNode->name("Mode");
+    node->append_node(parameterNode);
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    attribute->name("value");
+    parameterNode->append_attribute(attribute);
+    switch(mode) {
+        case Looping:
+            attribute->value("looping");
+        break;
+        case Hold:
+            attribute->value("hold");
+        break;
+        case Dispose:
+            attribute->value("dispose");
+        break;
+    }
+    
+    if(!soundTrack->isStereo()) {
+        float volume = getVolume();
+        if(volume != 1.0) {
+            parameterNode = doc.allocate_node(rapidxml::node_element);
+            parameterNode->name("Volume");
+            node->append_node(parameterNode);
+            attribute = doc.allocate_attribute();
+            attribute->name("value");
+            attribute->value(doc.allocate_string(stringOf(volume).c_str()));
+            parameterNode->append_attribute(attribute);
+        }
+    }
+    
+    if(getPlaying()) {
+        parameterNode = doc.allocate_node(rapidxml::node_element);
+        parameterNode->name("IsPlaying");
+        node->append_node(parameterNode);
+    }
+    
+    parameterNode = doc.allocate_node(rapidxml::node_element);
+    parameterNode->name("TimeOffset");
+    node->append_node(parameterNode);
+    attribute = doc.allocate_attribute();
+    attribute->name("value");
+    attribute->value(doc.allocate_string(stringOf(getTimeOffset()).c_str()));
+    parameterNode->append_attribute(attribute);
+    
     return node;
 }

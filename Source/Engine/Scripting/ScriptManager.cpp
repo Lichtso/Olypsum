@@ -120,6 +120,7 @@ ScriptManager::ScriptManager() {
     scriptRigidObject.init(globalTemplate);
     scriptTerrainObject.init(globalTemplate);
     scriptCamObject.init(globalTemplate);
+    scriptSoundObject.init(globalTemplate);
 }
 
 ScriptManager::~ScriptManager() {

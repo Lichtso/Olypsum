@@ -6,7 +6,7 @@
 //
 //
 
-#include "ScriptSimpleObject.h"
+#include "ScriptManager.h"
 
 v8::Handle<v8::Value> ScriptCamObject::GetFov(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
@@ -100,11 +100,7 @@ v8::Handle<v8::Value> ScriptCamObject::GetMainCam(const v8::Arguments& args) {
     return handleScope.Close(result);
 }
 
-ScriptCamObject::ScriptCamObject(const char* name) :ScriptBaseObject(name) {
-    
-}
-
-ScriptCamObject::ScriptCamObject() :ScriptCamObject("CamObject") {
+ScriptCamObject::ScriptCamObject() :ScriptBaseObject("CamObject") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
@@ -121,5 +117,102 @@ ScriptCamObject::ScriptCamObject() :ScriptCamObject("CamObject") {
 }
 
 
+v8::Handle<v8::Value> ScriptSoundObject::GetSoundTrack(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
+    std::string name;
+    FilePackage* filePackage = fileManager.findResource<SoundTrack>(objectPtr->soundTrack, name);
+    if(!filePackage) return v8::Undefined();
+    return handleScope.Close(v8::String::New(fileManager.getResourcePath(filePackage, name).c_str()));
+}
+
+void ScriptSoundObject::SetSoundTrack(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsString()) return;
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
+    auto soundTrack = fileManager.initResource<SoundTrack>(scriptManager->stdStringOf(value->ToString()));
+    if(soundTrack) objectPtr->setSoundTrack(soundTrack);
+}
+
+v8::Handle<v8::Value> ScriptSoundObject::GetTimeOffset(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
+    return handleScope.Close(v8::Number::New(objectPtr->getTimeOffset()));
+}
+
+void ScriptSoundObject::SetTimeOffset(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsNumber()) return;
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
+    objectPtr->setTimeOffset(value->NumberValue());
+}
+
+v8::Handle<v8::Value> ScriptSoundObject::GetVolume(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
+    return handleScope.Close(v8::Number::New(objectPtr->getVolume()));
+}
+
+void ScriptSoundObject::SetVolume(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsNumber()) return;
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
+    objectPtr->setVolume(value->NumberValue());
+}
+
+v8::Handle<v8::Value> ScriptSoundObject::GetPlaying(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
+    return handleScope.Close(v8::Boolean::New(objectPtr->getPlaying()));
+}
+
+void ScriptSoundObject::SetPlaying(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsBoolean()) return;
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
+    objectPtr->setPlaying(value->BooleanValue());
+}
+
+v8::Handle<v8::Value> ScriptSoundObject::GetMode(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
+    switch(objectPtr->mode) {
+        case SoundObject::Mode::Looping:
+            return handleScope.Close(v8::String::New("looping"));
+        case SoundObject::Mode::Hold:
+            return handleScope.Close(v8::String::New("hold"));
+        case SoundObject::Mode::Dispose:
+            return handleScope.Close(v8::String::New("dispose"));
+    }
+}
+
+void ScriptSoundObject::SetMode(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsString()) return;
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
+    const char* str = scriptManager->cStringOf(value->ToString());
+    if(strcmp(str, "looping") == 0)
+        objectPtr->mode = SoundObject::Mode::Looping;
+    else if(strcmp(str, "hold") == 0)
+        objectPtr->mode = SoundObject::Mode::Hold;
+    else if(strcmp(str, "dispose") == 0)
+        objectPtr->mode = SoundObject::Mode::Dispose;
+}
+
+ScriptSoundObject::ScriptSoundObject() :ScriptBaseObject("SoundObject") {
+    v8::HandleScope handleScope;
+    
+    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
+    objectTemplate->SetAccessor(v8::String::New("soundTrack"), GetSoundTrack, SetSoundTrack);
+    objectTemplate->SetAccessor(v8::String::New("timeOffset"), GetTimeOffset, SetTimeOffset);
+    objectTemplate->SetAccessor(v8::String::New("volume"), GetVolume, SetVolume);
+    objectTemplate->SetAccessor(v8::String::New("playing"), GetPlaying, SetPlaying);
+    objectTemplate->SetAccessor(v8::String::New("mode"), GetMode, SetMode);
+    
+    functionTemplate->Inherit(scriptPhysicObject.functionTemplate);
+}
+
+
 
 ScriptCamObject scriptCamObject;
+ScriptSoundObject scriptSoundObject;

@@ -45,12 +45,12 @@ class SoundObject : public SimpleObject {
     ALuint ALname; //!< The OpenAL identifier of this SoundObject
     std::shared_ptr<SoundTrack> soundTrack; //!< The SoundTrack used for audio playback
     //! The playback state
-    enum {
-        SoundObject_looping, //!< Restart playing if the SoundTrack reaches its end
-        SoundObject_hold, //!< Stops playing if the SoundTrack reaches its end
-        SoundObject_disposable //!< Deletes this SoundObject if the SoundTrack reaches its end
+    enum Mode {
+        Looping, //!< Restart playing if the SoundTrack reaches its end
+        Hold, //!< Stops playing if the SoundTrack reaches its end
+        Dispose //!< Deletes this SoundObject if the SoundTrack reaches its end
     } mode;
-    SoundObject(SoundTrack* soundTrack);
+    SoundObject(SoundTrack* soundTrack, Mode mode);
     SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     ~SoundObject();
     void remove();
@@ -58,16 +58,12 @@ class SoundObject : public SimpleObject {
      @param soundTrack The new SoundTrack
      */
     void setSoundTrack(std::shared_ptr<SoundTrack> soundTrack);
-    //! Starts to play the SoundTrack or resumes it
-    void play();
-    //! Stops playing the SoundTrack but keeps the current playback position
-    void pause();
-    //! Stops playing the SoundTrack and resets the current playback position
-    void stop();
+    //! Starts/stops playing the SoundTrack or resumes it
+    void setPlaying(bool playing);
     /*!
      @return Is this SoundObject currently playing
      */
-    bool isPlaying();
+    bool getPlaying();
     /*! Sets the playback position
      @param timeOffset The new playback position in seconds
      */
@@ -76,6 +72,15 @@ class SoundObject : public SimpleObject {
      @return The current playback position in seconds
      */
     float getTimeOffset();
+    /*! Sets the volume
+     @param volume The new volume
+     @pre soundTrack must be mono channel
+     */
+    void setVolume(float volume);
+    /*!
+     @return The current volume
+     */
+    float getVolume();
     bool gameTick();
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };

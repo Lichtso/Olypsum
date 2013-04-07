@@ -111,6 +111,30 @@
                                         <xsd:group ref="BaseObject"/>
                                         <xsd:choice>
                                             <xsd:element name="SoundTrack" type="Resource" minOccurs="1"/>
+                                            <xsd:element name="Mode" minOccurs="0">
+                                                <xsd:complexType>
+                                                    <xsd:attribute name="value">
+                                                        <xsd:simpleType>
+                                                            <xsd:restriction base="xsd:string">
+                                                                <xsd:enumeration value="looping"/>
+                                                                <xsd:enumeration value="hold"/>
+                                                                <xsd:enumeration value="dispose"/>
+                                                            </xsd:restriction>
+                                                        </xsd:simpleType>
+                                                    </xsd:attribute>
+                                                </xsd:complexType>
+                                            </xsd:element>
+                                            <xsd:element name="Volume" minOccurs="0">
+                                                <xsd:complexType>
+                                                    <xsd:attribute name="value" type="NonNegativeScalar"/>
+                                                </xsd:complexType>
+                                            </xsd:element>
+                                            <xsd:element name="IsPlaying" minOccurs="0"/>
+                                            <xsd:element name="TimeOffset" minOccurs="0">
+                                                <xsd:complexType>
+                                                    <xsd:attribute name="value" type="NonNegativeScalar"/>
+                                                </xsd:complexType>
+                                            </xsd:element>
                                         </xsd:choice>
                                     </xsd:sequence>
                                 </xsd:complexType>
