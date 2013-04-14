@@ -121,6 +121,11 @@ ScriptManager::ScriptManager() {
     scriptTerrainObject.init(globalTemplate);
     scriptCamObject.init(globalTemplate);
     scriptSoundObject.init(globalTemplate);
+    scriptParticlesObject.init(globalTemplate);
+    scriptLightObject.init(globalTemplate);
+    scriptDirectionalLight.init(globalTemplate);
+    scriptSpotLight.init(globalTemplate);
+    scriptPositionalLight.init(globalTemplate);
 }
 
 ScriptManager::~ScriptManager() {

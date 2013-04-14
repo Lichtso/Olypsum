@@ -54,6 +54,9 @@ class SoundObject : public SimpleObject {
     SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     ~SoundObject();
     void remove();
+    void newScriptInstance();
+    bool gameTick();
+    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
     /*! Adds a SoundTrack to this SoundObject
      @param soundTrack The new SoundTrack
      */
@@ -81,8 +84,6 @@ class SoundObject : public SimpleObject {
      @return The current volume
      */
     float getVolume();
-    bool gameTick();
-    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
 #endif

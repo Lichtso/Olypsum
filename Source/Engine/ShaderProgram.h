@@ -27,6 +27,8 @@ class Color4 {
     Color4(float gray, float aB) : r(gray), g(gray), b(gray), a(aB) {};
     //! A rgb color
     Color4(float rB, float gB, float bB) : r(rB), g(gB), b(bB), a(1) {};
+    //! A rgb color
+    Color4(btVector3 vec) : r(vec.x()), g(vec.y()), b(vec.z()), a(1) {};
     //! A transparent rgb color
     Color4(float rB, float gB, float bB, float aB) : r(rB), g(gB), b(bB), a(aB) {};
     Color4& operator=(const Color4& B);

@@ -106,7 +106,7 @@ class OptionsState {
           screenBlurFactor = -1.0,
           globalVolume = 0.5,
           musicVolume = 0.5,
-          mouseSensitivity = 0.005,
+          mouseSensitivity = 1.0,
           mouseSmoothing = 0.5;
     bool edgeSmoothEnabled = false,
          cubemapsEnabled = false,

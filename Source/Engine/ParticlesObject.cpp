@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "LevelManager.h"
+#include "ScriptParticlesObject.h"
 
 static bool readBoundsNode(rapidxml::xml_node<xmlUsedCharType>* node, const char* name, btVector3& min, btVector3& max) {
     XMLValueArray<float> vecData;
@@ -184,6 +184,13 @@ void ParticlesObject::setTransformation(const btTransform& transformation) {
 
 btTransform ParticlesObject::getTransformation() {
     return body->getWorldTransform();
+}
+
+void ParticlesObject::newScriptInstance() {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    v8::Local<v8::Object> instance = scriptParticlesObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    scriptInstance = v8::Persistent<v8::Object>::New(instance);
 }
 
 bool ParticlesObject::gameTick() {

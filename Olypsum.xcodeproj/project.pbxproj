@@ -33,6 +33,8 @@
 		1118251B14F2553A00F198A7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118251A14F2553A00F198A7 /* Cocoa.framework */; };
 		1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254114F2559600F198A7 /* OpenGL.framework */; };
 		1118254414F2559B00F198A7 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254314F2559B00F198A7 /* OpenAL.framework */; };
+		112307F5171462E0001167DF /* ScriptParticlesObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112307F3171462E0001167DF /* ScriptParticlesObject.cpp */; };
+		112307F81718A083001167DF /* ScriptLightObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112307F61718A082001167DF /* ScriptLightObject.cpp */; };
 		112672E91699BBFD000BB805 /* Links.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112672E71699BBFD000BB805 /* Links.cpp */; };
 		112672EC1699BCF1000BB805 /* TerrainObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112672EA1699BCF0000BB805 /* TerrainObject.cpp */; };
 		112BF180162AFE8100CF0C0D /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112BF17E162AFE8100CF0C0D /* Object.cpp */; };
@@ -139,6 +141,10 @@
 		1118251F14F2553A00F198A7 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1118254114F2559600F198A7 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		1118254314F2559B00F198A7 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
+		112307F3171462E0001167DF /* ScriptParticlesObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptParticlesObject.cpp; sourceTree = "<group>"; };
+		112307F4171462E0001167DF /* ScriptParticlesObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptParticlesObject.h; sourceTree = "<group>"; };
+		112307F61718A082001167DF /* ScriptLightObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptLightObject.cpp; sourceTree = "<group>"; };
+		112307F71718A083001167DF /* ScriptLightObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptLightObject.h; sourceTree = "<group>"; };
 		112672E71699BBFD000BB805 /* Links.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Links.cpp; sourceTree = "<group>"; };
 		112672E81699BBFD000BB805 /* Links.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Links.h; sourceTree = "<group>"; };
 		112672EA1699BCF0000BB805 /* TerrainObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TerrainObject.cpp; sourceTree = "<group>"; };
@@ -492,6 +498,10 @@
 				11511423170D9B7B00F77236 /* ScriptDisplayObject.cpp */,
 				1145E3C4170ECEBB00480189 /* ScriptSimpleObject.h */,
 				1145E3C3170ECEBB00480189 /* ScriptSimpleObject.cpp */,
+				112307F4171462E0001167DF /* ScriptParticlesObject.h */,
+				112307F3171462E0001167DF /* ScriptParticlesObject.cpp */,
+				112307F71718A083001167DF /* ScriptLightObject.h */,
+				112307F61718A082001167DF /* ScriptLightObject.cpp */,
 				1151141F170C1A0E00F77236 /* ScriptIntersection.h */,
 				1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */,
 				11FE8AB116B5A3F400B682D0 /* ScriptManager.h */,
@@ -618,6 +628,8 @@
 				11511420170C1A0E00F77236 /* ScriptIntersection.cpp in Sources */,
 				11511425170D9B7C00F77236 /* ScriptDisplayObject.cpp in Sources */,
 				1145E3C5170ECEBB00480189 /* ScriptSimpleObject.cpp in Sources */,
+				112307F5171462E0001167DF /* ScriptParticlesObject.cpp in Sources */,
+				112307F81718A083001167DF /* ScriptLightObject.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "LevelManager.h"
+#include "ScriptManager.h"
 
 #define coneAccuracy 12
 #define sphereAccuracyX 10
@@ -26,6 +26,12 @@ void initLightVolumes() {
 }
 
 
+
+void LightObject::setPhysicsShape(btCollisionShape* shape) {
+    if(body->getCollisionShape())
+        delete body->getCollisionShape();
+    body->setCollisionShape(shape);
+}
 
 LightObject::LightObject() {
     objectManager.lightObjects.push_back(this);
@@ -57,10 +63,8 @@ btTransform LightObject::getTransformation() {
     return shadowCam.getTransformation();
 }
 
-void LightObject::setPhysicsShape(btCollisionShape* shape) {
-    if(body->getCollisionShape())
-        delete body->getCollisionShape();
-    body->setCollisionShape(shape);
+float LightObject::getRange() {
+    return shadowCam.far;
 }
 
 bool LightObject::gameTick(bool shadowActive) {
@@ -95,7 +99,6 @@ void LightObject::draw() {
         mainFBO.gBuffers[positionDBuffer],
         mainFBO.gBuffers[normalDBuffer],
         mainFBO.gBuffers[materialDBuffer],
-        //mainFBO.gBuffers[transparentDBuffer],
         mainFBO.gBuffers[diffuseDBuffer],
         mainFBO.gBuffers[specularDBuffer]
     };
@@ -150,8 +153,15 @@ DirectionalLight::DirectionalLight(rapidxml::xml_node<xmlUsedCharType>* node, Le
     }
     XMLValueArray<float> vecData;
     vecData.readString(bounds->value(), "%f");
-    setBounds(vecData.data[0], vecData.data[1], vecData.data[2]);
+    setBounds(vecData.getVector3());
     LightObject::init(node, levelLoader);
+}
+
+void DirectionalLight::newScriptInstance() {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    v8::Local<v8::Object> instance = scriptDirectionalLight.functionTemplate->GetFunction()->NewInstance(1, &external);
+    scriptInstance = v8::Persistent<v8::Object>::New(instance);
 }
 
 void DirectionalLight::setTransformation(const btTransform& transformation) {
@@ -162,13 +172,18 @@ void DirectionalLight::setTransformation(const btTransform& transformation) {
     body->setWorldTransform(transformation * shiftMat);
 }
 
-void DirectionalLight::setBounds(float width, float height, float range) {
-    shadowCam.width = width;
-    shadowCam.height = height;
-    shadowCam.far = range;
-    shadowCam.near = range*0.01;
+void DirectionalLight::setBounds(btVector3 bounds) {
+    shadowCam.width = bounds.x();
+    shadowCam.height = bounds.y();
+    shadowCam.far = bounds.z();
+    shadowCam.near = bounds.z()*0.01;
     
-    setPhysicsShape(new btBoxShape(btVector3(width, height, range*0.5)));
+    bounds.setZ(bounds.z()*0.5);
+    setPhysicsShape(new btBoxShape(bounds));
+}
+
+btVector3 DirectionalLight::getBounds() {
+    return btVector3(shadowCam.width, shadowCam.height, shadowCam.far);
 }
 
 bool DirectionalLight::gameTick(bool shadowActive) {
@@ -251,6 +266,13 @@ SpotLight::SpotLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* lev
     LightObject::init(node, levelLoader);
 }
 
+void SpotLight::newScriptInstance() {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    v8::Local<v8::Object> instance = scriptSpotLight.functionTemplate->GetFunction()->NewInstance(1, &external);
+    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+}
+
 void SpotLight::setTransformation(const btTransform& transformation) {
     shadowCam.setTransformation(transformation);
     btTransform shiftMat;
@@ -265,6 +287,10 @@ void SpotLight::setBounds(float cutoff, float range) {
     shadowCam.far = range;
     
     setPhysicsShape(new btConeShapeZ(tan(shadowCam.fov*0.5)*shadowCam.far, shadowCam.far));
+}
+
+float SpotLight::getCutoff() {
+    return shadowCam.fov*0.5;
 }
 
 bool SpotLight::gameTick(bool shadowActive) {
@@ -363,16 +389,23 @@ PositionalLight::~PositionalLight() {
         delete shadowMapB;
 }
 
+void PositionalLight::newScriptInstance() {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    v8::Local<v8::Object> instance = scriptPositionalLight.functionTemplate->GetFunction()->NewInstance(1, &external);
+    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+}
+
 void PositionalLight::setTransformation(const btTransform& transformation) {
     shadowCam.setTransformation(transformation);
-    if(abs(shadowCam.fov-M_PI*2.0) < 0.001) {
+    if(getOmniDirectional())
         body->setWorldTransform(transformation);
-        return;
+    else{
+        btTransform shiftMat;
+        shiftMat.setIdentity();
+        shiftMat.setOrigin(btVector3(0, 0, -shadowCam.far*0.5));
+        body->setWorldTransform(transformation * shiftMat);
     }
-    btTransform shiftMat;
-    shiftMat.setIdentity();
-    shiftMat.setOrigin(btVector3(0, 0, -shadowCam.far*0.5));
-    body->setWorldTransform(transformation * shiftMat);
 }
 
 void PositionalLight::setBounds(bool omniDirectional, float range) {
@@ -385,9 +418,13 @@ void PositionalLight::setBounds(bool omniDirectional, float range) {
         setPhysicsShape(new btCylinderShape(btVector3(range, range, range*0.5)));
 }
 
+bool PositionalLight::getOmniDirectional() {
+    return abs(shadowCam.fov-M_PI*2.0) < 0.001;
+}
+
 bool PositionalLight::gameTick(bool shadowActive) {
     if(!LightObject::gameTick(shadowActive)) return true;
-    if(abs(shadowCam.fov-M_PI*2.0) < 0.001 && !shadowMapB && !optionsState.cubemapsEnabled) {
+    if(getOmniDirectional() && !shadowMapB && !optionsState.cubemapsEnabled) {
         unsigned int size = min(1024U, mainFBO.maxSize);
         shadowMapB = new ColorBuffer(true, false, size, size);
         if(glGetError() == GL_OUT_OF_MEMORY) {
@@ -476,7 +513,7 @@ void PositionalLight::draw() {
         shaderPrograms[positionalLightSP]->use();
     
     currentShaderProgram->setUniformMatrix4("lShadowMat", &shadowCam.viewMat);
-    currentShaderProgram->setUniformF("lCutoff", (abs(shadowCam.fov-M_PI*2.0) < 0.001) ? 1.0 : 0.0);
+    currentShaderProgram->setUniformF("lCutoff", (getOmniDirectional()) ? 1.0 : 0.0);
     currentShaderProgram->setUniformVec3("lPosition", shadowCam.getTransformation().getOrigin());
     currentShaderProgram->setUniformVec3("lDirection", shadowCam.getTransformation().getBasis().getColumn(2)*-1.0);
     if(optionsState.cubemapsEnabled)
@@ -509,7 +546,7 @@ rapidxml::xml_node<xmlUsedCharType>* PositionalLight::write(rapidxml::xml_docume
     node->append_node(boundsNode);
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
     attribute->name("omniDirectional");
-    if(abs(shadowCam.fov-M_PI*2.0) < 0.001)
+    if(getOmniDirectional())
         attribute->value("true");
     else
         attribute->value("false");

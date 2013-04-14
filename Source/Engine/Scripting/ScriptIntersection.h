@@ -6,7 +6,7 @@
 //
 //
 
-#include "ScriptSimpleObject.h"
+#include "ScriptLightObject.h"
 
 #ifndef ScriptIntersection_h
 #define ScriptIntersection_h

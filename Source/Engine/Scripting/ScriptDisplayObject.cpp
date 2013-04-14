@@ -289,6 +289,7 @@ ScriptTerrainObject::ScriptTerrainObject() :ScriptPhysicObject("TerrainObject") 
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
+    objectTemplate->SetAccessor(v8::String::New("collisionShape"), NULL, NULL);
     objectTemplate->SetAccessor(v8::String::New("width"), GetWidth);
     objectTemplate->SetAccessor(v8::String::New("length"), GetLength);
     objectTemplate->SetAccessor(v8::String::New("bitDepth"), GetBitDepth, SetBitDepth);

@@ -7,7 +7,7 @@
 //
 
 #include <Vorbis/vorbisfile.h>
-#include "LevelManager.h"
+#include "ScriptSimpleObject.h"
 
 #ifdef LITTLE_ENDIAN
 #define ENDIAN 0
@@ -159,6 +159,84 @@ void SoundObject::remove() {
     BaseObject::remove();
 }
 
+void SoundObject::newScriptInstance() {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    v8::Local<v8::Object> instance = scriptSoundObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+}
+
+bool SoundObject::gameTick() {
+    if(mode == Dispose && !getPlaying()) {
+        remove();
+        return false;
+    }
+    btVector3 direction = transformation.getBasis().getColumn(2),
+    position = transformation.getOrigin();
+    velocity = (position-prevPosition)/profiler.animationFactor;
+    if(soundTrack->isStereo())
+        alSourcef(ALname, AL_GAIN, optionsState.musicVolume);
+    alSource3f(ALname, AL_DIRECTION, direction.x(), direction.y(), direction.z());
+    alSource3f(ALname, AL_POSITION, position.x(), position.y(), position.z());
+    alSource3f(ALname, AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());
+    prevPosition = position;
+    return true;
+}
+
+rapidxml::xml_node<xmlUsedCharType>* SoundObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
+    
+    node->name("SoundObject");
+    node->append_node(fileManager.writeResource(doc, "SoundTrack", soundTrack));
+    
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode = doc.allocate_node(rapidxml::node_element);
+    parameterNode->name("Mode");
+    node->append_node(parameterNode);
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    attribute->name("value");
+    parameterNode->append_attribute(attribute);
+    switch(mode) {
+        case Looping:
+            attribute->value("looping");
+            break;
+        case Hold:
+            attribute->value("hold");
+            break;
+        case Dispose:
+            attribute->value("dispose");
+            break;
+    }
+    
+    if(!soundTrack->isStereo()) {
+        float volume = getVolume();
+        if(volume != 1.0) {
+            parameterNode = doc.allocate_node(rapidxml::node_element);
+            parameterNode->name("Volume");
+            node->append_node(parameterNode);
+            attribute = doc.allocate_attribute();
+            attribute->name("value");
+            attribute->value(doc.allocate_string(stringOf(volume).c_str()));
+            parameterNode->append_attribute(attribute);
+        }
+    }
+    
+    if(getPlaying()) {
+        parameterNode = doc.allocate_node(rapidxml::node_element);
+        parameterNode->name("IsPlaying");
+        node->append_node(parameterNode);
+    }
+    
+    parameterNode = doc.allocate_node(rapidxml::node_element);
+    parameterNode->name("TimeOffset");
+    node->append_node(parameterNode);
+    attribute = doc.allocate_attribute();
+    attribute->name("value");
+    attribute->value(doc.allocate_string(stringOf(getTimeOffset()).c_str()));
+    parameterNode->append_attribute(attribute);
+    
+    return node;
+}
+
 void SoundObject::setSoundTrack(std::shared_ptr<SoundTrack> soundTrackB) {
     soundTrack = soundTrackB;
     alSourcei(ALname, AL_BUFFER, soundTrack->ALname);
@@ -199,75 +277,4 @@ float SoundObject::getVolume() {
     ALfloat volume;
     alGetSourcef(ALname, AL_GAIN, &volume);
     return volume;
-}
-
-bool SoundObject::gameTick() {
-    if(mode == Dispose && !getPlaying()) {
-        remove();
-        return false;
-    }
-    btVector3 direction = transformation.getBasis().getColumn(2),
-    position = transformation.getOrigin();
-    velocity = (position-prevPosition)/profiler.animationFactor;
-    if(soundTrack->isStereo())
-        alSourcef(ALname, AL_GAIN, optionsState.musicVolume);
-    alSource3f(ALname, AL_DIRECTION, direction.x(), direction.y(), direction.z());
-    alSource3f(ALname, AL_POSITION, position.x(), position.y(), position.z());
-    alSource3f(ALname, AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());
-    prevPosition = position;
-    return true;
-}
-
-rapidxml::xml_node<xmlUsedCharType>* SoundObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
-    rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
-    
-    node->name("SoundObject");
-    node->append_node(fileManager.writeResource(doc, "SoundTrack", soundTrack));
-    
-    rapidxml::xml_node<xmlUsedCharType>* parameterNode = doc.allocate_node(rapidxml::node_element);
-    parameterNode->name("Mode");
-    node->append_node(parameterNode);
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
-    attribute->name("value");
-    parameterNode->append_attribute(attribute);
-    switch(mode) {
-        case Looping:
-            attribute->value("looping");
-        break;
-        case Hold:
-            attribute->value("hold");
-        break;
-        case Dispose:
-            attribute->value("dispose");
-        break;
-    }
-    
-    if(!soundTrack->isStereo()) {
-        float volume = getVolume();
-        if(volume != 1.0) {
-            parameterNode = doc.allocate_node(rapidxml::node_element);
-            parameterNode->name("Volume");
-            node->append_node(parameterNode);
-            attribute = doc.allocate_attribute();
-            attribute->name("value");
-            attribute->value(doc.allocate_string(stringOf(volume).c_str()));
-            parameterNode->append_attribute(attribute);
-        }
-    }
-    
-    if(getPlaying()) {
-        parameterNode = doc.allocate_node(rapidxml::node_element);
-        parameterNode->name("IsPlaying");
-        node->append_node(parameterNode);
-    }
-    
-    parameterNode = doc.allocate_node(rapidxml::node_element);
-    parameterNode->name("TimeOffset");
-    node->append_node(parameterNode);
-    attribute = doc.allocate_attribute();
-    attribute->name("value");
-    attribute->value(doc.allocate_string(stringOf(getTimeOffset()).c_str()));
-    parameterNode->append_attribute(attribute);
-    
-    return node;
 }

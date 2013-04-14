@@ -527,16 +527,16 @@ void Menu::setMenu(Name menu) {
                 }, [](GUISlider* slider, bool dragging) {
                     optionsState.musicVolume = slider->value;
                 }, [](GUISlider* slider, bool dragging) {
-                    optionsState.mouseSensitivity = slider->value*5.0F;
+                    optionsState.mouseSensitivity = slider->value*2.0F;
                 }, [](GUISlider* slider, bool dragging) {
-                    optionsState.mouseSmoothing = 1.01F-slider->value;
+                    optionsState.mouseSmoothing = max(0.01F, 1.0F-slider->value);
                 }
             };
             float sliderValues[] = {
                 optionsState.globalVolume,
                 optionsState.musicVolume,
-                optionsState.mouseSensitivity*0.2F,
-                1.01F-optionsState.mouseSmoothing
+                optionsState.mouseSensitivity*0.5F,
+                1.0F-optionsState.mouseSmoothing
             };
             const char* sliderLabels[] = {
                 "soundGlobal",

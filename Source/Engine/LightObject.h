@@ -25,6 +25,7 @@ class LightObject : public DisplayObject {
     ~LightObject();
     void remove();
     btTransform getTransformation();
+    float getRange();
     virtual bool gameTick(bool shadowActive);
     void draw();
     virtual void deleteShadowMap();
@@ -37,8 +38,10 @@ class DirectionalLight : public LightObject {
     public:
     DirectionalLight();
     DirectionalLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    void newScriptInstance();
     void setTransformation(const btTransform& transformation);
-    void setBounds(float width, float height, float range);
+    void setBounds(btVector3 bounds);
+    btVector3 getBounds();
     bool gameTick(bool shadowActive);
     void draw();
     float getPriority(btVector3 position);
@@ -49,8 +52,10 @@ class SpotLight : public LightObject {
     public:
     SpotLight();
     SpotLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    void newScriptInstance();
     void setTransformation(const btTransform& transformation);
     void setBounds(float cutoff, float range);
+    float getCutoff();
     bool gameTick(bool shadowActive);
     void draw();
     float getPriority(btVector3 position);
@@ -63,8 +68,10 @@ class PositionalLight : public LightObject {
     PositionalLight();
     PositionalLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     ~PositionalLight();
+    void newScriptInstance();
     void setTransformation(const btTransform& transformation);
     void setBounds(bool omniDirectional, float range);
+    bool getOmniDirectional();
     bool gameTick(bool shadowActive);
     void draw();
     void deleteShadowMap();

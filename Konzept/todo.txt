@@ -1,6 +1,6 @@
 Implement btSoftBody
 Implement btRayCastVehicle
-V8 API
+V8 API: Links, Animations, GUI
 Animation File Format
 Leap Motion
 Use C++11 Multithreading
@@ -14,6 +14,8 @@ Light scattering / HDRR
 Improve Parallax Occlusion / Position / Depth
 Magnetic Attraction PhysicLink
 Gear Rack PhysicLink
+Networking / Multiplayer
 
 Bugs:
 Check memory leaks
+Update connected physics bodies when removing PhysicLink

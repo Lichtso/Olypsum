@@ -50,6 +50,7 @@ class ParticlesObject : public DisplayObject {
     void remove();
     void setTransformation(const btTransform& transformation);
     btTransform getTransformation();
+    void newScriptInstance();
     bool gameTick();
     void draw();
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
