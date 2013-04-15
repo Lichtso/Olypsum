@@ -235,7 +235,7 @@ void Menu::gameTick() {
                 consoleMessages[i].timeLeft -= profiler.animationFactor;
                 if(consoleMessages[i].timeLeft < 0.0) {
                     if(i < view->children.size())
-                        view->removeChild(i);
+                        view->deleteChild(i);
                     consoleMessages.erase(consoleMessages.begin()+i);
                     i --;
                     continue;
@@ -266,7 +266,7 @@ void Menu::gameTick() {
             }
             
             for(int i = consoleMessages.size(); i < view->children.size(); i ++)
-                view->removeChild(i);
+                view->deleteChild(i);
             
             mouseMotionX = optionsState.mouseSmoothing*mouseVelocityX;
             mouseMotionY = optionsState.mouseSmoothing*mouseVelocityY;
@@ -387,23 +387,6 @@ void Menu::setMenu(Name menu) {
             view->posX = currentScreenView->width*-0.52;
             currentScreenView->addChild(view);
             
-            button = new GUIButton();
-            button->posX = view->width*-0.52;
-            button->posY = currentScreenView->height*(0.06);
-            button->onClick = [this](GUIButton* button) {
-                setMenu(videoResolution);
-            };
-            if(levelManager.gameStatus != noGame)
-                button->state = GUIButtonStateDisabled;
-            view->addChild(button);
-            label = new GUILabel();
-            label->text = stringOf(optionsState.videoWidth)+" x "+stringOf(optionsState.videoHeight);
-            if(optionsState.videoScale > 1) label->text += " ("+localization.localizeString("retina")+")";
-            label->fontHeight = currentScreenView->height*0.05;
-            label->width = currentScreenView->width*0.15;
-            label->sizeAlignment = GUISizeAlignment_Height;
-            button->addChild(label);
-            
             std::function<void(GUICheckBox*)> onClick[] = {
                 [](GUICheckBox* checkBox) {
                     optionsState.cubemapsEnabled = (checkBox->state == GUIButtonStatePressed);
@@ -453,6 +436,23 @@ void Menu::setMenu(Name menu) {
                     checkBox->state = GUIButtonStatePressed;
                 view->addChild(checkBox);
             }
+            
+            button = new GUIButton();
+            button->posX = view->width*-0.52;
+            button->posY = currentScreenView->height*(0.06);
+            button->onClick = [this](GUIButton* button) {
+                setMenu(videoResolution);
+            };
+            if(levelManager.gameStatus != noGame)
+                button->state = GUIButtonStateDisabled;
+            view->addChild(button);
+            label = new GUILabel();
+            label->text = stringOf(optionsState.videoWidth)+" x "+stringOf(optionsState.videoHeight);
+            if(optionsState.videoScale > 1) label->text += " ("+localization.localizeString("retina")+")";
+            label->fontHeight = currentScreenView->height*0.05;
+            label->width = currentScreenView->width*0.15;
+            label->sizeAlignment = GUISizeAlignment_Height;
+            button->addChild(label);
             
             unsigned int sliderSteps[] = { 3, 3, 4, 4, 3 };
             std::function<void(GUISlider*, bool)> onChangeGraphics[] = {

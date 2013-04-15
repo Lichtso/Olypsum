@@ -19,6 +19,9 @@ class GUIView : public GUIRect {
     ~GUIView();
     virtual void addChild(GUIRect* child);
     int getIndexOfChild(GUIRect* child);
+    //! Deletes the child at given index
+    void deleteChild(unsigned int index);
+    //! Removes the connection between parent and child at given index
     void removeChild(unsigned int index);
     void updateContent();
     void draw(btVector3 parentTransform, GUIClipRect& parentClipRect);

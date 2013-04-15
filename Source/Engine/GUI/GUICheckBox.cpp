@@ -9,7 +9,6 @@
 #include "GUICheckBox.h"
 
 GUICheckBox::GUICheckBox() {
-    type = GUIType_CheckBox;
     paddingX = paddingY = 0;
     width = height = currentScreenView->width*0.022;
     sizeAlignment = GUISizeAlignment_None;

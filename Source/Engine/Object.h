@@ -29,7 +29,7 @@ class BaseObject {
     public:
     virtual ~BaseObject();
     ScriptFile* scriptFile; //!< The script file to be called on events
-    v8::Persistent<v8::Object> scriptInstance; //!< The script representation of this BaseObject
+    v8::Persistent<v8::Object> scriptInstance; //!< The script representation
     std::map<std::string, BaseLink*> links; //!< A map of LinkObject and names to connect BaseObject to others
     /*! Used to update the transfomation of this object
      @param transformation The new transformation
@@ -53,8 +53,10 @@ class BaseObject {
     static btTransform readTransformtion(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     //! Writes its self to rapidxml::xml_node and returns it
     virtual rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
-    //! Returns the object at the end of the path (seperated by '/')
+    //! Returns the BaseObject at the end of the path (seperated by '/')
     BaseObject* findObjectByPath(std::string path);
+    //! Returns the path of this BaseObject (seperated by '/')
+    std::string getPath();
 };
 
 //! BaseObject without physics-body, only transformation

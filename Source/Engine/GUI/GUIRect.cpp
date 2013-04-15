@@ -8,14 +8,8 @@
 
 #include "GUIView.h"
 
-GUIRect::GUIRect() {
-    type = GUIType_Rect;
-    parent = NULL;
-    visible = true;
-    posX = 0;
-    posY = 0;
-    width = 100;
-    height = 100;
+GUIRect::GUIRect() :parent(NULL), visible(true), posX(0), posY(0), width(100), height(100) {
+    
 }
 
 GUIRect::~GUIRect() {
@@ -30,23 +24,20 @@ GUIRect* GUIRect::getRootParent() {
 }
 
 bool GUIRect::isFirstResponder() {
-    GUIScreenView* screenView = (GUIScreenView*)getRootParent();
-    if(!screenView || screenView->type != GUIType_ScreenView) return false;
+    GUIScreenView* screenView = dynamic_cast<GUIScreenView*>(getRootParent());
+    if(!screenView) return false;
     return (screenView->firstResponder == this);
 }
 
-void GUIRect::setFirstResponderStatus() {
-    GUIScreenView* screenView = (GUIScreenView*)getRootParent();
-    if(!screenView || screenView->type != GUIType_ScreenView) return;
-    if(screenView->firstResponder)
-        screenView->firstResponder->removeFirstResponderStatus();
-    screenView->firstResponder = this;
-}
-
-void GUIRect::removeFirstResponderStatus() {
-    GUIScreenView* screenView = (GUIScreenView*)getRootParent();
-    if(!screenView || screenView->type != GUIType_ScreenView) return;
-    screenView->firstResponder = NULL;
+void GUIRect::setFirstResponderStatus(bool active) {
+    GUIScreenView* screenView = dynamic_cast<GUIScreenView*>(getRootParent());
+    if(!screenView) return;
+    if(active) {
+        if(screenView->firstResponder)
+            screenView->firstResponder->setFirstResponderStatus(false);
+        screenView->firstResponder = this;
+    }else
+        screenView->firstResponder = NULL;
 }
 
 bool GUIRect::getLimSize(GUIClipRect& clipRect, GUIClipRect& parentClipRect) {

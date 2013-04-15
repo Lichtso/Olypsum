@@ -54,15 +54,16 @@ class GraphicObject : public DisplayObject {
  @warning Don't use it directly
  */
 class ModelObject : public GraphicObject {
-    btTransform* skeletonPose;
+    std::unique_ptr<btTransform> skeletonPose;
     void setupBones(BaseObject* object, Bone* bone);
     void writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver,
                     rapidxml::xml_node<xmlUsedCharType>* node, BoneObject *object);
     void updateSkeletonPose(BaseObject* object, Bone* bone);
     protected:
-    ModelObject() :skeletonPose(NULL), integrity(1.0) { };
-    public:
+    ModelObject() :integrity(1.0) { };
     ~ModelObject();
+    public:
+    void remove();
     void newScriptInstance();
     bool gameTick();
     float integrity; //! Health <= 0.0: destroyed

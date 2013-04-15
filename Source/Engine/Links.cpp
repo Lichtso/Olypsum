@@ -459,6 +459,14 @@ PhysicLink::~PhysicLink() {
     objectManager.physicsWorld->removeConstraint(constraint);
 }
 
+void PhysicLink::remove(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
+    btRigidBody& body = constraint->getRigidBodyA();
+    body.setActivationState(ACTIVE_TAG);
+	body = constraint->getRigidBodyB();
+    body.setActivationState(ACTIVE_TAG);
+    BaseLink::remove(a, iteratorInA);
+}
+
 rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver) {
     if(&constraint->getRigidBodyA() == static_cast<RigidObject*>(linkSaver->object[1])->getBody())
         linkSaver->swap();
@@ -994,16 +1002,12 @@ void TransformLink::gameTickFrom(BaseObject* parent) {
 }
 
 void TransformLink::remove(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
-    a->links.erase(iteratorInA);
-    BaseObject* b = getOther(a);
-    for(auto iterator : b->links)
-        if(iterator.second == this) {
-            b->links.erase(iterator.first);
-            break;
-        }
-    if(iteratorInA->first != "..") //Only remove child if called by parent
-        b->remove();
-    delete this;
+    if(iteratorInA->first != "..") { //Only remove child if called by parent
+        a->links.erase(iteratorInA);
+        getOther(a)->remove(); //Remove child
+        //delete this; //Is done by line above and line below
+    }else
+        BaseLink::remove(a, iteratorInA);
 }
 
 void TransformLink::init(LinkInitializer &initializer) {

@@ -9,7 +9,6 @@
 #include "GUIButtonList.h"
 
 GUIButtonList::GUIButtonList() {
-    type = GUIType_ButtonList;
     orientation = GUIOrientation_Vertical;
     sizeAlignment = GUISizeAlignment_All;
 }

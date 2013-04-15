@@ -74,6 +74,7 @@ class PhysicLink : public BaseLink {
      */
     PhysicLink(LinkInitializer& initializer, btTypedConstraint* constraint);
     PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    void remove(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
 

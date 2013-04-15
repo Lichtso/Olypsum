@@ -10,7 +10,6 @@
 #include "GUIProgressBar.h"
 
 GUIProgressBar::GUIProgressBar() {
-    type = GUIType_ProgressBar;
     value = 0.5;
     orientation = GUIOrientation_Horizontal;
     width = currentScreenView->width*0.2;

@@ -32,8 +32,7 @@ class GUITextField : public GUIRect {
     std::function<void(GUITextField*)> onFocus, onChange, onBlur;
     GUITextField();
     ~GUITextField();
-    void setFirstResponderStatus();
-    void removeFirstResponderStatus();
+    void setFirstResponderStatus(bool active);
     void updateContent();
     void draw(btVector3 transform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);

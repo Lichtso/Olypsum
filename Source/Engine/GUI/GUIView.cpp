@@ -9,7 +9,7 @@
 #include "GUIView.h"
 
 GUIView::GUIView() {
-    type = GUIType_View;
+    
 }
 
 GUIView::~GUIView() {
@@ -29,8 +29,14 @@ int GUIView::getIndexOfChild(GUIRect* child) {
     return -1;
 }
 
-void GUIView::removeChild(unsigned int index) {
+void GUIView::deleteChild(unsigned int index) {
     delete children[index];
+    children.erase(children.begin()+index);
+}
+
+void GUIView::removeChild(unsigned int index) {
+    GUIRect* child = children[index];
+    child->parent = NULL;
     children.erase(children.begin()+index);
 }
 
@@ -83,7 +89,6 @@ bool GUIView::handleMouseWheel(int mouseX, int mouseY, float delta) {
 
 
 GUIFramedView::GUIFramedView() {
-    type = GUIType_View;
     content.topColor = Color4(0.78);
     content.bottomColor = Color4(0.78);
     content.borderColor = Color4(0.78);
@@ -119,7 +124,6 @@ void GUIFramedView::draw(btVector3 transform, GUIClipRect& parentClipRect) {
 
 
 GUIScreenView::GUIScreenView() {
-    type = GUIType_ScreenView;
     modalView = NULL;
     firstResponder = NULL;
     updateContent();
@@ -243,10 +247,8 @@ bool GUIScreenView::handleKeyUp(SDL_keysym* key) {
 }
 
 void GUIScreenView::setModalView(GUIRect* modalViewB) {
-    if(firstResponder) {
-        firstResponder->removeFirstResponderStatus();
-        firstResponder = NULL;
-    }
+    if(firstResponder)
+        firstResponder->setFirstResponderStatus(false);
     modalView = modalViewB;
     if(modalView) {
         modalView->parent = this;

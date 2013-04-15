@@ -18,6 +18,7 @@ class ScriptBaseObject : public ScriptClass {
     static void SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetLinkNames(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetLinkedObject(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetPath(const v8::Arguments& args);
     protected:
     static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
     ScriptBaseObject(const char* name);

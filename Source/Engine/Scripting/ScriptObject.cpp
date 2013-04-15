@@ -75,6 +75,12 @@ v8::Handle<v8::Value> ScriptBaseObject::GetLinkedObject(const v8::Arguments& arg
     return handleScope.Close(linkedObject->scriptInstance);
 }
 
+v8::Handle<v8::Value> ScriptBaseObject::GetPath(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
+    return handleScope.Close(v8::String::New(objectPtr->getPath().c_str()));
+}
+
 ScriptBaseObject::ScriptBaseObject(const char* name) :ScriptClass(name, Constructor) {
     v8::HandleScope handleScope;
     
@@ -91,6 +97,7 @@ ScriptBaseObject::ScriptBaseObject() :ScriptBaseObject("BaseObject") {
     objectTemplate->SetAccessor(v8::String::New("scriptClass"), GetScriptClass, SetScriptClass);
     objectTemplate->Set(v8::String::New("getLinkNames"), v8::FunctionTemplate::New(GetLinkNames));
     objectTemplate->Set(v8::String::New("getLinkedObject"), v8::FunctionTemplate::New(GetLinkedObject));
+    objectTemplate->Set(v8::String::New("getPath"), v8::FunctionTemplate::New(GetPath));
 }
 
 

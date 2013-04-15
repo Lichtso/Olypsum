@@ -20,6 +20,11 @@ void GraphicObject::remove() {
 
 
 ModelObject::~ModelObject() {
+    textureAnimation.clear();
+    skeletonPose.reset();
+}
+
+void ModelObject::remove() {
     setModel(NULL);
 }
 
@@ -46,7 +51,7 @@ void ModelObject::writeBones(rapidxml::xml_document<char> &doc, LevelSaver* leve
 }
 
 void ModelObject::updateSkeletonPose(BaseObject* object, Bone* bone) {
-    skeletonPose[bone->jointIndex] = object->getTransformation() * bone->absoluteInv;
+    skeletonPose.get()[bone->jointIndex] = object->getTransformation() * bone->absoluteInv;
     for(auto childBone : bone->children)
         updateSkeletonPose(object->links[childBone->name]->getOther(object), childBone);
 }
@@ -88,7 +93,7 @@ void ModelObject::setModel(std::shared_ptr<Model> _model) {
                 link->second->remove(this, link);
     }
     textureAnimation.clear();
-    if(skeletonPose) delete [] skeletonPose;
+    skeletonPose.reset();
     
     model = _model;
     if(!model) return;
@@ -98,7 +103,7 @@ void ModelObject::setModel(std::shared_ptr<Model> _model) {
             textureAnimation.push_back(0.0);
     
     if(model->skeleton) {
-        skeletonPose = new btTransform[model->skeleton->bones.size()];
+        skeletonPose.reset(new btTransform[model->skeleton->bones.size()]);
         setupBones(this, model->skeleton->rootBone);
     }
 }
@@ -131,7 +136,7 @@ void ModelObject::prepareShaderProgram(Mesh* mesh) {
     
     currentShaderProgram->setUniformF("discardDensity", clamp(integrity+1.0F, 0.0F, 1.0F));
     if(skeletonPose)
-        currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose, model->skeleton->bones.size());
+        currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose.get(), model->skeleton->bones.size());
 }
 
 void ModelObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {

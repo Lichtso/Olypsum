@@ -21,13 +21,14 @@ enum GUITextAlign {
 struct GUILabelLine {
     GLuint texture;
     GUIDrawableRect content;
+    float scale;
     int posX, posY;
     std::string text;
 };
 
 class GUILabel : public GUIRect {
-    void addSegment(std::string text);
-    void addLine(unsigned int warpWidth, std::string text);
+    void addSegment(unsigned int& newWidth, unsigned int& newHeight, std::string text);
+    void addLine(unsigned int& newWidth, unsigned int& newHeight, std::string text);
     public:
     std::vector<GUILabelLine> lines;
     Color4 color;

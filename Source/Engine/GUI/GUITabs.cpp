@@ -9,7 +9,6 @@
 #include "GUITabs.h"
 
 GUITabs::GUITabs() {
-    type = GUIType_Tabs;
     selectedIndex = -1;
     deactivatable = true;
     onChange = NULL;

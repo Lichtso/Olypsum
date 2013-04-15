@@ -13,7 +13,6 @@
 #define sliderRadius (currentScreenView->width*0.02)
 
 GUISlider::GUISlider() {
-    type = GUIType_Silder;
     mouseDragPos = -1;
     highlighted = false;
     value = 0.5;

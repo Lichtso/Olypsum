@@ -86,27 +86,31 @@ BaseObject* BaseObject::findObjectByPath(std::string path) {
     return object;
 }
 
-
-
-rapidxml::xml_node<xmlUsedCharType>* BoneObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
-    rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
-    node->name("BoneObject");
-    
+std::string BaseObject::getPath() {
     std::string path = "";
     BaseObject* object = this;
-    auto parentIterator = object->links.find(".."); //Find parent
-    while(parentIterator != object->links.end()) {
+    while(true) {
+        auto parentIterator = object->links.find(".."); //Find parent
+        if(parentIterator == object->links.end() || !dynamic_cast<TransformLink*>(parentIterator->second)) break;
         object = parentIterator->second->getOther(object);
         for(auto iterator : object->links)
             if(iterator.second == parentIterator->second) {
                 path = (path.size() == 0) ? iterator.first : iterator.first+'/'+path;
                 break;
             }
-        parentIterator = object->links.find(".."); //Find parent
     }
+    return path;
+}
+
+
+
+rapidxml::xml_node<xmlUsedCharType>* BoneObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
+    node->name("BoneObject");
+    
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
     attribute->name("path");
-    attribute->value(doc.allocate_string(path.c_str()));
+    attribute->value(doc.allocate_string(getPath().c_str()));
     node->append_attribute(attribute);
     return node;
 }

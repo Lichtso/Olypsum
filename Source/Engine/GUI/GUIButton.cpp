@@ -9,7 +9,6 @@
 #include "GUIButton.h"
 
 GUIButton::GUIButton() {
-    type = GUIType_Button;
     onClick = NULL;
     paddingX = currentScreenView->width*0.012;
     paddingY = currentScreenView->width*0.006;
@@ -26,8 +25,8 @@ void GUIButton::updateContent() {
         height = 12+paddingY;
     
     for(unsigned int i = 0; i < children.size(); i ++) {
-        if(children[i]->type == GUIType_Label) {
-            GUILabel* label = (GUILabel*)children[i];
+        GUILabel* label = dynamic_cast<GUILabel*>(children[i]);
+        if(label)
             switch(state) {
                 case GUIButtonStateDisabled:
                     label->color = Color4(0.12);
@@ -62,7 +61,7 @@ void GUIButton::updateContent() {
                     label->font = italicFont;
                 break;
             }
-        }
+        
         children[i]->updateContent();
         
         if(sizeAlignment & GUISizeAlignment_Width) {

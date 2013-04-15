@@ -11,7 +11,6 @@
 #include "AppMain.h"
 
 GUITextField::GUITextField() {
-    type = GUIType_TextField;
     highlighted = false;
     enabled = true;
     cursorDrawTick = 0.0;
@@ -59,19 +58,18 @@ void GUITextField::moveCursorRight() {
     cursorDrawTick = 0.0;
 }
 
-void GUITextField::setFirstResponderStatus() {
-    GUIRect::setFirstResponderStatus();
-    cursorDrawTick = 0.0;
-    cursorIndexX = 0;
+void GUITextField::setFirstResponderStatus(bool active) {
+    GUIRect::setFirstResponderStatus(active);
+    if(active) {
+        cursorDrawTick = 0.0;
+        cursorIndexX = 0;
+        if(onFocus) onFocus(this);
+    }else{
+        cursorIndexX = -1;
+        updateContent();
+        if(onBlur) onBlur(this);
+    }
     updateContent();
-    if(onFocus) onFocus(this);
-}
-
-void GUITextField::removeFirstResponderStatus() {
-    GUIRect::removeFirstResponderStatus();
-    cursorIndexX = -1;
-    updateContent();
-    if(onBlur) onBlur(this);
 }
 
 void GUITextField::updateContent() {
@@ -138,13 +136,13 @@ bool GUITextField::handleMouseDown(int mouseX, int mouseY) {
     
     if(!visible || !enabled || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) {
         if(!screenView || screenView->firstResponder != this) return false;
-        removeFirstResponderStatus();
+        setFirstResponderStatus(false);
         return false;
     }
     
     if(!screenView) return true;
     if(screenView->firstResponder != this)
-        setFirstResponderStatus();
+        setFirstResponderStatus(true);
     
     mouseX -= label->posX;
     
@@ -194,7 +192,7 @@ bool GUITextField::handleKeyDown(SDL_keysym* key) {
         case SDLK_TAB:
         case SDLK_RETURN:
         case SDLK_ESCAPE:
-            removeFirstResponderStatus();
+            setFirstResponderStatus(false);
         break;
         case SDLK_UP:
             cursorIndexX = 0;
