@@ -75,14 +75,11 @@ CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* lev
     if(!mainCam) mainCam = this;
 }
 
-CamObject::~CamObject() {
+void CamObject::removeClean() {
     if(mainCam == this) mainCam = NULL;
     if(currentCam == this) currentCam = NULL;
-}
-
-void CamObject::remove() {
     objectManager.simpleObjects.erase(this);
-    BaseObject::remove();
+    BaseObject::removeClean();
 }
 
 Matrix4 CamObject::getCamMatrix() {

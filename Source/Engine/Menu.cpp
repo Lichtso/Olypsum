@@ -97,6 +97,18 @@ static void getAvailableResolutions(std::vector<Resolution>& resolutions) {
 
 
 
+void Menu::setPause(bool active) {
+    if(levelManager.gameStatus == noGame) return;
+    if(active)
+        setMenu(gameEsc);
+    else
+        setMenu(inGame);
+    
+    v8::HandleScope handleScope;
+    scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
+                                        "onpause", false, { v8::Boolean::New(active) });
+}
+
 void Menu::consoleAdd(const std::string& message, float duration) {
     ConsoleEntry entry;
     entry.message = message;
@@ -109,7 +121,7 @@ void Menu::consoleAdd(const std::string& message, float duration) {
 
 void Menu::handleActiveEvent(bool active) {
     if(!active && menu.current == Menu::Name::inGame)
-        menu.setMenu(Menu::Name::gameEsc);
+        menu.setPause(true);
 }
 
 void Menu::handleMouseDown(SDL_Event& event) {
@@ -140,13 +152,14 @@ void Menu::handleMouseMove(SDL_Event& event) {
     currentScreenView->handleMouseMove(event.button.x, event.button.y);
     if(menu.current != inGame) return;
     
-    int mouseX = event.button.x-currentScreenView->width;
-    int mouseY = event.button.y-currentScreenView->height;
-    if(mouseX == 0 && mouseY == 0) return;
+    mouseX = event.button.x-currentScreenView->width;
+    mouseY = event.button.y-currentScreenView->height;
     
-    SDL_WarpMouse(currentScreenView->width / prevOptionsState.videoScale, currentScreenView->height / prevOptionsState.videoScale);
-    mouseVelocityX -= optionsState.mouseSensitivity*mouseX;
-    mouseVelocityY -= optionsState.mouseSensitivity*mouseY;
+    if((mouseX != 0 || mouseY != 0) && mouseFixed) {
+        SDL_WarpMouse(currentScreenView->width / prevOptionsState.videoScale, currentScreenView->height / prevOptionsState.videoScale);
+        mouseVelocityX -= optionsState.mouseSensitivity*mouseX;
+        mouseVelocityY -= optionsState.mouseSensitivity*mouseY;
+    }
 }
 
 void Menu::handleMouseWheel(SDL_Event& event) {
@@ -189,10 +202,10 @@ void Menu::handleKeyUp(SDL_Event& event) {
                 setMenu(main);
                 return;
             case inGame:
-                setMenu(gameEsc);
+                setPause(true);
                 return;
             case gameEsc:
-                setMenu(inGame);
+                setPause(false);
                 return;
             case newGame:
                 setMenu(saveGames);
@@ -228,7 +241,7 @@ void Menu::gameTick() {
                 setMenu(main);
         } break;
         case inGame: {
-            GUIView* view = static_cast<GUIView*>(currentScreenView->children[1]);
+            GUIView* view = static_cast<GUIView*>(currentScreenView->children[0]);
             int posY = view->height;
             for(int i = 0; i < consoleMessages.size(); i ++) {
                 GUILabel* label;
@@ -254,7 +267,6 @@ void Menu::gameTick() {
                     view->addChild(label);
                 }
                 label->width = view->width;
-                label->fontHeight = currentScreenView->height*0.04;
                 label->textAlign = GUITextAlign_Left;
                 label->sizeAlignment = GUISizeAlignment_Height;
                 label->color = Color4(1.0);
@@ -268,12 +280,14 @@ void Menu::gameTick() {
             for(int i = consoleMessages.size(); i < view->children.size(); i ++)
                 view->deleteChild(i);
             
-            mouseMotionX = optionsState.mouseSmoothing*mouseVelocityX;
-            mouseMotionY = optionsState.mouseSmoothing*mouseVelocityY;
-            mouseVelocityX -= mouseMotionX;
-            mouseVelocityY -= mouseMotionY;
-            
-            SDL_ShowCursor(0);
+            if(mouseFixed) {
+                mouseX = optionsState.mouseSmoothing*mouseVelocityX;
+                mouseY = optionsState.mouseSmoothing*mouseVelocityY;
+                mouseVelocityX -= mouseX;
+                mouseVelocityY -= mouseY;
+                SDL_ShowCursor(0);
+            }else
+                SDL_ShowCursor(1);
         } break;
         default:
             SDL_ShowCursor(1);
@@ -762,11 +776,6 @@ void Menu::setMenu(Name menu) {
             currentScreenView->addChild(label);
         } break;
         case inGame: {
-            GUILabel* label = new GUILabel();
-            label->text = std::string("+");
-            label->color = Color4(1.0);
-            currentScreenView->addChild(label);
-            
             GUIView* view = new GUIView();
             view->posX = currentScreenView->width*-0.5;
             view->posY = currentScreenView->height*0.3;
@@ -959,18 +968,19 @@ void Menu::setMenu(Name menu) {
             scrollView->addChild(buttonList);
             
             GUITextField* textField = new GUITextField();
+            label = static_cast<GUILabel*>(textField->children[0]);
             textField->posX = 0.0;
             textField->posY = currentScreenView->height*-0.8;
             textField->width = currentScreenView->width*0.4;
             textField->height = currentScreenView->height*0.07;
-            textField->label->fontHeight = currentScreenView->height*0.1;
-            textField->label->text = localization.localizeString("newGame");
+            //textField->label->fontHeight = currentScreenView->height*0.1;
+            label->text = localization.localizeString("newGame");
             currentScreenView->addChild(textField);
             std::function<void(GUIButton*)> onClick[] = {
                 [this](GUIButton* button) {
                     setMenu(saveGames);
-                }, [&menu, files, buttonList, textField](GUIButton* button) {
-                    levelManager.newGame(files[buttonList->selectedIndex], textField->label->text);
+                }, [files, buttonList, label](GUIButton* button) {
+                    levelManager.newGame(files[buttonList->selectedIndex], label->text);
                 }
             };
             const char* buttonLabels[] = { "cancel", "ok" };
@@ -990,8 +1000,9 @@ void Menu::setMenu(Name menu) {
             button->buttonType = GUIButtonTypeAdd;
             button->state = GUIButtonStateDisabled;
             textField->onChange = [button](GUITextField* textField) {
-                std::string path = gameDataDir+"Saves/"+textField->label->text+'/';
-                button->state = (!checkDir(path) && getUTF8Length(textField->label->text.c_str()) > 3) ? GUIButtonStateNormal : GUIButtonStateDisabled;
+                GUILabel* label = static_cast<GUILabel*>(textField->children[0]);
+                std::string path = gameDataDir+"Saves/"+label->text+'/';
+                button->state = (!checkDir(path) && getUTF8Length(label->text.c_str()) >= 3) ? GUIButtonStateNormal : GUIButtonStateDisabled;
                 button->updateContent();
             };
         } break;

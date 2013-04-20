@@ -16,8 +16,7 @@ class ScriptModelObject : public ScriptPhysicObject {
     static void SetIntegrity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetModel(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void SetModel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetTextureAnimation(const v8::Arguments& args);
-    static v8::Handle<v8::Value> SetTextureAnimation(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessTextureAnimation(const v8::Arguments& args);
     protected:
     ScriptModelObject(const char* name);
     public:
@@ -25,21 +24,21 @@ class ScriptModelObject : public ScriptPhysicObject {
 };
 
 class ScriptRigidObject : public ScriptModelObject {
+    static v8::Handle<v8::Value> GetCollisionShape(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static void SetCollisionShape(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetMass(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void SetMass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetAngularVelocity(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> SetAngularVelocity(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetLinearVelocity(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> SetLinearVelocity(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetAngularFactor(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> SetAngularFactor(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetLinearFactor(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> SetLinearFactor(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetKinematic(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static void SetKinematic(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> AccessAngularVelocity(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessLinearVelocity(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessAngularFactor(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessLinearFactor(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetAngularDamping(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void SetAngularDamping(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetLinearDamping(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void SetLinearDamping(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> SetTransformation(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessTransformation(const v8::Arguments& args);
     static v8::Handle<v8::Value> ApplyImpulseAtPoint(const v8::Arguments& args);
     static v8::Handle<v8::Value> ApplyAngularImpulse(const v8::Arguments& args);
     static v8::Handle<v8::Value> ApplyLinearImpulse(const v8::Arguments& args);

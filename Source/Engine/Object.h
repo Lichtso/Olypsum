@@ -26,11 +26,15 @@ class LevelSaver;
 class BaseObject {
     protected:
     BaseObject() :scriptFile(NULL) { };
-    public:
     virtual ~BaseObject();
+    public:
     ScriptFile* scriptFile; //!< The script file to be called on events
     v8::Persistent<v8::Object> scriptInstance; //!< The script representation
     std::map<std::string, BaseLink*> links; //!< A map of LinkObject and names to connect BaseObject to others
+    //! Used to remove a BaseObject from all lists correctly
+    virtual void removeClean();
+    //! Used to delete a BaseObject
+    virtual void removeFast();
     /*! Used to update the transfomation of this object
      @param transformation The new transformation
      */
@@ -43,8 +47,6 @@ class BaseObject {
      @return Returns false when it deleted it's self in this tick
      */
     virtual bool gameTick();
-    //! Used to remove a BaseObject from all lists correctly
-    virtual void remove();
     //! Initialize from rapidxml::xml_node
     void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     //! Allocates a new BaseObject::scriptInstance (overwritten by child classes)
@@ -113,7 +115,8 @@ class PhysicObject : public BaseObject {
     btCollisionObject* body; //!< The physics-body
     PhysicObject() :body(NULL) { }
     public:
-    ~PhysicObject();
+    void removeClean();
+    void removeFast();
     virtual void setTransformation(const btTransform& transformation) {
         body->setWorldTransform(transformation);
     }
@@ -121,6 +124,8 @@ class PhysicObject : public BaseObject {
         return body->getWorldTransform();
     }
     void newScriptInstance();
+    //! Activates all PhysicObjects that are touching this PhysicObject
+    void updateTouchingObjects();
     //! Is called by the engine if a collision to another PhysicObject has been detected
     virtual void handleCollision(btPersistentManifold* contactManifold, PhysicObject* b);
     //! Getter method for the physics body, child classes will upcast their bodies

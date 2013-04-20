@@ -607,56 +607,44 @@ v8::Handle<v8::Value> ScriptMatrix4::toJSON(const v8::Arguments& args) {
     return handleScope.Close(array);
 }
 
-v8::Handle<v8::Value> ScriptMatrix4::GetRowX(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+v8::Handle<v8::Value> ScriptMatrix4::AccessRowX(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    return handleScope.Close(scriptVector3.newInstance(getDataOfInstance(info.This())->x));
+    Matrix4* objectPtr = getDataOfInstance(args.This());
+    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+        objectPtr->x = scriptVector3.getDataOfInstance(args[0]);
+        return args[0];
+    }else
+        return handleScope.Close(scriptVector3.newInstance(objectPtr->x));
 }
 
-v8::Handle<v8::Value> ScriptMatrix4::SetRowX(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptMatrix4::AccessRowY(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptVector3.isCorrectInstance(args[0]))
-         return v8::ThrowException(v8::String::New("Matrix4 x: Invalid argument"));
-    getDataOfInstance(args.This())->x = scriptVector3.getDataOfInstance(args[0]);
-    return args.This();
+    Matrix4* objectPtr = getDataOfInstance(args.This());
+    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+        objectPtr->y = scriptVector3.getDataOfInstance(args[0]);
+        return args[0];
+    }else
+        return handleScope.Close(scriptVector3.newInstance(objectPtr->y));
 }
 
-v8::Handle<v8::Value> ScriptMatrix4::GetRowY(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+v8::Handle<v8::Value> ScriptMatrix4::AccessRowZ(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    return handleScope.Close(scriptVector3.newInstance(getDataOfInstance(info.This())->y));
+    Matrix4* objectPtr = getDataOfInstance(args.This());
+    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+        objectPtr->z = scriptVector3.getDataOfInstance(args[0]);
+        return args[0];
+    }else
+        return handleScope.Close(scriptVector3.newInstance(objectPtr->z));
 }
 
-v8::Handle<v8::Value> ScriptMatrix4::SetRowY(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptMatrix4::AccessRowW(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptVector3.isCorrectInstance(args[0]))
-        return v8::ThrowException(v8::String::New("Matrix4 y: Invalid argument"));
-    getDataOfInstance(args.This())->y = scriptVector3.getDataOfInstance(args[0]);
-    return args.This();
-}
-
-v8::Handle<v8::Value> ScriptMatrix4::GetRowZ(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
-    v8::HandleScope handleScope;
-    return handleScope.Close(scriptVector3.newInstance(getDataOfInstance(info.This())->z));
-}
-
-v8::Handle<v8::Value> ScriptMatrix4::SetRowZ(const v8::Arguments& args) {
-    v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptVector3.isCorrectInstance(args[0]))
-        return v8::ThrowException(v8::String::New("Matrix4 z: Invalid argument"));
-    getDataOfInstance(args.This())->z = scriptVector3.getDataOfInstance(args[0]);
-    return args.This();
-}
-
-v8::Handle<v8::Value> ScriptMatrix4::GetRowW(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
-    v8::HandleScope handleScope;
-    return handleScope.Close(scriptVector3.newInstance(getDataOfInstance(info.This())->w));
-}
-
-v8::Handle<v8::Value> ScriptMatrix4::SetRowW(const v8::Arguments& args) {
-    v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptVector3.isCorrectInstance(args[0]))
-        return v8::ThrowException(v8::String::New("Matrix4 w: Invalid argument"));
-    getDataOfInstance(args.This())->w = scriptVector3.getDataOfInstance(args[0]);
-    return args.This();
+    Matrix4* objectPtr = getDataOfInstance(args.This());
+    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+        objectPtr->w = scriptVector3.getDataOfInstance(args[0]);
+        return args[0];
+    }else
+        return handleScope.Close(scriptVector3.newInstance(objectPtr->w));
 }
 
 v8::Handle<v8::Value> ScriptMatrix4::GetRotation(const v8::Arguments& args) {
@@ -798,14 +786,10 @@ ScriptMatrix4::ScriptMatrix4() :ScriptClass("Matrix4", Constructor) {
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->Set(v8::String::New("toString"), v8::FunctionTemplate::New(toString));
     objectTemplate->Set(v8::String::New("toJSON"), v8::FunctionTemplate::New(toJSON));
-    objectTemplate->SetAccessor(v8::String::New("x"), GetRowX);
-    objectTemplate->Set(v8::String::New("setX"), v8::FunctionTemplate::New(SetRowX));
-    objectTemplate->SetAccessor(v8::String::New("y"), GetRowY);
-    objectTemplate->Set(v8::String::New("setY"), v8::FunctionTemplate::New(SetRowY));
-    objectTemplate->SetAccessor(v8::String::New("z"), GetRowZ);
-    objectTemplate->Set(v8::String::New("setZ"), v8::FunctionTemplate::New(SetRowZ));
-    objectTemplate->SetAccessor(v8::String::New("w"), GetRowW);
-    objectTemplate->Set(v8::String::New("setW"), v8::FunctionTemplate::New(SetRowW));
+    objectTemplate->Set(v8::String::New("x"), v8::FunctionTemplate::New(AccessRowX));
+    objectTemplate->Set(v8::String::New("y"), v8::FunctionTemplate::New(AccessRowY));
+    objectTemplate->Set(v8::String::New("z"), v8::FunctionTemplate::New(AccessRowZ));
+    objectTemplate->Set(v8::String::New("w"), v8::FunctionTemplate::New(AccessRowW));
     objectTemplate->Set(v8::String::New("getRotation"), v8::FunctionTemplate::New(GetRotation));
     objectTemplate->Set(v8::String::New("setRotation"), v8::FunctionTemplate::New(SetRotation));
     objectTemplate->Set(v8::String::New("getEuler"), v8::FunctionTemplate::New(GetEuler));

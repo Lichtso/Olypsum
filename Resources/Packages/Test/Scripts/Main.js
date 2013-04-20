@@ -1,28 +1,59 @@
 exports.onload = function(localData, globalData) {
-	log(levelID);
+	
 };
 
 /*exports.onleave = function() {
 	saveLevel(null, null);
 };*/
 
+/*exports.onpause = function(paused) {
+	if(!paused) {
+		var view = new GUIFramedView(GUIScreenView());
+	}
+};*/
+
 exports.ongametick = function() {
 	var Cam = require('Cam');
-	Cam.ongametick.call(Cam.camObject);
+
+	var transform = Cam.camObject.transformation(),
+		speed = animationFactor*5.0;
+
+	if(Keyboard.isKeyPressed(97)) //A
+		transform.w(transform.w().add(transform.x().mult(-speed)));
+	else if(Keyboard.isKeyPressed(100)) //D
+		transform.w(transform.w().add(transform.x().mult(speed)));
+
+	if(Keyboard.isKeyPressed(101)) //E
+		transform.w(transform.w().add(transform.y().mult(-speed)));
+	else if(Keyboard.isKeyPressed(113)) //Q
+		transform.w(transform.w().add(transform.y().mult(speed)));
+
+	if(Keyboard.isKeyPressed(119)) //W
+		transform.w(transform.w().add(transform.z().mult(-speed)));
+	else if(Keyboard.isKeyPressed(115)) //S
+		transform.w(transform.w().add(transform.z().mult(speed)));
+
+	if(!Keyboard.isKeyPressed(308)) { //Alt left
+		Cam.camObject.rotation[0] += Mouse.x()*0.01;
+		Cam.camObject.rotation[1] = Math.min(Math.max(Cam.camObject.rotation[1]+Mouse.y()*0.01, -Math.PI/2), Math.PI/2);
+		transform.setRotation(new Quaternion(Cam.camObject.rotation));
+	}
+
+	Cam.camObject.transformation(transform);
 
 	if(exports.grabbedObject != null) {
-		var camTransform = require('Cam').camObject.transformation;
-		var objTransform = exports.grabbedObject.transformation;
-		var velocity = camTransform.getTransformed(exports.grabbedVector).sub(objTransform.w);
-        var speed = velocity.getLength();
+		var camTransform = require('Cam').camObject.transformation(),
+			objTransform = exports.grabbedObject.transformation();
+		var velocity = camTransform.getTransformed(exports.grabbedVector).sub(objTransform.w()),
+			speed = velocity.getLength();
         velocity.mult(1.0/speed);
         speed = Math.min(speed*5.0, 10.0);
         
-        if(isKeyPressed(308))
-            exports.grabbedObject.setAngularVelocity(camTransform.getRotated(new Vector3(mouseMotionY, mouseMotionX, 0.0)).mult(-0.1));
+        if(Keyboard.isKeyPressed(308)) //Alt left
+            exports.grabbedObject.angularVelocity(camTransform.getRotated(new Vector3(Mouse.y(), Mouse.x(), 0.0)).mult(-0.1));
         else
-            exports.grabbedObject.setAngularVelocity(new Vector3(0.0, 0.0, 0.0));
-        exports.grabbedObject.setLinearVelocity(velocity.mult(speed));
+            exports.grabbedObject.angularVelocity(new Vector3(0.0, 0.0, 0.0));
+        exports.grabbedObject.linearVelocity(velocity.mult(speed));
 	}
 };
 
@@ -36,13 +67,13 @@ exports.onmousewheel = function(delta) {
 };
 
 exports.onmousedown = function() {
-	var transform = require('Cam').camObject.transformation;
-	var hits = Intersection.rayCast(transform.w, transform.z.mult(-100.0), 0xFFFF, true);
+	var transform = require('Cam').camObject.transformation();
+	var hits = Intersection.rayCast(transform.w(), transform.z().mult(-100.0), 0xFFFF, true);
 	if(hits.objects.length == 0 || !hits.objects[0].mass)
 		exports.grabbedObject = null;
 	else{
 		exports.grabbedObject = hits.objects[0];
-		exports.grabbedVector = new Vector3(0, 0, -exports.grabbedObject.transformation.w.sub(transform.w).getLength());
+		exports.grabbedVector = new Vector3(0, 0, -exports.grabbedObject.transformation().w().sub(transform.w()).getLength());
 	}
 };
 

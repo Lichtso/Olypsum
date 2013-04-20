@@ -81,7 +81,7 @@ void ObjectManager::clear() {
     currentShadowLight = NULL;
     
     for(unsigned int i = 0; i < lightObjects.size(); i ++)
-        delete lightObjects[i];
+        lightObjects[i]->removeFast();
     lightObjects.clear();
     
     for(unsigned int i = 0; i < transparentAccumulator.size(); i ++)
@@ -93,15 +93,15 @@ void ObjectManager::clear() {
     decals.clear();
     
     for(auto graphicObject : graphicObjects)
-        delete graphicObject;
+        graphicObject->removeFast();
     graphicObjects.clear();
     
     for(auto particlesObject : particlesObjects)
-        delete particlesObject;
+        particlesObject->removeFast();
     particlesObjects.clear();
     
     for(auto simpleObject : simpleObjects)
-        delete simpleObject;
+        simpleObject->removeFast();
     simpleObjects.clear();
     
     physicsWorld.reset();
@@ -232,10 +232,10 @@ void ObjectManager::physicsTick() {
 		btPersistentManifold* contactManifold = collisionDispatcher->getManifoldByIndexInternal(i);
         if(contactManifold->getNumContacts() == 0) continue;
         
-		const btCollisionObject *objectA = static_cast<const btCollisionObject*>(contactManifold->getBody0()),
-        *objectB = static_cast<const btCollisionObject*>(contactManifold->getBody1());
+		const btCollisionObject *objectA = contactManifold->getBody0(),
+                                *objectB = contactManifold->getBody1();
         PhysicObject *userObjectA = static_cast<PhysicObject*>(objectA->getUserPointer()),
-        *userObjectB = static_cast<PhysicObject*>(objectB->getUserPointer());
+                     *userObjectB = static_cast<PhysicObject*>(objectB->getUserPointer());
         
         //printf("%p %p (%p %p) %d\n", objectA, objectB, userObjectA, userObjectB, contactManifold->getNumContacts());
         

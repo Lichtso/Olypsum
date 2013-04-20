@@ -9,27 +9,6 @@
 #include "ObjectManager.h"
 #include "FileManager.h"
 
-Color4& Color4::operator=(const Color4& B) {
-    r = B.r;
-    g = B.g;
-    b = B.b;
-    a = B.a;
-    return *this;
-}
-
-btVector3 Color4::getVector() {
-    return btVector3(r, g, b);
-}
-
-SDL_Color Color4::getSDL() {
-    SDL_Color B;
-    B.r = r*255;
-    B.g = g*255;
-    B.b = b*255;
-    B.unused = a*255;
-    return B;
-}
-
 const char *seperatorString = "#separator\n", *includeString = "#include ";
 
 ShaderProgram::ShaderProgram() {

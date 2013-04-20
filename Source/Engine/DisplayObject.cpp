@@ -12,20 +12,22 @@ GraphicObject::GraphicObject() {
     objectManager.graphicObjects.insert(this);
 }
 
-void GraphicObject::remove() {
+void GraphicObject::removeClean() {
     objectManager.graphicObjects.erase(this);
-    BaseObject::remove();
+    BaseObject::removeClean();
 }
 
 
 
-ModelObject::~ModelObject() {
+void ModelObject::removeClean() {
+    setModel(NULL);
+    GraphicObject::removeClean();
+}
+
+void ModelObject::removeFast() {
     textureAnimation.clear();
     skeletonPose.reset();
-}
-
-void ModelObject::remove() {
-    setModel(NULL);
+    GraphicObject::removeFast();
 }
 
 void ModelObject::setupBones(BaseObject* object, Bone* bone) {
@@ -76,7 +78,7 @@ bool ModelObject::gameTick() {
     if(integrity <= 0.0) {
         integrity -= profiler.animationFactor;
         if(integrity < -1.0) {
-            remove();
+            removeClean();
             return false;
         }
     }
@@ -90,7 +92,7 @@ void ModelObject::setModel(std::shared_ptr<Model> _model) {
                 objectManager.reflectiveAccumulator.erase(this);
         foreach_e(links, link)
             if(dynamic_cast<TransformLink*>(link->second))
-                link->second->remove(this, link);
+                link->second->removeClean(this, link);
     }
     textureAnimation.clear();
     skeletonPose.reset();
@@ -177,8 +179,7 @@ void ModelObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
                 log(error_log, "Tried to construct BoneObject with invalid path.");
                 return;
             }
-            levelLoader->pushObject(boneObject);
-            boneObject->setTransformation(BaseObject::readTransformtion(parameterNode, levelLoader));
+            boneObject->init(parameterNode, levelLoader);
             parameterNode = parameterNode->next_sibling();
         }
     }
@@ -299,8 +300,7 @@ RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
     btVector3 localInertia;
     collisionShape->calculateLocalInertia(mass, localInertia);
     btTransform transform = BaseObject::readTransformtion(node, levelLoader);
-    btRigidBody::btRigidBodyConstructionInfo rBCI(mass, new simpleMotionState(transform), collisionShape, localInertia);
-    body = new btRigidBody(rBCI);
+    body = new btRigidBody(btRigidBody::btRigidBodyConstructionInfo(mass, new simpleMotionState(transform), collisionShape, localInertia));
     body->setUserPointer(this);
     btRigidBody* body = getBody();
     body->setSleepingThresholds(0.5, 0.5);
@@ -350,19 +350,25 @@ RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
     }
 }
 
-RigidObject::~RigidObject() {
+void RigidObject::removeClean() {
     if(body) {
         btRigidBody* rigidBody = getBody();
-        while(rigidBody->getNumConstraintRefs() > 0) {
-            btTypedConstraint* constraint = rigidBody->getConstraintRef(0);
-            objectManager.physicsWorld->removeConstraint(constraint);
-            delete constraint;
-        }
         delete rigidBody->getMotionState();
         objectManager.physicsWorld->removeRigidBody(rigidBody);
         delete rigidBody;
         body = NULL;
     }
+    ModelObject::removeClean();
+}
+
+void RigidObject::removeFast() {
+    if(body) {
+        btRigidBody* rigidBody = getBody();
+        delete rigidBody->getMotionState();
+        delete rigidBody;
+        body = NULL;
+    }
+    ModelObject::removeFast();
 }
 
 void RigidObject::setTransformation(const btTransform& transformation) {
@@ -440,4 +446,19 @@ rapidxml::xml_node<xmlUsedCharType>* RigidObject::write(rapidxml::xml_document<x
     }
     
     return node;
+}
+
+bool RigidObject::getKinematic() {
+    return body->getCollisionFlags() & btCollisionObject::CF_KINEMATIC_OBJECT;
+}
+
+void RigidObject::setKinematic(bool active) {
+    if(getBody()->getInvMass() == 0.0) return;
+    if(active) {
+        body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+        body->setActivationState(DISABLE_DEACTIVATION);
+    }else if(getKinematic()) {
+        body->setCollisionFlags(body->getCollisionFlags() & (~ btCollisionObject::CF_KINEMATIC_OBJECT));
+        body->forceActivationState(ACTIVE_TAG);
+    }
 }

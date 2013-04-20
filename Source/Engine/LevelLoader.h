@@ -18,6 +18,7 @@ class LevelLoader {
     public:
     btTransform transformation;
     LevelLoader();
+    v8::Handle<v8::Array> getResultsArray();
     BaseObject* getObjectLinking(const char* id);
     void pushObject(BaseObject* object);
     bool loadContainer(std::string name);

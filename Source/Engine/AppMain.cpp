@@ -160,7 +160,7 @@ void AppMain(int argc, char *argv[]) {
                 break;
             }
         }
-        keyState = SDL_GetKeyState(NULL);
+        keyState = SDL_GetKeyState(&keyStateSize);
         //modKeyState = SDL_GetModState();
         
         if(menu.current == Menu::Name::inGame && profiler.isFirstFrameInSec()) {
@@ -169,6 +169,8 @@ void AppMain(int argc, char *argv[]) {
             menu.consoleAdd(str, 1.0);
         }
         
+        networkManager.gameTick();
+        menu.gameTick();
         if(levelManager.gameStatus == noGame) {
             glClearColor(1, 1, 1, 1);
             glViewport(0, 0, prevOptionsState.videoWidth, prevOptionsState.videoHeight);
@@ -178,10 +180,7 @@ void AppMain(int argc, char *argv[]) {
             profiler.leaveSection("Rest");
             objectManager.gameTick();
         }
-        menu.gameTick();
-        //if(currentScreenView)
-            currentScreenView->draw();
-        networkManager.gameTick();
+        currentScreenView->draw();
         SDL_GL_SwapBuffers();
         profiler.leaveSection("Swap Buffers");
         profiler.markFrame();
@@ -195,3 +194,4 @@ void AppTerminate() {
 }
 
 Uint8* keyState;
+int keyStateSize;

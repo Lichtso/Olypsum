@@ -122,15 +122,11 @@ void GUIRoundedRect::drawInTexture() {
                 pixel[0] = pixel[1] = pixel[2] = 0;
                 continue;
             }
-            if(transposed) {
-                pixel[0] = ((bottomColor.r-topColor.r)*0.5*x/width+topColor.r)*255.0;
-                pixel[1] = ((bottomColor.g-topColor.g)*0.5*x/width+topColor.g)*255.0;
-                pixel[2] = ((bottomColor.b-topColor.b)*0.5*x/width+topColor.b)*255.0;
-            }else{
-                pixel[0] = ((bottomColor.r-topColor.r)*0.5*y/height+topColor.r)*255.0;
-                pixel[1] = ((bottomColor.g-topColor.g)*0.5*y/height+topColor.g)*255.0;
-                pixel[2] = ((bottomColor.b-topColor.b)*0.5*y/height+topColor.b)*255.0;
-            }
+            float scale = (transposed) ? 0.5*x/width : 0.5*y/height;
+            pixel[0] = ((bottomColor.r-topColor.r)*scale+topColor.r)*255.0;
+            pixel[1] = ((bottomColor.g-topColor.g)*scale+topColor.g)*255.0;
+            pixel[2] = ((bottomColor.b-topColor.b)*scale+topColor.b)*255.0;
+            pixel[3] = ((bottomColor.a-topColor.a)*scale+topColor.a)*255.0;
         }
     
     if(innerShadow != 0) {

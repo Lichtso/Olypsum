@@ -46,17 +46,16 @@ LightObject::LightObject() {
 }
 
 LightObject::~LightObject() {
-    if(shadowMap)
-        delete shadowMap;
+    if(shadowMap) delete shadowMap;
 }
 
-void LightObject::remove() {
+void LightObject::removeClean() {
     for(int i = 0; i < objectManager.lightObjects.size(); i ++)
         if(objectManager.lightObjects[i] == this) {
             objectManager.lightObjects.erase(objectManager.lightObjects.begin()+i);
             break;
         }
-    BaseObject::remove();
+    BaseObject::removeClean();
 }
 
 btTransform LightObject::getTransformation() {
@@ -385,8 +384,7 @@ PositionalLight::PositionalLight(rapidxml::xml_node<xmlUsedCharType>* node, Leve
 }
 
 PositionalLight::~PositionalLight() {
-    if(shadowMapB)
-        delete shadowMapB;
+    if(shadowMapB) delete shadowMapB;
 }
 
 void PositionalLight::newScriptInstance() {

@@ -12,6 +12,15 @@ LevelLoader::LevelLoader() :transformation(btTransform::getIdentity()) {
     
 }
 
+v8::Handle<v8::Array> LevelLoader::getResultsArray() {
+    v8::HandleScope handleScope;
+    unsigned int i = 0;
+    v8::Handle<v8::Array> objects = v8::Array::New();
+    for(auto hit : objectLinkingIndex)
+        objects->Set(i ++, hit->scriptInstance);
+    return handleScope.Close(objects);
+}
+
 BaseObject* LevelLoader::getObjectLinking(const char* id) {
     unsigned int offset;
     sscanf(id, "%d", &offset);
@@ -309,6 +318,6 @@ bool LevelLoader::loadLevel(std::string levelId) {
     
     //Update gameStatus and start the game
     objectManager.updateRendererSettings();
-    menu.setMenu(Menu::Name::inGame);
+    menu.setPause(false);
     return true;
 }

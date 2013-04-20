@@ -21,8 +21,8 @@ class GUIView : public GUIRect {
     int getIndexOfChild(GUIRect* child);
     //! Deletes the child at given index
     void deleteChild(unsigned int index);
-    //! Removes the connection between parent and child at given index
-    void removeChild(unsigned int index);
+    //! Moves the child at given index to another parent
+    void moveChildToParent(unsigned int index, GUIView* newParent);
     void updateContent();
     void draw(btVector3 parentTransform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);
@@ -41,8 +41,9 @@ class GUIFramedView : public GUIView {
 
 class GUIScreenView : public GUIView {
     public:
-    GUIRect *modalView, *firstResponder;
+    GUIRect *modalView, *focused;
     GUIScreenView();
+    ~GUIScreenView();
     bool getLimSize(GUIClipRect& clipRect);
     void updateContent();
     void draw();

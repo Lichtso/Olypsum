@@ -34,6 +34,21 @@ v8::Handle<v8::Value> ScriptManager::ScriptRequire(const v8::Arguments& args) {
     return handleScope.Close(script->exports);
 }
 
+v8::Handle<v8::Value> ScriptManager::ScriptLoadContainer(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    if(args.Length() < 2)
+        return v8::ThrowException(v8::String::New("loadContainer(): To less arguments"));
+    if(scriptMatrix4.isCorrectInstance(args[0]) || args[1]->IsString())
+        return v8::ThrowException(v8::String::New("loadContainer(): Invalid argument"));
+    LevelLoader levelLoader;
+    levelLoader.transformation = scriptMatrix4.getDataOfInstance(args[0])->getBTTransform();
+    
+    if(!levelLoader.loadContainer(stdStringOf(args[1]->ToString())))
+       return v8::Undefined();
+    
+    return levelLoader.getResultsArray();
+}
+
 v8::Handle<v8::Value> ScriptManager::ScriptSaveLevel(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 2)
@@ -41,15 +56,6 @@ v8::Handle<v8::Value> ScriptManager::ScriptSaveLevel(const v8::Arguments& args) 
     std::string localData = (args[0]->IsString()) ? stdStringOf(args[0]->ToString()) : "",
                 globalData = (args[1]->IsString()) ? stdStringOf(args[1]->ToString()) : "";
     return v8::Boolean::New(levelManager.saveLevel(localData, globalData));
-}
-
-v8::Handle<v8::Value> ScriptManager::ScriptIsKeyPressed(const v8::Arguments& args) {
-    v8::HandleScope handleScope;
-    if(args.Length() == 0)
-        return v8::ThrowException(v8::String::New("isKeyPressed(): To less arguments"));
-    if(!args[0]->IsInt32() || args[0]->Uint32Value() > 322)
-        return v8::ThrowException(v8::String::New("isKeyPressed(): Invalid argument"));
-    return handleScope.Close(v8::Boolean::New(keyState[args[0]->Uint32Value()]));
 }
 
 v8::Handle<v8::Value> ScriptManager::ScriptGetLevel(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
@@ -64,14 +70,6 @@ void ScriptManager::ScriptSetLevel(v8::Local<v8::String> property, v8::Local<v8:
 
 v8::Handle<v8::Value> ScriptManager::ScriptGetAnimationFactor(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     return v8::Number::New(profiler.animationFactor);
-}
-
-v8::Handle<v8::Value> ScriptManager::ScriptGetMouseMotionX(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
-    return v8::Number::New(menu.mouseMotionX);
-}
-
-v8::Handle<v8::Value> ScriptManager::ScriptGetMouseMotionY(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
-    return v8::Number::New(menu.mouseMotionY);
 }
 
 const char* ScriptManager::cStringOf(v8::Handle<v8::String> string) {
@@ -104,16 +102,13 @@ ScriptManager::ScriptManager() {
     globalTemplate = v8::Persistent<v8::ObjectTemplate>::New(v8::ObjectTemplate::New());
     globalTemplate->Set(v8::String::New("log"), v8::FunctionTemplate::New(ScriptLog));
     globalTemplate->Set(v8::String::New("require"), v8::FunctionTemplate::New(ScriptRequire));
+    globalTemplate->Set(v8::String::New("loadContainer"), v8::FunctionTemplate::New(ScriptLoadContainer));
     globalTemplate->Set(v8::String::New("saveLevel"), v8::FunctionTemplate::New(ScriptSaveLevel));
-    globalTemplate->Set(v8::String::New("isKeyPressed"), v8::FunctionTemplate::New(ScriptIsKeyPressed));
     globalTemplate->SetAccessor(v8::String::New("levelID"), ScriptGetLevel, ScriptSetLevel);
     globalTemplate->SetAccessor(v8::String::New("animationFactor"), ScriptGetAnimationFactor);
-    globalTemplate->SetAccessor(v8::String::New("mouseMotionX"), ScriptGetMouseMotionX);
-    globalTemplate->SetAccessor(v8::String::New("mouseMotionY"), ScriptGetMouseMotionY);
     scriptVector3.init(globalTemplate);
     scriptQuaternion.init(globalTemplate);
     scriptMatrix4.init(globalTemplate);
-    scriptIntersection.init(globalTemplate);
     scriptBaseObject.init(globalTemplate);
     scriptPhysicObject.init(globalTemplate);
     scriptModelObject.init(globalTemplate);
@@ -126,6 +121,13 @@ ScriptManager::ScriptManager() {
     scriptDirectionalLight.init(globalTemplate);
     scriptSpotLight.init(globalTemplate);
     scriptPositionalLight.init(globalTemplate);
+    scriptIntersection.init(globalTemplate);
+    scriptMouse.init(globalTemplate);
+    scriptKeyboard.init(globalTemplate);
+    scriptGUIRect.init(globalTemplate);
+    scriptGUIView.init(globalTemplate);
+    scriptGUIFramedView.init(globalTemplate);
+    scriptGUIScreenView.init(globalTemplate);
 }
 
 ScriptManager::~ScriptManager() {

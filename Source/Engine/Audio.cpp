@@ -154,9 +154,10 @@ SoundObject::~SoundObject() {
     alDeleteSources(1, &ALname);
 }
 
-void SoundObject::remove() {
+void SoundObject::removeClean() {
+    alDeleteSources(1, &ALname);
     objectManager.simpleObjects.erase(this);
-    BaseObject::remove();
+    BaseObject::removeClean();
 }
 
 void SoundObject::newScriptInstance() {
@@ -168,7 +169,7 @@ void SoundObject::newScriptInstance() {
 
 bool SoundObject::gameTick() {
     if(mode == Dispose && !getPlaying()) {
-        remove();
+        removeClean();
         return false;
     }
     btVector3 direction = transformation.getBasis().getColumn(2),

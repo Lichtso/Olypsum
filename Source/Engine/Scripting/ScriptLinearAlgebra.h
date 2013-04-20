@@ -72,14 +72,10 @@ class ScriptMatrix4 : public ScriptClass {
     static void Destructor(v8::Persistent<v8::Value> value, void* data);
     static v8::Handle<v8::Value> toString(const v8::Arguments& args);
     static v8::Handle<v8::Value> toJSON(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetRowX(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> SetRowX(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetRowY(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> SetRowY(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetRowZ(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> SetRowZ(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetRowW(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> SetRowW(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessRowX(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessRowY(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessRowZ(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessRowW(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetRotation(const v8::Arguments& args);
     static v8::Handle<v8::Value> SetRotation(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetEuler(const v8::Arguments& args);

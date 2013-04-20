@@ -109,79 +109,54 @@ void ScriptParticlesObject::SetSizeMax(v8::Local<v8::String> property, v8::Local
     objectPtr->sizeMax = value->NumberValue();
 }
 
-v8::Handle<v8::Value> ScriptParticlesObject::GetForce(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+v8::Handle<v8::Value> ScriptParticlesObject::AccessForce(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
-    return handleScope.Close(scriptVector3.newInstance(objectPtr->force));
-}
-
-v8::Handle<v8::Value> ScriptParticlesObject::SetForce(const v8::Arguments& args) {
-    v8::HandleScope handleScope;
-    if(args.Length() < 1 || scriptVector3.isCorrectInstance(args[0]))
-        return v8::ThrowException(v8::String::New("ParticlesObject setForce: Invalid argument"));
     ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    objectPtr->force = scriptVector3.getDataOfInstance(args[0]);
-    return args.This();
+    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+        objectPtr->force = scriptVector3.getDataOfInstance(args[0]);
+        return args[0];
+    }else
+        return handleScope.Close(scriptVector3.newInstance(objectPtr->force));
 }
 
-v8::Handle<v8::Value> ScriptParticlesObject::GetPosMin(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+v8::Handle<v8::Value> ScriptParticlesObject::AccessPosMin(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
-    return handleScope.Close(scriptVector3.newInstance(objectPtr->posMin));
-}
-
-v8::Handle<v8::Value> ScriptParticlesObject::SetPosMin(const v8::Arguments& args) {
-    v8::HandleScope handleScope;
-    if(args.Length() < 1 || scriptVector3.isCorrectInstance(args[0]))
-        return v8::ThrowException(v8::String::New("ParticlesObject setPosMin: Invalid argument"));
     ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    objectPtr->posMin = scriptVector3.getDataOfInstance(args[0]);
-    return args.This();
+    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+        objectPtr->posMin = scriptVector3.getDataOfInstance(args[0]);
+        return args[0];
+    }else
+        return handleScope.Close(scriptVector3.newInstance(objectPtr->posMin));
 }
 
-v8::Handle<v8::Value> ScriptParticlesObject::GetPosMax(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+v8::Handle<v8::Value> ScriptParticlesObject::AccessPosMax(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
-    return handleScope.Close(scriptVector3.newInstance(objectPtr->posMax));
-}
-
-v8::Handle<v8::Value> ScriptParticlesObject::SetPosMax(const v8::Arguments& args) {
-    v8::HandleScope handleScope;
-    if(args.Length() < 1 || scriptVector3.isCorrectInstance(args[0]))
-        return v8::ThrowException(v8::String::New("ParticlesObject setPosMax: Invalid argument"));
     ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    objectPtr->posMax = scriptVector3.getDataOfInstance(args[0]);
-    return args.This();
+    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+        objectPtr->posMax = scriptVector3.getDataOfInstance(args[0]);
+        return args[0];
+    }else
+        return handleScope.Close(scriptVector3.newInstance(objectPtr->posMax));
 }
 
-v8::Handle<v8::Value> ScriptParticlesObject::GetDirMin(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+v8::Handle<v8::Value> ScriptParticlesObject::AccessDirMin(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
-    return handleScope.Close(scriptVector3.newInstance(objectPtr->dirMin));
-}
-
-v8::Handle<v8::Value> ScriptParticlesObject::SetDirMin(const v8::Arguments& args) {
-    v8::HandleScope handleScope;
-    if(args.Length() < 1 || scriptVector3.isCorrectInstance(args[0]))
-        return v8::ThrowException(v8::String::New("ParticlesObject setDirMin: Invalid argument"));
     ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    objectPtr->dirMin = scriptVector3.getDataOfInstance(args[0]);
-    return args.This();
+    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+        objectPtr->dirMin = scriptVector3.getDataOfInstance(args[0]);
+        return args[0];
+    }else
+        return handleScope.Close(scriptVector3.newInstance(objectPtr->dirMin));
 }
 
-v8::Handle<v8::Value> ScriptParticlesObject::GetDirMax(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+v8::Handle<v8::Value> ScriptParticlesObject::AccessDirMax(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
-    return handleScope.Close(scriptVector3.newInstance(objectPtr->dirMax));
-}
-
-v8::Handle<v8::Value> ScriptParticlesObject::SetDirMax(const v8::Arguments& args) {
-    v8::HandleScope handleScope;
-    if(args.Length() < 1 || scriptVector3.isCorrectInstance(args[0]))
-        return v8::ThrowException(v8::String::New("ParticlesObject setDirMax: Invalid argument"));
     ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    objectPtr->dirMax = scriptVector3.getDataOfInstance(args[0]);
-    return args.This();
+    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+        objectPtr->dirMax = scriptVector3.getDataOfInstance(args[0]);
+        return args[0];
+    }else
+        return handleScope.Close(scriptVector3.newInstance(objectPtr->dirMax));
 }
 
 ScriptParticlesObject::ScriptParticlesObject() :ScriptPhysicObject("ParticlesObject") {
@@ -196,16 +171,11 @@ ScriptParticlesObject::ScriptParticlesObject() :ScriptPhysicObject("ParticlesObj
     objectTemplate->SetAccessor(v8::String::New("lifeMax"), GetLifeMax, SetLifeMax);
     objectTemplate->SetAccessor(v8::String::New("sizeMin"), GetSizeMin, SetSizeMin);
     objectTemplate->SetAccessor(v8::String::New("sizeMax"), GetSizeMax, SetSizeMax);
-    objectTemplate->SetAccessor(v8::String::New("force"), GetForce);
-    objectTemplate->Set(v8::String::New("setForce"), v8::FunctionTemplate::New(SetForce));
-    objectTemplate->SetAccessor(v8::String::New("posMin"), GetPosMin);
-    objectTemplate->Set(v8::String::New("setPosMin"), v8::FunctionTemplate::New(SetPosMin));
-    objectTemplate->SetAccessor(v8::String::New("posMax"), GetPosMax);
-    objectTemplate->Set(v8::String::New("setPosMax"), v8::FunctionTemplate::New(SetPosMax));
-    objectTemplate->SetAccessor(v8::String::New("dirMin"), GetDirMin);
-    objectTemplate->Set(v8::String::New("setDirMin"), v8::FunctionTemplate::New(SetDirMin));
-    objectTemplate->SetAccessor(v8::String::New("dirMax"), GetDirMax);
-    objectTemplate->Set(v8::String::New("setDirMax"), v8::FunctionTemplate::New(SetDirMax));
+    objectTemplate->Set(v8::String::New("force"), v8::FunctionTemplate::New(AccessForce));
+    objectTemplate->Set(v8::String::New("posMin"), v8::FunctionTemplate::New(AccessPosMin));
+    objectTemplate->Set(v8::String::New("posMax"), v8::FunctionTemplate::New(AccessPosMax));
+    objectTemplate->Set(v8::String::New("dirMin"), v8::FunctionTemplate::New(AccessDirMin));
+    objectTemplate->Set(v8::String::New("dirMax"), v8::FunctionTemplate::New(AccessDirMax));
     
     functionTemplate->Inherit(scriptPhysicObject.functionTemplate);
 }

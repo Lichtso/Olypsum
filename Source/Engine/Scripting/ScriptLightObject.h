@@ -13,8 +13,7 @@
 
 class ScriptLightObject : public ScriptPhysicObject {
     static v8::Handle<v8::Value> GetRange(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetColor(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> SetColor(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessColor(const v8::Arguments& args);
     public:
     ScriptLightObject();
 };

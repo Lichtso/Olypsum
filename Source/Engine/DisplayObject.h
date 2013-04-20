@@ -45,7 +45,7 @@ class GraphicObject : public DisplayObject {
     protected:
     GraphicObject();
     public:
-    void remove();
+    void removeClean();
 };
 
 //! A GraphicObject with a Model
@@ -61,9 +61,9 @@ class ModelObject : public GraphicObject {
     void updateSkeletonPose(BaseObject* object, Bone* bone);
     protected:
     ModelObject() :integrity(1.0) { };
-    ~ModelObject();
     public:
-    void remove();
+    void removeClean();
+    void removeFast();
     void newScriptInstance();
     bool gameTick();
     float integrity; //! Health <= 0.0: destroyed
@@ -121,8 +121,8 @@ class EnvironmentReflective : public Reflective {
 class SoftObject : public GraphicObject {
     public:
     SoftObject();
-    ~SoftObject();
-    
+    void removeClean();
+    void removeFast();
     btSoftBody* getBody() {
         return static_cast<btSoftBody*>(body);
     }
@@ -155,7 +155,8 @@ class comMotionState : public simpleMotionState {
 class RigidObject : public ModelObject {
     public:
     RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    ~RigidObject();
+    void removeClean();
+    void removeFast();
     void setTransformation(const btTransform& transformation);
     btTransform getTransformation();
     btRigidBody* getBody() {
@@ -163,6 +164,10 @@ class RigidObject : public ModelObject {
     }
     void newScriptInstance();
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
+    //! Returns true if the btCollisionObject::CF_KINEMATIC_OBJECT flag is set
+    bool getKinematic();
+    //! Sets or removes the btCollisionObject::CF_KINEMATIC_OBJECT flag
+    void setKinematic(bool active);
 };
 
 #endif

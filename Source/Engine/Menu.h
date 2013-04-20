@@ -42,8 +42,10 @@ class Menu {
         float timeLeft;
     };
     std::vector<ConsoleEntry> consoleMessages;
-    float mouseMotionX = 0.0, mouseMotionY = 0.0;
+    float mouseX = 0.0, mouseY = 0.0;
+    bool mouseFixed = true;
     
+    void setPause(bool active);
     void consoleAdd(const std::string& message, float duration = 10.0);
     void handleActiveEvent(bool active);
     void handleMouseDown(SDL_Event& event);

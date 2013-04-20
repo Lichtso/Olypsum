@@ -12,6 +12,7 @@
 #define AppMain_h
 
 extern Uint8* keyState;
+extern int keyStateSize;
 
 const SDL_VideoInfo* updateVideoModeInternal(bool& fullScreen);
 void updateVideoMode();

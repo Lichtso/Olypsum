@@ -22,17 +22,19 @@ enum GUIOrientation {
     GUIOrientation_Horizontal = 12
 };
 
+class GUIView;
+
 class GUIRect {
     public:
     v8::Persistent<v8::Object> scriptInstance; //!< The script representation
-    GUIRect* parent;
+    GUIView* parent;
     bool visible;
     int width, height, posX, posY;
     GUIRect();
     virtual ~GUIRect();
     GUIRect* getRootParent();
-    bool isFirstResponder();
-    virtual void setFirstResponderStatus(bool active);
+    bool getFocus();
+    virtual void setFocus(bool active);
     virtual bool getLimSize(GUIClipRect& clipRect, GUIClipRect& parentClipRect);
     virtual void updateContent();
     virtual void draw(btVector3 transform, GUIClipRect& parentClipRect) = 0;

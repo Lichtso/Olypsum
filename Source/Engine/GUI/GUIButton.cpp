@@ -83,6 +83,7 @@ void GUIButton::updateContent() {
     content.height = height;
     content.cornerRadius = currentScreenView->width*0.014;
     content.innerShadow = (state >= GUIButtonStatePressed) ? currentScreenView->width*0.01 : 0;
+    content.borderColor = Color4(0.5);
     
     switch(state) {
         case GUIButtonStateDisabled:

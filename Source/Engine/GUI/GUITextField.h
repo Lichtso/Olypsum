@@ -17,8 +17,7 @@ void setClipboardText(const char* str);
 std::string getClipboardText();
 bool hasClipboardText();
 
-class GUITextField : public GUIRect {
-    GUIRoundedRect content, cursor;
+class GUITextField : public GUIFramedView {
     float cursorDrawTick;
     bool highlighted;
     void insertStr(const char* str);
@@ -27,12 +26,10 @@ class GUITextField : public GUIRect {
     void moveCursorRight();
     public:
     int cursorIndexX;
-    GUILabel* label;
     bool enabled;
     std::function<void(GUITextField*)> onFocus, onChange, onBlur;
     GUITextField();
-    ~GUITextField();
-    void setFirstResponderStatus(bool active);
+    void setFocus(bool active);
     void updateContent();
     void draw(btVector3 transform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);

@@ -17,14 +17,23 @@ BaseLink::BaseLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* level
     init(initializer);
 }
 
-void BaseLink::remove(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
-    a->links.erase(iteratorInA);
+void BaseLink::cleanLinkOther(BaseObject* a) {
     BaseObject* b = getOther(a);
     for(auto iterator : b->links)
         if(iterator.second == this) {
             b->links.erase(iterator.first);
             break;
         }
+}
+
+void BaseLink::removeClean(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
+    a->links.erase(iteratorInA);
+    cleanLinkOther(a);
+    delete this;
+}
+
+void BaseLink::removeFast(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
+    cleanLinkOther(a);
     delete this;
 }
 
@@ -456,15 +465,18 @@ PhysicLink::PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
 }
 
 PhysicLink::~PhysicLink() {
-    objectManager.physicsWorld->removeConstraint(constraint);
+    delete constraint;
 }
 
-void PhysicLink::remove(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
-    btRigidBody& body = constraint->getRigidBodyA();
-    body.setActivationState(ACTIVE_TAG);
-	body = constraint->getRigidBodyB();
-    body.setActivationState(ACTIVE_TAG);
-    BaseLink::remove(a, iteratorInA);
+void PhysicLink::removeClean(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
+    objectManager.physicsWorld->removeConstraint(constraint);
+    
+    btRigidBody* body = static_cast<RigidObject*>(a)->getBody();
+    if(body) body->activate();
+    body = static_cast<RigidObject*>(getOther(a))->getBody();
+    if(body) body->activate();
+    
+    BaseLink::removeClean(a, iteratorInA);
 }
 
 rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver) {
@@ -979,11 +991,6 @@ TransformLink::TransformLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoa
     }
 }
 
-TransformLink::~TransformLink() {
-    for(auto transform : transforms)
-        delete transform;
-}
-
 void TransformLink::gameTickFrom(BaseObject* parent) {
     BaseObject* child = getOther(parent);
     BoneObject* boneObject = dynamic_cast<BoneObject*>(child);
@@ -1001,13 +1008,25 @@ void TransformLink::gameTickFrom(BaseObject* parent) {
     if(boneObject) boneObject->gameTick();
 }
 
-void TransformLink::remove(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
+TransformLink::~TransformLink() {
+    for(auto transform : transforms)
+        delete transform;
+}
+
+void TransformLink::removeClean(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
     if(iteratorInA->first != "..") { //Only remove child if called by parent
         a->links.erase(iteratorInA);
-        getOther(a)->remove(); //Remove child
-        //delete this; //Is done by line above and line below
+        getOther(a)->removeClean(); //Remove child
     }else
-        BaseLink::remove(a, iteratorInA);
+        BaseLink::removeClean(a, iteratorInA);
+}
+
+void TransformLink::removeFast(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
+    BaseObject* child = getOther(a);
+    if(iteratorInA->first != ".." && dynamic_cast<BoneObject*>(child)) //Only remove child if called by parent and is BoneObject
+        child->removeFast(); //Remove child
+    else
+        BaseLink::removeFast(a, iteratorInA);
 }
 
 void TransformLink::init(LinkInitializer &initializer) {
@@ -1026,12 +1045,12 @@ void TransformLink::init(LinkInitializer &initializer) {
     //Replace link and child object if there is already one
     auto iterator = initializer.object[0]->links.find(initializer.name[1]);
     if(iterator != initializer.object[0]->links.end()) {
-        iterator->second->remove(initializer.object[0], iterator);
+        iterator->second->removeClean(initializer.object[0], iterator);
     }else{
         iterator = initializer.object[1]->links.find("..");
         if(iterator != initializer.object[1]->links.end()) {
             log(warning_log, "Constructed TransformLink with a child node which was already bound.");
-            iterator->second->remove(initializer.object[1], iterator);
+            iterator->second->removeClean(initializer.object[1], iterator);
         }
     }
     

@@ -13,7 +13,7 @@ GUILabel::GUILabel() {
     color = Color4(0.0, 1.0);
     textAlign = GUITextAlign_Middle;
     sizeAlignment = GUISizeAlignment_All;
-    fontHeight = 30;
+    fontHeight = currentScreenView->height*0.04;
     height = fontHeight >> 1;
 }
 
@@ -108,7 +108,7 @@ void GUILabel::draw(btVector3 transform, GUIClipRect& parentClipRect) {
         modelMat.setOrigin(transform);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, line->texture);
-        line->content.drawOnScreen(transform, line->posX, line->posY, parentClipRect);
+        line->content.drawOnScreen(transform, line->posX, line->posY, clipRect);
     }
     shaderPrograms[spriteSP]->setUniformF("alpha", 1.0);
 }

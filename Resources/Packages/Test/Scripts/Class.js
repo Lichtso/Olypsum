@@ -1,14 +1,16 @@
 exports.onload = function(data) {
-	log(this.collisionShape);
+	log(data);
 };
 
 /*
 exports.onsave = function() {
 	return "ObjectData";
 };
-
+*/
 exports.oncollision = function(otherObject) {
 	var result = Intersection.sphereIntersection(this.transformation.w, 15.0, 0xFFFF);
-	log(result);
-	otherObject.applyLinearImpulse(otherObject.transformation.w.getDiff(this.transformation.w).mult(10.0));
-};*/
+	for(var i = 0; i < result.length; i ++) {
+		if(result[i].mass)
+			result[i].applyLinearImpulse(result[i].transformation.w.getDiff(this.transformation.w).mult(2.0));
+	}
+};

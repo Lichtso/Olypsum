@@ -27,6 +27,7 @@ class ParticlesObject : public DisplayObject {
     ParticlesObject();
     //! Internal initialize arrays and OpenGL buffers
     void init();
+    void clean();
     public:
     bool transformAligned; //!< If set to false the particles will be orientated to view
     btVector3 posMin, //!< The negative position vector relative to the system for spawning new particles
@@ -46,8 +47,8 @@ class ParticlesObject : public DisplayObject {
      */
     ParticlesObject(unsigned int maxParticles, btCollisionShape* collisionShape);
     ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    ~ParticlesObject();
-    void remove();
+    void removeClean();
+    void removeFast();
     void setTransformation(const btTransform& transformation);
     btTransform getTransformation();
     void newScriptInstance();

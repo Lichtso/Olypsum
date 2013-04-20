@@ -41,6 +41,7 @@ class SoundTrack : public FilePackageResource {
  */
 class SoundObject : public SimpleObject {
     btVector3 prevPosition, velocity; //!< Used by the engine to calculate the Doppler effect
+    ~SoundObject();
     public:
     ALuint ALname; //!< The OpenAL identifier of this SoundObject
     std::shared_ptr<SoundTrack> soundTrack; //!< The SoundTrack used for audio playback
@@ -52,8 +53,7 @@ class SoundObject : public SimpleObject {
     } mode;
     SoundObject(SoundTrack* soundTrack, Mode mode);
     SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    ~SoundObject();
-    void remove();
+    void removeClean();
     void newScriptInstance();
     bool gameTick();
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);

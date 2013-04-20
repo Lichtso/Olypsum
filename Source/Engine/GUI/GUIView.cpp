@@ -34,9 +34,8 @@ void GUIView::deleteChild(unsigned int index) {
     children.erase(children.begin()+index);
 }
 
-void GUIView::removeChild(unsigned int index) {
-    GUIRect* child = children[index];
-    child->parent = NULL;
+void GUIView::moveChildToParent(unsigned int index, GUIView* newParent) {
+    newParent->addChild(children[index]);
     children.erase(children.begin()+index);
 }
 
@@ -123,10 +122,13 @@ void GUIFramedView::draw(btVector3 transform, GUIClipRect& parentClipRect) {
 
 
 
-GUIScreenView::GUIScreenView() {
-    modalView = NULL;
-    firstResponder = NULL;
+GUIScreenView::GUIScreenView() :modalView(NULL), focused(NULL) {
     updateContent();
+}
+
+GUIScreenView::~GUIScreenView() {
+    if(!scriptInstance.IsEmpty())
+        scriptInstance.Dispose();
 }
 
 bool GUIScreenView::getLimSize(GUIClipRect& clipRect) {
@@ -237,23 +239,30 @@ bool GUIScreenView::handleMouseWheel(int mouseX, int mouseY, float delta) {
 }
 
 bool GUIScreenView::handleKeyDown(SDL_keysym* key) {
-    if(!firstResponder) return false;
-    return firstResponder->handleKeyDown(key);
+    if(!focused) return false;
+    return focused->handleKeyDown(key);
 }
 
 bool GUIScreenView::handleKeyUp(SDL_keysym* key) {
-    if(!firstResponder) return false;
-    return firstResponder->handleKeyUp(key);
+    if(!focused) return false;
+    return focused->handleKeyUp(key);
 }
 
 void GUIScreenView::setModalView(GUIRect* modalViewB) {
-    if(firstResponder)
-        firstResponder->setFirstResponderStatus(false);
+    if(focused)
+        focused->setFocus(false);
+    if(modalView)
+        deleteChild(getIndexOfChild(modalView));
     modalView = modalViewB;
-    if(modalView) {
-        modalView->parent = this;
-        modalView->updateContent();
+    if(!modalView) return;
+    if(modalView->parent != this) {
+        if(modalView->parent)
+            modalView->parent->moveChildToParent(modalView->parent->getIndexOfChild(modalView), this);
+        else
+            addChild(modalView);
     }
+    modalView->visible = true;
+    modalView->updateContent();
 }
 
 GUIScreenView* currentScreenView = NULL;

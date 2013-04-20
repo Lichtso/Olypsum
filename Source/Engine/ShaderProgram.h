@@ -29,13 +29,34 @@ class Color4 {
     Color4(float rB, float gB, float bB) : r(rB), g(gB), b(bB), a(1) {};
     //! A rgb color
     Color4(btVector3 vec) : r(vec.x()), g(vec.y()), b(vec.z()), a(1) {};
+    //! A rgb color
+    Color4(btQuaternion vec) : r(vec.x()), g(vec.y()), b(vec.z()), a(vec.w()) {};
     //! A transparent rgb color
     Color4(float rB, float gB, float bB, float aB) : r(rB), g(gB), b(bB), a(aB) {};
-    Color4& operator=(const Color4& B);
+    Color4& operator=(const Color4& B) {
+        r = B.r;
+        g = B.g;
+        b = B.b;
+        a = B.a;
+        return *this;
+    }
     //! Converts this Color4 to a btVector3
-    btVector3 getVector();
+    btVector3 getVector() {
+        return btVector3(r, g, b);
+    }
+    //! Converts this Color4 to a btQuaternion
+    btQuaternion getQuaternion() {
+        return btQuaternion(r, g, b, a);
+    }
     //! Converts this Color4 to a SDL_Color
-    SDL_Color getSDL();
+    SDL_Color getSDL() {
+        SDL_Color B;
+        B.r = r*255;
+        B.g = g*255;
+        B.b = b*255;
+        B.unused = a*255;
+        return B;
+    }
 };
 
 #define POSITION_ATTRIBUTE 0

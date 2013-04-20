@@ -1,6 +1,6 @@
+V8 API: Links, Animations, GUI
 Implement btSoftBody
 Implement btRayCastVehicle
-V8 API: Links, Animations, GUI
 Animation File Format
 Leap Motion
 Use C++11 Multithreading
@@ -17,5 +17,5 @@ Gear Rack PhysicLink
 Networking / Multiplayer
 
 Bugs:
+Cam rotation onload
 Check memory leaks
-Update connected physics bodies when removing PhysicLink

@@ -14,19 +14,14 @@ v8::Handle<v8::Value> ScriptLightObject::GetRange(v8::Local<v8::String> property
     return handleScope.Close(v8::Number::New(objectPtr->getRange()));
 }
 
-v8::Handle<v8::Value> ScriptLightObject::GetColor(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+v8::Handle<v8::Value> ScriptLightObject::AccessColor(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    LightObject* objectPtr = getDataOfInstance<LightObject>(info.This());
-    return handleScope.Close(scriptVector3.newInstance(objectPtr->color.getVector()));
-}
-
-v8::Handle<v8::Value> ScriptLightObject::SetColor(const v8::Arguments& args) {
-    v8::HandleScope handleScope;
-    if(args.Length() < 1 || scriptVector3.isCorrectInstance(args[0]))
-        return v8::ThrowException(v8::String::New("LightObject setColor: Invalid argument"));
     LightObject* objectPtr = getDataOfInstance<LightObject>(args.This());
-    objectPtr->color = Color4(scriptVector3.getDataOfInstance(args[0]));
-    return args.This();
+    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+        objectPtr->color = Color4(scriptVector3.getDataOfInstance(args[0]));
+        return args[0];
+    }else
+        return handleScope.Close(scriptVector3.newInstance(objectPtr->color.getVector()));
 }
 
 ScriptLightObject::ScriptLightObject() :ScriptPhysicObject("LightObject") {
@@ -35,8 +30,7 @@ ScriptLightObject::ScriptLightObject() :ScriptPhysicObject("LightObject") {
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->SetAccessor(v8::String::New("collisionShape"), NULL, NULL);
     objectTemplate->SetAccessor(v8::String::New("range"), GetRange);
-    objectTemplate->SetAccessor(v8::String::New("color"), GetColor);
-    objectTemplate->Set(v8::String::New("setColor"), v8::FunctionTemplate::New(SetColor));
+    objectTemplate->Set(v8::String::New("color"), v8::FunctionTemplate::New(AccessColor));
     
     functionTemplate->Inherit(scriptPhysicObject.functionTemplate);
 }

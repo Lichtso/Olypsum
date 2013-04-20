@@ -8,22 +8,28 @@
 
 #include "AppMain.h"
 
+BaseObject::~BaseObject() {
+    if(!scriptInstance.IsEmpty())
+        scriptInstance.Dispose();
+}
+
+void BaseObject::removeClean() {
+    while(links.size() > 0)
+        links.begin()->second->removeClean(this, links.begin());
+    delete this;
+}
+
+void BaseObject::removeFast() {
+    foreach_e(links, iterator)
+        iterator->second->removeFast(this, iterator);
+    delete this;
+}
+
 bool BaseObject::gameTick() {
     for(auto link : links)
         if(link.first != "..") //Don't process parent
             link.second->gameTickFrom(this);
     return true;
-}
-
-void BaseObject::remove() {
-    if(!scriptInstance.IsEmpty())
-        scriptInstance.Dispose();
-    delete this;
-}
-
-BaseObject::~BaseObject() {
-    while(links.size() > 0)
-        links.begin()->second->remove(this, links.begin());
 }
 
 void BaseObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
@@ -117,13 +123,25 @@ rapidxml::xml_node<xmlUsedCharType>* BoneObject::write(rapidxml::xml_document<xm
 
 
 
-PhysicObject::~PhysicObject() {
+void PhysicObject::removeClean() {
     if(body) {
         if(body->getCollisionShape())
             delete body->getCollisionShape();
         objectManager.physicsWorld->removeCollisionObject(body);
         delete body;
+        body = NULL;
     }
+    BaseObject::removeClean();
+}
+
+void PhysicObject::removeFast() {
+    if(body) {
+        if(body->getCollisionShape())
+            delete body->getCollisionShape();
+        delete body;
+        body = NULL;
+    }
+    BaseObject::removeFast();
 }
 
 void PhysicObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
@@ -142,6 +160,23 @@ void PhysicObject::newScriptInstance() {
     v8::Handle<v8::Value> external = v8::External::New(this);
     v8::Local<v8::Object> instance = scriptPhysicObject.functionTemplate->GetFunction()->NewInstance(1, &external);
     scriptInstance = v8::Persistent<v8::Object>::New(instance);
+}
+
+void PhysicObject::updateTouchingObjects() {
+    unsigned int numManifolds = objectManager.collisionDispatcher->getNumManifolds();
+	for(unsigned int i = 0; i < numManifolds; i ++) {
+		btPersistentManifold* contactManifold = objectManager.collisionDispatcher->getManifoldByIndexInternal(i);
+        if(contactManifold->getNumContacts() == 0) continue;
+        
+		const btCollisionObject *objectA = contactManifold->getBody0(),
+        *objectB = contactManifold->getBody1();
+        if(objectA == body)
+            objectB->activate();
+        else if(objectB == body)
+            objectA->activate();
+	}
+    
+    body->activate();
 }
 
 void PhysicObject::handleCollision(btPersistentManifold* contactManifold, PhysicObject* b) {

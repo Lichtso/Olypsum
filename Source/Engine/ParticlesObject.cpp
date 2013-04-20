@@ -156,7 +156,7 @@ ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, Leve
     texture->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGB);
 }
 
-ParticlesObject::~ParticlesObject() {
+void ParticlesObject::clean() {
     if(body) {
         objectManager.physicsWorld->removeCollisionObject(body);
         delete body;
@@ -173,9 +173,15 @@ ParticlesObject::~ParticlesObject() {
     }
 }
 
-void ParticlesObject::remove() {
+void ParticlesObject::removeClean() {
     objectManager.particlesObjects.erase(this);
-    BaseObject::remove();
+    clean();
+    BaseObject::removeClean();
+}
+
+void ParticlesObject::removeFast() {
+    clean();
+    BaseObject::removeFast();
 }
 
 void ParticlesObject::setTransformation(const btTransform& transformation) {
@@ -200,7 +206,7 @@ bool ParticlesObject::gameTick() {
     if(systemLife > -1.0) {
         systemLife -= profiler.animationFactor;
         if(systemLife <= 0.0) {
-            remove();
+            removeClean();
             return false;
         }
     }

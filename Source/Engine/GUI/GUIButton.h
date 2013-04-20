@@ -28,9 +28,8 @@ enum GUIButtonType {
     GUIButtonTypeLockable = 4
 };
 
-class GUIButton : public GUIView {
+class GUIButton : public GUIFramedView {
     public:
-    GUIRoundedRect content;
     GUISizeAlignment sizeAlignment;
     int paddingX, paddingY;
     GUIButtonType buttonType;

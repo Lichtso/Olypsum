@@ -32,7 +32,8 @@ class BaseLink {
     BaseObject* fusion; //!< A pointer which combines the pointers of BaseObject a and b via xor
     protected:
     BaseLink() { };
-    virtual ~BaseLink() { }
+    virtual ~BaseLink() { };
+    void cleanLinkOther(BaseObject* a);
     public:
     /*! Constructs a new LinkObject
      @param initializer A LinkInitializer which contains the objects and names to be linked together
@@ -53,7 +54,12 @@ class BaseLink {
      @param a One of the two BaseObject passed in the constructor. Either a or b
      @param iteratorInA the iterator of this LinkObject in the BaseObject::links map of the first parameter
      */
-    virtual void remove(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
+    virtual void removeClean(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
+    /*! Used to delete a LinkObject
+     @param a One of the two BaseObject passed in the constructor. Either a or b
+     @param iteratorInA the iterator of this LinkObject in the BaseObject::links map of the first parameter
+     */
+    virtual void removeFast(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
     //! Reads the LinkInitializer from rapidxml::xml_node
     static LinkInitializer readInitializer(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     //! Initialize from LinkInitializer
@@ -64,7 +70,6 @@ class BaseLink {
 
 //! A BaseLink with a btTypedConstraint
 class PhysicLink : public BaseLink {
-    protected:
     ~PhysicLink();
     public:
     btTypedConstraint* constraint;
@@ -74,12 +79,13 @@ class PhysicLink : public BaseLink {
      */
     PhysicLink(LinkInitializer& initializer, btTypedConstraint* constraint);
     PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    void remove(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
+    void removeClean(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
 
 //! A BaseLink with a parent child relationship
 class TransformLink : public BaseLink {
+    ~TransformLink();
     public:
     //! This is the base for all entries of a TransformLink
     /*!
@@ -146,7 +152,6 @@ class TransformLink : public BaseLink {
      */
     TransformLink(LinkInitializer& initializer);
     TransformLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    ~TransformLink();
     /*! Used to remove a HierarchicalLink correctly.
      This will call BaseObject::remove() on the child if and only if the parameter a is the parent.
      @param a One of the two BaseObject passed in the constructor. Either parent or child
@@ -154,7 +159,8 @@ class TransformLink : public BaseLink {
      
      @warning This method calls remove() on the child object but only if it is called from the parent
      */
-    void remove(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
+    void removeClean(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
+    void removeFast(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
     void init(LinkInitializer& initializer);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };

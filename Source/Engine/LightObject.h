@@ -19,11 +19,11 @@ class LightObject : public DisplayObject {
     ColorBuffer* shadowMap;
     void setPhysicsShape(btCollisionShape* shape);
     LightObject();
+    ~LightObject();
     public:
     CamObject shadowCam;
     Color4 color;
-    ~LightObject();
-    void remove();
+    void removeClean();
     btTransform getTransformation();
     float getRange();
     virtual bool gameTick(bool shadowActive);
@@ -64,10 +64,10 @@ class SpotLight : public LightObject {
 
 class PositionalLight : public LightObject {
     ColorBuffer* shadowMapB;
+    ~PositionalLight();
     public:
     PositionalLight();
     PositionalLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    ~PositionalLight();
     void newScriptInstance();
     void setTransformation(const btTransform& transformation);
     void setBounds(bool omniDirectional, float range);
