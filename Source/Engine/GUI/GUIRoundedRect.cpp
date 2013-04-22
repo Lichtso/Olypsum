@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUIView.h"
+#include "Menu.h"
 
 void GUIDrawableRect::drawOnScreen(btVector3 parentTransform, int posX, int posY, GUIClipRect &parentClipRect) {
     GUIClipRect clipRect;
@@ -39,9 +39,9 @@ void GUIDrawableRect::drawOnScreen(btVector3 parentTransform, int posX, int posY
 GUIRoundedRect::GUIRoundedRect() {
     texture = 0;
     transposed = false;
-    roundedCorners = (GUICorners) (GUITopLeftCorner | GUITopRightCorner | GUIBottomLeftCorner | GUIBottomRightCorner);
-    innerShadow = -currentScreenView->width*0.012;
-    cornerRadius = currentScreenView->width*0.02;
+    roundedCorners = (GUICorner) (GUICorner::TopLeft | GUICorner::TopRight | GUICorner::BottomLeft | GUICorner::BottomRight);
+    innerShadow = -menu.screenView->width*0.012;
+    cornerRadius = menu.screenView->width*0.02;
     width = height = 100;
     topColor = Color4(0.9);
     bottomColor = Color4(1.0);
@@ -105,16 +105,16 @@ void GUIRoundedRect::drawInTexture() {
         for(unsigned int x = 0; x < width*2; x ++) {
             pixel = pixels+(y*width*8)+x*4;
             pixel[3] = 255;
-            if((roundedCorners & GUITopLeftCorner) && x < cornerRadius && y < cornerRadius) {
+            if((roundedCorners & GUICorner::TopLeft) && x < cornerRadius && y < cornerRadius) {
                 if(cornerRadius-x-cos(asin((float)(cornerRadius-y)/cornerRadius))*cornerRadius > 0)
                     pixel[3] = 0;
-            }else if((roundedCorners & GUITopRightCorner) && x >= width*2-cornerRadius && y < cornerRadius) {
+            }else if((roundedCorners & GUICorner::TopRight) && x >= width*2-cornerRadius && y < cornerRadius) {
                 if(x-width*2+cornerRadius+1-cos(asin((float)(cornerRadius-y)/cornerRadius))*cornerRadius > 0)
                     pixel[3] = 0;
-            }else if((roundedCorners & GUIBottomLeftCorner) && x < cornerRadius && y >= height*2-cornerRadius) {
+            }else if((roundedCorners & GUICorner::BottomLeft) && x < cornerRadius && y >= height*2-cornerRadius) {
                 if(cornerRadius-x-cos(asin((float)(y-height*2+cornerRadius+1)/cornerRadius))*cornerRadius > 0)
                     pixel[3] = 0;
-            }else if((roundedCorners & GUIBottomRightCorner) && x >= width*2-cornerRadius && y >= height*2-cornerRadius) {
+            }else if((roundedCorners & GUICorner::BottomRight) && x >= width*2-cornerRadius && y >= height*2-cornerRadius) {
                 if(x-width*2+cornerRadius+1-cos(asin((float)(y-height*2+cornerRadius+1)/cornerRadius))*cornerRadius > 0)
                     pixel[3] = 0;
             }
@@ -156,14 +156,14 @@ void GUIRoundedRect::drawInTexture() {
         }
     }
     
-    int xMinA = (roundedCorners&GUITopLeftCorner)?cornerRadius:0,
-    xMaxA = width*2-((roundedCorners&GUITopRightCorner)?cornerRadius:0),
-    xMinB = (roundedCorners&GUIBottomLeftCorner)?cornerRadius:0,
-    xMaxB = width*2-((roundedCorners&GUIBottomRightCorner)?cornerRadius:0),
-    yMinA = (roundedCorners&GUITopLeftCorner)?cornerRadius:0,
-    yMaxA = height*2-((roundedCorners&GUIBottomLeftCorner)?cornerRadius:0),
-    yMinB = (roundedCorners&GUITopRightCorner)?cornerRadius:0,
-    yMaxB = height*2-((roundedCorners&GUIBottomRightCorner)?cornerRadius:0);
+    int xMinA = (roundedCorners&GUICorner::TopLeft)?cornerRadius:0,
+    xMaxA = width*2-((roundedCorners&GUICorner::TopRight)?cornerRadius:0),
+    xMinB = (roundedCorners&GUICorner::BottomLeft)?cornerRadius:0,
+    xMaxB = width*2-((roundedCorners&GUICorner::BottomRight)?cornerRadius:0),
+    yMinA = (roundedCorners&GUICorner::TopLeft)?cornerRadius:0,
+    yMaxA = height*2-((roundedCorners&GUICorner::BottomLeft)?cornerRadius:0),
+    yMinB = (roundedCorners&GUICorner::TopRight)?cornerRadius:0,
+    yMaxB = height*2-((roundedCorners&GUICorner::BottomRight)?cornerRadius:0);
     
     for(unsigned int x = xMinA; x < xMaxA; x ++) setBorderPixel(pixels, x, 0);
     for(unsigned int x = xMinB; x < xMaxB; x ++) setBorderPixel(pixels, x, height*2-1);
@@ -178,25 +178,25 @@ void GUIRoundedRect::drawInTexture() {
         while(x >= y) {
             float alpha = fmax(0.0, sqrt(x*x+(y+1)*(y+1))-cornerRadius);
             
-            if(roundedCorners & GUITopLeftCorner) {
+            if(roundedCorners & GUICorner::TopLeft) {
                 setBorderPixel(pixels, radius-x, radius-y);
                 setBorderPixel(pixels, radius-y, radius-x);
                 setBorderPixelBlended(pixels, radius-x+1, radius-y, alpha);
                 setBorderPixelBlended(pixels, radius-y, radius-x+1, alpha);
             }
-            if(roundedCorners & GUITopRightCorner) {
+            if(roundedCorners & GUICorner::TopRight) {
                 setBorderPixel(pixels, x+width*2-radius-1, radius-y);
                 setBorderPixel(pixels, y+width*2-radius-1, radius-x);
                 setBorderPixelBlended(pixels, x+width*2-radius-2, radius-y, alpha);
                 setBorderPixelBlended(pixels, y+width*2-radius-1, radius-x+1, alpha);
             }
-            if(roundedCorners & GUIBottomLeftCorner) {
+            if(roundedCorners & GUICorner::BottomLeft) {
                 setBorderPixel(pixels, radius-x, y+height*2-radius-1);
                 setBorderPixel(pixels, radius-y, x+height*2-radius-1);
                 setBorderPixelBlended(pixels, radius-x+1, y+height*2-radius-1, alpha);
                 setBorderPixelBlended(pixels, radius-y, x+height*2-radius-2, alpha);
             }
-            if(roundedCorners & GUIBottomRightCorner) {
+            if(roundedCorners & GUICorner::BottomRight) {
                 setBorderPixel(pixels, x+width*2-radius-1, y+height*2-radius-1);
                 setBorderPixel(pixels, y+width*2-radius-1, x+height*2-radius-1);
                 setBorderPixelBlended(pixels, x+width*2-radius-2, y+height*2-radius-1, alpha);

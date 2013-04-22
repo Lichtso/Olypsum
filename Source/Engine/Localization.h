@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "XMLUtilities.h"
+#include "ObjectManager.h"
 
 #ifndef Localization_h
 #define Localization_h

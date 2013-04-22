@@ -6,10 +6,10 @@
 //
 //
 
-#include "ScriptIntersection.h"
-
 #ifndef ScriptIO_h
 #define ScriptIO_h
+
+#include "ScriptIntersection.h"
 
 class ScriptMouse : public ScriptClass {
     static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);

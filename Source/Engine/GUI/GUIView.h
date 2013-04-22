@@ -6,11 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUIRect.h"
-#include "GUIRoundedRect.h"
-
 #ifndef GUIView_h
 #define GUIView_h
+
+#include "GUIRoundedRect.h"
 
 class GUIView : public GUIRect {
     public:
@@ -55,7 +54,5 @@ class GUIScreenView : public GUIView {
     bool handleKeyUp(SDL_keysym* key);
     void setModalView(GUIRect* modalView);
 };
-
-extern GUIScreenView* currentScreenView;
 
 #endif

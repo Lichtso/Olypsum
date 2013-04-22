@@ -6,22 +6,22 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUIButton.h"
+#include "Menu.h"
 
 GUIButton::GUIButton() {
     onClick = NULL;
-    paddingX = currentScreenView->width*0.012;
-    paddingY = currentScreenView->width*0.006;
-    sizeAlignment = GUISizeAlignment_All;
+    paddingX = menu.screenView->width*0.012;
+    paddingY = menu.screenView->width*0.006;
+    sizeAlignment = GUISizeAlignment::All;
     buttonType = GUIButtonTypeNormal;
     state = GUIButtonStateNormal;
 }
 
 void GUIButton::updateContent() {
-    if(sizeAlignment & GUISizeAlignment_Width)
+    if(sizeAlignment & GUISizeAlignment::Width)
         width = 12+paddingX;
     
-    if(sizeAlignment & GUISizeAlignment_Height)
+    if(sizeAlignment & GUISizeAlignment::Height)
         height = 12+paddingY;
     
     for(unsigned int i = 0; i < children.size(); i ++) {
@@ -44,7 +44,7 @@ void GUIButton::updateContent() {
                             label->color = Color4(0.94);
                         break;
                     }
-                    label->font = mainFont;
+                    label->font = fileManager.getPackage("Default")->getResource<TextFont>("font");
                 break;
                 case GUIButtonStatePressed:
                     switch(buttonType) {
@@ -58,20 +58,20 @@ void GUIButton::updateContent() {
                             label->color = Color4(0.94);
                         break;
                     }
-                    label->font = italicFont;
+                    label->font = fileManager.getPackage("Default")->getResource<TextFont>("font_italic");
                 break;
             }
         
         children[i]->updateContent();
         
-        if(sizeAlignment & GUISizeAlignment_Width) {
+        if(sizeAlignment & GUISizeAlignment::Width) {
             if(children[i]->posX+children[i]->width+paddingX > width)
                 width = children[i]->posX+children[i]->width+paddingX;
             if(children[i]->posX-children[i]->width-paddingX < -width)
                 width = children[i]->width-children[i]->posX+paddingX;
         }
         
-        if(sizeAlignment & GUISizeAlignment_Height) {
+        if(sizeAlignment & GUISizeAlignment::Height) {
             if(children[i]->posY+children[i]->height+paddingY > height)
                 height = children[i]->posY+children[i]->height+paddingY;
             if(children[i]->posY-children[i]->height-paddingY < -height)
@@ -81,8 +81,8 @@ void GUIButton::updateContent() {
     
     content.width = width;
     content.height = height;
-    content.cornerRadius = currentScreenView->width*0.014;
-    content.innerShadow = (state >= GUIButtonStatePressed) ? currentScreenView->width*0.01 : 0;
+    content.cornerRadius = menu.screenView->width*0.014;
+    content.innerShadow = (state >= GUIButtonStatePressed) ? menu.screenView->width*0.01 : 0;
     content.borderColor = Color4(0.5);
     
     switch(state) {

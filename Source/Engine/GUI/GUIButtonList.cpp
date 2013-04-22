@@ -9,8 +9,8 @@
 #include "GUIButtonList.h"
 
 GUIButtonList::GUIButtonList() {
-    orientation = GUIOrientation_Vertical;
-    sizeAlignment = GUISizeAlignment_All;
+    orientation = GUIOrientation::Vertical;
+    sizeAlignment = GUISizeAlignment::All;
 }
 
 void GUIButtonList::addChild(GUIButton* child) {
@@ -27,9 +27,9 @@ void GUIButtonList::updateContent() {
     
     for(unsigned int i = 0; i < children.size(); i ++) {
         button = (GUIButton*)children[i];
-        button->sizeAlignment = GUISizeAlignment_All;
+        button->sizeAlignment = GUISizeAlignment::All;
         button->updateContent();
-        if(orientation & GUIOrientation_Vertical) {
+        if(orientation & GUIOrientation::Vertical) {
             widthAux = max(widthAux, button->width);
             heightAux += button->height;
         }else{
@@ -38,35 +38,35 @@ void GUIButtonList::updateContent() {
         }
     }
     
-    if(orientation & GUIOrientation_Vertical)
+    if(orientation & GUIOrientation::Vertical)
         widthAux -= ceil(children.size() / 2.0) - 1;
     else
         heightAux -= ceil(children.size() / 2.0) - 1;
     
-    if(sizeAlignment & GUISizeAlignment_Width) width = widthAux;
-    if(sizeAlignment & GUISizeAlignment_Height) height = heightAux;
+    if(sizeAlignment & GUISizeAlignment::Width) width = widthAux;
+    if(sizeAlignment & GUISizeAlignment::Height) height = heightAux;
     
     int posCounter = 0;
     for(unsigned int i = 0; i < children.size(); i ++) {
         button = (GUIButton*)children[i];
-        if(orientation & GUIOrientation_Vertical) {
+        if(orientation & GUIOrientation::Vertical) {
             button->width = width;
-            if(!(sizeAlignment & GUISizeAlignment_Height)) button->height = floor(height/(float)children.size())+(i%2);
+            if(!(sizeAlignment & GUISizeAlignment::Height)) button->height = floor(height/(float)children.size())+(i%2);
             button->posX = 0;
             button->posY = height-posCounter-button->height;
-            button->content.roundedCorners = (GUICorners) ((i == 0) ? GUITopLeftCorner | GUITopRightCorner : 0);
-            if(i == children.size()-1) button->content.roundedCorners = (GUICorners) (button->content.roundedCorners | GUIBottomLeftCorner | GUIBottomRightCorner);
+            button->content.roundedCorners = (GUICorner) ((i == 0) ? GUICorner::TopLeft | GUICorner::TopRight : 0);
+            if(i == children.size()-1) button->content.roundedCorners = (GUICorner) (button->content.roundedCorners | GUICorner::BottomLeft | GUICorner::BottomRight);
             posCounter += button->height*2-1;
         }else{
-            if(!(sizeAlignment & GUISizeAlignment_Width)) button->width = floor(width/(float)children.size())+(i%2);
+            if(!(sizeAlignment & GUISizeAlignment::Width)) button->width = floor(width/(float)children.size())+(i%2);
             button->height = height;
             button->posX = -width+posCounter+button->width;
             button->posY = 0;
-            button->content.roundedCorners = (GUICorners) ((i == 0) ? GUITopLeftCorner | GUIBottomLeftCorner : 0);
-            if(i == children.size()-1) button->content.roundedCorners = (GUICorners) (button->content.roundedCorners | GUITopRightCorner | GUIBottomRightCorner);
+            button->content.roundedCorners = (GUICorner) ((i == 0) ? GUICorner::TopLeft | GUICorner::BottomLeft : 0);
+            if(i == children.size()-1) button->content.roundedCorners = (GUICorner) (button->content.roundedCorners | GUICorner::TopRight | GUICorner::BottomRight);
             posCounter += button->width*2-1;
         }
-        button->sizeAlignment = GUISizeAlignment_None;
+        button->sizeAlignment = GUISizeAlignment::None;
         button->updateContent();
     }
 }

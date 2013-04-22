@@ -6,11 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUIRoundedRect.h"
-#include "GUIRect.h"
-
 #ifndef GUIProgressBar_h
 #define GUIProgressBar_h
+
+#include "GUITabs.h"
 
 class GUIProgressBar : public GUIRect {
     GUIRoundedRect barL, barR;

@@ -6,12 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUILabel.h"
-#include "GUIView.h"
-#include "GUIRoundedRect.h"
-
 #ifndef GUIButton_h
 #define GUIButton_h
+
+#include "GUILabel.h"
 
 enum GUIButtonState {
     GUIButtonStateDisabled = 0,

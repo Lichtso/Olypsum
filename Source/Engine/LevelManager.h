@@ -6,12 +6,10 @@
 //
 //
 
-#include "LevelLoader.h"
-#include "LevelSaver.h"
-#include "FileManager.h"
-
 #ifndef LevelManager_h
 #define LevelManager_h
+
+#include "LevelSaver.h"
 
 enum GameStatusName {
     noGame = 0,
@@ -33,7 +31,7 @@ class LevelManager {
     std::string getCollisionShapeName(btCollisionShape* shape);
     //! Deletes all shared objects
     void clear();
-    bool loadLevel(const std::string& levelId);
+    bool loadLevel(const std::string& levelPackage, const std::string& levelId);
     bool saveLevel(const std::string& localData, const std::string& globalData);
     bool loadGame(const std::string& name);
     bool newGame(const std::string& packageName, const std::string& name);

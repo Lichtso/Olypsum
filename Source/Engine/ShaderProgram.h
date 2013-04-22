@@ -6,58 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Matrix4.h"
 #include "Links.h"
 
 #ifndef ShaderProgram_h
 #define ShaderProgram_h
-
-//! A class to store a color used for graphics
-class Color4 {
-    public:
-    float r, //!< The red channel (0.0 - 1.0)
-          g, //!< The green channel (0.0 - 1.0)
-          b, //!< The blue channel (0.0 - 1.0)
-          a; //!< The transparency channel (0.0 - 1.0)
-    //! A black color
-    Color4() : r(0), g(0), b(0), a(1) {};
-    //! A gray color
-    Color4(float gray) : r(gray), g(gray), b(gray), a(1) {};
-    //! A transparent gray color
-    Color4(float gray, float aB) : r(gray), g(gray), b(gray), a(aB) {};
-    //! A rgb color
-    Color4(float rB, float gB, float bB) : r(rB), g(gB), b(bB), a(1) {};
-    //! A rgb color
-    Color4(btVector3 vec) : r(vec.x()), g(vec.y()), b(vec.z()), a(1) {};
-    //! A rgb color
-    Color4(btQuaternion vec) : r(vec.x()), g(vec.y()), b(vec.z()), a(vec.w()) {};
-    //! A transparent rgb color
-    Color4(float rB, float gB, float bB, float aB) : r(rB), g(gB), b(bB), a(aB) {};
-    Color4& operator=(const Color4& B) {
-        r = B.r;
-        g = B.g;
-        b = B.b;
-        a = B.a;
-        return *this;
-    }
-    //! Converts this Color4 to a btVector3
-    btVector3 getVector() {
-        return btVector3(r, g, b);
-    }
-    //! Converts this Color4 to a btQuaternion
-    btQuaternion getQuaternion() {
-        return btQuaternion(r, g, b, a);
-    }
-    //! Converts this Color4 to a SDL_Color
-    SDL_Color getSDL() {
-        SDL_Color B;
-        B.r = r*255;
-        B.g = g*255;
-        B.b = b*255;
-        B.unused = a*255;
-        return B;
-    }
-};
 
 #define POSITION_ATTRIBUTE 0
 #define TEXTURE_COORD_ATTRIBUTE 1

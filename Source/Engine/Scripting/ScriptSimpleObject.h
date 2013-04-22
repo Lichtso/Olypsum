@@ -6,10 +6,10 @@
 //
 //
 
-#include "ScriptDisplayObject.h"
-
 #ifndef ScriptSimpleObject_h
 #define ScriptSimpleObject_h
+
+#include "ScriptDisplayObject.h"
 
 class ScriptCamObject : public ScriptBaseObject {
     static v8::Handle<v8::Value> GetFov(v8::Local<v8::String> property, const v8::AccessorInfo& info);

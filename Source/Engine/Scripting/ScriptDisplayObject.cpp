@@ -6,7 +6,7 @@
 //
 //
 
-#include "ScriptManager.h"
+#include "ScriptDisplayObject.h"
 
 v8::Handle<v8::Value> ScriptModelObject::GetIntegrity(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
@@ -35,7 +35,7 @@ void ScriptModelObject::SetModel(v8::Local<v8::String> property, v8::Local<v8::V
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     ModelObject* objectPtr = getDataOfInstance<ModelObject>(info.This());
-    auto model = fileManager.initResource<Model>(scriptManager->stdStringOf(value->ToString()));
+    auto model = fileManager.initResource<Model>(stdStrOfV8(value));
     if(model) objectPtr->setModel(model);
 }
 
@@ -78,7 +78,7 @@ v8::Handle<v8::Value> ScriptRigidObject::GetMass(v8::Local<v8::String> property,
 
 void ScriptRigidObject::SetMass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    if(!value->IsNumber() || value->NumberValue() < 0.0) return;
+    if(!value->IsNumber() || value->NumberValue() < 0.0 || value->NumberValue() == NAN) return;
     btVector3 inertia;
     btRigidBody* body = getDataOfInstance<RigidObject>(info.This())->getBody();
     body->getCollisionShape()->calculateLocalInertia(value->NumberValue(), inertia);
@@ -103,8 +103,11 @@ v8::Handle<v8::Value> ScriptRigidObject::AccessAngularVelocity(const v8::Argumen
     v8::HandleScope handleScope;
     btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
     if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
-        body->setAngularVelocity(scriptVector3.getDataOfInstance(args[0]));
-        body->activate();
+        btVector3 vec = scriptVector3.getDataOfInstance(args[0]);
+        if(isValidVector(vec)) {
+            body->setAngularVelocity(vec);
+            body->activate();
+        }
         return args[0];
     }
     return handleScope.Close(scriptVector3.newInstance(body->getAngularVelocity()));
@@ -114,8 +117,11 @@ v8::Handle<v8::Value> ScriptRigidObject::AccessLinearVelocity(const v8::Argument
     v8::HandleScope handleScope;
     btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
     if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
-        body->setLinearVelocity(scriptVector3.getDataOfInstance(args[0]));
-        body->activate();
+        btVector3 vec = scriptVector3.getDataOfInstance(args[0]);
+        if(isValidVector(vec)) {
+            body->setLinearVelocity(vec);
+            body->activate();
+        }
         return args[0];
     }
     return handleScope.Close(scriptVector3.newInstance(body->getLinearVelocity()));
@@ -125,7 +131,9 @@ v8::Handle<v8::Value> ScriptRigidObject::AccessAngularFactor(const v8::Arguments
     v8::HandleScope handleScope;
     btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
     if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
-        body->setAngularFactor(scriptVector3.getDataOfInstance(args[0]));
+        btVector3 vec = scriptVector3.getDataOfInstance(args[0]);
+        if(isValidVector(vec))
+            body->setAngularFactor(vec);
         return args[0];
     }
     return handleScope.Close(scriptVector3.newInstance(body->getAngularFactor()));
@@ -135,7 +143,9 @@ v8::Handle<v8::Value> ScriptRigidObject::AccessLinearFactor(const v8::Arguments&
     v8::HandleScope handleScope;
     btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
     if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
-        body->setLinearFactor(scriptVector3.getDataOfInstance(args[0]));
+        btVector3 vec = scriptVector3.getDataOfInstance(args[0]);
+        if(isValidVector(vec))
+            body->setLinearFactor(vec);
         return args[0];
     }
     return handleScope.Close(scriptVector3.newInstance(body->getLinearFactor()));
@@ -149,7 +159,7 @@ v8::Handle<v8::Value> ScriptRigidObject::GetAngularDamping(v8::Local<v8::String>
 
 void ScriptRigidObject::SetAngularDamping(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    if(!value->IsNumber()) return;
+    if(!value->IsNumber() || value->NumberValue() == NAN) return;
     btRigidBody* body = getDataOfInstance<RigidObject>(info.This())->getBody();
     body->setAngularDamping(value->NumberValue());
 }
@@ -162,7 +172,7 @@ v8::Handle<v8::Value> ScriptRigidObject::GetLinearDamping(v8::Local<v8::String> 
 
 void ScriptRigidObject::SetLinearDamping(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    if(!value->IsNumber()) return;
+    if(!value->IsNumber() || value->NumberValue() == NAN) return;
     btRigidBody* body = getDataOfInstance<RigidObject>(info.This())->getBody();
     body->setLinearDamping(value->NumberValue());
 }
@@ -171,8 +181,11 @@ v8::Handle<v8::Value> ScriptRigidObject::AccessTransformation(const v8::Argument
     v8::HandleScope handleScope;
     RigidObject* objectPtr = getDataOfInstance<RigidObject>(args.This());
     if(args.Length() == 1 && scriptMatrix4.isCorrectInstance(args[0])) {
-        objectPtr->setTransformation(scriptMatrix4.getDataOfInstance(args[0])->getBTTransform());
-        objectPtr->setKinematic(true);
+        Matrix4* mat = scriptMatrix4.getDataOfInstance(args[0]);
+        if(mat->isValid()) {
+            objectPtr->setTransformation(mat->getBTTransform());
+            objectPtr->setKinematic(true);
+        }
         return args[0];
     }else
         return handleScope.Close(scriptMatrix4.newInstance(Matrix4(objectPtr->getTransformation())));
@@ -185,8 +198,12 @@ v8::Handle<v8::Value> ScriptRigidObject::ApplyImpulseAtPoint(const v8::Arguments
     if(!scriptVector3.isCorrectInstance(args[0]) || !scriptVector3.isCorrectInstance(args[1]))
         return v8::ThrowException(v8::String::New("RigidObject applyImpulseAtPoint(): Invalid argument"));
     btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
-    body->applyImpulse(scriptVector3.getDataOfInstance(args[0]), scriptVector3.getDataOfInstance(args[1]));
-    body->activate();
+    btVector3 vecA = scriptVector3.getDataOfInstance(args[0]),
+              vecB = scriptVector3.getDataOfInstance(args[1]);
+    if(isValidVector(vecA) && isValidVector(vecB)) {
+        body->applyImpulse(vecA, vecB);
+        body->activate();
+    }
     return v8::Undefined();
 }
 
@@ -197,8 +214,11 @@ v8::Handle<v8::Value> ScriptRigidObject::ApplyAngularImpulse(const v8::Arguments
     if(!scriptVector3.isCorrectInstance(args[0]))
         return v8::ThrowException(v8::String::New("RigidObject applyAngularImpulse(): Invalid argument"));
     btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
-    body->applyTorqueImpulse(scriptVector3.getDataOfInstance(args[0]));
-    body->activate();
+    btVector3 vec = scriptVector3.getDataOfInstance(args[0]);
+    if(isValidVector(vec)) {
+        body->applyTorqueImpulse(vec);
+        body->activate();
+    }
     return v8::Undefined();
 }
 
@@ -209,8 +229,11 @@ v8::Handle<v8::Value> ScriptRigidObject::ApplyLinearImpulse(const v8::Arguments&
     if(!scriptVector3.isCorrectInstance(args[0]))
         return v8::ThrowException(v8::String::New("RigidObject applyLinearImpulse(): Invalid argument"));
     btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
-    body->applyCentralImpulse(scriptVector3.getDataOfInstance(args[0]));
-    body->activate();
+    btVector3 vec = scriptVector3.getDataOfInstance(args[0]);
+    if(isValidVector(vec)) {
+        body->applyCentralImpulse(vec);
+        body->activate();
+    }
     return v8::Undefined();
 }
 

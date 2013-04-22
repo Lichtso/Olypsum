@@ -22,7 +22,9 @@ v8::Handle<v8::Value> ScriptBaseObject::AccessTransformation(const v8::Arguments
     v8::HandleScope handleScope;
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
     if(args.Length() == 1 && scriptMatrix4.isCorrectInstance(args[0])) {
-        objectPtr->setTransformation(scriptMatrix4.getDataOfInstance(args[0])->getBTTransform());
+        Matrix4* mat = scriptMatrix4.getDataOfInstance(args[0]);
+        if(mat->isValid())
+            objectPtr->setTransformation(mat->getBTTransform());
         return args[0];
     }else
         return handleScope.Close(scriptMatrix4.newInstance(Matrix4(objectPtr->getTransformation())));
@@ -43,7 +45,7 @@ void ScriptBaseObject::SetScriptClass(v8::Local<v8::String> property, v8::Local<
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(info.This());
     FilePackage* filePackage;
     std::string name;
-    if(fileManager.readResource(scriptManager->stdStringOf(value->ToString()), filePackage, name))
+    if(fileManager.readResource(stdStrOfV8(value), filePackage, name))
         objectPtr->scriptFile = scriptManager->getScriptFile(filePackage, name);
 }
 
@@ -64,7 +66,7 @@ v8::Handle<v8::Value> ScriptBaseObject::GetLinkedObject(const v8::Arguments& arg
     if(!args[0]->IsString())
         return v8::ThrowException(v8::String::New("BaseObject getLinkedObject(): Invalid argument"));
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
-    BaseObject* linkedObject = objectPtr->findObjectByPath(scriptManager->stdStringOf(args[0]->ToString()));
+    BaseObject* linkedObject = objectPtr->findObjectByPath(stdStrOfV8(args[0]));
     if(!linkedObject) return v8::Undefined();
     return handleScope.Close(linkedObject->scriptInstance);
 }
@@ -106,7 +108,7 @@ v8::Handle<v8::Value> ScriptPhysicObject::GetCollisionShape(v8::Local<v8::String
 void ScriptPhysicObject::SetCollisionShape(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
-    btCollisionShape* shape = levelManager.getCollisionShape(scriptManager->stdStringOf(value->ToString()));
+    btCollisionShape* shape = levelManager.getCollisionShape(stdStrOfV8(value));
     if(shape) {
         PhysicObject* objectPtr = getDataOfInstance<PhysicObject>(info.This());
         objectPtr->getBody()->setCollisionShape(shape);

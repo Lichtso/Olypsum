@@ -54,7 +54,7 @@ rapidxml::xml_node<xmlUsedCharType>* BaseObject::write(rapidxml::xml_document<xm
     if(scriptFile) {
         v8::Handle<v8::Value> scritData = scriptManager->callFunctionOfScript(scriptFile, "onsave", true, { scriptInstance });
         if(!scritData.IsEmpty() && scritData->IsString())
-            scriptManager->writeCdataXMLNode(doc, scriptManager->stdStringOf(scritData->ToString()));
+            scriptManager->writeCdataXMLNode(doc, stdStrOfV8(scritData));
         node->append_node(fileManager.writeResource(doc, "Script", scriptFile->filePackage, scriptFile->name));
     }
     btTransform transform = getTransformation();

@@ -14,13 +14,13 @@ v8::Handle<v8::Value> ScriptMouse::Constructor(const v8::Arguments &args) {
 }
 
 v8::Handle<v8::Value> ScriptMouse::AccessX(const v8::Arguments& args) {
-    if(args.Length() == 1 && args[0]->IsNumber() && args[0]->NumberValue() >= -currentScreenView->width && args[0]->NumberValue() <= currentScreenView->width)
+    if(args.Length() == 1 && args[0]->IsNumber() && args[0]->NumberValue() >= -menu.screenView->width && args[0]->NumberValue() <= menu.screenView->width)
         menu.mouseX = args[0]->NumberValue();
     return v8::Number::New(menu.mouseX);
 }
 
 v8::Handle<v8::Value> ScriptMouse::AccessY(const v8::Arguments& args) {
-    if(args.Length() == 1 && args[0]->IsNumber() && args[0]->NumberValue() >= -currentScreenView->height && args[0]->NumberValue() <= currentScreenView->height)
+    if(args.Length() == 1 && args[0]->IsNumber() && args[0]->NumberValue() >= -menu.screenView->height && args[0]->NumberValue() <= menu.screenView->height)
         menu.mouseY = args[0]->NumberValue();
     return v8::Number::New(menu.mouseY);
 }
@@ -34,7 +34,6 @@ v8::Handle<v8::Value> ScriptMouse::AccessFixed(const v8::Arguments& args) {
 ScriptMouse::ScriptMouse() :ScriptClass("Mouse", Constructor) {
     v8::HandleScope handleScope;
     
-    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     functionTemplate->Set(v8::String::New("x"), v8::FunctionTemplate::New(AccessX));
     functionTemplate->Set(v8::String::New("y"), v8::FunctionTemplate::New(AccessY));
     functionTemplate->Set(v8::String::New("fixed"), v8::FunctionTemplate::New(AccessFixed));

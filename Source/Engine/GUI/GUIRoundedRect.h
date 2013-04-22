@@ -6,17 +6,16 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "LightVolume.h"
-#include "GUIClipRect.h"
-
 #ifndef GUIRoundedRect_h
 #define GUIRoundedRect_h
 
-enum GUICorners {
-    GUITopLeftCorner = 1,
-    GUITopRightCorner = 2,
-    GUIBottomLeftCorner = 4,
-    GUIBottomRightCorner = 8
+#include "GUIRect.h"
+
+enum GUICorner {
+    TopLeft = 1,
+    TopRight = 2,
+    BottomLeft = 4,
+    BottomRight = 8
 };
 
 class GUIDrawableRect {
@@ -33,7 +32,7 @@ class GUIRoundedRect : public GUIDrawableRect {
     public:
     GLuint texture;
     bool transposed;
-    GUICorners roundedCorners;
+    GUICorner roundedCorners;
     Color4 topColor, bottomColor, borderColor;
     int innerShadow;
     unsigned int cornerRadius;

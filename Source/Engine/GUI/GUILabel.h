@@ -6,17 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "TextFont.h"
-#include "GUIView.h"
-
 #ifndef GUILabel_h
 #define GUILabel_h
 
-enum GUITextAlign {
-    GUITextAlign_Left = 0,
-    GUITextAlign_Middle = 1,
-    GUITextAlign_Right = 2,
-};
+#include "GUIScrollView.h"
 
 struct GUILabelLine {
     GLuint texture;
@@ -32,10 +25,14 @@ class GUILabel : public GUIRect {
     public:
     std::vector<GUILabelLine> lines;
     Color4 color;
-    TextFont* font;
+    FileResourcePtr<TextFont> font;
     GUISizeAlignment sizeAlignment;
     unsigned int fontHeight;
-    GUITextAlign textAlign;
+    enum TextAlignment {
+        Left = 0,
+        Middle = 1,
+        Right = 2,
+    } textAlignment;
     std::string text;
     GUILabel();
     ~GUILabel();

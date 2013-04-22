@@ -171,8 +171,8 @@ Model::~Model() {
     }
 }
 
-std::shared_ptr<FilePackageResource> Model::load(FilePackage* filePackageB, const std::string& name) {
-    auto pointer = FilePackageResource::load(filePackageB, name);
+FileResourcePtr<FileResource> Model::load(FilePackage* filePackageB, const std::string& name) {
+    auto pointer = FileResource::load(filePackageB, name);
     if(meshes.size() > 0) return NULL;
     
     rapidxml::xml_document<xmlUsedCharType> doc;

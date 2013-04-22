@@ -9,12 +9,7 @@
 #ifndef GUIClipRect_h
 #define GUIClipRect_h
 
-enum GUISizeAlignment {
-    GUISizeAlignment_None = 0,
-    GUISizeAlignment_Width = 1,
-    GUISizeAlignment_Height = 2,
-    GUISizeAlignment_All = 3
-};
+#include "TextFont.h"
 
 class GUIClipRect {
     public:

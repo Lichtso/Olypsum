@@ -108,12 +108,6 @@ void AppMain(int argc, char *argv[]) {
     guiCam->updateViewMat();
     
     //Init Resources
-    mainFont = new TextFont();
-    mainFont->size = prevOptionsState.videoWidth*0.04;
-    mainFont->loadTTF("font");
-    italicFont = new TextFont();
-    italicFont->size = prevOptionsState.videoHeight*0.04;
-    italicFont->loadTTF("font_italic");
     initLightVolumes();
     objectManager.init();
     loadStaticShaderPrograms();
@@ -122,7 +116,6 @@ void AppMain(int argc, char *argv[]) {
     SDL_Event event;
     while(true) {
         while(SDL_PollEvent(&event)) {
-            if(!currentScreenView) break;
             switch(event.type) {
                 case SDL_ACTIVEEVENT:
                     menu.handleActiveEvent(event.active.gain);
@@ -180,7 +173,7 @@ void AppMain(int argc, char *argv[]) {
             profiler.leaveSection("Rest");
             objectManager.gameTick();
         }
-        currentScreenView->draw();
+        menu.screenView->draw();
         SDL_GL_SwapBuffers();
         profiler.leaveSection("Swap Buffers");
         profiler.markFrame();

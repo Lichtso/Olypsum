@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUIView.h"
-
 #ifndef GUIScrollView_h
 #define GUIScrollView_h
+
+#include "GUIView.h"
 
 class GUIScrollView : public GUIFramedView {
     GUIRoundedRect sliderV, sliderH;
@@ -19,7 +19,7 @@ class GUIScrollView : public GUIFramedView {
     int getBarPosX();
     int getBarPosY();
     public:
-    bool hideSliderX, hideSliderY;
+    bool sliderX, sliderY;
     int scrollPosX, scrollPosY, contentWidth, contentHeight;
     GUIScrollView();
     void updateContent();

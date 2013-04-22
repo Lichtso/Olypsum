@@ -52,7 +52,7 @@ TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelL
             log(error_log, "Found \"HeightsMap\"-node without \"src\"-attribute.");
             return;
         }
-        std::shared_ptr<Texture> heightMap = fileManager.initResource<Texture>(attribute->value());
+        FileResourcePtr<Texture> heightMap = fileManager.initResource<Texture>(attribute->value());
         if(!heightMap) return;
         width = heightMap->width;
         length = heightMap->height;

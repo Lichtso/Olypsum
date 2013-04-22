@@ -6,29 +6,26 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "LevelManager.h"
+#include "Menu.h"
 
-std::shared_ptr<FilePackageResource> FilePackageResource::load(FilePackage* filePackageB, const std::string& nameB) {
+FileResourcePtr<FileResource> FileResource::load(FilePackage* filePackageB, const std::string& nameB) {
     filePackage = filePackageB;
     name = nameB;
-    std::shared_ptr<FilePackageResource> pointer(this);
-    filePackage->resources[name] = pointer;
-    return pointer;
+    filePackage->resources[name] = this;
+    return this;
 }
 
-FilePackageResource::~FilePackageResource() {
+void FileResource::remove() {
     if(filePackage)
         filePackage->resources.erase(name);
+    delete this;
 }
 
 
-
-FilePackage::FilePackage(std::string nameB) :name(nameB) {
-    
-}
 
 FilePackage::~FilePackage() {
-    
+    for(auto iterator : resources)
+        delete iterator.second;
 }
 
 bool FilePackage::init() {
@@ -52,14 +49,12 @@ std::string FilePackage::getPathOfFile(const char* groupName, const std::string&
 
 
 
-FileManager::~FileManager() {
-    clear();
-}
-
 void FileManager::clear() {
+    menu.clear();
     for(auto iterator : filePackages)
         delete iterator.second;
     filePackages.clear();
+    getPackage("Default");
 }
 
 FilePackage* FileManager::getPackage(const std::string& name) {

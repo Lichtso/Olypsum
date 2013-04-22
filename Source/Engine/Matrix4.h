@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Utilities.h"
+#include "Ray3.h"
 
 #ifndef Matrix4_h
 #define Matrix4_h
@@ -39,6 +39,8 @@ class Matrix4 {
     btMatrix3x3 getNormalMatrix();
     //! Converts this Matrix4 into a float[16]
     void getOpenGLMatrix(float* matData) const;
+    //! Returns true if this Matrix4 does not conatin any NaN values
+    bool isValid();
     //! Resets the transformation
     Matrix4& setIdentity();
     //! Mirrors the values at the diagonal
@@ -92,5 +94,8 @@ class Matrix4 {
 
 //! Converts a Matrix4 into a std::string
 std::string stringOf(Matrix4& mat);
+
+//! Returns true if a btVector3 does not conatin any NaN values
+bool isValidVector(const btVector3& vec);
 
 #endif

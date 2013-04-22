@@ -6,22 +6,83 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Model.h"
-#include "Audio.h"
-#include "Localization.h"
+#include "Matrix4.h"
 
 #ifndef FileManager_h
 #define FileManager_h
+
+class FilePackage;
+class FileResource;
+
+//! A pointer referencing a ARC FileResource
+template<class T> class FileResourcePtr {
+    T* resource; //!< The referenced FileResource
+    inline void decrementRetain() {
+        if(resource) {
+            resource->retainCount --;
+            if(resource->retainCount == 0 && resource->filePackage->name != "Default")
+                resource->remove();
+        }
+    }
+    inline void incrementRetain() {
+        if(resource)
+            resource->retainCount ++;
+    }
+    public:
+    FileResourcePtr() :resource(NULL) { }
+    FileResourcePtr(T* resource_) :resource(resource_) {
+        incrementRetain();
+    }
+    template<class U> FileResourcePtr(U* resource_) :FileResourcePtr(static_cast<T*>(resource_)) { }
+    template<class U> FileResourcePtr(const FileResourcePtr<U>& ptr) :FileResourcePtr(*ptr) { }
+    FileResourcePtr(const FileResourcePtr<T>& ptr) :FileResourcePtr(*ptr) { }
+    FileResourcePtr(FileResourcePtr<T>&& ptr) :FileResourcePtr(*ptr) { }
+    ~FileResourcePtr() {
+        decrementRetain();
+    }
+    T* operator*() const {
+        return resource;
+    }
+    T* operator->() const {
+        return resource;
+    }
+    operator bool() const {
+        return resource != NULL;
+    }
+    FileResourcePtr<T>& operator=(const FileResourcePtr<T>& ptr) {
+        decrementRetain();
+        resource = *ptr;
+        incrementRetain();
+        return *this;
+    }
+};
+
+//! A resource represented by a file in a FilePackage
+class FileResource {
+    public:
+    FilePackage* filePackage; //!< The parent FilePackage
+    std::string name; //!< The name of the file
+    unsigned int retainCount; //!< How many objects use this FileResource
+    FileResource() :filePackage(NULL), retainCount(0) { }
+    virtual ~FileResource() { };
+    //! Removes this FileResource correctly from its FilePackage
+    void remove();
+    /*! Loads the file
+     @param filePackage The FilePackage as parent
+     @param name The file name to be loaded
+     */
+    virtual FileResourcePtr<FileResource> load(FilePackage* filePackage, const std::string& name);
+};
 
 //! A bundle of resources in a level package
 class FilePackage {
     public:
     std::string path, //!< The absolute path to its directory
                 name; //!< The name
-    std::map<std::string, std::weak_ptr<FilePackageResource>> resources; //!< All its loaded resources
-    FilePackage(std::string name);
+    std::map<std::string, FileResource*> resources; //!< All its loaded resources
+    FilePackage(std::string name_) :name(name_) { };
     ~FilePackage();
-    //! Initialize
+    //! Initialize, returns Success
     bool init();
     /*! Ascertains the absolute path of a resource
      @param groupName A child directory which contains the resource
@@ -30,25 +91,22 @@ class FilePackage {
      */
     std::string getPathOfFile(const char* groupName, const std::string& fileName);
     //! Loads and initializes a FilePackageResource
-    template <class T> std::shared_ptr<T> getResource(const std::string& fileName) {
+    template <class T> FileResourcePtr<T> getResource(const std::string& fileName) {
         auto iterator = resources.find(fileName);
         if(iterator != resources.end()) {
-            std::shared_ptr<FilePackageResource> pointer = iterator->second.lock();
-            if(!dynamic_cast<T*>(pointer.get())) {
+            if(!dynamic_cast<T*>(iterator->second)) {
                 log(error_log, std::string("The resource ")+fileName+" in "+name+" is already used by another resource type.");
-                return NULL;
+                return FileResourcePtr<T>();
             }
-            return std::static_pointer_cast<T>(pointer);
+            return iterator->second;
         }
-        return std::static_pointer_cast<T>((new T())->load(this, fileName));
+        return (new T())->load(this, fileName);
     }
     //! Finds the name of a already loaded resource
-    template <class T> std::string getNameOfResource(std::shared_ptr<T>& resource) {
-        for(auto iterator : resources) {
-            std::shared_ptr<FilePackageResource> ptr = iterator.second.lock();
-            if(ptr == resource)
+    template <class T> std::string getNameOfResource(const FileResourcePtr<T>& resource) {
+        for(auto iterator : resources)
+            if(iterator.second == *resource)
                 return iterator.first;
-        }
         return "";
     }
 };
@@ -57,7 +115,6 @@ class FilePackage {
 class FileManager {
     public:
     std::map<std::string, FilePackage*> filePackages; //!< All FilePackages that are loaded
-    ~FileManager();
     //! Deletes all FilePackages
     void clear();
     //! Finds a FilePackage and loads it if not already done
@@ -72,7 +129,7 @@ class FileManager {
     rapidxml::xml_node<xmlUsedCharType>* writeResource(rapidxml::xml_document<xmlUsedCharType>& doc, const char* nodeName,
                                                        FilePackage* filePackage, const std::string& name);
     //! Initialize a resource from path
-    template <class T> std::shared_ptr<T> initResource(const std::string path) {
+    template <class T> FileResourcePtr<T> initResource(const std::string path) {
         FilePackage* filePackage;
         std::string name;
         if(!readResource(path, filePackage, name)) {
@@ -82,7 +139,7 @@ class FileManager {
         return filePackage->getResource<T>(name);
     };
     //Finds a resource by searching through all FilePackages
-    template <class T> FilePackage* findResource(std::shared_ptr<T>& resource, std::string& name) {
+    template <class T> FilePackage* findResource(const FileResourcePtr<T>& resource, std::string& name) {
         for(auto iterator : filePackages) {
             name = iterator.second->getNameOfResource(resource);
             if(name.size() == 0) continue;
@@ -92,7 +149,7 @@ class FileManager {
     }
     //Writes a resource to rapidxml::xml_node and returns it
     template <class T> rapidxml::xml_node<xmlUsedCharType>* writeResource(rapidxml::xml_document<xmlUsedCharType>& doc,
-                                                                          const char* nodeName, std::shared_ptr<T>& resource) {
+                                                                          const char* nodeName, const FileResourcePtr<T>& resource) {
         std::string name;
         FilePackage* filePackage = findResource<T>(resource, name);
         return writeResource(doc, nodeName, filePackage, name);

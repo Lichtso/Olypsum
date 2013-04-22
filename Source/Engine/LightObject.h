@@ -7,7 +7,6 @@
 //
 
 #include "LightVolume.h"
-#include "DisplayObject.h"
 
 #ifndef LightObject_h
 #define LightObject_h

@@ -20,15 +20,15 @@ Texture::~Texture() {
     if(frames) delete [] frames;
 }
 
-std::shared_ptr<FilePackageResource> Texture::load(FilePackage* filePackageB, const std::string& name) {
-    auto pointer = FilePackageResource::load(filePackageB, name);
-    if(surface) return NULL;
+FileResourcePtr<FileResource> Texture::load(FilePackage* filePackageB, const std::string& name) {
+    auto pointer = FileResource::load(filePackageB, name);
+    if(surface) return FileResourcePtr<FileResource>();
     
     std::string filePath = filePackage->getPathOfFile("Textures", name);
     surface = IMG_Load(filePath.c_str());
     if(!surface) {
         log(error_log, std::string("Unable to load texture ")+filePath+".\n"+IMG_GetError());
-        return NULL;
+        return FileResourcePtr<FileResource>();
     }
     
     switch(surface->format->BitsPerPixel) {
@@ -39,12 +39,12 @@ std::shared_ptr<FilePackageResource> Texture::load(FilePackage* filePackageB, co
             break;
         default:
             log(error_log, std::string("Unable to load texture ")+filePath+".\nUnsupported bit-depth.");
-            return NULL;
+            return FileResourcePtr<FileResource>();
     }
     
     if(surface->format->palette) {
         log(error_log, std::string("Unable to load texture ")+filePath+".\nTexture uses a color palette.");
-        return NULL;
+        return FileResourcePtr<FileResource>();
     }
     
     width = surface->w;

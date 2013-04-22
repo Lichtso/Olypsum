@@ -6,10 +6,10 @@
 //
 //
 
-#include "ScriptParticlesObject.h"
-
 #ifndef ScriptLightObject_h
 #define ScriptLightObject_h
+
+#include "ScriptParticlesObject.h"
 
 class ScriptLightObject : public ScriptPhysicObject {
     static v8::Handle<v8::Value> GetRange(v8::Local<v8::String> property, const v8::AccessorInfo& info);

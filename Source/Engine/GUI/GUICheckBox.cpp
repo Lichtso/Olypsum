@@ -6,17 +6,17 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUICheckBox.h"
+#include "Menu.h"
 
 GUICheckBox::GUICheckBox() {
     paddingX = paddingY = 0;
-    width = height = currentScreenView->width*0.022;
-    sizeAlignment = GUISizeAlignment_None;
+    width = height = menu.screenView->width*0.022;
+    sizeAlignment = GUISizeAlignment::None;
     GUILabel* label = new GUILabel();
     label->text = "√";
     label->parent = this;
-    label->fontHeight = currentScreenView->width*0.03;
-    label->posY = currentScreenView->width*0.002;
+    label->fontHeight = menu.screenView->width*0.03;
+    label->posY = menu.screenView->width*0.002;
     children.push_back(label);
 }
 

@@ -54,6 +54,18 @@ exports.ongametick = function() {
         else
             exports.grabbedObject.angularVelocity(new Vector3(0.0, 0.0, 0.0));
         exports.grabbedObject.linearVelocity(velocity.mult(speed));
+
+        if(Keyboard.isKeyPressed(304)) { //Shift left: Explode
+		var result = Intersection.sphereIntersection(exports.grabbedObject.transformation().w(), 10.0, 0xFFFF);
+			for(var i = 0; i < result.length; i ++)
+				if(result[i].mass && result[i] != exports.grabbedObject) {
+					var vec = result[i].transformation().w().sub(exports.grabbedObject.transformation().w());
+					vec.mult(120.0/vec.getLength());
+					result[i].applyLinearImpulse(vec);
+				}
+			exports.grabbedObject.integrity = 0.0;
+			exports.grabbedObject = null;
+		}
 	}
 };
 

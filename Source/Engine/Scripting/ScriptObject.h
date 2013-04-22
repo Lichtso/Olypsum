@@ -6,10 +6,10 @@
 //
 //
 
-#include "ScriptLinearAlgebra.h"
-
 #ifndef ScriptObject_h
 #define ScriptObject_h
+
+#include "ScriptLinearAlgebra.h"
 
 class ScriptBaseObject : public ScriptClass {
     static v8::Handle<v8::Value> AccessTransformation(const v8::Arguments& args);

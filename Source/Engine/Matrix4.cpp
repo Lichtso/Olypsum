@@ -83,6 +83,10 @@ void Matrix4::getOpenGLMatrix(btScalar* matData) const {
     matData[15] = w.w();
 }
 
+bool Matrix4::isValid() {
+    return isValidVector(x) && isValidVector(y) && isValidVector(z) && isValidVector(w);
+}
+
 Matrix4& Matrix4::setIdentity() {
     x = btVector3(1, 0, 0);
     y = btVector3(0, 1, 0);
@@ -428,6 +432,8 @@ Matrix4& Matrix4::ortho(float w, float h, float n, float f) {
     return (*this *= b);
 }
 
+
+
 std::string stringOf(Matrix4& mat) {
     std::ostringstream ss;
     ss << "(";
@@ -438,4 +444,8 @@ std::string stringOf(Matrix4& mat) {
     }
     ss << ")";
     return ss.str();
+}
+
+bool isValidVector(const btVector3& vec) {
+    return isfinite(vec.x()) && isfinite(vec.y()) && isfinite(vec.z()) && isfinite(vec.w());
 }

@@ -6,17 +6,23 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "ScriptManager.h"
-
 #ifndef AppMain_h
 #define AppMain_h
 
-extern Uint8* keyState;
-extern int keyStateSize;
+#include "ScriptManager.h"
+
+void openExternURL(const char* str);
+void setClipboardText(const char* str);
+std::string getClipboardText();
+bool hasClipboardText();
 
 const SDL_VideoInfo* updateVideoModeInternal(bool& fullScreen);
 void updateVideoMode();
+
 void AppMain(int argc, char *argv[]);
 void AppTerminate();
+
+extern Uint8* keyState;
+extern int keyStateSize;
 
 #endif

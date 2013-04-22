@@ -6,33 +6,62 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include <OpenGL/gl3.h>
-#include <SDL/SDL.h>
-#include "XMLUtilities.h"
+#include "FileManager.h"
 
 #ifndef Texture_h
 #define Texture_h
 #define GL_TEXTURE_MAX_ANISOTROPY 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY 0x84FF
 
-class FilePackage;
-
-//! A resource represented by a file in a FilePackage
-class FilePackageResource {
+//! A class to store a color used for graphics
+class Color4 {
     public:
-    FilePackage* filePackage; //!< The parent FilePackage
-    std::string name; //!< The name of the file
-    FilePackageResource() :filePackage(NULL) { }
-    virtual ~FilePackageResource();
-    /*! Loads the file
-     @param filePackage The FilePackage as parent
-     @param name The file name to be loaded
-     */
-    virtual std::shared_ptr<FilePackageResource> load(FilePackage* filePackage, const std::string& name);
+    float r, //!< The red channel (0.0 - 1.0)
+    g, //!< The green channel (0.0 - 1.0)
+    b, //!< The blue channel (0.0 - 1.0)
+    a; //!< The transparency channel (0.0 - 1.0)
+    //! A black color
+    Color4() : r(0), g(0), b(0), a(1) {};
+    //! A gray color
+    Color4(float gray) : r(gray), g(gray), b(gray), a(1) {};
+    //! A transparent gray color
+    Color4(float gray, float aB) : r(gray), g(gray), b(gray), a(aB) {};
+    //! A rgb color
+    Color4(float rB, float gB, float bB) : r(rB), g(gB), b(bB), a(1) {};
+    //! A rgb color
+    Color4(btVector3 vec) : r(vec.x()), g(vec.y()), b(vec.z()), a(1) {};
+    //! A rgb color
+    Color4(btQuaternion vec) : r(vec.x()), g(vec.y()), b(vec.z()), a(vec.w()) {};
+    //! A transparent rgb color
+    Color4(float rB, float gB, float bB, float aB) : r(rB), g(gB), b(bB), a(aB) {};
+    Color4& operator=(const Color4& B) {
+        r = B.r;
+        g = B.g;
+        b = B.b;
+        a = B.a;
+        return *this;
+    }
+    //! Converts this Color4 to a btVector3
+    btVector3 getVector() {
+        return btVector3(r, g, b);
+    }
+    //! Converts this Color4 to a btQuaternion
+    btQuaternion getQuaternion() {
+        return btQuaternion(r, g, b, a);
+    }
+    //! Converts this Color4 to a SDL_Color
+    SDL_Color getSDL() {
+        SDL_Color B;
+        B.r = r*255;
+        B.g = g*255;
+        B.b = b*255;
+        B.unused = a*255;
+        return B;
+    }
 };
 
 //! A texture used for graphics
-class Texture : public FilePackageResource {
+class Texture : public FileResource {
     public:
     //! A single frame used for texture animation
     struct AnimationFrame {
@@ -47,7 +76,7 @@ class Texture : public FilePackageResource {
     SDL_Surface* surface; //!< The SDL_Surface if the Texture is present in the RAM
     Texture();
     ~Texture();
-    std::shared_ptr<FilePackageResource> load(FilePackage* filePackageB, const std::string& name);
+    FileResourcePtr<FileResource> load(FilePackage* filePackageB, const std::string& name);
     //! Prepare to be uploaded as a 3D Texture, returns success
     bool setAnimationFrames(std::vector<AnimationFrame> frames);
     //! Loads random data in a SDL_Surface

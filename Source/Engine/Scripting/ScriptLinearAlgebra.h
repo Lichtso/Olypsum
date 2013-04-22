@@ -6,10 +6,10 @@
 //
 //
 
-#include "Script.h"
-
 #ifndef ScriptLinearAlgebra_h
 #define ScriptLinearAlgebra_h
+
+#include "Script.h"
 
 class ScriptVector3 : public ScriptClass {
     static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);

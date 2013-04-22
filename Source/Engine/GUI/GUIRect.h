@@ -6,20 +6,25 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include <SDL/SDL.h>
-#include "FileManager.h"
-#include "GUIClipRect.h"
-
 #ifndef GUIRect_h
 #define GUIRect_h
 
+#include "GUIClipRect.h"
+
 enum GUIOrientation {
-    GUIOrientation_Left = 1,
-    GUIOrientation_Right = 2,
-    GUIOrientation_Top = 4,
-    GUIOrientation_Bottom = 8,
-    GUIOrientation_Vertical = 3,
-    GUIOrientation_Horizontal = 12
+    Left = 1,
+    Right = 2,
+    Top = 4,
+    Bottom = 8,
+    Vertical = 3,
+    Horizontal = 12
+};
+
+enum GUISizeAlignment {
+    None = 0,
+    Width = 1,
+    Height = 2,
+    All = 3
 };
 
 class GUIView;

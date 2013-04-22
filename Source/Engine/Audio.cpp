@@ -23,15 +23,15 @@ SoundTrack::~SoundTrack() {
     if(ALname) alDeleteBuffers(1, &ALname);
 }
 
-std::shared_ptr<FilePackageResource> SoundTrack::load(FilePackage* filePackageB, const std::string& name) {
-    auto pointer = FilePackageResource::load(filePackageB, name);
-    if(ALname) return NULL;
+FileResourcePtr<FileResource> SoundTrack::load(FilePackage* filePackageB, const std::string& name) {
+    auto pointer = FileResource::load(filePackageB, name);
+    if(ALname) return FileResourcePtr<FileResource>();
     
     std::string filePath = filePackageB->getPathOfFile("Sounds", name);
     FILE* fp = fopen(filePath.c_str(), "r");
     if(!fp) {
         log(error_log, std::string("The file ")+filePath+" couldn't be found.");
-        return NULL;
+        return FileResourcePtr<FileResource>();
     }
     
     OggVorbis_File vf;
@@ -39,7 +39,7 @@ std::shared_ptr<FilePackageResource> SoundTrack::load(FilePackage* filePackageB,
         log(error_log, std::string("The file ")+filePath+" is not a valid ogg file.");
         ov_clear(&vf);
         fclose(fp);
-        return NULL;
+        return FileResourcePtr<FileResource>();
     }
     
     int section = 0, bytesRead, bufferSize = ov_pcm_total(&vf, 0)*2*ov_info(&vf, 0)->channels;
@@ -238,7 +238,7 @@ rapidxml::xml_node<xmlUsedCharType>* SoundObject::write(rapidxml::xml_document<x
     return node;
 }
 
-void SoundObject::setSoundTrack(std::shared_ptr<SoundTrack> soundTrackB) {
+void SoundObject::setSoundTrack(FileResourcePtr<SoundTrack> soundTrackB) {
     soundTrack = soundTrackB;
     alSourcei(ALname, AL_BUFFER, soundTrack->ALname);
 }

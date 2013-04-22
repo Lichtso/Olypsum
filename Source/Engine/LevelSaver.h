@@ -6,10 +6,10 @@
 //
 //
 
-#include "ObjectManager.h"
-
 #ifndef LevelSaver_h
 #define LevelSaver_h
+
+#include "LevelLoader.h"
 
 class LevelSaver {
     int objectCounter;

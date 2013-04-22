@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUIScrollView.h"
+#include "Menu.h"
 
-#define scrollBarWidth (currentScreenView->width*0.005)
+#define scrollBarWidth (menu.screenView->width*0.005)
 
 int GUIScrollView::getBarWidth() {
     if(contentWidth > width*2 && contentHeight > height*2)
@@ -46,7 +46,7 @@ GUIScrollView::GUIScrollView() {
     contentHeight = height;
     content.innerShadow = 0;
     mouseDragPosX = mouseDragPosY = -2;
-    hideSliderX = hideSliderY = true;
+    sliderX = sliderY = true;
 }
 
 void GUIScrollView::updateContent() {
@@ -124,10 +124,10 @@ bool GUIScrollView::handleMouseDown(int mouseX, int mouseY) {
 
 bool GUIScrollView::handleMouseUp(int mouseX, int mouseY) {
     mouseDragPosX = (contentWidth > width*2 &&
-                     (!hideSliderX || (mouseX >= -width && mouseX <= width &&
+                     (sliderX || (mouseX >= -width && mouseX <= width &&
                                        mouseY >= -height && mouseY <= 3*scrollBarWidth-height))) ? -1 : -2;
     mouseDragPosY = (contentHeight > height*2 &&
-                     (!hideSliderY || (mouseX >= width-3*scrollBarWidth && mouseX <= width &&
+                     (sliderY || (mouseX >= width-3*scrollBarWidth && mouseX <= width &&
                                        mouseY >= -height && mouseY <= height))) ? -1 : -2;
     
     return GUIView::handleMouseUp(mouseX+scrollPosX, mouseY-scrollPosY);
@@ -141,7 +141,7 @@ void GUIScrollView::handleMouseMove(int mouseX, int mouseY) {
             if(scrollPosX < 0) scrollPosX = 0;
             else if(scrollPosX > contentWidth-width*2) scrollPosX = contentWidth-width*2;
             return;
-        }else mouseDragPosX = (!hideSliderX || (mouseX >= -width && mouseX <= width && mouseY >= -height && mouseY <= 3*scrollBarWidth-height)) ? -1 : -2;
+        }else mouseDragPosX = (sliderX || (mouseX >= -width && mouseX <= width && mouseY >= -height && mouseY <= 3*scrollBarWidth-height)) ? -1 : -2;
     }else mouseDragPosX = -2;
     
     if(contentHeight > height) {
@@ -151,7 +151,7 @@ void GUIScrollView::handleMouseMove(int mouseX, int mouseY) {
             if(scrollPosY < 0) scrollPosY = 0;
             else if(scrollPosY > contentHeight-height*2) scrollPosY = contentHeight-height*2;
             return;
-        }else mouseDragPosY = (!hideSliderY || (mouseX >= width-3*scrollBarWidth && mouseX <= width && mouseY >= -height && mouseY <= height)) ? -1 : -2;
+        }else mouseDragPosY = (sliderY || (mouseX >= width-3*scrollBarWidth && mouseX <= width && mouseY >= -height && mouseY <= height)) ? -1 : -2;
     }else mouseDragPosY = -2;
     
     GUIView::handleMouseMove(mouseX+scrollPosX, mouseY-scrollPosY);

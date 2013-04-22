@@ -6,18 +6,17 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUIView.h"
-#include "GUIProgressBar.h"
+#include "Menu.h"
 
 GUIProgressBar::GUIProgressBar() {
     value = 0.5;
-    orientation = GUIOrientation_Horizontal;
-    width = currentScreenView->width*0.2;
-    height = currentScreenView->width*0.01;
+    orientation = GUIOrientation::Horizontal;
+    width = menu.screenView->width*0.2;
+    height = menu.screenView->width*0.01;
 }
 
 void GUIProgressBar::updateContent() {
-    if(orientation & GUIOrientation_Horizontal) {
+    if(orientation & GUIOrientation::Horizontal) {
         barL.width = barR.width = width;
         barL.height = barR.height = height;
     }else{
@@ -27,7 +26,7 @@ void GUIProgressBar::updateContent() {
     }
     
     barL.innerShadow = barR.innerShadow = 0;
-    barL.cornerRadius = barR.cornerRadius = currentScreenView->width*0.01;
+    barL.cornerRadius = barR.cornerRadius = menu.screenView->width*0.01;
     barL.borderColor = barR.borderColor = Color4(0.63);
     barL.topColor = Color4(0.4, 0.98, 0.75);
     barL.bottomColor = Color4(0.04, 0.59, 0.2);
@@ -39,7 +38,7 @@ void GUIProgressBar::updateContent() {
 }
 
 void GUIProgressBar::drawBar(btVector3 transform, GUIClipRect clipRect, GUIRoundedRect& roundedRect) {
-    if(orientation & GUIOrientation_Horizontal) {
+    if(orientation & GUIOrientation::Horizontal) {
         int splitPos = width*(value*2.0-1.0);
         if(&roundedRect == &barL)
             clipRect.maxPosX = min(clipRect.maxPosX, splitPos);

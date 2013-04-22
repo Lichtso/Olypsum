@@ -85,7 +85,7 @@ bool ModelObject::gameTick() {
     return true;
 }
 
-void ModelObject::setModel(std::shared_ptr<Model> _model) {
+void ModelObject::setModel(FileResourcePtr<Model> _model) {
     if(model) {
         for(unsigned int i = 0; i < model->meshes.size(); i ++)
             if(model->meshes[i]->material.reflectivity != 0)

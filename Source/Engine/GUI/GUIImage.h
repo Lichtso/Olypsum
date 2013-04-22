@@ -6,17 +6,16 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUIRoundedRect.h"
-#include "GUIRect.h"
-
 #ifndef GUIImage_h
 #define GUIImage_h
+
+#include "GUITextField.h"
 
 class GUIImage : public GUIRect {
     public:
     GUIDrawableRect content;
     GUISizeAlignment sizeAlignment;
-    std::shared_ptr<Texture> texture;
+    FileResourcePtr<Texture> texture;
     GUIImage();
     void updateContent();
     void draw(btVector3 transform, GUIClipRect& parentClipRect);

@@ -12,7 +12,7 @@ v8::Handle<v8::Value> ScriptManager::ScriptLog(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() == 0)
         return v8::ThrowException(v8::String::New("log(): To less arguments"));
-    log(script_log, stdStringOf(args[0]->ToString()));
+    log(script_log, stdStrOfV8(args[0]));
     return v8::Undefined();
 }
 
@@ -38,12 +38,12 @@ v8::Handle<v8::Value> ScriptManager::ScriptLoadContainer(const v8::Arguments& ar
     v8::HandleScope handleScope;
     if(args.Length() < 2)
         return v8::ThrowException(v8::String::New("loadContainer(): To less arguments"));
-    if(scriptMatrix4.isCorrectInstance(args[0]) || args[1]->IsString())
+    if(!scriptMatrix4.isCorrectInstance(args[0]) || !args[1]->IsString())
         return v8::ThrowException(v8::String::New("loadContainer(): Invalid argument"));
     LevelLoader levelLoader;
     levelLoader.transformation = scriptMatrix4.getDataOfInstance(args[0])->getBTTransform();
     
-    if(!levelLoader.loadContainer(stdStringOf(args[1]->ToString())))
+    if(!levelLoader.loadContainer(stdStrOfV8(args[1]), false))
        return v8::Undefined();
     
     return levelLoader.getResultsArray();
@@ -53,8 +53,8 @@ v8::Handle<v8::Value> ScriptManager::ScriptSaveLevel(const v8::Arguments& args) 
     v8::HandleScope handleScope;
     if(args.Length() < 2)
         return v8::ThrowException(v8::String::New("saveLevel(): To less arguments"));
-    std::string localData = (args[0]->IsString()) ? stdStringOf(args[0]->ToString()) : "",
-                globalData = (args[1]->IsString()) ? stdStringOf(args[1]->ToString()) : "";
+    std::string localData = (args[0]->IsString()) ? stdStrOfV8(args[0]) : "",
+                globalData = (args[1]->IsString()) ? stdStrOfV8(args[1]) : "";
     return v8::Boolean::New(levelManager.saveLevel(localData, globalData));
 }
 
@@ -65,21 +65,11 @@ v8::Handle<v8::Value> ScriptManager::ScriptGetLevel(v8::Local<v8::String> proper
 void ScriptManager::ScriptSetLevel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
-    levelManager.loadLevel(stdStringOf(value->ToString()));
+    levelManager.loadLevel(levelManager.levelPackage->name, stdStrOfV8(value));
 }
 
 v8::Handle<v8::Value> ScriptManager::ScriptGetAnimationFactor(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     return v8::Number::New(profiler.animationFactor);
-}
-
-const char* ScriptManager::cStringOf(v8::Handle<v8::String> string) {
-    v8::String::Utf8Value value(string);
-    return *value ? *value : "<string conversion failed>";
-}
-
-std::string ScriptManager::stdStringOf(v8::Handle<v8::String> string) {
-    v8::String::Utf8Value value(string);
-    return std::string(*value ? *value : "<string conversion failed>");
 }
 
 v8::Handle<v8::Value> ScriptManager::readCdataXMLNode(rapidxml::xml_node<xmlUsedCharType>* node) {
@@ -128,6 +118,8 @@ ScriptManager::ScriptManager() {
     scriptGUIView.init(globalTemplate);
     scriptGUIFramedView.init(globalTemplate);
     scriptGUIScreenView.init(globalTemplate);
+    scriptGUIScrollView.init(globalTemplate);
+    scriptGUILabel.init(globalTemplate);
 }
 
 ScriptManager::~ScriptManager() {
@@ -179,10 +171,10 @@ bool ScriptManager::tryCatch(v8::TryCatch* tryCatch) {
         log(script_log, *v8::String::Utf8Value(tryCatch->StackTrace()));
     }else{
         std::ostringstream stream;
-        stream << stdStringOf(message->GetScriptResourceName()->ToString());
+        stream << stdStrOfV8(message->GetScriptResourceName());
         stream << ':' << message->GetLineNumber() << ": ";
-        stream << stdStringOf(tryCatch->Exception()->ToString()) << '\n';
-        stream << stdStringOf(message->GetSourceLine()) << '\n';
+        stream << stdStrOfV8(tryCatch->Exception()) << '\n';
+        stream << stdStrOfV8(message->GetSourceLine()) << '\n';
         int start = message->GetStartColumn(), end = message->GetEndColumn();
         for(int i = 0; i < start; i ++)
             stream << ' ';
@@ -190,7 +182,7 @@ bool ScriptManager::tryCatch(v8::TryCatch* tryCatch) {
             stream << '^';
         stream << '\n';
         if(!tryCatch->StackTrace().IsEmpty())
-            stream << stdStringOf(tryCatch->StackTrace()->ToString());
+            stream << stdStrOfV8(tryCatch->StackTrace());
         log(script_log, stream.str());
     }
     return false;

@@ -6,10 +6,10 @@
 //
 //
 
-#include "ScriptSimpleObject.h"
-
 #ifndef ScriptParticlesObject_h
 #define ScriptParticlesObject_h
+
+#include "ScriptSimpleObject.h"
 
 class ScriptParticlesObject : public ScriptPhysicObject {
     static v8::Handle<v8::Value> GetMaxParticles(v8::Local<v8::String> property, const v8::AccessorInfo& info);

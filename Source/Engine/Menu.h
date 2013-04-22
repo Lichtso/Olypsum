@@ -6,26 +6,18 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include <SDL/SDL.h>
-#include "LevelManager.h"
-#include "GUIScrollView.h"
-#include "GUICheckBox.h"
-#include "GUITabs.h"
-#include "GUIProgressBar.h"
-#include "GUISlider.h"
-#include "GUITextField.h"
-#include "GUIImage.h"
-
 #ifndef Menu_h
 #define Menu_h
 
-void openExternURL(const char* str);
+#include "LevelManager.h"
 
 class Menu {
     float mouseVelocityX = 0.0, mouseVelocityY = 0.0;
     public:
+    GUIScreenView* screenView;
     enum Name {
-        loading = 0,
+        none,
+        loading,
         main,
         options,
         videoResolution,
@@ -45,7 +37,7 @@ class Menu {
     float mouseX = 0.0, mouseY = 0.0;
     bool mouseFixed = true;
     
-    void setPause(bool active);
+    Menu();
     void consoleAdd(const std::string& message, float duration = 10.0);
     void handleActiveEvent(bool active);
     void handleMouseDown(SDL_Event& event);
@@ -55,6 +47,8 @@ class Menu {
     void handleKeyDown(SDL_Event& event);
     void handleKeyUp(SDL_Event& event);
     void gameTick();
+    void clear();
+    void setPause(bool active);
     void setMenu(Name menu);
 };
 

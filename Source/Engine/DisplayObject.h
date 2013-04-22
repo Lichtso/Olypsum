@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Model.h"
-
 #ifndef DisplayObject_h
 #define DisplayObject_h
+
+#include "Model.h"
 
 //! A PhysicObject which is visible on screen
 /*!
@@ -68,9 +68,9 @@ class ModelObject : public GraphicObject {
     bool gameTick();
     float integrity; //! Health <= 0.0: destroyed
     std::vector<float> textureAnimation; //!< Animation time for each mesh;
-    std::shared_ptr<Model> model;
+    FileResourcePtr<Model> model;
     //! Overwrites the model and cleans the textureAnimation
-    void setModel(std::shared_ptr<Model> model);
+    void setModel(FileResourcePtr<Model> model);
     //! Draws the entire model with all meshes
     void draw();
     //! Draws a single mesh

@@ -6,10 +6,10 @@
 //
 //
 
-#include "ScriptLightObject.h"
-
 #ifndef ScriptIntersection_h
 #define ScriptIntersection_h
+
+#include "ScriptLightObject.h"
 
 class ScriptIntersection : public ScriptClass {
     static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);

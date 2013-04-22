@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "TerrainObject.h"
+#include "Audio.h"
 
 #ifndef ParticlesObject_h
 #define ParticlesObject_h
@@ -41,7 +41,7 @@ class ParticlesObject : public DisplayObject {
           sizeMax, //!< The maximal size of a new particle in world units
           systemLife; //!< The life time of the entire system in seconds until it is deleted or -1.0 if it is infinite
     unsigned int maxParticles; //!< The maximal amount of simultaneously existing particles in the system
-    std::shared_ptr<Texture> texture; //!< The texture of the particles
+    FileResourcePtr<Texture> texture; //!< The texture of the particles
     /*! Constructs a new particle system
      @param maxParticles The maximal amount of simultaneously existing particles in the system
      */

@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUIButtonList.h"
-
 #ifndef GUITabs_h
 #define GUITabs_h
+
+#include "GUIButtonList.h"
 
 class GUITabs : public GUIButtonList {
     public:

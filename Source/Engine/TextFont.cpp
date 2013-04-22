@@ -8,9 +8,8 @@
 
 #include "TextFont.h"
 
-TextFont::TextFont() {
-    ttf = NULL;
-    size = 12;
+TextFont::TextFont() :ttf(NULL), size(prevOptionsState.videoWidth*0.04) {
+    
 }
 
 TextFont::~TextFont() {
@@ -18,20 +17,18 @@ TextFont::~TextFont() {
         TTF_CloseFont(ttf);
 }
 
-bool TextFont::loadTTF(const char* fileName) {
-    if(ttf) return false;
+FileResourcePtr<FileResource> TextFont::load(FilePackage* filePackageB, const std::string& name) {
+    auto pointer = FileResource::load(filePackageB, name);
+    if(ttf) return NULL;
     
-    std::string url("Fonts/");
-    url += fileName;
-    url += ".ttf";
-    
-    ttf = TTF_OpenFont(url.c_str(), size);
+    std::string filePath = filePackage->getPathOfFile("Fonts", name)+".ttf";
+    ttf = TTF_OpenFont(filePath.c_str(), size);
     if(ttf == NULL) {
-        log(error_log, std::string("Unable to load font ")+url.c_str()+".\n"+TTF_GetError());
+        log(error_log, std::string("Unable to load font ")+filePath.c_str()+".\n"+TTF_GetError());
         return false;
     }
     
-    return true;
+    return pointer;
 }
 
 GLuint TextFont::renderStringToTexture(const char* str, Color4 color, bool antialiasing, int& width, int& height) {
@@ -155,4 +152,6 @@ void TextFont::renderStringToScreen(const char* str, btVector3 pos, float scale,
     glDeleteTextures(1, &texture);
 }
 
-TextFont *mainFont, *italicFont;
+void TextFont::calculateTextSize(const char* text, int& width, int& height) {
+    TTF_SizeUTF8(ttf, text, &width, &height);
+}

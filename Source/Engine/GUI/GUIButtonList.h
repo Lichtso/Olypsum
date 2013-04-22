@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUIButton.h"
-
 #ifndef GUIButtonList_h
 #define GUIButtonList_h
+
+#include "GUICheckBox.h"
 
 class GUIButtonList : public GUIView {
     public:

@@ -6,14 +6,14 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUILabel.h"
+#include "Menu.h"
 
 GUILabel::GUILabel() {
-    font = mainFont;
+    font = fileManager.getPackage("Default")->getResource<TextFont>("font");
     color = Color4(0.0, 1.0);
-    textAlign = GUITextAlign_Middle;
-    sizeAlignment = GUISizeAlignment_All;
-    fontHeight = currentScreenView->height*0.04;
+    textAlignment = TextAlignment::Middle;
+    sizeAlignment = GUISizeAlignment::All;
+    fontHeight = menu.screenView->height*0.04;
     height = fontHeight >> 1;
 }
 
@@ -42,7 +42,7 @@ void GUILabel::addSegment(unsigned int& newWidth, unsigned int& newHeight, std::
 }
 
 void GUILabel::addLine(unsigned int& newWidth, unsigned int& newHeight, std::string text) {
-    if(sizeAlignment & GUISizeAlignment_Width)
+    if(sizeAlignment & GUISizeAlignment::Width)
         return addSegment(newWidth, newHeight, text);
     
     while(text.size() > 0) {
@@ -67,21 +67,21 @@ void GUILabel::updateContent() {
         }
     addLine(newWidth, newHeight, text.substr(prevPos, length-prevPos));
     
-    if(sizeAlignment & GUISizeAlignment_Width) width = newWidth;
-    if(sizeAlignment & GUISizeAlignment_Height) height = newHeight;
+    if(sizeAlignment & GUISizeAlignment::Width) width = newWidth;
+    if(sizeAlignment & GUISizeAlignment::Height) height = newHeight;
     
     GUILabelLine* line;
     unsigned int renderY = height-(fontHeight>>1);
     for(unsigned int i = 0; i < lines.size(); i ++) {
         line = &lines[i];
-        switch(textAlign) {
-            case GUITextAlign_Left:
+        switch(textAlignment) {
+            case TextAlignment::Left:
                 line->posX = line->content.width-width;
                 break;
-            case GUITextAlign_Middle:
+            case TextAlignment::Middle:
                 line->posX = 0;
                 break;
-            case GUITextAlign_Right:
+            case TextAlignment::Right:
                 line->posX = width-line->content.width;
                 break;
         }
@@ -120,14 +120,14 @@ bool GUILabel::handleMouseDown(int mouseX, int mouseY) {
 void GUILabel::getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int& posX, int& posY) {
     if(lineIndex >= lines.size()) {
         posY = 0;
-        switch(textAlign) {
-            case GUITextAlign_Left:
+        switch(textAlignment) {
+            case TextAlignment::Left:
                 posX = -width;
             return;
-            case GUITextAlign_Middle:
+            case TextAlignment::Middle:
                 posX = 0;
             return;
-            case GUITextAlign_Right:
+            case TextAlignment::Right:
                 posX = width;
             return;
         }
@@ -136,7 +136,7 @@ void GUILabel::getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int&
     posY = line->posY;
     std::string str = line->text.substr(0, charIndex);
     int height;
-    TTF_SizeUTF8(font->ttf, str.c_str(), &posX, &height);
+    font->calculateTextSize(str.c_str(), posX, height);
     posX = line->scale*posX+line->posX-line->content.width;
     return;
 }
@@ -145,7 +145,7 @@ unsigned int GUILabel::getCharCountThatFitsIn(unsigned int warpWidth, const std:
     int l = text.size()/2, w, h;
     for(unsigned int size = l; size >= 1; size >>= 1) {
         std::string segment = text.substr(0, l);
-        TTF_SizeUTF8(font->ttf, segment.c_str(), &w, &h);
+        font->calculateTextSize(segment.c_str(), w, h);
         if(0.5*fontHeight/h*w > warpWidth)
             l -= size;
         else

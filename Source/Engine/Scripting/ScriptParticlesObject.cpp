@@ -6,7 +6,7 @@
 //
 //
 
-#include "ScriptManager.h"
+#include "ScriptParticlesObject.h"
 
 v8::Handle<v8::Value> ScriptParticlesObject::GetMaxParticles(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
@@ -27,7 +27,7 @@ void ScriptParticlesObject::SetTexture(v8::Local<v8::String> property, v8::Local
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
-    auto texture = fileManager.initResource<Texture>(scriptManager->stdStringOf(value->ToString()));
+    auto texture = fileManager.initResource<Texture>(stdStrOfV8(value));
     if(texture) objectPtr->texture = texture;
 }
 

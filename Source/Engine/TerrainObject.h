@@ -6,10 +6,10 @@
 //
 //
 
-#include "DisplayObject.h"
-
 #ifndef HeightMap_h
 #define HeightMap_h
+
+#include "DisplayObject.h"
 
 //! A GraphicObject used to describe a Terrain
 /*!
@@ -23,7 +23,7 @@ class TerrainObject : public GraphicObject {
     //! Updates the OpenGL buffers with the data from heights
     public:
     btVector3 textureScale; //!< Used to scale the diffuse and specular texture in OpenGL
-    std::shared_ptr<Texture> diffuse, //!< The diffuse texture
+    FileResourcePtr<Texture> diffuse, //!< The diffuse texture
     effectMap; //!< The specular texture
     unsigned int width, length, bitDepth;
     float* heights;

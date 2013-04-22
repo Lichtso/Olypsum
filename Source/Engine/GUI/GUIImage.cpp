@@ -9,21 +9,21 @@
 #include "FileManager.h"
 #include "GUIImage.h"
 
-GUIImage::GUIImage() :sizeAlignment(GUISizeAlignment_All) {
+GUIImage::GUIImage() :sizeAlignment(GUISizeAlignment::All) {
     
 }
 
 void GUIImage::updateContent() {
     if(!texture) return;
     switch(sizeAlignment) {
-        case GUISizeAlignment_All:
+        case GUISizeAlignment::All:
             width = texture->width >> 1;
             height = texture->height >> 1;
         break;
-        case GUISizeAlignment_Width:
+        case GUISizeAlignment::Width:
             width = (float)texture->width/texture->height*height;
         break;
-        case GUISizeAlignment_Height:
+        case GUISizeAlignment::Height:
             height = (float)texture->height/texture->width*width;
         break;
         default:

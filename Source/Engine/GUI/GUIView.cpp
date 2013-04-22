@@ -264,5 +264,3 @@ void GUIScreenView::setModalView(GUIRect* modalViewB) {
     modalView->visible = true;
     modalView->updateContent();
 }
-
-GUIScreenView* currentScreenView = NULL;

@@ -36,7 +36,7 @@ void LevelLoader::pushObject(BaseObject* object) {
     objectLinkingIndex.push_back(object);
 }
 
-bool LevelLoader::loadContainer(std::string name) {
+bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
     v8::HandleScope handleScope;
     rapidxml::xml_document<xmlUsedCharType> doc;
     
@@ -64,7 +64,7 @@ bool LevelLoader::loadContainer(std::string name) {
     //Check for Level-node
     rapidxml::xml_node<xmlUsedCharType>* levelNode = containerNode->first_node("Level");
     if(levelNode) {
-        if(containerStack.size() > 1) {
+        if(!isLevelRoot) {
             log(error_log, "Found a \"Level\"-node in a child container.");
             return false;
         }
@@ -81,7 +81,7 @@ bool LevelLoader::loadContainer(std::string name) {
             vecData.readString(parameterNode->value(), "%f");
             objectManager.sceneAmbient = vecData.getVector3();
         }
-    }else if(containerStack.size() == 1) {
+    }else if(isLevelRoot) {
         log(error_log, "Root container does not contain a \"Level\"-node.");
         return false;
     }
@@ -97,7 +97,7 @@ bool LevelLoader::loadContainer(std::string name) {
         }
         btTransform parentTransform = transformation;
         transformation *= readTransformationXML(node);
-        if(!loadContainer(attribute->value())) return false;
+        if(!loadContainer(attribute->value(), false)) return false;
         transformation = parentTransform;
         node = node->next_sibling("Container");
     }
@@ -201,7 +201,10 @@ bool LevelLoader::loadContainer(std::string name) {
     return true;
 }
 
-bool LevelLoader::loadLevel(std::string levelId) {
+bool LevelLoader::loadLevel(const std::string& levelPackage, const std::string& levelId) {
+    objectManager.initGame(levelPackage);
+    levelManager.gameStatus = localGame;
+    
     //Load CollisionShapes
     rapidxml::xml_document<xmlUsedCharType> doc;
     std::unique_ptr<char[]> collisionShapesData = readXmlFile(doc, levelManager.levelPackage->path+'/'+"CollisionShapes.xml", false);
@@ -308,9 +311,7 @@ bool LevelLoader::loadLevel(std::string levelId) {
     }
     
     //Load root conatiner
-    levelManager.gameStatus = localGame;
-    objectManager.initGame();
-    if(!loadContainer(levelId)) {
+    if(!loadContainer(levelId, true)) {
         objectManager.clear();
         levelManager.gameStatus = noGame;
         return false;

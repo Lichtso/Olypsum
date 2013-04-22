@@ -79,7 +79,7 @@ void GUITextField::setFocus(bool active) {
 void GUITextField::updateContent() {
     content.width = width;
     content.height = height;
-    content.cornerRadius = currentScreenView->width*0.014;
+    content.cornerRadius = menu.screenView->width*0.014;
     content.borderColor = (highlighted) ? Color4(0.31, 0.51, 1.0) : Color4(0.51);
     content.drawInTexture();
     

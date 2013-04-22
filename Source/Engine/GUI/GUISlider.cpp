@@ -6,23 +6,22 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUIView.h"
-#include "GUISlider.h"
+#include "Menu.h"
 
-#define barHeight (currentScreenView->width*0.01)
-#define sliderRadius (currentScreenView->width*0.02)
+#define barHeight (menu.screenView->width*0.01)
+#define sliderRadius (menu.screenView->width*0.02)
 
 GUISlider::GUISlider() {
     mouseDragPos = -1;
     highlighted = false;
     value = 0.5;
     steps = 0;
-    orientation = GUIOrientation_Horizontal;
+    orientation = GUIOrientation::Horizontal;
     enabled = true;
 }
 
 void GUISlider::updateContent() {
-    if(orientation & GUIOrientation_Horizontal) {
+    if(orientation & GUIOrientation::Horizontal) {
         if(width < sliderRadius) width = sliderRadius;
         height = sliderRadius;
         barL.width = barR.width = width-sliderRadius+barHeight;
@@ -73,7 +72,7 @@ void GUISlider::updateContent() {
 }
 
 void GUISlider::drawBar(btVector3 transform, GUIClipRect clipRect, GUIRoundedRect& roundedRect) {
-    if(orientation & GUIOrientation_Horizontal) {
+    if(orientation & GUIOrientation::Horizontal) {
         int splitPos = width*(value*2.0-1.0);
         if(&roundedRect == &barL)
             clipRect.maxPosX = min(clipRect.maxPosX, splitPos);
@@ -99,8 +98,8 @@ void GUISlider::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     drawBar(transform, clipRect, barL);
     drawBar(transform, clipRect, barR);
     
-    int barLength = ((orientation & GUIOrientation_Horizontal) ? width : height)-sliderRadius;
-    if(orientation & GUIOrientation_Horizontal)
+    int barLength = ((orientation & GUIOrientation::Horizontal) ? width : height)-sliderRadius;
+    if(orientation & GUIOrientation::Horizontal)
         slider.drawOnScreen(transform, 2.0*barLength*value-width+sliderRadius, 0, clipRect);
     else
         slider.drawOnScreen(transform, 0, 2.0*barLength*value-height+sliderRadius, clipRect);
@@ -110,7 +109,7 @@ bool GUISlider::handleMouseDown(int mouseX, int mouseY) {
     if(!visible || !enabled) return false;
     highlighted = false;
     
-    if(orientation & GUIOrientation_Horizontal) {
+    if(orientation & GUIOrientation::Horizontal) {
         mouseX -= (width-sliderRadius)*(2.0*value-1.0);
         if(mouseX*mouseX + mouseY*mouseY > sliderRadius*sliderRadius) return false;
         mouseDragPos = mouseX;
@@ -157,7 +156,7 @@ void GUISlider::handleMouseMove(int mouseX, int mouseY) {
         return;
     }
     
-    if(orientation & GUIOrientation_Horizontal)
+    if(orientation & GUIOrientation::Horizontal)
         value = 0.5+0.5*(mouseX-mouseDragPos)/(width-sliderRadius);
     else
         value = 0.5+0.5*(mouseY-mouseDragPos)/(height-sliderRadius);

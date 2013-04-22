@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "CamObject.h"
+#include "ParticlesObject.h"
 
 #ifndef LightVolume_h
 #define LightVolume_h

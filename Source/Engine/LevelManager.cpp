@@ -14,32 +14,32 @@ LevelManager::LevelManager() {
 
 void LevelManager::showErrorModal(const std::string& error) {
     GUIFramedView* modalView = new GUIFramedView();
-    modalView->width = currentScreenView->width*0.4;
-    modalView->height = currentScreenView->height*0.4;
+    modalView->width = menu.screenView->width*0.4;
+    modalView->height = menu.screenView->height*0.4;
     GUILabel* label = new GUILabel();
     label->color = Color4(1, 0, 0);
     label->posY = modalView->height*0.65;
     label->text = localization.localizeString("error");
-    label->fontHeight = currentScreenView->height*0.14;
+    label->fontHeight = menu.screenView->height*0.14;
     modalView->addChild(label);
     label = new GUILabel();
     label->width = modalView->width*0.9;
     label->text = error;
-    label->fontHeight = currentScreenView->height*0.09;
+    label->fontHeight = menu.screenView->height*0.09;
     modalView->addChild(label);
     GUIButton* button = new GUIButton();
     button->posY = modalView->height*-0.7;
-    button->width = currentScreenView->width*0.14;
-    button->sizeAlignment = GUISizeAlignment_Height;
+    button->width = menu.screenView->width*0.14;
+    button->sizeAlignment = GUISizeAlignment::Height;
     modalView->addChild(button);
     label = new GUILabel();
     label->text = localization.localizeString("ok");
-    label->fontHeight = currentScreenView->height*0.1;
+    label->fontHeight = menu.screenView->height*0.1;
     button->addChild(label);
     button->onClick = [](GUIButton* button) {
-        currentScreenView->setModalView(NULL);
+        menu.screenView->setModalView(NULL);
     };
-    currentScreenView->setModalView(modalView);
+    menu.screenView->setModalView(modalView);
 }
 
 btCollisionShape* LevelManager::getCollisionShape(const std::string& name) {
@@ -68,16 +68,14 @@ void LevelManager::clear() {
         delete iterator.second;
     sharedCollisionShapes.clear();
     objectManager.clear();
-    fileManager.clear();
-    fileManager.getPackage("Default");
     menu.setMenu(Menu::Name::main);
 }
 
-bool LevelManager::loadLevel(const std::string& nextLevelId) {
+bool LevelManager::loadLevel(const std::string& levelPackage, const std::string& nextLevelId) {
     LevelLoader levelLoader;
-    if(levelLoader.loadLevel(nextLevelId))
+    if(levelLoader.loadLevel(levelPackage, nextLevelId))
         return true;
-    if(!currentScreenView->modalView)
+    if(!menu.screenView->modalView)
         showErrorModal(localization.localizeString("packageError_Corrupted"));
     return false;
 }
@@ -105,8 +103,8 @@ bool LevelManager::loadGame(const std::string& name) {
         return false;
     }
     saveGameName = name;
-    levelPackage = fileManager.getPackage(statusNode->first_node("Package")->first_attribute("value")->value());
-    loadLevel(statusNode->first_node("Level")->first_attribute("value")->value());
+    loadLevel(statusNode->first_node("Package")->first_attribute("value")->value(),
+              statusNode->first_node("Level")->first_attribute("value")->value());
     return true;
 }
 

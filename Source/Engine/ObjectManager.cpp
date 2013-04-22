@@ -37,7 +37,6 @@ ObjectManager::ObjectManager() {
 ObjectManager::~ObjectManager() {
     alcDestroyContext(soundContext);
     alcCloseDevice(soundDevice);
-    clear();
     
     delete broadphase;
     delete constraintSolver;
@@ -106,11 +105,13 @@ void ObjectManager::clear() {
     
     physicsWorld.reset();
     scriptManager.reset();
+    fileManager.clear();
     mainCam = NULL;
 }
 
-void ObjectManager::initGame() {
+void ObjectManager::initGame(const std::string& levelPackage) {
     clear();
+    levelManager.levelPackage = fileManager.getPackage(levelPackage);
     physicsWorld.reset(new btDiscreteDynamicsWorld(collisionDispatcher, broadphase, constraintSolver, collisionConfiguration));
     physicsWorld->setInternalTickCallback(calculatePhysicsTick);
     scriptManager.reset(new ScriptManager());

@@ -6,12 +6,13 @@
 //
 //
 
-#include "ScriptIO.h"
-
 #ifndef ScriptGUIRect_h
 #define ScriptGUIRect_h
 
+#include "ScriptIO.h"
+
 class ScriptGUIRect : public ScriptClass {
+    static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetPosX(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void SetPosX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetPosY(v8::Local<v8::String> property, const v8::AccessorInfo& info);
@@ -29,9 +30,36 @@ class ScriptGUIRect : public ScriptClass {
     static v8::Handle<v8::Value> MoveToParent(const v8::Arguments& args);
     static v8::Handle<v8::Value> UpdateContent(const v8::Arguments& args);
     protected:
-    static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
     ScriptGUIRect(const char* name, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args));
     public:
+    template<typename T> static v8::Handle<v8::Value> GetSizeAlignment(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+        v8::HandleScope handleScope;
+        T* objectPtr = getDataOfInstance<T>(info.This());
+        switch(objectPtr->sizeAlignment) {
+            case GUISizeAlignment::None:
+                return handleScope.Close(v8::String::New("none"));
+            case GUISizeAlignment::Width:
+                return handleScope.Close(v8::String::New("width"));
+            case GUISizeAlignment::Height:
+                return handleScope.Close(v8::String::New("height"));
+            case GUISizeAlignment::All:
+                return handleScope.Close(v8::String::New("all"));
+        }
+    }
+    template<typename T> static void SetSizeAlignment(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+        v8::HandleScope handleScope;
+        if(!value->IsString()) return;
+        T* objectPtr = getDataOfInstance<T>(info.This());
+        const char* str = cStrOfV8(value);
+        if(strcmp(str, "none") == 0)
+            objectPtr->sizeAlignment = GUISizeAlignment::None;
+        else if(strcmp(str, "width") == 0)
+            objectPtr->sizeAlignment = GUISizeAlignment::Width;
+        else if(strcmp(str, "height") == 0)
+            objectPtr->sizeAlignment = GUISizeAlignment::Height;
+        else if(strcmp(str, "all") == 0)
+            objectPtr->sizeAlignment = GUISizeAlignment::All;
+    }
     template<typename T> static T* getDataOfInstance(const v8::Local<v8::Value>& value) {
         v8::HandleScope handleScope;
         v8::Local<v8::Object> object = v8::Local<v8::Object>::Cast(value);

@@ -6,10 +6,10 @@
 //
 //
 
-#include "ObjectManager.h"
-
 #ifndef LevelLoader_h
 #define LevelLoader_h
+
+#include "GUIImage.h"
 
 class LevelLoader {
     unsigned int objectLinkingScope, objectLinkingOffset;
@@ -21,8 +21,8 @@ class LevelLoader {
     v8::Handle<v8::Array> getResultsArray();
     BaseObject* getObjectLinking(const char* id);
     void pushObject(BaseObject* object);
-    bool loadContainer(std::string name);
-    bool loadLevel(std::string levelId);
+    bool loadContainer(std::string name, bool isLevelRoot);
+    bool loadLevel(const std::string& levelPackage, const std::string& levelId);
 };
 
 #endif

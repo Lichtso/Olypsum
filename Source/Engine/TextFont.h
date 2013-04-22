@@ -6,21 +6,19 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include <SDL_ttf/SDL_ttf.h>
-#include "CamObject.h"
+#include "Localization.h"
 
 #ifndef TextFont_h
 #define TextFont_h
 
 //! Used to render text and strings
-class TextFont {
-    public:
+class TextFont : public FileResource {
     TTF_Font* ttf; //!< The TTF_Font
+    public:
     unsigned int size; //!< The font size in pixels
     TextFont();
     ~TextFont();
-    //! Loads a TTF font from a .ttf file
-    bool loadTTF(const char* fileName);
+    FileResourcePtr<FileResource> load(FilePackage* filePackageB, const std::string& name);
     /*! Renders a string into a OpenGL texture
      @param str The string to be rendered
      @param color The color of the string used for filling
@@ -47,8 +45,12 @@ class TextFont {
      @param antialiasing Enable edge smoothing
      */
     void renderStringToScreen(const char* str, btVector3 pos, float scale, Color4 color, bool antialiasing);
+    /*! Calculates the width and height of a text
+     @param text The text used to calculate the size
+     @param width The result width is stored here
+     @param height The result height is stored here
+     */
+    void calculateTextSize(const char* text, int& width, int& height);
 };
-
-extern TextFont *mainFont, *italicFont;
 
 #endif

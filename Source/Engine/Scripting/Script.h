@@ -6,10 +6,10 @@
 //
 //
 
-#include "Menu.h"
-
 #ifndef Script_h
 #define Script_h
+
+#include "Menu.h"
 
 class Script {
     protected:
@@ -40,5 +40,15 @@ class ScriptClass {
     bool isCorrectInstance(const v8::Local<v8::Value>& object);
     void init(const v8::Persistent<v8::ObjectTemplate>& globalTemplate);
 };
+
+static const char* cStrOfV8(v8::Handle<v8::Value> string) {
+    v8::String::Utf8Value value(string->ToString());
+    return *value ? *value : "<string conversion failed>";
+}
+
+static std::string stdStrOfV8(v8::Handle<v8::Value> string) {
+    v8::String::Utf8Value value(string->ToString());
+    return std::string(*value ? *value : "<string conversion failed>");
+}
 
 #endif

@@ -10,8 +10,14 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <fstream>
 #include <map>
 
+#include <OpenAL/al.h>
+#include <OpenAL/alc.h>
+#include <OpenGL/gl3.h>
+#include <SDL/SDL.h>
+#include <SDL_ttf/SDL_ttf.h>
 #include <BulletCollision/btBulletCollisionCommon.h>
 #include <BulletDynamics/btBulletDynamicsCommon.h>
 #include <BulletSoftBody/btSoftBody.h>

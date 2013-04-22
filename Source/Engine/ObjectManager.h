@@ -6,9 +6,6 @@
 //
 //
 
-#include "DisplayObject.h"
-#include "ParticlesObject.h"
-#include "Audio.h"
 #include "LightObject.h"
 
 #ifndef ObjectManager_h
@@ -18,7 +15,7 @@
 class Decal {
     public:
     btTransform transformation; //!< The world transformation of this decal
-    std::shared_ptr<Texture> diffuse, //!< A color texture
+    FileResourcePtr<Texture> diffuse, //!< A color texture
                              heightMap; //!< A height map
     float life; //!< The remaining life time in seconds
 };
@@ -51,8 +48,10 @@ class ObjectManager {
     void init();
     //! Deletes all Objects and the physics world
     void clear();
-    //! Initializes a new game
-    void initGame();
+    /*! Initializes a new game
+     @param levelPackage The name of the FilePackage to be used as levelPackage
+     */
+    void initGame(const std::string& levelPackage);
     //! Calculate a game tick
     void gameTick();
     //! Calculate the physics

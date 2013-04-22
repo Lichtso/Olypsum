@@ -130,7 +130,7 @@ void ScriptSoundObject::SetSoundTrack(v8::Local<v8::String> property, v8::Local<
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
-    auto soundTrack = fileManager.initResource<SoundTrack>(scriptManager->stdStringOf(value->ToString()));
+    auto soundTrack = fileManager.initResource<SoundTrack>(stdStrOfV8(value));
     if(soundTrack) objectPtr->setSoundTrack(soundTrack);
 }
 
@@ -190,7 +190,7 @@ void ScriptSoundObject::SetMode(v8::Local<v8::String> property, v8::Local<v8::Va
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
-    const char* str = scriptManager->cStringOf(value->ToString());
+    const char* str = cStrOfV8(value);
     if(strcmp(str, "looping") == 0)
         objectPtr->mode = SoundObject::Mode::Looping;
     else if(strcmp(str, "hold") == 0)
