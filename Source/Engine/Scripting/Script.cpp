@@ -72,6 +72,19 @@ ScriptClass::~ScriptClass() {
     functionTemplate.Dispose();
 }
 
+v8::Handle<v8::Value> ScriptClass::callFunction(v8::Handle<v8::Object> scriptInstance, const char* functionName, std::vector<v8::Handle<v8::Value>> args) {
+    if(scriptInstance.IsEmpty()) return v8::Undefined();
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast(scriptInstance->GetRealNamedProperty(v8::String::New(functionName)));
+    if(function.IsEmpty() || !function->IsFunction()) return v8::Undefined();
+    v8::TryCatch tryCatch;
+    v8::Handle<v8::Value> result = function->CallAsFunction(scriptInstance, args.size(), &args[0]);
+    if(scriptManager->tryCatch(&tryCatch))
+        return result;
+    else
+        return v8::Undefined();
+}
+
 bool ScriptClass::isCorrectInstance(const v8::Local<v8::Value>& object) {
     v8::HandleScope handleScope;
     if(!object->IsObject()) return false;

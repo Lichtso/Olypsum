@@ -17,9 +17,10 @@ GUIView::~GUIView() {
         delete children[i];
 }
 
-void GUIView::addChild(GUIRect* child) {
+bool GUIView::addChild(GUIRect* child) {
     child->parent = this;
     children.push_back(child);
+    return true;
 }
 
 int GUIView::getIndexOfChild(GUIRect* child) {
@@ -96,7 +97,7 @@ GUIFramedView::GUIFramedView() {
 void GUIFramedView::updateContent() {
     content.width = width;
     content.height = height;
-    content.drawInTexture();
+    content.updateContent();
     
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->updateContent();

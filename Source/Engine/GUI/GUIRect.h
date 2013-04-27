@@ -14,8 +14,8 @@
 enum GUIOrientation {
     Left = 1,
     Right = 2,
-    Top = 4,
-    Bottom = 8,
+    Bottom = 4,
+    Top = 8,
     Vertical = 3,
     Horizontal = 12
 };

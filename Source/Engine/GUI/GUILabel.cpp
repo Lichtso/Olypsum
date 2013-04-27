@@ -8,11 +8,8 @@
 
 #include "Menu.h"
 
-GUILabel::GUILabel() {
+GUILabel::GUILabel() :color(Color4(0.0, 1.0)), textAlignment(TextAlignment::Middle), sizeAlignment(GUISizeAlignment::All) {
     font = fileManager.getPackage("Default")->getResource<TextFont>("font");
-    color = Color4(0.0, 1.0);
-    textAlignment = TextAlignment::Middle;
-    sizeAlignment = GUISizeAlignment::All;
     fontHeight = menu.screenView->height*0.04;
     height = fontHeight >> 1;
 }
@@ -156,6 +153,10 @@ unsigned int GUILabel::getCharCountThatFitsIn(unsigned int warpWidth, const std:
     return l;
 }
 
+unsigned int GUILabel::getLength() {
+    return toUTF8Length(text.c_str(), text.length());
+}
+
 unsigned char getNextCharSize(const char* str) {
     if((*str & 0xC0) != 0xC0) return 1;
     unsigned char length = 1;
@@ -164,10 +165,18 @@ unsigned char getNextCharSize(const char* str) {
     return length;
 }
 
-unsigned int getUTF8Length(const char* str) {
+unsigned int toUTF8Length(const char* str, unsigned int until) {
     unsigned char byteIndex = 0, length = 0;
-    while(byteIndex < strlen(str))
+    while(byteIndex < until)
         if((str[byteIndex ++] & 0xC0) != 0x80)
             length ++;
     return length;
+}
+
+unsigned int fromUTF8Length(const char* str, unsigned int until) {
+    unsigned char byteIndex = 0, length = 0;
+    while(length < until)
+        if((str[byteIndex ++] & 0xC0) != 0x80)
+            length ++;
+    return byteIndex;
 }

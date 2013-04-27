@@ -11,27 +11,23 @@
 
 #include "GUILabel.h"
 
-enum GUIButtonState {
-    GUIButtonStateDisabled = 0,
-    GUIButtonStateNormal = 1,
-    GUIButtonStateHighlighted = 2,
-    GUIButtonStatePressed = 3
-};
-
-enum GUIButtonType {
-    GUIButtonTypeNormal = 0,
-    GUIButtonTypeDelete = 1,
-    GUIButtonTypeAdd = 2,
-    GUIButtonTypeEdit = 3,
-    GUIButtonTypeLockable = 4
-};
-
 class GUIButton : public GUIFramedView {
     public:
     GUISizeAlignment sizeAlignment;
-    int paddingX, paddingY;
-    GUIButtonType buttonType;
-    GUIButtonState state;
+    unsigned int paddingX, paddingY;
+    enum State {
+        Disabled = 0,
+        Enabled = 1,
+        Highlighted = 2,
+        Pressed = 3
+    } state;
+    enum Type {
+        Normal = 0,
+        Delete = 1,
+        Add = 2,
+        Edit = 3,
+        Lockable = 4
+    } type;
     std::function<void(GUIButton*)> onClick;
     GUIButton();
     void updateContent();

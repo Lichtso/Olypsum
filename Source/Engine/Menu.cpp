@@ -19,10 +19,10 @@ static void updateOptionBackButton(GUIButton* button) {
     if((optionsState.videoWidth != prevOptionsState.videoWidth ||
         optionsState.videoHeight != prevOptionsState.videoHeight ||
         optionsState.vSyncEnabled != prevOptionsState.vSyncEnabled)) {
-        button->buttonType = GUIButtonTypeDelete;
+        button->type = GUIButton::Type::Delete;
         static_cast<GUILabel*>(button->children[0])->text = localization.localizeString("restart");
     }else{
-        button->buttonType = GUIButtonTypeNormal;
+        button->type = GUIButton::Type::Normal;
         static_cast<GUILabel*>(button->children[0])->text = localization.localizeString("back");
     }
 }
@@ -175,6 +175,7 @@ void Menu::handleKeyUp(SDL_Event& event) {
     
     if(event.key.keysym.sym == SDLK_ESCAPE) {
         switch(current) {
+            case none:
             case loading:
             case main:
                 AppTerminate();
@@ -411,16 +412,16 @@ void Menu::setMenu(Name menu) {
             
             std::function<void(GUICheckBox*)> onClick[] = {
                 [](GUICheckBox* checkBox) {
-                    optionsState.cubemapsEnabled = (checkBox->state == GUIButtonStatePressed);
+                    optionsState.cubemapsEnabled = (checkBox->state == GUIButton::State::Pressed);
                     updateGraphicOptions();
                 }, [](GUICheckBox* checkBox) {
-                    optionsState.edgeSmoothEnabled = (checkBox->state == GUIButtonStatePressed);
+                    optionsState.edgeSmoothEnabled = (checkBox->state == GUIButton::State::Pressed);
                     updateGraphicOptions();
                 }, [](GUICheckBox* checkBox) {
-                    optionsState.screenBlurFactor = (checkBox->state == GUIButtonStatePressed) ? 0.0 : -1.0;
+                    optionsState.screenBlurFactor = (checkBox->state == GUIButton::State::Pressed) ? 0.0 : -1.0;
                     updateGraphicOptions();
                 }, [button](GUICheckBox* checkBox) {
-                    optionsState.vSyncEnabled = (checkBox->state == GUIButtonStatePressed);
+                    optionsState.vSyncEnabled = (checkBox->state == GUIButton::State::Pressed);
                     updateOptionBackButton(button);
                 }
             };
@@ -453,9 +454,9 @@ void Menu::setMenu(Name menu) {
                 checkBox->posY = label->posY;
                 checkBox->onClick = onClick[i];
                 if(i == 3 && levelManager.gameStatus != noGame)
-                    checkBox->state = GUIButtonStateDisabled;
+                    checkBox->state = GUIButton::State::Disabled;
                 else if(checkBoxActive[i])
-                    checkBox->state = GUIButtonStatePressed;
+                    checkBox->state = GUIButton::State::Pressed;
                 view->addChild(checkBox);
             }
             
@@ -466,7 +467,7 @@ void Menu::setMenu(Name menu) {
                 setMenu(videoResolution);
             };
             if(levelManager.gameStatus != noGame)
-                button->state = GUIButtonStateDisabled;
+                button->state = GUIButton::State::Disabled;
             view->addChild(button);
             label = new GUILabel();
             label->text = stringOf(optionsState.videoWidth)+" x "+stringOf(optionsState.videoHeight);
@@ -618,7 +619,7 @@ void Menu::setMenu(Name menu) {
             button->onClick = [](GUIButton* button) {
                 //setMenu(leapMotionMenu);
             };
-            button->state = GUIButtonStateDisabled;
+            button->state = GUIButton::State::Disabled;
             screenView->addChild(button);
             label = new GUILabel();
             label->text = localization.localizeString("leapMotion");
@@ -661,9 +662,9 @@ void Menu::setMenu(Name menu) {
             tabs->onChange = [](GUITabs* tabs) {
                 std::vector<Resolution> resolutions;
                 getAvailableResolutions(resolutions);
-                optionsState.videoWidth = resolutions[tabs->selectedIndex].width;
-                optionsState.videoHeight = resolutions[tabs->selectedIndex].height;
-                optionsState.videoScale = resolutions[tabs->selectedIndex].scale;
+                optionsState.videoWidth = resolutions[tabs->selected].width;
+                optionsState.videoHeight = resolutions[tabs->selected].height;
+                optionsState.videoScale = resolutions[tabs->selected].scale;
             };
             for(unsigned char i = 0; i < resolutions.size(); i ++) {
                 GUIButton* button = new GUIButton();
@@ -680,7 +681,7 @@ void Menu::setMenu(Name menu) {
                 if(resolutions[i].width == optionsState.videoWidth &&
                    resolutions[i].height == optionsState.videoHeight &&
                    resolutions[i].scale == optionsState.videoScale) {
-                    tabs->selectedIndex = i;
+                    tabs->selected = i;
                     tabs->updateContent();
                 }
             }
@@ -722,7 +723,7 @@ void Menu::setMenu(Name menu) {
                 std::vector<std::string> languages;
                 localization.getLocalizableLanguages(languages);
                 localization.strings.clear();
-                localization.selected = languages[tabs->selectedIndex];
+                localization.selected = languages[tabs->selected];
                 localization.loadLocalization(resourcesDir+"Packages/Default/Languages/"+localization.selected+".xml");
             };
             for(unsigned char i = 0; i < languages.size(); i ++) {
@@ -733,7 +734,7 @@ void Menu::setMenu(Name menu) {
                 button->addChild(label);
                 tabs->addChild(button);
                 if(languages[i] == localization.selected) {
-                    tabs->selectedIndex = i;
+                    tabs->selected = i;
                     tabs->updateContent();
                 }
             }
@@ -899,7 +900,7 @@ void Menu::setMenu(Name menu) {
                     button->posY = modalView->height*-0.7;
                     button->width = screenView->width*0.14;
                     button->sizeAlignment = GUISizeAlignment::Height;
-                    button->buttonType = GUIButtonTypeDelete;
+                    button->type = GUIButton::Type::Delete;
                     modalView->addChild(button);
                     label = new GUILabel();
                     label->text = localization.localizeString("ok");
@@ -987,7 +988,7 @@ void Menu::setMenu(Name menu) {
                 [this](GUIButton* button) {
                     setMenu(saveGames);
                 }, [files, buttonList, label](GUIButton* button) {
-                    levelManager.newGame(files[buttonList->selectedIndex], label->text);
+                    levelManager.newGame(files[buttonList->selected], label->text);
                 }
             };
             const char* buttonLabels[] = { "cancel", "ok" };
@@ -1004,12 +1005,12 @@ void Menu::setMenu(Name menu) {
                 button->addChild(label);
                 button->onClick = onClick[i];
             }
-            button->buttonType = GUIButtonTypeAdd;
-            button->state = GUIButtonStateDisabled;
+            button->type = GUIButton::Type::Add;
+            button->state = GUIButton::State::Disabled;
             textField->onChange = [button](GUITextField* textField) {
                 GUILabel* label = static_cast<GUILabel*>(textField->children[0]);
                 std::string path = gameDataDir+"Saves/"+label->text+'/';
-                button->state = (!checkDir(path) && getUTF8Length(label->text.c_str()) >= 3) ? GUIButtonStateNormal : GUIButtonStateDisabled;
+                button->state = (!checkDir(path) && label->getLength() >= 3) ? GUIButton::State::Enabled : GUIButton::State::Disabled;
                 button->updateContent();
             };
         } break;

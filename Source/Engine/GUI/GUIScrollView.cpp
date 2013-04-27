@@ -56,14 +56,14 @@ void GUIScrollView::updateContent() {
         sliderH.width = getBarWidth();
         sliderH.height = scrollBarWidth;
         sliderH.cornerRadius = scrollBarWidth;
-        sliderH.drawInTexture();
+        sliderH.updateContent();
     }
     
     if(contentHeight > height*2) {
         sliderV.width = scrollBarWidth;
         sliderV.height = getBarHeight();
         sliderV.cornerRadius = scrollBarWidth;
-        sliderV.drawInTexture();
+        sliderV.updateContent();
     }
 }
 

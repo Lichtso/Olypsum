@@ -8,13 +8,9 @@
 
 #include "Menu.h"
 
-GUIButton::GUIButton() {
-    onClick = NULL;
+GUIButton::GUIButton() :sizeAlignment(GUISizeAlignment::All), type(GUIButton::Type::Normal), state(GUIButton::State::Enabled) {
     paddingX = menu.screenView->width*0.012;
     paddingY = menu.screenView->width*0.006;
-    sizeAlignment = GUISizeAlignment::All;
-    buttonType = GUIButtonTypeNormal;
-    state = GUIButtonStateNormal;
 }
 
 void GUIButton::updateContent() {
@@ -28,33 +24,33 @@ void GUIButton::updateContent() {
         GUILabel* label = dynamic_cast<GUILabel*>(children[i]);
         if(label)
             switch(state) {
-                case GUIButtonStateDisabled:
+                case GUIButton::State::Disabled:
                     label->color = Color4(0.12);
                 break;
-                case GUIButtonStateNormal:
-                case GUIButtonStateHighlighted:
-                    switch(buttonType) {
-                        case GUIButtonTypeNormal:
-                        case GUIButtonTypeLockable:
+                case GUIButton::State::Enabled:
+                case GUIButton::State::Highlighted:
+                    switch(type) {
+                        case GUIButton::Type::Normal:
+                        case GUIButton::Type::Lockable:
                             label->color = Color4(0.24);
                         break;
-                        case GUIButtonTypeDelete:
-                        case GUIButtonTypeAdd:
-                        case GUIButtonTypeEdit:
+                        case GUIButton::Type::Delete:
+                        case GUIButton::Type::Add:
+                        case GUIButton::Type::Edit:
                             label->color = Color4(0.94);
                         break;
                     }
                     label->font = fileManager.getPackage("Default")->getResource<TextFont>("font");
                 break;
-                case GUIButtonStatePressed:
-                    switch(buttonType) {
-                        case GUIButtonTypeNormal:
+                case GUIButton::State::Pressed:
+                    switch(type) {
+                        case GUIButton::Type::Normal:
                             label->color = Color4(0.12, 0.43, 0.78);
                         break;
-                        case GUIButtonTypeDelete:
-                        case GUIButtonTypeAdd:
-                        case GUIButtonTypeEdit:
-                        case GUIButtonTypeLockable:
+                        case GUIButton::Type::Delete:
+                        case GUIButton::Type::Add:
+                        case GUIButton::Type::Edit:
+                        case GUIButton::Type::Lockable:
                             label->color = Color4(0.94);
                         break;
                     }
@@ -82,72 +78,72 @@ void GUIButton::updateContent() {
     content.width = width;
     content.height = height;
     content.cornerRadius = menu.screenView->width*0.014;
-    content.innerShadow = (state >= GUIButtonStatePressed) ? menu.screenView->width*0.01 : 0;
+    content.innerShadow = (state >= GUIButton::State::Pressed) ? menu.screenView->width*0.01 : 0;
     content.borderColor = Color4(0.5);
     
     switch(state) {
-        case GUIButtonStateDisabled:
+        case GUIButton::State::Disabled:
             content.topColor = Color4(0.78);
             content.bottomColor = Color4(0.4);
             break;
-        case GUIButtonStateNormal:
-            switch(buttonType) {
-                case GUIButtonTypeNormal:
-                case GUIButtonTypeLockable:
+        case GUIButton::State::Enabled:
+            switch(type) {
+                case GUIButton::Type::Normal:
+                case GUIButton::Type::Lockable:
                     content.topColor = Color4(0.94);
                     content.bottomColor = Color4(0.71);
                     break;
-                case GUIButtonTypeDelete:
+                case GUIButton::Type::Delete:
                     content.topColor = Color4(0.94, 0.63, 0.63);
                     content.bottomColor = Color4(0.55, 0.0, 0.0);
                     break;
-                case GUIButtonTypeAdd:
+                case GUIButton::Type::Add:
                     content.topColor = Color4(0.55, 0.94, 0.55);
                     content.bottomColor = Color4(0.0, 0.55, 0.0);
                     break;
-                case GUIButtonTypeEdit:
+                case GUIButton::Type::Edit:
                     content.topColor = Color4(0.55, 0.78, 0.94);
                     content.bottomColor = Color4(0.0, 0.24, 0.63);
                     break;
             }
             break;
-        case GUIButtonStateHighlighted:
-            switch(buttonType) {
-                case GUIButtonTypeNormal:
-                case GUIButtonTypeLockable:
+        case GUIButton::State::Highlighted:
+            switch(type) {
+                case GUIButton::Type::Normal:
+                case GUIButton::Type::Lockable:
                     content.topColor = Color4(0.98);
                     content.bottomColor = Color4(0.82);
                     break;
-                case GUIButtonTypeDelete:
+                case GUIButton::Type::Delete:
                     content.topColor = Color4(0.98, 0.75, 0.75);
                     content.bottomColor = Color4(0.59, 0.12, 0.12);
                     break;
-                case GUIButtonTypeAdd:
+                case GUIButton::Type::Add:
                     content.topColor = Color4(0.71, 0.98, 0.71);
                     content.bottomColor = Color4(0.12, 0.59, 0.12);
                     break;
-                case GUIButtonTypeEdit:
+                case GUIButton::Type::Edit:
                     content.topColor = Color4(0.63, 0.86, 0.94);
                     content.bottomColor = Color4(0.08, 0.31, 0.71);
                     break;
             }
             break;
-        case GUIButtonStatePressed:
-            switch(buttonType) {
-                case GUIButtonTypeNormal:
+        case GUIButton::State::Pressed:
+            switch(type) {
+                case GUIButton::Type::Normal:
                     content.topColor = Color4(0.7);
                     content.bottomColor = Color4(0.78);
                     break;
-                case GUIButtonTypeDelete:
+                case GUIButton::Type::Delete:
                     content.topColor = Color4(0.55, 0.0, 0.0);
                     content.bottomColor = Color4(0.94, 0.63, 0.63);
                     break;
-                case GUIButtonTypeAdd:
+                case GUIButton::Type::Add:
                     content.topColor = Color4(0.0, 0.55, 0.0);
                     content.bottomColor = Color4(0.55, 0.94, 0.55);
                     break;
-                case GUIButtonTypeEdit:
-                case GUIButtonTypeLockable:
+                case GUIButton::Type::Edit:
+                case GUIButton::Type::Lockable:
                     content.topColor = Color4(0.0, 0.24, 0.63);
                     content.bottomColor = Color4(0.55, 0.78, 0.94);
                     break;
@@ -155,7 +151,7 @@ void GUIButton::updateContent() {
             break;
     }
     
-    content.drawInTexture();
+    content.updateContent();
 }
 
 void GUIButton::draw(btVector3 transform, GUIClipRect& parentClipRect) {
@@ -172,21 +168,21 @@ void GUIButton::draw(btVector3 transform, GUIClipRect& parentClipRect) {
 }
 
 bool GUIButton::handleMouseDown(int mouseX, int mouseY) {
-    if(!visible || state == GUIButtonStateDisabled || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
-    state = GUIButtonStatePressed;
+    if(!visible || state == GUIButton::State::Disabled || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
+    state = GUIButton::State::Pressed;
     updateContent();
     return true;
 }
 
 bool GUIButton::handleMouseUp(int mouseX, int mouseY) {
-    if(!visible || state == GUIButtonStateDisabled) return false;
+    if(!visible || state == GUIButton::State::Disabled) return false;
     bool triggerEvent = false;
     if(mouseX < -width || mouseX > width || mouseY < -height || mouseY > height)
-        state = GUIButtonStateNormal;
+        state = GUIButton::State::Enabled;
     else{
-        if(state == GUIButtonStatePressed)
+        if(state == GUIButton::State::Pressed)
             triggerEvent = true;
-        state = GUIButtonStateHighlighted;
+        state = GUIButton::State::Highlighted;
     }
     updateContent();
     if(triggerEvent && onClick) {
@@ -197,13 +193,13 @@ bool GUIButton::handleMouseUp(int mouseX, int mouseY) {
 }
 
 void GUIButton::handleMouseMove(int mouseX, int mouseY) {
-    if(!visible || state == GUIButtonStateDisabled) return;
-    GUIButtonState prevState = state;
+    if(!visible || state == GUIButton::State::Disabled) return;
+    GUIButton::State prevState = state;
     if(mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) {
-        state = GUIButtonStateNormal;
-    }else if(state == GUIButtonStatePressed)
+        state = GUIButton::State::Enabled;
+    }else if(state == GUIButton::State::Pressed)
         return;
     else
-        state = GUIButtonStateHighlighted;
+        state = GUIButton::State::Highlighted;
     if(prevState != state) updateContent();
 }

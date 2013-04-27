@@ -16,7 +16,7 @@ class GUIView : public GUIRect {
     std::vector<GUIRect*> children;
     GUIView();
     ~GUIView();
-    virtual void addChild(GUIRect* child);
+    virtual bool addChild(GUIRect* child);
     int getIndexOfChild(GUIRect* child);
     //! Deletes the child at given index
     void deleteChild(unsigned int index);

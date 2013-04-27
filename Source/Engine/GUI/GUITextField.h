@@ -12,6 +12,7 @@
 #include "GUISlider.h"
 
 class GUITextField : public GUIFramedView {
+    GUIRoundedRect cursor;
     float cursorDrawTick;
     bool highlighted;
     void insertStr(const char* str);
@@ -19,16 +20,21 @@ class GUITextField : public GUIFramedView {
     void moveCursorLeft();
     void moveCursorRight();
     public:
-    int cursorIndexX;
+    unsigned int cursorX;
     bool enabled;
     std::function<void(GUITextField*)> onFocus, onChange, onBlur;
     GUITextField();
     void setFocus(bool active);
+    bool addChild(GUIRect* child);
     void updateContent();
     void draw(btVector3 transform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
     bool handleKeyDown(SDL_keysym* key);
+    //! Sets the offset of the cursorX in UTF8 characters
+    void setCursorX(unsigned int cursorX);
+    //! Returns the offset of the cursorX in UTF8 characters
+    unsigned int getCursorX();
 };
 
 #endif

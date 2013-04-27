@@ -1,4 +1,5 @@
-V8 API: Links, Animations, GUI
+V8 API: Links, Animations
+Test explosions, JS class identify
 Implement btSoftBody
 Implement btRayCastVehicle
 Animation File Format

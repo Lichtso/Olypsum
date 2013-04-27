@@ -38,7 +38,7 @@ class GUIRoundedRect : public GUIDrawableRect {
     unsigned int cornerRadius;
     GUIRoundedRect();
     ~GUIRoundedRect();
-    void drawInTexture();
+    void updateContent();
     void drawOnScreen(btVector3 parentTransform, int posX, int posY, GUIClipRect &parentClipRect);
 };
 

@@ -9,11 +9,13 @@
 #ifndef GUITabs_h
 #define GUITabs_h
 
-#include "GUIButtonList.h"
+#include "GUICheckBox.h"
 
-class GUITabs : public GUIButtonList {
+class GUITabs : public GUIView {
     public:
-    int selectedIndex;
+    GUISizeAlignment sizeAlignment;
+    GUIOrientation orientation;
+    int selected;
     bool deactivatable;
     std::function<void(GUITabs*)> onChange;
     GUITabs();

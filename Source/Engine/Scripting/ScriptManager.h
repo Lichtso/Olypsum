@@ -10,7 +10,7 @@
 #define ScriptManager_h
 #define MainScriptFileName "Main"
 
-#include "ScriptGUILabel.h"
+#include "ScriptGUIButton.h"
 
 class ScriptManager {
     static v8::Handle<v8::Value> ScriptLog(const v8::Arguments& args);

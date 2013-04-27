@@ -127,6 +127,16 @@ ScriptGUIRect::ScriptGUIRect(const char* name, v8::Handle<v8::Value>(constructor
     instanceTemplate->SetInternalFieldCount(1);
 }
 
+v8::Handle<v8::Value> ScriptGUIRect::initInstance(v8::Local<v8::Object> instance, GUIView* parent, GUIRect* child) {
+    if(!parent->addChild(child)) {
+        delete child;
+        return v8::ThrowException(v8::String::New("GUIView addChild(): Failed"));
+    }
+    child->scriptInstance = v8::Persistent<v8::Object>::New(instance);
+    instance->SetInternalField(0, v8::External::New(child));
+    return instance;
+}
+
 ScriptGUIRect::ScriptGUIRect() :ScriptGUIRect("GUIRect", Constructor) {
     v8::HandleScope handleScope;
     

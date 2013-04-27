@@ -4,11 +4,15 @@ exports.onload = function(localData, globalData) {
 
 /*exports.onleave = function() {
 	saveLevel(null, null);
-};*/
+};
 
-/*exports.onpause = function(paused) {
+exports.onpause = function(paused) {
 	if(!paused) {
 		var view = new GUIFramedView(GUIScreenView());
+		view.width = 200;
+		var input = new GUITextField(view);
+		input.text = "lol";
+		view.updateContent();
 	}
 };*/
 

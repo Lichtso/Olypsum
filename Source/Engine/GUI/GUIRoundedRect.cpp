@@ -16,13 +16,12 @@ void GUIDrawableRect::drawOnScreen(btVector3 parentTransform, int posX, int posY
     clipRect.maxPosY = min(parentClipRect.maxPosY, posY+height);
     if(clipRect.minPosX > clipRect.maxPosX || clipRect.minPosY > clipRect.maxPosY) return;
     
-    btTransform auxMat = btTransform::getIdentity();
+    modelMat.setIdentity();
     btVector3 halfSize(0.5*(clipRect.maxPosX-clipRect.minPosX), 0.5*(clipRect.maxPosY-clipRect.minPosY), 1.0);
-    auxMat.setBasis(auxMat.getBasis().scaled(halfSize));
-    auxMat.setOrigin(btVector3(halfSize.x()+clipRect.minPosX, halfSize.y()+clipRect.minPosY, 0)+parentTransform);
-    modelMat = auxMat;
+    modelMat.setBasis(modelMat.getBasis().scaled(halfSize));
+    modelMat.setOrigin(btVector3(halfSize.x()+clipRect.minPosX, halfSize.y()+clipRect.minPosY, 0)+parentTransform);
     
-    auxMat.setIdentity();
+    btTransform auxMat = btTransform::getIdentity();
     btVector3 minFactor(0.5+0.5*(clipRect.minPosX-posX)/width, 0.5-0.5*(clipRect.maxPosY-posY)/height, 0.0),
     maxFactor(0.5+0.5*(clipRect.maxPosX-posX)/width, 0.5-0.5*(clipRect.minPosY-posY)/height, 0.0);
     btVector3 halfCoords(0.5*(maxFactor.x()-minFactor.x()), -0.5*(maxFactor.y()-minFactor.y()), 1.0);
@@ -36,9 +35,7 @@ void GUIDrawableRect::drawOnScreen(btVector3 parentTransform, int posX, int posY
 
 
 
-GUIRoundedRect::GUIRoundedRect() {
-    texture = 0;
-    transposed = false;
+GUIRoundedRect::GUIRoundedRect() :texture(0), transposed(false) {
     roundedCorners = (GUICorner) (GUICorner::TopLeft | GUICorner::TopRight | GUICorner::BottomLeft | GUICorner::BottomRight);
     innerShadow = -menu.screenView->width*0.012;
     cornerRadius = menu.screenView->width*0.02;
@@ -98,7 +95,7 @@ void GUIRoundedRect::setInnerShadowPixel(unsigned char* pixels, unsigned int x, 
     }
 }
 
-void GUIRoundedRect::drawInTexture() {
+void GUIRoundedRect::updateContent() {
     unsigned char *pixel, *pixels = new unsigned char[width*height*16];
     
     for(unsigned int y = 0; y < height*2; y ++)
@@ -224,7 +221,7 @@ void GUIRoundedRect::drawInTexture() {
 }
 
 void GUIRoundedRect::drawOnScreen(btVector3 parentTransform, int posX, int posY, GUIClipRect &parentClipRect) {
-    if(!texture) drawInTexture();
+    if(!texture) updateContent();
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
     GUIDrawableRect::drawOnScreen(parentTransform, posX, posY, parentClipRect);

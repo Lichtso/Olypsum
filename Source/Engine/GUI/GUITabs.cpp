@@ -8,16 +8,15 @@
 
 #include "GUITabs.h"
 
-GUITabs::GUITabs() {
-    selectedIndex = -1;
-    deactivatable = true;
-    onChange = NULL;
+GUITabs::GUITabs() :orientation(GUIOrientation::Vertical), sizeAlignment(GUISizeAlignment::All), selected(-1), deactivatable(true) {
+    
 }
 
 void GUITabs::addChild(GUIButton* child) {
-    children.push_back(child);
-    child->parent = this;
-    if(!deactivatable && selectedIndex < 0) selectedIndex = 0;
+    if(!dynamic_cast<GUIButton*>(child)) return;
+    if(!deactivatable && selected < 0)
+        selected = 0;
+    GUIView::addChild(child);
     updateContent();
 }
 
@@ -29,7 +28,7 @@ void GUITabs::updateContent() {
     
     for(unsigned int i = 0; i < children.size(); i ++) {
         button = (GUIButton*)children[i];
-        button->buttonType = GUIButtonTypeLockable;
+        button->type = GUIButton::Type::Lockable;
         button->sizeAlignment = GUISizeAlignment::All;
         button->updateContent();
         if(orientation & GUIOrientation::Vertical) {
@@ -47,8 +46,8 @@ void GUITabs::updateContent() {
     int posCounter = 0;
     for(unsigned int i = 0; i < children.size(); i ++) {
         button = (GUIButton*)children[i];
-        if(button->state != GUIButtonStateDisabled)
-            button->state = (i == selectedIndex) ? GUIButtonStatePressed : GUIButtonStateNormal;
+        if(button->state != GUIButton::State::Disabled)
+            button->state = (i == selected) ? GUIButton::State::Pressed : GUIButton::State::Enabled;
         button->content.roundedCorners = (GUICorner) 0;
         
         if(orientation & GUIOrientation::Vertical) {
@@ -122,24 +121,25 @@ bool GUITabs::handleMouseDown(int mouseXo, int mouseYo) {
         button = (GUIButton*)children[i];
         mouseX = mouseXo-button->posX;
         mouseY = mouseYo-button->posY;
-        if(mouseX < -button->width || mouseX > button->width || mouseY < -button->height || mouseY > button->height || button->state == GUIButtonStateDisabled) continue;
+        if(mouseX < -button->width || mouseX > button->width || mouseY < -button->height
+           || mouseY > button->height || button->state == GUIButton::State::Disabled) continue;
         
-        if(selectedIndex != i) {
-            button->state = GUIButtonStatePressed;
-            selectedIndex = i;
+        if(selected != i) {
+            button->state = GUIButton::State::Pressed;
+            selected = i;
             if(button->onClick)
                 button->onClick(button);
             if(onChange)
                 onChange(this);
         }else if(deactivatable) {
-            button->state = GUIButtonStateHighlighted;
-            selectedIndex = -1;
+            button->state = GUIButton::State::Highlighted;
+            selected = -1;
         }else return false;
         
         for(unsigned int j = 0; j < children.size(); j ++) {
             button = (GUIButton*)children[j];
-            if(i != j && button->state != GUIButtonStateDisabled)
-                button->state = GUIButtonStateNormal;
+            if(i != j && button->state != GUIButton::State::Disabled)
+                button->state = GUIButton::State::Enabled;
             button->updateContent();
         }
         return true;
@@ -158,15 +158,15 @@ void GUITabs::handleMouseMove(int mouseXo, int mouseYo) {
     int mouseX, mouseY;
     for(int i = (int)children.size()-1; i >= 0; i --) {
         button = (GUIButton*) children[i];
-        if(button->state == GUIButtonStateDisabled || button->state == GUIButtonStatePressed) continue;
+        if(button->state == GUIButton::State::Disabled || button->state == GUIButton::State::Pressed) continue;
         mouseX = mouseXo-button->posX;
         mouseY = mouseYo-button->posY;
         
-        GUIButtonState prevState = button->state;
+        GUIButton::State prevState = button->state;
         if(mouseX < -button->width || mouseX > button->width || mouseY < -button->height || mouseY > button->height) {
-            button->state = GUIButtonStateNormal;
+            button->state = GUIButton::State::Enabled;
         }else
-            button->state = GUIButtonStateHighlighted;
+            button->state = GUIButton::State::Highlighted;
         if(prevState != button->state) button->updateContent();
     }
 }

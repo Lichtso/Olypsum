@@ -1,12 +1,12 @@
 //
-//  ScriptGUILabel.cpp
+//  ScriptGUIOutput.cpp
 //  Olypsum
 //
 //  Created by Alexander Meißner on 21.04.13.
 //
 //
 
-#include "ScriptGUILabel.h"
+#include "ScriptGUIOutput.h"
 
 v8::Handle<v8::Value> ScriptGUILabel::Constructor(const v8::Arguments &args) {
     v8::HandleScope handleScope;
@@ -15,10 +15,7 @@ v8::Handle<v8::Value> ScriptGUILabel::Constructor(const v8::Arguments &args) {
         return v8::ThrowException(v8::String::New("GUILabel Constructor: Invalid argument"));
     
     GUILabel* objectPtr = new GUILabel();
-    objectPtr->scriptInstance = v8::Persistent<v8::Object>::New(args.This());
-    args.This()->SetInternalField(0, v8::External::New(objectPtr));
-    getDataOfInstance<GUIView>(args[0])->addChild(objectPtr);
-    return args.This();
+    return initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr);
 }
 
 v8::Handle<v8::Value> ScriptGUILabel::GetTextAlignment(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
@@ -114,4 +111,82 @@ ScriptGUILabel::ScriptGUILabel() :ScriptGUIRect("GUILabel", Constructor) {
     functionTemplate->Inherit(scriptGUIRect.functionTemplate);
 }
 
+
+
+v8::Handle<v8::Value> ScriptGUIProgressBar::Constructor(const v8::Arguments &args) {
+    v8::HandleScope handleScope;
+    
+    if(args.Length() != 1 || !scriptGUIView.isCorrectInstance(args[0]))
+        return v8::ThrowException(v8::String::New("GUIProgressBar Constructor: Invalid argument"));
+    
+    GUIProgressBar* objectPtr = new GUIProgressBar();
+    return initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr);
+}
+
+v8::Handle<v8::Value> ScriptGUIProgressBar::GetValue(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    GUIProgressBar* objectPtr = getDataOfInstance<GUIProgressBar>(info.This());
+    return v8::Number::New(objectPtr->value);
+}
+
+void ScriptGUIProgressBar::SetValue(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->NumberValue()) return;
+    GUIProgressBar* objectPtr = getDataOfInstance<GUIProgressBar>(info.This());
+    objectPtr->value = clamp(value->NumberValue(), 0.0, 1.0);
+}
+
+ScriptGUIProgressBar::ScriptGUIProgressBar() :ScriptGUIRect("GUIProgressBar", Constructor) {
+    v8::HandleScope handleScope;
+    
+    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
+    objectTemplate->SetAccessor(v8::String::New("orientation"), GetOrientation<GUIProgressBar>, SetOrientationDual<GUIProgressBar>);
+    objectTemplate->SetAccessor(v8::String::New("value"), GetValue, SetValue);
+    
+    functionTemplate->Inherit(scriptGUIRect.functionTemplate);
+}
+
+
+
+v8::Handle<v8::Value> ScriptGUIImage::Constructor(const v8::Arguments &args) {
+    v8::HandleScope handleScope;
+    
+    if(args.Length() != 1 || !scriptGUIView.isCorrectInstance(args[0]))
+        return v8::ThrowException(v8::String::New("GUIImage Constructor: Invalid argument"));
+    
+    GUIImage* objectPtr = new GUIImage();
+    return initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr);
+}
+
+v8::Handle<v8::Value> ScriptGUIImage::GetImage(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    GUIImage* objectPtr = getDataOfInstance<GUIImage>(info.This());
+    std::string name;
+    FilePackage* filePackage = fileManager.findResource<Texture>(objectPtr->texture, name);
+    if(!filePackage) return v8::Undefined();
+    return handleScope.Close(v8::String::New(fileManager.getResourcePath(filePackage, name).c_str()));
+}
+
+void ScriptGUIImage::SetImage(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsString()) return;
+    GUIImage* objectPtr = getDataOfInstance<GUIImage>(info.This());
+    auto font = fileManager.initResource<Texture>(stdStrOfV8(value));
+    if(font) objectPtr->texture = font;
+}
+
+ScriptGUIImage::ScriptGUIImage() :ScriptGUIRect("GUIImage", Constructor) {
+    v8::HandleScope handleScope;
+    
+    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
+    objectTemplate->SetAccessor(v8::String::New("sizeAlignment"), GetSizeAlignment<GUIImage>, SetSizeAlignment<GUIImage>);
+    objectTemplate->SetAccessor(v8::String::New("image"), GetImage, SetImage);
+    
+    functionTemplate->Inherit(scriptGUIRect.functionTemplate);
+}
+
+
+
 ScriptGUILabel scriptGUILabel;
+ScriptGUIProgressBar scriptGUIProgressBar;
+ScriptGUIImage scriptGUIImage;

@@ -120,6 +120,13 @@ ScriptManager::ScriptManager() {
     scriptGUIScreenView.init(globalTemplate);
     scriptGUIScrollView.init(globalTemplate);
     scriptGUILabel.init(globalTemplate);
+    scriptGUIProgressBar.init(globalTemplate);
+    scriptGUIImage.init(globalTemplate);
+    scriptGUISlider.init(globalTemplate);
+    scriptGUITextField.init(globalTemplate);
+    scriptGUIButton.init(globalTemplate);
+    scriptGUICheckBox.init(globalTemplate);
+    scriptGUITabs.init(globalTemplate);
 }
 
 ScriptManager::~ScriptManager() {

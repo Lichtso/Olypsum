@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1102B34C172AEF3500D6913E /* ScriptGUIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1102B34A172AEF3500D6913E /* ScriptGUIButton.cpp */; };
 		1114B84616A88BD100B1CD41 /* BulletCollision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B84016A88BD100B1CD41 /* BulletCollision.framework */; };
 		1114B84716A88BD100B1CD41 /* BulletDynamics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B84116A88BD100B1CD41 /* BulletDynamics.framework */; };
 		1114B84816A88BD100B1CD41 /* BulletMultiThreaded.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B84216A88BD100B1CD41 /* BulletMultiThreaded.framework */; };
@@ -52,7 +53,7 @@
 		118620481650165400A32518 /* ObjectManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118620461650165400A32518 /* ObjectManager.cpp */; };
 		118B60621573E2E8004C132E /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118B60611573E2E8004C132E /* Audio.cpp */; };
 		1199EC331722D205006BD235 /* ScriptIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1199EC311722D204006BD235 /* ScriptIO.cpp */; };
-		1199EC361723D795006BD235 /* ScriptGUILabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1199EC341723D793006BD235 /* ScriptGUILabel.cpp */; };
+		1199EC361723D795006BD235 /* ScriptGUIOutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1199EC341723D793006BD235 /* ScriptGUIOutput.cpp */; };
 		11A3255517089E2100B038D2 /* Network.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A3255317089E2100B038D2 /* Network.cpp */; };
 		11A6811F16B96CFC000E4029 /* ScriptLinearAlgebra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A6811D16B96CFC000E4029 /* ScriptLinearAlgebra.cpp */; };
 		11A6812416B9B2B5000E4029 /* libv8.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A6812316B9B2B5000E4029 /* libv8.dylib */; };
@@ -61,7 +62,6 @@
 		11A79B6B153C2FE9002B9F0A /* CamObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B22153C2FE9002B9F0A /* CamObject.cpp */; };
 		11A79B6C153C2FE9002B9F0A /* FileManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B24153C2FE9002B9F0A /* FileManager.cpp */; };
 		11A79B6D153C2FE9002B9F0A /* GUIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B27153C2FE9002B9F0A /* GUIButton.cpp */; };
-		11A79B6E153C2FE9002B9F0A /* GUIButtonList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B29153C2FE9002B9F0A /* GUIButtonList.cpp */; };
 		11A79B6F153C2FE9002B9F0A /* GUICheckBox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B2B153C2FE9002B9F0A /* GUICheckBox.cpp */; };
 		11A79B70153C2FE9002B9F0A /* GUIClipRect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B2D153C2FE9002B9F0A /* GUIClipRect.cpp */; };
 		11A79B71153C2FE9002B9F0A /* GUIImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B2F153C2FE9002B9F0A /* GUIImage.cpp */; };
@@ -88,6 +88,7 @@
 		11B2626F15E28DF7002C638D /* DisplayObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11B2626D15E28DF6002C638D /* DisplayObject.cpp */; };
 		11BD39AD15414AA6007846B8 /* LightObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11BD39AC15414AA6007846B8 /* LightObject.cpp */; };
 		11C238D91613164C009D6F9C /* LevelManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11C238D71613164C009D6F9C /* LevelManager.cpp */; };
+		11D0C0F31727CE71004C30E9 /* ScriptGUIInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11D0C0F11727CE70004C30E9 /* ScriptGUIInput.cpp */; };
 		11D74B4716270A65000EEB50 /* Packages in Resources */ = {isa = PBXBuildFile; fileRef = 11D74B4416270A65000EEB50 /* Packages */; };
 		11D74B4816270A65000EEB50 /* Shaders in Resources */ = {isa = PBXBuildFile; fileRef = 11D74B4516270A65000EEB50 /* Shaders */; };
 		11D74B4F16296735000EEB50 /* LevelLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11D74B4D16296735000EEB50 /* LevelLoader.cpp */; };
@@ -124,6 +125,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1102B34A172AEF3500D6913E /* ScriptGUIButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptGUIButton.cpp; sourceTree = "<group>"; };
+		1102B34B172AEF3500D6913E /* ScriptGUIButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptGUIButton.h; sourceTree = "<group>"; };
 		1114B84016A88BD100B1CD41 /* BulletCollision.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletCollision.framework; path = /Library/Frameworks/BulletCollision.framework; sourceTree = "<absolute>"; };
 		1114B84116A88BD100B1CD41 /* BulletDynamics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletDynamics.framework; path = /Library/Frameworks/BulletDynamics.framework; sourceTree = "<absolute>"; };
 		1114B84216A88BD100B1CD41 /* BulletMultiThreaded.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletMultiThreaded.framework; path = /Library/Frameworks/BulletMultiThreaded.framework; sourceTree = "<absolute>"; };
@@ -180,8 +183,8 @@
 		118B60611573E2E8004C132E /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Audio.cpp; sourceTree = "<group>"; };
 		1199EC311722D204006BD235 /* ScriptIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptIO.cpp; sourceTree = "<group>"; };
 		1199EC321722D204006BD235 /* ScriptIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptIO.h; sourceTree = "<group>"; };
-		1199EC341723D793006BD235 /* ScriptGUILabel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptGUILabel.cpp; sourceTree = "<group>"; };
-		1199EC351723D794006BD235 /* ScriptGUILabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptGUILabel.h; sourceTree = "<group>"; };
+		1199EC341723D793006BD235 /* ScriptGUIOutput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptGUIOutput.cpp; sourceTree = "<group>"; };
+		1199EC351723D794006BD235 /* ScriptGUIOutput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptGUIOutput.h; sourceTree = "<group>"; };
 		11A3255317089E2100B038D2 /* Network.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Network.cpp; sourceTree = "<group>"; };
 		11A3255417089E2100B038D2 /* Network.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Network.h; sourceTree = "<group>"; };
 		11A6811D16B96CFC000E4029 /* ScriptLinearAlgebra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptLinearAlgebra.cpp; sourceTree = "<group>"; };
@@ -195,8 +198,6 @@
 		11A79B25153C2FE9002B9F0A /* FileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileManager.h; sourceTree = "<group>"; };
 		11A79B27153C2FE9002B9F0A /* GUIButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIButton.cpp; sourceTree = "<group>"; };
 		11A79B28153C2FE9002B9F0A /* GUIButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIButton.h; sourceTree = "<group>"; };
-		11A79B29153C2FE9002B9F0A /* GUIButtonList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIButtonList.cpp; sourceTree = "<group>"; };
-		11A79B2A153C2FE9002B9F0A /* GUIButtonList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIButtonList.h; sourceTree = "<group>"; };
 		11A79B2B153C2FE9002B9F0A /* GUICheckBox.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUICheckBox.cpp; sourceTree = "<group>"; };
 		11A79B2C153C2FE9002B9F0A /* GUICheckBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUICheckBox.h; sourceTree = "<group>"; };
 		11A79B2D153C2FE9002B9F0A /* GUIClipRect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIClipRect.cpp; sourceTree = "<group>"; };
@@ -252,6 +253,8 @@
 		11BD39AC15414AA6007846B8 /* LightObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LightObject.cpp; sourceTree = "<group>"; };
 		11C238D71613164C009D6F9C /* LevelManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelManager.cpp; sourceTree = "<group>"; };
 		11C238D81613164C009D6F9C /* LevelManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LevelManager.h; sourceTree = "<group>"; };
+		11D0C0F11727CE70004C30E9 /* ScriptGUIInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptGUIInput.cpp; sourceTree = "<group>"; };
+		11D0C0F21727CE71004C30E9 /* ScriptGUIInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptGUIInput.h; sourceTree = "<group>"; };
 		11D74B4416270A65000EEB50 /* Packages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Packages; sourceTree = "<group>"; };
 		11D74B4516270A65000EEB50 /* Shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Shaders; sourceTree = "<group>"; };
 		11D74B4D16296735000EEB50 /* LevelLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelLoader.cpp; sourceTree = "<group>"; };
@@ -446,8 +449,6 @@
 				11A79B27153C2FE9002B9F0A /* GUIButton.cpp */,
 				11A79B2C153C2FE9002B9F0A /* GUICheckBox.h */,
 				11A79B2B153C2FE9002B9F0A /* GUICheckBox.cpp */,
-				11A79B2A153C2FE9002B9F0A /* GUIButtonList.h */,
-				11A79B29153C2FE9002B9F0A /* GUIButtonList.cpp */,
 				11A79B3E153C2FE9002B9F0A /* GUITabs.h */,
 				11A79B3D153C2FE9002B9F0A /* GUITabs.cpp */,
 				11A79B34153C2FE9002B9F0A /* GUIProgressBar.h */,
@@ -519,8 +520,12 @@
 				11623855171DF1050027561B /* ScriptGUIRect.cpp */,
 				1178F6B617209036006EAE7D /* ScriptGUIView.h */,
 				1178F6B517209036006EAE7D /* ScriptGUIView.cpp */,
-				1199EC351723D794006BD235 /* ScriptGUILabel.h */,
-				1199EC341723D793006BD235 /* ScriptGUILabel.cpp */,
+				1199EC351723D794006BD235 /* ScriptGUIOutput.h */,
+				1199EC341723D793006BD235 /* ScriptGUIOutput.cpp */,
+				11D0C0F21727CE71004C30E9 /* ScriptGUIInput.h */,
+				11D0C0F11727CE70004C30E9 /* ScriptGUIInput.cpp */,
+				1102B34B172AEF3500D6913E /* ScriptGUIButton.h */,
+				1102B34A172AEF3500D6913E /* ScriptGUIButton.cpp */,
 				11FE8AB116B5A3F400B682D0 /* ScriptManager.h */,
 				11FE8AB016B5A3F400B682D0 /* ScriptManager.cpp */,
 			);
@@ -596,7 +601,6 @@
 				11A79B6B153C2FE9002B9F0A /* CamObject.cpp in Sources */,
 				11A79B6C153C2FE9002B9F0A /* FileManager.cpp in Sources */,
 				11A79B6D153C2FE9002B9F0A /* GUIButton.cpp in Sources */,
-				11A79B6E153C2FE9002B9F0A /* GUIButtonList.cpp in Sources */,
 				11A79B6F153C2FE9002B9F0A /* GUICheckBox.cpp in Sources */,
 				11A79B70153C2FE9002B9F0A /* GUIClipRect.cpp in Sources */,
 				11A79B71153C2FE9002B9F0A /* GUIImage.cpp in Sources */,
@@ -649,7 +653,9 @@
 				11623857171DF1050027561B /* ScriptGUIRect.cpp in Sources */,
 				1178F6B717209036006EAE7D /* ScriptGUIView.cpp in Sources */,
 				1199EC331722D205006BD235 /* ScriptIO.cpp in Sources */,
-				1199EC361723D795006BD235 /* ScriptGUILabel.cpp in Sources */,
+				1199EC361723D795006BD235 /* ScriptGUIOutput.cpp in Sources */,
+				11D0C0F31727CE71004C30E9 /* ScriptGUIInput.cpp in Sources */,
+				1102B34C172AEF3500D6913E /* ScriptGUIButton.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

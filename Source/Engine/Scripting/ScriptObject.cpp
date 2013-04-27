@@ -132,34 +132,34 @@ v8::Handle<v8::Value> ScriptPhysicObject::GetCollisionShapeInfo(const v8::Argume
             result->Set(v8::String::New("radius"), v8::Number::New(static_cast<btSphereShape*>(shape)->getRadius()));
         } break;
         case CAPSULE_SHAPE_PROXYTYPE: {
-            btCapsuleShape* shape = static_cast<btCapsuleShape*>(shape);
-            result->Set(v8::String::New("radius"), v8::Number::New(shape->getRadius()));
-            result->Set(v8::String::New("length"), v8::Number::New(shape->getHalfHeight()));
+            btCapsuleShape* capsuleShape = static_cast<btCapsuleShape*>(shape);
+            result->Set(v8::String::New("radius"), v8::Number::New(capsuleShape->getRadius()));
+            result->Set(v8::String::New("length"), v8::Number::New(capsuleShape->getHalfHeight()));
         } break;
         case CONE_SHAPE_PROXYTYPE: {
-            btConeShape* shape = static_cast<btConeShape*>(shape);
-            result->Set(v8::String::New("radius"), v8::Number::New(shape->getRadius()));
-            result->Set(v8::String::New("length"), v8::Number::New(shape->getHeight()));
+            btConeShape* coneShape = static_cast<btConeShape*>(shape);
+            result->Set(v8::String::New("radius"), v8::Number::New(coneShape->getRadius()));
+            result->Set(v8::String::New("length"), v8::Number::New(coneShape->getHeight()));
         } break;
         case MULTI_SPHERE_SHAPE_PROXYTYPE: {
-            btMultiSphereShape* shape = static_cast<btMultiSphereShape*>(shape);
-            v8::Handle<v8::Array> positions = v8::Array::New(shape->getSphereCount());
-            v8::Handle<v8::Array> radii = v8::Array::New(shape->getSphereCount());
-            for(unsigned int i = 0; i < shape->getSphereCount(); i ++) {
-                positions->Set(i, scriptVector3.newInstance(shape->getSpherePosition(i)));
-                radii->Set(i, v8::Number::New(shape->getSphereRadius(i)));
+            btMultiSphereShape* multiSphereShape = static_cast<btMultiSphereShape*>(shape);
+            v8::Handle<v8::Array> positions = v8::Array::New(multiSphereShape->getSphereCount());
+            v8::Handle<v8::Array> radii = v8::Array::New(multiSphereShape->getSphereCount());
+            for(unsigned int i = 0; i < multiSphereShape->getSphereCount(); i ++) {
+                positions->Set(i, scriptVector3.newInstance(multiSphereShape->getSpherePosition(i)));
+                radii->Set(i, v8::Number::New(multiSphereShape->getSphereRadius(i)));
             }
             result->Set(v8::String::New("positions"), positions);
             result->Set(v8::String::New("radii"), radii);
         } break;
         case COMPOUND_SHAPE_PROXYTYPE: {
-            btCompoundShape* shape = static_cast<btCompoundShape*>(shape);
+            btCompoundShape* compoundShape = static_cast<btCompoundShape*>(shape);
             
-            v8::Handle<v8::Array> transformations = v8::Array::New(shape->getNumChildShapes());
-            v8::Handle<v8::Array> children = v8::Array::New(shape->getNumChildShapes());
-            for(unsigned int i = 0; i < shape->getNumChildShapes(); i ++) {
-                transformations->Set(i, scriptMatrix4.newInstance(shape->getChildTransform(i)));
-                std::string buffer = levelManager.getCollisionShapeName(shape->getChildShape(i));
+            v8::Handle<v8::Array> transformations = v8::Array::New(compoundShape->getNumChildShapes());
+            v8::Handle<v8::Array> children = v8::Array::New(compoundShape->getNumChildShapes());
+            for(unsigned int i = 0; i < compoundShape->getNumChildShapes(); i ++) {
+                transformations->Set(i, scriptMatrix4.newInstance(compoundShape->getChildTransform(i)));
+                std::string buffer = levelManager.getCollisionShapeName(compoundShape->getChildShape(i));
                 if(buffer.size())
                     children->Set(i, v8::String::New(buffer.c_str()));
             }
@@ -167,16 +167,16 @@ v8::Handle<v8::Value> ScriptPhysicObject::GetCollisionShapeInfo(const v8::Argume
             result->Set(v8::String::New("children"), children);
         } break;
         case CONVEX_HULL_SHAPE_PROXYTYPE: {
-            btConvexHullShape* shape = static_cast<btConvexHullShape*>(shape);
-            v8::Handle<v8::Array> points = v8::Array::New(shape->getNumPoints());
-            for(unsigned int i = 0; i < shape->getNumPoints(); i ++)
-                points->Set(i, scriptVector3.newInstance(shape->getUnscaledPoints()[i]));
+            btConvexHullShape* convexHullShape = static_cast<btConvexHullShape*>(shape);
+            v8::Handle<v8::Array> points = v8::Array::New(convexHullShape->getNumPoints());
+            for(unsigned int i = 0; i < convexHullShape->getNumPoints(); i ++)
+                points->Set(i, scriptVector3.newInstance(convexHullShape->getUnscaledPoints()[i]));
             result->Set(v8::String::New("points"), points);
         } break;
         case STATIC_PLANE_PROXYTYPE: {
-            btStaticPlaneShape* shape = static_cast<btStaticPlaneShape*>(shape);
-            result->Set(v8::String::New("normal"), scriptVector3.newInstance(shape->getPlaneNormal()));
-            result->Set(v8::String::New("distance"), v8::Number::New(shape->getPlaneConstant()));
+            btStaticPlaneShape* staticPlaneShape = static_cast<btStaticPlaneShape*>(shape);
+            result->Set(v8::String::New("normal"), scriptVector3.newInstance(staticPlaneShape->getPlaneNormal()));
+            result->Set(v8::String::New("distance"), v8::Number::New(staticPlaneShape->getPlaneConstant()));
         } break;
     }
     return handleScope.Close(result);

@@ -60,12 +60,59 @@ class ScriptGUIRect : public ScriptClass {
         else if(strcmp(str, "all") == 0)
             objectPtr->sizeAlignment = GUISizeAlignment::All;
     }
+    template<typename T> static v8::Handle<v8::Value> GetOrientation(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+        v8::HandleScope handleScope;
+        T* objectPtr = getDataOfInstance<T>(info.This());
+        switch(objectPtr->orientation) {
+            case GUIOrientation::Left:
+                return handleScope.Close(v8::String::New("left"));
+            case GUIOrientation::Right:
+                return handleScope.Close(v8::String::New("right"));
+            case GUIOrientation::Bottom:
+                return handleScope.Close(v8::String::New("bottom"));
+            case GUIOrientation::Top:
+                return handleScope.Close(v8::String::New("top"));
+            case GUIOrientation::Vertical:
+                return handleScope.Close(v8::String::New("vertical"));
+            case GUIOrientation::Horizontal:
+                return handleScope.Close(v8::String::New("horizontal"));
+        }
+    }
+    template<typename T> static void SetOrientation(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+        v8::HandleScope handleScope;
+        if(!value->IsString()) return;
+        T* objectPtr = getDataOfInstance<T>(info.This());
+        const char* str = cStrOfV8(value);
+        if(strcmp(str, "left") == 0)
+            objectPtr->orientation = GUIOrientation::Left;
+        else if(strcmp(str, "right") == 0)
+            objectPtr->orientation = GUIOrientation::Right;
+        else if(strcmp(str, "bottom") == 0)
+            objectPtr->orientation = GUIOrientation::Bottom;
+        else if(strcmp(str, "top") == 0)
+            objectPtr->orientation = GUIOrientation::Top;
+        else if(strcmp(str, "vertical") == 0)
+            objectPtr->orientation = GUIOrientation::Vertical;
+        else if(strcmp(str, "horizontal") == 0)
+            objectPtr->orientation = GUIOrientation::Horizontal;
+    }
+    template<typename T> static void SetOrientationDual(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+        v8::HandleScope handleScope;
+        if(!value->IsString()) return;
+        T* objectPtr = getDataOfInstance<T>(info.This());
+        const char* str = cStrOfV8(value);
+        if(strcmp(str, "vertical") == 0)
+            objectPtr->orientation = GUIOrientation::Vertical;
+        else if(strcmp(str, "horizontal") == 0)
+            objectPtr->orientation = GUIOrientation::Horizontal;
+    }
     template<typename T> static T* getDataOfInstance(const v8::Local<v8::Value>& value) {
         v8::HandleScope handleScope;
         v8::Local<v8::Object> object = v8::Local<v8::Object>::Cast(value);
         v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(object->GetInternalField(0));
         return static_cast<T*>(wrap->Value());
     }
+    static v8::Handle<v8::Value> initInstance(v8::Local<v8::Object> instance, GUIView* parent, GUIRect* child);
     ScriptGUIRect();
 };
 

@@ -10,55 +10,49 @@
 #include "LevelManager.h"
 #include "AppMain.h"
 
-GUITextField::GUITextField() {
-    highlighted = false;
-    enabled = true;
-    cursorDrawTick = 0.0;
-    cursorIndexX = -1;
+GUITextField::GUITextField() :highlighted(false), enabled(true), cursorX(0), cursorDrawTick(0.0) {
+    content.innerShadow = 0;
     GUILabel* label = new GUILabel();
-    addChild(label);
+    GUIFramedView::addChild(label);
     label->width = 0;
     height = (float)label->fontHeight/1.2;
-    GUIFramedView* cursor = new GUIFramedView();
-    addChild(cursor);
-    cursor->width = 1;
-    cursor->visible = false;
-    cursor->content.borderColor = Color4(0.0);
-    cursor->content.cornerRadius = cursor->content.innerShadow = content.innerShadow = 0;
+    cursor.width = 1;
+    cursor.borderColor = Color4(0.0);
+    cursor.cornerRadius = cursor.innerShadow = 0;
 }
 
 void GUITextField::insertStr(const char* str) {
     cursorDrawTick = 0.0;
     GUILabel* label = static_cast<GUILabel*>(children[0]);
-    label->text = label->text.substr(0, cursorIndexX)+str+label->text.substr(cursorIndexX);
+    label->text = label->text.substr(0, cursorX)+str+label->text.substr(cursorX);
     label->updateContent();
-    cursorIndexX += strlen(str);
+    cursorX += strlen(str);
     if(onChange) onChange(this);
 }
 
 void GUITextField::removeChar() {
-    if(cursorIndexX == 0) return;
+    if(cursorX == 0) return;
     moveCursorLeft();
     GUILabel* label = static_cast<GUILabel*>(children[0]);
-    unsigned char len = getNextCharSize(&label->text[cursorIndexX]);
-    label->text = label->text.substr(0, cursorIndexX)+label->text.substr(cursorIndexX+len);
+    unsigned char len = getNextCharSize(&label->text[cursorX]);
+    label->text = label->text.substr(0, cursorX)+label->text.substr(cursorX+len);
     label->updateContent();
     if(onChange) onChange(this);
 }
 
 void GUITextField::moveCursorLeft() {
-    if(cursorIndexX == 0) return;
+    if(cursorX == 0) return;
     GUILabel* label = static_cast<GUILabel*>(children[0]);
-    while(label->text[-- cursorIndexX] >> 7)
-        if((label->text[cursorIndexX] & 0xC0) == 0xC0)
+    while(label->text[-- cursorX] >> 7)
+        if((label->text[cursorX] & 0xC0) == 0xC0)
             break;
     cursorDrawTick = 0.0;
 }
 
 void GUITextField::moveCursorRight() {
     GUILabel* label = static_cast<GUILabel*>(children[0]);
-    if(cursorIndexX == label->text.size()) return;
-    cursorIndexX += getNextCharSize(&label->text[cursorIndexX]);
+    if(cursorX == label->text.size()) return;
+    cursorX += getNextCharSize(&label->text[cursorX]);
     cursorDrawTick = 0.0;
 }
 
@@ -66,14 +60,18 @@ void GUITextField::setFocus(bool active) {
     GUIRect::setFocus(active);
     if(active) {
         cursorDrawTick = 0.0;
-        cursorIndexX = 0;
+        cursorX = 0;
         if(onFocus) onFocus(this);
     }else{
-        cursorIndexX = -1;
+        cursorX = -1;
         updateContent();
         if(onBlur) onBlur(this);
     }
     updateContent();
+}
+
+bool GUITextField::addChild(GUIRect* child) {
+    return false;
 }
 
 void GUITextField::updateContent() {
@@ -81,16 +79,15 @@ void GUITextField::updateContent() {
     content.height = height;
     content.cornerRadius = menu.screenView->width*0.014;
     content.borderColor = (highlighted) ? Color4(0.31, 0.51, 1.0) : Color4(0.51);
-    content.drawInTexture();
+    content.updateContent();
     
     GUILabel* label = static_cast<GUILabel*>(children[0]);
-    GUIFramedView* cursor = static_cast<GUIFramedView*>(children[1]);
     label->fontHeight = 1.2*height;
-    cursor->height = label->fontHeight >> 1;
-    cursor->updateContent();
+    cursor.height = label->fontHeight >> 1;
+    cursor.updateContent();
 }
 
-#define GUITextField_CursorDist 8
+#define GUITextField_Padding 8
 
 void GUITextField::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     if(!visible) return;
@@ -102,10 +99,9 @@ void GUITextField::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     modelMat.setOrigin(transform);
     
     content.drawOnScreen(transform, 0, 0, clipRect);
-    if(!clipRect.getLimSize(posX, posY, width-GUITextField_CursorDist+1, height, parentClipRect)) return;
+    if(!clipRect.getLimSize(posX, posY, width-GUITextField_Padding+1, height, parentClipRect)) return;
     
     GUILabel* label = static_cast<GUILabel*>(children[0]);
-    GUIFramedView* cursor = static_cast<GUIFramedView*>(children[1]);
     int cursorPosX, cursorPosY;
     bool cursorActive = getFocus();
     if(cursorActive) {
@@ -120,16 +116,18 @@ void GUITextField::draw(btVector3 transform, GUIClipRect& parentClipRect) {
         
         cursorDrawTick += profiler.animationFactor;
         if(cursorDrawTick > 0.5) cursorDrawTick = 0.0;
-        cursorIndexX = clamp(cursorIndexX, 0, (int)label->text.size());
-        label->getPosOfChar(cursorIndexX, 0, cursorPosX, cursorPosY);
-        label->posX = -max(width-label->width-GUITextField_CursorDist, cursorPosX-width+GUITextField_CursorDist);
-        cursor->posX = label->posX+cursorPosX;
-        cursor->visible = (cursorDrawTick <= 0.25);
-    }else
-        label->posX = label->width-width+GUITextField_CursorDist;
-    
-    label->draw(transform, clipRect);
-    cursor->draw(transform, clipRect);
+        cursorX = clamp(cursorX, 0U, (unsigned int)label->text.size());
+        
+        label->getPosOfChar(cursorX, 0, cursorPosX, cursorPosY);
+        label->posX = -max(width-label->width-GUITextField_Padding, cursorPosX-width+GUITextField_Padding);
+        label->draw(transform, clipRect);
+        
+        if(cursorDrawTick <= 0.25)
+            cursor.drawOnScreen(transform, cursorPosX+label->posX, 0, clipRect);
+    }else{
+        label->posX = label->width-width+GUITextField_Padding;
+        label->draw(transform, clipRect);
+    }
 }
 
 bool GUITextField::handleMouseDown(int mouseX, int mouseY) {
@@ -143,15 +141,15 @@ bool GUITextField::handleMouseDown(int mouseX, int mouseY) {
     GUILabel* label = static_cast<GUILabel*>(children[0]);
     mouseX -= label->posX;
     label->getPosOfChar(0, 0, cursorPosXa, cursorPosY);
-    for(cursorIndexX = 0; cursorIndexX < label->text.size(); cursorPosXa = cursorPosXb) {
-        unsigned int len = getNextCharSize(&label->text[cursorIndexX]);
-        label->getPosOfChar(cursorIndexX+len, 0, cursorPosXb, cursorPosY);
+    for(cursorX = 0; cursorX < label->text.size(); cursorPosXa = cursorPosXb) {
+        unsigned int len = getNextCharSize(&label->text[cursorX]);
+        label->getPosOfChar(cursorX+len, 0, cursorPosXb, cursorPosY);
         if(cursorPosXa-mouseX <= 0 && cursorPosXb-mouseX >= 0) {
             if(mouseX-cursorPosXa > cursorPosXb-mouseX)
-                cursorIndexX += len;
+                cursorX += len;
             break;
         }
-        cursorIndexX += len;
+        cursorX += len;
     }
     
     updateContent();
@@ -190,11 +188,11 @@ bool GUITextField::handleKeyDown(SDL_keysym* key) {
             setFocus(false);
         break;
         case SDLK_UP:
-            cursorIndexX = 0;
+            cursorX = 0;
             cursorDrawTick = 0.0;
         break;
         case SDLK_DOWN:
-            cursorIndexX = static_cast<GUILabel*>(children[0])->text.size();
+            cursorX = static_cast<GUILabel*>(children[0])->text.size();
             cursorDrawTick = 0.0;
         break;
         case SDLK_BACKSPACE:
@@ -220,4 +218,14 @@ bool GUITextField::handleKeyDown(SDL_keysym* key) {
         } break;
     }
     return true;
+}
+
+void GUITextField::setCursorX(unsigned int newCursorX) {
+    GUILabel* label = static_cast<GUILabel*>(children[0]);
+    cursorX = fromUTF8Length(label->text.c_str(), min(newCursorX, (unsigned int)label->text.length()));
+}
+
+unsigned int GUITextField::getCursorX() {
+    GUILabel* label = static_cast<GUILabel*>(children[0]);
+    return toUTF8Length(label->text.c_str(), cursorX);
 }

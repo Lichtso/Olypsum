@@ -8,9 +8,7 @@
 
 #include "Menu.h"
 
-GUIProgressBar::GUIProgressBar() {
-    value = 0.5;
-    orientation = GUIOrientation::Horizontal;
+GUIProgressBar::GUIProgressBar() :value(0.5), orientation(GUIOrientation::Horizontal) {
     width = menu.screenView->width*0.2;
     height = menu.screenView->width*0.01;
 }
@@ -33,8 +31,8 @@ void GUIProgressBar::updateContent() {
     barR.topColor = Color4(0.71);
     barR.bottomColor = Color4(1.0);
     
-    barL.drawInTexture();
-    barR.drawInTexture();
+    barL.updateContent();
+    barR.updateContent();
 }
 
 void GUIProgressBar::drawBar(btVector3 transform, GUIClipRect clipRect, GUIRoundedRect& roundedRect) {

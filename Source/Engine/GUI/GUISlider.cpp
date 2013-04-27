@@ -11,13 +11,8 @@
 #define barHeight (menu.screenView->width*0.01)
 #define sliderRadius (menu.screenView->width*0.02)
 
-GUISlider::GUISlider() {
-    mouseDragPos = -1;
-    highlighted = false;
-    value = 0.5;
-    steps = 0;
-    orientation = GUIOrientation::Horizontal;
-    enabled = true;
+GUISlider::GUISlider() :mouseDragPos(-1), enabled(true), highlighted(false), value(0.5), steps(0), orientation(GUIOrientation::Horizontal) {
+    
 }
 
 void GUISlider::updateContent() {
@@ -48,8 +43,8 @@ void GUISlider::updateContent() {
         barR.topColor = Color4(0.47);
         barR.bottomColor = Color4(0.71);
     }
-    barL.drawInTexture();
-    barR.drawInTexture();
+    barL.updateContent();
+    barR.updateContent();
     
     slider.width = sliderRadius;
     slider.height = sliderRadius;
@@ -68,7 +63,7 @@ void GUISlider::updateContent() {
         slider.topColor = Color4(0.59);
         slider.bottomColor = Color4(0.43);
     }
-    slider.drawInTexture();
+    slider.updateContent();
 }
 
 void GUISlider::drawBar(btVector3 transform, GUIClipRect clipRect, GUIRoundedRect& roundedRect) {

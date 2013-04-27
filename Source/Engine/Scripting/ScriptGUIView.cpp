@@ -15,10 +15,7 @@ v8::Handle<v8::Value> ScriptGUIView::Constructor(const v8::Arguments &args) {
         return v8::ThrowException(v8::String::New("GUIView Constructor: Invalid argument"));
     
     GUIView* objectPtr = new GUIView();
-    objectPtr->scriptInstance = v8::Persistent<v8::Object>::New(args.This());
-    args.This()->SetInternalField(0, v8::External::New(objectPtr));
-    getDataOfInstance<GUIView>(args[0])->addChild(objectPtr);
-    return args.This();
+    return initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr);
 }
 
 v8::Handle<v8::Value> ScriptGUIView::GetChildCount(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
@@ -54,11 +51,7 @@ v8::Handle<v8::Value> ScriptGUIFramedView::Constructor(const v8::Arguments &args
         return v8::ThrowException(v8::String::New("GUIFramedView Constructor: Invalid argument"));
     
     GUIFramedView* objectPtr = new GUIFramedView();
-    objectPtr->scriptInstance = v8::Persistent<v8::Object>::New(args.This());
-    args.This()->SetInternalField(0, v8::External::New(objectPtr));
-    GUIView* parent = getDataOfInstance<GUIView>(args[0]);
-    parent->addChild(objectPtr);
-    return args.This();
+    return initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr);
 }
 
 v8::Handle<v8::Value> ScriptGUIFramedView::AccessTopColor(const v8::Arguments& args) {

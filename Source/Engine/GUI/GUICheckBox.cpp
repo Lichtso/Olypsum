@@ -17,16 +17,16 @@ GUICheckBox::GUICheckBox() {
     label->parent = this;
     label->fontHeight = menu.screenView->width*0.03;
     label->posY = menu.screenView->width*0.002;
-    children.push_back(label);
+    GUIButton::addChild(label);
 }
 
-void GUICheckBox::addChild(GUIRect* child) {
-    
+bool GUICheckBox::addChild(GUIRect* child) {
+    return false;
 }
 
 void GUICheckBox::updateContent() {
     GUILabel* label = (GUILabel*)children[0];
-    if(state == GUIButtonStatePressed)
+    if(state == GUIButton::State::Pressed)
         label->visible = true;
     else
         label->visible = false;
@@ -35,8 +35,8 @@ void GUICheckBox::updateContent() {
 }
 
 bool GUICheckBox::handleMouseDown(int mouseX, int mouseY) {
-    if(!visible || state == GUIButtonStateDisabled || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
-    state = (state != GUIButtonStatePressed) ? GUIButtonStatePressed : GUIButtonStateHighlighted;
+    if(!visible || state == GUIButton::State::Disabled || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
+    state = (state != GUIButton::State::Pressed) ? GUIButton::State::Pressed : GUIButton::State::Highlighted;
     updateContent();
     if(onClick)
         onClick(this);
@@ -44,20 +44,20 @@ bool GUICheckBox::handleMouseDown(int mouseX, int mouseY) {
 }
 
 bool GUICheckBox::handleMouseUp(int mouseX, int mouseY) {
-    if(!visible || state == GUIButtonStateDisabled || state == GUIButtonStatePressed) return false;
+    if(!visible || state == GUIButton::State::Disabled || state == GUIButton::State::Pressed) return false;
     if(mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) {
-        state = GUIButtonStateNormal;
+        state = GUIButton::State::Enabled;
         updateContent();
     }
     return false;
 }
 
 void GUICheckBox::handleMouseMove(int mouseX, int mouseY) {
-    if(!visible || state == GUIButtonStateDisabled || state == GUIButtonStatePressed) return;
-    GUIButtonState prevState = state;
+    if(!visible || state == GUIButton::State::Disabled || state == GUIButton::State::Pressed) return;
+    GUIButton::State prevState = state;
     if(mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) {
-        state = GUIButtonStateNormal;
+        state = GUIButton::State::Enabled;
     }else
-        state = GUIButtonStateHighlighted;
+        state = GUIButton::State::Highlighted;
     if(prevState != state) updateContent();
 }

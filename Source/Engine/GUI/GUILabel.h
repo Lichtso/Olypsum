@@ -41,9 +41,17 @@ class GUILabel : public GUIRect {
     bool handleMouseDown(int mouseX, int mouseY);
     void getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int& posX, int& posY);
     unsigned int getCharCountThatFitsIn(unsigned int width, const std::string& text);
+    //! Returns the size in UTF8 characters of text
+    unsigned int getLength();
 };
 
+//! Returns the size in bytes of the next UTF8 character
 unsigned char getNextCharSize(const char* str);
-unsigned int getUTF8Length(const char* str);
+
+//! Returns the size in UTF8 characters of the given string up to byte offset "until"
+unsigned int toUTF8Length(const char* str, unsigned int until);
+
+//! Returns the size in bytes of the given string up to UTF8 offset "until"
+unsigned int fromUTF8Length(const char* str, unsigned int until);
 
 #endif

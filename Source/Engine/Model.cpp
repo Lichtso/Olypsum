@@ -537,8 +537,7 @@ FileResourcePtr<FileResource> Model::load(FilePackage* filePackageB, const std::
             skinIndecies.count += vcount.data[i]*2;
         }
         
-        geometry = geometry->next_sibling("controllers");
-        if(!skeleton) {
+        if(geometry->next_sibling("controllers")) {
             log(error_log, "More than one controller found.");
             goto endParsingXML;
         }
