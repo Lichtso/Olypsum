@@ -26,8 +26,11 @@ class ScriptFile : public Script {
     ~ScriptFile();
     FilePackage* filePackage;
     std::string name;
+    v8::Persistent<v8::Context> context;
     v8::Persistent<v8::Object> exports;
     bool load(FilePackage* filePackage, const std::string& name);
+    bool checkFunction(const char* functionName);
+    v8::Handle<v8::Value> callFunction(const char* functionName, bool recvFirstArg, std::vector<v8::Handle<v8::Value>> args);
 };
 
 class ScriptClass {

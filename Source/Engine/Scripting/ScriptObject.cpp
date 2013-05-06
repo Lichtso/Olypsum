@@ -62,7 +62,7 @@ v8::Handle<v8::Value> ScriptBaseObject::GetLinkNames(const v8::Arguments& args) 
 v8::Handle<v8::Value> ScriptBaseObject::GetLinkedObject(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1)
-        return v8::ThrowException(v8::String::New("BaseObject getLinkedObject(): To less arguments"));
+        return v8::ThrowException(v8::String::New("BaseObject getLinkedObject(): Too less arguments"));
     if(!args[0]->IsString())
         return v8::ThrowException(v8::String::New("BaseObject getLinkedObject(): Invalid argument"));
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
@@ -178,6 +178,12 @@ v8::Handle<v8::Value> ScriptPhysicObject::GetCollisionShapeInfo(const v8::Argume
             result->Set(v8::String::New("normal"), scriptVector3.newInstance(staticPlaneShape->getPlaneNormal()));
             result->Set(v8::String::New("distance"), v8::Number::New(staticPlaneShape->getPlaneConstant()));
         } break;
+        case TERRAIN_SHAPE_PROXYTYPE: {
+            TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(args.This());
+            btVector3 size = static_cast<btHeightfieldTerrainShape*>(shape)->getLocalScaling() *
+                             btVector3(objectPtr->width*0.5, 0.5, objectPtr->length*0.5);
+            result->Set(v8::String::New("size"), scriptVector3.newInstance(size));
+        } break;
     }
     return handleScope.Close(result);
 }
@@ -186,12 +192,12 @@ ScriptPhysicObject::ScriptPhysicObject(const char* name) :ScriptBaseObject(name)
     
 }
 
-ScriptPhysicObject::ScriptPhysicObject() :ScriptPhysicObject("PhysicsObject") {
+ScriptPhysicObject::ScriptPhysicObject() :ScriptPhysicObject("PhysicObject") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->SetAccessor(v8::String::New("collisionShape"), GetCollisionShape, SetCollisionShape);
-    objectTemplate->Set(v8::String::New("getCollisionShapeInfo"), v8::FunctionTemplate::New(GetCollisionShapeInfo));
+    objectTemplate->Set(v8::String::New("collisionShapeInfo"), v8::FunctionTemplate::New(GetCollisionShapeInfo));
     
     functionTemplate->Inherit(scriptBaseObject.functionTemplate);
 }

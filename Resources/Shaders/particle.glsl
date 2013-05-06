@@ -1,15 +1,15 @@
 in vec4 position;
 in vec4 velocity;
-uniform float lifeInvMin;
-uniform float lifeInvMax;
+uniform float textureZScale;
+uniform float textureAScale;
 out vec3 gPosition;
 out vec2 gLife;
 out float gSize;
 
 void main() {
     gPosition = position.xyz;
-    gLife.x = position.w*lifeInvMax;
-    gLife.y = min(position.w*lifeInvMin, 1.0);
+    gLife.x = position.w*textureZScale;
+    gLife.y = min(position.w*textureAScale, 1.0);
     gSize = velocity.w;
 }
 
@@ -56,7 +56,7 @@ void main() {
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
 
-uniform mat4 modelViewMat;
+uniform mat4 viewMat;
 uniform mat3 viewNormalMat;
 uniform vec4 clipPlane[1];
 in vec3 gPosition[1];
@@ -74,28 +74,28 @@ void main() {
     
     vNormal = viewNormalMat[2]-viewNormalMat[0]+viewNormalMat[1];
     vPosition = gPosition[0]-rightVec+upVec;
-    gl_Position = vec4(vPosition.xyz, 1.0)*modelViewMat;
+    gl_Position = vec4(vPosition.xyz, 1.0)*viewMat;
 	vTexCoord = vec4(0.0, 0.0, gLife[0]);
     gl_ClipDistance[0] = dot(vec4(vPosition.xyz, 1.0), clipPlane[0]);
 	EmitVertex();
     
     vNormal = viewNormalMat[2]-viewNormalMat[0]-viewNormalMat[1];
     vPosition = gPosition[0]-rightVec-upVec;
-    gl_Position = vec4(vPosition.xyz, 1.0)*modelViewMat;
+    gl_Position = vec4(vPosition.xyz, 1.0)*viewMat;
 	vTexCoord = vec4(0.0, 1.0, gLife[0]);
     gl_ClipDistance[0] = dot(vec4(vPosition.xyz, 1.0), clipPlane[0]);
 	EmitVertex();
     
     vNormal = viewNormalMat[2]+viewNormalMat[0]+viewNormalMat[1];
     vPosition = gPosition[0]+rightVec+upVec;
-    gl_Position = vec4(vPosition.xyz, 1.0)*modelViewMat;
+    gl_Position = vec4(vPosition.xyz, 1.0)*viewMat;
 	vTexCoord = vec4(1.0, 0.0, gLife[0]);
     gl_ClipDistance[0] = dot(vec4(vPosition.xyz, 1.0), clipPlane[0]);
 	EmitVertex();
     
     vNormal = viewNormalMat[2]+viewNormalMat[0]-viewNormalMat[1];
     vPosition = gPosition[0]+rightVec-upVec;
-    gl_Position = vec4(vPosition.xyz, 1.0)*modelViewMat;
+    gl_Position = vec4(vPosition.xyz, 1.0)*viewMat;
 	vTexCoord = vec4(1.0, 1.0, gLife[0]);
     gl_ClipDistance[0] = dot(vec4(vPosition.xyz, 1.0), clipPlane[0]);
 	EmitVertex();

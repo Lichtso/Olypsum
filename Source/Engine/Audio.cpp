@@ -157,7 +157,7 @@ SoundObject::~SoundObject() {
 void SoundObject::removeClean() {
     alDeleteSources(1, &ALname);
     objectManager.simpleObjects.erase(this);
-    BaseObject::removeClean();
+    SimpleObject::removeClean();
 }
 
 void SoundObject::newScriptInstance() {

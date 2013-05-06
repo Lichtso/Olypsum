@@ -23,7 +23,6 @@ class ParticlesObject : public DisplayObject {
     GLuint particlesVAO[2], particlesVBO[2];
     bool activeVAO;
     unsigned int particlesCount;
-    float addParticles;
     ParticlesObject();
     //! Internal initialize arrays and OpenGL buffers
     void init();

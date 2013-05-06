@@ -148,7 +148,8 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
                     std::string name;
                     if(fileManager.readResource(attribute->value(), filePackage, name)) {
                         object->scriptFile = scriptManager->getScriptFile(filePackage, name);
-                        scriptManager->callFunctionOfScript(object->scriptFile, "onload", true, { object->scriptInstance, scriptManager->readCdataXMLNode(node) });
+                        if(object->scriptFile)
+                            object->scriptFile->callFunction("onload", true, { object->scriptInstance, scriptManager->readCdataXMLNode(node) });
                     }
                 }else
                     log(error_log, "Tried to construct resource without \"src\"-attribute.");
@@ -191,8 +192,8 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
         if(!writeXmlFile(doc, statusFilePath, true))
             return false;
         levelManager.levelId = name;
-        scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
-                                            "onload", false, { localData, globalData });
+        ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
+        if(script) script->callFunction("onload", false, { localData, globalData });
         if(!mainCam) {
             log(error_log, "No CamObject was set as mainCam.");
             return false;

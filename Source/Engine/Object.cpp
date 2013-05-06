@@ -52,7 +52,7 @@ rapidxml::xml_node<xmlUsedCharType>* BaseObject::write(rapidxml::xml_document<xm
     rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
     node->name("BaseObject");
     if(scriptFile) {
-        v8::Handle<v8::Value> scritData = scriptManager->callFunctionOfScript(scriptFile, "onsave", true, { scriptInstance });
+        v8::Handle<v8::Value> scritData = scriptFile->callFunction("onsave", true, { scriptInstance });
         if(!scritData.IsEmpty() && scritData->IsString())
             scriptManager->writeCdataXMLNode(doc, stdStrOfV8(scritData));
         node->append_node(fileManager.writeResource(doc, "Script", scriptFile->filePackage, scriptFile->name));
@@ -180,7 +180,7 @@ void PhysicObject::updateTouchingObjects() {
 }
 
 void PhysicObject::handleCollision(btPersistentManifold* contactManifold, PhysicObject* b) {
-    if(!scriptManager->checkFunctionOfScript(scriptFile, "oncollision")) return;
+    if(!scriptFile || !scriptFile->checkFunction("oncollision")) return;
     
     v8::HandleScope handleScope;
     v8::Handle<v8::Array> pointsA = v8::Array::New(contactManifold->getNumContacts()),
@@ -196,7 +196,7 @@ void PhysicObject::handleCollision(btPersistentManifold* contactManifold, Physic
         impulses->Set(i, v8::Number::New(point.getAppliedImpulse()));
     }
     
-    scriptManager->callFunctionOfScript(scriptFile, "oncollision", true, { scriptInstance, b->scriptInstance, pointsA, pointsB, distances, impulses });
+    scriptFile->callFunction("oncollision", true, { scriptInstance, b->scriptInstance, pointsA, pointsB, distances, impulses });
 }
 
 btCollisionShape* PhysicObject::readCollisionShape(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {

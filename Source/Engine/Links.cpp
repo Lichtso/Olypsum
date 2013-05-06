@@ -1015,7 +1015,6 @@ TransformLink::~TransformLink() {
 
 void TransformLink::removeClean(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
     if(iteratorInA->first != "..") { //Only remove child if called by parent
-        a->links.erase(iteratorInA);
         getOther(a)->removeClean(); //Remove child
     }else
         BaseLink::removeClean(a, iteratorInA);

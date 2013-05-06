@@ -14,7 +14,7 @@ GraphicObject::GraphicObject() {
 
 void GraphicObject::removeClean() {
     objectManager.graphicObjects.erase(this);
-    BaseObject::removeClean();
+    DisplayObject::removeClean();
 }
 
 

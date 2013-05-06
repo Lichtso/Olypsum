@@ -194,7 +194,7 @@ v8::Handle<v8::Value> ScriptRigidObject::AccessTransformation(const v8::Argument
 v8::Handle<v8::Value> ScriptRigidObject::ApplyImpulseAtPoint(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 2)
-        return v8::ThrowException(v8::String::New("RigidObject applyImpulseAtPoint(): To less arguments"));
+        return v8::ThrowException(v8::String::New("RigidObject applyImpulseAtPoint(): Too less arguments"));
     if(!scriptVector3.isCorrectInstance(args[0]) || !scriptVector3.isCorrectInstance(args[1]))
         return v8::ThrowException(v8::String::New("RigidObject applyImpulseAtPoint(): Invalid argument"));
     btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
@@ -210,7 +210,7 @@ v8::Handle<v8::Value> ScriptRigidObject::ApplyImpulseAtPoint(const v8::Arguments
 v8::Handle<v8::Value> ScriptRigidObject::ApplyAngularImpulse(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1)
-        return v8::ThrowException(v8::String::New("RigidObject applyAngularImpulse(): To less arguments"));
+        return v8::ThrowException(v8::String::New("RigidObject applyAngularImpulse(): Too less arguments"));
     if(!scriptVector3.isCorrectInstance(args[0]))
         return v8::ThrowException(v8::String::New("RigidObject applyAngularImpulse(): Invalid argument"));
     btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
@@ -225,7 +225,7 @@ v8::Handle<v8::Value> ScriptRigidObject::ApplyAngularImpulse(const v8::Arguments
 v8::Handle<v8::Value> ScriptRigidObject::ApplyLinearImpulse(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1)
-        return v8::ThrowException(v8::String::New("RigidObject applyLinearImpulse(): To less arguments"));
+        return v8::ThrowException(v8::String::New("RigidObject applyLinearImpulse(): Too less arguments"));
     if(!scriptVector3.isCorrectInstance(args[0]))
         return v8::ThrowException(v8::String::New("RigidObject applyLinearImpulse(): Invalid argument"));
     btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();

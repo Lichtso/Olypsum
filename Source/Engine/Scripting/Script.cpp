@@ -34,6 +34,7 @@ v8::Handle<v8::Value> Script::run() {
 }
 
 ScriptFile::~ScriptFile() {
+    context.Dispose();
     exports.Dispose();
 }
 
@@ -42,9 +43,9 @@ bool ScriptFile::load(FilePackage* filePackageB, const std::string& nameB) {
     std::string filePath = filePackageB->getPathOfFile("Scripts", name+".js");
     std::unique_ptr<char[]> data = readFile(filePath, true);
     if(!data) return false;
-    v8::HandleScope handleScope;
     v8::TryCatch tryCatch;
-    v8::Handle<v8::Context> context = v8::Context::New(NULL, scriptManager->globalTemplate);
+    v8::HandleScope handleScope;
+    context = v8::Context::New(NULL, scriptManager->globalTemplate);
     context->Enter();
     context->Global()->Set(v8::String::New("exports"), v8::Object::New());
     
@@ -60,12 +61,37 @@ bool ScriptFile::load(FilePackage* filePackageB, const std::string& nameB) {
     return !tryCatch.HasCaught();
 }
 
+bool ScriptFile::checkFunction(const char* functionName) {
+    if(exports.IsEmpty()) return false;
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast(exports->GetRealNamedProperty(v8::String::New(functionName)));
+    return (!function.IsEmpty() && function->IsFunction());
+}
+
+v8::Handle<v8::Value> ScriptFile::callFunction(const char* functionName, bool recvFirstArg, std::vector<v8::Handle<v8::Value>> args) {
+    if(exports.IsEmpty()) return v8::Undefined();
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast(exports->GetRealNamedProperty(v8::String::New(functionName)));
+    if(function.IsEmpty() || !function->IsFunction()) return v8::Undefined();
+    v8::TryCatch tryCatch;
+    v8::Handle<v8::Value> result;
+    if(recvFirstArg && args.size() > 0 && !args[0].IsEmpty() && args[0]->IsObject())
+        result = function->CallAsFunction(v8::Handle<v8::Object>::Cast(args[0]), args.size()-1, &args[1]);
+    else
+        result = function->CallAsFunction(exports, args.size(), &args[0]);
+    if(scriptManager->tryCatch(&tryCatch))
+        return result;
+    else
+        return v8::Undefined();
+}
+
 
 
 ScriptClass::ScriptClass(const char* nameB, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args)) :name(nameB) {
     v8::HandleScope handleScope;
     functionTemplate = v8::Persistent<v8::FunctionTemplate>::New(v8::FunctionTemplate::New(constructor));
     functionTemplate->SetClassName(v8::String::New(name));
+    functionTemplate->PrototypeTemplate()->Set(v8::String::New("className"), v8::String::New(name));
 }
 
 ScriptClass::~ScriptClass() {
@@ -89,7 +115,6 @@ bool ScriptClass::isCorrectInstance(const v8::Local<v8::Value>& object) {
     v8::HandleScope handleScope;
     if(!object->IsObject()) return false;
     return functionTemplate->HasInstance(object);
-    //return v8::Local<v8::Object>::Cast(object)->GetConstructor() == functionTemplate->GetFunction();
 }
 
 void ScriptClass::init(const v8::Persistent<v8::ObjectTemplate>& globalTemplate) {

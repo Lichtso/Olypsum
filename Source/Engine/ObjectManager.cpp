@@ -115,8 +115,8 @@ void ObjectManager::initGame(const std::string& levelPackage) {
     physicsWorld.reset(new btDiscreteDynamicsWorld(collisionDispatcher, broadphase, constraintSolver, collisionConfiguration));
     physicsWorld->setInternalTickCallback(calculatePhysicsTick);
     scriptManager.reset(new ScriptManager());
-    scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
     sceneAmbient = btVector3(0.1, 0.1, 0.1);
+    scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
 }
 
 void ObjectManager::gameTick() {
@@ -169,7 +169,7 @@ void ObjectManager::gameTick() {
     
     if(optionsState.screenBlurFactor > 0.0) {
         shaderPrograms[blurSP]->use();
-        currentShaderProgram->setUniformF("processingValue", optionsState.screenBlurFactor);
+        currentShaderProgram->setUniformF("processingValue", optionsState.screenBlurFactor * prevOptionsState.videoScale);
         mainFBO.renderInBuffers(true, &buffersPostRenderer[1], 1, 0, 0);
         profiler.leaveSection("Apply screen blur");
     }else{
@@ -219,8 +219,8 @@ void ObjectManager::gameTick() {
     if(optionsState.particleCalcTarget == 2) glDisable(GL_RASTERIZER_DISCARD);
     profiler.leaveSection("Calculate particle systems");
     
-    scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
-                                        "ongametick", false, { });
+    ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
+    if(script) script->callFunction("ongametick", false, { });
     profiler.leaveSection("Execute script: ongametick()");
 }
 
@@ -244,8 +244,8 @@ void ObjectManager::physicsTick() {
         userObjectB->handleCollision(contactManifold, userObjectA);
 	}
     
-    scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
-                                        "onphysicstick", false, { });
+    ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
+    if(script) script->callFunction("onphysicstick", false, { });
 }
 
 void ObjectManager::drawShadowCasters() {

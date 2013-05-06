@@ -3,7 +3,7 @@
 	<Box id="box0" size="0.5 0.5 0.5"/>
 	<Box id="mirrorBox" size="0.1 5.0 8.0"/>
 	<Box id="manBox" size="1.0 1.0 0.25"/>
-	<Sphere id="sphere0" radius="0.5"/>
+	<Sphere id="sphere0" radius="2.5"/>
 	<Capsule id="capsule0" radius="0.5" length="0.5" direction="y"/>
 	<Cone id="cone0" radius="0.5" length="0.5" direction="y"/>
 	<SphereCompound id="sphereCompound0">
@@ -16,7 +16,7 @@
 	<StaticPlane id="staticPlane" distance="0.0">0.0 1.0 0.0</StaticPlane>
 	<Compound id="worldBox">
 		<Child collisionShape="staticPlane">
-			<Translate>0.0 -5.0 0.0</Translate>
+			<Translate>0.0 -10.0 0.0</Translate>
 		</Child>
 		<Child collisionShape="staticPlane">
 			<Translate>0.0 10.0 0.0</Translate>

@@ -79,7 +79,7 @@ void CamObject::removeClean() {
     if(mainCam == this) mainCam = NULL;
     if(currentCam == this) currentCam = NULL;
     objectManager.simpleObjects.erase(this);
-    BaseObject::removeClean();
+    SimpleObject::removeClean();
 }
 
 Matrix4 CamObject::getCamMatrix() {

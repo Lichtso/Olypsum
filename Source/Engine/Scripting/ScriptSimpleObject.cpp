@@ -76,7 +76,7 @@ void ScriptCamObject::SetHeight(v8::Local<v8::String> property, v8::Local<v8::Va
 v8::Handle<v8::Value> ScriptCamObject::GetViewRay(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 2)
-        return v8::ThrowException(v8::String::New("getViewRay(): To less arguments"));
+        return v8::ThrowException(v8::String::New("getViewRay(): Too less arguments"));
     if(!args[0]->IsNumber() || !args[1]->IsNumber())
         return v8::ThrowException(v8::String::New("getViewRay(): Invalid argument"));
     CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());

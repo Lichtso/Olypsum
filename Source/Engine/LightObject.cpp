@@ -55,7 +55,7 @@ void LightObject::removeClean() {
             objectManager.lightObjects.erase(objectManager.lightObjects.begin()+i);
             break;
         }
-    BaseObject::removeClean();
+    DisplayObject::removeClean();
 }
 
 btTransform LightObject::getTransformation() {

@@ -33,15 +33,6 @@
 			<Color>1.0 1.0 1.0</Color>
 			<Bounds omniDirectional="true" range="15.0" />
 		</LightObject>
-		<ParticlesObject particles="50">
-			<Translate>0.0 1.5 0.0</Translate>
-			<Texture src="flash.png" />
-			<PhysicsBody collisionShape="box0" />
-			<Life min="3.0" max="7.0" />
-			<Size min="0.1" max="0.2" />
-			<SpawnBox min="-0.2 0.0 -0.2" max="0.2 0.0 0.2" />
-			<Velocity min="-0.2 0.3 -0.2" max="0.2 1.2 0.2" />
-		</ParticlesObject>
 		<TerrainObject>
 			<Diffuse src="terrainDiffuse.png" />
 			<HeightsMap src="terrainMap.png" />

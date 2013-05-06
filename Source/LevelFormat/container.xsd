@@ -175,6 +175,7 @@
                                         </xsd:choice>
                                     </xsd:sequence>
                                     <xsd:attribute name="particles" type="xsd:positiveInteger"/>
+                                    <xsd:attribute name="systemLife" type="NonNegativeScalar" minOccurs="0"/>
                                 </xsd:complexType>
                             </xsd:element>
                             <xsd:element name="TerrainObject" minOccurs="0" maxOccurs="unbounded">

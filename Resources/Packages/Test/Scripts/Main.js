@@ -1,3 +1,35 @@
+exports.explosion = function(transform) {
+	var radius = 5, result = Intersection.sphereIntersection(transform.w(), radius, 0xFFFF);
+	for(var i = 0; i < result.length; i ++) {
+		if(result[i].mass && result[i] != exports.grabbedObject) { //Push other objects away
+			var vec = result[i].transformation().w().sub(transform.w());
+			vec.mult(120.0/vec.getLength());
+			result[i].applyLinearImpulse(vec);
+		}
+
+		if(result[i].className == "TerrainObject") { //Hole in ground
+			var mat = result[i].transformation().getInverse().mult(transform),
+				size = result[i].collisionShapeInfo().size,
+				pos = mat.w().divide(size).mult(0.5).add(new Vector3(0.5, 0.5, 0.5)),
+				centerX = Math.round(pos.x*result[i].width), centerY = Math.round(pos.z*result[i].length);
+			radius = radius*0.25*result[i].width/size.x;
+			for(var y = Math.max(centerY-radius, 0); y < Math.min(centerY+radius+1, result[i].length); y ++)
+				for(var x = Math.max(centerX-radius, 0); x < Math.min(centerX+radius+1, result[i].width); x ++) {
+					var diffX = x-centerX, diffY = y-centerY,
+						dist = Math.sqrt(diffX*diffX+diffY*diffY)/radius;
+					if(dist < 1.0)
+						result[i][y*result[i].width+x] = Math.min(result[i][y*result[i].width+x], Math.max(0.0, pos.y-Math.cos(Math.asin(dist))/size.y));
+				}
+			result[i].updateModel();
+		}
+	}
+
+	//Spawn effects
+	var mat = new Matrix4();
+	mat.w(transform.w());
+	loadContainer(mat, "explosion");
+}
+
 exports.onload = function(localData, globalData) {
 	
 };
@@ -38,11 +70,15 @@ exports.ongametick = function() {
 		transform.w(transform.w().add(transform.z().mult(speed)));
 
 	if(!Keyboard.isKeyPressed(308)) { //Alt left
-		Cam.camObject.rotation[0] += Mouse.x()*0.01;
-		Cam.camObject.rotation[1] = Math.min(Math.max(Cam.camObject.rotation[1]+Mouse.y()*0.01, -Math.PI/2), Math.PI/2);
-		transform.setRotation(new Quaternion(Cam.camObject.rotation));
+		var rotation = transform.getRotation(), up = new Vector3(0.0, 1.0, 0.0);
+		transform.setRotation(rotation.getProduct(new Quaternion(Mouse.x()*0.01, Mouse.y()*0.01, 0.0)));
+		transform.y(up);
+		transform.x(transform.y().cross(transform.z()).normalize());
+		transform.y(transform.z().cross(transform.x()).normalize());
+		if(transform.y().getDot(up) < 0.12)
+			transform.setRotation(rotation.mult(new Quaternion(Mouse.x()*0.01, 0.0, 0.0)));
 	}
-
+	
 	Cam.camObject.transformation(transform);
 
 	if(exports.grabbedObject != null) {
@@ -60,16 +96,10 @@ exports.ongametick = function() {
         exports.grabbedObject.linearVelocity(velocity.mult(speed));
 
         if(Keyboard.isKeyPressed(304)) { //Shift left: Explode
-		var result = Intersection.sphereIntersection(exports.grabbedObject.transformation().w(), 10.0, 0xFFFF);
-			for(var i = 0; i < result.length; i ++)
-				if(result[i].mass && result[i] != exports.grabbedObject) {
-					var vec = result[i].transformation().w().sub(exports.grabbedObject.transformation().w());
-					vec.mult(120.0/vec.getLength());
-					result[i].applyLinearImpulse(vec);
-				}
+			exports.explosion(exports.grabbedObject.transformation());
 			exports.grabbedObject.integrity = 0.0;
 			exports.grabbedObject = null;
-		}
+        }
 	}
 };
 

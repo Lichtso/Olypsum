@@ -69,7 +69,7 @@ rapidxml::xml_node<xmlUsedCharType>* writeBoundsNode(rapidxml::xml_document<xmlU
     return node;
 }
 
-ParticlesObject::ParticlesObject() :activeVAO(0), addParticles(0.0), systemLife(-1.0), force(btVector3(0, -9.81, 0)), transformAligned(false) {
+ParticlesObject::ParticlesObject() :activeVAO(0), systemLife(-1.0), force(btVector3(0, -9.81, 0)), transformAligned(false) {
     objectManager.particlesObjects.insert(this);
     body = new btCollisionObject();
     body->setUserPointer(this);
@@ -125,6 +125,10 @@ ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, Leve
     sscanf(attribute->value(), "%d", &maxParticles);
     init();
     
+    attribute = node->first_attribute("systemLife");
+    if(attribute)
+        sscanf(attribute->value(), "%f", &systemLife);
+    
     rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Force");
     if(parameterNode) {
         XMLValueArray<float> vecData;
@@ -153,7 +157,7 @@ ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, Leve
         return;
     }
     texture = fileManager.initResource<Texture>(attribute->value());
-    texture->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGB);
+    texture->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGBA);
 }
 
 void ParticlesObject::clean() {
@@ -176,12 +180,12 @@ void ParticlesObject::clean() {
 void ParticlesObject::removeClean() {
     objectManager.particlesObjects.erase(this);
     clean();
-    BaseObject::removeClean();
+    DisplayObject::removeClean();
 }
 
 void ParticlesObject::removeFast() {
     clean();
-    BaseObject::removeFast();
+    DisplayObject::removeFast();
 }
 
 void ParticlesObject::setTransformation(const btTransform& transformation) {
@@ -200,7 +204,7 @@ void ParticlesObject::newScriptInstance() {
 }
 
 bool ParticlesObject::gameTick() {
-    btVector3 position = getTransformation().getOrigin();
+    btTransform transform = getTransformation();
     
     if(optionsState.particleCalcTarget == 0) systemLife = 0.0;
     if(systemLife > -1.0) {
@@ -215,8 +219,8 @@ bool ParticlesObject::gameTick() {
         if(systemLife == -1.0 || systemLife > lifeMax)
             for(; particlesCount < maxParticles; particlesCount ++) {
                 Particle* particle = &particles[particlesCount];
-                particle->pos = vec3rand(posMin, posMax)+position;
-                particle->dir = vec3rand(dirMin, dirMax).normalize()*(dirMax-dirMin).length()*0.5;
+                particle->pos = transform(vec3rand(posMin, posMax));
+                particle->dir = transform(vec3rand(dirMin, dirMax).normalize()*(dirMax-dirMin).length()*0.5);
                 particle->life = frand(lifeMin, lifeMax);
                 particle->size = frand(sizeMin, sizeMax);
             }
@@ -235,13 +239,15 @@ bool ParticlesObject::gameTick() {
         }
     }else if(optionsState.particleCalcTarget == 2) {
         shaderPrograms[particleCalculateSP]->use();
+        currentShaderProgram->setUniformMatrix4("modelMat", &transform);
+        currentShaderProgram->setUniformMatrix3("normalMat", &transform.getBasis(), false);
         currentShaderProgram->setUniformF("respawnParticles", (systemLife == -1.0 || systemLife > lifeMax) ? 1.0 : 0.0);
         currentShaderProgram->setUniformF("animationFactor", profiler.animationFactor);
         currentShaderProgram->setUniformF("lifeCenter", (lifeMax+lifeMin)*0.5);
         currentShaderProgram->setUniformF("lifeRange", lifeMax-lifeMin);
         currentShaderProgram->setUniformF("sizeCenter", (sizeMax+sizeMin)*0.5);
         currentShaderProgram->setUniformF("sizeRange", sizeMax-sizeMin);
-        currentShaderProgram->setUniformVec3("posCenter", (posMax+posMin)*0.5+position);
+        currentShaderProgram->setUniformVec3("posCenter", (posMax+posMin)*0.5);
         currentShaderProgram->setUniformVec3("posRange", posMax-posMin);
         currentShaderProgram->setUniformVec3("dirCenter", (dirMax+dirMin)*0.5);
         currentShaderProgram->setUniformVec3("dirRange", dirMax-dirMin);
@@ -262,15 +268,16 @@ bool ParticlesObject::gameTick() {
 }
 
 void ParticlesObject::draw() {
-    modelMat = getTransformation();
+    //modelMat.setIdentity();
+    
     if(texture->depth > 1)
         shaderPrograms[particleDrawAnimatedSP]->use();
     else
         shaderPrograms[particleDrawSP]->use();
     texture->use(0);
     
-    currentShaderProgram->setUniformF("lifeInvMin", 5.0/lifeMin);
-    currentShaderProgram->setUniformF("lifeInvMax", (float)texture->depth/lifeMax);
+    currentShaderProgram->setUniformF("textureZScale", (float)texture->depth/lifeMax);
+    currentShaderProgram->setUniformF("textureAScale", 5.0/lifeMin);
     if(transformAligned) {
         btMatrix3x3 viewNormalMat = getTransformation().getBasis();
         currentShaderProgram->setUniformMatrix3("viewNormalMat", &viewNormalMat, false);
@@ -307,6 +314,13 @@ rapidxml::xml_node<xmlUsedCharType>* ParticlesObject::write(rapidxml::xml_docume
     attribute->name("particles");
     attribute->value(doc.allocate_string(stringOf((int)maxParticles).c_str()));
     node->append_attribute(attribute);
+    
+    if(systemLife > -1.0) {
+        attribute = doc.allocate_attribute();
+        attribute->name("systemLife");
+        attribute->value(doc.allocate_string(stringOf(systemLife).c_str()));
+        node->append_attribute(attribute);
+    }
     
     rapidxml::xml_node<xmlUsedCharType>* parameterNode = doc.allocate_node(rapidxml::node_element);
     parameterNode->name("Force");

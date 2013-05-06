@@ -57,9 +57,10 @@ std::string LevelManager::getCollisionShapeName(btCollisionShape* shape) {
 }
 
 void LevelManager::clear() {
-    if(scriptManager)
-        scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
-                                            "onleave", false, { });
+    if(scriptManager) {
+        ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
+        if(script) script->callFunction("onleave", false, { });
+    }
     levelId = "";
     saveGameName = "";
     levelPackage = NULL;

@@ -1,5 +1,6 @@
+Test explosions
 V8 API: Links, Animations
-Test explosions, JS class identify
+Decals: Tests and V8 API
 Implement btSoftBody
 Implement btRayCastVehicle
 Animation File Format
@@ -18,5 +19,6 @@ Gear Rack PhysicLink
 Networking / Multiplayer
 
 Bugs:
-Cam rotation onload
+Mac OS 10.8.3: Texture 3D with mipmap and compression
+V8 API: Euler and Quaternion conversion
 Check memory leaks

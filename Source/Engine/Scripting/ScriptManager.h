@@ -28,8 +28,6 @@ class ScriptManager {
     ScriptManager();
     ~ScriptManager();
     ScriptFile* getScriptFile(FilePackage* filePackage, const std::string& name);
-    bool checkFunctionOfScript(ScriptFile* script, const char* functionName);
-    v8::Handle<v8::Value> callFunctionOfScript(ScriptFile* scriptFile, const char* functionName, bool recvFirstArg, std::vector<v8::Handle<v8::Value>> args);
     bool tryCatch(v8::TryCatch* tryCatch);
 };
 

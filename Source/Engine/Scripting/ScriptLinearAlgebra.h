@@ -21,6 +21,7 @@ class ScriptVector3 : public ScriptClass {
     static v8::Handle<v8::Value> GetSum(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetDifference(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetProduct(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetQuotient(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetDotProduct(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetCrossProduct(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetLength(const v8::Arguments& args);
@@ -29,6 +30,7 @@ class ScriptVector3 : public ScriptClass {
     static v8::Handle<v8::Value> Sum(const v8::Arguments& args);
     static v8::Handle<v8::Value> Subtract(const v8::Arguments& args);
     static v8::Handle<v8::Value> Multiply(const v8::Arguments& args);
+    static v8::Handle<v8::Value> Divide(const v8::Arguments& args);
     static v8::Handle<v8::Value> CrossProduct(const v8::Arguments& args);
     static v8::Handle<v8::Value> Normalize(const v8::Arguments& args);
     public:
@@ -54,8 +56,9 @@ class ScriptQuaternion : public ScriptClass {
     static v8::Handle<v8::Value> GetLength(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetNormalized(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetInterpolation(const v8::Arguments& args);
-    static v8::Handle<v8::Value> SetRotation(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetEuler(const v8::Arguments& args);
     static v8::Handle<v8::Value> SetEuler(const v8::Arguments& args);
+    static v8::Handle<v8::Value> SetRotation(const v8::Arguments& args);
     static v8::Handle<v8::Value> Sum(const v8::Arguments& args);
     static v8::Handle<v8::Value> Subtract(const v8::Arguments& args);
     static v8::Handle<v8::Value> Multiply(const v8::Arguments& args);
@@ -78,7 +81,6 @@ class ScriptMatrix4 : public ScriptClass {
     static v8::Handle<v8::Value> AccessRowW(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetRotation(const v8::Arguments& args);
     static v8::Handle<v8::Value> SetRotation(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetEuler(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetInverse(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetProduct(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetRotatedVector(const v8::Arguments& args);

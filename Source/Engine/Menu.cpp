@@ -122,9 +122,8 @@ void Menu::handleMouseDown(SDL_Event& event) {
     if((event.button.button == SDL_BUTTON_LEFT && screenView->handleMouseDown(event.button.x, event.button.y))
        || menu.current != inGame) return;
     
-    v8::HandleScope handleScope;
-    scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
-                                                                    "onmousedown", false, { });
+    ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
+    if(script) script->callFunction("onmousedown", false, { });
 }
 
 void Menu::handleMouseUp(SDL_Event& event) {
@@ -132,9 +131,8 @@ void Menu::handleMouseUp(SDL_Event& event) {
     event.button.y *= prevOptionsState.videoScale;
     if(screenView->handleMouseUp(event.button.x, event.button.y) || menu.current != inGame) return;
     
-    v8::HandleScope handleScope;
-    scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
-                                        "onmouseup", false, { });
+    ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
+    if(script) script->callFunction("onmouseup", false, { });
 }
 
 void Menu::handleMouseMove(SDL_Event& event) {
@@ -158,16 +156,18 @@ void Menu::handleMouseWheel(SDL_Event& event) {
     event.button.y *= prevOptionsState.videoScale;
     float delta = (event.button.button == SDL_BUTTON_WHEELDOWN) ? -1.0 : 1.0;
     if(screenView->handleMouseWheel(event.button.x, event.button.y, delta) || menu.current != inGame) return;
+    
     v8::HandleScope handleScope;
-    scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
-                                        "onmousewheel", false, { v8::Number::New(delta) });
+    ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
+    if(script) script->callFunction("onmousewheel", false, { v8::Number::New(delta) });
 }
 
 void Menu::handleKeyDown(SDL_Event& event) {
     if(screenView->handleKeyDown(&event.key.keysym) || menu.current != inGame) return;
+    
     v8::HandleScope handleScope;
-    scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
-                                        "onkeydown", false, { v8::Integer::New(event.key.keysym.sym) });
+    ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
+    if(script) script->callFunction("onkeydown", false, { v8::Integer::New(event.key.keysym.sym) });
 }
 
 void Menu::handleKeyUp(SDL_Event& event) {
@@ -207,8 +207,8 @@ void Menu::handleKeyUp(SDL_Event& event) {
     
     if(menu.current == inGame) {
         v8::HandleScope handleScope;
-        scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
-                                            "onkeyup", false, { v8::Integer::New(event.key.keysym.sym) });
+        ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
+        if(script) script->callFunction("onkeyup", false, { v8::Integer::New(event.key.keysym.sym) });
     }
 }
 
@@ -301,8 +301,8 @@ void Menu::setPause(bool active) {
         setMenu(inGame);
     
     v8::HandleScope handleScope;
-    scriptManager->callFunctionOfScript(scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName),
-                                        "onpause", false, { v8::Boolean::New(active) });
+    ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
+    if(script) script->callFunction("onpause", false, { v8::Boolean::New(active) });
 }
 
 void Menu::setMenu(Name menu) {

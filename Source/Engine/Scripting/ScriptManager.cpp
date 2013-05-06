@@ -11,7 +11,7 @@
 v8::Handle<v8::Value> ScriptManager::ScriptLog(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() == 0)
-        return v8::ThrowException(v8::String::New("log(): To less arguments"));
+        return v8::ThrowException(v8::String::New("log(): Too less arguments"));
     log(script_log, stdStrOfV8(args[0]));
     return v8::Undefined();
 }
@@ -19,7 +19,7 @@ v8::Handle<v8::Value> ScriptManager::ScriptLog(const v8::Arguments& args) {
 v8::Handle<v8::Value> ScriptManager::ScriptRequire(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() == 0)
-        return v8::ThrowException(v8::String::New("require(): To less arguments"));
+        return v8::ThrowException(v8::String::New("require(): Too less arguments"));
     v8::String::AsciiValue name(args[0]->ToString());
     FilePackage* filePackage = levelManager.levelPackage;
     if(args.Length() == 2) {
@@ -37,7 +37,7 @@ v8::Handle<v8::Value> ScriptManager::ScriptRequire(const v8::Arguments& args) {
 v8::Handle<v8::Value> ScriptManager::ScriptLoadContainer(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 2)
-        return v8::ThrowException(v8::String::New("loadContainer(): To less arguments"));
+        return v8::ThrowException(v8::String::New("loadContainer(): Too less arguments"));
     if(!scriptMatrix4.isCorrectInstance(args[0]) || !args[1]->IsString())
         return v8::ThrowException(v8::String::New("loadContainer(): Invalid argument"));
     LevelLoader levelLoader;
@@ -52,7 +52,7 @@ v8::Handle<v8::Value> ScriptManager::ScriptLoadContainer(const v8::Arguments& ar
 v8::Handle<v8::Value> ScriptManager::ScriptSaveLevel(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 2)
-        return v8::ThrowException(v8::String::New("saveLevel(): To less arguments"));
+        return v8::ThrowException(v8::String::New("saveLevel(): Too less arguments"));
     std::string localData = (args[0]->IsString()) ? stdStrOfV8(args[0]) : "",
                 globalData = (args[1]->IsString()) ? stdStrOfV8(args[1]) : "";
     return v8::Boolean::New(levelManager.saveLevel(localData, globalData));
@@ -143,30 +143,6 @@ ScriptFile* ScriptManager::getScriptFile(FilePackage* filePackage, const std::st
     script->load(filePackage, name);
     loadedScripts[name] = script;
     return script;
-}
-
-bool ScriptManager::checkFunctionOfScript(ScriptFile* script, const char* functionName) {
-    if(!script) return false;
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast(script->exports->GetRealNamedProperty(v8::String::New(functionName)));
-    return (!function.IsEmpty() && function->IsFunction());
-}
-
-v8::Handle<v8::Value> ScriptManager::callFunctionOfScript(ScriptFile* script, const char* functionName, bool recvFirstArg, std::vector<v8::Handle<v8::Value>> args) {
-    if(!script) return v8::Undefined();
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast(script->exports->GetRealNamedProperty(v8::String::New(functionName)));
-    if(function.IsEmpty() || !function->IsFunction()) return v8::Undefined();
-    v8::TryCatch tryCatch;
-    v8::Handle<v8::Value> result;
-    if(recvFirstArg && args.size() > 0 && !args[0].IsEmpty() && args[0]->IsObject())
-        result = function->CallAsFunction(v8::Handle<v8::Object>::Cast(args[0]), args.size()-1, &args[1]);
-    else
-        result = function->CallAsFunction(script->exports, args.size(), &args[0]);
-    if(scriptManager->tryCatch(&tryCatch))
-        return result;
-    else
-        return v8::Undefined();
 }
 
 bool ScriptManager::tryCatch(v8::TryCatch* tryCatch) {

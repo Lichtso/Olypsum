@@ -1,5 +1,5 @@
-exports.onload = function(data) {
-	log(data);
+/*exports.onload = function(data) {
+	log([typeof this, this instanceof Object]);
 };
 
 /*
