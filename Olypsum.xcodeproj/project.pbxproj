@@ -51,6 +51,7 @@
 		1178F6B717209036006EAE7D /* ScriptGUIView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1178F6B517209036006EAE7D /* ScriptGUIView.cpp */; };
 		117CBA9C16EBDC6800307B94 /* ScriptObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 117CBA9A16EBDC6800307B94 /* ScriptObject.cpp */; };
 		118620481650165400A32518 /* ObjectManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118620461650165400A32518 /* ObjectManager.cpp */; };
+		1188A5431745403900D535B2 /* ScriptAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1188A5411745403900D535B2 /* ScriptAnimation.cpp */; };
 		118B60621573E2E8004C132E /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118B60611573E2E8004C132E /* Audio.cpp */; };
 		1199EC331722D205006BD235 /* ScriptIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1199EC311722D204006BD235 /* ScriptIO.cpp */; };
 		1199EC361723D795006BD235 /* ScriptGUIOutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1199EC341723D793006BD235 /* ScriptGUIOutput.cpp */; };
@@ -179,6 +180,8 @@
 		117CBA9B16EBDC6800307B94 /* ScriptObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptObject.h; sourceTree = "<group>"; };
 		118620461650165400A32518 /* ObjectManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ObjectManager.cpp; sourceTree = "<group>"; };
 		118620471650165400A32518 /* ObjectManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectManager.h; sourceTree = "<group>"; };
+		1188A5411745403900D535B2 /* ScriptAnimation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptAnimation.cpp; sourceTree = "<group>"; };
+		1188A5421745403900D535B2 /* ScriptAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptAnimation.h; sourceTree = "<group>"; };
 		118B60601573E2DF004C132E /* Audio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Audio.h; sourceTree = "<group>"; };
 		118B60611573E2E8004C132E /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Audio.cpp; sourceTree = "<group>"; };
 		1199EC311722D204006BD235 /* ScriptIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptIO.cpp; sourceTree = "<group>"; };
@@ -514,6 +517,8 @@
 				112307F61718A082001167DF /* ScriptLightObject.cpp */,
 				1151141F170C1A0E00F77236 /* ScriptIntersection.h */,
 				1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */,
+				1188A5421745403900D535B2 /* ScriptAnimation.h */,
+				1188A5411745403900D535B2 /* ScriptAnimation.cpp */,
 				1199EC321722D204006BD235 /* ScriptIO.h */,
 				1199EC311722D204006BD235 /* ScriptIO.cpp */,
 				11623856171DF1050027561B /* ScriptGUIRect.h */,
@@ -656,6 +661,7 @@
 				1199EC361723D795006BD235 /* ScriptGUIOutput.cpp in Sources */,
 				11D0C0F31727CE71004C30E9 /* ScriptGUIInput.cpp in Sources */,
 				1102B34C172AEF3500D6913E /* ScriptGUIButton.cpp in Sources */,
+				1188A5431745403900D535B2 /* ScriptAnimation.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

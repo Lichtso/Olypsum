@@ -15,6 +15,7 @@ void openExternURL(const char* str);
 void setClipboardText(const char* str);
 std::string getClipboardText();
 bool hasClipboardText();
+void restartApplication();
 
 const SDL_VideoInfo* updateVideoModeInternal(bool& fullScreen);
 void updateVideoMode();

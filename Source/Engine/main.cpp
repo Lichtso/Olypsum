@@ -39,6 +39,10 @@ void openExternURL(const char* str) {
     
 }
 
+void restartApplication() {
+    AppTerminate();
+}
+
 int main(int argc, char *argv[]) {
     NL::init();
     

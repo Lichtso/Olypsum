@@ -231,6 +231,8 @@ void Texture::updateFilters(GLenum textureTarget) {
     }else{
         glTexParameteri(textureTarget, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(textureTarget, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        if(depth > 1)
+            glTexParameteri(textureTarget, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glTexParameterf(textureTarget, GL_TEXTURE_MAX_ANISOTROPY, optionsState.anisotropy);
     }
     glTexParameteri(textureTarget, GL_TEXTURE_MIN_FILTER, minFilter);

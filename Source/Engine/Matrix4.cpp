@@ -19,11 +19,13 @@ Matrix4::Matrix4(Matrix4 const &mat) {
     w = mat.w;
 }
 
-Matrix4::Matrix4(btMatrix3x3 const &basis) {
-    x = basis.getColumn(0);
-    y = basis.getColumn(1);
-    z = basis.getColumn(2);
-    w = btVector3(0.0, 0.0, 0.0);
+Matrix4::Matrix4(btMatrix3x3 const &basis)
+    :x(basis.getColumn(0)), y(basis.getColumn(1)), z(basis.getColumn(2)), w(btVector3(0.0, 0.0, 0.0)) {
+    w.setW(1.0);
+}
+
+Matrix4::Matrix4(btMatrix3x3 const &basis, btVector3 const &origin)
+    :x(basis.getColumn(0)), y(basis.getColumn(1)), z(basis.getColumn(2)), w(origin) {
     w.setW(1.0);
 }
 
@@ -49,15 +51,15 @@ btVector3 Matrix4::getColum(unsigned char index) {
     return vec;
 }
 
-btMatrix3x3 Matrix4::getNormalMatrix() {
+btMatrix3x3 Matrix4::getNormalMatrix() const {
     return btMatrix3x3(x.normalized(), y.normalized(), z.normalized()).transpose();
 }
 
-btMatrix3x3 Matrix4::getBTMatrix3x3() {
+btMatrix3x3 Matrix4::getBTMatrix3x3() const {
     return btMatrix3x3(x, y, z).transpose();
 }
 
-btTransform Matrix4::getBTTransform() {
+btTransform Matrix4::getBTTransform() const {
     btTransform mat;
     mat.setBasis(getBTMatrix3x3());
     mat.setOrigin(w);
@@ -430,6 +432,16 @@ Matrix4& Matrix4::ortho(float w, float h, float n, float f) {
     b.z.setZ(2.0/(n-f));
     b.w.setZ((n+f)/(n-f));
     return (*this *= b);
+}
+
+Matrix4 Matrix4::getInterpolation(const Matrix4& _b, float t) {
+    btTransform a = getBTTransform(), b = _b.getBTTransform();
+    btQuaternion rotA, rotB;
+    a.getBasis().getRotation(rotA);
+    b.getBasis().getRotation(rotB);
+    Matrix4 result = btMatrix3x3(rotA.slerp(rotB, t));
+    result.w = a.getOrigin().lerp(b.getOrigin(), t);
+    return result;
 }
 
 

@@ -23,7 +23,6 @@ TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelL
     }
     diffuse = fileManager.initResource<Texture>(attribute->value());
     diffuse->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGB);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     if(diffuse->depth <= 1) {
         log(error_log, "Tried to construct TerrainObject with invalid \"EffectMap\" texture.");
         return;
@@ -38,7 +37,6 @@ TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelL
         }
         effectMap = fileManager.initResource<Texture>(attribute->value());
         effectMap->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGB);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         if(effectMap->depth <= 1) {
             log(error_log, "Tried to construct TerrainObject with invalid \"EffectMap\" texture.");
             return;
@@ -169,8 +167,8 @@ void TerrainObject::draw() {
         unsigned int shaderProgram = solidShadowSP;
         if(objectManager.currentShadowIsParabolid) shaderProgram += 4;
         shaderPrograms[shaderProgram]->use();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        //glActiveTexture(GL_TEXTURE0);
+        //glBindTexture(GL_TEXTURE_2D, 0);
     }else{
         shaderPrograms[terrainGSP]->use();
         currentShaderProgram->setUniformVec3("textureScale", textureScale);

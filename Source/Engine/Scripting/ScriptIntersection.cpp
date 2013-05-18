@@ -16,7 +16,7 @@ v8::Handle<v8::Value> ScriptIntersection::Constructor(const v8::Arguments &args)
 v8::Handle<v8::Value> ScriptIntersection::RayCast(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 4)
-        return v8::ThrowException(v8::String::New("rayCast(): Too less arguments"));
+        return v8::ThrowException(v8::String::New("rayCast(): Too few arguments"));
     if(!scriptVector3.isCorrectInstance(args[0]) || !scriptVector3.isCorrectInstance(args[1]) ||
        !args[2]->IsInt32() || !args[3]->IsBoolean())
         return v8::ThrowException(v8::String::New("rayCast(): Invalid argument"));
@@ -99,7 +99,7 @@ struct	ContactResultCallback : btCollisionWorld::ContactResultCallback {
 v8::Handle<v8::Value> ScriptIntersection::AABBIntersection(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 3)
-        return v8::ThrowException(v8::String::New("aabbIntersection(): Too less arguments"));
+        return v8::ThrowException(v8::String::New("aabbIntersection(): Too few arguments"));
     if(!scriptVector3.isCorrectInstance(args[0]) || !scriptVector3.isCorrectInstance(args[1]) || !args[2]->IsInt32())
         return v8::ThrowException(v8::String::New("aabbIntersection(): Invalid argument"));
     
@@ -117,7 +117,7 @@ v8::Handle<v8::Value> ScriptIntersection::AABBIntersection(const v8::Arguments& 
 v8::Handle<v8::Value> ScriptIntersection::SphereIntersection(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 3)
-        return v8::ThrowException(v8::String::New("sphereIntersection(): Too less arguments"));
+        return v8::ThrowException(v8::String::New("sphereIntersection(): Too few arguments"));
     if(!scriptVector3.isCorrectInstance(args[0]) || !args[1]->IsNumber() || !args[2]->IsInt32())
         return v8::ThrowException(v8::String::New("sphereIntersection(): Invalid argument"));
     

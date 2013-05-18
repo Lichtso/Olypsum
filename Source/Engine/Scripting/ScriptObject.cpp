@@ -62,7 +62,7 @@ v8::Handle<v8::Value> ScriptBaseObject::GetLinkNames(const v8::Arguments& args) 
 v8::Handle<v8::Value> ScriptBaseObject::GetLinkedObject(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1)
-        return v8::ThrowException(v8::String::New("BaseObject getLinkedObject(): Too less arguments"));
+        return v8::ThrowException(v8::String::New("BaseObject getLinkedObject(): Too few arguments"));
     if(!args[0]->IsString())
         return v8::ThrowException(v8::String::New("BaseObject getLinkedObject(): Invalid argument"));
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());

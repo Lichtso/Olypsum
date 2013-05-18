@@ -79,8 +79,8 @@ class ScriptMatrix4 : public ScriptClass {
     static v8::Handle<v8::Value> AccessRowY(const v8::Arguments& args);
     static v8::Handle<v8::Value> AccessRowZ(const v8::Arguments& args);
     static v8::Handle<v8::Value> AccessRowW(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetRotation(const v8::Arguments& args);
-    static v8::Handle<v8::Value> SetRotation(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessRotation(const v8::Arguments& args);
+    static v8::Handle<v8::Value> SetIdentity(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetInverse(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetProduct(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetRotatedVector(const v8::Arguments& args);

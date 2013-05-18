@@ -27,16 +27,17 @@ class Matrix4 {
     Matrix4();
     Matrix4(Matrix4 const &mat);
     Matrix4(btMatrix3x3 const &basis);
+    Matrix4(btMatrix3x3 const &basis, btVector3 const &origin);
     Matrix4(btTransform const &mat);
     Matrix4(btScalar matData[16]);
     //! Returns the colum of this Matrix4 at index
     btVector3 getColum(unsigned char index);
     //! Converts this Matrix4 into a btMatrix3x3 (the w component is ignored)
-    btMatrix3x3 getBTMatrix3x3();
+    btMatrix3x3 getBTMatrix3x3() const;
     //! Converts this Matrix4 into a btTransform
-    btTransform getBTTransform();
+    btTransform getBTTransform() const;
     //! Converts this Matrix4 into a normalized btMatrix3x3 (the w component is ignored)
-    btMatrix3x3 getNormalMatrix();
+    btMatrix3x3 getNormalMatrix() const;
     //! Converts this Matrix4 into a float[16]
     void getOpenGLMatrix(float* matData) const;
     //! Returns true if this Matrix4 does not conatin any NaN values
@@ -90,6 +91,8 @@ class Matrix4 {
      @param far The distance of the near far
      */
     Matrix4& ortho(btScalar width, btScalar height, btScalar near, btScalar far);
+    //! Returns the interpolation between the this and the given Matirx4
+    Matrix4 getInterpolation(const Matrix4&, float);
 };
 
 //! Converts a Matrix4 into a std::string

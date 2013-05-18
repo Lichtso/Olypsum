@@ -329,3 +329,12 @@ void openExternURL(const char* str) {
     NSURL *url = [[NSURL alloc] initWithString:[NSString stringWithUTF8String:str]];
     [[NSWorkspace sharedWorkspace] openURL:url];
 }
+
+void restartApplication() {
+    //NSTask* task = [NSTask launchedTaskWithLaunchPath:[[NSBundle mainBundle] executablePath] arguments:[NSArray arrayWithObjects:nil]];
+    NSDictionary *config = [NSDictionary dictionaryWithObjectsAndKeys:nil];
+    NSError *error = nil;
+    [[NSWorkspace sharedWorkspace] launchApplicationAtURL:[NSURL URLWithString:[[NSBundle mainBundle] executablePath]]
+                                   options:NSWorkspaceLaunchNewInstance | NSWorkspaceLaunchDefault configuration:config error:&error];
+    AppTerminate();
+}

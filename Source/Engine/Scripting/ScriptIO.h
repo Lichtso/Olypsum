@@ -9,7 +9,7 @@
 #ifndef ScriptIO_h
 #define ScriptIO_h
 
-#include "ScriptIntersection.h"
+#include "ScriptAnimation.h"
 
 class ScriptMouse : public ScriptClass {
     static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);

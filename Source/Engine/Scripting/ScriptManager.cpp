@@ -11,7 +11,7 @@
 v8::Handle<v8::Value> ScriptManager::ScriptLog(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() == 0)
-        return v8::ThrowException(v8::String::New("log(): Too less arguments"));
+        return v8::ThrowException(v8::String::New("log(): Too few arguments"));
     log(script_log, stdStrOfV8(args[0]));
     return v8::Undefined();
 }
@@ -19,25 +19,20 @@ v8::Handle<v8::Value> ScriptManager::ScriptLog(const v8::Arguments& args) {
 v8::Handle<v8::Value> ScriptManager::ScriptRequire(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() == 0)
-        return v8::ThrowException(v8::String::New("require(): Too less arguments"));
-    v8::String::AsciiValue name(args[0]->ToString());
-    FilePackage* filePackage = levelManager.levelPackage;
-    if(args.Length() == 2) {
-        v8::String::AsciiValue filePackageName(args[1]->ToString());
-        filePackage = fileManager.getPackage(*filePackageName);
-    }
-    if(!filePackage)
-        return v8::ThrowException(v8::String::New("require(): FilePackage not found"));
-    ScriptFile* script = scriptManager->getScriptFile(filePackage, *name);
-    if(script->exports.IsEmpty())
+        return v8::ThrowException(v8::String::New("require(): Too few arguments"));
+    
+    FilePackage* filePackage;
+    std::string name;
+    if(!fileManager.readResource(stdStrOfV8(args[0]->ToString()), filePackage, name))
         return v8::ThrowException(v8::String::New("require(): Error loading file"));
-    return handleScope.Close(script->exports);
+    
+    return handleScope.Close(scriptManager->getScriptFile(filePackage, name)->exports);
 }
 
 v8::Handle<v8::Value> ScriptManager::ScriptLoadContainer(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 2)
-        return v8::ThrowException(v8::String::New("loadContainer(): Too less arguments"));
+        return v8::ThrowException(v8::String::New("loadContainer(): Too few arguments"));
     if(!scriptMatrix4.isCorrectInstance(args[0]) || !args[1]->IsString())
         return v8::ThrowException(v8::String::New("loadContainer(): Invalid argument"));
     LevelLoader levelLoader;
@@ -52,7 +47,7 @@ v8::Handle<v8::Value> ScriptManager::ScriptLoadContainer(const v8::Arguments& ar
 v8::Handle<v8::Value> ScriptManager::ScriptSaveLevel(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 2)
-        return v8::ThrowException(v8::String::New("saveLevel(): Too less arguments"));
+        return v8::ThrowException(v8::String::New("saveLevel(): Too few arguments"));
     std::string localData = (args[0]->IsString()) ? stdStrOfV8(args[0]) : "",
                 globalData = (args[1]->IsString()) ? stdStrOfV8(args[1]) : "";
     return v8::Boolean::New(levelManager.saveLevel(localData, globalData));
@@ -112,6 +107,7 @@ ScriptManager::ScriptManager() {
     scriptSpotLight.init(globalTemplate);
     scriptPositionalLight.init(globalTemplate);
     scriptIntersection.init(globalTemplate);
+    scriptAnimation.init(globalTemplate);
     scriptMouse.init(globalTemplate);
     scriptKeyboard.init(globalTemplate);
     scriptGUIRect.init(globalTemplate);
@@ -131,6 +127,8 @@ ScriptManager::ScriptManager() {
 
 ScriptManager::~ScriptManager() {
     for(auto iterator : loadedScripts)
+        delete iterator.second;
+    for(auto iterator : animations)
         delete iterator.second;
     globalTemplate.Dispose();
 }
@@ -169,6 +167,14 @@ bool ScriptManager::tryCatch(v8::TryCatch* tryCatch) {
         log(script_log, stream.str());
     }
     return false;
+}
+
+void ScriptManager::gameTick() {
+    foreach_e(animations, iterator)
+        if(iterator->second->gameTick(iterator->first.c_str())) {
+            delete iterator->second;
+            animations.erase(iterator);
+        }
 }
 
 std::unique_ptr<ScriptManager> scriptManager;

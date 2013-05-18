@@ -42,7 +42,7 @@ static void leaveOptionsMenu(GUIButton* button) {
     if(optionsState.videoWidth != prevOptionsState.videoWidth ||
        optionsState.videoHeight != prevOptionsState.videoHeight ||
        optionsState.vSyncEnabled != prevOptionsState.vSyncEnabled)
-        AppTerminate();
+        restartApplication();
     updateGraphicOptions();
     menu.setMenu((levelManager.gameStatus == noGame) ? Menu::Name::main : Menu::Name::gameEsc);
 }

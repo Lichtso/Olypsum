@@ -188,7 +188,7 @@ void ObjectManager::gameTick() {
     
     glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
-    profiler.leaveSection("Draw post effects");
+    //profiler.leaveSection("Draw post effects");
     
     //Calculate Physics
     physicsWorld->stepSimulation(profiler.animationFactor, 4, 1.0/60.0); //Try to maintain 60 FPS
@@ -218,6 +218,9 @@ void ObjectManager::gameTick() {
         (*iterator)->gameTick();
     if(optionsState.particleCalcTarget == 2) glDisable(GL_RASTERIZER_DISCARD);
     profiler.leaveSection("Calculate particle systems");
+    
+    //Script Animations
+    scriptManager->gameTick();
     
     ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
     if(script) script->callFunction("ongametick", false, { });

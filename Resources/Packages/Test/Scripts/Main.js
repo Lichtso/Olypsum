@@ -27,7 +27,8 @@ exports.explosion = function(transform) {
 	//Spawn effects
 	var mat = new Matrix4();
 	mat.w(transform.w());
-	loadContainer(mat, "explosion");
+	var imported = loadContainer(mat, "explosion");
+	Animation.addFrames(imported[1], "color", false, [1.0, 1.0], [0.0, 1.5], [null, new Vector3(0.0, 0.0, 0.0)]);
 }
 
 exports.onload = function(localData, globalData) {
@@ -70,13 +71,13 @@ exports.ongametick = function() {
 		transform.w(transform.w().add(transform.z().mult(speed)));
 
 	if(!Keyboard.isKeyPressed(308)) { //Alt left
-		var rotation = transform.getRotation(), up = new Vector3(0.0, 1.0, 0.0);
-		transform.setRotation(rotation.getProduct(new Quaternion(Mouse.x()*0.01, Mouse.y()*0.01, 0.0)));
+		var rotation = transform.rotation(), up = new Vector3(0.0, 1.0, 0.0);
+		transform.rotation(rotation.getProduct(new Quaternion(Mouse.x()*0.01, Mouse.y()*0.01, 0.0)));
 		transform.y(up);
 		transform.x(transform.y().cross(transform.z()).normalize());
 		transform.y(transform.z().cross(transform.x()).normalize());
 		if(transform.y().getDot(up) < 0.12)
-			transform.setRotation(rotation.mult(new Quaternion(Mouse.x()*0.01, 0.0, 0.0)));
+			transform.rotation(rotation.mult(new Quaternion(Mouse.x()*0.01, 0.0, 0.0)));
 	}
 	
 	Cam.camObject.transformation(transform);

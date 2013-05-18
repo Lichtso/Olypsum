@@ -111,7 +111,7 @@ v8::Handle<v8::Value> ScriptVector3::GetDifference(const v8::Arguments& args) {
 v8::Handle<v8::Value> ScriptVector3::GetProduct(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1)
-        return v8::ThrowException(v8::String::New("Vector3 getProduct: Too less arguments"));
+        return v8::ThrowException(v8::String::New("Vector3 getProduct: Too few arguments"));
     btVector3 vec = getDataOfInstance(args.This());
     if(scriptVector3.isCorrectInstance(args[0]))
         return handleScope.Close(scriptVector3.newInstance(vec*getDataOfInstance(args[0])));
@@ -124,7 +124,7 @@ v8::Handle<v8::Value> ScriptVector3::GetProduct(const v8::Arguments& args) {
 v8::Handle<v8::Value> ScriptVector3::GetQuotient(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1)
-        return v8::ThrowException(v8::String::New("Vector3 getQuotient: Too less arguments"));
+        return v8::ThrowException(v8::String::New("Vector3 getQuotient: Too few arguments"));
     btVector3 vec = getDataOfInstance(args.This());
     if(scriptVector3.isCorrectInstance(args[0]))
         return handleScope.Close(scriptVector3.newInstance(vec/getDataOfInstance(args[0])));
@@ -196,7 +196,7 @@ v8::Handle<v8::Value> ScriptVector3::Subtract(const v8::Arguments& args) {
 v8::Handle<v8::Value> ScriptVector3::Multiply(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1)
-        return v8::ThrowException(v8::String::New("Vector3 mult: Too less arguments"));
+        return v8::ThrowException(v8::String::New("Vector3 mult: Too few arguments"));
     btVector3 vec = getDataOfInstance(args.This());
     if(scriptVector3.isCorrectInstance(args[0]))
         setDataToInstance(args.This(), vec*getDataOfInstance(args[0]));
@@ -210,7 +210,7 @@ v8::Handle<v8::Value> ScriptVector3::Multiply(const v8::Arguments& args) {
 v8::Handle<v8::Value> ScriptVector3::Divide(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1)
-        return v8::ThrowException(v8::String::New("Vector3 divide: Too less arguments"));
+        return v8::ThrowException(v8::String::New("Vector3 divide: Too few arguments"));
     btVector3 vec = getDataOfInstance(args.This());
     if(scriptVector3.isCorrectInstance(args[0]))
         setDataToInstance(args.This(), vec/getDataOfInstance(args[0]));
@@ -427,7 +427,7 @@ v8::Handle<v8::Value> ScriptQuaternion::GetDifference(const v8::Arguments& args)
 v8::Handle<v8::Value> ScriptQuaternion::GetProduct(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() != 1)
-        return v8::ThrowException(v8::String::New("Quaternion getProduct: Too less arguments"));
+        return v8::ThrowException(v8::String::New("Quaternion getProduct: Too few arguments"));
     btQuaternion quaternion;
     if(args[0]->IsNumber()) {
         quaternion = getDataOfInstance(args.This())*args[0]->NumberValue();
@@ -532,7 +532,7 @@ v8::Handle<v8::Value> ScriptQuaternion::Multiply(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     btQuaternion quaternion;
     if(args.Length() != 1)
-        return v8::ThrowException(v8::String::New("Quaternion mult: Too less arguments"));
+        return v8::ThrowException(v8::String::New("Quaternion mult: Too few arguments"));
     if(args[0]->IsNumber()) {
         quaternion = getDataOfInstance(args.This())*args[0]->NumberValue();
     }else if(scriptQuaternion.isCorrectInstance(args[0])) {
@@ -702,22 +702,25 @@ v8::Handle<v8::Value> ScriptMatrix4::AccessRowW(const v8::Arguments& args) {
         return handleScope.Close(scriptVector3.newInstance(objectPtr->w));
 }
 
-v8::Handle<v8::Value> ScriptMatrix4::GetRotation(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptMatrix4::AccessRotation(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    btQuaternion quaternion;
-    getDataOfInstance(args.This())->getBTMatrix3x3().getRotation(quaternion);
-    return handleScope.Close(scriptQuaternion.newInstance(quaternion));
+    
+    Matrix4* mat = getDataOfInstance(args.This());
+    if(args.Length() == 1 && scriptQuaternion.isCorrectInstance(args[0])) {
+        btMatrix3x3 basis;
+        basis.setRotation(scriptQuaternion.getDataOfInstance(args[0]));
+        *mat = Matrix4(basis, mat->w);
+        return args[0];
+    }else{
+        btQuaternion quaternion;
+        mat->getBTMatrix3x3().getRotation(quaternion);
+        return handleScope.Close(scriptQuaternion.newInstance(quaternion));
+    }
 }
 
-v8::Handle<v8::Value> ScriptMatrix4::SetRotation(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptMatrix4::SetIdentity(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() != 1 || !scriptQuaternion.isCorrectInstance(args[0]))
-        return v8::ThrowException(v8::String::New("Matrix4 setRotation: Invalid argument"));
-    btMatrix3x3 basis;
-    basis.setRotation(scriptQuaternion.getDataOfInstance(args[0]));
-    Matrix4 mat(basis);
-    mat.w = getDataOfInstance(args.This())->w;
-    *getDataOfInstance(args.This()) = mat;
+    getDataOfInstance(args.This())->setIdentity();
     return handleScope.Close(args.This());
 }
 
@@ -835,8 +838,8 @@ ScriptMatrix4::ScriptMatrix4() :ScriptClass("Matrix4", Constructor) {
     objectTemplate->Set(v8::String::New("y"), v8::FunctionTemplate::New(AccessRowY));
     objectTemplate->Set(v8::String::New("z"), v8::FunctionTemplate::New(AccessRowZ));
     objectTemplate->Set(v8::String::New("w"), v8::FunctionTemplate::New(AccessRowW));
-    objectTemplate->Set(v8::String::New("getRotation"), v8::FunctionTemplate::New(GetRotation));
-    objectTemplate->Set(v8::String::New("setRotation"), v8::FunctionTemplate::New(SetRotation));
+    objectTemplate->Set(v8::String::New("rotation"), v8::FunctionTemplate::New(AccessRotation));
+    objectTemplate->Set(v8::String::New("setIdentity"), v8::FunctionTemplate::New(SetIdentity));
     objectTemplate->Set(v8::String::New("getInverse"), v8::FunctionTemplate::New(GetInverse));
     objectTemplate->Set(v8::String::New("getProduct"), v8::FunctionTemplate::New(GetProduct));
     objectTemplate->Set(v8::String::New("getRotated"), v8::FunctionTemplate::New(GetRotatedVector));
