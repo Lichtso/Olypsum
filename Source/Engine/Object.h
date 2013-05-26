@@ -17,20 +17,33 @@ class BaseLink;
 class LevelLoader;
 class LevelSaver;
 
+//! Objects and Links basic class
+/*!
+ This is the basic class for all Objects and Links.
+ 
+ @warning Don't use it directly
+ */
+class BaseClass {
+    protected:
+    BaseClass() :scriptFile(NULL) { };
+    virtual ~BaseClass();
+    public:
+    ScriptFile* scriptFile; //!< The script file to be called on events
+    v8::Persistent<v8::Object> scriptInstance; //!< The script representation
+    //! Allocates a new BaseObject::scriptInstance (overwritten by child classes)
+    virtual void newScriptInstance();
+};
+
 //! Objects basic class
 /*!
  This is the basic class for all Objects.
  
  @warning Don't use it directly
  */
-class BaseObject {
-    protected:
-    BaseObject() :scriptFile(NULL) { };
-    virtual ~BaseObject();
+class BaseObject : public BaseClass {
     public:
-    ScriptFile* scriptFile; //!< The script file to be called on events
-    v8::Persistent<v8::Object> scriptInstance; //!< The script representation
     std::map<std::string, BaseLink*> links; //!< A map of LinkObject and names to connect BaseObject to others
+    void newScriptInstance();
     //! Used to remove a BaseObject from all lists correctly
     virtual void removeClean();
     //! Used to delete a BaseObject
@@ -49,8 +62,6 @@ class BaseObject {
     virtual bool gameTick();
     //! Initialize from rapidxml::xml_node
     void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    //! Allocates a new BaseObject::scriptInstance (overwritten by child classes)
-    virtual void newScriptInstance();
     //! Reads the transformation from a rapidxml::xml_node
     static btTransform readTransformtion(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     //! Writes its self to rapidxml::xml_node and returns it
@@ -59,6 +70,8 @@ class BaseObject {
     BaseObject* findObjectByPath(std::string path);
     //! Returns the path of this BaseObject (seperated by '/')
     std::string getPath();
+    //! Returns the iterator of a BaseLink
+    std::map<std::string, BaseLink*>::iterator getIteratorOfLink(BaseLink* link);
 };
 
 //! BaseObject without physics-body, only transformation
@@ -101,7 +114,6 @@ class BoneObject : public SimpleObject {
     public:
     Bone* bone;
     BoneObject(Bone* boneB) : bone(boneB) { }
-    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
 //! BaseObject with physics-body

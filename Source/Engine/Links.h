@@ -28,13 +28,12 @@ class LinkInitializer {
 /*!
  This is the basic class for all LinkObjects.
  */
-class BaseLink {
-    BaseObject* fusion; //!< A pointer which combines the pointers of BaseObject a and b via xor
+class BaseLink : public BaseClass {
     protected:
     BaseLink() { };
     virtual ~BaseLink() { };
-    void cleanLinkOther(BaseObject* a);
     public:
+    BaseObject *a, *b; //!< The linkes BaseObjects
     /*! Constructs a new LinkObject
      @param initializer A LinkInitializer which contains the objects and names to be linked together
      */
@@ -42,28 +41,24 @@ class BaseLink {
     //! Initialize from rapidxml::xml_node
     BaseLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     //! Is called by a parent BaseObject to its children to prepare the next graphics frame
-    virtual void gameTickFrom(BaseObject* parent) { };
+    virtual void gameTick() { };
     /*! Gets the other BaseObject
      @param a One of the two BaseObject passed in the constructor. Either a or b
      @return If a was passed then b and if b was passed then a
      */
-    BaseObject* getOther(BaseObject* a) {
-        return reinterpret_cast<BaseObject*>(reinterpret_cast<unsigned long>(a) ^ reinterpret_cast<unsigned long>(fusion));
+    BaseObject* getOther(BaseObject* object) {
+        return (object == b) ? a : b;
     }
-    /*! Used to remove a LinkObject correctly
-     @param a One of the two BaseObject passed in the constructor. Either a or b
-     @param iteratorInA the iterator of this LinkObject in the BaseObject::links map of the first parameter
-     */
-    virtual void removeClean(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
+    //! Used to remove a LinkObject correctly
+    virtual void removeClean();
     /*! Used to delete a LinkObject
-     @param a One of the two BaseObject passed in the constructor. Either a or b
-     @param iteratorInA the iterator of this LinkObject in the BaseObject::links map of the first parameter
+     @param object One of the two BaseObject passed in the constructor. Either a or b
      */
-    virtual void removeFast(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
+    virtual void removeFast(BaseObject* object);
     //! Reads the LinkInitializer from rapidxml::xml_node
     static LinkInitializer readInitializer(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    //! Initialize from LinkInitializer
-    void init(LinkInitializer& initializer);
+    //! Initialize from LinkInitializer. Returns success
+    bool init(LinkInitializer& initializer);
     //! Writes its self to rapidxml::xml_node and returns it
     virtual rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
@@ -73,80 +68,22 @@ class PhysicLink : public BaseLink {
     ~PhysicLink();
     public:
     btTypedConstraint* constraint;
+    void gameTick();
     /*! Constructs a new PhysicLink
      @param initializer A LinkInitializer which contains the objects and names to be linked together
      @param constraint The bullet physics constraint to be attached
      */
     PhysicLink(LinkInitializer& initializer, btTypedConstraint* constraint);
     PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    void removeClean(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
+    void removeClean();
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
 
 //! A BaseLink with a parent child relationship
 class TransformLink : public BaseLink {
-    ~TransformLink();
     public:
-    //! This is the base for all entries of a TransformLink
-    /*!
-     @warning Don't use it directly
-     */
-    class BaseEntry {
-        protected:
-        BaseEntry() { }
-        public:
-        /*! This calculates a matrix which is multiplied with the others in TransformLink::transforms
-         @return A btTransform to be used to transform the child object of this link
-         */
-        virtual btTransform gameTick() {
-            return btTransform::getIdentity();
-        }
-        //! Writes its self to rapidxml::xml_node and returns it
-        virtual rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc);
-    };
-    //! A TransformLink::BaseEntry which transforms with a matrix
-    class TransformEntry : public BaseEntry {
-        public:
-        btTransform matrix; //!< The direct transformation matrix
-        TransformEntry(btTransform matrixB) : matrix(matrixB) { }
-        btTransform gameTick() {
-            return matrix;
-        }
-        rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc);
-    };
-    //! A TransformLink::BaseEntry which transforms with animation frames
-    class AnimationEntry : public BaseEntry {
-        public:
-        //! This is key frame used for animation
-        class Frame {
-            public:
-            btQuaternion rotation;
-            btVector3 position;
-            float accBegin, //!< The acceleration at t = 0
-            accEnd, //!< The acceleration at t = duration
-            duration; //!< The duration of this frame in seconds
-            Frame(float accBegin, float accEnd, float duration, btQuaternion rotation, btVector3 position);
-            /*! Internaly used by the engine to get the transformation if only one frame is available
-             @return The transformation at t = 0
-             */
-            btTransform getTransform();
-            /*! Internaly used by the engine to interpolate with a cubic hermite spline
-             @param next The next TransformFrame to interpolate to
-             @param t The time in seconds
-             @return The interpolated result
-             */
-            btTransform interpolateTo(Frame* next, float t);
-        };
-        bool loop; //!< True if the animation repeats its self
-        float animationTime; //!< How many seconds is the current frame old
-        std::vector<Frame*> frames; //!< The frames in this animation
-        AnimationEntry(bool loop = true, float animationTime = 0.0);
-        ~AnimationEntry();
-        btTransform gameTick();
-        rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc);
-    };
-    std::vector<BaseEntry*> transforms; //!< A array with all the transformations to be applied
-    virtual void gameTickFrom(BaseObject* parent);
+    btTransform transform; //!< Applied from parent to child
+    void gameTick();
     /*! Constructs a new HierarchicalLink
      @param initializer A LinkInitializer which contains the objects and names to be linked together
      */
@@ -159,9 +96,9 @@ class TransformLink : public BaseLink {
      
      @warning This method calls remove() on the child object but only if it is called from the parent
      */
-    void removeClean(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
-    void removeFast(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA);
-    void init(LinkInitializer& initializer);
+    void removeClean();
+    void removeFast(BaseObject* a);
+    bool init(LinkInitializer& initializer);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
 

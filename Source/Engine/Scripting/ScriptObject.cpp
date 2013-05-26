@@ -8,15 +8,46 @@
 
 #include "ScriptManager.h"
 
-v8::Handle<v8::Value> ScriptBaseObject::Constructor(const v8::Arguments &args) {
+v8::Handle<v8::Value> ScriptBaseClass::Constructor(const v8::Arguments &args) {
     v8::HandleScope handleScope;
     
     if(args.Length() != 1 || !args[0]->IsExternal())
-        return v8::ThrowException(v8::String::New("BaseObject Constructor: Class can't be instantiated"));
+        return v8::ThrowException(v8::String::New("BaseClass Constructor: Class can't be instantiated"));
     
     args.This()->SetInternalField(0, args[0]);
     return args.This();
 }
+
+v8::Handle<v8::Value> ScriptBaseClass::GetScriptClass(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    BaseObject* objectPtr = getDataOfInstance<BaseObject>(info.This());
+    std::string path = objectPtr->scriptFile->name;
+    if(objectPtr->scriptFile->filePackage != levelManager.levelPackage)
+        path = std::string("../")+objectPtr->scriptFile->filePackage->name+'/'+path;
+    return handleScope.Close(v8::String::New(path.c_str()));
+}
+
+void ScriptBaseClass::SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsString()) return;
+    BaseObject* objectPtr = getDataOfInstance<BaseObject>(info.This());
+    FilePackage* filePackage;
+    std::string name;
+    if(fileManager.readResource(stdStrOfV8(value), filePackage, name))
+        objectPtr->scriptFile = scriptManager->getScriptFile(filePackage, name);
+}
+
+ScriptBaseClass::ScriptBaseClass(const char* name) :ScriptClass(name, Constructor) {
+    v8::HandleScope handleScope;
+    
+    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
+    objectTemplate->SetAccessor(v8::String::New("scriptClass"), GetScriptClass, SetScriptClass);
+    
+    v8::Local<v8::ObjectTemplate> instanceTemplate = functionTemplate->InstanceTemplate();
+    instanceTemplate->SetInternalFieldCount(1);
+}
+
+
 
 v8::Handle<v8::Value> ScriptBaseObject::AccessTransformation(const v8::Arguments& args) {
     v8::HandleScope handleScope;
@@ -30,23 +61,29 @@ v8::Handle<v8::Value> ScriptBaseObject::AccessTransformation(const v8::Arguments
         return handleScope.Close(scriptMatrix4.newInstance(Matrix4(objectPtr->getTransformation())));
 }
 
-v8::Handle<v8::Value> ScriptBaseObject::GetScriptClass(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+v8::Handle<v8::Value> ScriptBaseObject::RemoveLink(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(info.This());
-    std::string path = objectPtr->scriptFile->name;
-    if(objectPtr->scriptFile->filePackage != levelManager.levelPackage)
-        path = std::string("../")+objectPtr->scriptFile->filePackage->name+'/'+path;
-    return handleScope.Close(v8::String::New(path.c_str()));
+    if(args.Length() < 1)
+        return v8::ThrowException(v8::String::New("BaseObject removeLink(): Too few arguments"));
+    if(!args[0]->IsString())
+        return v8::ThrowException(v8::String::New("BaseObject removeLink(): Invalid argument"));
+    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
+    BaseLink* link = objectPtr->links[stdStrOfV8(args[0])];
+    if(!link) return v8::Boolean::New(false);
+    link->removeClean();
+    return v8::Boolean::New(true);
 }
 
-void ScriptBaseObject::SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+v8::Handle<v8::Value> ScriptBaseObject::GetLink(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(!value->IsString()) return;
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(info.This());
-    FilePackage* filePackage;
-    std::string name;
-    if(fileManager.readResource(stdStrOfV8(value), filePackage, name))
-        objectPtr->scriptFile = scriptManager->getScriptFile(filePackage, name);
+    if(args.Length() < 1)
+        return v8::ThrowException(v8::String::New("BaseObject getLink(): Too few arguments"));
+    if(!args[0]->IsString())
+        return v8::ThrowException(v8::String::New("BaseObject getLink(): Invalid argument"));
+    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
+    BaseLink* link = objectPtr->links[stdStrOfV8(args[0])];
+    if(!link) return v8::Undefined();
+    return handleScope.Close(link->scriptInstance);
 }
 
 v8::Handle<v8::Value> ScriptBaseObject::GetLinkNames(const v8::Arguments& args) {
@@ -77,19 +114,13 @@ v8::Handle<v8::Value> ScriptBaseObject::GetPath(const v8::Arguments& args) {
     return handleScope.Close(v8::String::New(objectPtr->getPath().c_str()));
 }
 
-ScriptBaseObject::ScriptBaseObject(const char* name) :ScriptClass(name, Constructor) {
-    v8::HandleScope handleScope;
-    
-    v8::Local<v8::ObjectTemplate> instanceTemplate = functionTemplate->InstanceTemplate();
-    instanceTemplate->SetInternalFieldCount(1);
-}
-
 ScriptBaseObject::ScriptBaseObject() :ScriptBaseObject("BaseObject") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->Set(v8::String::New("transformation"), v8::FunctionTemplate::New(AccessTransformation));
-    objectTemplate->SetAccessor(v8::String::New("scriptClass"), GetScriptClass, SetScriptClass);
+    objectTemplate->Set(v8::String::New("removeLink"), v8::FunctionTemplate::New(RemoveLink));
+    objectTemplate->Set(v8::String::New("getLink"), v8::FunctionTemplate::New(GetLink));
     objectTemplate->Set(v8::String::New("getLinkNames"), v8::FunctionTemplate::New(GetLinkNames));
     objectTemplate->Set(v8::String::New("getLinkedObject"), v8::FunctionTemplate::New(GetLinkedObject));
     objectTemplate->Set(v8::String::New("getPath"), v8::FunctionTemplate::New(GetPath));
@@ -188,10 +219,6 @@ v8::Handle<v8::Value> ScriptPhysicObject::GetCollisionShapeInfo(const v8::Argume
     return handleScope.Close(result);
 }
 
-ScriptPhysicObject::ScriptPhysicObject(const char* name) :ScriptBaseObject(name) {
-    
-}
-
 ScriptPhysicObject::ScriptPhysicObject() :ScriptPhysicObject("PhysicObject") {
     v8::HandleScope handleScope;
     
@@ -204,5 +231,6 @@ ScriptPhysicObject::ScriptPhysicObject() :ScriptPhysicObject("PhysicObject") {
 
 
 
+ScriptBaseClass scriptBaseClass;
 ScriptBaseObject scriptBaseObject;
 ScriptPhysicObject scriptPhysicObject;

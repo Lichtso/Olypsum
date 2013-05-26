@@ -78,7 +78,7 @@ bool LightObject::gameTick(bool shadowActive) {
         }
     }
     objectManager.currentShadowLight = this;
-    return true;
+    return DisplayObject::gameTick();
 }
 
 void LightObject::draw() {

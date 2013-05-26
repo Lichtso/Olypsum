@@ -36,7 +36,7 @@ void ScriptModelObject::SetModel(v8::Local<v8::String> property, v8::Local<v8::V
     if(!value->IsString()) return;
     ModelObject* objectPtr = getDataOfInstance<ModelObject>(info.This());
     auto model = fileManager.initResource<Model>(stdStrOfV8(value));
-    if(model) objectPtr->setModel(model);
+    if(model) objectPtr->setModel(NULL, model);
 }
 
 v8::Handle<v8::Value> ScriptModelObject::AccessTextureAnimation(const v8::Arguments& args) {

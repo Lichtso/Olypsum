@@ -313,7 +313,7 @@ bool CamObject::gameTick() {
     alListenerfv(AL_ORIENTATION, orientation);
     alListener3f(AL_POSITION, pos.x(), pos.y(), pos.z());
     alListener3f(AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());
-    return true;
+    return SimpleObject::gameTick();
 }
 
 void CamObject::newScriptInstance() {

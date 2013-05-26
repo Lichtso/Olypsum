@@ -181,7 +181,7 @@ bool SoundObject::gameTick() {
     alSource3f(ALname, AL_POSITION, position.x(), position.y(), position.z());
     alSource3f(ALname, AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());
     prevPosition = position;
-    return true;
+    return SimpleObject::gameTick();
 }
 
 rapidxml::xml_node<xmlUsedCharType>* SoundObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {

@@ -8,27 +8,36 @@
 
 #include "AppMain.h"
 
-BaseObject::~BaseObject() {
+BaseClass::~BaseClass() {
     if(!scriptInstance.IsEmpty())
         scriptInstance.Dispose();
 }
 
+void BaseClass::newScriptInstance() {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    v8::Local<v8::Object> instance = scriptBaseClass.functionTemplate->GetFunction()->NewInstance(1, &external);
+    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+}
+
+
+
 void BaseObject::removeClean() {
     while(links.size() > 0)
-        links.begin()->second->removeClean(this, links.begin());
+        links.begin()->second->removeClean();
     delete this;
 }
 
 void BaseObject::removeFast() {
     foreach_e(links, iterator)
-        iterator->second->removeFast(this, iterator);
+        iterator->second->removeFast(this);
     delete this;
 }
 
 bool BaseObject::gameTick() {
-    for(auto link : links)
-        if(link.first != "..") //Don't process parent
-            link.second->gameTickFrom(this);
+    foreach_e(links, iterator)
+        if(iterator->second->b != this || !dynamic_cast<TransformLink*>(iterator->second)) //Don't process parent
+            iterator->second->gameTick();
     return true;
 }
 
@@ -98,7 +107,7 @@ std::string BaseObject::getPath() {
     while(true) {
         auto parentIterator = object->links.find(".."); //Find parent
         if(parentIterator == object->links.end() || !dynamic_cast<TransformLink*>(parentIterator->second)) break;
-        object = parentIterator->second->getOther(object);
+        object = parentIterator->second->a;
         for(auto iterator : object->links)
             if(iterator.second == parentIterator->second) {
                 path = (path.size() == 0) ? iterator.first : iterator.first+'/'+path;
@@ -108,17 +117,11 @@ std::string BaseObject::getPath() {
     return path;
 }
 
-
-
-rapidxml::xml_node<xmlUsedCharType>* BoneObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
-    rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
-    node->name("BoneObject");
-    
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
-    attribute->name("path");
-    attribute->value(doc.allocate_string(getPath().c_str()));
-    node->append_attribute(attribute);
-    return node;
+std::map<std::string, BaseLink*>::iterator BaseObject::getIteratorOfLink(BaseLink* link) {
+    foreach_e(links, iterator)
+        if(iterator->second == link)
+            return  iterator;
+    return links.end();
 }
 
 

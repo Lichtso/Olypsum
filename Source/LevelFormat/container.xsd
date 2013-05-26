@@ -34,18 +34,6 @@
                                                 </xsd:complexType>
                                             </xsd:element>
                                             <xsd:element name="Model" type="Resource" minOccurs="1"/>
-                                            <xsd:element name="SkeletonPose" minOccurs="0">
-                                                <xsd:complexType>
-                                                    <xsd:sequence>
-                                                        <xsd:element name="BoneObject" minOccurs="0" maxOccurs="unbounded">
-                                                            <xsd:complexType>
-                                                                <xsd:group ref="Transformation"/>
-                                                                <xsd:attribute name="path" type="xsd:string"/>
-                                                            </xsd:complexType>
-                                                        </xsd:element>
-                                                    </xsd:sequence>
-                                                </xsd:complexType>
-                                            </xsd:element>
                                             <xsd:element name="TextureAnimation" type="ScalarList" minOccurs="0"/>
                                             <xsd:element name="Integrity" type="xsd:decimal" minOccurs="0"/>
                                             <xsd:element name="AngularVelocity" type="Vector3" minOccurs="0"/>

@@ -94,6 +94,7 @@ ScriptManager::ScriptManager() {
     scriptVector3.init(globalTemplate);
     scriptQuaternion.init(globalTemplate);
     scriptMatrix4.init(globalTemplate);
+    scriptBaseClass.init(globalTemplate);
     scriptBaseObject.init(globalTemplate);
     scriptPhysicObject.init(globalTemplate);
     scriptModelObject.init(globalTemplate);
@@ -106,6 +107,9 @@ ScriptManager::ScriptManager() {
     scriptDirectionalLight.init(globalTemplate);
     scriptSpotLight.init(globalTemplate);
     scriptPositionalLight.init(globalTemplate);
+    //scriptBaseLink.init(globalTemplate);
+    //scriptPhysicLink.init(globalTemplate);
+    //scriptTransformLink.init(globalTemplate);
     scriptIntersection.init(globalTemplate);
     scriptAnimation.init(globalTemplate);
     scriptMouse.init(globalTemplate);

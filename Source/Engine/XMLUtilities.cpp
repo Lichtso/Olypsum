@@ -74,9 +74,6 @@ btTransform readTransformationXML(rapidxml::xml_node<xmlUsedCharType>* node) {
             btTransform mat;
             mat.setIdentity();
             mat.setBasis(mat.getBasis().scaled(btVector3(vectorData.data[0], vectorData.data[1], vectorData.data[2])));
-            /*mat.setBasis(btMatrix3x3(btVector3(vectorData.data[0], 0, 0),
-                                     btVector3(0, vectorData.data[1], 0),
-                                     btVector3(0, 0, vectorData.data[2])));*/
             transform = transform * mat;
         }
         node = node->next_sibling();

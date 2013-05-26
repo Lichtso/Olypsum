@@ -3,23 +3,21 @@
 		<ParticlesObject particles="20" systemLife="2.5">
 			<Texture src="explosion.png" />
 			<PhysicsBody collisionShape="sphere0" />
-			<Life min="1.0" max="2.0" />
+			<Life min="1.7" max="2.0" />
 			<Size min="0.5" max="0.9" />
 			<SpawnBox min="-0.2 -0.2 -0.2" max="0.2 0.2 0.2" />
 			<Velocity min="-0.6 -0.6 -0.6" max="0.6 0.6 0.6" />
 		</ParticlesObject>
 		<LightObject type="positional">
-			<Color>1.0 0.5 0.0</Color>
-			<Bounds omniDirectional="true" range="5.0" />
+			<Color>2.0 0.9 0.0</Color>
+			<Bounds omniDirectional="true" range="8.0" />
 		</LightObject>
 	</Objects>
 	<Links>
 		<TransformLink>
 			<Object index="0" name=".." />
 			<Object index="1" name="child" />
-			<Transforms>
-
-			</Transforms>
+			<Translate>0.0 1.0 0.0</Translate>
 		</TransformLink>
 	</Links>
 </Container>

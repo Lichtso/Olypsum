@@ -20,7 +20,7 @@
             <xsd:length value="3"/>
         </xsd:restriction>
     </xsd:simpleType>
-	<xsd:simpleType name="Quaternion">
+	<xsd:simpleType name="Vector4">
     	<xsd:restriction base="ScalarList">
     		<xsd:length value="4"/>
     	</xsd:restriction>
@@ -46,7 +46,7 @@
 	</xsd:simpleType>
 	<xsd:group name="Transformation">
 		<xsd:choice>
-			<xsd:element name="rotate" type="Quaternion" minOccurs="0" maxOccurs="unbounded"/>
+			<xsd:element name="rotate" type="Vector4" minOccurs="0" maxOccurs="unbounded"/>
 			<xsd:element name="translate" type="Vector3" minOccurs="0" maxOccurs="unbounded"/>
 			<xsd:element name="scale" type="Vector3" minOccurs="0" maxOccurs="unbounded"/>
 			<xsd:element name="matrix" type="Matrix4" minOccurs="0" maxOccurs="unbounded"/>

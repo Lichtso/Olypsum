@@ -137,6 +137,7 @@ void main() {
     intensity = (1.0-intensity);
     #endif //Shadows disabled
     
+    intensity *= intensity;
     diffuseOut = lColor*intensity*max(dot(lightDir, normal), 0.0);
     specularOut = lColor*intensity*pow(max(dot(reflect(lightDir, normal), normalize(pos-camPos)), 0.0), material.r*19.0+1.0)*material.g;
 }

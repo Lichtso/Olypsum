@@ -30,7 +30,7 @@
 		</RigidObject>
 		<LightObject type="positional">
 			<Translate>2.0 3.0 2.0</Translate>
-			<Color>1.0 1.0 1.0</Color>
+			<Color>1.7 1.8 2.0</Color>
 			<Bounds omniDirectional="true" range="15.0" />
 		</LightObject>
 		<TerrainObject>
@@ -69,12 +69,8 @@
 		</PhysicLink>
 		<TransformLink>
 			<Object index="2" name=".." />
-			<Object index="3" name="child" />
-			<Transforms>
-				<Entry type="transform">
-					<Translate>0.0 7.0 1.0</Translate>
-				</Entry>
-			</Transforms>
+			<Object index="28" name="child" />
+			<Translate>0.0 7.0 1.0</Translate>
 		</TransformLink>
 	</Links>
 </Container>

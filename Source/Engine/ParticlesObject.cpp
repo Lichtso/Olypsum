@@ -264,7 +264,7 @@ bool ParticlesObject::gameTick() {
         activeVAO = !activeVAO;
     }
     
-    return true;
+    return DisplayObject::gameTick();
 }
 
 void ParticlesObject::draw() {

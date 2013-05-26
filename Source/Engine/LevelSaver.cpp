@@ -21,11 +21,6 @@ void LevelSaver::pushObject(BaseObject* object) {
     for(auto iteratorInObject : object->links) {
         auto iteratorInSet = linkingMap.find(iteratorInObject.second);
         if(iteratorInSet == linkingMap.end()) {
-            if(dynamic_cast<BoneObject*>(object) && iteratorInObject.first == "..")
-                continue; //Object 0 is child and BoneObject
-            if(dynamic_cast<BoneObject*>(iteratorInObject.second->getOther(object)) && iteratorInObject.first != "..")
-                continue; //Object 1 is child and BoneObject
-            
             LinkInitializer* linkSaver = new LinkInitializer();
             linkSaver->index[0] = objectCounter;
             linkSaver->object[0] = object;

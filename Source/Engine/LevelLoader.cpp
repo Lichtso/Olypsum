@@ -21,15 +21,13 @@ v8::Handle<v8::Array> LevelLoader::getResultsArray() {
     return handleScope.Close(objects);
 }
 
-BaseObject* LevelLoader::getObjectLinking(const char* id) {
-    unsigned int offset;
-    sscanf(id, "%d", &offset);
-    offset += objectLinkingOffset;
-    if(offset < objectLinkingScope || offset >= objectLinkingIndex.size()) {
-        log(error_log, std::string("Object linking offset out of scope: ")+id+'.');
+BaseObject* LevelLoader::getObjectLinking(unsigned int index) {
+    index += objectLinkingOffset;
+    if(index < objectLinkingScope || index >= objectLinkingIndex.size()) {
+        log(error_log, std::string("Object linking offset out of scope: "+stringOf(index)+'.'));
         return NULL;
     }
-    return objectLinkingIndex[offset];
+    return objectLinkingIndex[index];
 }
 
 void LevelLoader::pushObject(BaseObject* object) {

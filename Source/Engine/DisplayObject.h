@@ -55,9 +55,8 @@ class GraphicObject : public DisplayObject {
  */
 class ModelObject : public GraphicObject {
     std::unique_ptr<btTransform> skeletonPose;
-    void setupBones(BaseObject* object, Bone* bone);
-    void writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver,
-                    rapidxml::xml_node<xmlUsedCharType>* node, BoneObject *object);
+    void setupBones(LevelLoader* levelLoader, BaseObject* object, Bone* bone);
+    void writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver, BoneObject *object);
     void updateSkeletonPose(BaseObject* object, Bone* bone);
     protected:
     ModelObject() :integrity(1.0) { };
@@ -70,7 +69,7 @@ class ModelObject : public GraphicObject {
     std::vector<float> textureAnimation; //!< Animation time for each mesh;
     FileResourcePtr<Model> model;
     //! Overwrites the model and cleans the textureAnimation
-    void setModel(FileResourcePtr<Model> model);
+    void setModel(LevelLoader* levelLoader, FileResourcePtr<Model> model);
     //! Draws the entire model with all meshes
     void draw();
     //! Draws a single mesh

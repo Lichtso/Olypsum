@@ -17,24 +17,24 @@ BaseLink::BaseLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* level
     init(initializer);
 }
 
-void BaseLink::cleanLinkOther(BaseObject* a) {
-    BaseObject* b = getOther(a);
-    for(auto iterator : b->links)
-        if(iterator.second == this) {
-            b->links.erase(iterator.first);
-            break;
-        }
-}
-
-void BaseLink::removeClean(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
-    a->links.erase(iteratorInA);
-    cleanLinkOther(a);
+void BaseLink::removeClean() {
+    a->links.erase(a->getIteratorOfLink(this));
+    b->links.erase(b->getIteratorOfLink(this));
     delete this;
 }
 
-void BaseLink::removeFast(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
-    cleanLinkOther(a);
-    delete this;
+void BaseLink::removeFast(BaseObject* object) {
+    /*if(!a || !b)
+        delete this;
+    else if(a == object)
+        a = NULL;
+    else
+        b = NULL;*/
+    
+    if(!b)
+        delete this;
+    else
+        b = NULL;
 }
 
 LinkInitializer BaseLink::readInitializer(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
@@ -50,7 +50,8 @@ LinkInitializer BaseLink::readInitializer(rapidxml::xml_node<xmlUsedCharType>* n
             log(error_log, "Tried to construct BaseLink without \"index\"-attribute.");
             return initializer;
         }
-        initializer.object[i] = levelLoader->getObjectLinking(attribute->value());
+        sscanf(attribute->value(), "%d", &initializer.index[i]);
+        initializer.object[i] = levelLoader->getObjectLinking(initializer.index[i]);
         attribute = node->first_attribute("name");
         if(!attribute) {
             log(error_log, "Tried to construct BaseLink without \"name\"-attribute.");
@@ -62,10 +63,26 @@ LinkInitializer BaseLink::readInitializer(rapidxml::xml_node<xmlUsedCharType>* n
     return initializer;
 }
 
-void BaseLink::init(LinkInitializer& initializer) {
-    initializer.object[0]->links[initializer.name[1]] = this;
-    initializer.object[1]->links[initializer.name[0]] = this;
-    fusion = reinterpret_cast<BaseObject*>(reinterpret_cast<unsigned long>(initializer.object[0]) ^ reinterpret_cast<unsigned long>(initializer.object[1]));
+bool BaseLink::init(LinkInitializer& initializer) {
+    auto iteratorA = initializer.object[0]->links.find(initializer.name[1]),
+         iteratorB = initializer.object[1]->links.find(initializer.name[0]);
+    if(iteratorA != initializer.object[0]->links.end() || iteratorB != initializer.object[1]->links.end()) {
+        if(iteratorA->second == iteratorB->second && dynamic_cast<TransformLink*>(iteratorA->second)) {
+            delete iteratorA->second;
+            iteratorA->second = this;
+            iteratorB->second = this;
+        }else{
+            log(error_log, "Tried to overwrite BaseLink.");
+            delete this;
+            return false;
+        }
+    }else{
+        initializer.object[0]->links[initializer.name[1]] = this;
+        initializer.object[1]->links[initializer.name[0]] = this;
+    }
+    a = initializer.object[0];
+    b = initializer.object[1];
+    return true;
 }
 
 rapidxml::xml_node<xmlUsedCharType>* BaseLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver) {
@@ -460,6 +477,7 @@ PhysicLink::PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
         log(error_log, std::string("Tried to construct PhysicLink with invalid \"type\"-attribute: ")+attribute->value()+'.');
         return;
     }
+    
     constraint->setUserConstraintPtr(this);
     objectManager.physicsWorld->addConstraint(constraint);
 }
@@ -468,15 +486,20 @@ PhysicLink::~PhysicLink() {
     delete constraint;
 }
 
-void PhysicLink::removeClean(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
+void PhysicLink::gameTick() {
+    if(constraint->isEnabled()) return;
+    removeClean();
+}
+
+void PhysicLink::removeClean() {
     objectManager.physicsWorld->removeConstraint(constraint);
     
     btRigidBody* body = static_cast<RigidObject*>(a)->getBody();
     if(body) body->activate();
-    body = static_cast<RigidObject*>(getOther(a))->getBody();
+    body = static_cast<RigidObject*>(b)->getBody();
     if(body) body->activate();
     
-    BaseLink::removeClean(a, iteratorInA);
+    BaseLink::removeClean();
 }
 
 rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver) {
@@ -806,265 +829,63 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
 
 
 
-rapidxml::xml_node<xmlUsedCharType>* TransformLink::BaseEntry::write(rapidxml::xml_document<xmlUsedCharType>& doc) {
-    rapidxml::xml_node<xmlUsedCharType>* entryNode = doc.allocate_node(rapidxml::node_element);
-    entryNode->name("Entry");
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
-    attribute->name("type");
-    entryNode->append_attribute(attribute);
-    return entryNode;
-}
-
-rapidxml::xml_node<xmlUsedCharType>* TransformLink::TransformEntry::write(rapidxml::xml_document<xmlUsedCharType>& doc) {
-    rapidxml::xml_node<xmlUsedCharType>* entryNode = BaseEntry::write(doc);
-    entryNode->first_attribute("type")->value("transform");
-    entryNode->append_node(writeTransformationXML(doc, matrix));
-    return entryNode;
-}
-
-TransformLink::AnimationEntry::Frame::Frame(float accBeginB, float accEndB, float durationB, btQuaternion rotationB, btVector3 positionB)
-: accBegin(accBeginB), accEnd(accEndB), duration(durationB), rotation(rotationB), position(positionB) {}
-
-btTransform TransformLink::AnimationEntry::Frame::getTransform() {
-    btTransform transform;
-    transform.setRotation(rotation);
-    transform.setOrigin(position);
-    return transform;
-}
-
-btTransform TransformLink::AnimationEntry::Frame::interpolateTo(Frame* next, float t) {
-    t /= duration;
-    float t2 = t*t, t3 = t2*t;
-    t = 3.0*t2-2.0*t3+(t3-2.0*t2+t)*accBegin+(t3-t2)*accEnd;
-    
-    btTransform transform;
-    transform.setRotation(rotation.slerp(next->rotation, t));
-    transform.setOrigin(position+(next->position-position)*t);
-    return transform;
-}
-
-TransformLink::AnimationEntry::AnimationEntry(bool loopB, float animationTimeB) :loop(loopB), animationTime(animationTimeB) {
-    
-}
-
-TransformLink::AnimationEntry::~AnimationEntry() {
-    for(auto frame : frames)
-        delete frame;
-}
-
-btTransform TransformLink::AnimationEntry::gameTick() {
-    if(frames.size() == 0) return btTransform::getIdentity();
-    Frame* currentFrame = frames[0];
-    if(frames.size() == 1) return currentFrame->getTransform();
-    btTransform transform = currentFrame->interpolateTo(frames[1], animationTime);
-    animationTime += profiler.animationFactor;
-    if(animationTime > currentFrame->duration) {
-        animationTime -= currentFrame->duration;
-        frames.erase(frames.begin());
-        if(loop)
-            frames.push_back(currentFrame);
-        else
-            delete currentFrame;
-    }
-    return transform;
-}
-
-rapidxml::xml_node<xmlUsedCharType>* TransformLink::AnimationEntry::write(rapidxml::xml_document<xmlUsedCharType>& doc) {
-    rapidxml::xml_node<xmlUsedCharType>* entryNode = BaseEntry::write(doc);
-    entryNode->first_attribute("type")->value("animation");
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
-    attribute->name("loop");
-    attribute->value((loop) ? "true" : "false");
-    entryNode->append_attribute(attribute);
-    attribute = doc.allocate_attribute();
-    attribute->name("animationTime");
-    attribute->value(doc.allocate_string(stringOf(animationTime).c_str()));
-    entryNode->append_attribute(attribute);
-    rapidxml::xml_node<xmlUsedCharType>* framesNode = doc.allocate_node(rapidxml::node_element);
-    framesNode->name("Frames");
-    entryNode->append_node(framesNode);
-    for(auto frame : frames) {
-        rapidxml::xml_node<xmlUsedCharType>* frameNode = doc.allocate_node(rapidxml::node_element);
-        frameNode->name("Frame");
-        framesNode->append_node(frameNode);
-        attribute = doc.allocate_attribute();
-        attribute->name("acceleration");
-        std::ostringstream ss;
-        ss << frame->accBegin << " " << frame->accEnd;
-        attribute->value(doc.allocate_string(ss.str().c_str()));
-        frameNode->append_attribute(attribute);
-        attribute = doc.allocate_attribute();
-        attribute->name("duration");
-        attribute->value(doc.allocate_string(stringOf(frame->duration).c_str()));
-        frameNode->append_attribute(attribute);
-        attribute = doc.allocate_attribute();
-        attribute->name("rotation");
-        attribute->value(doc.allocate_string(stringOf(frame->rotation).c_str()));
-        frameNode->append_attribute(attribute);
-        attribute = doc.allocate_attribute();
-        attribute->name("position");
-        attribute->value(doc.allocate_string(stringOf(frame->position).c_str()));
-        frameNode->append_attribute(attribute);
-    }
-    return entryNode;
-}
-
-TransformLink::TransformLink(LinkInitializer& initializer) {
+TransformLink::TransformLink(LinkInitializer& initializer) :transform(btTransform::getIdentity()) {
     init(initializer);
 }
 
 TransformLink::TransformLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
     LinkInitializer initializer = BaseLink::readInitializer(node, levelLoader);
-    rapidxml::xml_node<xmlUsedCharType>* entryNode = node->first_node("Transforms");
-    if(!entryNode) {
-        log(error_log, "Tried to construct TransformLink without \"Transforms\"-node.");
-        return;
-    }
-    init(initializer);
-    entryNode = entryNode->first_node("Entry");
-    while(entryNode) {
-        rapidxml::xml_attribute<xmlUsedCharType>* attribute = entryNode->first_attribute("type");
-        if(!attribute) {
-            log(error_log, "Tried to construct TransformLink-Entry without \"type\"-attribute.");
-            return;
-        }
-        if(strcmp(attribute->value(), "transform") == 0) {
-            transforms.push_back(new TransformEntry(readTransformationXML(entryNode)));
-        }else if(strcmp(attribute->value(), "animation") == 0) {
-            attribute = entryNode->first_attribute("animationTime");
-            if(!attribute) {
-                log(error_log, "Tried to construct TransformLink-AnimationEntry without \"animationTime\"-attribute.");
-                return;
-            }
-            float animationTime;
-            sscanf(attribute->value(), "%f", &animationTime);
-            attribute = entryNode->first_attribute("loop");
-            if(!attribute) {
-                log(error_log, "Tried to construct TransformLink-AnimationEntry without \"loop\"-attribute.");
-                return;
-            }
-            rapidxml::xml_node<xmlUsedCharType>* framesNode = entryNode->first_node("Frames");
-            if(!framesNode) {
-                log(error_log, "Tried to construct TransformLink-AnimationEntry without \"Frames\"-node.");
-                return;
-            }
-            AnimationEntry* animationEntry = new AnimationEntry(strcmp(attribute->value(), "true") == 0, animationTime);
-            transforms.push_back(animationEntry);
-            rapidxml::xml_node<xmlUsedCharType>* frameNode = framesNode->first_node("Frame");
-            while(frameNode) {
-                XMLValueArray<float> vecData;
-                attribute = frameNode->first_attribute("rotation");
-                if(!attribute) {
-                    log(error_log, "Tried to construct TransformLink-AnimationEntry-Frame without \"rotation\"-attribute.");
-                    return;
-                }
-                vecData.readString(attribute->value(), "%f");
-                btQuaternion rot = vecData.getQuaternion();
-                attribute = frameNode->first_attribute("position");
-                if(!attribute) {
-                    log(error_log, "Tried to construct TransformLink-AnimationEntry-Frame without \"position\"-attribute.");
-                    return;
-                }
-                vecData.readString(attribute->value(), "%f");
-                btVector3 pos = vecData.getVector3();
-                attribute = frameNode->first_attribute("acceleration");
-                if(!attribute) {
-                    log(error_log, "Tried to construct TransformLink-AnimationEntry-Frame without \"acceleration\"-attribute.");
-                    return;
-                }
-                vecData.readString(attribute->value(), "%f");
-                attribute = frameNode->first_attribute("duration");
-                if(!attribute) {
-                    log(error_log, "Tried to construct TransformLink-AnimationEntry-Frame without \"duration\"-attribute.");
-                    return;
-                }
-                float duration;
-                sscanf(attribute->value(), "%f", &duration);
-                animationEntry->frames.push_back(new AnimationEntry::Frame(vecData.data[0], vecData.data[1], duration, rot, pos));
-                frameNode = frameNode->next_sibling("Frame");
-            }
-        }else{
-            log(error_log, std::string("Tried to TransformLink-Entry with invalid type: ")+attribute->value()+'.');
-            return;
-        }
-        entryNode = entryNode->next_sibling("Entry");
-    }
+    if(init(initializer))
+        transform = readTransformationXML(node);
 }
 
-void TransformLink::gameTickFrom(BaseObject* parent) {
-    BaseObject* child = getOther(parent);
-    BoneObject* boneObject = dynamic_cast<BoneObject*>(child);
-    btTransform transform = btTransform::getIdentity();
-    
-    if(transforms.size() > 0) {
-        transform = transforms[0]->gameTick();
-        for(unsigned int i = 1; i < transforms.size(); i ++)
-            transform = transforms[i]->gameTick()*transform;
-    }
-    
-    if(boneObject) transform = boneObject->bone->relativeMat*transform;
-    child->setTransformation(parent->getTransformation()*transform);
-    
-    if(boneObject) boneObject->gameTick();
-}
-
-TransformLink::~TransformLink() {
-    for(auto transform : transforms)
-        delete transform;
-}
-
-void TransformLink::removeClean(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
-    if(iteratorInA->first != "..") { //Only remove child if called by parent
-        getOther(a)->removeClean(); //Remove child
+void TransformLink::gameTick() {
+    BoneObject* boneObject = dynamic_cast<BoneObject*>(b);
+    if(boneObject) {
+        b->setTransformation(a->getTransformation()*(boneObject->bone->relativeMat*transform));
+        boneObject->gameTick();
     }else
-        BaseLink::removeClean(a, iteratorInA);
+        b->setTransformation(a->getTransformation()*transform);
 }
 
-void TransformLink::removeFast(BaseObject* a, const std::map<std::string, BaseLink*>::iterator& iteratorInA) {
-    BaseObject* child = getOther(a);
-    if(iteratorInA->first != ".." && dynamic_cast<BoneObject*>(child)) //Only remove child if called by parent and is BoneObject
-        child->removeFast(); //Remove child
-    else
-        BaseLink::removeFast(a, iteratorInA);
+void TransformLink::removeClean() {
+    a->links.erase(a->getIteratorOfLink(this));
+    b->links.erase(b->links.find(".."));
+    b->removeClean();
+    delete this;
 }
 
-void TransformLink::init(LinkInitializer &initializer) {
+void TransformLink::removeFast(BaseObject* object) {
+    if(dynamic_cast<BoneObject*>(b)) {
+        b->links.erase(b->links.find(".."));
+        b->removeFast();
+        delete this;
+    }else
+        BaseLink::removeFast(object);
+}
+
+bool TransformLink::init(LinkInitializer &initializer) {
     //Make sure that a is the parent and b the child node
     if(initializer.name[1] == "..") {
         if(initializer.name[0] == "..") {
             log(error_log, "Tried to construct TransformLink with two parent nodes.");
-            return;
+            delete this;
+            return false;
         }
         initializer.swap();
     }else if(initializer.name[0] != "..") {
         log(error_log, "Tried to construct TransformLink without parent nodes.");
-        return;
+        delete this;
+        return false;
     }
     
-    //Replace link and child object if there is already one
-    auto iterator = initializer.object[0]->links.find(initializer.name[1]);
-    if(iterator != initializer.object[0]->links.end()) {
-        iterator->second->removeClean(initializer.object[0], iterator);
-    }else{
-        iterator = initializer.object[1]->links.find("..");
-        if(iterator != initializer.object[1]->links.end()) {
-            log(warning_log, "Constructed TransformLink with a child node which was already bound.");
-            iterator->second->removeClean(initializer.object[1], iterator);
-        }
-    }
-    
-    BaseLink::init(initializer);
+    return BaseLink::init(initializer);
 }
 
 rapidxml::xml_node<xmlUsedCharType>* TransformLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver) {
     rapidxml::xml_node<xmlUsedCharType>* node = BaseLink::write(doc, linkSaver);
     node->name("TransformLink");
-    rapidxml::xml_node<xmlUsedCharType>* transformsNode = doc.allocate_node(rapidxml::node_element);
-    transformsNode->name("Transforms");
-    node->append_node(transformsNode);
     
-    for(unsigned int i = 0; i < transforms.size(); i ++)
-        transformsNode->append_node(transforms[i]->write(doc));
-    
+    node->append_node(writeTransformationXML(doc, transform));
     return node;
 }
