@@ -31,13 +31,18 @@ class ScriptBaseObject : public ScriptBaseClass {
     static v8::Handle<v8::Value> AccessTransformation(const v8::Arguments& args);
     static v8::Handle<v8::Value> RemoveLink(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetLink(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetLinkNames(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetLinkedObject(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetPath(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetLinks(const v8::Arguments& args);
     protected:
     ScriptBaseObject(const char* name) :ScriptBaseClass(name) { }
     public:
     ScriptBaseObject();
+};
+
+class ScriptBoneObject : public ScriptBaseObject {
+    protected:
+    ScriptBoneObject(const char* name) :ScriptBaseObject(name) { }
+    public:
+    ScriptBoneObject();
 };
 
 class ScriptPhysicObject : public ScriptBaseObject {
@@ -52,6 +57,7 @@ class ScriptPhysicObject : public ScriptBaseObject {
 
 extern ScriptBaseClass scriptBaseClass;
 extern ScriptBaseObject scriptBaseObject;
+extern ScriptBoneObject scriptBoneObject;
 extern ScriptPhysicObject scriptPhysicObject;
 
 #endif

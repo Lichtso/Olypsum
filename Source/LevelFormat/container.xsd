@@ -16,7 +16,7 @@
                 <xsd:element name="Container" maxOccurs="unbounded">
                     <xsd:complexType>
                         <xsd:group ref="Transformation"/>
-                        <xsd:attribute name="src" type="xsd:string"/>
+                        <xsd:attribute name="src" type="xsd:string" use="required"/>
                     </xsd:complexType>
                 </xsd:element>
                 <xsd:element name="Objects">
@@ -29,8 +29,8 @@
                                         <xsd:choice>
                                             <xsd:element name="PhysicsBody" minOccurs="1">
                                                 <xsd:complexType>
-                                                    <xsd:attribute name="collisionShape" type="xsd:string"/>
-                                                    <xsd:attribute name="mass" type="NonNegativeScalar"/>
+                                                    <xsd:attribute name="collisionShape" type="xsd:string" use="required"/>
+                                                    <xsd:attribute name="mass" type="NonNegativeScalar" use="required"/>
                                                 </xsd:complexType>
                                             </xsd:element>
                                             <xsd:element name="Model" type="Resource" minOccurs="1"/>
@@ -42,8 +42,8 @@
                                             <xsd:element name="LinearFactor" type="Vector3" minOccurs="0"/>
                                             <xsd:element name="Damping" minOccurs="0">
                                                 <xsd:complexType>
-                                                    <xsd:attribute name="angular" type="xsd:decimal"/>
-                                                    <xsd:attribute name="linear" type="xsd:decimal"/>
+                                                    <xsd:attribute name="angular" type="xsd:decimal" use="required"/>
+                                                    <xsd:attribute name="linear" type="xsd:decimal" use="required"/>
                                                 </xsd:complexType>
                                             </xsd:element>
                                         </xsd:choice>
@@ -57,13 +57,13 @@
                                         <xsd:choice>
                                             <xsd:element name="Bounds" minOccurs="1">
                                                 <xsd:complexType>
-                                                    <xsd:attribute name="omniDirectional" type="xsd:boolean"/>
-                                                    <xsd:attribute name="range" type="PositiveScalar"/>
+                                                    <xsd:attribute name="omniDirectional" type="xsd:boolean" use="required"/>
+                                                    <xsd:attribute name="range" type="PositiveScalar" use="required"/>
                                                 </xsd:complexType>
                                             </xsd:element>
                                         </xsd:choice>
                                     </xsd:sequence>
-                                    <xsd:attribute name="type" fixed="positional"/>
+                                    <xsd:attribute name="type" fixed="positional" use="required"/>
                                 </xsd:complexType>
                             </xsd:element>
                             <xsd:element name="LightObject" minOccurs="0" maxOccurs="unbounded">
@@ -73,13 +73,13 @@
                                         <xsd:choice>
                                             <xsd:element name="Bounds" minOccurs="1">
                                                 <xsd:complexType>
-                                                    <xsd:attribute name="cutoff" type="PositiveScalar"/>
-                                                    <xsd:attribute name="range" type="PositiveScalar"/>
+                                                    <xsd:attribute name="cutoff" type="PositiveScalar" use="required"/>
+                                                    <xsd:attribute name="range" type="PositiveScalar" use="required"/>
                                                 </xsd:complexType>
                                             </xsd:element>
                                         </xsd:choice>
                                     </xsd:sequence>
-                                    <xsd:attribute name="type" fixed="spot"/>
+                                    <xsd:attribute name="type" fixed="spot" use="required"/>
                                 </xsd:complexType>
                             </xsd:element>
                             <xsd:element name="LightObject" minOccurs="0" maxOccurs="unbounded">
@@ -90,7 +90,7 @@
                                             <xsd:element name="Bounds" type="Vector3" minOccurs="1"/>
                                         </xsd:choice>
                                     </xsd:sequence>
-                                    <xsd:attribute name="type" fixed="directional"/>
+                                    <xsd:attribute name="type" fixed="directional" use="required"/>
                                 </xsd:complexType>
                             </xsd:element>
                             <xsd:element name="SoundObject" minOccurs="0" maxOccurs="unbounded">
@@ -101,7 +101,7 @@
                                             <xsd:element name="SoundTrack" type="Resource" minOccurs="1"/>
                                             <xsd:element name="Mode" minOccurs="0">
                                                 <xsd:complexType>
-                                                    <xsd:attribute name="value">
+                                                    <xsd:attribute name="value" use="required">
                                                         <xsd:simpleType>
                                                             <xsd:restriction base="xsd:string">
                                                                 <xsd:enumeration value="looping"/>
@@ -114,13 +114,13 @@
                                             </xsd:element>
                                             <xsd:element name="Volume" minOccurs="0">
                                                 <xsd:complexType>
-                                                    <xsd:attribute name="value" type="NonNegativeScalar"/>
+                                                    <xsd:attribute name="value" type="NonNegativeScalar" use="required"/>
                                                 </xsd:complexType>
                                             </xsd:element>
                                             <xsd:element name="IsPlaying" minOccurs="0"/>
                                             <xsd:element name="TimeOffset" minOccurs="0">
                                                 <xsd:complexType>
-                                                    <xsd:attribute name="value" type="NonNegativeScalar"/>
+                                                    <xsd:attribute name="value" type="NonNegativeScalar" use="required"/>
                                                 </xsd:complexType>
                                             </xsd:element>
                                         </xsd:choice>
@@ -134,9 +134,9 @@
                                         <xsd:choice>
                                             <xsd:element name="Bounds" minOccurs="1">
                                                 <xsd:complexType>
-                                                    <xsd:attribute name="fov" type="NonNegativeScalar"/>
-                                                    <xsd:attribute name="near" type="PositiveScalar"/>
-                                                    <xsd:attribute name="far" type="PositiveScalar"/>
+                                                    <xsd:attribute name="fov" type="NonNegativeScalar" use="required"/>
+                                                    <xsd:attribute name="near" type="PositiveScalar" use="required"/>
+                                                    <xsd:attribute name="far" type="PositiveScalar" use="required"/>
                                                 </xsd:complexType>
                                             </xsd:element>
                                         </xsd:choice>
@@ -150,7 +150,7 @@
                                         <xsd:choice>
                                             <xsd:element name="PhysicsBody" minOccurs="1">
                                                 <xsd:complexType>
-                                                    <xsd:attribute name="collisionShape" type="xsd:string"/>
+                                                    <xsd:attribute name="collisionShape" type="xsd:string" use="required"/>
                                                 </xsd:complexType>
                                             </xsd:element>
                                             <xsd:element name="Texture" type="Resource" minOccurs="1"/>
@@ -162,8 +162,8 @@
                                             <xsd:element name="TransformAligned" minOccurs="0"/>
                                         </xsd:choice>
                                     </xsd:sequence>
-                                    <xsd:attribute name="particles" type="xsd:positiveInteger"/>
-                                    <xsd:attribute name="systemLife" type="NonNegativeScalar" minOccurs="0"/>
+                                    <xsd:attribute name="particles" type="xsd:positiveInteger" use="required"/>
+                                    <xsd:attribute name="systemLife" type="NonNegativeScalar"/>
                                 </xsd:complexType>
                             </xsd:element>
                             <xsd:element name="TerrainObject" minOccurs="0" maxOccurs="unbounded">
@@ -173,7 +173,7 @@
                                         <xsd:choice>
                                             <xsd:element name="PhysicsBody" minOccurs="1">
                                                 <xsd:complexType>
-                                                    <xsd:attribute name="collisionShape" type="xsd:string"/>
+                                                    <xsd:attribute name="collisionShape" type="xsd:string" use="required"/>
                                                 </xsd:complexType>
                                             </xsd:element>
                                             <xsd:element name="Diffuse" type="Resource" minOccurs="1"/>
@@ -183,8 +183,8 @@
                                                     <xsd:complexType>
                                                         <xsd:simpleContent>
                                                             <xsd:extension base="xsd:hexBinary">
-                                                                <xsd:attribute name="width" type="xsd:positiveInteger"/>
-                                                                <xsd:attribute name="length" type="xsd:positiveInteger"/>
+                                                                <xsd:attribute name="width" type="xsd:positiveInteger" use="required"/>
+                                                                <xsd:attribute name="length" type="xsd:positiveInteger" use="required"/>
                                                             </xsd:extension>
                                                         </xsd:simpleContent>
                                                     </xsd:complexType>
@@ -194,7 +194,6 @@
                                             <xsd:element name="TextureScale" type="Vector2" minOccurs="1"/>
                                         </xsd:choice>
                                     </xsd:sequence>
-                                    <xsd:attribute name="particles" type="xsd:positiveInteger"/>
                                 </xsd:complexType>
                             </xsd:element>
                         </xsd:choice>
@@ -222,7 +221,7 @@
                                                 <xsd:sequence>
                                                     <xsd:element name="Point" type="Vector3" minOccurs="2" maxOccurs="2"/>
                                                 </xsd:sequence>
-                                                <xsd:attribute name="type" type="xsd:string" fixed="point"/>
+                                                <xsd:attribute name="type" type="xsd:string" fixed="point" use="required"/>
                                             </xsd:complexType>
                                         </xsd:element>
                                     </xsd:sequence>
@@ -237,7 +236,7 @@
                                                 <xsd:sequence>
                                                     <xsd:element name="Axis" type="Vector3" minOccurs="2" maxOccurs="2"/>
                                                 </xsd:sequence>
-                                                <xsd:attribute name="type" type="xsd:string" fixed="gear"/>
+                                                <xsd:attribute name="type" type="xsd:string" fixed="gear" use="required"/>
                                             </xsd:complexType>
                                         </xsd:element>
                                     </xsd:sequence>
@@ -258,7 +257,7 @@
                                                     <xsd:element name="AngularLimit" type="ScalarRange" minOccurs="0"/>
                                                     <xsd:element name="AngularMotor" type="PhysicsMotor" minOccurs="0"/>
                                                 </xsd:sequence>
-                                                <xsd:attribute name="type" type="xsd:string" fixed="hinge"/>
+                                                <xsd:attribute name="type" type="xsd:string" fixed="hinge" use="required"/>
                                             </xsd:complexType>
                                         </xsd:element>
                                     </xsd:sequence>
@@ -281,7 +280,7 @@
                                                     <xsd:element name="LinearLimit" type="ScalarRange" minOccurs="0"/>
                                                     <xsd:element name="LinearMotor" type="PhysicsMotor" minOccurs="0"/>
                                                 </xsd:sequence>
-                                                <xsd:attribute name="type" type="xsd:string" fixed="slider"/>
+                                                <xsd:attribute name="type" type="xsd:string" fixed="slider" use="required"/>
                                             </xsd:complexType>
                                         </xsd:element>
                                     </xsd:sequence>
@@ -303,20 +302,20 @@
                                                     <xsd:element name="LinearLimit" type="Vector3Range" minOccurs="0"/>
                                                     <xsd:element name="Motor" minOccurs="0" maxOccurs="6">
                                                         <xsd:complexType>
-                                                            <xsd:attribute name="index" type="Dof6Axis"/>
+                                                            <xsd:attribute name="index" type="Dof6Axis" use="required"/>
                                                             <xsd:attributeGroup ref="PhysicsMotorAttributes"/>
                                                         </xsd:complexType>
                                                     </xsd:element>
                                                     <xsd:element name="Spring" minOccurs="0" maxOccurs="6">
                                                         <xsd:complexType>
-                                                            <xsd:attribute name="index" type="Dof6Axis"/>
+                                                            <xsd:attribute name="index" type="Dof6Axis" use="required"/>
                                                             <xsd:attribute name="stiffness" type="xsd:decimal"/>
                                                             <xsd:attribute name="damping" type="xsd:decimal"/>
                                                             <xsd:attribute name="equilibrium" type="xsd:decimal"/>
                                                         </xsd:complexType>
                                                     </xsd:element>
                                                 </xsd:sequence>
-                                                <xsd:attribute name="type" type="xsd:string" fixed="dof6"/>
+                                                <xsd:attribute name="type" type="xsd:string" fixed="dof6" use="required"/>
                                             </xsd:complexType>
                                         </xsd:element>
                                     </xsd:sequence>
@@ -336,13 +335,13 @@
                                                     </xsd:element>
                                                     <xsd:element name="AngularLimit" minOccurs="0">
                                                         <xsd:complexType>
-                                                            <xsd:attribute name="radiusA" type="xsd:decimal"/>
-                                                            <xsd:attribute name="radiusB" type="xsd:decimal"/>
-                                                            <xsd:attribute name="twist" type="xsd:decimal"/>
+                                                            <xsd:attribute name="radiusA" type="xsd:decimal" use="required"/>
+                                                            <xsd:attribute name="radiusB" type="xsd:decimal" use="required"/>
+                                                            <xsd:attribute name="twist" type="xsd:decimal" use="required"/>
                                                         </xsd:complexType>
                                                     </xsd:element>
                                                 </xsd:sequence>
-                                                <xsd:attribute name="type" type="xsd:string" fixed="coneTwist"/>
+                                                <xsd:attribute name="type" type="xsd:string" fixed="coneTwist" use="required"/>
                                             </xsd:complexType>
                                         </xsd:element>
                                     </xsd:sequence>

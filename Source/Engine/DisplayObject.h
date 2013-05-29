@@ -54,10 +54,10 @@ class GraphicObject : public DisplayObject {
  @warning Don't use it directly
  */
 class ModelObject : public GraphicObject {
-    std::unique_ptr<btTransform> skeletonPose;
+    std::unique_ptr<btTransform> skeletonPose; //!< Poses of the BoneObjects (if model has a skeleton) for OpenGL
     void setupBones(LevelLoader* levelLoader, BaseObject* object, Bone* bone);
     void writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver, BoneObject *object);
-    void updateSkeletonPose(BaseObject* object, Bone* bone);
+    void updateSkeletonPose(BoneObject* object, Bone* bone);
     protected:
     ModelObject() :integrity(1.0) { };
     public:
@@ -68,6 +68,8 @@ class ModelObject : public GraphicObject {
     float integrity; //! Health <= 0.0: destroyed
     std::vector<float> textureAnimation; //!< Animation time for each mesh;
     FileResourcePtr<Model> model;
+    //! Finds the root bone (if model has a skeleton else returns NULL)
+    BoneObject* getRootBone();
     //! Overwrites the model and cleans the textureAnimation
     void setModel(LevelLoader* levelLoader, FileResourcePtr<Model> model);
     //! Draws the entire model with all meshes

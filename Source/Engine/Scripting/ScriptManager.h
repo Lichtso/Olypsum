@@ -24,6 +24,7 @@ class ScriptManager {
     v8::Persistent<v8::ObjectTemplate> globalTemplate;
     std::map<std::string, ScriptFile*> loadedScripts;
     std::map<std::string, AnimationProperty*> animations;
+    std::set<AnimationTimer*> timers;
     static v8::Handle<v8::Value> readCdataXMLNode(rapidxml::xml_node<xmlUsedCharType>* node);
     static rapidxml::xml_node<xmlUsedCharType>* writeCdataXMLNode(rapidxml::xml_document<xmlUsedCharType>& doc, const std::string& str);
     ScriptManager();

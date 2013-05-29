@@ -6,36 +6,36 @@
             <xsd:choice>
                 <xsd:element name="Cylinder" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
-                        <xsd:attribute name="id" type="xsd:string"/>
-                        <xsd:attribute name="size" type="Vector3"/>
+                        <xsd:attribute name="id" type="xsd:string" use="required"/>
+                        <xsd:attribute name="size" type="Vector3" use="required"/>
                     </xsd:complexType>
                 </xsd:element>
                 <xsd:element name="Box" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
-                        <xsd:attribute name="id" type="xsd:string"/>
-                        <xsd:attribute name="size" type="Vector3"/>
+                        <xsd:attribute name="id" type="xsd:string" use="required"/>
+                        <xsd:attribute name="size" type="Vector3" use="required"/>
                     </xsd:complexType>
                 </xsd:element>
                 <xsd:element name="Sphere" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
-                        <xsd:attribute name="id" type="xsd:string"/>
-                        <xsd:attribute name="radius" type="PositiveScalar"/>
+                        <xsd:attribute name="id" type="xsd:string" use="required"/>
+                        <xsd:attribute name="radius" type="PositiveScalar" use="required"/>
                     </xsd:complexType>
                 </xsd:element>
                 <xsd:element name="Capsule" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
-                        <xsd:attribute name="id" type="xsd:string"/>
-                        <xsd:attribute name="radius" type="PositiveScalar"/>
-                        <xsd:attribute name="length" type="PositiveScalar"/>
-                        <xsd:attribute name="direction" type="AxisName"/>
+                        <xsd:attribute name="id" type="xsd:string" use="required"/>
+                        <xsd:attribute name="radius" type="PositiveScalar" use="required"/>
+                        <xsd:attribute name="length" type="PositiveScalar" use="required"/>
+                        <xsd:attribute name="direction" type="AxisName" use="required"/>
                     </xsd:complexType>
                 </xsd:element>
                 <xsd:element name="Cone" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
-                        <xsd:attribute name="id" type="xsd:string"/>
-                        <xsd:attribute name="radius" type="PositiveScalar"/>
-                        <xsd:attribute name="length" type="PositiveScalar"/>
-                        <xsd:attribute name="direction" type="AxisName"/>
+                        <xsd:attribute name="id" type="xsd:string" use="required"/>
+                        <xsd:attribute name="radius" type="PositiveScalar" use="required"/>
+                        <xsd:attribute name="length" type="PositiveScalar" use="required"/>
+                        <xsd:attribute name="direction" type="AxisName" use="required"/>
                     </xsd:complexType>
                 </xsd:element>
                 <xsd:element name="SphereCompound" minOccurs="0" maxOccurs="unbounded">
@@ -43,12 +43,12 @@
                         <xsd:sequence>
                             <xsd:element name="Sphere" minOccurs="1" maxOccurs="unbounded">
                                 <xsd:complexType>
-                                    <xsd:attribute name="position" type="Vector3"/>
-                                    <xsd:attribute name="radius" type="PositiveScalar"/>
+                                    <xsd:attribute name="position" type="Vector3" use="required"/>
+                                    <xsd:attribute name="radius" type="PositiveScalar" use="required"/>
                                 </xsd:complexType>
                             </xsd:element>
                         </xsd:sequence>
-                        <xsd:attribute name="id" type="xsd:string"/>
+                        <xsd:attribute name="id" type="xsd:string" use="required"/>
                     </xsd:complexType>
                 </xsd:element>
                 <xsd:element name="Compound" minOccurs="0" maxOccurs="unbounded">
@@ -59,23 +59,23 @@
                                     <xsd:sequence>
                                         <xsd:group ref="Transformation"/>
                                     </xsd:sequence>
-                                    <xsd:attribute name="collisionShape" type="xsd:string"/>
+                                    <xsd:attribute name="collisionShape" type="xsd:string" use="required"/>
                                 </xsd:complexType>
                             </xsd:element>
                         </xsd:sequence>
-                        <xsd:attribute name="id" type="xsd:string"/>
+                        <xsd:attribute name="id" type="xsd:string" use="required"/>
                     </xsd:complexType>
                 </xsd:element>
                 <xsd:element name="VertexCloud" type="ScalarList" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
-                        <xsd:attribute name="id" type="xsd:string"/>
-                        <xsd:attribute name="vertexCount" type="xsd:positiveInteger"/>
+                        <xsd:attribute name="id" type="xsd:string" use="required"/>
+                        <xsd:attribute name="vertexCount" type="xsd:positiveInteger" use="required"/>
                     </xsd:complexType>
                 </xsd:element>
                 <xsd:element name="StaticPlane" type="Vector3" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
-                        <xsd:attribute name="id" type="xsd:string"/>
-                        <xsd:attribute name="distance" type="xsd:decimal"/>
+                        <xsd:attribute name="id" type="xsd:string" use="required"/>
+                        <xsd:attribute name="distance" type="xsd:decimal" use="required"/>
                     </xsd:complexType>
                 </xsd:element>
             </xsd:choice>

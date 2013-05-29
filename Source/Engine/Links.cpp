@@ -18,8 +18,8 @@ BaseLink::BaseLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* level
 }
 
 void BaseLink::removeClean() {
-    a->links.erase(a->getIteratorOfLink(this));
-    b->links.erase(b->getIteratorOfLink(this));
+    a->links.erase(this);
+    b->links.erase(this);
     delete this;
 }
 
@@ -52,34 +52,27 @@ LinkInitializer BaseLink::readInitializer(rapidxml::xml_node<xmlUsedCharType>* n
         }
         sscanf(attribute->value(), "%d", &initializer.index[i]);
         initializer.object[i] = levelLoader->getObjectLinking(initializer.index[i]);
-        attribute = node->first_attribute("name");
-        if(!attribute) {
-            log(error_log, "Tried to construct BaseLink without \"name\"-attribute.");
-            return initializer;
-        }
-        initializer.name[i] = attribute->value();
         node = node->next_sibling("Object");
     }
     return initializer;
 }
 
 bool BaseLink::init(LinkInitializer& initializer) {
-    auto iteratorA = initializer.object[0]->links.find(initializer.name[1]),
-         iteratorB = initializer.object[1]->links.find(initializer.name[0]);
+    auto iteratorA = initializer.object[0]->findLink(initializer.object[1]),
+         iteratorB = initializer.object[1]->findLink(initializer.object[0]);
     if(iteratorA != initializer.object[0]->links.end() || iteratorB != initializer.object[1]->links.end()) {
-        if(iteratorA->second == iteratorB->second && dynamic_cast<TransformLink*>(iteratorA->second)) {
-            delete iteratorA->second;
-            iteratorA->second = this;
-            iteratorB->second = this;
+        if(iteratorA == iteratorB && dynamic_cast<TransformLink*>(*iteratorA)) {
+            delete *iteratorA;
+            initializer.object[0]->links.erase(iteratorA);
+            initializer.object[1]->links.erase(iteratorB);
         }else{
             log(error_log, "Tried to overwrite BaseLink.");
             delete this;
             return false;
         }
-    }else{
-        initializer.object[0]->links[initializer.name[1]] = this;
-        initializer.object[1]->links[initializer.name[0]] = this;
     }
+    initializer.object[0]->links.insert(this);
+    initializer.object[1]->links.insert(this);
     a = initializer.object[0];
     b = initializer.object[1];
     return true;
@@ -95,10 +88,6 @@ rapidxml::xml_node<xmlUsedCharType>* BaseLink::write(rapidxml::xml_document<xmlU
         rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
         attribute->name("index");
         attribute->value(doc.allocate_string(stringOf(linkSaver->index[i]).c_str()));
-        objectNode->append_attribute(attribute);
-        attribute = doc.allocate_attribute();
-        attribute->name("name");
-        attribute->value(doc.allocate_string(linkSaver->name[i].c_str()));
         objectNode->append_attribute(attribute);
     }
     return node;
@@ -849,15 +838,15 @@ void TransformLink::gameTick() {
 }
 
 void TransformLink::removeClean() {
-    a->links.erase(a->getIteratorOfLink(this));
-    b->links.erase(b->links.find(".."));
+    a->links.erase(a->links.find(this));
+    b->links.erase(b->links.find(this));
     b->removeClean();
     delete this;
 }
 
 void TransformLink::removeFast(BaseObject* object) {
     if(dynamic_cast<BoneObject*>(b)) {
-        b->links.erase(b->links.find(".."));
+        b->links.erase(b->links.find(this));
         b->removeFast();
         delete this;
     }else
@@ -865,16 +854,8 @@ void TransformLink::removeFast(BaseObject* object) {
 }
 
 bool TransformLink::init(LinkInitializer &initializer) {
-    //Make sure that a is the parent and b the child node
-    if(initializer.name[1] == "..") {
-        if(initializer.name[0] == "..") {
-            log(error_log, "Tried to construct TransformLink with two parent nodes.");
-            delete this;
-            return false;
-        }
-        initializer.swap();
-    }else if(initializer.name[0] != "..") {
-        log(error_log, "Tried to construct TransformLink without parent nodes.");
+    if(initializer.object[1]->findParentLink() != initializer.object[1]->links.end()) {
+        log(error_log, "Tried to overwrite parent of child in a TransformLink.");
         delete this;
         return false;
     }

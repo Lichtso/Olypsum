@@ -179,6 +179,13 @@ void ScriptManager::gameTick() {
             delete iterator->second;
             animations.erase(iterator);
         }
+    
+    auto timeNow = getTime();
+    foreach_e(timers, iterator)
+        if((*iterator)->timeNext < timeNow && (*iterator)->gameTick(timeNow)) {
+            delete *iterator;
+            timers.erase(iterator);
+        }
 }
 
 std::unique_ptr<ScriptManager> scriptManager;

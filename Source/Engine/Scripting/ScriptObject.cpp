@@ -65,12 +65,13 @@ v8::Handle<v8::Value> ScriptBaseObject::RemoveLink(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1)
         return v8::ThrowException(v8::String::New("BaseObject removeLink(): Too few arguments"));
-    if(!args[0]->IsString())
+    if(!args[0]->IsUint32())
         return v8::ThrowException(v8::String::New("BaseObject removeLink(): Invalid argument"));
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
-    BaseLink* link = objectPtr->links[stdStrOfV8(args[0])];
+    if(args[0]->IntegerValue() >= objectPtr->links.size())
+        return v8::ThrowException(v8::String::New("BaseObject removeLink(): Out of bounds"));
     if(!link) return v8::Boolean::New(false);
-    link->removeClean();
+    (*std::next(objectPtr->links.begin(), args[0]->IntegerValue()))->removeClean();
     return v8::Boolean::New(true);
 }
 
@@ -78,52 +79,37 @@ v8::Handle<v8::Value> ScriptBaseObject::GetLink(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1)
         return v8::ThrowException(v8::String::New("BaseObject getLink(): Too few arguments"));
-    if(!args[0]->IsString())
+    if(!args[0]->IsUint32())
         return v8::ThrowException(v8::String::New("BaseObject getLink(): Invalid argument"));
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
-    BaseLink* link = objectPtr->links[stdStrOfV8(args[0])];
-    if(!link) return v8::Undefined();
-    return handleScope.Close(link->scriptInstance);
+    if(args[0]->IntegerValue() >= objectPtr->links.size())
+        return v8::ThrowException(v8::String::New("BaseObject getLink(): Out of bounds"));
+    if(!link) return v8::Boolean::New(false);
+    return handleScope.Close((*std::next(objectPtr->links.begin(), args[0]->IntegerValue()))->scriptInstance);
 }
 
-v8::Handle<v8::Value> ScriptBaseObject::GetLinkNames(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptBaseObject::GetLinks(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
-    v8::Handle<v8::Array> array = v8::Array::New(objectPtr->links.size());
-    unsigned int i = 0;
-    for(auto iterator : objectPtr->links)
-        array->Set(i ++, v8::String::New(iterator.first.c_str()));
-    return handleScope.Close(array);
+    return handleScope.Close(v8::Integer::New(objectPtr->links.size()));
 }
 
-v8::Handle<v8::Value> ScriptBaseObject::GetLinkedObject(const v8::Arguments& args) {
-    v8::HandleScope handleScope;
-    if(args.Length() < 1)
-        return v8::ThrowException(v8::String::New("BaseObject getLinkedObject(): Too few arguments"));
-    if(!args[0]->IsString())
-        return v8::ThrowException(v8::String::New("BaseObject getLinkedObject(): Invalid argument"));
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
-    BaseObject* linkedObject = objectPtr->findObjectByPath(stdStrOfV8(args[0]));
-    if(!linkedObject) return v8::Undefined();
-    return handleScope.Close(linkedObject->scriptInstance);
-}
-
-v8::Handle<v8::Value> ScriptBaseObject::GetPath(const v8::Arguments& args) {
-    v8::HandleScope handleScope;
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
-    return handleScope.Close(v8::String::New(objectPtr->getPath().c_str()));
-}
-
-ScriptBaseObject::ScriptBaseObject() :ScriptBaseObject("BaseObject") {
+ScriptBaseObject::ScriptBaseObject() :ScriptBaseClass("BaseObject") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->Set(v8::String::New("transformation"), v8::FunctionTemplate::New(AccessTransformation));
     objectTemplate->Set(v8::String::New("removeLink"), v8::FunctionTemplate::New(RemoveLink));
     objectTemplate->Set(v8::String::New("getLink"), v8::FunctionTemplate::New(GetLink));
-    objectTemplate->Set(v8::String::New("getLinkNames"), v8::FunctionTemplate::New(GetLinkNames));
-    objectTemplate->Set(v8::String::New("getLinkedObject"), v8::FunctionTemplate::New(GetLinkedObject));
-    objectTemplate->Set(v8::String::New("getPath"), v8::FunctionTemplate::New(GetPath));
+    objectTemplate->Set(v8::String::New("getLinks"), v8::FunctionTemplate::New(GetLinks));
+}
+
+
+
+ScriptBoneObject::ScriptBoneObject() :ScriptBaseObject("BoneObject") {
+    v8::HandleScope handleScope;
+    
+    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
 }
 
 
@@ -233,4 +219,5 @@ ScriptPhysicObject::ScriptPhysicObject() :ScriptPhysicObject("PhysicObject") {
 
 ScriptBaseClass scriptBaseClass;
 ScriptBaseObject scriptBaseObject;
+ScriptBoneObject scriptBoneObject;
 ScriptPhysicObject scriptPhysicObject;

@@ -42,7 +42,7 @@ class BaseClass {
  */
 class BaseObject : public BaseClass {
     public:
-    std::map<std::string, BaseLink*> links; //!< A map of LinkObject and names to connect BaseObject to others
+    std::set<BaseLink*> links; //!< A map of LinkObject and names to connect BaseObject to others
     void newScriptInstance();
     //! Used to remove a BaseObject from all lists correctly
     virtual void removeClean();
@@ -66,12 +66,15 @@ class BaseObject : public BaseClass {
     static btTransform readTransformtion(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     //! Writes its self to rapidxml::xml_node and returns it
     virtual rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
-    //! Returns the BaseObject at the end of the path (seperated by '/')
-    BaseObject* findObjectByPath(std::string path);
-    //! Returns the path of this BaseObject (seperated by '/')
-    std::string getPath();
-    //! Returns the iterator of a BaseLink
-    std::map<std::string, BaseLink*>::iterator getIteratorOfLink(BaseLink* link);
+    /*! Returns the iterator of a BaseLink
+     @return TransformLink between this and parent or links.end()
+     */
+    std::set<BaseLink*>::iterator findParentLink();
+    /*! Returns the iterator of a BaseLink
+     @param linked BaseObject* to search for
+     @return BaseLink between this and linked or links.end()
+    */
+    std::set<BaseLink*>::iterator findLink(BaseObject* linked);
 };
 
 //! BaseObject without physics-body, only transformation
@@ -114,6 +117,7 @@ class BoneObject : public SimpleObject {
     public:
     Bone* bone;
     BoneObject(Bone* boneB) : bone(boneB) { }
+    void newScriptInstance();
 };
 
 //! BaseObject with physics-body

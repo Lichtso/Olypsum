@@ -15,11 +15,9 @@
 class LinkInitializer {
     public:
     BaseObject* object[2]; //!< The objects to be linked together
-    std::string name[2]; //!< The name of the link in each object
     int index[2];  //!< The index of each object (only needed to save the link)
     void swap() {
         std::swap(object[0], object[1]);
-        std::swap(name[0], name[1]);
         std::swap(index[0], index[1]);
     }
 };

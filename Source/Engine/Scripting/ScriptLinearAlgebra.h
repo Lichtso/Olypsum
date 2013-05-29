@@ -13,8 +13,8 @@
 
 class ScriptVector3 : public ScriptClass {
     static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
-    static v8::Handle<v8::Value> toString(const v8::Arguments& args);
-    static v8::Handle<v8::Value> toJSON(const v8::Arguments& args);
+    static v8::Handle<v8::Value> ToString(const v8::Arguments& args);
+    static v8::Handle<v8::Value> ToJSON(const v8::Arguments& args);
     static v8::Handle<v8::Value> IndexedPropertyGetter(uint32_t index, const v8::AccessorInfo &info);
     static v8::Handle<v8::Value> IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
     static v8::Handle<v8::Value> GetAngle(const v8::Arguments& args);

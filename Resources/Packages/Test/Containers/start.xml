@@ -55,8 +55,8 @@
 			</Constraint>
 		</PhysicLink>-->
 		<PhysicLink>
-			<Object index="1" name="a" />
-			<Object index="2" name="b" />
+			<Object index="1"/>
+			<Object index="2"/>
 			<Constraint type="slider">
 				<Frame>
 					<Translate>0.0 -1.5 0.0</Translate>
@@ -68,8 +68,8 @@
 			</Constraint>
 		</PhysicLink>
 		<TransformLink>
-			<Object index="2" name=".." />
-			<Object index="28" name="child" />
+			<Object index="2"/>
+			<Object index="28"/>
 			<Translate>0.0 7.0 1.0</Translate>
 		</TransformLink>
 	</Links>

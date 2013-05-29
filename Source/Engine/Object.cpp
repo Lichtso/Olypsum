@@ -24,20 +24,20 @@ void BaseClass::newScriptInstance() {
 
 void BaseObject::removeClean() {
     while(links.size() > 0)
-        links.begin()->second->removeClean();
+        (*links.begin())->removeClean();
     delete this;
 }
 
 void BaseObject::removeFast() {
     foreach_e(links, iterator)
-        iterator->second->removeFast(this);
+        (*iterator)->removeFast(this);
     delete this;
 }
 
 bool BaseObject::gameTick() {
     foreach_e(links, iterator)
-        if(iterator->second->b != this || !dynamic_cast<TransformLink*>(iterator->second)) //Don't process parent
-            iterator->second->gameTick();
+        if((*iterator)->b != this || !dynamic_cast<TransformLink*>(*iterator)) //Don't process parent
+            (*iterator)->gameTick();
     return true;
 }
 
@@ -72,56 +72,27 @@ rapidxml::xml_node<xmlUsedCharType>* BaseObject::write(rapidxml::xml_document<xm
     return node;
 }
 
-BaseObject* BaseObject::findObjectByPath(std::string path) {
-    std::vector<char*> objectNames;
-    char buffer[path.size()+1], *str = buffer;
-    strcpy(buffer, path.c_str());
-    
-    objectNames.push_back(buffer);
-    while(*str != 0) {
-        if(*str != '/') {
-            str ++;
-            continue;
-        }
-        *str = 0;
-        str ++;
-        objectNames.push_back(str);
-    }
-    
-    BaseObject* object = this;
-    for(char* objectName : objectNames) {
-        auto iterator = object->links.find(objectName);
-        if(iterator == object->links.end()) {
-            log(error_log, std::string("Couldn't find object (")+objectName+") in path: "+path+'.');
-            return NULL;
-        }
-        object = iterator->second->getOther(object);
-    }
-    
-    return object;
-}
-
-std::string BaseObject::getPath() {
-    std::string path = "";
-    BaseObject* object = this;
-    while(true) {
-        auto parentIterator = object->links.find(".."); //Find parent
-        if(parentIterator == object->links.end() || !dynamic_cast<TransformLink*>(parentIterator->second)) break;
-        object = parentIterator->second->a;
-        for(auto iterator : object->links)
-            if(iterator.second == parentIterator->second) {
-                path = (path.size() == 0) ? iterator.first : iterator.first+'/'+path;
-                break;
-            }
-    }
-    return path;
-}
-
-std::map<std::string, BaseLink*>::iterator BaseObject::getIteratorOfLink(BaseLink* link) {
-    foreach_e(links, iterator)
-        if(iterator->second == link)
-            return  iterator;
+std::set<BaseLink*>::iterator BaseObject::findParentLink() {
+    for(std::set<BaseLink*>::iterator i = links.begin(); i != links.end(); i ++)
+        if(dynamic_cast<TransformLink*>(*i) && (*i)->b == this)
+            return i;
     return links.end();
+}
+
+std::set<BaseLink*>::iterator BaseObject::findLink(BaseObject* linked) {
+    for(std::set<BaseLink*>::iterator i = links.begin(); i != links.end(); i ++)
+        if((*i)->getOther(this) == linked)
+            return i;
+    return links.end();
+}
+
+
+
+void BoneObject::newScriptInstance() {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    v8::Local<v8::Object> instance = scriptBoneObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    scriptInstance = v8::Persistent<v8::Object>::New(instance);
 }
 
 

@@ -63,7 +63,7 @@
         </xsd:restriction>
     </xsd:simpleType>
     <xsd:complexType name="Resource">
-        <xsd:attribute name="src" type="xsd:string"/>
+        <xsd:attribute name="src" type="xsd:string" use="required"/>
     </xsd:complexType>
 	<xsd:group name="BaseObject">
 		<xsd:sequence>
@@ -78,27 +78,26 @@
         </xsd:sequence>
     </xsd:group>
     <xsd:complexType name="ScalarRange">
-        <xsd:attribute name="min" type="xsd:decimal"/>
-        <xsd:attribute name="max" type="xsd:decimal"/>
+        <xsd:attribute name="min" type="xsd:decimal" use="required"/>
+        <xsd:attribute name="max" type="xsd:decimal" use="required"/>
     </xsd:complexType>
     <xsd:complexType name="Vector3Range">
-        <xsd:attribute name="min" type="Vector3"/>
-        <xsd:attribute name="max" type="Vector3"/>
+        <xsd:attribute name="min" type="Vector3" use="required"/>
+        <xsd:attribute name="max" type="Vector3" use="required"/>
     </xsd:complexType>
     <xsd:group name="BaseLink">
         <xsd:sequence>
             <xsd:element name="Object" minOccurs="2" maxOccurs="2">
                 <xsd:complexType>
-                    <xsd:attribute name="index" type="xsd:decimal"/>
-                    <xsd:attribute name="name" type="xsd:string"/>
+                    <xsd:attribute name="index" type="xsd:decimal" use="required"/>
                 </xsd:complexType>
             </xsd:element>
         </xsd:sequence>
     </xsd:group>
     <xsd:attributeGroup name="PhysicsMotorAttributes">
-        <xsd:attribute name="enabled" type="xsd:boolean"/>
-        <xsd:attribute name="velocity" type="xsd:decimal"/>
-        <xsd:attribute name="force" type="xsd:decimal"/>
+        <xsd:attribute name="enabled" type="xsd:boolean" use="required"/>
+        <xsd:attribute name="velocity" type="xsd:decimal" use="required"/>
+        <xsd:attribute name="force" type="xsd:decimal" use="required"/>
     </xsd:attributeGroup>
     <xsd:complexType name="PhysicsMotor">
         <xsd:attributeGroup ref="PhysicsMotorAttributes"/>

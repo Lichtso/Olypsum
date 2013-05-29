@@ -17,6 +17,7 @@ class ScriptModelObject : public ScriptPhysicObject {
     static v8::Handle<v8::Value> GetModel(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void SetModel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> AccessTextureAnimation(const v8::Arguments& args);
+    static v8::Handle<v8::Value> FindBoneByPath(const v8::Arguments& args);
     protected:
     ScriptModelObject(const char* name);
     public:

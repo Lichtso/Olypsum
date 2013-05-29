@@ -19,18 +19,16 @@ LevelSaver::~LevelSaver() {
 
 void LevelSaver::pushObject(BaseObject* object) {
     for(auto iteratorInObject : object->links) {
-        auto iteratorInSet = linkingMap.find(iteratorInObject.second);
+        auto iteratorInSet = linkingMap.find(iteratorInObject);
         if(iteratorInSet == linkingMap.end()) {
             LinkInitializer* linkSaver = new LinkInitializer();
             linkSaver->index[0] = objectCounter;
             linkSaver->object[0] = object;
-            linkSaver->name[1] = iteratorInObject.first;
-            linkingMap[iteratorInObject.second] = linkSaver;
+            linkingMap[iteratorInObject] = linkSaver;
         }else{
             LinkInitializer* linkSaver = iteratorInSet->second;
             linkSaver->index[1] = objectCounter;
             linkSaver->object[1] = object;
-            linkSaver->name[0] = iteratorInObject.first;
         }
     }
     objectCounter ++;

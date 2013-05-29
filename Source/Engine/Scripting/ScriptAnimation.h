@@ -36,11 +36,21 @@ class AnimationProperty {
     bool gameTick(const char* property);
 };
 
+class AnimationTimer {
+    public:
+    double timeNext, timeLength;
+    v8::Persistent<v8::Function> function;
+    AnimationTimer(v8::Handle<v8::Function> function, double timeLength);
+    bool gameTick(double timeNow);
+};
+
 class ScriptAnimation : public ScriptClass {
     static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
     static v8::Handle<v8::Value> AddFrames(const v8::Arguments& args);
     static v8::Handle<v8::Value> RemoveFrames(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetTrackInfo(const v8::Arguments& args);
+    static v8::Handle<v8::Value> StartTimer(const v8::Arguments& args);
+    static v8::Handle<v8::Value> StopTimer(const v8::Arguments& args);
     public:
     ScriptAnimation();
 };

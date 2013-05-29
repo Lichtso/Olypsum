@@ -48,13 +48,13 @@ v8::Handle<v8::Value> ScriptVector3::Constructor(const v8::Arguments& args) {
     return args.This();
 }
 
-v8::Handle<v8::Value> ScriptVector3::toString(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptVector3::ToString(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     btVector3 vec = getDataOfInstance(args.This());
     return handleScope.Close(v8::String::New(stringOf(vec).c_str()));
 }
 
-v8::Handle<v8::Value> ScriptVector3::toJSON(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptVector3::ToJSON(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     btVector3 vec = getDataOfInstance(args.This());
     v8::Local<v8::Array> array = v8::Array::New(3);
@@ -272,8 +272,8 @@ ScriptVector3::ScriptVector3() :ScriptClass("Vector3", Constructor) {
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->SetIndexedPropertyHandler(IndexedPropertyGetter, IndexedPropertySetter);
-    objectTemplate->Set(v8::String::New("toString"), v8::FunctionTemplate::New(toString));
-    objectTemplate->Set(v8::String::New("toJSON"), v8::FunctionTemplate::New(toJSON));
+    objectTemplate->Set(v8::String::New("toString"), v8::FunctionTemplate::New(ToString));
+    objectTemplate->Set(v8::String::New("toJSON"), v8::FunctionTemplate::New(ToJSON));
     objectTemplate->Set(v8::String::New("getAngle"), v8::FunctionTemplate::New(GetAngle));
     objectTemplate->Set(v8::String::New("getSum"), v8::FunctionTemplate::New(GetSum));
     objectTemplate->Set(v8::String::New("getDiff"), v8::FunctionTemplate::New(GetDifference));

@@ -34,8 +34,6 @@ void ModelObject::setupBones(LevelLoader* levelLoader, BaseObject* object, Bone*
     LinkInitializer initializer;
     initializer.object[0] = object;
     initializer.object[1] = object = new BoneObject(bone);
-    initializer.name[0] = ".."; //parent
-    initializer.name[1] = bone->name;
     new TransformLink(initializer);
     if(levelLoader)
         levelLoader->pushObject(object);
@@ -47,17 +45,20 @@ void ModelObject::writeBones(rapidxml::xml_document<char> &doc, LevelSaver* leve
     object->write(doc, levelSaver);
     for(unsigned int i = 0; i < object->bone->children.size(); i ++)
         for(auto iterator : object->links) {
-            BoneObject* boneObject = dynamic_cast<BoneObject*>(iterator.second->b);
+            BoneObject* boneObject = dynamic_cast<BoneObject*>(iterator->b);
             if(!boneObject || boneObject->bone != object->bone->children[i]) continue;
             writeBones(doc, levelSaver, boneObject);
             break;
         }
 }
 
-void ModelObject::updateSkeletonPose(BaseObject* object, Bone* bone) {
+void ModelObject::updateSkeletonPose(BoneObject* object, Bone* bone) {
     skeletonPose.get()[bone->jointIndex] = object->getTransformation() * bone->absoluteInv;
-    for(auto childBone : bone->children)
-        updateSkeletonPose(object->links[childBone->name]->b, childBone);
+    for(auto iterator : object->links) {
+        BoneObject* boneObject = dynamic_cast<BoneObject*>(iterator->b);
+        if(boneObject && boneObject != object)
+            updateSkeletonPose(boneObject, boneObject->bone);
+    }
 }
 
 void ModelObject::newScriptInstance() {
@@ -70,7 +71,7 @@ void ModelObject::newScriptInstance() {
 bool ModelObject::gameTick() {
     if(model->skeleton) {
         Bone* rootBone = model->skeleton->rootBone;
-        updateSkeletonPose(links[rootBone->name]->b, rootBone);
+        updateSkeletonPose(getRootBone(), rootBone);
     }
     for(unsigned int i = 0; i < textureAnimation.size(); i ++)
         if(textureAnimation[i ++] >= 0.0)
@@ -85,16 +86,27 @@ bool ModelObject::gameTick() {
     return GraphicObject::gameTick();
 }
 
+BoneObject* ModelObject::getRootBone() {
+    if(model->skeleton) {
+        Bone* rootBone = model->skeleton->rootBone;
+        for(auto iterator : links) {
+            if(!dynamic_cast<TransformLink*>(iterator)) continue;
+            BoneObject* rootBoneObject = dynamic_cast<BoneObject*>(iterator->b);
+            if(rootBoneObject && rootBoneObject->bone == rootBone)
+                return rootBoneObject;
+        }
+    }
+    return NULL;
+}
+
 void ModelObject::setModel(LevelLoader* levelLoader, FileResourcePtr<Model> _model) {
     if(model) {
         for(unsigned int i = 0; i < model->meshes.size(); i ++)
             if(model->meshes[i]->material.reflectivity != 0)
                 objectManager.reflectiveAccumulator.erase(this);
-        foreach_e(links, link) {
-            TransformLink* transformLink = dynamic_cast<TransformLink*>(link->second);
-            if(transformLink && link->first != "..")
-                transformLink->removeClean();
-        }
+        for(auto iterator : links)
+            if(dynamic_cast<TransformLink*>(iterator) && dynamic_cast<BoneObject*>(iterator->b))
+                iterator->removeClean();
     }
     textureAnimation.clear();
     skeletonPose.reset();
@@ -197,7 +209,7 @@ rapidxml::xml_node<xmlUsedCharType>* ModelObject::write(rapidxml::xml_document<x
         node->append_node(integrityNode);
     }
     if(skeletonPose)
-        writeBones(doc, levelSaver, static_cast<BoneObject*>(links[model->skeleton->rootBone->name]->b));
+        writeBones(doc, levelSaver, getRootBone());
     return node;
 }
 

@@ -1,8 +1,7 @@
-V8 API: Links, Timeout, Interval, Documentation
+V8 API: Documentation
 Decals: Tests and V8 API
 Implement btSoftBody
 Implement btRayCastVehicle
-Animation File Format
 Leap Motion
 Use C++11 Multithreading
 Windows / Linux Support

@@ -313,6 +313,7 @@ bool LevelLoader::loadLevel(const std::string& levelPackage, const std::string& 
     if(!loadContainer(levelId, true)) {
         objectManager.clear();
         levelManager.gameStatus = noGame;
+        menu.setMenu(Menu::saveGames);
         return false;
     }
     

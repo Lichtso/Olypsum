@@ -44,13 +44,45 @@ v8::Handle<v8::Value> ScriptModelObject::AccessTextureAnimation(const v8::Argume
     if(args.Length() < 1 || !args[0]->IsInt32())
         return v8::ThrowException(v8::String::New("ModelObject getTextureAnimation: Invalid argument"));
     ModelObject* objectPtr = getDataOfInstance<ModelObject>(args.This());
-    if(args[0]->Uint32Value() > objectPtr->textureAnimation.size())
+    if(args[0]->Uint32Value() >= objectPtr->textureAnimation.size())
         return v8::ThrowException(v8::String::New("ModelObject getTextureAnimation: Out of bounds"));
     if(args.Length() == 2 && args[1]->IsNumber()) {
         objectPtr->textureAnimation[args[0]->Uint32Value()] = args[1]->NumberValue();
         return args[1];
     }else
         return handleScope.Close(v8::Number::New(objectPtr->textureAnimation[args[0]->Uint32Value()]));
+}
+
+v8::Handle<v8::Value> ScriptModelObject::FindBoneByPath(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    if(args.Length() < 1)
+        return v8::ThrowException(v8::String::New("BaseObject findBoneByPath(): Too few arguments"));
+    if(!args[0]->IsArray())
+        return v8::ThrowException(v8::String::New("BaseObject findBoneByPath(): Invalid argument"));
+    
+    v8::Handle<v8::Array> path = v8::Handle<v8::Array>::Cast(args[0]);
+    ModelObject* objectPtr = getDataOfInstance<ModelObject>(args.This());
+    BoneObject* boneObject = objectPtr->getRootBone();
+    if(!boneObject) return v8::Undefined();
+    
+    for(unsigned int i = 0; i < path->Length(); i ++) {
+        bool notFound = true;
+        std::string boneName = stdStrOfV8(path->Get(i));
+        for(auto iterator : boneObject->links) {
+            if(dynamic_cast<TransformLink*>(iterator) &&
+               dynamic_cast<BoneObject*>(iterator->b) &&
+               static_cast<BoneObject*>(iterator->b)->bone->name == boneName) {
+                boneObject = static_cast<BoneObject*>(iterator->b);
+                notFound = false;
+                break;
+            }
+        }
+        
+        if(notFound)
+            return v8::Undefined();
+    }
+    
+    return handleScope.Close(boneObject->scriptInstance);
 }
 
 ScriptModelObject::ScriptModelObject(const char* name) :ScriptPhysicObject(name) {
@@ -64,6 +96,7 @@ ScriptModelObject::ScriptModelObject() :ScriptModelObject("ModelObject") {
     objectTemplate->SetAccessor(v8::String::New("integrity"), GetIntegrity, SetIntegrity);
     objectTemplate->SetAccessor(v8::String::New("model"), GetModel, SetModel);
     objectTemplate->Set(v8::String::New("textureAnimation"), v8::FunctionTemplate::New(AccessTextureAnimation));
+    objectTemplate->Set(v8::String::New("findBoneByPath"), v8::FunctionTemplate::New(FindBoneByPath));
     
     functionTemplate->Inherit(scriptPhysicObject.functionTemplate);
 }
