@@ -9,7 +9,7 @@
 #ifndef ScriptDisplayObject_h
 #define ScriptDisplayObject_h
 
-#include "ScriptObject.h"
+#include "ScriptLinks.h"
 
 class ScriptModelObject : public ScriptPhysicObject {
     static v8::Handle<v8::Value> GetIntegrity(v8::Local<v8::String> property, const v8::AccessorInfo& info);

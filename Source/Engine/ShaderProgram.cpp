@@ -286,7 +286,7 @@ void loadStaticShaderPrograms() {
     std::vector<GLenum> shaderTypeVertexFragment = { GL_VERTEX_SHADER, GL_FRAGMENT_SHADER };
     
     for(unsigned int p = 0; p < sizeof(shaderPrograms)/sizeof(ShaderProgram*); p ++)
-        shaderPrograms[p] = (p <= deferredCombineSP) ? new ShaderProgram() : NULL;
+        shaderPrograms[p] = (p < solidGSP) ? new ShaderProgram() : NULL;
     
     shaderPrograms[normalMapGenSP]->loadShaderProgram("preProcessing", shaderTypeVertexFragment, { "PROCESSING_TYPE 1" });
     shaderPrograms[normalMapGenSP]->addAttribute(POSITION_ATTRIBUTE, "position");
@@ -312,10 +312,14 @@ void loadStaticShaderPrograms() {
     shaderPrograms[colorSP]->addFragDataLocations({ "colorOut", "materialOut", "normalOut", "positionOut" });
     shaderPrograms[colorSP]->link();
     
-    shaderPrograms[deferredCombineSP]->loadShaderProgram("deferredShader", shaderTypeVertexFragment, { "BLENDING_QUALITY 0" });
-    shaderPrograms[deferredCombineSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[deferredCombineSP]->addFragDataLocations(colorFragOut);
-    shaderPrograms[deferredCombineSP]->link();
+    char blendingQualityMacro[32];
+    for(unsigned int i = 0; i < 3; i ++) {
+        sprintf(blendingQualityMacro, "BLENDING_QUALITY %d", i);
+        shaderPrograms[deferredCombineSP+i]->loadShaderProgram("deferredShader", shaderTypeVertexFragment, { blendingQualityMacro });
+        shaderPrograms[deferredCombineSP+i]->addAttribute(POSITION_ATTRIBUTE, "position");
+        shaderPrograms[deferredCombineSP+i]->addFragDataLocations(colorFragOut);
+        shaderPrograms[deferredCombineSP+i]->link();
+    }
 }
 
 void loadDynamicShaderPrograms() {
@@ -518,13 +522,6 @@ void loadDynamicShaderPrograms() {
         shaderPrograms[ssaoCombineSP]->link();
     }
     
-    if(optionsState.blendingQuality > 0) {
-        shaderPrograms[deferredCombineTransparentSP]->loadShaderProgram("deferredShader", shaderTypeVertexFragment, { blendingQualityMacro, "SSAO_QUALITY 0" });
-        shaderPrograms[deferredCombineTransparentSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-        shaderPrograms[deferredCombineTransparentSP]->addFragDataLocations(colorFragOut);
-        shaderPrograms[deferredCombineTransparentSP]->link();
-    }
-    
     if(optionsState.edgeSmoothEnabled) {
         shaderPrograms[edgeSmoothSP]->loadShaderProgram("postProcessing", shaderTypeVertexFragment, { "PROCESSING_TYPE 1" });
         shaderPrograms[edgeSmoothSP]->addAttribute(POSITION_ATTRIBUTE, "position");
@@ -549,16 +546,16 @@ void loadDynamicShaderPrograms() {
         }else
            optionsState.particleCalcTarget = 1;
         
-        shaderPrograms[particleDrawSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { "TEXTURE_ANIMATION 0", blendingQualityMacro });
+        shaderPrograms[particleDrawSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { "TEXTURE_ANIMATION 0" });
         shaderPrograms[particleDrawSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[particleDrawSP]->addAttribute(VELOCITY_ATTRIBUTE, "velocity");
-        shaderPrograms[particleDrawSP]->addFragDataLocations((optionsState.blendingQuality > 1) ? gBufferFiveOut : gBufferOut);
+        shaderPrograms[particleDrawSP]->addFragDataLocations(gBufferOut);
         shaderPrograms[particleDrawSP]->link();
         
-        shaderPrograms[particleDrawAnimatedSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { "TEXTURE_ANIMATION 1", blendingQualityMacro });
+        shaderPrograms[particleDrawAnimatedSP]->loadShaderProgram("particle", shaderTypeVertexFragmentGeometry, { "TEXTURE_ANIMATION 1" });
         shaderPrograms[particleDrawAnimatedSP]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[particleDrawAnimatedSP]->addAttribute(VELOCITY_ATTRIBUTE, "velocity");
-        shaderPrograms[particleDrawAnimatedSP]->addFragDataLocations((optionsState.blendingQuality > 1) ? gBufferFiveOut : gBufferOut);
+        shaderPrograms[particleDrawAnimatedSP]->addFragDataLocations(gBufferOut);
         shaderPrograms[particleDrawAnimatedSP]->link();
     }else
         optionsState.particleCalcTarget = 0;

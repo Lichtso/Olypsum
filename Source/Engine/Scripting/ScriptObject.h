@@ -32,6 +32,7 @@ class ScriptBaseObject : public ScriptBaseClass {
     static v8::Handle<v8::Value> RemoveLink(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetLink(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetLinks(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetParentLink(const v8::Arguments& args);
     protected:
     ScriptBaseObject(const char* name) :ScriptBaseClass(name) { }
     public:
@@ -40,6 +41,8 @@ class ScriptBaseObject : public ScriptBaseClass {
 
 class ScriptBoneObject : public ScriptBaseObject {
     protected:
+    static v8::Handle<v8::Value> GetName(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> GetChildren(const v8::Arguments& args);
     ScriptBoneObject(const char* name) :ScriptBaseObject(name) { }
     public:
     ScriptBoneObject();

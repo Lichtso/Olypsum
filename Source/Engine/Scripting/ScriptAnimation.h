@@ -25,6 +25,7 @@ class AnimationTrack {
     float time;
     bool looping;
     AnimationTrack(v8::Handle<v8::Object> object);
+    bool update(const char* property);
     bool gameTick(const char* property);
 };
 

@@ -1,6 +1,7 @@
 <Container>
 	<Objects>
 		<RigidObject>
+			<Script src="Class" />
 			<Model src="woodenBox.dae" />
 			<PhysicsBody collisionShape="box0" mass="10.0" />
 			<Damping linear="0.01" angular="0.01" />

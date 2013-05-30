@@ -38,6 +38,7 @@ class BaseLink : public BaseClass {
     BaseLink(LinkInitializer& initializer);
     //! Initialize from rapidxml::xml_node
     BaseLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    void newScriptInstance();
     //! Is called by a parent BaseObject to its children to prepare the next graphics frame
     virtual void gameTick() { };
     /*! Gets the other BaseObject
@@ -66,6 +67,7 @@ class PhysicLink : public BaseLink {
     ~PhysicLink();
     public:
     btTypedConstraint* constraint;
+    void newScriptInstance();
     void gameTick();
     /*! Constructs a new PhysicLink
      @param initializer A LinkInitializer which contains the objects and names to be linked together
@@ -81,6 +83,7 @@ class PhysicLink : public BaseLink {
 class TransformLink : public BaseLink {
     public:
     btTransform transform; //!< Applied from parent to child
+    void newScriptInstance();
     void gameTick();
     /*! Constructs a new HierarchicalLink
      @param initializer A LinkInitializer which contains the objects and names to be linked together

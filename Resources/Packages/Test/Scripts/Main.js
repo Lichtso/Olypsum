@@ -1,10 +1,15 @@
-exports.explosion = function(transform) {
-	var radius = 5, result = Intersection.sphereIntersection(transform.w(), radius, 0xFFFF);
+exports.explosion = function(object) {
+	object.integrity = 0.0;
+	if(object == exports.grabbedObject)
+		exports.grabbedObject = null;
+
+	var transform = object.transformation(), radius = 5,
+		result = Intersection.sphereIntersection(transform.w(), radius, 0xFFFF);
 	for(var i = 0; i < result.length; i ++) {
-		if(result[i].mass && result[i] != exports.grabbedObject) { //Push other objects away
-			var vec = result[i].transformation().w().sub(transform.w());
-			vec.mult(120.0/vec.getLength());
-			result[i].applyLinearImpulse(vec);
+		if(result[i].mass && result[i] != object) { //Push other objects away
+			var vec = result[i].transformation().w().sub(transform.w()), force = 120.0/vec.getLength();
+			result[i].applyLinearImpulse(vec.mult(force));
+			result[i].integrity -= force*0.01;
 		}
 
 		if(result[i].className == "TerrainObject") { //Hole in ground
@@ -95,12 +100,6 @@ exports.ongametick = function() {
         else
             exports.grabbedObject.angularVelocity(new Vector3(0.0, 0.0, 0.0));
         exports.grabbedObject.linearVelocity(velocity.mult(speed));
-
-        if(Keyboard.isKeyPressed(304)) { //Shift left: Explode
-			exports.explosion(exports.grabbedObject.transformation());
-			exports.grabbedObject.integrity = 0.0;
-			exports.grabbedObject = null;
-        }
 	}
 };
 

@@ -6,7 +6,7 @@
 //
 //
 
-#include "LevelManager.h"
+#include "ScriptLinks.h"
 
 BaseLink::BaseLink(LinkInitializer& initializer) {
     init(initializer);
@@ -15,6 +15,13 @@ BaseLink::BaseLink(LinkInitializer& initializer) {
 BaseLink::BaseLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
     LinkInitializer initializer = readInitializer(node, levelLoader);
     init(initializer);
+}
+
+void BaseLink::newScriptInstance() {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    v8::Local<v8::Object> instance = scriptBaseLink.functionTemplate->GetFunction()->NewInstance(1, &external);
+    scriptInstance = v8::Persistent<v8::Object>::New(instance);
 }
 
 void BaseLink::removeClean() {
@@ -475,6 +482,13 @@ PhysicLink::~PhysicLink() {
     delete constraint;
 }
 
+void PhysicLink::newScriptInstance() {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    v8::Local<v8::Object> instance = scriptPhysicLink.functionTemplate->GetFunction()->NewInstance(1, &external);
+    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+}
+
 void PhysicLink::gameTick() {
     if(constraint->isEnabled()) return;
     removeClean();
@@ -826,6 +840,13 @@ TransformLink::TransformLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoa
     LinkInitializer initializer = BaseLink::readInitializer(node, levelLoader);
     if(init(initializer))
         transform = readTransformationXML(node);
+}
+
+void TransformLink::newScriptInstance() {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    v8::Local<v8::Object> instance = scriptTransformLink.functionTemplate->GetFunction()->NewInstance(1, &external);
+    scriptInstance = v8::Persistent<v8::Object>::New(instance);
 }
 
 void TransformLink::gameTick() {

@@ -194,7 +194,6 @@ bool DirectionalLight::gameTick(bool shadowActive) {
     glDisable(GL_BLEND);
     mainFBO.renderInTexture(shadowMap, GL_TEXTURE_2D);
     objectManager.drawShadowCasters();
-    //glEnable(GL_BLEND);
     return true;
 }
 
@@ -304,7 +303,6 @@ bool SpotLight::gameTick(bool shadowActive) {
     shaderPrograms[spotShadowCircleLightSP]->use();
     mainFBO.vao.draw();
     objectManager.drawShadowCasters();
-    //glEnable(GL_BLEND);
     
     return true;
 }
@@ -490,7 +488,6 @@ bool PositionalLight::gameTick(bool shadowActive) {
         }
         glDisable(GL_CLIP_DISTANCE0);
     }
-    //glEnable(GL_BLEND);
     return true;
 }
 

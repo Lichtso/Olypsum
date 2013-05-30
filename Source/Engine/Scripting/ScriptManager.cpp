@@ -107,9 +107,9 @@ ScriptManager::ScriptManager() {
     scriptDirectionalLight.init(globalTemplate);
     scriptSpotLight.init(globalTemplate);
     scriptPositionalLight.init(globalTemplate);
-    //scriptBaseLink.init(globalTemplate);
-    //scriptPhysicLink.init(globalTemplate);
-    //scriptTransformLink.init(globalTemplate);
+    scriptBaseLink.init(globalTemplate);
+    scriptPhysicLink.init(globalTemplate);
+    scriptTransformLink.init(globalTemplate);
     scriptIntersection.init(globalTemplate);
     scriptAnimation.init(globalTemplate);
     scriptMouse.init(globalTemplate);

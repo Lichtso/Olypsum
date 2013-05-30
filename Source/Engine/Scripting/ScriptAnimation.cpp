@@ -18,7 +18,7 @@ AnimationTrack::AnimationTrack(v8::Handle<v8::Object> _object)
     
 }
 
-bool AnimationTrack::gameTick(const char* property) {
+bool AnimationTrack::update(const char* property) {
     v8::HandleScope handleScope;
     if(frames.size() <= 1 || frames[0].value.IsEmpty() || frames[1].value.IsEmpty())
         return false;
@@ -56,6 +56,12 @@ bool AnimationTrack::gameTick(const char* property) {
         function->CallAsFunction(object, 1, &value);
     else
         object->Set(v8::String::New(property), value);
+    
+    return true;
+}
+
+bool AnimationTrack::gameTick(const char* property) {
+    if(!update(property)) return false;
     
     time += profiler.animationFactor;
     while(time >= frames[1].duration && frames.size() > 1) {
@@ -178,6 +184,7 @@ v8::Handle<v8::Value> ScriptAnimation::AddFrames(const v8::Arguments& args) {
         track->frames.push_back(AnimationFrame(accelerations->Get(i)->NumberValue(), durations->Get(i)->NumberValue(),
                                               (values->Get(i)->IsNull()) ? defaultValue : values->Get(i)));
     }
+    track->update(property.c_str());
     
     return v8::Undefined();
 }

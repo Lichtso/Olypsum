@@ -206,7 +206,7 @@ bool Texture::uploadNormalMap(float processingValue) {
     glDisable(GL_DEPTH_TEST);
     mainFBO.vao.draw();
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
+    //glEnable(GL_BLEND);
     unloadTexture();
     
     GLname = normalMap;

@@ -157,7 +157,6 @@ void ObjectManager::gameTick() {
         shaderPrograms[ssaoCombineSP]->use();
         mainFBO.renderInBuffers(true, buffersSSAO, 2, &mainFBO.gBuffers[colorDBuffer], (keepInColorBuffer) ? 1 : 0);
         glDisable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         
         profiler.leaveSection("Apply SSAO");
     }
@@ -259,7 +258,6 @@ void ObjectManager::drawShadowCasters() {
     for(auto graphicObject : graphicObjects)
         if(graphicObject->inFrustum)
             graphicObject->draw();
-    //glEnable(GL_BLEND);
 }
 
 void ObjectManager::illuminate() {
@@ -270,7 +268,6 @@ void ObjectManager::illuminate() {
         if(lightObjects[i]->inFrustum)
             lightObjects[i]->draw();
     glFrontFace(GL_CCW);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
 }
@@ -378,20 +375,23 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
         
         for(unsigned int i = 0; i < transparentAccumulator.size(); i ++) {
             mainFBO.renderInGBuffers(buffersCombine[1]);
-            glDisable(GL_BLEND);
             glEnable(GL_DEPTH_TEST);
             
             AccumulatedTransparent* transparent = transparentAccumulator[i];
-            if(optionsState.blendingQuality > 1) {
-                glActiveTexture((transparent->mesh) ? GL_TEXTURE3 : GL_TEXTURE1);
-                glBindTexture(GL_TEXTURE_RECTANGLE, buffersCombine[3]);
-            }
-            
+            ShaderProgramName sp = deferredCombine1SP;
             if(transparent->mesh) {
+                if(optionsState.blendingQuality > 1) {
+                    glActiveTexture((transparent->mesh) ? GL_TEXTURE3 : GL_TEXTURE1);
+                    glBindTexture(GL_TEXTURE_RECTANGLE, buffersCombine[3]);
+                    sp ++;
+                }
+                glDisable(GL_BLEND);
                 glDepthMask(GL_TRUE);
                 glFrontFace((planeReflective) ? GL_CW : GL_CCW);
                 static_cast<ModelObject*>(transparent->object)->drawAccumulatedMesh(transparent->mesh);
             }else{
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                 glDepthMask(GL_FALSE);
                 glFrontFace(GL_CCW);
                 static_cast<ParticlesObject*>(transparent->object)->draw();
@@ -399,9 +399,9 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
             delete transparent;
             
             illuminate();
-            shaderPrograms[deferredCombineTransparentSP]->use();
+            shaderPrograms[sp]->use();
             mainFBO.renderInBuffers(true,
-                                    buffersCombine, (optionsState.blendingQuality == 1) ? 4 : 3,
+                                    buffersCombine, (sp == deferredCombine1SP) ? 4 : 3,
                                     &buffersCombine[3], 1);
         }
         if(!renderTarget)
@@ -411,10 +411,10 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
 }
 
 void ObjectManager::updateRendererSettings() {
-    shaderPrograms[deferredCombineSP]->use();
-    shaderPrograms[deferredCombineSP]->setUniformVec3("sceneAmbient", sceneAmbient);
-    shaderPrograms[deferredCombineTransparentSP]->use();
-    shaderPrograms[deferredCombineTransparentSP]->setUniformVec3("sceneAmbient", sceneAmbient);
+    for(unsigned int i = 0; i < 3; i ++) {
+        shaderPrograms[deferredCombineSP+i]->use();
+        shaderPrograms[deferredCombineSP+i]->setUniformVec3("sceneAmbient", sceneAmbient);
+    }
 }
 
 ObjectManager objectManager;

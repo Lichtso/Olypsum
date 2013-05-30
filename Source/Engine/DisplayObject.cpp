@@ -104,9 +104,9 @@ void ModelObject::setModel(LevelLoader* levelLoader, FileResourcePtr<Model> _mod
         for(unsigned int i = 0; i < model->meshes.size(); i ++)
             if(model->meshes[i]->material.reflectivity != 0)
                 objectManager.reflectiveAccumulator.erase(this);
-        for(auto iterator : links)
-            if(dynamic_cast<TransformLink*>(iterator) && dynamic_cast<BoneObject*>(iterator->b))
-                iterator->removeClean();
+        foreach_e(links, iterator)
+            if(dynamic_cast<TransformLink*>(*iterator) && dynamic_cast<BoneObject*>((*iterator)->b))
+                (*iterator)->removeClean();
     }
     textureAnimation.clear();
     skeletonPose.reset();

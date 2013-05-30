@@ -94,6 +94,14 @@ v8::Handle<v8::Value> ScriptBaseObject::GetLinks(const v8::Arguments& args) {
     return handleScope.Close(v8::Integer::New(objectPtr->links.size()));
 }
 
+v8::Handle<v8::Value> ScriptBaseObject::GetParentLink(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
+    auto iterator = objectPtr->findParentLink();
+    if(iterator == objectPtr->links.end()) return v8::Undefined();
+    return handleScope.Close((*iterator)->scriptInstance);
+}
+
 ScriptBaseObject::ScriptBaseObject() :ScriptBaseClass("BaseObject") {
     v8::HandleScope handleScope;
     
@@ -102,14 +110,32 @@ ScriptBaseObject::ScriptBaseObject() :ScriptBaseClass("BaseObject") {
     objectTemplate->Set(v8::String::New("removeLink"), v8::FunctionTemplate::New(RemoveLink));
     objectTemplate->Set(v8::String::New("getLink"), v8::FunctionTemplate::New(GetLink));
     objectTemplate->Set(v8::String::New("getLinks"), v8::FunctionTemplate::New(GetLinks));
+    objectTemplate->Set(v8::String::New("getParentLink"), v8::FunctionTemplate::New(GetLink));
 }
 
 
+
+v8::Handle<v8::Value> ScriptBoneObject::GetName(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    BoneObject* objectPtr = getDataOfInstance<BoneObject>(info.This());
+    return handleScope.Close(v8::String::New(objectPtr->bone->name.c_str()));
+}
+
+v8::Handle<v8::Value> ScriptBoneObject::GetChildren(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    Bone* bone = getDataOfInstance<BoneObject>(args.This())->bone;
+    v8::Handle<v8::Array> array = v8::Array::New(bone->children.size());
+    for(unsigned int i = 0; i < bone->children.size(); i ++)
+        array->Set(i, v8::String::New(bone->children[i]->name.c_str()));
+    return handleScope.Close(array);
+}
 
 ScriptBoneObject::ScriptBoneObject() :ScriptBaseObject("BoneObject") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
+    objectTemplate->SetAccessor(v8::String::New("name"), GetName);
+    objectTemplate->Set(v8::String::New("getChildren"), v8::FunctionTemplate::New(GetChildren));
 }
 
 
