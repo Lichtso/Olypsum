@@ -84,9 +84,6 @@
                     <index_of_refraction>
                         <float sid="index_of_refraction">2</float>
                     </index_of_refraction>
-                    <transparent>
-                        <color sid="transparent">0 0 0 1</color>
-                    </transparent>
                     <emission>
                       <color sid="emission">0 0 0 1</color>
                     </emission>

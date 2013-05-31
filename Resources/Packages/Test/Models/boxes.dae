@@ -52,9 +52,6 @@
             <diffuse>
               <texture texture="glass_texture-sampler" texcoord="UVTex"/>
             </diffuse>
-            <bump>
-              <texture texture="bump_map-sampler" texcoord="UVTex"/>
-            </bump>
             <specular>
               <color sid="specular">0.5 0.5 0.5 1</color>
             </specular>
@@ -65,6 +62,13 @@
               <float>0.0</float>
             </transparency>
           </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="bump_map-sampler" texcoord="UVTex"/>
+              </bump>
+            </technique>
+          </extra>
         </technique>
       </profile_COMMON>
     </effect>

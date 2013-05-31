@@ -151,10 +151,15 @@ ScriptGUIProgressBar::ScriptGUIProgressBar() :ScriptGUIRect("GUIProgressBar", Co
 v8::Handle<v8::Value> ScriptGUIImage::Constructor(const v8::Arguments &args) {
     v8::HandleScope handleScope;
     
-    if(args.Length() != 1 || !scriptGUIView.isCorrectInstance(args[0]))
+    if(args.Length() != 2 || !scriptGUIView.isCorrectInstance(args[0]) || !args[1]->IsString())
+        return v8::ThrowException(v8::String::New("GUIImage Constructor: Invalid argument"));
+    
+    auto image = fileManager.initResource<Texture>(stdStrOfV8(args[1]));
+    if(!image)
         return v8::ThrowException(v8::String::New("GUIImage Constructor: Invalid argument"));
     
     GUIImage* objectPtr = new GUIImage();
+    objectPtr->texture = image;
     return initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr);
 }
 
@@ -171,8 +176,8 @@ void ScriptGUIImage::SetImage(v8::Local<v8::String> property, v8::Local<v8::Valu
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     GUIImage* objectPtr = getDataOfInstance<GUIImage>(info.This());
-    auto font = fileManager.initResource<Texture>(stdStrOfV8(value));
-    if(font) objectPtr->texture = font;
+    auto image = fileManager.initResource<Texture>(stdStrOfV8(value));
+    if(image) objectPtr->texture = image;
 }
 
 ScriptGUIImage::ScriptGUIImage() :ScriptGUIRect("GUIImage", Constructor) {
