@@ -58,6 +58,16 @@ class ScriptSliderPhysicLink : public ScriptPhysicLink {
 };
 
 class ScriptDof6PhysicLink : public ScriptPhysicLink {
+    static v8::Handle<v8::Value> AccessSpringStiffness(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessSpringDamping(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessSpringEquilibrium(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessMotorEnabled(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessMotorVelocity(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessMotorForce(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessAngularLimitMin(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessAngularLimitMax(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessLinearLimitMin(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessLinearLimitMax(const v8::Arguments& args);
     public:
     ScriptDof6PhysicLink();
 };

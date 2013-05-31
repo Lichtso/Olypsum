@@ -66,6 +66,7 @@ ScriptGUISlider::ScriptGUISlider() :ScriptGUIRect("GUISlider", Constructor) {
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->SetAccessor(v8::String::New("orientation"), GetOrientation<GUISlider>, SetOrientationDual<GUISlider>);
     objectTemplate->SetAccessor(v8::String::New("value"), GetValue, SetValue);
+    objectTemplate->SetAccessor(v8::String::New("steps"), GetSteps, SetSteps);
     objectTemplate->SetAccessor(v8::String::New("enabled"), GetEnabled, SetEnabled);
     
     functionTemplate->Inherit(scriptGUIRect.functionTemplate);

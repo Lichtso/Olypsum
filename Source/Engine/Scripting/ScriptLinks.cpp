@@ -213,12 +213,176 @@ ScriptSliderPhysicLink::ScriptSliderPhysicLink() :ScriptPhysicLink("SliderPhysic
 
 
 
+v8::Handle<v8::Value> ScriptDof6PhysicLink::AccessSpringStiffness(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    btGeneric6DofSpringConstraint* constraint = static_cast<btGeneric6DofSpringConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
+    if(args.Length() == 0 || !args[0]->IsUint32() || args[0]->IntegerValue() > 5 || constraint->getConstraintType() != D6_SPRING_CONSTRAINT_TYPE)
+        return v8::Undefined();
+    if(args.Length() > 1 && !args[1]->IsNumber()) {
+        constraint->setStiffness(args[0]->IntegerValue(), args[1]->NumberValue());
+        return args[1];
+    }else
+        return v8::Number::New(constraint->getStiffness(args[0]->IntegerValue()));
+}
+
+v8::Handle<v8::Value> ScriptDof6PhysicLink::AccessSpringDamping(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    btGeneric6DofSpringConstraint* constraint = static_cast<btGeneric6DofSpringConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
+    if(args.Length() == 0 || !args[0]->IsUint32() || args[0]->IntegerValue() > 5 || constraint->getConstraintType() != D6_SPRING_CONSTRAINT_TYPE)
+        return v8::Undefined();
+    if(args.Length() > 1 && !args[1]->IsNumber()) {
+        constraint->setDamping(args[0]->IntegerValue(), args[1]->NumberValue());
+        return args[1];
+    }else
+        return v8::Number::New(constraint->getDamping(args[0]->IntegerValue()));
+}
+
+v8::Handle<v8::Value> ScriptDof6PhysicLink::AccessSpringEquilibrium(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    btGeneric6DofSpringConstraint* constraint = static_cast<btGeneric6DofSpringConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
+    if(args.Length() == 0 || !args[0]->IsUint32() || args[0]->IntegerValue() > 5 || constraint->getConstraintType() != D6_SPRING_CONSTRAINT_TYPE)
+        return v8::Undefined();
+    if(args.Length() > 1 && !args[1]->IsNumber()) {
+        constraint->setEquilibriumPoint(args[0]->IntegerValue(), args[1]->NumberValue());
+        return args[1];
+    }else
+        return v8::Number::New(constraint->getEquilibriumPoint(args[0]->IntegerValue()));
+}
+
+v8::Handle<v8::Value> ScriptDof6PhysicLink::AccessAngularLimitMin(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    btGeneric6DofConstraint* constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
+    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+        constraint->setAngularLowerLimit(scriptVector3.getDataOfInstance(args[0]));
+        return args[0];
+    }else{
+        btVector3 value;
+        constraint->getAngularLowerLimit(value);
+        return handleScope.Close(scriptVector3.newInstance(value));
+    }
+}
+
+v8::Handle<v8::Value> ScriptDof6PhysicLink::AccessMotorEnabled(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    btGeneric6DofConstraint* constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
+    if(args.Length() == 0 || !args[0]->IsUint32() || args[0]->IntegerValue() > 5)
+        return v8::Undefined();
+    
+    bool* value;
+    if(args[0]->IntegerValue() < 3) {
+        btTranslationalLimitMotor* linearMotor = constraint->getTranslationalLimitMotor();
+        value = &linearMotor->m_enableMotor[args[0]->IntegerValue()];
+    }else{
+        btRotationalLimitMotor* angularMotor = constraint->getRotationalLimitMotor(args[0]->IntegerValue()-3);
+        value = &angularMotor->m_enableMotor;
+    }
+    
+    if(args.Length() > 1 && !args[1]->IsBoolean()) {
+        *value = args[1]->BooleanValue();
+        return args[1];
+    }else
+        return v8::Boolean::New(value);
+}
+
+v8::Handle<v8::Value> ScriptDof6PhysicLink::AccessMotorVelocity(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    btGeneric6DofConstraint* constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
+    if(args.Length() == 0 || !args[0]->IsUint32() || args[0]->IntegerValue() > 5)
+        return v8::Undefined();
+    
+    float* value;
+    if(args[0]->IntegerValue() < 3) {
+        btTranslationalLimitMotor* linearMotor = constraint->getTranslationalLimitMotor();
+        value = &linearMotor->m_targetVelocity[args[0]->IntegerValue()];
+    }else{
+        btRotationalLimitMotor* angularMotor = constraint->getRotationalLimitMotor(args[0]->IntegerValue()-3);
+        value = &angularMotor->m_targetVelocity;
+    }
+    
+    if(args.Length() > 1 && !args[1]->IsNumber()) {
+        *value = args[1]->NumberValue();
+        return args[1];
+    }else
+        return v8::Boolean::New(value);
+}
+
+v8::Handle<v8::Value> ScriptDof6PhysicLink::AccessMotorForce(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    btGeneric6DofConstraint* constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
+    if(args.Length() == 0 || !args[0]->IsUint32() || args[0]->IntegerValue() > 5)
+        return v8::Undefined();
+    
+    float* value;
+    if(args[0]->IntegerValue() < 3) {
+        btTranslationalLimitMotor* linearMotor = constraint->getTranslationalLimitMotor();
+        value = &linearMotor->m_maxMotorForce[args[0]->IntegerValue()];
+    }else{
+        btRotationalLimitMotor* angularMotor = constraint->getRotationalLimitMotor(args[0]->IntegerValue()-3);
+        value = &angularMotor->m_maxMotorForce;
+    }
+    
+    if(args.Length() > 1 && !args[1]->IsNumber()) {
+        *value = args[1]->NumberValue();
+        return args[1];
+    }else
+        return v8::Boolean::New(value);
+}
+
+v8::Handle<v8::Value> ScriptDof6PhysicLink::AccessAngularLimitMax(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    btGeneric6DofConstraint* constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
+    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+        constraint->setAngularUpperLimit(scriptVector3.getDataOfInstance(args[0]));
+        return args[0];
+    }else{
+        btVector3 value;
+        constraint->getAngularUpperLimit(value);
+        return handleScope.Close(scriptVector3.newInstance(value));
+    }
+}
+
+v8::Handle<v8::Value> ScriptDof6PhysicLink::AccessLinearLimitMin(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    btGeneric6DofConstraint* constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
+    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+        constraint->setLinearLowerLimit(scriptVector3.getDataOfInstance(args[0]));
+        return args[0];
+    }else{
+        btVector3 value;
+        constraint->getLinearLowerLimit(value);
+        return handleScope.Close(scriptVector3.newInstance(value));
+    }
+}
+
+v8::Handle<v8::Value> ScriptDof6PhysicLink::AccessLinearLimitMax(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    btGeneric6DofConstraint* constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
+    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+        constraint->setLinearUpperLimit(scriptVector3.getDataOfInstance(args[0]));
+        return args[0];
+    }else{
+        btVector3 value;
+        constraint->getLinearUpperLimit(value);
+        return handleScope.Close(scriptVector3.newInstance(value));
+    }
+}
+
 ScriptDof6PhysicLink::ScriptDof6PhysicLink() :ScriptPhysicLink("Dof6PhysicLink") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->SetAccessor(v8::String::New("frameA"), GetFrame, SetFrame);
     objectTemplate->SetAccessor(v8::String::New("frameB"), GetFrame, SetFrame);
+    objectTemplate->Set(v8::String::New("springStiffness"), v8::FunctionTemplate::New(AccessSpringStiffness));
+    objectTemplate->Set(v8::String::New("springDamping"), v8::FunctionTemplate::New(AccessSpringDamping));
+    objectTemplate->Set(v8::String::New("springEquilibrium"), v8::FunctionTemplate::New(AccessSpringEquilibrium));
+    objectTemplate->Set(v8::String::New("motorEnabled"), v8::FunctionTemplate::New(AccessMotorEnabled));
+    objectTemplate->Set(v8::String::New("motorVelocity"), v8::FunctionTemplate::New(AccessMotorVelocity));
+    objectTemplate->Set(v8::String::New("motorForce"), v8::FunctionTemplate::New(AccessMotorForce));
+    objectTemplate->Set(v8::String::New("angularLimitMin"), v8::FunctionTemplate::New(AccessAngularLimitMin));
+    objectTemplate->Set(v8::String::New("angularLimitMax"), v8::FunctionTemplate::New(AccessAngularLimitMax));
+    objectTemplate->Set(v8::String::New("linearLimitMin"), v8::FunctionTemplate::New(AccessLinearLimitMin));
+    objectTemplate->Set(v8::String::New("linearLimitMax"), v8::FunctionTemplate::New(AccessLinearLimitMax));
 }
 
 

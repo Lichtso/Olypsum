@@ -17,6 +17,8 @@ class ScriptGUIButton : public ScriptGUIFramedView {
     static void SetPaddingX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetPaddingY(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void SetPaddingY(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> GetEnabled(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static void SetEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetState(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void SetState(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetType(v8::Local<v8::String> property, const v8::AccessorInfo& info);

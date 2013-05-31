@@ -47,14 +47,25 @@ void ScriptGUIButton::SetPaddingY(v8::Local<v8::String> property, v8::Local<v8::
     objectPtr->paddingY = value->IntegerValue();
 }
 
+v8::Handle<v8::Value> ScriptGUIButton::GetEnabled(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    GUIButton* objectPtr = getDataOfInstance<GUIButton>(info.This());
+    return v8::Boolean::New(objectPtr->enabled);
+}
+
+void ScriptGUIButton::SetEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsBoolean()) return;
+    GUIButton* objectPtr = getDataOfInstance<GUIButton>(info.This());
+    objectPtr->enabled = value->BooleanValue();
+}
+
 v8::Handle<v8::Value> ScriptGUIButton::GetState(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
     GUIButton* objectPtr = getDataOfInstance<GUIButton>(info.This());
     switch(objectPtr->state) {
-        case GUIButton::State::Disabled:
-            return handleScope.Close(v8::String::New("disabled"));
-        case GUIButton::State::Enabled:
-            return handleScope.Close(v8::String::New("enabled"));
+        case GUIButton::State::Released:
+            return handleScope.Close(v8::String::New("released"));
         case GUIButton::State::Highlighted:
             return handleScope.Close(v8::String::New("highlighted"));
         case GUIButton::State::Pressed:
@@ -67,10 +78,8 @@ void ScriptGUIButton::SetState(v8::Local<v8::String> property, v8::Local<v8::Val
     if(!value->IsString()) return;
     GUIButton* objectPtr = getDataOfInstance<GUIButton>(info.This());
     const char* str = cStrOfV8(value);
-    if(strcmp(str, "disabled") == 0)
-        objectPtr->state = GUIButton::State::Disabled;
-    else if(strcmp(str, "enabled") == 0)
-        objectPtr->state = GUIButton::State::Enabled;
+    if(strcmp(str, "released") == 0)
+        objectPtr->state = GUIButton::State::Released;
     else if(strcmp(str, "highlighted") == 0)
         objectPtr->state = GUIButton::State::Highlighted;
     else if(strcmp(str, "pressed") == 0)
@@ -118,6 +127,7 @@ ScriptGUIButton::ScriptGUIButton() :ScriptGUIFramedView("GUIButton", Constructor
     objectTemplate->SetAccessor(v8::String::New("sizeAlignment"), GetSizeAlignment<GUIButton>, SetSizeAlignment<GUIButton>);
     objectTemplate->SetAccessor(v8::String::New("paddingX"), GetPaddingX, SetPaddingX);
     objectTemplate->SetAccessor(v8::String::New("paddingY"), GetPaddingY, SetPaddingY);
+    objectTemplate->SetAccessor(v8::String::New("enabled"), GetEnabled, SetEnabled);
     objectTemplate->SetAccessor(v8::String::New("state"), GetState, SetState);
     objectTemplate->SetAccessor(v8::String::New("type"), GetType, SetType);
     

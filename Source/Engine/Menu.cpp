@@ -453,10 +453,8 @@ void Menu::setMenu(Name menu) {
                 checkBox->posX = view->width*-0.52;
                 checkBox->posY = label->posY;
                 checkBox->onClick = onClick[i];
-                if(i == 3 && levelManager.gameStatus != noGame)
-                    checkBox->state = GUIButton::State::Disabled;
-                else if(checkBoxActive[i])
-                    checkBox->state = GUIButton::State::Pressed;
+                checkBox->enabled = (i != 3 || levelManager.gameStatus == noGame);
+                checkBox->state = (checkBoxActive[i]) ? GUIButton::State::Pressed : GUIButton::State::Released;
                 view->addChild(checkBox);
             }
             
@@ -466,8 +464,7 @@ void Menu::setMenu(Name menu) {
             button->onClick = [this](GUIButton* button) {
                 setMenu(videoResolution);
             };
-            if(levelManager.gameStatus != noGame)
-                button->state = GUIButton::State::Disabled;
+            button->enabled = (levelManager.gameStatus == noGame);
             view->addChild(button);
             label = new GUILabel();
             label->text = stringOf(optionsState.videoWidth)+" x "+stringOf(optionsState.videoHeight);
@@ -619,7 +616,7 @@ void Menu::setMenu(Name menu) {
             button->onClick = [](GUIButton* button) {
                 //setMenu(leapMotionMenu);
             };
-            button->state = GUIButton::State::Disabled;
+            button->enabled = false;
             screenView->addChild(button);
             label = new GUILabel();
             label->text = localization.localizeString("leapMotion");
@@ -1006,11 +1003,11 @@ void Menu::setMenu(Name menu) {
                 button->onClick = onClick[i];
             }
             button->type = GUIButton::Type::Add;
-            button->state = GUIButton::State::Disabled;
+            button->enabled = false;
             textField->onChange = [button](GUITextField* textField) {
                 GUILabel* label = static_cast<GUILabel*>(textField->children[0]);
                 std::string path = gameDataDir+"Saves/"+label->text+'/';
-                button->state = (!checkDir(path) && label->getLength() >= 3) ? GUIButton::State::Enabled : GUIButton::State::Disabled;
+                button->enabled = (!checkDir(path) && label->getLength() >= 3);
                 button->updateContent();
             };
         } break;

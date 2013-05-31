@@ -35,7 +35,7 @@ void GUICheckBox::updateContent() {
 }
 
 bool GUICheckBox::handleMouseDown(int mouseX, int mouseY) {
-    if(!visible || state == GUIButton::State::Disabled || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
+    if(!visible || !enabled || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
     state = (state != GUIButton::State::Pressed) ? GUIButton::State::Pressed : GUIButton::State::Highlighted;
     updateContent();
     if(onClick)
@@ -44,19 +44,19 @@ bool GUICheckBox::handleMouseDown(int mouseX, int mouseY) {
 }
 
 bool GUICheckBox::handleMouseUp(int mouseX, int mouseY) {
-    if(!visible || state == GUIButton::State::Disabled || state == GUIButton::State::Pressed) return false;
+    if(!visible || !enabled || state == GUIButton::State::Pressed) return false;
     if(mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) {
-        state = GUIButton::State::Enabled;
+        state = GUIButton::State::Released;
         updateContent();
     }
     return false;
 }
 
 void GUICheckBox::handleMouseMove(int mouseX, int mouseY) {
-    if(!visible || state == GUIButton::State::Disabled || state == GUIButton::State::Pressed) return;
+    if(!visible || !enabled || state == GUIButton::State::Pressed) return;
     GUIButton::State prevState = state;
     if(mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) {
-        state = GUIButton::State::Enabled;
+        state = GUIButton::State::Released;
     }else
         state = GUIButton::State::Highlighted;
     if(prevState != state) updateContent();

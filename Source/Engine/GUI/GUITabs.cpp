@@ -46,8 +46,8 @@ void GUITabs::updateContent() {
     int posCounter = 0;
     for(unsigned int i = 0; i < children.size(); i ++) {
         button = (GUIButton*)children[i];
-        if(button->state != GUIButton::State::Disabled)
-            button->state = (i == selected) ? GUIButton::State::Pressed : GUIButton::State::Enabled;
+        if(button->enabled)
+            button->state = (i == selected) ? GUIButton::State::Pressed : GUIButton::State::Released;
         button->content.roundedCorners = (GUICorner) 0;
         
         if(orientation & GUIOrientation::Vertical) {
@@ -122,7 +122,7 @@ bool GUITabs::handleMouseDown(int mouseXo, int mouseYo) {
         mouseX = mouseXo-button->posX;
         mouseY = mouseYo-button->posY;
         if(mouseX < -button->width || mouseX > button->width || mouseY < -button->height
-           || mouseY > button->height || button->state == GUIButton::State::Disabled) continue;
+           || mouseY > button->height || !button->enabled) continue;
         
         if(selected != i) {
             button->state = GUIButton::State::Pressed;
@@ -138,8 +138,8 @@ bool GUITabs::handleMouseDown(int mouseXo, int mouseYo) {
         
         for(unsigned int j = 0; j < children.size(); j ++) {
             button = (GUIButton*)children[j];
-            if(i != j && button->state != GUIButton::State::Disabled)
-                button->state = GUIButton::State::Enabled;
+            if(i != j && button->enabled)
+                button->state = GUIButton::State::Released;
             button->updateContent();
         }
         return true;
@@ -158,13 +158,13 @@ void GUITabs::handleMouseMove(int mouseXo, int mouseYo) {
     int mouseX, mouseY;
     for(int i = (int)children.size()-1; i >= 0; i --) {
         button = (GUIButton*) children[i];
-        if(button->state == GUIButton::State::Disabled || button->state == GUIButton::State::Pressed) continue;
+        if(!button->enabled || button->state == GUIButton::State::Pressed) continue;
         mouseX = mouseXo-button->posX;
         mouseY = mouseYo-button->posY;
         
         GUIButton::State prevState = button->state;
         if(mouseX < -button->width || mouseX > button->width || mouseY < -button->height || mouseY > button->height) {
-            button->state = GUIButton::State::Enabled;
+            button->state = GUIButton::State::Released;
         }else
             button->state = GUIButton::State::Highlighted;
         if(prevState != button->state) button->updateContent();

@@ -15,11 +15,11 @@ class GUIButton : public GUIFramedView {
     public:
     GUISizeAlignment sizeAlignment;
     unsigned int paddingX, paddingY;
+    bool enabled;
     enum State {
-        Disabled = 0,
-        Enabled = 1,
-        Highlighted = 2,
-        Pressed = 3
+        Released = 0,
+        Highlighted = 1,
+        Pressed = 2
     } state;
     enum Type {
         Normal = 0,
