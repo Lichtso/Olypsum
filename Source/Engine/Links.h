@@ -48,8 +48,10 @@ class BaseLink : public BaseClass {
     BaseObject* getOther(BaseObject* object) {
         return (object == b) ? a : b;
     }
-    //! Used to remove a LinkObject correctly
-    virtual void removeClean();
+    /*! Used to remove a LinkObject correctly
+     @param object One of the two BaseObject passed in the constructor. Either a or b
+     */
+    virtual void removeClean(BaseObject* object);
     /*! Used to delete a LinkObject
      @param object One of the two BaseObject passed in the constructor. Either a or b
      */
@@ -75,7 +77,7 @@ class PhysicLink : public BaseLink {
      */
     PhysicLink(LinkInitializer& initializer, btTypedConstraint* constraint);
     PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    void removeClean();
+    void removeClean(BaseObject* object);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
 
@@ -97,9 +99,8 @@ class TransformLink : public BaseLink {
      
      @warning This method calls remove() on the child object but only if it is called from the parent
      */
-    void removeClean();
+    void removeClean(BaseObject* object);
     void removeFast(BaseObject* a);
-    bool init(LinkInitializer& initializer);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
 

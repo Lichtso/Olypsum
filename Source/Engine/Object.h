@@ -25,7 +25,7 @@ class LevelSaver;
  */
 class BaseClass {
     protected:
-    BaseClass() :scriptFile(NULL) { };
+    BaseClass() :scriptFile(NULL) { }
     virtual ~BaseClass();
     public:
     ScriptFile* scriptFile; //!< The script file to be called on events
@@ -131,6 +131,7 @@ class PhysicObject : public BaseObject {
     btCollisionObject* body; //!< The physics-body
     PhysicObject() :body(NULL) { }
     public:
+    PhysicObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     void removeClean();
     void removeFast();
     virtual void setTransformation(const btTransform& transformation) {
@@ -148,8 +149,6 @@ class PhysicObject : public BaseObject {
     btCollisionObject* getBody() {
         return body;
     }
-    //! Initialize from rapidxml::xml_node as btCollisionObject
-    void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     //! Reads the collision shape from a rapidxml::xml_node named "PhysicsBody"
     btCollisionShape* readCollisionShape(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);

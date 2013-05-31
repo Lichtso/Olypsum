@@ -24,7 +24,7 @@ void BaseClass::newScriptInstance() {
 
 void BaseObject::removeClean() {
     while(links.size() > 0)
-        (*links.begin())->removeClean();
+        (*links.begin())->removeClean(this);
     delete this;
 }
 
@@ -97,6 +97,17 @@ void BoneObject::newScriptInstance() {
 
 
 
+PhysicObject::PhysicObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+    btCollisionShape* collisionShape = readCollisionShape(node->first_node("PhysicsBody"), levelLoader);
+    if(!collisionShape) return;
+    body = new btCollisionObject();
+    body->setCollisionShape(collisionShape);
+    body->setWorldTransform(BaseObject::readTransformtion(node, levelLoader));
+    body->setUserPointer(this);
+    body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
+    objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Zone, CollisionMask_Object);
+}
+
 void PhysicObject::removeClean() {
     if(body) {
         if(body->getCollisionShape())
@@ -116,17 +127,6 @@ void PhysicObject::removeFast() {
         body = NULL;
     }
     BaseObject::removeFast();
-}
-
-void PhysicObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
-    btCollisionShape* collisionShape = readCollisionShape(node->first_node("PhysicsBody"), levelLoader);
-    if(!collisionShape) return;
-    body = new btCollisionObject();
-    body->setCollisionShape(collisionShape);
-    body->setWorldTransform(BaseObject::readTransformtion(node, levelLoader));
-    body->setUserPointer(this);
-    body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-    objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Zone, CollisionMask_Object);
 }
 
 void PhysicObject::newScriptInstance() {
@@ -193,6 +193,7 @@ btCollisionShape* PhysicObject::readCollisionShape(rapidxml::xml_node<xmlUsedCha
 
 rapidxml::xml_node<xmlUsedCharType>* PhysicObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
     rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
+    node->name("PhysicObject");
     rapidxml::xml_node<xmlUsedCharType>* physicsBody = doc.allocate_node(rapidxml::node_element);
     physicsBody->name("PhysicsBody");
     node->append_node(physicsBody);

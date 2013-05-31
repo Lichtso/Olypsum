@@ -112,6 +112,8 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
             BaseObject* object;
             if(strcmp(node->name(), "RigidObject") == 0) {
                 object = new RigidObject(node, this);
+            }else if(strcmp(node->name(), "PhysicObject") == 0) {
+                object = new PhysicObject(node, this);
             }else if(strcmp(node->name(), "LightObject") == 0) {
                 attribute = node->first_attribute("type");
                 if(!attribute) {

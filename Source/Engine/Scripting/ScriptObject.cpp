@@ -71,7 +71,7 @@ v8::Handle<v8::Value> ScriptBaseObject::RemoveLink(const v8::Arguments& args) {
     if(args[0]->IntegerValue() >= objectPtr->links.size())
         return v8::ThrowException(v8::String::New("BaseObject removeLink(): Out of bounds"));
     if(!link) return v8::Boolean::New(false);
-    (*std::next(objectPtr->links.begin(), args[0]->IntegerValue()))->removeClean();
+    (*std::next(objectPtr->links.begin(), args[0]->IntegerValue()))->removeClean(objectPtr);
     return v8::Boolean::New(true);
 }
 

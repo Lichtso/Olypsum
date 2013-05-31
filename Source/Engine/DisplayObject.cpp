@@ -106,7 +106,7 @@ void ModelObject::setModel(LevelLoader* levelLoader, FileResourcePtr<Model> _mod
                 objectManager.reflectiveAccumulator.erase(this);
         foreach_e(links, iterator)
             if(dynamic_cast<TransformLink*>(*iterator) && dynamic_cast<BoneObject*>((*iterator)->b))
-                (*iterator)->removeClean();
+                (*iterator)->removeClean(this);
     }
     textureAnimation.clear();
     skeletonPose.reset();
@@ -186,10 +186,6 @@ void ModelObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
 
 rapidxml::xml_node<xmlUsedCharType>* ModelObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
     rapidxml::xml_node<xmlUsedCharType>* node = PhysicObject::write(doc, levelSaver);
-    if(!model) {
-        log(error_log, "Tried to save ModelObject without model.");
-        return node;
-    }
     node->append_node(fileManager.writeResource(doc, "Model", model));
     if(textureAnimation.size() > 0) {
         rapidxml::xml_node<xmlUsedCharType>* textureAnimationNode = doc.allocate_node(rapidxml::node_element);

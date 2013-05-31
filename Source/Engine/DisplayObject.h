@@ -18,7 +18,7 @@
  */
 class DisplayObject : public PhysicObject {
     protected:
-    DisplayObject() { };
+    DisplayObject() { }
     public:
     bool inFrustum; //!< This flag is set by the engine when the DisplayObject was in the frustum at the last graphics frame
     //! Called by the engine to render this DisplayObject

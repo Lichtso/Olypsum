@@ -29,6 +29,8 @@ void LevelSaver::pushObject(BaseObject* object) {
             LinkInitializer* linkSaver = iteratorInSet->second;
             linkSaver->index[1] = objectCounter;
             linkSaver->object[1] = object;
+            if(linkSaver->object[0] != iteratorInObject->a)
+                linkSaver->swap();
         }
     }
     objectCounter ++;

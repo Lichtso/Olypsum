@@ -45,30 +45,23 @@
 		</CamObject>
 	</Objects>
 	<Links>
-		<!--<PhysicLink>
-			<Object index="1" name="a" />
-			<Object index="2" name="b" />
-			<Constraint type="point">
-				<Point>0.0 -1.0 0.0</Point>
-				<Point>0.0 1.0 0.0</Point>
-			</Constraint>
+		<!--<PhysicLink type="point">
+			<Objects indexA="1" indexB="2" />
+			<Point>0.0 -1.0 0.0</Point>
+			<Point>0.0 1.0 0.0</Point>
 		</PhysicLink>-->
-		<PhysicLink>
-			<Object index="1"/>
-			<Object index="2"/>
-			<Constraint type="slider">
-				<Frame>
-					<Translate>0.0 -1.5 0.0</Translate>
-				</Frame>
-				<Frame>
-					<Translate>0.0 0.5 0.0</Translate>
-				</Frame>
-				<AngularLimit min="1.0" max="-1.0" />
-			</Constraint>
+		<PhysicLink type="slider">
+			<Objects indexA="1" indexB="2"/>
+			<Frame>
+				<Translate>0.0 -1.5 0.0</Translate>
+			</Frame>
+			<Frame>
+				<Translate>0.0 0.5 0.0</Translate>
+			</Frame>
+			<AngularLimit min="1.0" max="-1.0" />
 		</PhysicLink>
 		<TransformLink>
-			<Object index="2"/>
-			<Object index="28"/>
+			<Objects indexA="2" indexB="28"/>
 			<Translate>0.0 7.0 1.0</Translate>
 		</TransformLink>
 	</Links>

@@ -15,8 +15,7 @@
 	</Objects>
 	<Links>
 		<TransformLink>
-			<Object index="0"/>
-			<Object index="1"/>
+			<Objects indexA="0" indexB="1"/>
 			<Translate>0.0 1.0 0.0</Translate>
 		</TransformLink>
 	</Links>

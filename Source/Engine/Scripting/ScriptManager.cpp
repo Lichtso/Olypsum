@@ -109,6 +109,12 @@ ScriptManager::ScriptManager() {
     scriptPositionalLight.init(globalTemplate);
     scriptBaseLink.init(globalTemplate);
     scriptPhysicLink.init(globalTemplate);
+    scriptPointPhysicLink.init(globalTemplate);
+    scriptGearPhysicLink.init(globalTemplate);
+    scriptHingePhysicLink.init(globalTemplate);
+    scriptSliderPhysicLink.init(globalTemplate);
+    scriptDof6PhysicLink.init(globalTemplate);
+    scriptConeTwistPhysicLink.init(globalTemplate);
     scriptTransformLink.init(globalTemplate);
     scriptIntersection.init(globalTemplate);
     scriptAnimation.init(globalTemplate);
