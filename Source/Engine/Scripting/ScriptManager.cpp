@@ -84,7 +84,7 @@ rapidxml::xml_node<xmlUsedCharType>* ScriptManager::writeCdataXMLNode(rapidxml::
 
 ScriptManager::ScriptManager() {
     v8::HandleScope handleScope;
-    globalTemplate = v8::Persistent<v8::ObjectTemplate>::New(v8::ObjectTemplate::New());
+    globalTemplate = v8::Persistent<v8::ObjectTemplate>::New(v8::Isolate::GetCurrent(), v8::ObjectTemplate::New());
     globalTemplate->Set(v8::String::New("log"), v8::FunctionTemplate::New(ScriptLog));
     globalTemplate->Set(v8::String::New("require"), v8::FunctionTemplate::New(ScriptRequire));
     globalTemplate->Set(v8::String::New("loadContainer"), v8::FunctionTemplate::New(ScriptLoadContainer));

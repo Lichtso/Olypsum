@@ -132,7 +132,8 @@ v8::Handle<v8::Value> ScriptGUIScreenView::Constructor(const v8::Arguments &args
         v8::Persistent<v8::Object> instance = menu.screenView->scriptInstance;
         if(instance.IsEmpty()) {
             v8::Handle<v8::Value> external = v8::External::New(menu.screenView);
-            instance = v8::Persistent<v8::Object>::New(scriptGUIScreenView.functionTemplate->GetFunction()->NewInstance(1, &external));
+            instance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(),
+                       scriptGUIScreenView.functionTemplate->GetFunction()->NewInstance(1, &external));
             menu.screenView->scriptInstance = instance;
         }
         return instance;
@@ -187,7 +188,7 @@ v8::Handle<v8::Value> ScriptGUIScrollView::Constructor(const v8::Arguments &args
         return v8::ThrowException(v8::String::New("GUIScrollView Constructor: Invalid argument"));
     
     GUIScrollView* objectPtr = new GUIScrollView();
-    objectPtr->scriptInstance = v8::Persistent<v8::Object>::New(args.This());
+    objectPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
     args.This()->SetInternalField(0, v8::External::New(objectPtr));
     GUIView* parent = getDataOfInstance<GUIView>(args[0]);
     parent->addChild(objectPtr);

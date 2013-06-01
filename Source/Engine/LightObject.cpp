@@ -160,7 +160,7 @@ void DirectionalLight::newScriptInstance() {
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);
     v8::Local<v8::Object> instance = scriptDirectionalLight.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 void DirectionalLight::setTransformation(const btTransform& transformation) {
@@ -268,7 +268,7 @@ void SpotLight::newScriptInstance() {
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);
     v8::Local<v8::Object> instance = scriptSpotLight.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 void SpotLight::setTransformation(const btTransform& transformation) {
@@ -389,7 +389,7 @@ void PositionalLight::newScriptInstance() {
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);
     v8::Local<v8::Object> instance = scriptPositionalLight.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 void PositionalLight::setTransformation(const btTransform& transformation) {

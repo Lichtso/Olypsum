@@ -17,7 +17,7 @@ void BaseClass::newScriptInstance() {
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);
     v8::Local<v8::Object> instance = scriptBaseClass.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 
@@ -50,7 +50,7 @@ void BaseObject::newScriptInstance() {
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);
     v8::Local<v8::Object> instance = scriptBaseObject.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 btTransform BaseObject::readTransformtion(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
@@ -92,7 +92,7 @@ void BoneObject::newScriptInstance() {
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);
     v8::Local<v8::Object> instance = scriptBoneObject.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 
@@ -133,7 +133,7 @@ void PhysicObject::newScriptInstance() {
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);
     v8::Local<v8::Object> instance = scriptPhysicObject.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 void PhysicObject::updateTouchingObjects() {

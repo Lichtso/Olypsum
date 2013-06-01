@@ -21,7 +21,7 @@ void BaseLink::newScriptInstance() {
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);
     v8::Local<v8::Object> instance = scriptBaseLink.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 void BaseLink::removeClean(BaseObject* object) {
@@ -498,7 +498,7 @@ void PhysicLink::newScriptInstance() {
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);
     v8::Local<v8::Object> instance = scriptPhysicLink.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 void PhysicLink::gameTick() {
@@ -867,7 +867,7 @@ void TransformLink::newScriptInstance() {
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);
     v8::Local<v8::Object> instance = scriptTransformLink.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 void TransformLink::gameTick() {

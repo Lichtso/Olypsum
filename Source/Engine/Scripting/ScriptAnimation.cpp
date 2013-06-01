@@ -9,12 +9,14 @@
 #include "ScriptManager.h"
 
 AnimationFrame::AnimationFrame(float _acceleration, float _duration, v8::Handle<v8::Value> _value)
-    :acceleration(_acceleration), duration(_duration), value(v8::Persistent<v8::Value>::New(_value)) {
+    :acceleration(_acceleration), duration(_duration),
+    value(v8::Persistent<v8::Value>::New(v8::Isolate::GetCurrent(), _value)) {
     
 }
 
 AnimationTrack::AnimationTrack(v8::Handle<v8::Object> _object)
-    :object(v8::Persistent<v8::Object>::New(_object)), time(0.0), looping(false) {
+    :object(v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), _object)),
+    time(0.0), looping(false) {
     
 }
 
@@ -104,7 +106,7 @@ bool AnimationProperty::gameTick(const char* property) {
 
 
 AnimationTimer::AnimationTimer(v8::Handle<v8::Function> _function, double _timeLength)
-    :function(v8::Persistent<v8::Function>::New(_function)),
+    :function(v8::Persistent<v8::Function>::New(v8::Isolate::GetCurrent(), _function)),
     timeLength(_timeLength), timeNext(_timeLength+getTime()) {
     
 }

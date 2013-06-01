@@ -149,7 +149,7 @@ void TerrainObject::newScriptInstance() {
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);
     v8::Local<v8::Object> instance = scriptTerrainObject.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(instance);
+    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
     scriptInstance->SetIndexedPropertiesToExternalArrayData(heights, v8::kExternalFloatArray, width*length);
 }
 

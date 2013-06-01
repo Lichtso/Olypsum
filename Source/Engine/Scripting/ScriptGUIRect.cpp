@@ -132,7 +132,7 @@ v8::Handle<v8::Value> ScriptGUIRect::initInstance(v8::Local<v8::Object> instance
         delete child;
         return v8::ThrowException(v8::String::New("GUIView addChild(): Failed"));
     }
-    child->scriptInstance = v8::Persistent<v8::Object>::New(instance);
+    child->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
     instance->SetInternalField(0, v8::External::New(child));
     return instance;
 }

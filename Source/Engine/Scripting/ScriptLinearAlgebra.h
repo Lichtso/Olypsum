@@ -72,7 +72,7 @@ class ScriptQuaternion : public ScriptClass {
 
 class ScriptMatrix4 : public ScriptClass {
     static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
-    static void Destructor(v8::Persistent<v8::Value> value, void* data);
+    static void Destructor(v8::Isolate* isolate, v8::Persistent<v8::Object>* value, void* data);
     static v8::Handle<v8::Value> toString(const v8::Arguments& args);
     static v8::Handle<v8::Value> toJSON(const v8::Arguments& args);
     static v8::Handle<v8::Value> AccessRowX(const v8::Arguments& args);

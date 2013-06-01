@@ -17,7 +17,7 @@ Script::Script(const std::string& sourceCode, const std::string& name) {
     v8::TryCatch tryCatch;
     v8::Handle<v8::Script> scriptLocal = v8::Script::Compile(v8::String::New(sourceCode.c_str()), v8::String::New(name.c_str()));
     if(scriptManager->tryCatch(&tryCatch))
-        script = v8::Persistent<v8::Script>::New(scriptLocal);
+        script = v8::Persistent<v8::Script>::New(v8::Isolate::GetCurrent(), scriptLocal);
 }
 
 Script::~Script() {
@@ -45,17 +45,18 @@ bool ScriptFile::load(FilePackage* filePackageB, const std::string& nameB) {
     if(!data) return false;
     v8::TryCatch tryCatch;
     v8::HandleScope handleScope;
-    context = v8::Context::New(NULL, scriptManager->globalTemplate);
+    context = v8::Persistent<v8::Context>::New(v8::Isolate::GetCurrent(),
+              v8::Context::New(v8::Isolate::GetCurrent(), NULL, scriptManager->globalTemplate));
     context->Enter();
     context->Global()->Set(v8::String::New("exports"), v8::Object::New());
     
     v8::Local<v8::Script> scriptLocal = v8::Script::Compile(v8::String::New(data.get()), v8::String::New(name.c_str()));
     if(scriptManager->tryCatch(&tryCatch)) {
         filePackage = filePackageB;
-        script = v8::Persistent<v8::Script>::New(scriptLocal);
+        script = v8::Persistent<v8::Script>::New(v8::Isolate::GetCurrent(), scriptLocal);
         v8::Handle<v8::Object>::Cast(run());
         v8::Local<v8::Value> objectLocal = context->Global()->Get(v8::String::New("exports"));
-        exports = v8::Persistent<v8::Object>::New(v8::Local<v8::Object>::Cast(objectLocal));
+        exports = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), v8::Local<v8::Object>::Cast(objectLocal));
     }
     
     return !tryCatch.HasCaught();
@@ -89,7 +90,7 @@ v8::Handle<v8::Value> ScriptFile::callFunction(const char* functionName, bool re
 
 ScriptClass::ScriptClass(const char* nameB, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args)) :name(nameB) {
     v8::HandleScope handleScope;
-    functionTemplate = v8::Persistent<v8::FunctionTemplate>::New(v8::FunctionTemplate::New(constructor));
+    functionTemplate = v8::Persistent<v8::FunctionTemplate>::New(v8::Isolate::GetCurrent(), v8::FunctionTemplate::New(constructor));
     functionTemplate->SetClassName(v8::String::New(name));
     functionTemplate->PrototypeTemplate()->Set(v8::String::New("className"), v8::String::New(name));
 }

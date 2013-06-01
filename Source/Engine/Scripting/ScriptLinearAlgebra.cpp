@@ -628,21 +628,21 @@ v8::Handle<v8::Value> ScriptMatrix4::Constructor(const v8::Arguments& args) {
         }
     }
     
-    v8::Persistent<v8::Object> object = v8::Persistent<v8::Object>::New(args.This());
-    object.MakeWeak(NULL, &Destructor);
+    v8::Persistent<v8::Object> object = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
+    
+    object.MakeWeak<void>(NULL, &Destructor);
     object->SetIndexedPropertiesToExternalArrayData(&matrix.get()->values, v8::kExternalFloatArray, 16);
     object->SetInternalField(0, v8::External::New(matrix.release()));
     v8::V8::AdjustAmountOfExternalAllocatedMemory(sizeof(Matrix4));
     return object;
 }
 
-void ScriptMatrix4::Destructor(v8::Persistent<v8::Value> value, void* data) {
+void ScriptMatrix4::Destructor(v8::Isolate* isolate, v8::Persistent<v8::Object>* value, void* data) {
     v8::HandleScope handleScope;
-    v8::Persistent<v8::Object> object = v8::Persistent<v8::Object>::Cast(value);
-    Matrix4* mat = getDataOfInstance(*object);
+    Matrix4* mat = getDataOfInstance(**value);
     v8::V8::AdjustAmountOfExternalAllocatedMemory(-sizeof(Matrix4));
-    object.ClearWeak();
-    object.Dispose();
+    value->ClearWeak();
+    value->Dispose();
     //printf("~ ScriptMatrix4\n");
     delete mat;
 }
