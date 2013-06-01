@@ -16,7 +16,7 @@ class ScriptBaseClass : public ScriptClass {
     static void SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     protected:
     static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
-    ScriptBaseClass(const char* name);
+    ScriptBaseClass(const char* name, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args) = Constructor);
     public:
     template<typename T> static T* getDataOfInstance(const v8::Local<v8::Value>& value) {
         v8::HandleScope handleScope;
@@ -24,14 +24,14 @@ class ScriptBaseClass : public ScriptClass {
         v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(object->GetInternalField(0));
         return static_cast<T*>(wrap->Value());
     }
-    ScriptBaseClass() :ScriptBaseClass("BaseClass") { };
+    ScriptBaseClass();
 };
 
 class ScriptBaseObject : public ScriptBaseClass {
     static v8::Handle<v8::Value> AccessTransformation(const v8::Arguments& args);
     static v8::Handle<v8::Value> RemoveLink(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetLink(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetLinks(const v8::Arguments& args);
+    static v8::Handle<v8::Value> GetLinkCount(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetParentLink(const v8::Arguments& args);
     protected:
     ScriptBaseObject(const char* name) :ScriptBaseClass(name) { }

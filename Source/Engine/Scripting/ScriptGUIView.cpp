@@ -32,7 +32,7 @@ v8::Handle<v8::Value> ScriptGUIView::GetChild(uint32_t index, const v8::Accessor
     return objectPtr->children[index]->scriptInstance;
 }
 
-ScriptGUIView::ScriptGUIView() :ScriptGUIView("GUIView", Constructor) {
+ScriptGUIView::ScriptGUIView() :ScriptGUIRect("GUIView", Constructor) {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
@@ -110,7 +110,7 @@ void ScriptGUIFramedView::SetCornerRadius(v8::Local<v8::String> property, v8::Lo
     objectPtr->content.cornerRadius = value->IntegerValue();
 }
 
-ScriptGUIFramedView::ScriptGUIFramedView() :ScriptGUIFramedView("GUIFramedView", Constructor) {
+ScriptGUIFramedView::ScriptGUIFramedView() :ScriptGUIView("GUIFramedView", Constructor) {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
@@ -169,7 +169,7 @@ v8::Handle<v8::Value> ScriptGUIScreenView::GetFocused(v8::Local<v8::String> prop
     return objectPtr->focused->scriptInstance;
 }
 
-ScriptGUIScreenView::ScriptGUIScreenView() :ScriptGUIScreenView("GUIScreenView", Constructor) {
+ScriptGUIScreenView::ScriptGUIScreenView() :ScriptGUIView("GUIScreenView", Constructor) {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();

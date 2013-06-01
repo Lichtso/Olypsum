@@ -28,16 +28,9 @@ class LinkInitializer {
  */
 class BaseLink : public BaseClass {
     protected:
-    BaseLink() { };
     virtual ~BaseLink() { };
     public:
     BaseObject *a, *b; //!< The linkes BaseObjects
-    /*! Constructs a new LinkObject
-     @param initializer A LinkInitializer which contains the objects and names to be linked together
-     */
-    BaseLink(LinkInitializer& initializer);
-    //! Initialize from rapidxml::xml_node
-    BaseLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     void newScriptInstance();
     //! Is called by a parent BaseObject to its children to prepare the next graphics frame
     virtual void gameTick() { };
@@ -56,10 +49,12 @@ class BaseLink : public BaseClass {
      @param object One of the two BaseObject passed in the constructor. Either a or b
      */
     virtual void removeFast(BaseObject* object);
-    //! Reads the LinkInitializer from rapidxml::xml_node
-    static LinkInitializer readInitializer(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    //! Initialize from LinkInitializer. Returns success
+    /*! Initialize from LinkInitializer. Returns success
+     @param initializer A LinkInitializer which contains the objects and names to be linked together
+     */
     bool init(LinkInitializer& initializer);
+    //! Initialize from rapidxml::xml_node. Returns success
+    virtual bool init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     //! Writes its self to rapidxml::xml_node and returns it
     virtual rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
@@ -71,13 +66,9 @@ class PhysicLink : public BaseLink {
     btTypedConstraint* constraint;
     void newScriptInstance();
     void gameTick();
-    /*! Constructs a new PhysicLink
-     @param initializer A LinkInitializer which contains the objects and names to be linked together
-     @param constraint The bullet physics constraint to be attached
-     */
-    PhysicLink(LinkInitializer& initializer, btTypedConstraint* constraint);
-    PhysicLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     void removeClean(BaseObject* object);
+    bool init(LinkInitializer& initializer, btTypedConstraint* constraint);
+    bool init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
 
@@ -87,11 +78,6 @@ class TransformLink : public BaseLink {
     btTransform transform; //!< Applied from parent to child
     void newScriptInstance();
     void gameTick();
-    /*! Constructs a new HierarchicalLink
-     @param initializer A LinkInitializer which contains the objects and names to be linked together
-     */
-    TransformLink(LinkInitializer& initializer);
-    TransformLink(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     /*! Used to remove a HierarchicalLink correctly.
      This will call BaseObject::remove() on the child if and only if the parameter a is the parent.
      @param a One of the two BaseObject passed in the constructor. Either parent or child
@@ -101,6 +87,8 @@ class TransformLink : public BaseLink {
      */
     void removeClean(BaseObject* object);
     void removeFast(BaseObject* a);
+    bool init(LinkInitializer& initializer, btTransform& transform);
+    bool init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
 

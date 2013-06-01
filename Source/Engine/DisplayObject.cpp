@@ -34,7 +34,8 @@ void ModelObject::setupBones(LevelLoader* levelLoader, BaseObject* object, Bone*
     LinkInitializer initializer;
     initializer.object[0] = object;
     initializer.object[1] = object = new BoneObject(bone);
-    new TransformLink(initializer);
+    btTransform transform = btTransform::getIdentity();
+    (new TransformLink())->init(initializer, transform);
     if(levelLoader)
         levelLoader->pushObject(object);
     for(auto childBone : bone->children)

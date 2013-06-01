@@ -164,16 +164,18 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
     if(node) {
         node = node->first_node();
         while(node) {
+            BaseLink* link;
             if(strcmp(node->name(), "BaseLink") == 0) {
-                new BaseLink(node, this);
+                link = new BaseLink();
             }else if(strcmp(node->name(), "PhysicLink") == 0) {
-                new PhysicLink(node, this);
+                link = new PhysicLink();
             }else if(strcmp(node->name(), "TransformLink") == 0) {
-                new TransformLink(node, this);
+                link = new TransformLink();
             }else{
                 log(error_log, std::string("Tried to construct invalid Link: ")+node->name()+'.');
                 return false;
             }
+            link->init(node, this);
             node = node->next_sibling();
         }
     }

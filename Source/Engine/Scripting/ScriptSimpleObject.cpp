@@ -113,7 +113,7 @@ ScriptCamObject::ScriptCamObject() :ScriptBaseObject("CamObject") {
     objectTemplate->Set(v8::String::New("setMainCam"), v8::FunctionTemplate::New(SetMainCam));
     
     functionTemplate->Set(v8::String::New("getMainCam"), v8::FunctionTemplate::New(GetMainCam));
-    functionTemplate->Inherit(scriptPhysicObject.functionTemplate);
+    functionTemplate->Inherit(scriptBaseObject.functionTemplate);
 }
 
 

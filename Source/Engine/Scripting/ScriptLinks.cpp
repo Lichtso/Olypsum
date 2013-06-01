@@ -8,6 +8,27 @@
 
 #include "ScriptLinks.h"
 
+v8::Handle<v8::Value> ScriptBaseLink::Constructor(const v8::Arguments &args) {
+    v8::HandleScope handleScope;
+    
+    if(args.Length() == 1 && args[0]->IsExternal()) {
+        args.This()->SetInternalField(0, args[0]);
+        return args.This();
+    }else if(args.Length() == 2 &&
+             scriptBaseObject.isCorrectInstance(args[0]) && scriptBaseObject.isCorrectInstance(args[1])) {
+        LinkInitializer initializer;
+        initializer.object[0] = scriptBaseObject.getDataOfInstance<BaseObject>(args[0]);
+        initializer.object[1] = scriptBaseObject.getDataOfInstance<BaseObject>(args[1]);
+        BaseLink* linkPtr = new BaseLink();
+        if(linkPtr->init(initializer)) {
+            args.This()->SetInternalField(0, v8::External::New(linkPtr));
+            return args.This();
+        }
+    }
+    
+    return v8::ThrowException(v8::String::New("BaseLink Constructor: Class can't be instantiated"));
+}
+
 v8::Handle<v8::Value> ScriptBaseLink::GetObjectA(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
     BaseLink* linkPtr = getDataOfInstance<BaseLink>(info.This());
@@ -20,15 +41,22 @@ v8::Handle<v8::Value> ScriptBaseLink::GetObjectB(v8::Local<v8::String> property,
     return handleScope.Close(linkPtr->b->scriptInstance);
 }
 
-ScriptBaseLink::ScriptBaseLink() :ScriptBaseLink("BaseLink") {
+ScriptBaseLink::ScriptBaseLink() :ScriptBaseLink("BaseLink", Constructor) {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->SetAccessor(v8::String::New("objectA"), GetObjectA);
     objectTemplate->SetAccessor(v8::String::New("objectB"), GetObjectB);
+    
+    functionTemplate->Inherit(scriptBaseClass.functionTemplate);
 }
 
 
+
+v8::Handle<v8::Value> ScriptPhysicLink::Constructor(const v8::Arguments &args) {
+    v8::HandleScope handleScope;
+    return v8::ThrowException(v8::String::New("PhysicLink Constructor: Class can't be instantiated"));
+}
 
 v8::Handle<v8::Value> ScriptPhysicLink::GetBurstImpulse(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
@@ -113,14 +141,41 @@ void ScriptPhysicLink::SetFrame(v8::Local<v8::String> property, v8::Local<v8::Va
     }
 }
 
-ScriptPhysicLink::ScriptPhysicLink() :ScriptBaseLink("PhysicLink") {
+ScriptPhysicLink::ScriptPhysicLink() :ScriptBaseLink("PhysicLink", Constructor) {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->SetAccessor(v8::String::New("burstImpulse"), GetBurstImpulse, SetBurstImpulse);
+    
+    functionTemplate->Inherit(scriptBaseLink.functionTemplate);
 }
 
 
+
+v8::Handle<v8::Value> ScriptPointPhysicLink::Constructor(const v8::Arguments &args) {
+    v8::HandleScope handleScope;
+    
+    if(args.Length() == 1 && args[0]->IsExternal()) {
+        args.This()->SetInternalField(0, args[0]);
+        return args.This();
+    }else if(args.Length() == 4 &&
+             scriptRigidObject.isCorrectInstance(args[0]) && scriptRigidObject.isCorrectInstance(args[1]) &&
+             scriptVector3.isCorrectInstance(args[2]) && scriptVector3.isCorrectInstance(args[3])) {
+        LinkInitializer initializer;
+        RigidObject *a, *b;
+        initializer.object[0] = a = scriptBaseObject.getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
+        PhysicLink* linkPtr = new PhysicLink();
+        if(linkPtr->init(initializer, new btPoint2PointConstraint(*a->getBody(), *b->getBody(),
+                                                                  scriptVector3.getDataOfInstance(args[0]),
+                                                                  scriptVector3.getDataOfInstance(args[1])))) {
+            args.This()->SetInternalField(0, v8::External::New(linkPtr));
+            return args.This();
+        }
+    }
+    
+    return v8::ThrowException(v8::String::New("PointPhysicLink Constructor: Class can't be instantiated"));
+}
 
 v8::Handle<v8::Value> ScriptPointPhysicLink::GetPoint(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
@@ -140,15 +195,44 @@ void ScriptPointPhysicLink::SetPoint(v8::Local<v8::String> property, v8::Local<v
         constraint->setPivotB(point);
 }
 
-ScriptPointPhysicLink::ScriptPointPhysicLink() :ScriptPhysicLink("PointPhysicLink") {
+ScriptPointPhysicLink::ScriptPointPhysicLink() :ScriptPhysicLink("PointPhysicLink", Constructor) {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->SetAccessor(v8::String::New("pointA"), GetPoint, SetPoint);
     objectTemplate->SetAccessor(v8::String::New("pointB"), GetPoint, SetPoint);
+    
+    functionTemplate->Inherit(scriptPhysicLink.functionTemplate);
 }
 
 
+
+v8::Handle<v8::Value> ScriptGearPhysicLink::Constructor(const v8::Arguments &args) {
+    v8::HandleScope handleScope;
+    
+    if(args.Length() == 1 && args[0]->IsExternal()) {
+        args.This()->SetInternalField(0, args[0]);
+        return args.This();
+    }else if(args.Length() == 5 &&
+             scriptRigidObject.isCorrectInstance(args[0]) && scriptRigidObject.isCorrectInstance(args[1]) &&
+             scriptVector3.isCorrectInstance(args[2]) && scriptVector3.isCorrectInstance(args[3]) &&
+             args[4]->IsNumber()) {
+        LinkInitializer initializer;
+        RigidObject *a, *b;
+        initializer.object[0] = a = scriptBaseObject.getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
+        PhysicLink* linkPtr = new PhysicLink();
+        if(linkPtr->init(initializer, new btGearConstraint(*a->getBody(), *b->getBody(),
+                                                           scriptVector3.getDataOfInstance(args[0]),
+                                                           scriptVector3.getDataOfInstance(args[1]),
+                                                           args[4]->NumberValue()))) {
+            args.This()->SetInternalField(0, v8::External::New(linkPtr));
+            return args.This();
+        }
+    }
+    
+    return v8::ThrowException(v8::String::New("GearPhysicLink Constructor: Class can't be instantiated"));
+}
 
 v8::Handle<v8::Value> ScriptGearPhysicLink::GetAxis(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
@@ -182,16 +266,44 @@ void ScriptGearPhysicLink::SetRatio(v8::Local<v8::String> property, v8::Local<v8
     constraint->setRatio(value->NumberValue());
 }
 
-ScriptGearPhysicLink::ScriptGearPhysicLink() :ScriptPhysicLink("GearPhysicLink") {
+ScriptGearPhysicLink::ScriptGearPhysicLink() :ScriptPhysicLink("GearPhysicLink", Constructor) {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->SetAccessor(v8::String::New("axisA"), GetAxis, SetAxis);
     objectTemplate->SetAccessor(v8::String::New("axisB"), GetAxis, SetAxis);
     objectTemplate->SetAccessor(v8::String::New("ratio"), GetRatio, SetRatio);
+    
+    functionTemplate->Inherit(scriptPhysicLink.functionTemplate);
 }
 
 
+
+v8::Handle<v8::Value> ScriptHingePhysicLink::Constructor(const v8::Arguments &args) {
+    v8::HandleScope handleScope;
+    
+    if(args.Length() == 1 && args[0]->IsExternal()) {
+        args.This()->SetInternalField(0, args[0]);
+        return args.This();
+    }else if(args.Length() == 4 &&
+             scriptRigidObject.isCorrectInstance(args[0]) && scriptRigidObject.isCorrectInstance(args[1]) &&
+             scriptVector3.isCorrectInstance(args[2]) && scriptVector3.isCorrectInstance(args[3])) {
+        LinkInitializer initializer;
+        RigidObject *a, *b;
+        initializer.object[0] = a = scriptBaseObject.getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
+        PhysicLink* linkPtr = new PhysicLink();
+        if(linkPtr->init(initializer, new btHingeConstraint(*a->getBody(), *b->getBody(),
+                                                            scriptMatrix4.getDataOfInstance(args[0])->getBTTransform(),
+                                                            scriptMatrix4.getDataOfInstance(args[1])->getBTTransform(),
+                                                            true))) {
+            args.This()->SetInternalField(0, v8::External::New(linkPtr));
+            return args.This();
+        }
+    }
+    
+    return v8::ThrowException(v8::String::New("HingePhysicLink Constructor: Class can't be instantiated"));
+}
 
 v8::Handle<v8::Value> ScriptHingePhysicLink::GetHingeAngle(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
@@ -255,7 +367,7 @@ v8::Handle<v8::Value> ScriptHingePhysicLink::AccessAngularMotorForce(const v8::A
         return v8::Number::New(constraint->getMaxMotorImpulse());
 }
 
-ScriptHingePhysicLink::ScriptHingePhysicLink() :ScriptPhysicLink("HingePhysicLink") {
+ScriptHingePhysicLink::ScriptHingePhysicLink() :ScriptPhysicLink("HingePhysicLink", Constructor) {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
@@ -267,9 +379,37 @@ ScriptHingePhysicLink::ScriptHingePhysicLink() :ScriptPhysicLink("HingePhysicLin
     objectTemplate->Set(v8::String::New("angularMotorEnabled"), v8::FunctionTemplate::New(AccessAngularMotorEnabled));
     objectTemplate->Set(v8::String::New("angularMotorVelocity"), v8::FunctionTemplate::New(AccessAngularMotorVelocity));
     objectTemplate->Set(v8::String::New("angularMotorForce"), v8::FunctionTemplate::New(AccessAngularMotorForce));
+    
+    functionTemplate->Inherit(scriptPhysicLink.functionTemplate);
 }
 
 
+
+v8::Handle<v8::Value> ScriptSliderPhysicLink::Constructor(const v8::Arguments &args) {
+    v8::HandleScope handleScope;
+    
+    if(args.Length() == 1 && args[0]->IsExternal()) {
+        args.This()->SetInternalField(0, args[0]);
+        return args.This();
+    }else if(args.Length() == 4 &&
+             scriptRigidObject.isCorrectInstance(args[0]) && scriptRigidObject.isCorrectInstance(args[1]) &&
+             scriptVector3.isCorrectInstance(args[2]) && scriptVector3.isCorrectInstance(args[3])) {
+        LinkInitializer initializer;
+        RigidObject *a, *b;
+        initializer.object[0] = a = scriptBaseObject.getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
+        PhysicLink* linkPtr = new PhysicLink();
+        if(linkPtr->init(initializer, new btSliderConstraint(*a->getBody(), *b->getBody(),
+                                                             scriptMatrix4.getDataOfInstance(args[0])->getBTTransform(),
+                                                             scriptMatrix4.getDataOfInstance(args[1])->getBTTransform(),
+                                                             true))) {
+            args.This()->SetInternalField(0, v8::External::New(linkPtr));
+            return args.This();
+        }
+    }
+    
+    return v8::ThrowException(v8::String::New("SliderPhysicLink Constructor: Class can't be instantiated"));
+}
 
 v8::Handle<v8::Value> ScriptSliderPhysicLink::GetHingeAngle(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
@@ -383,7 +523,7 @@ v8::Handle<v8::Value> ScriptSliderPhysicLink::AccessLinearMotorForce(const v8::A
         return v8::Number::New(constraint->getMaxLinMotorForce());
 }
 
-ScriptSliderPhysicLink::ScriptSliderPhysicLink() :ScriptPhysicLink("SliderPhysicLink") {
+ScriptSliderPhysicLink::ScriptSliderPhysicLink() :ScriptPhysicLink("SliderPhysicLink", Constructor) {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
@@ -401,9 +541,42 @@ ScriptSliderPhysicLink::ScriptSliderPhysicLink() :ScriptPhysicLink("SliderPhysic
     objectTemplate->Set(v8::String::New("linearMotorEnabled"), v8::FunctionTemplate::New(AccessLinearMotorEnabled));
     objectTemplate->Set(v8::String::New("linearMotorVelocity"), v8::FunctionTemplate::New(AccessLinearMotorVelocity));
     objectTemplate->Set(v8::String::New("linearMotorForce"), v8::FunctionTemplate::New(AccessLinearMotorForce));
+    
+    functionTemplate->Inherit(scriptPhysicLink.functionTemplate);
 }
 
 
+
+v8::Handle<v8::Value> ScriptDof6PhysicLink::Constructor(const v8::Arguments &args) {
+    v8::HandleScope handleScope;
+    
+    if(args.Length() == 1 && args[0]->IsExternal()) {
+        args.This()->SetInternalField(0, args[0]);
+        return args.This();
+    }else if(args.Length() == 5 &&
+             scriptRigidObject.isCorrectInstance(args[0]) && scriptRigidObject.isCorrectInstance(args[1]) &&
+             scriptVector3.isCorrectInstance(args[2]) && scriptVector3.isCorrectInstance(args[3]) &&
+             args[4]->IsBoolean()) {
+        LinkInitializer initializer;
+        RigidObject *a, *b;
+        initializer.object[0] = a = scriptBaseObject.getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
+        btTransform transA = scriptMatrix4.getDataOfInstance(args[0])->getBTTransform(),
+                    transB = scriptMatrix4.getDataOfInstance(args[1])->getBTTransform();
+        PhysicLink* linkPtr = new PhysicLink();
+        btGeneric6DofConstraint* constraint;
+        if(args[4]->BooleanValue())
+            constraint = new btGeneric6DofSpringConstraint(*a->getBody(), *b->getBody(), transA, transB, true);
+        else
+            constraint = new btGeneric6DofConstraint(*a->getBody(), *b->getBody(), transA, transB, true);
+        if(linkPtr->init(initializer, constraint)) {
+            args.This()->SetInternalField(0, v8::External::New(linkPtr));
+            return args.This();
+        }
+    }
+    
+    return v8::ThrowException(v8::String::New("Dof6PhysicLink Constructor: Class can't be instantiated"));
+}
 
 v8::Handle<v8::Value> ScriptDof6PhysicLink::AccessSpringStiffness(const v8::Arguments& args) {
     v8::HandleScope handleScope;
@@ -559,7 +732,7 @@ v8::Handle<v8::Value> ScriptDof6PhysicLink::AccessLinearLimitMax(const v8::Argum
     }
 }
 
-ScriptDof6PhysicLink::ScriptDof6PhysicLink() :ScriptPhysicLink("Dof6PhysicLink") {
+ScriptDof6PhysicLink::ScriptDof6PhysicLink() :ScriptPhysicLink("Dof6PhysicLink", Constructor) {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
@@ -575,9 +748,36 @@ ScriptDof6PhysicLink::ScriptDof6PhysicLink() :ScriptPhysicLink("Dof6PhysicLink")
     objectTemplate->Set(v8::String::New("angularLimitMax"), v8::FunctionTemplate::New(AccessAngularLimitMax));
     objectTemplate->Set(v8::String::New("linearLimitMin"), v8::FunctionTemplate::New(AccessLinearLimitMin));
     objectTemplate->Set(v8::String::New("linearLimitMax"), v8::FunctionTemplate::New(AccessLinearLimitMax));
+    
+    functionTemplate->Inherit(scriptPhysicLink.functionTemplate);
 }
 
 
+
+v8::Handle<v8::Value> ScriptConeTwistPhysicLink::Constructor(const v8::Arguments &args) {
+    v8::HandleScope handleScope;
+    
+    if(args.Length() == 1 && args[0]->IsExternal()) {
+        args.This()->SetInternalField(0, args[0]);
+        return args.This();
+    }else if(args.Length() == 4 &&
+             scriptRigidObject.isCorrectInstance(args[0]) && scriptRigidObject.isCorrectInstance(args[1]) &&
+             scriptVector3.isCorrectInstance(args[2]) && scriptVector3.isCorrectInstance(args[3])) {
+        LinkInitializer initializer;
+        RigidObject *a, *b;
+        initializer.object[0] = a = scriptBaseObject.getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
+        PhysicLink* linkPtr = new PhysicLink();
+        if(linkPtr->init(initializer, new btConeTwistConstraint(*a->getBody(), *b->getBody(),
+                                                             scriptMatrix4.getDataOfInstance(args[0])->getBTTransform(),
+                                                             scriptMatrix4.getDataOfInstance(args[1])->getBTTransform()))) {
+            args.This()->SetInternalField(0, v8::External::New(linkPtr));
+            return args.This();
+        }
+    }
+    
+    return v8::ThrowException(v8::String::New("ConeTwistPhysicLink Constructor: Class can't be instantiated"));
+}
 
 v8::Handle<v8::Value> ScriptConeTwistPhysicLink::GetSwingSpan(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
@@ -616,7 +816,7 @@ v8::Handle<v8::Value> ScriptConeTwistPhysicLink::GetTwistAngle(v8::Local<v8::Str
     return v8::Number::New(constraint->getTwistAngle());
 }
 
-ScriptConeTwistPhysicLink::ScriptConeTwistPhysicLink() :ScriptPhysicLink("ConeTwistPhysicLink") {
+ScriptConeTwistPhysicLink::ScriptConeTwistPhysicLink() :ScriptPhysicLink("ConeTwistPhysicLink", Constructor) {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
@@ -626,9 +826,34 @@ ScriptConeTwistPhysicLink::ScriptConeTwistPhysicLink() :ScriptPhysicLink("ConeTw
     objectTemplate->SetAccessor(v8::String::New("swingSpanB"), GetSwingSpan, SetSwingSpan);
     objectTemplate->SetAccessor(v8::String::New("twistSpan"), GetTwistSpan, SetTwistSpan);
     objectTemplate->SetAccessor(v8::String::New("twistAngle"), GetTwistAngle);
+    
+    functionTemplate->Inherit(scriptPhysicLink.functionTemplate);
 }
 
 
+
+v8::Handle<v8::Value> ScriptTransformLink::Constructor(const v8::Arguments &args) {
+    v8::HandleScope handleScope;
+    
+    if(args.Length() == 1 && args[0]->IsExternal()) {
+        args.This()->SetInternalField(0, args[0]);
+        return args.This();
+    }else if(args.Length() == 3 &&
+             scriptBaseObject.isCorrectInstance(args[0]) && scriptBaseObject.isCorrectInstance(args[1]) &&
+             scriptMatrix4.isCorrectInstance(args[2])) {
+        LinkInitializer initializer;
+        initializer.object[0] = scriptBaseObject.getDataOfInstance<BaseObject>(args[0]);
+        initializer.object[1] = scriptBaseObject.getDataOfInstance<BaseObject>(args[1]);
+        TransformLink* linkPtr = new TransformLink();
+        btTransform transform = scriptMatrix4.getDataOfInstance(args[2])->getBTTransform();
+        if(linkPtr->init(initializer, transform)) {
+            args.This()->SetInternalField(0, v8::External::New(linkPtr));
+            return args.This();
+        }
+    }
+    
+    return v8::ThrowException(v8::String::New("BaseLink Constructor: Class can't be instantiated"));
+}
 
 v8::Handle<v8::Value> ScriptTransformLink::AccessTransformation(const v8::Arguments& args) {
     v8::HandleScope handleScope;
@@ -642,11 +867,13 @@ v8::Handle<v8::Value> ScriptTransformLink::AccessTransformation(const v8::Argume
         return handleScope.Close(scriptMatrix4.newInstance(Matrix4(linkPtr->transform)));
 }
 
-ScriptTransformLink::ScriptTransformLink() :ScriptTransformLink("TransformLink") {
+ScriptTransformLink::ScriptTransformLink() :ScriptBaseLink("TransformLink", Constructor) {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->Set(v8::String::New("transformation"), v8::FunctionTemplate::New(AccessTransformation));
+    
+    functionTemplate->Inherit(scriptBaseLink.functionTemplate);
 }
 
 

@@ -85,11 +85,7 @@ v8::Handle<v8::Value> ScriptModelObject::FindBoneByPath(const v8::Arguments& arg
     return handleScope.Close(boneObject->scriptInstance);
 }
 
-ScriptModelObject::ScriptModelObject(const char* name) :ScriptPhysicObject(name) {
-    
-}
-
-ScriptModelObject::ScriptModelObject() :ScriptModelObject("ModelObject") {
+ScriptModelObject::ScriptModelObject() :ScriptPhysicObject("ModelObject") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();

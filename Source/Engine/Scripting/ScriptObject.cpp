@@ -37,14 +37,18 @@ void ScriptBaseClass::SetScriptClass(v8::Local<v8::String> property, v8::Local<v
         objectPtr->scriptFile = scriptManager->getScriptFile(filePackage, name);
 }
 
-ScriptBaseClass::ScriptBaseClass(const char* name) :ScriptClass(name, Constructor) {
+ScriptBaseClass::ScriptBaseClass(const char* name, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args)) :ScriptClass(name, constructor) {
+    v8::HandleScope handleScope;
+    
+    v8::Local<v8::ObjectTemplate> instanceTemplate = functionTemplate->InstanceTemplate();
+    instanceTemplate->SetInternalFieldCount(1);
+}
+
+ScriptBaseClass::ScriptBaseClass() :ScriptBaseClass("BaseClass") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->SetAccessor(v8::String::New("scriptClass"), GetScriptClass, SetScriptClass);
-    
-    v8::Local<v8::ObjectTemplate> instanceTemplate = functionTemplate->InstanceTemplate();
-    instanceTemplate->SetInternalFieldCount(1);
 }
 
 
@@ -88,7 +92,7 @@ v8::Handle<v8::Value> ScriptBaseObject::GetLink(const v8::Arguments& args) {
     return handleScope.Close((*std::next(objectPtr->links.begin(), args[0]->IntegerValue()))->scriptInstance);
 }
 
-v8::Handle<v8::Value> ScriptBaseObject::GetLinks(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptBaseObject::GetLinkCount(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
     return handleScope.Close(v8::Integer::New(objectPtr->links.size()));
@@ -109,8 +113,10 @@ ScriptBaseObject::ScriptBaseObject() :ScriptBaseClass("BaseObject") {
     objectTemplate->Set(v8::String::New("transformation"), v8::FunctionTemplate::New(AccessTransformation));
     objectTemplate->Set(v8::String::New("removeLink"), v8::FunctionTemplate::New(RemoveLink));
     objectTemplate->Set(v8::String::New("getLink"), v8::FunctionTemplate::New(GetLink));
-    objectTemplate->Set(v8::String::New("getLinks"), v8::FunctionTemplate::New(GetLinks));
+    objectTemplate->Set(v8::String::New("getLinkCount"), v8::FunctionTemplate::New(GetLinkCount));
     objectTemplate->Set(v8::String::New("getParentLink"), v8::FunctionTemplate::New(GetLink));
+    
+    functionTemplate->Inherit(scriptBaseClass.functionTemplate);
 }
 
 

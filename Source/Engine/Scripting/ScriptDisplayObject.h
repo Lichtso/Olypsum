@@ -9,7 +9,7 @@
 #ifndef ScriptDisplayObject_h
 #define ScriptDisplayObject_h
 
-#include "ScriptLinks.h"
+#include "ScriptObject.h"
 
 class ScriptModelObject : public ScriptPhysicObject {
     static v8::Handle<v8::Value> GetIntegrity(v8::Local<v8::String> property, const v8::AccessorInfo& info);
@@ -19,7 +19,7 @@ class ScriptModelObject : public ScriptPhysicObject {
     static v8::Handle<v8::Value> AccessTextureAnimation(const v8::Arguments& args);
     static v8::Handle<v8::Value> FindBoneByPath(const v8::Arguments& args);
     protected:
-    ScriptModelObject(const char* name);
+    ScriptModelObject(const char* name) :ScriptPhysicObject(name) { }
     public:
     ScriptModelObject();
 };
