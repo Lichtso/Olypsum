@@ -48,11 +48,29 @@ class ScriptGearPhysicLink : public ScriptPhysicLink {
 };
 
 class ScriptHingePhysicLink : public ScriptPhysicLink {
+    static v8::Handle<v8::Value> GetHingeAngle(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> AccessAngularLimitMin(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessAngularLimitMax(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessAngularMotorEnabled(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessAngularMotorVelocity(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessAngularMotorForce(const v8::Arguments& args);
     public:
     ScriptHingePhysicLink();
 };
 
 class ScriptSliderPhysicLink : public ScriptPhysicLink {
+    static v8::Handle<v8::Value> GetHingeAngle(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> GetSliderPos(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> AccessAngularLimitMin(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessAngularLimitMax(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessLinearLimitMin(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessLinearLimitMax(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessAngularMotorEnabled(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessAngularMotorVelocity(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessAngularMotorForce(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessLinearMotorEnabled(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessLinearMotorVelocity(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessLinearMotorForce(const v8::Arguments& args);
     public:
     ScriptSliderPhysicLink();
 };
