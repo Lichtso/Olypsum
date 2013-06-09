@@ -97,7 +97,6 @@ void AppMain(int argc, char *argv[]) {
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     //Init Cams
     guiCam = new CamObject();

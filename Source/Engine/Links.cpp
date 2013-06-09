@@ -239,10 +239,10 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         btSliderConstraint* slider = NULL;
         
         if(strcmp(attribute->value(), "hinge") == 0) {
-            /*btTransform transform = btTransform::getIdentity();
+            btTransform transform = btTransform::getIdentity();
             transform.setRotation(btQuaternion(M_PI_2, 0.0, 0.0));
             frameA *= transform;
-            frameB *= transform;*/
+            frameB *= transform;
             constraint = hinge = new btHingeConstraint(*rigidA->getBody(), *rigidB->getBody(), frameA, frameB, true);
         }else
             constraint = slider = new btSliderConstraint(*rigidA->getBody(), *rigidB->getBody(), frameA, frameB, true);
@@ -621,12 +621,10 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
                 angMotor = hinge->getEnableAngularMotor();
                 angMotorVelocity = hinge->getMotorTargetVelosity();
                 angMotorForce = hinge->getMaxMotorImpulse();
-                /*btTransform transform = btTransform::getIdentity();
+                btTransform transform = btTransform::getIdentity();
                 transform.setRotation(btQuaternion(-M_PI_2, 0.0, 0.0));
                 frameA = hinge->getFrameOffsetA()*transform;
-                frameB = hinge->getFrameOffsetB()*transform;*/
-                frameA = slider->getFrameOffsetA();
-                frameB = slider->getFrameOffsetB();
+                frameB = hinge->getFrameOffsetB()*transform;
             }else{
                 attribute->value("slider");
                 slider = static_cast<btSliderConstraint*>(constraint);

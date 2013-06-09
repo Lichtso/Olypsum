@@ -129,14 +129,9 @@ bool Texture::uploadTexture(GLenum textureTarget, GLenum format) {
     }
     
     glBindTexture(textureTarget, GLname);
-    if(textureTarget == GL_TEXTURE_2D_ARRAY) {
-        //Prevent Mac OS 10.8.3 Nvidia graphics driver bug
-        if(format == GL_COMPRESSED_RGB)
-            format = GL_RGB;
-        else if(format == GL_COMPRESSED_RGBA)
-            format = GL_RGBA;
+    if(textureTarget == GL_TEXTURE_2D_ARRAY)
         glTexImage3D(textureTarget, 0, format, width, height, depth, 0, getSurfacesGLFormat(), GL_UNSIGNED_BYTE, surface->pixels);
-    }else
+    else
         glTexImage2D(textureTarget, 0, format, width, height, 0, getSurfacesGLFormat(), GL_UNSIGNED_BYTE, surface->pixels);
         
     if(textureTarget != GL_TEXTURE_RECTANGLE)

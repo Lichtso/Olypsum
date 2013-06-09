@@ -114,11 +114,11 @@ void FBO::init() {
     initBuffer(specularDBuffer); //Needs maxSize because it is used as color buffer for shadow map calculations
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB,
                  maxSize, maxSize,
-                 0, GL_RGB, GL_FLOAT, NULL);
+                 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     initBuffer(diffuseDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB16F,
                  prevOptionsState.videoWidth, prevOptionsState.videoHeight,
-                 0, GL_RGB, GL_FLOAT, NULL);
+                 0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
     initBuffer(transparentDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA,
                  prevOptionsState.videoWidth, prevOptionsState.videoHeight,
@@ -171,7 +171,7 @@ void FBO::copyBuffer(GLuint source, GLuint destination) {
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
-void FBO::renderInGBuffers(GLuint colorBuffer) {
+void FBO::renderInGBuffers(GLuint colorBuffer, bool specular) {
     glClearColor(0, 0, 0, 0);
     glViewport(0, 0, prevOptionsState.videoWidth, prevOptionsState.videoHeight);
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
@@ -187,12 +187,13 @@ void FBO::renderInGBuffers(GLuint colorBuffer) {
     for(unsigned char o = 0; o < 4; o ++)
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1+o, GL_TEXTURE_RECTANGLE, gBuffers[materialDBuffer+o], 0);
     if(colorBuffer == gBuffers[transparentDBuffer]) {
+        //glDrawBuffers(3, drawBuffers); //Clear normalDBuffer, positionDBuffer too
         glDrawBuffers(1, drawBuffers);
         glClear(GL_COLOR_BUFFER_BIT);
     }else{
         glClear(GL_DEPTH_BUFFER_BIT);
     }
-    glDrawBuffers(5, drawBuffers);
+    glDrawBuffers((specular) ? 5 : 4, drawBuffers);
 }
 
 void FBO::renderInBuffers(bool fillScreen, GLuint* inBuffers, unsigned char inBuffersCount, GLuint* outBuffers, unsigned char outBuffersCount) {

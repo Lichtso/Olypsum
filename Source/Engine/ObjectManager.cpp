@@ -319,7 +319,7 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
         mainFBO.gBuffers[specularDBuffer],
         0
     };
-    mainFBO.renderInGBuffers(buffersCombine[1]);
+    mainFBO.renderInGBuffers(buffersCombine[1], true);
     currentCam->updateViewMat();
     
     //Push ParticlesObjects in transparentAccumulator
@@ -374,11 +374,11 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
         });
         
         for(unsigned int i = 0; i < transparentAccumulator.size(); i ++) {
-            mainFBO.renderInGBuffers(buffersCombine[1]);
-            glEnable(GL_DEPTH_TEST);
-            
             AccumulatedTransparent* transparent = transparentAccumulator[i];
             ShaderProgramName sp = deferredCombine1SP;
+            
+            mainFBO.renderInGBuffers(buffersCombine[1], transparent->mesh != NULL);
+            glEnable(GL_DEPTH_TEST);
             if(transparent->mesh) {
                 if(optionsState.blendingQuality > 1) {
                     glActiveTexture((transparent->mesh) ? GL_TEXTURE3 : GL_TEXTURE1);
@@ -399,10 +399,12 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
             delete transparent;
             
             illuminate();
+            if(sp == deferredCombine1SP) {
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            }
             shaderPrograms[sp]->use();
-            mainFBO.renderInBuffers(true,
-                                    buffersCombine, (sp == deferredCombine1SP) ? 4 : 3,
-                                    &buffersCombine[3], 1);
+            mainFBO.renderInBuffers(true, buffersCombine, 3, &buffersCombine[3], 1);
         }
         if(!renderTarget)
             mainFBO.copyBuffer(buffersCombine[3], 0);

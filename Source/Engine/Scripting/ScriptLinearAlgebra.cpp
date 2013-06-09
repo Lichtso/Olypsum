@@ -468,36 +468,6 @@ v8::Handle<v8::Value> ScriptQuaternion::GetInterpolation(const v8::Arguments& ar
     return handleScope.Close(scriptQuaternion.newInstance(quaternionA.slerp(quaternionB, args[1]->NumberValue())));
 }
 
-v8::Handle<v8::Value> ScriptQuaternion::GetEuler(const v8::Arguments& args) {
-    v8::HandleScope handleScope;
-    btQuaternion quaternion = getDataOfInstance(args.This());
-    v8::Handle<v8::Array> euler = v8::Array::New(3);
-    euler->Set(0, v8::Number::New(atan2(2.0*(quaternion.x()*quaternion.y()+quaternion.z()*quaternion.w()),
-                                    1.0-2.0*(quaternion.y()*quaternion.y()+quaternion.z()*quaternion.z()))));
-    euler->Set(1, v8::Number::New(asin(2.0*(quaternion.x()*quaternion.z()-quaternion.y()*quaternion.w()))));
-    euler->Set(2, v8::Number::New(atan2(2.0*(quaternion.x()*quaternion.w()+quaternion.y()*quaternion.z()),
-                                    1.0-2.0*(quaternion.z()*quaternion.z()+quaternion.w()*quaternion.w()))));
-    return handleScope.Close(euler);
-}
-
-v8::Handle<v8::Value> ScriptQuaternion::SetEuler(const v8::Arguments& args) {
-    v8::HandleScope handleScope;
-    btQuaternion quaternion = getDataOfInstance(args.This());
-    switch(args.Length()) {
-        case 1: {
-            if(!args[0]->IsArray()) break;
-            v8::Handle<v8::Array> array = v8::Handle<v8::Array>::Cast(args[0]);
-            if(array->Length() != 3 || !array->Get(0)->IsNumber() || !array->Get(1)->IsNumber() || !array->Get(2)->IsNumber()) break;
-            quaternion.setEulerZYX(array->Get(0)->NumberValue(), array->Get(1)->NumberValue(), array->Get(2)->NumberValue());
-            return handleScope.Close(args.This());
-        } case 3:
-            if(!args[0]->IsNumber() || !args[1]->IsNumber() || !args[2]->IsNumber()) break;
-            quaternion.setEulerZYX(args[0]->NumberValue(), args[1]->NumberValue(), args[2]->NumberValue());
-            return handleScope.Close(args.This());
-    }
-    return v8::ThrowException(v8::String::New("Quaternion setRotation: Invalid argument"));
-}
-
 v8::Handle<v8::Value> ScriptQuaternion::SetRotation(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() != 2 || !scriptVector3.isCorrectInstance(args[0]) || !args[1]->IsNumber())
@@ -599,8 +569,6 @@ ScriptQuaternion::ScriptQuaternion() :ScriptClass("Quaternion", Constructor) {
     objectTemplate->Set(v8::String::New("getLength"), v8::FunctionTemplate::New(GetLength));
     objectTemplate->Set(v8::String::New("getNormalized"), v8::FunctionTemplate::New(GetNormalized));
     objectTemplate->Set(v8::String::New("getInterpolation"), v8::FunctionTemplate::New(GetInterpolation));
-    objectTemplate->Set(v8::String::New("getEuler"), v8::FunctionTemplate::New(GetEuler));
-    objectTemplate->Set(v8::String::New("setEuler"), v8::FunctionTemplate::New(SetEuler));
     objectTemplate->Set(v8::String::New("setRotation"), v8::FunctionTemplate::New(SetRotation));
     objectTemplate->Set(v8::String::New("add"), v8::FunctionTemplate::New(Sum));
     objectTemplate->Set(v8::String::New("sub"), v8::FunctionTemplate::New(Subtract));

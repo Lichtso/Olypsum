@@ -1,4 +1,5 @@
-V8 API: Links, Documentation
+V8 API: Documentation
+Linked objects collision flag
 Decals: Tests and V8 API
 Implement btSoftBody
 Implement btRayCastVehicle
@@ -19,6 +20,4 @@ Networking / Multiplayer
 GUILabel texture mask
 
 Bugs:
-Mac OS 10.8.3: Texture 3D with mipmap and compression
-V8 API: Euler and Quaternion conversion
 Check memory leaks

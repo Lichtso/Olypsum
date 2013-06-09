@@ -56,8 +56,6 @@ class ScriptQuaternion : public ScriptClass {
     static v8::Handle<v8::Value> GetLength(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetNormalized(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetInterpolation(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetEuler(const v8::Arguments& args);
-    static v8::Handle<v8::Value> SetEuler(const v8::Arguments& args);
     static v8::Handle<v8::Value> SetRotation(const v8::Arguments& args);
     static v8::Handle<v8::Value> Sum(const v8::Arguments& args);
     static v8::Handle<v8::Value> Subtract(const v8::Arguments& args);

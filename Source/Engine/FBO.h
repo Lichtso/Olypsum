@@ -48,8 +48,9 @@ class FBO {
     void copyBuffer(GLuint source, GLuint destination);
     /*! Prepares the g-buffers to be rendered in
      @param colorBuffer The buffer used to store the color
+     @param specular Shall the specular buffer be a render target
      */
-    void renderInGBuffers(GLuint colorBuffer);
+    void renderInGBuffers(GLuint colorBuffer, bool specular);
     /*! Prepares buffers to be rendered in and read out
      @param fillScreen If true this method will render the entire screen else it will only prepare the g-buffers
      @param inBuffers A array of buffers to be used as textures. The index of each element will also be its texture target index

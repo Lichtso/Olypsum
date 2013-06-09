@@ -209,7 +209,7 @@ ScriptSoundObject::ScriptSoundObject() :ScriptBaseObject("SoundObject") {
     objectTemplate->SetAccessor(v8::String::New("playing"), GetPlaying, SetPlaying);
     objectTemplate->SetAccessor(v8::String::New("mode"), GetMode, SetMode);
     
-    functionTemplate->Inherit(scriptPhysicObject.functionTemplate);
+    functionTemplate->Inherit(scriptBaseObject.functionTemplate);
 }
 
 
