@@ -152,9 +152,9 @@ std::unique_ptr<unsigned int[]> LightSphereVolume::getIndecies(unsigned int& tri
             indecies[index ++] = referenceVertex+x;
             indecies[index ++] = (x < accuracyX-1) ? referenceVertex+x+1 : referenceVertex;
             indecies[index ++] = referenceVertex+accuracyX+x;
-            indecies[index ++] = indecies[index-2];
+            indecies[index] = indecies[index-2]; index ++;
             indecies[index ++] = (x < accuracyX-1) ? referenceVertex+accuracyX+x+1 : referenceVertex+accuracyX;
-            indecies[index ++] = indecies[index-3];
+            indecies[index] = indecies[index-3]; index ++;
         }
     }
     referenceVertex = accuracyX*(accuracyY-1)+1;
@@ -216,9 +216,9 @@ std::unique_ptr<unsigned int[]> LightParabolidVolume::getIndecies(unsigned int& 
             indecies[index ++] = referenceVertex+x;
             indecies[index ++] = (x < accuracyX-1) ? referenceVertex+x+1 : referenceVertex;
             indecies[index ++] = referenceVertex+accuracyX+x;
-            indecies[index ++] = indecies[index-2];
+            indecies[index] = indecies[index-2]; index ++;
             indecies[index ++] = (x < accuracyX-1) ? referenceVertex+accuracyX+x+1 : referenceVertex+accuracyX;
-            indecies[index ++] = indecies[index-3];
+            indecies[index] = indecies[index-3]; index ++;
         }
     }
     referenceVertex = 1+accuracyX*accuracyY;

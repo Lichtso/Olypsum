@@ -41,8 +41,13 @@ uniform mat4 lShadowMat;
 #define depthOffset -0.002
 #define blurBias 0.003
 #elif LIGHT_TYPE == 3
+#if SHADOWS_ACTIVE < 3
 #define depthBias 0.99*0.5
 #define blurBias 0.001
+#else
+#define depthBias 0.99
+#define blurBias 0.002
+#endif
 #endif
 
 float random(vec2 co) {
@@ -110,7 +115,7 @@ void main() {
     }
     #endif
     #else //Cubemap
-    shadowCoord.w = max(max(abs(shadowCoord.x), abs(shadowCoord.y)), abs(shadowCoord.z));
+    shadowCoord.w = max(max(abs(shadowCoord.x), abs(shadowCoord.y)), abs(shadowCoord.z))*depthBias;
     #if SHADOW_QUALITY == 1
     shadowCoord.w = (shadowDepthTransform.x + shadowDepthTransform.y/shadowCoord.w);
     intensity = (1.0-intensity)*texture(sampler3, shadowCoord);
@@ -122,8 +127,8 @@ void main() {
         sideIndex = 4;
     shadowCoord.w = (shadowDepthTransform.x + shadowDepthTransform.y/shadowCoord.w);
     shadowCoord.xyz = normalize(shadowCoord.xyz);
-    vec3 rightVec = shadowReflector[sideIndex+1]*blurBias*2.0;
-    vec3 upVec = shadowReflector[sideIndex]*blurBias*2.0;
+    vec3 rightVec = shadowReflector[sideIndex+1]*blurBias;
+    vec3 upVec = shadowReflector[sideIndex]*blurBias;
     float shadowSum = 0.0;
 	const float blurSize = float(SHADOW_QUALITY)-1.0, blurSum = (blurSize*2.0+1.0)*(blurSize*2.0+1.0);
 	for(float y = -blurSize; y <= blurSize; y += 1.0)

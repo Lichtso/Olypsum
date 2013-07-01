@@ -149,7 +149,7 @@ v8::Handle<v8::Value> ScriptGUIScreenView::Constructor(const v8::Arguments &args
 v8::Handle<v8::Value> ScriptGUIScreenView::GetModalView(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
     GUIScreenView* objectPtr = getDataOfInstance<GUIScreenView>(info.This());
-    if(objectPtr->modalView) return v8::Undefined();
+    if(!objectPtr->modalView) return v8::Undefined();
     return objectPtr->modalView->scriptInstance;
 }
 
@@ -165,7 +165,7 @@ void ScriptGUIScreenView::SetModalView(v8::Local<v8::String> property, v8::Local
 v8::Handle<v8::Value> ScriptGUIScreenView::GetFocused(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
     GUIScreenView* objectPtr = getDataOfInstance<GUIScreenView>(info.This());
-    if(objectPtr->focused) return v8::Undefined();
+    if(!objectPtr->focused) return v8::Undefined();
     return objectPtr->focused->scriptInstance;
 }
 

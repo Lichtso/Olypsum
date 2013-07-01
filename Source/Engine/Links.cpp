@@ -144,7 +144,6 @@ void PhysicLink::removeClean(BaseObject* object) {
 bool PhysicLink::init(LinkInitializer& initializer, btTypedConstraint* _constraint) {
     if(!BaseLink::init(initializer)) return false;
     constraint = _constraint;
-    constraint->enableFeedback(true);
     constraint->setUserConstraintPtr(this);
     objectManager.physicsWorld->addConstraint(constraint);
     return true;
@@ -556,9 +555,8 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         constraint->setBreakingImpulseThreshold(value);
     }
     
-    constraint->enableFeedback(true);
     constraint->setUserConstraintPtr(this);
-    objectManager.physicsWorld->addConstraint(constraint);
+    objectManager.physicsWorld->addConstraint(constraint, node->first_node("CollisionDisabled"));
     return true;
 }
 
@@ -566,6 +564,7 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
     if(&constraint->getRigidBodyA() == static_cast<RigidObject*>(linkSaver->object[1])->getBody())
         linkSaver->swap();
     
+    RigidObject *rigidA = static_cast<RigidObject*>(a), *rigidB = static_cast<RigidObject*>(b);
     rapidxml::xml_node<xmlUsedCharType> *parameterNode, *node = BaseLink::write(doc, linkSaver);
     node->name("PhysicLink");
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
@@ -885,6 +884,12 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
         attribute->name("burstImpulse");
         attribute->value(doc.allocate_string(stringOf(constraint->getBreakingImpulseThreshold()).c_str()));
         node->append_attribute(attribute);
+    }
+    
+    if(!rigidA->getBody()->isConstraintCollisionEnabled(rigidB->getBody())) {
+        parameterNode = doc.allocate_node(rapidxml::node_element);
+        parameterNode->name("CollisionDisabled");
+        node->append_node(parameterNode);
     }
     
     return node;

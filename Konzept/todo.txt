@@ -1,5 +1,4 @@
 V8 API: Documentation
-Linked objects collision flag
 Decals: Tests and V8 API
 Implement btSoftBody
 Implement btRayCastVehicle
