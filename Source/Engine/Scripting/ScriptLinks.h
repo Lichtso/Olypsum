@@ -26,6 +26,8 @@ class ScriptPhysicLink : public ScriptBaseLink {
     static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetBurstImpulse(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void SetBurstImpulse(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> GetCollisionDisabled(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static void SetCollisionDisabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     protected:
     static v8::Handle<v8::Value> GetFrame(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void SetFrame(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);

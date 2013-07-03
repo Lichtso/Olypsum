@@ -121,6 +121,20 @@ void PhysicLink::newScriptInstance() {
     scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
+void PhysicLink::setCollisionDisabled(bool collisionDisabled) {
+    if(collisionDisabled) {
+        constraint->getRigidBodyA().addConstraintRef(constraint);
+		constraint->getRigidBodyB().addConstraintRef(constraint);
+    }else{
+        constraint->getRigidBodyA().removeConstraintRef(constraint);
+        constraint->getRigidBodyB().removeConstraintRef(constraint);
+    }
+}
+
+bool PhysicLink::isCollisionDisabled() {
+    return constraint->getRigidBodyA().isConstraintCollisionEnabled(&constraint->getRigidBodyB());
+}
+
 void PhysicLink::gameTick() {
     if(constraint->isEnabled()) return;
     
@@ -564,7 +578,6 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
     if(&constraint->getRigidBodyA() == static_cast<RigidObject*>(linkSaver->object[1])->getBody())
         linkSaver->swap();
     
-    RigidObject *rigidA = static_cast<RigidObject*>(a), *rigidB = static_cast<RigidObject*>(b);
     rapidxml::xml_node<xmlUsedCharType> *parameterNode, *node = BaseLink::write(doc, linkSaver);
     node->name("PhysicLink");
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
@@ -886,7 +899,7 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
         node->append_attribute(attribute);
     }
     
-    if(!rigidA->getBody()->isConstraintCollisionEnabled(rigidB->getBody())) {
+    if(isCollisionDisabled()) {
         parameterNode = doc.allocate_node(rapidxml::node_element);
         parameterNode->name("CollisionDisabled");
         node->append_node(parameterNode);

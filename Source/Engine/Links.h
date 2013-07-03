@@ -65,6 +65,10 @@ class PhysicLink : public BaseLink {
     public:
     btTypedConstraint* constraint;
     void newScriptInstance();
+    //! Enables/Disables collisions between the linked objects
+    void setCollisionDisabled(bool collisionDisabled);
+    //! Returns if collisions between the linked objects are disabled
+    bool isCollisionDisabled();
     void gameTick();
     void removeClean(BaseObject* object);
     bool init(LinkInitializer& initializer, btTypedConstraint* constraint);

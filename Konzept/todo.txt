@@ -1,4 +1,4 @@
-V8 API: Documentation
+V8 API: Create Objects, Instance/Class Callbacks, Documentation
 Decals: Tests and V8 API
 Implement btSoftBody
 Implement btRayCastVehicle
@@ -11,12 +11,14 @@ PCSS
 Fog
 Enviornment maping
 Light scattering / HDRR
-Improve Parallax Occlusion / Position / Depth
 Magnetic Attraction PhysicLink
 Gear Rack PhysicLink
 Networking / Multiplayer
+Destructible objects / Voronoi
+Procedural models / Plants
 3D GUI transformations
 GUILabel texture mask
 
 Bugs:
 Check memory leaks
+Parallax Occlusion / Position / Depth

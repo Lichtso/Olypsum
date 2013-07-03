@@ -120,6 +120,9 @@ void ObjectManager::initGame(const std::string& levelPackage) {
 }
 
 void ObjectManager::gameTick() {
+    glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
+    
     //Calculate LightObjects
     LightPrioritySorter lightPrioritySorter;
     lightPrioritySorter.position = mainCam->getTransformation().getOrigin();
@@ -147,8 +150,9 @@ void ObjectManager::gameTick() {
             mainFBO.gBuffers[ssaoDBuffer]
         };
         
-        glViewport(0, 0, prevOptionsState.videoWidth / prevOptionsState.videoScale, prevOptionsState.videoHeight / prevOptionsState.videoScale);
+        glDisable(GL_BLEND);
         shaderPrograms[ssaoSP]->use();
+        glViewport(0, 0, prevOptionsState.videoWidth / prevOptionsState.videoScale, prevOptionsState.videoHeight / prevOptionsState.videoScale);
         mainFBO.renderInBuffers(true, buffersSSAO, 1, &buffersSSAO[1], 1);
         glViewport(0, 0, prevOptionsState.videoWidth, prevOptionsState.videoHeight);
         
@@ -167,11 +171,14 @@ void ObjectManager::gameTick() {
     };
     
     if(optionsState.screenBlurFactor > 0.0) {
+        glDisable(GL_BLEND);
         shaderPrograms[blurSP]->use();
         currentShaderProgram->setUniformF("processingValue", optionsState.screenBlurFactor * prevOptionsState.videoScale);
         mainFBO.renderInBuffers(true, &buffersPostRenderer[1], 1, 0, 0);
         profiler.leaveSection("Apply screen blur");
     }else{
+        glDisable(GL_BLEND);
+        
         if(optionsState.edgeSmoothEnabled) {
             shaderPrograms[edgeSmoothSP]->use();
             mainFBO.renderInBuffers(true, buffersPostRenderer, 2, &buffersPostRenderer[1], (optionsState.depthOfFieldQuality) ? 1 : 0);
@@ -185,9 +192,7 @@ void ObjectManager::gameTick() {
         }
     }
     
-    glDepthMask(GL_TRUE);
-    glEnable(GL_DEPTH_TEST);
-    //profiler.leaveSection("Draw post effects");
+    profiler.leaveSection("Draw post effects");
     
     //Calculate Physics
     physicsWorld->stepSimulation(profiler.animationFactor, 4, 1.0/60.0); //Try to maintain 60 FPS
@@ -254,7 +259,6 @@ void ObjectManager::drawShadowCasters() {
     currentCam->doFrustumCulling();
     
     //Draw GraphicObjects
-    glDisable(GL_BLEND);
     for(auto graphicObject : graphicObjects)
         if(graphicObject->inFrustum)
             graphicObject->draw();
@@ -269,7 +273,6 @@ void ObjectManager::illuminate() {
             lightObjects[i]->draw();
     glFrontFace(GL_CCW);
     glDisable(GL_DEPTH_TEST);
-    glDisable(GL_BLEND);
 }
 
 void ObjectManager::drawFrame(GLuint renderTarget) {
@@ -360,6 +363,7 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
     
     //Illuminate non transparent
     illuminate();
+    glDisable(GL_BLEND);
     shaderPrograms[deferredCombineSP]->use();
     mainFBO.renderInBuffers(true, buffersCombine, 3, &buffersCombine[1], (renderTarget || transparentAccumulator.size() > 0) ? 1 : 0);
     
@@ -402,7 +406,8 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
             if(sp == deferredCombine1SP) {
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            }
+            }else
+                glDisable(GL_BLEND);
             shaderPrograms[sp]->use();
             mainFBO.renderInBuffers(true, buffersCombine, 3, &buffersCombine[3], 1);
         }

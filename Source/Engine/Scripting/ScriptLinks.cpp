@@ -72,6 +72,18 @@ void ScriptPhysicLink::SetBurstImpulse(v8::Local<v8::String> property, v8::Local
     constraint->setBreakingImpulseThreshold(value->NumberValue());
 }
 
+v8::Handle<v8::Value> ScriptPhysicLink::GetCollisionDisabled(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    return v8::Boolean::New(getDataOfInstance<PhysicLink>(info.This())->isCollisionDisabled());
+}
+
+void ScriptPhysicLink::SetCollisionDisabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsBoolean()) return;
+    
+    getDataOfInstance<PhysicLink>(info.This())->setCollisionDisabled(value->BooleanValue());
+}
+
 v8::Handle<v8::Value> ScriptPhysicLink::GetFrame(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
     bool isA = (stdStrOfV8(property) == "frameA");
@@ -146,6 +158,7 @@ ScriptPhysicLink::ScriptPhysicLink() :ScriptBaseLink("PhysicLink", Constructor) 
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->SetAccessor(v8::String::New("burstImpulse"), GetBurstImpulse, SetBurstImpulse);
+    objectTemplate->SetAccessor(v8::String::New("collisionDisabled"), GetCollisionDisabled, SetCollisionDisabled);
     
     functionTemplate->Inherit(scriptBaseLink.functionTemplate);
 }
