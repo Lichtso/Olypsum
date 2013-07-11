@@ -122,17 +122,17 @@ class FileManager {
     //! Deletes a FilePackage
     void unloadPackage(const std::string& name);
     //! Reads a resources path
-    bool readResource(const std::string& path, FilePackage*& filePackage, std::string& name);
-    //! Reads a resources path
+    bool readResourcePath(const std::string& path, FilePackage*& filePackage, std::string& name);
+    //! Returns a resources path
     std::string getResourcePath(FilePackage* filePackage, std::string name);
     //Writes a resource to rapidxml::xml_node and returns it
     rapidxml::xml_node<xmlUsedCharType>* writeResource(rapidxml::xml_document<xmlUsedCharType>& doc, const char* nodeName,
                                                        FilePackage* filePackage, const std::string& name);
-    //! Initialize a resource from path
-    template <class T> FileResourcePtr<T> initResource(const std::string path) {
+    //! Gets a resource from a given path
+    template <class T> FileResourcePtr<T> getResourceByPath(const std::string path) {
         FilePackage* filePackage;
         std::string name;
-        if(!readResource(path, filePackage, name)) {
+        if(!readResourcePath(path, filePackage, name)) {
             log(error_log, "Couldn't initialize resource.");
             return NULL;
         }

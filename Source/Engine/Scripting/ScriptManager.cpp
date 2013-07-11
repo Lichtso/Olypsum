@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 27.01.13.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #include "AppMain.h"
@@ -23,7 +23,7 @@ v8::Handle<v8::Value> ScriptManager::ScriptRequire(const v8::Arguments& args) {
     
     FilePackage* filePackage;
     std::string name;
-    if(!fileManager.readResource(stdStrOfV8(args[0]->ToString()), filePackage, name))
+    if(!fileManager.readResourcePath(stdStrOfV8(args[0]->ToString()), filePackage, name))
         return v8::ThrowException(v8::String::New("require(): Error loading file"));
     
     return handleScope.Close(scriptManager->getScriptFile(filePackage, name)->exports);

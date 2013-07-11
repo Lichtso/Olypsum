@@ -1,7 +1,6 @@
-V8 API: Create Objects, Instance/Class Callbacks, Documentation
+V8 API: Create Objects, Documentation
 Decals: Tests and V8 API
 Implement btSoftBody
-Implement btRayCastVehicle
 Leap Motion
 Use C++11 Multithreading
 Windows / Linux Support
@@ -18,6 +17,10 @@ Destructible objects / Voronoi
 Procedural models / Plants
 3D GUI transformations
 GUILabel texture mask
+
+Test:
+TransformLink with a RigidObject as child
+Skeletal animation
 
 Bugs:
 Check memory leaks

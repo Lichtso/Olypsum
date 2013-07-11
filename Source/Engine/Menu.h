@@ -40,10 +40,10 @@ class Menu {
     Menu();
     void consoleAdd(const std::string& message, float duration = 10.0);
     void handleActiveEvent(bool active);
-    void handleMouseDown(SDL_Event& event);
-    void handleMouseUp(SDL_Event& event);
-    void handleMouseMove(SDL_Event& event);
-    void handleMouseWheel(SDL_Event& event);
+    void handleMouseDown(int mouseX, int mouseY, Uint8 button);
+    void handleMouseUp(int mouseX, int mouseY, Uint8 button);
+    void handleMouseMove(int mouseX, int mouseY);
+    void handleMouseWheel(int mouseX, int mouseY, float delta);
     void handleKeyDown(SDL_Event& event);
     void handleKeyUp(SDL_Event& event);
     void gameTick();

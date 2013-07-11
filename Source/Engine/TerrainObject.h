@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 06.01.13.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #ifndef HeightMap_h
@@ -11,7 +11,7 @@
 
 #include "DisplayObject.h"
 
-//! A GraphicObject used to describe a Terrain
+//! A GraphicObject used to describe a terrain
 /*!
  Used to make a terrain.
  This class manages its own collision shape and drawing

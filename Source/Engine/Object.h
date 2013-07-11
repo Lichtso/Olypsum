@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 14.10.12.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #include "FBO.h"

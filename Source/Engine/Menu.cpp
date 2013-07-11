@@ -8,7 +8,7 @@
 
 #include "AppMain.h"
 
-const float loadingScreenTime = 1.0;
+const float loadingScreenTime = 3.0;
 float loadingScreen = loadingScreenTime;
 
 struct Resolution {
@@ -96,7 +96,7 @@ static void getAvailableResolutions(std::vector<Resolution>& resolutions) {
 
 
 
-Menu::Menu() :current(none), screenView(new GUIScreenView()) {
+Menu::Menu() :current(none), screenView(NULL) {
     
 }
 
@@ -115,47 +115,39 @@ void Menu::handleActiveEvent(bool active) {
         menu.setPause(true);
 }
 
-void Menu::handleMouseDown(SDL_Event& event) {
-    event.button.x *= prevOptionsState.videoScale;
-    event.button.y *= prevOptionsState.videoScale;
-    
-    if((event.button.button == SDL_BUTTON_LEFT && screenView->handleMouseDown(event.button.x, event.button.y))
+void Menu::handleMouseDown(int mouseX, int mouseY, Uint8 button) {
+    if((button == SDL_BUTTON_LEFT && screenView->handleMouseDown(mouseX, mouseY))
        || menu.current != inGame) return;
     
+    v8::HandleScope handleScope;
     ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
-    if(script) script->callFunction("onmousedown", false, { });
+    if(script) script->callFunction("onmousedown", false, { v8::Number::New(button) });
 }
 
-void Menu::handleMouseUp(SDL_Event& event) {
-    event.button.x *= prevOptionsState.videoScale;
-    event.button.y *= prevOptionsState.videoScale;
-    if(screenView->handleMouseUp(event.button.x, event.button.y) || menu.current != inGame) return;
+void Menu::handleMouseUp(int mouseX, int mouseY, Uint8 button) {
+    if(screenView->handleMouseUp(mouseX, mouseY) || menu.current != inGame) return;
     
+    v8::HandleScope handleScope;
     ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
-    if(script) script->callFunction("onmouseup", false, { });
+    if(script) script->callFunction("onmouseup", false, { v8::Number::New(button) });
 }
 
-void Menu::handleMouseMove(SDL_Event& event) {
-    event.button.x *= prevOptionsState.videoScale;
-    event.button.y *= prevOptionsState.videoScale;
-    screenView->handleMouseMove(event.button.x, event.button.y);
+void Menu::handleMouseMove(int mouseX, int mouseY) {
+    screenView->handleMouseMove(mouseX, mouseY);
+    
     if(menu.current != inGame) return;
     
-    mouseX = event.button.x-screenView->width;
-    mouseY = event.button.y-screenView->height;
-    
-    if((mouseX != 0 || mouseY != 0) && mouseFixed) {
+    this->mouseX = mouseX-screenView->width;
+    this->mouseY = mouseY-screenView->height;
+    if((this->mouseX != 0 || this->mouseY != 0) && mouseFixed) {
         SDL_WarpMouse(screenView->width / prevOptionsState.videoScale, screenView->height / prevOptionsState.videoScale);
-        mouseVelocityX -= optionsState.mouseSensitivity*mouseX;
-        mouseVelocityY -= optionsState.mouseSensitivity*mouseY;
+        mouseVelocityX -= optionsState.mouseSensitivity*this->mouseX;
+        mouseVelocityY -= optionsState.mouseSensitivity*this->mouseY;
     }
 }
 
-void Menu::handleMouseWheel(SDL_Event& event) {
-    event.button.x *= prevOptionsState.videoScale;
-    event.button.y *= prevOptionsState.videoScale;
-    float delta = (event.button.button == SDL_BUTTON_WHEELDOWN) ? -1.0 : 1.0;
-    if(screenView->handleMouseWheel(event.button.x, event.button.y, delta) || menu.current != inGame) return;
+void Menu::handleMouseWheel(int mouseX, int mouseY, float delta) {
+    if(screenView->handleMouseWheel(mouseX, mouseY, delta) || menu.current != inGame) return;
     
     v8::HandleScope handleScope;
     ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
@@ -226,6 +218,7 @@ void Menu::gameTick() {
         case loading: {
             if(loadingScreen == loadingScreenTime)
                 loadDynamicShaderPrograms();
+            
             loadingScreen -= profiler.animationFactor;
             GUIProgressBar* progressBar = static_cast<GUIProgressBar*>(screenView->children[0]);
             progressBar->value = 1.0-loadingScreen/loadingScreenTime;
@@ -288,7 +281,8 @@ void Menu::gameTick() {
 }
 
 void Menu::clear() {
-    delete screenView;
+    if(screenView)
+        delete screenView;
     screenView = new GUIScreenView();
     current = none;
 }
@@ -597,7 +591,7 @@ void Menu::setMenu(Name menu) {
             }
             
             button = new GUIButton();
-            button->posX = screenView->width*0.32;
+            button->posX = screenView->width*0.52;
             button->posY = screenView->height*-0.48;
             button->onClick = [this](GUIButton* button) {
                 setMenu(languages);
@@ -605,21 +599,6 @@ void Menu::setMenu(Name menu) {
             screenView->addChild(button);
             label = new GUILabel();
             label->text = localization.localizeString("language");
-            label->fontHeight = screenView->height*0.1;
-            label->width = screenView->width*0.15;
-            label->sizeAlignment = GUISizeAlignment::Height;
-            button->addChild(label);
-            
-            button = new GUIButton();
-            button->posX = screenView->width*0.72;
-            button->posY = screenView->height*-0.48;
-            button->onClick = [](GUIButton* button) {
-                //setMenu(leapMotionMenu);
-            };
-            button->enabled = false;
-            screenView->addChild(button);
-            label = new GUILabel();
-            label->text = localization.localizeString("leapMotion");
             label->fontHeight = screenView->height*0.1;
             label->width = screenView->width*0.15;
             label->sizeAlignment = GUISizeAlignment::Height;

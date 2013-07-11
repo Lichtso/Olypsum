@@ -199,7 +199,7 @@ bool Texture::uploadNormalMap(float processingValue) {
     currentShaderProgram->setUniformF("processingValue", processingValue);
     glDisable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
-    mainFBO.vao.draw();
+    rectVAO.draw();
     glEnable(GL_DEPTH_TEST);
     //glEnable(GL_BLEND);
     unloadTexture();

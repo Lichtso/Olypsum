@@ -30,7 +30,7 @@ void GUIDrawableRect::drawOnScreen(btVector3 parentTransform, int posX, int posY
     
     shaderPrograms[spriteSP]->use();
     currentShaderProgram->setUniformMatrix3("textureMat", &auxMat);
-    mainFBO.vao.draw();
+    rectVAO.draw();
 }
 
 

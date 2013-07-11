@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 11.01.13.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #include "VertexArrayObject.h"
@@ -82,3 +82,5 @@ void VertexArrayObject::draw() {
         glDrawArrays(drawType, 0, elementsCount);
     glBindVertexArray(0);
 }
+
+VertexArrayObject rectVAO;

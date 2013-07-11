@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 11.01.13.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #include "Texture.h"
@@ -47,5 +47,7 @@ class VertexArrayObject {
     //! Draws the buffers
     void draw();
 };
+
+extern VertexArrayObject rectVAO;
 
 #endif

@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 06.01.13.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #include "Object.h"
@@ -90,7 +90,9 @@ class TransformLink : public BaseLink {
      @warning This method calls remove() on the child object but only if it is called from the parent
      */
     void removeClean(BaseObject* object);
-    void removeFast(BaseObject* a);
+    void removeFast(BaseObject* object);
+    //! Returns true if a connection between the linked objects is allowed
+    bool checkIfAttachingIsValid();
     bool init(LinkInitializer& initializer, btTransform& transform);
     bool init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);

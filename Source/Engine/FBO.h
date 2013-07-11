@@ -36,7 +36,6 @@ class FBO {
     //! Internaly used to set up a g-buffer
     void initBuffer(unsigned int index);
     public:
-    VertexArrayObject vao; //!< Used for full screen rendering
     GLuint frameBuffer, //!< The OpenGL identifier of the frame buffer
            gBuffers[gBuffersCount]; //!< The OpenGL identifiers of the g-buffers
     unsigned int maxSize; //! The maximal width and height of a color buffer

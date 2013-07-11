@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 09.03.13.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #ifndef ScriptObject_h

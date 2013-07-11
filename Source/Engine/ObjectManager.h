@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 11.11.12.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #include "LightObject.h"
@@ -36,11 +36,12 @@ class ObjectManager {
     std::set<SimpleObject*> simpleObjects; //! All Cams and SoundObjects in the scene
     btVector3 sceneAmbient; //! Ambient light color
     
-    btDefaultCollisionConfiguration* collisionConfiguration; //!< The physics collision configuration
+    btCollisionConfiguration* collisionConfiguration; //!< The physics collision configuration
     btCollisionDispatcher* collisionDispatcher; //!< The physics collision dispatcher
-    btSequentialImpulseConstraintSolver* constraintSolver; //!< The physics constraint solver
+    btConstraintSolver* constraintSolver; //!< The physics constraint solver
+    btSoftBodySolver* softBodySolver; //!< The physics soft body solver
     btBroadphaseInterface* broadphase; //!< The physics broadphase
-    std::unique_ptr<btDiscreteDynamicsWorld> physicsWorld; //!< The physics world
+    std::unique_ptr<btSoftRigidDynamicsWorld> physicsWorld; //!< The physics world
     
     ObjectManager();
     ~ObjectManager();

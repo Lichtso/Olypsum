@@ -3,13 +3,13 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 28.01.13.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #ifndef Script_h
 #define Script_h
 
-#include "Menu.h"
+#include "LeapMotion.h"
 
 class Script {
     protected:

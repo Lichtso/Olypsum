@@ -147,7 +147,7 @@ void TextFont::renderStringToScreen(const char* str, btVector3 pos, float scale,
     
     shaderPrograms[spriteSP]->use();
     currentShaderProgram->setUniformMatrix3("textureMat", &auxMat);
-    mainFBO.vao.draw();
+    rectVAO.draw();
     
     glDeleteTextures(1, &texture);
 }

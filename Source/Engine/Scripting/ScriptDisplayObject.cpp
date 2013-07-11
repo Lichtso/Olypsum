@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 04.04.13.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #include "ScriptDisplayObject.h"
@@ -35,7 +35,7 @@ void ScriptModelObject::SetModel(v8::Local<v8::String> property, v8::Local<v8::V
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     ModelObject* objectPtr = getDataOfInstance<ModelObject>(info.This());
-    auto model = fileManager.initResource<Model>(stdStrOfV8(value));
+    auto model = fileManager.getResourceByPath<Model>(stdStrOfV8(value));
     if(model) objectPtr->setModel(NULL, model);
 }
 

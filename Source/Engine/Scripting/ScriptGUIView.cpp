@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 18.04.13.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #include "ScriptGUIView.h"
@@ -32,12 +32,22 @@ v8::Handle<v8::Value> ScriptGUIView::GetChild(uint32_t index, const v8::Accessor
     return objectPtr->children[index]->scriptInstance;
 }
 
+v8::Handle<v8::Value> ScriptGUIView::Adopt(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    if(args.Length() < 1 || !scriptGUIRect.isCorrectInstance(args[0]))
+        return v8::ThrowException(v8::String::New("GUIRect adopt(): Child is not a GUIRect"));
+    GUIView* objectPtr = getDataOfInstance<GUIView>(args.This());
+    objectPtr->addChild(getDataOfInstance<GUIRect>(args.This()));
+    return v8::Undefined();
+}
+
 ScriptGUIView::ScriptGUIView() :ScriptGUIRect("GUIView", Constructor) {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->SetAccessor(v8::String::New("length"), GetChildCount);
     objectTemplate->SetIndexedPropertyHandler(GetChild);
+    objectTemplate->Set(v8::String::New("adopt"), v8::FunctionTemplate::New(Adopt));
     
     functionTemplate->Inherit(scriptGUIRect.functionTemplate);
 }

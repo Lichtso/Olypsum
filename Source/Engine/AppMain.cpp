@@ -27,6 +27,7 @@ const SDL_VideoInfo* updateVideoModeInternal(bool& fullScreen) {
     optionsState.videoWidth *= optionsState.videoScale;
     optionsState.videoHeight *= optionsState.videoScale;
     prevOptionsState = optionsState;
+    menu.clear();
     
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, optionsState.vSyncEnabled);
@@ -98,22 +99,15 @@ void AppMain(int argc, char *argv[]) {
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
     
-    //Init Cams
-    guiCam = new CamObject();
-    guiCam->fov = 0.0;
-    guiCam->near = -1.0;
-    guiCam->far = 1.0;
-    guiCam->updateViewMat();
-    
-    //Init Resources
-    initLightVolumes();
+    //Init the rest
     objectManager.init();
-    loadStaticShaderPrograms();
-    menu.setMenu(Menu::Name::loading);
     
     SDL_Event event;
     while(true) {
         while(SDL_PollEvent(&event)) {
+            event.button.x *= prevOptionsState.videoScale;
+            event.button.y *= prevOptionsState.videoScale;
+            
             switch(event.type) {
                 case SDL_ACTIVEEVENT:
                     menu.handleActiveEvent(event.active.gain);
@@ -129,20 +123,22 @@ void AppMain(int argc, char *argv[]) {
                         case SDL_BUTTON_LEFT:
                         case SDL_BUTTON_MIDDLE:
                         case SDL_BUTTON_RIGHT:
-                            menu.handleMouseDown(event);
+                            menu.handleMouseDown(event.button.x, event.button.y, event.button.button);
                             break;
                         case SDL_BUTTON_WHEELDOWN:
+                            menu.handleMouseWheel(event.button.x, event.button.y, -1.0);
+                            break;
                         case SDL_BUTTON_WHEELUP:
-                            menu.handleMouseWheel(event);
+                            menu.handleMouseWheel(event.button.x, event.button.y, 1.0);
                             break;
                     }
                 break;
                 case SDL_MOUSEBUTTONUP:
                     if(event.button.button == SDL_BUTTON_WHEELDOWN || event.button.button == SDL_BUTTON_WHEELUP) break;
-                    menu.handleMouseUp(event);
+                    menu.handleMouseUp(event.button.x, event.button.y, event.button.button);
                 break;
                 case SDL_MOUSEMOTION:
-                    menu.handleMouseMove(event);
+                    menu.handleMouseMove(event.button.x, event.button.y);
                 break;
                 case SDL_QUIT:
                     AppTerminate();
@@ -152,7 +148,6 @@ void AppMain(int argc, char *argv[]) {
             }
         }
         keyState = SDL_GetKeyState(&keyStateSize);
-        //modKeyState = SDL_GetModState();
         
         if(menu.current == Menu::Name::inGame && profiler.isFirstFrameInSec()) {
             char str[64];
@@ -161,6 +156,7 @@ void AppMain(int argc, char *argv[]) {
         }
         
         networkManager.gameTick();
+        leapManager.gameTick();
         menu.gameTick();
         if(levelManager.gameStatus == noGame) {
             glClearColor(1, 1, 1, 1);

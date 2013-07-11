@@ -168,7 +168,7 @@ void ModelObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* l
         log(error_log, "Found \"Model\"-node without \"src\"-attribute.");
         return;
     }
-    setModel(levelLoader, fileManager.initResource<Model>(attribute->value()));
+    setModel(levelLoader, fileManager.getResourceByPath<Model>(attribute->value()));
     
     if((parameterNode = node->first_node("TextureAnimation"))) {
         XMLValueArray<float> animationTime;
@@ -245,6 +245,31 @@ bool PlaneReflective::gameTick() {
     objectManager.drawFrame(buffer->texture);
     glDisable(GL_CLIP_DISTANCE0);
     return true;
+}
+
+
+
+SoftObject::SoftObject() {
+    //btSoftBodyHelpers
+}
+
+void SoftObject::removeClean() {
+    if(body) {
+        btSoftBody* softBody = getBody();
+        objectManager.physicsWorld->removeSoftBody(softBody);
+        delete softBody;
+        body = NULL;
+    }
+    GraphicObject::removeClean();
+}
+
+void SoftObject::removeFast() {
+    if(body) {
+        btSoftBody* softBody = getBody();
+        delete softBody;
+        body = NULL;
+    }
+    GraphicObject::removeFast();
 }
 
 

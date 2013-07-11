@@ -20,8 +20,11 @@
 #include <SDL_ttf/SDL_ttf.h>
 #include <BulletCollision/btBulletCollisionCommon.h>
 #include <BulletDynamics/btBulletDynamicsCommon.h>
-#include <BulletSoftBody/btSoftBody.h>
+#include <BulletSoftBody/btSoftRigidDynamicsWorld.h>
+#include <BulletSoftBody/btDefaultSoftBodySolver.h>
+#include <BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h>
 #include <v8.h>
+#include <Leap.h>
 #include <netLink.h>
 
 #ifndef Utilities_h
@@ -126,6 +129,10 @@ template <class T> inline const T frand(T min, T max) {
 
 inline btVector3 vec3rand(btVector3 min, btVector3 max) {
     return btVector3(frand(min.x(), max.x()), frand(min.y(), max.y()), frand(min.z(), max.z()));
+}
+
+inline btVector3 leapToBullet(Leap::Vector vec) {
+    return btVector3(vec.x, vec.y, vec.z);
 }
 
 //! System time in seconds

@@ -18,6 +18,9 @@ GUIView::~GUIView() {
 }
 
 bool GUIView::addChild(GUIRect* child) {
+    if(child->parent)
+        child->parent->children.erase(child->parent->children.begin()+child->parent->getIndexOfChild(child));
+    
     child->parent = this;
     children.push_back(child);
     return true;
@@ -32,11 +35,6 @@ int GUIView::getIndexOfChild(GUIRect* child) {
 
 void GUIView::deleteChild(unsigned int index) {
     delete children[index];
-    children.erase(children.begin()+index);
-}
-
-void GUIView::moveChildToParent(unsigned int index, GUIView* newParent) {
-    newParent->addChild(children[index]);
     children.erase(children.begin()+index);
 }
 
@@ -176,7 +174,7 @@ void GUIScreenView::draw() {
         modelMat.setOrigin(btVector3(0, 0, 0));
         shaderPrograms[spriteSP]->use();
         shaderPrograms[spriteSP]->setUniformF("alpha", 0.5);
-        mainFBO.vao.draw();
+        rectVAO.draw();
         shaderPrograms[spriteSP]->setUniformF("alpha", 1.0);
         
         modalView->draw(transform, clipRect);
@@ -257,12 +255,8 @@ void GUIScreenView::setModalView(GUIRect* modalViewB) {
         deleteChild(getIndexOfChild(modalView));
     modalView = modalViewB;
     if(!modalView) return;
-    if(modalView->parent != this) {
-        if(modalView->parent)
-            modalView->parent->moveChildToParent(modalView->parent->getIndexOfChild(modalView), this);
-        else
-            addChild(modalView);
-    }
+    if(modalView->parent != this)
+        addChild(modalView);
     modalView->visible = true;
     modalView->updateContent();
 }

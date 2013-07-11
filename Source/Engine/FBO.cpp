@@ -135,18 +135,6 @@ void FBO::init() {
     
     glBindTexture(GL_TEXTURE_RECTANGLE, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    
-    VertexArrayObject::Attribute attr;
-    attr.size = 2;
-    std::vector<VertexArrayObject::Attribute> attributes;
-    attr.name = POSITION_ATTRIBUTE;
-    attributes.push_back(attr);
-    vao.init(attributes, false);
-    
-    float vertices[8] = { -1.0, -1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0 };
-    vao.updateVertices(8, vertices, GL_STATIC_DRAW);
-    vao.elementsCount = 4;
-    vao.drawType = GL_TRIANGLE_FAN;
 }
 
 void FBO::copyBuffer(GLuint source, GLuint destination) {
@@ -216,7 +204,7 @@ void FBO::renderInBuffers(bool fillScreen, GLuint* inBuffers, unsigned char inBu
     if(!fillScreen) return;
     modelMat.setIdentity();
     currentShaderProgram->setUniformMatrix4("modelViewMat", &modelMat);
-    vao.draw();
+    rectVAO.draw();
 }
 
 void FBO::renderInTexture(ColorBuffer* colorBuffer, GLenum textureTarget) {

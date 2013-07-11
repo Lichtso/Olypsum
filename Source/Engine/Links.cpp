@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 06.01.13.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #include "ScriptLinks.h"
@@ -943,14 +943,23 @@ void TransformLink::removeFast(BaseObject* object) {
         BaseLink::removeFast(object);
 }
 
+bool TransformLink::checkIfAttachingIsValid() {
+    foreach_e(b->links, iterator)
+    if(*iterator != this && (*iterator)->b == b && dynamic_cast<TransformLink*>(*iterator)) {
+        log(error_log, "Tried to attach a TransformLink to a child which already got another parent.");
+        return false;
+    }
+    return true;
+}
+
 bool TransformLink::init(LinkInitializer& initializer, btTransform& _transform) {
-    if(!BaseLink::init(initializer)) return false;
+    if(!BaseLink::init(initializer) || !checkIfAttachingIsValid()) return false;
     transform = _transform;
     return true;
 }
 
 bool TransformLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
-    if(!BaseLink::init(node, levelLoader)) return false;
+    if(!BaseLink::init(node, levelLoader) || !checkIfAttachingIsValid()) return false;
     transform = readTransformationXML(node);
     return true;
 }
@@ -958,7 +967,6 @@ bool TransformLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
 rapidxml::xml_node<xmlUsedCharType>* TransformLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver) {
     rapidxml::xml_node<xmlUsedCharType>* node = BaseLink::write(doc, linkSaver);
     node->name("TransformLink");
-    
     node->append_node(writeTransformationXML(doc, transform));
     return node;
 }

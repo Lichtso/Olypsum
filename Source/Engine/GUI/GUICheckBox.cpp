@@ -14,7 +14,6 @@ GUICheckBox::GUICheckBox() {
     sizeAlignment = GUISizeAlignment::None;
     GUILabel* label = new GUILabel();
     label->text = "√";
-    label->parent = this;
     label->fontHeight = menu.screenView->width*0.03;
     label->posY = menu.screenView->width*0.002;
     GUIButton::addChild(label);

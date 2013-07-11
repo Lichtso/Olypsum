@@ -156,7 +156,7 @@ ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, Leve
         log(error_log, "Found \"Texture\"-node without \"src\"-attribute.");
         return;
     }
-    texture = fileManager.initResource<Texture>(attribute->value());
+    texture = fileManager.getResourceByPath<Texture>(attribute->value());
     texture->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGBA);
 }
 

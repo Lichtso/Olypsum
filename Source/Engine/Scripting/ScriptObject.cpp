@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 09.03.13.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #include "ScriptManager.h"
@@ -33,7 +33,7 @@ void ScriptBaseClass::SetScriptClass(v8::Local<v8::String> property, v8::Local<v
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(info.This());
     FilePackage* filePackage;
     std::string name;
-    if(fileManager.readResource(stdStrOfV8(value), filePackage, name))
+    if(fileManager.readResourcePath(stdStrOfV8(value), filePackage, name))
         objectPtr->scriptFile = scriptManager->getScriptFile(filePackage, name);
 }
 

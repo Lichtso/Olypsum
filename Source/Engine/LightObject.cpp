@@ -301,7 +301,7 @@ bool SpotLight::gameTick(bool shadowActive) {
     mainFBO.renderInTexture(shadowMap, GL_TEXTURE_2D);
     //Render circle mask
     shaderPrograms[spotShadowCircleLightSP]->use();
-    mainFBO.vao.draw();
+    rectVAO.draw();
     objectManager.drawShadowCasters();
     
     return true;

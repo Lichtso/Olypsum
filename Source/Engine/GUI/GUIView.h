@@ -16,12 +16,12 @@ class GUIView : public GUIRect {
     std::vector<GUIRect*> children;
     GUIView();
     ~GUIView();
+    //! Adopts a child with or without a parent
     virtual bool addChild(GUIRect* child);
+    //! Returns the index of a given child or -1 if this is not the parent
     int getIndexOfChild(GUIRect* child);
     //! Deletes the child at given index
     void deleteChild(unsigned int index);
-    //! Moves the child at given index to another parent
-    void moveChildToParent(unsigned int index, GUIView* newParent);
     void updateContent();
     void draw(btVector3 parentTransform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);

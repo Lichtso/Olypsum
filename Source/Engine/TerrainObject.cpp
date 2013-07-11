@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 06.01.13.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #include "ScriptDisplayObject.h"
@@ -21,7 +21,7 @@ TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelL
         log(error_log, "Found \"Diffuse\"-node without \"src\"-attribute.");
         return;
     }
-    diffuse = fileManager.initResource<Texture>(attribute->value());
+    diffuse = fileManager.getResourceByPath<Texture>(attribute->value());
     diffuse->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGB);
     if(diffuse->depth <= 1) {
         log(error_log, "Tried to construct TerrainObject with invalid \"EffectMap\" texture.");
@@ -35,7 +35,7 @@ TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelL
             log(error_log, "Found \"EffectMap\"-node without \"src\"-attribute.");
             return;
         }
-        effectMap = fileManager.initResource<Texture>(attribute->value());
+        effectMap = fileManager.getResourceByPath<Texture>(attribute->value());
         effectMap->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGB);
         if(effectMap->depth <= 1) {
             log(error_log, "Tried to construct TerrainObject with invalid \"EffectMap\" texture.");
@@ -50,7 +50,7 @@ TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelL
             log(error_log, "Found \"HeightsMap\"-node without \"src\"-attribute.");
             return;
         }
-        FileResourcePtr<Texture> heightMap = fileManager.initResource<Texture>(attribute->value());
+        FileResourcePtr<Texture> heightMap = fileManager.getResourceByPath<Texture>(attribute->value());
         if(!heightMap) return;
         width = heightMap->width;
         length = heightMap->height;

@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 16.04.13.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #ifndef ScriptGUIRect_h
@@ -27,7 +27,6 @@ class ScriptGUIRect : public ScriptClass {
     static void SetFocus(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetParent(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> Remove(const v8::Arguments& args);
-    static v8::Handle<v8::Value> MoveToParent(const v8::Arguments& args);
     static v8::Handle<v8::Value> UpdateContent(const v8::Arguments& args);
     protected:
     ScriptGUIRect(const char* name, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args));

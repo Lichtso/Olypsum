@@ -78,7 +78,7 @@ void FileManager::unloadPackage(const std::string& name) {
     filePackages.erase(iterator);
 }
 
-bool FileManager::readResource(const std::string& path, FilePackage*& filePackage, std::string& name) {
+bool FileManager::readResourcePath(const std::string& path, FilePackage*& filePackage, std::string& name) {
     if(path.compare(0, 3, "../") == 0) {
         unsigned int seperation = name.find('/', 3);
         filePackage = getPackage(name.substr(3, seperation));

@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 21.04.13.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #include "ScriptGUIOutput.h"
@@ -70,7 +70,7 @@ void ScriptGUILabel::SetFont(v8::Local<v8::String> property, v8::Local<v8::Value
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     GUILabel* objectPtr = getDataOfInstance<GUILabel>(info.This());
-    auto font = fileManager.initResource<TextFont>(stdStrOfV8(value));
+    auto font = fileManager.getResourceByPath<TextFont>(stdStrOfV8(value));
     if(font) objectPtr->font = font;
 }
 
@@ -154,7 +154,7 @@ v8::Handle<v8::Value> ScriptGUIImage::Constructor(const v8::Arguments &args) {
     if(args.Length() != 2 || !scriptGUIView.isCorrectInstance(args[0]) || !args[1]->IsString())
         return v8::ThrowException(v8::String::New("GUIImage Constructor: Invalid argument"));
     
-    auto image = fileManager.initResource<Texture>(stdStrOfV8(args[1]));
+    auto image = fileManager.getResourceByPath<Texture>(stdStrOfV8(args[1]));
     if(!image)
         return v8::ThrowException(v8::String::New("GUIImage Constructor: Invalid argument"));
     
@@ -176,7 +176,7 @@ void ScriptGUIImage::SetImage(v8::Local<v8::String> property, v8::Local<v8::Valu
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     GUIImage* objectPtr = getDataOfInstance<GUIImage>(info.This());
-    auto image = fileManager.initResource<Texture>(stdStrOfV8(value));
+    auto image = fileManager.getResourceByPath<Texture>(stdStrOfV8(value));
     if(image) objectPtr->texture = image;
 }
 

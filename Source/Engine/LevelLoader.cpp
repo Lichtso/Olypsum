@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 13.10.12.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #include "AppMain.h"
@@ -146,7 +146,7 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
                 if(attribute) {
                     FilePackage* filePackage;
                     std::string name;
-                    if(fileManager.readResource(attribute->value(), filePackage, name)) {
+                    if(fileManager.readResourcePath(attribute->value(), filePackage, name)) {
                         object->scriptFile = scriptManager->getScriptFile(filePackage, name);
                         if(object->scriptFile)
                             object->scriptFile->callFunction("onload", true, { object->scriptInstance, scriptManager->readCdataXMLNode(node) });

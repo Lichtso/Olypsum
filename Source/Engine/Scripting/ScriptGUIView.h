@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 18.04.13.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #ifndef ScriptGUIView_h
@@ -15,6 +15,7 @@ class ScriptGUIView : public ScriptGUIRect {
     static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
     static v8::Handle<v8::Value> GetChildCount(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetChild(uint32_t index, const v8::AccessorInfo& info);
+    static v8::Handle<v8::Value> Adopt(const v8::Arguments& args);
     protected:
     ScriptGUIView(const char* name, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args)) :ScriptGUIRect(name, constructor) { }
     public:

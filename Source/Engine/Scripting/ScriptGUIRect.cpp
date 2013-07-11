@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 16.04.13.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #include "ScriptGUIView.h"
@@ -104,15 +104,6 @@ v8::Handle<v8::Value> ScriptGUIRect::Remove(const v8::Arguments& args) {
     return v8::Undefined();
 }
 
-v8::Handle<v8::Value> ScriptGUIRect::MoveToParent(const v8::Arguments& args) {
-    v8::HandleScope handleScope;
-    if(args.Length() < 1 || !scriptGUIView.isCorrectInstance(args[0]))
-        return v8::ThrowException(v8::String::New("GUIRect moveToParent(): New parent is not a GUIView"));
-    GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    objectPtr->parent->moveChildToParent(objectPtr->parent->getIndexOfChild(objectPtr), getDataOfInstance<GUIView>(args[0]));
-    return v8::Undefined();
-}
-
 v8::Handle<v8::Value> ScriptGUIRect::UpdateContent(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
@@ -130,7 +121,7 @@ ScriptGUIRect::ScriptGUIRect(const char* name, v8::Handle<v8::Value>(constructor
 v8::Handle<v8::Value> ScriptGUIRect::initInstance(v8::Local<v8::Object> instance, GUIView* parent, GUIRect* child) {
     if(!parent->addChild(child)) {
         delete child;
-        return v8::ThrowException(v8::String::New("GUIView addChild(): Failed"));
+        return v8::ThrowException(v8::String::New("GUIView adopt(): Failed"));
     }
     child->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
     instance->SetInternalField(0, v8::External::New(child));
@@ -149,7 +140,6 @@ ScriptGUIRect::ScriptGUIRect() :ScriptGUIRect("GUIRect", Constructor) {
     objectTemplate->SetAccessor(v8::String::New("focus"), GetFocus, SetFocus);
     objectTemplate->SetAccessor(v8::String::New("parent"), GetParent);
     objectTemplate->Set(v8::String::New("remove"), v8::FunctionTemplate::New(Remove));
-    objectTemplate->Set(v8::String::New("moveToParent"), v8::FunctionTemplate::New(MoveToParent));
     objectTemplate->Set(v8::String::New("updateContent"), v8::FunctionTemplate::New(UpdateContent));
 }
 

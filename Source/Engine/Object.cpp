@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 14.10.12.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #include "AppMain.h"
@@ -124,7 +124,6 @@ void PhysicObject::removeFast() {
         if(body->getCollisionShape())
             delete body->getCollisionShape();
         delete body;
-        body = NULL;
     }
     BaseObject::removeFast();
 }

@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 05.04.13.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #include "ScriptManager.h"
@@ -130,7 +130,7 @@ void ScriptSoundObject::SetSoundTrack(v8::Local<v8::String> property, v8::Local<
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
-    auto soundTrack = fileManager.initResource<SoundTrack>(stdStrOfV8(value));
+    auto soundTrack = fileManager.getResourceByPath<SoundTrack>(stdStrOfV8(value));
     if(soundTrack) objectPtr->setSoundTrack(soundTrack);
 }
 

@@ -3,14 +3,13 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 11.11.12.
-//
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
 #include "AppMain.h"
 
 ALCdevice* soundDevice;
 ALCcontext* soundContext;
-VertexArrayObject decalVAO;
 
 //! @cond
 class LightPrioritySorter {
@@ -28,9 +27,15 @@ static void calculatePhysicsTick(btDynamicsWorld* world, btScalar timeStep) {
 
 ObjectManager::ObjectManager() {
     currentShadowLight = NULL;
-    collisionConfiguration = new btDefaultCollisionConfiguration();
+    collisionConfiguration = new btSoftBodyRigidBodyCollisionConfiguration();
     collisionDispatcher = new btCollisionDispatcher(collisionConfiguration);
-    constraintSolver = new btSequentialImpulseConstraintSolver();
+    
+    /*PosixThreadSupport::ThreadConstructionInfo solverConstructionInfo("solver", SolverThreadFunc,
+																	  SolverlsMemoryFunc, maxNumThreads);
+	PosixThreadSupport* threadSupport = new PosixThreadSupport(solverConstructionInfo);*/
+    
+    constraintSolver = new btSequentialImpulseConstraintSolver(); //btParallelConstraintSolver();
+    softBodySolver = new btDefaultSoftBodySolver(); //btOpenCLSoftBodySolver();
     broadphase = new btDbvtBroadphase();
 }
 
@@ -39,13 +44,16 @@ ObjectManager::~ObjectManager() {
     alcCloseDevice(soundDevice);
     
     delete broadphase;
+    delete softBodySolver;
     delete constraintSolver;
     delete collisionDispatcher;
     delete collisionConfiguration;
 }
 
 void ObjectManager::init() {
-    //Init Decals
+    //Init VAOs
+    initLightVolumes();
+    
     float vertices[] = {
         -1.0, -1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0,
         1.0, -1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0,
@@ -63,10 +71,17 @@ void ObjectManager::init() {
     attr.name = NORMAL_ATTRIBUTE;
     attr.size = 3;
     attributes.push_back(attr);
-    decalVAO.init(attributes, false);
-    decalVAO.updateVertices(32, vertices, GL_STATIC_DRAW);
-    decalVAO.elementsCount = 4;
-    decalVAO.drawType = GL_TRIANGLE_STRIP;
+    rectVAO.init(attributes, false);
+    rectVAO.updateVertices(32, vertices, GL_STATIC_DRAW);
+    rectVAO.elementsCount = 4;
+    rectVAO.drawType = GL_TRIANGLE_STRIP;
+    
+    //Init Cams
+    guiCam = new CamObject();
+    guiCam->fov = 0.0;
+    guiCam->near = -1.0;
+    guiCam->far = 1.0;
+    guiCam->updateViewMat();
     
     //Init Sound
     soundDevice = alcOpenDevice(NULL);
@@ -74,6 +89,10 @@ void ObjectManager::init() {
     alcMakeContextCurrent(soundContext);
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
     log(info_log, std::string("OpenAL sound output: ")+alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
+    
+    
+    loadStaticShaderPrograms();
+    menu.setMenu(Menu::Name::loading);
 }
 
 void ObjectManager::clear() {
@@ -112,7 +131,7 @@ void ObjectManager::clear() {
 void ObjectManager::initGame(const std::string& levelPackage) {
     clear();
     levelManager.levelPackage = fileManager.getPackage(levelPackage);
-    physicsWorld.reset(new btDiscreteDynamicsWorld(collisionDispatcher, broadphase, constraintSolver, collisionConfiguration));
+    physicsWorld.reset(new btSoftRigidDynamicsWorld(collisionDispatcher, broadphase, constraintSolver, collisionConfiguration, softBodySolver));
     physicsWorld->setInternalTickCallback(calculatePhysicsTick);
     scriptManager.reset(new ScriptManager());
     sceneAmbient = btVector3(0.1, 0.1, 0.1);
@@ -199,12 +218,11 @@ void ObjectManager::gameTick() {
     profiler.leaveSection("Calculate physics");
     
     //Calculate Decals
-    for(auto iterator = decals.begin(); iterator != decals.end(); iterator ++) {
+    foreach_e(decals, iterator) {
         (*iterator)->life -= profiler.animationFactor;
         if((*iterator)->life > 0.0) continue;
         delete *iterator;
         decals.erase(iterator);
-        iterator --;
     }
     
     //Calculate GraphicObjects
@@ -358,7 +376,7 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
         }
         
         currentShaderProgram->setUniformF("discardDensity", min(1.0F, decal->life));
-        decalVAO.draw();
+        rectVAO.draw();
     }
     
     //Illuminate non transparent

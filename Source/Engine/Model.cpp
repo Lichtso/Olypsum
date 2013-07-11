@@ -305,7 +305,7 @@ FileResourcePtr<FileResource> Model::load(FilePackage* filePackageB, const std::
                 if((dataNode = source->first_node("diffuse"))) {
                     std::string url = readTextureURL(samplerURLs, dataNode);
                     if(url.size() > 0) {
-                        material.diffuse = filePackage->getResource<Texture>(url);
+                        material.diffuse = fileManager.getResourceByPath<Texture>(url);
                         material.diffuse->setAnimationFrames(readTextureFrames(dataNode->first_node("texture")));
                         material.diffuse->uploadTexture(GL_TEXTURE_2D_ARRAY, (material.refraction > 0.0) ? GL_COMPRESSED_RGBA : GL_COMPRESSED_RGB);
                     }
@@ -313,14 +313,14 @@ FileResourcePtr<FileResource> Model::load(FilePackage* filePackageB, const std::
                 if((dataNode = source->first_node("specular"))) {
                     std::string url = readTextureURL(samplerURLs, dataNode);
                     if(url.size() > 0) {
-                        material.effectMap = filePackage->getResource<Texture>(url);
+                        material.effectMap = fileManager.getResourceByPath<Texture>(url);
                         material.effectMap->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
                     }
                 }
                 if((dataNode = source->first_node("bump"))) {
                     std::string url = readTextureURL(samplerURLs, dataNode);
                     if(url.size() > 0) {
-                        material.heightMap = filePackage->getResource<Texture>(url);
+                        material.heightMap = fileManager.getResourceByPath<Texture>(url);
                         material.heightMap->uploadNormalMap(4.0);
                     }
                 }
