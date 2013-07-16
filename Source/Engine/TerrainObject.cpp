@@ -182,6 +182,7 @@ void TerrainObject::draw() {
     }
     
     vao.draw();
+    GraphicObject::draw();
 }
 
 btVector3 TerrainObject::getVertexAt(float* vertices, unsigned int x, unsigned int y) {

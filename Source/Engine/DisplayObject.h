@@ -36,6 +36,15 @@ struct AccumulatedTransparent {
     Mesh* mesh;
 };
 
+//! A decal used for graphic effects
+class Decal {
+    public:
+    btTransform transformation; //!< The world transformation of this decal
+    FileResourcePtr<Texture> diffuse, //!< A color texture
+                             heightMap; //!< A height map
+    float life; //!< The remaining life time in seconds
+};
+
 //! A DisplayObject which is managed by the ObjectManager
 /*!
  This is the basic class for all Objects, which are managed by the ObjectManager.
@@ -45,7 +54,11 @@ class GraphicObject : public DisplayObject {
     protected:
     GraphicObject();
     public:
+    std::set<Decal*> decals; //!< Decals attached to this GraphicObject
     void removeClean();
+    void removeFast();
+    bool gameTick();
+    void draw();
 };
 
 //! A GraphicObject with a Model

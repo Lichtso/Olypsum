@@ -8,6 +8,35 @@
 
 #include "ScriptDisplayObject.h"
 
+v8::Handle<v8::Value> ScriptGraphicObject::AttachDecal(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    if(args.Length() < 3 || !args[0]->IsNumber() || !scriptMatrix4.isCorrectInstance(args[1]) || !args[2]->IsString())
+        return v8::ThrowException(v8::String::New("GraphicObject attachDecal: Invalid argument"));
+    
+    Decal* decal = new Decal();
+    decal->life = args[0]->NumberValue();
+    decal->transformation = scriptMatrix4.getDataOfInstance(args[1])->getBTTransform();
+    decal->diffuse = fileManager.getResourceByPath<Texture>(stdStrOfV8(args[2]));
+    
+    if(args.Length() > 3 && args[3]->IsString())
+        decal->heightMap = fileManager.getResourceByPath<Texture>(stdStrOfV8(args[3]));
+    
+    GraphicObject* objectPtr = getDataOfInstance<GraphicObject>(args.This());
+    objectPtr->decals.insert(decal);
+    return v8::Undefined();
+}
+
+ScriptGraphicObject::ScriptGraphicObject() :ScriptPhysicObject("GraphicObject") {
+    v8::HandleScope handleScope;
+    
+    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
+    objectTemplate->Set(v8::String::New("attachDecal"), v8::FunctionTemplate::New(AttachDecal));
+    
+    functionTemplate->Inherit(scriptPhysicObject.functionTemplate);
+}
+
+
+
 v8::Handle<v8::Value> ScriptModelObject::GetIntegrity(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
     ModelObject* objectPtr = getDataOfInstance<ModelObject>(info.This());
@@ -85,7 +114,7 @@ v8::Handle<v8::Value> ScriptModelObject::FindBoneByPath(const v8::Arguments& arg
     return handleScope.Close(boneObject->scriptInstance);
 }
 
-ScriptModelObject::ScriptModelObject() :ScriptPhysicObject("ModelObject") {
+ScriptModelObject::ScriptModelObject() :ScriptGraphicObject("ModelObject") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
@@ -94,7 +123,7 @@ ScriptModelObject::ScriptModelObject() :ScriptPhysicObject("ModelObject") {
     objectTemplate->Set(v8::String::New("textureAnimation"), v8::FunctionTemplate::New(AccessTextureAnimation));
     objectTemplate->Set(v8::String::New("findBoneByPath"), v8::FunctionTemplate::New(FindBoneByPath));
     
-    functionTemplate->Inherit(scriptPhysicObject.functionTemplate);
+    functionTemplate->Inherit(scriptGraphicObject.functionTemplate);
 }
 
 
@@ -321,7 +350,7 @@ v8::Handle<v8::Value> ScriptTerrainObject::UpdateModel(const v8::Arguments& args
     return v8::Undefined();
 }
 
-ScriptTerrainObject::ScriptTerrainObject() :ScriptPhysicObject("TerrainObject") {
+ScriptTerrainObject::ScriptTerrainObject() :ScriptGraphicObject("TerrainObject") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
@@ -332,11 +361,12 @@ ScriptTerrainObject::ScriptTerrainObject() :ScriptPhysicObject("TerrainObject") 
     objectTemplate->SetAccessor(v8::String::New("bitDepth"), GetBitDepth, SetBitDepth);
     objectTemplate->Set(v8::String::New("updateModel"), v8::FunctionTemplate::New(UpdateModel));
     
-    functionTemplate->Inherit(scriptPhysicObject.functionTemplate);
+    functionTemplate->Inherit(scriptGraphicObject.functionTemplate);
 }
 
 
 
+ScriptGraphicObject scriptGraphicObject;
 ScriptModelObject scriptModelObject;
 ScriptRigidObject scriptRigidObject;
 ScriptTerrainObject scriptTerrainObject;

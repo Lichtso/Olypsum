@@ -12,7 +12,8 @@
 #include "Menu.h"
 
 class LeapManager : public Leap::Listener {
-    int64_t lastFrameID = 0;
+    int64_t lastFrameID = -1;
+    int prevMouseX, prevMouseY, prevZone, mouseX, mouseY, zone;
     public:
     Leap::Controller controller;
     LeapManager();

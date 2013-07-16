@@ -185,10 +185,8 @@ void GUIScreenView::draw() {
 }
 
 bool GUIScreenView::handleMouseDown(int mouseX, int mouseY) {
-    mouseX -= width;
-    mouseY = height-mouseY;
-    
     if(!visible || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
+    
     if(modalView)
         return modalView->handleMouseDown(mouseX-modalView->posX, mouseY-modalView->posY);
     else
@@ -200,8 +198,6 @@ bool GUIScreenView::handleMouseDown(int mouseX, int mouseY) {
 
 bool GUIScreenView::handleMouseUp(int mouseX, int mouseY) {
     if(!visible) return false;
-    mouseX -= width;
-    mouseY = height-mouseY;
     
     if(modalView)
         return modalView->handleMouseUp(mouseX-modalView->posX, mouseY-modalView->posY);
@@ -214,8 +210,6 @@ bool GUIScreenView::handleMouseUp(int mouseX, int mouseY) {
 
 void GUIScreenView::handleMouseMove(int mouseX, int mouseY) {
     if(!visible) return;
-    mouseX -= width;
-    mouseY = height-mouseY;
     
     if(modalView)
         return modalView->handleMouseMove(mouseX-modalView->posX, mouseY-modalView->posY);
@@ -225,10 +219,8 @@ void GUIScreenView::handleMouseMove(int mouseX, int mouseY) {
 }
 
 bool GUIScreenView::handleMouseWheel(int mouseX, int mouseY, float delta) {
-    mouseX -= width;
-    mouseY = height-mouseY;
-    
     if(!visible || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
+    
     if(modalView)
         return modalView->handleMouseWheel(mouseX-modalView->posX, mouseY-modalView->posY, delta);
     else

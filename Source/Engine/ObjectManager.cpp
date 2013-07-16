@@ -106,10 +106,6 @@ void ObjectManager::clear() {
         delete transparentAccumulator[i];
     transparentAccumulator.clear();
     
-    for(auto decal : decals)
-        delete decal;
-    decals.clear();
-    
     for(auto graphicObject : graphicObjects)
         graphicObject->removeFast();
     graphicObjects.clear();
@@ -216,14 +212,6 @@ void ObjectManager::gameTick() {
     //Calculate Physics
     physicsWorld->stepSimulation(profiler.animationFactor, 4, 1.0/60.0); //Try to maintain 60 FPS
     profiler.leaveSection("Calculate physics");
-    
-    //Calculate Decals
-    foreach_e(decals, iterator) {
-        (*iterator)->life -= profiler.animationFactor;
-        if((*iterator)->life > 0.0) continue;
-        delete *iterator;
-        decals.erase(iterator);
-    }
     
     //Calculate GraphicObjects
     foreach_e(graphicObjects, iterator)
@@ -356,28 +344,6 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
     for(auto graphicObject : graphicObjects)
         if(graphicObject->inFrustum)
             graphicObject->draw();
-    
-    //Draw Decals
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    for(auto decal : decals) {
-        modelMat = decal->transformation;
-        
-        if(decal->diffuse)
-            decal->diffuse->use(0);
-        
-        if(decal->heightMap) {
-            decal->heightMap->use(2);
-            shaderPrograms[solidBumpGSP]->use();
-        }else{
-            glActiveTexture(GL_TEXTURE2);
-            glBindTexture(GL_TEXTURE_2D, 0);
-            shaderPrograms[solidGSP]->use();
-        }
-        
-        currentShaderProgram->setUniformF("discardDensity", min(1.0F, decal->life));
-        rectVAO.draw();
-    }
     
     //Illuminate non transparent
     illuminate();

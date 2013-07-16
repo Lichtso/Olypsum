@@ -11,15 +11,6 @@
 #ifndef ObjectManager_h
 #define ObjectManager_h
 
-//! A decal used for graphic effects
-class Decal {
-    public:
-    btTransform transformation; //!< The world transformation of this decal
-    FileResourcePtr<Texture> diffuse, //!< A color texture
-                             heightMap; //!< A height map
-    float life; //!< The remaining life time in seconds
-};
-
 //! This class manages all objects in the scene
 class ObjectManager {
     public:
@@ -30,7 +21,6 @@ class ObjectManager {
     std::map<ModelObject*, Reflective*> reflectiveAccumulator; //!< Stores the mirrors for deferred rendering
     std::vector<AccumulatedTransparent*> transparentAccumulator; //!< Stores the transparent objects for deferred rendering
     std::vector<LightObject*> lightObjects; //!< All light sources of the scene
-    std::set<Decal*> decals; //!< All Decals in the scene
     std::set<GraphicObject*> graphicObjects; //!< All GraphicObjects (without ParticlesObjects) in the scene
     std::set<ParticlesObject*> particlesObjects; //! All ParticlesObjects in the scene
     std::set<SimpleObject*> simpleObjects; //! All Cams and SoundObjects in the scene

@@ -105,8 +105,8 @@ void AppMain(int argc, char *argv[]) {
     SDL_Event event;
     while(true) {
         while(SDL_PollEvent(&event)) {
-            event.button.x *= prevOptionsState.videoScale;
-            event.button.y *= prevOptionsState.videoScale;
+            int mouseX = event.button.x*prevOptionsState.videoScale - menu.screenView->width,
+                mouseY = menu.screenView->height - event.button.y*prevOptionsState.videoScale;
             
             switch(event.type) {
                 case SDL_ACTIVEEVENT:
@@ -123,22 +123,22 @@ void AppMain(int argc, char *argv[]) {
                         case SDL_BUTTON_LEFT:
                         case SDL_BUTTON_MIDDLE:
                         case SDL_BUTTON_RIGHT:
-                            menu.handleMouseDown(event.button.x, event.button.y, event.button.button);
+                            menu.handleMouseDown(mouseX, mouseY, event.button.button);
                             break;
                         case SDL_BUTTON_WHEELDOWN:
-                            menu.handleMouseWheel(event.button.x, event.button.y, -1.0);
+                            menu.handleMouseWheel(mouseX, mouseY, -1.0);
                             break;
                         case SDL_BUTTON_WHEELUP:
-                            menu.handleMouseWheel(event.button.x, event.button.y, 1.0);
+                            menu.handleMouseWheel(mouseX, mouseY, 1.0);
                             break;
                     }
                 break;
                 case SDL_MOUSEBUTTONUP:
                     if(event.button.button == SDL_BUTTON_WHEELDOWN || event.button.button == SDL_BUTTON_WHEELUP) break;
-                    menu.handleMouseUp(event.button.x, event.button.y, event.button.button);
+                    menu.handleMouseUp(mouseX, mouseY, event.button.button);
                 break;
                 case SDL_MOUSEMOTION:
-                    menu.handleMouseMove(event.button.x, event.button.y);
+                    menu.handleMouseMove(mouseX, mouseY);
                 break;
                 case SDL_QUIT:
                     AppTerminate();

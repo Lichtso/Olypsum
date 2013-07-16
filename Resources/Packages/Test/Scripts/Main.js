@@ -77,12 +77,12 @@ exports.ongametick = function() {
 
 	if(!Keyboard.isKeyPressed(308)) { //Alt left
 		var rotation = transform.rotation(), up = new Vector3(0.0, 1.0, 0.0);
-		transform.rotation(rotation.getProduct(new Quaternion(Mouse.x()*0.01, Mouse.y()*0.01, 0.0)));
+		transform.rotation(rotation.getProduct(new Quaternion(-Mouse.x()*0.01, Mouse.y()*0.01, 0.0)));
 		transform.y(up);
 		transform.x(transform.y().cross(transform.z()).normalize());
 		transform.y(transform.z().cross(transform.x()).normalize());
 		if(transform.y().getDot(up) < 0.12)
-			transform.rotation(rotation.mult(new Quaternion(Mouse.x()*0.01, 0.0, 0.0)));
+			transform.rotation(rotation.mult(new Quaternion(-Mouse.x()*0.01, 0.0, 0.0)));
 	}
 	
 	Cam.camObject.transformation(transform);
@@ -96,7 +96,7 @@ exports.ongametick = function() {
         speed = Math.min(speed*5.0, 10.0);
         
         if(Keyboard.isKeyPressed(308)) //Alt left
-            exports.grabbedObject.angularVelocity(camTransform.getRotated(new Vector3(Mouse.y(), Mouse.x(), 0.0)).mult(-0.1));
+            exports.grabbedObject.angularVelocity(camTransform.getRotated(new Vector3(-Mouse.y()*0.1, Mouse.x()*0.1, 0.0)));
         else
             exports.grabbedObject.angularVelocity(new Vector3(0.0, 0.0, 0.0));
         exports.grabbedObject.linearVelocity(velocity.mult(speed));

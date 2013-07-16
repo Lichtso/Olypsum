@@ -13,8 +13,56 @@ GraphicObject::GraphicObject() {
 }
 
 void GraphicObject::removeClean() {
+    for(auto decal : decals)
+        delete decal;
+    
+    decals.clear();
     objectManager.graphicObjects.erase(this);
+    
     DisplayObject::removeClean();
+}
+
+void GraphicObject::removeFast() {
+    for(auto decal : decals)
+        delete decal;
+    
+    DisplayObject::removeFast();
+}
+
+bool GraphicObject::gameTick() {
+    foreach_e(decals, iterator) {
+        (*iterator)->life -= profiler.animationFactor;
+        if((*iterator)->life > 0.0) continue;
+        delete *iterator;
+        decals.erase(iterator);
+    }
+    
+    return DisplayObject::gameTick();
+}
+
+void GraphicObject::draw() {
+    if(objectManager.currentShadowLight) return;
+    
+    btTransform transform = getTransformation();
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    
+    for(auto decal : decals) {
+        modelMat = transform * decal->transformation;
+        decal->diffuse->use(0);
+        
+        if(decal->heightMap) {
+            decal->heightMap->use(2);
+            shaderPrograms[solidBumpGSP]->use();
+        }else{
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, 0);
+            shaderPrograms[solidGSP]->use();
+        }
+        
+        currentShaderProgram->setUniformF("discardDensity", min(1.0F, decal->life));
+        rectVAO.draw();
+    }
 }
 
 
@@ -126,9 +174,11 @@ void ModelObject::setModel(LevelLoader* levelLoader, FileResourcePtr<Model> _mod
 }
 
 void ModelObject::draw() {
-    if(!model) return;
-    modelMat = getTransformation();
-    model->draw(this);
+    if(model) {
+        modelMat = getTransformation();
+        model->draw(this);
+    }
+    GraphicObject::draw();
 }
 
 void ModelObject::drawAccumulatedMesh(Mesh* mesh) {

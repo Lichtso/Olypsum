@@ -137,12 +137,12 @@ void Menu::handleMouseMove(int mouseX, int mouseY) {
     
     if(menu.current != inGame) return;
     
-    this->mouseX = mouseX-screenView->width;
-    this->mouseY = mouseY-screenView->height;
+    this->mouseX = mouseX;
+    this->mouseY = mouseY;
     if((this->mouseX != 0 || this->mouseY != 0) && mouseFixed) {
         SDL_WarpMouse(screenView->width / prevOptionsState.videoScale, screenView->height / prevOptionsState.videoScale);
-        mouseVelocityX -= optionsState.mouseSensitivity*this->mouseX;
-        mouseVelocityY -= optionsState.mouseSensitivity*this->mouseY;
+        mouseVelocityX += optionsState.mouseSensitivity*this->mouseX;
+        mouseVelocityY += optionsState.mouseSensitivity*this->mouseY;
     }
 }
 
@@ -271,8 +271,11 @@ void Menu::gameTick() {
                 mouseVelocityX -= mouseX;
                 mouseVelocityY -= mouseY;
                 SDL_ShowCursor(0);
-            }else
+            }else{
+                mouseVelocityX = 0.0;
+                mouseVelocityY = 0.0;
                 SDL_ShowCursor(1);
+            }
         } break;
         default:
             SDL_ShowCursor(1);

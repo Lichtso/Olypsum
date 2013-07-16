@@ -11,7 +11,15 @@
 
 #include "ScriptObject.h"
 
-class ScriptModelObject : public ScriptPhysicObject {
+class ScriptGraphicObject : public ScriptPhysicObject {
+    static v8::Handle<v8::Value> AttachDecal(const v8::Arguments& args);
+    protected:
+    ScriptGraphicObject(const char* name) :ScriptPhysicObject(name) { }
+    public:
+    ScriptGraphicObject();
+};
+
+class ScriptModelObject : public ScriptGraphicObject {
     static v8::Handle<v8::Value> GetIntegrity(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void SetIntegrity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetModel(v8::Local<v8::String> property, const v8::AccessorInfo& info);
@@ -19,7 +27,7 @@ class ScriptModelObject : public ScriptPhysicObject {
     static v8::Handle<v8::Value> AccessTextureAnimation(const v8::Arguments& args);
     static v8::Handle<v8::Value> FindBoneByPath(const v8::Arguments& args);
     protected:
-    ScriptModelObject(const char* name) :ScriptPhysicObject(name) { }
+    ScriptModelObject(const char* name) :ScriptGraphicObject(name) { }
     public:
     ScriptModelObject();
 };
@@ -47,7 +55,7 @@ class ScriptRigidObject : public ScriptModelObject {
     ScriptRigidObject();
 };
 
-class ScriptTerrainObject : public ScriptPhysicObject {
+class ScriptTerrainObject : public ScriptGraphicObject {
     static v8::Handle<v8::Value> GetWidth(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetLength(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetBitDepth(v8::Local<v8::String> property, const v8::AccessorInfo& info);
@@ -57,6 +65,7 @@ class ScriptTerrainObject : public ScriptPhysicObject {
     ScriptTerrainObject();
 };
 
+extern ScriptGraphicObject scriptGraphicObject;
 extern ScriptModelObject scriptModelObject;
 extern ScriptRigidObject scriptRigidObject;
 extern ScriptTerrainObject scriptTerrainObject;

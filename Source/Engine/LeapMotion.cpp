@@ -25,41 +25,54 @@ void LeapManager::onDisconnect(const Leap::Controller& controller) {
 }
 
 void LeapManager::gameTick() {
-    if(!controller.isConnected()) return;
+    if(menu.current == Menu::inGame) return;
     
-    const Leap::Frame frame = controller.frame();
-    if(!frame.isValid() || frame.hands().count() == 0 || lastFrameID == frame.id()) return;
-    lastFrameID = frame.id();
+    float touches = 0.0;
+    zone = Leap::Pointable::Zone::ZONE_NONE;
+    prevMouseX = mouseX;
+    prevMouseY = mouseY;
+    prevZone = zone;
     
-    const Leap::ScreenList screens = controller.locatedScreens();
-    const Leap::Screen screen = screens[0];
-    
-    if(screen.bottomLeftCorner() == Leap::Vector(-200, 50, -200) &&
-       screen.horizontalAxis() == Leap::Vector(400, 0, 0) &&
-       screen.verticalAxis() == Leap::Vector(0, 250, 0) &&
-       screen.normal() == Leap::Vector(0, 0, 1)) {
-        //printf("Leap needs calibration\n");
-    }else{
-        const Leap::Pointable pointable = frame.pointables().frontmost();
-        if(pointable.isValid()) {
-            Leap::Vector position = screen.intersect(pointable.stabilizedTipPosition(), pointable.direction(), true);
-            position.x *= screen.widthPixels();
-            position.y *= screen.heightPixels();
+    if(controller.isConnected()) {
+        const Leap::ScreenList screens = controller.locatedScreens();
+        const Leap::Screen screen = screens[0];
+        const Leap::Frame frame = controller.frame();
+        
+        if(frame.isValid() && lastFrameID != frame.id()) {
+            lastFrameID = frame.id();
             
-            switch(pointable.touchZone()) {
-                case Leap::Pointable::Zone::ZONE_HOVERING:
-                    menu.handleMouseMove(position.x, position.y);
-                    break;
-                case Leap::Pointable::Zone::ZONE_TOUCHING:
-                    menu.handleMouseDown(position.x, position.y, SDL_BUTTON_LEFT);
-                    break;
-                default:
-                    break;
+            for(int i = 0; i < frame.pointables().count(); i ++) {
+                const Leap::Pointable pointable = frame.pointables()[i];
+                if(!pointable.isValid() || pointable.touchZone() == Leap::Pointable::Zone::ZONE_NONE) continue;
+                Leap::Vector position = screen.intersect(pointable.stabilizedTipPosition(), pointable.direction(), true);
+                
+                mouseX += (position.x - 0.5) * prevOptionsState.videoWidth;
+                mouseY += (position.y - 0.5) * prevOptionsState.videoHeight;
+                zone += pointable.touchZone();
+                touches += 1.0;
             }
+            
+            touches = (touches > 0.0) ? 1.0 / touches : 0.0;
+            mouseX *= touches;
+            mouseY *= touches;
+            zone *= touches;
         }
     }
     
+    if(zone == Leap::Pointable::Zone::ZONE_TOUCHING && prevZone != Leap::Pointable::Zone::ZONE_TOUCHING)
+        menu.handleMouseDown(mouseX, mouseY, SDL_BUTTON_LEFT);
+    else if(zone != Leap::Pointable::Zone::ZONE_TOUCHING && prevZone == Leap::Pointable::Zone::ZONE_TOUCHING)
+        menu.handleMouseUp(mouseX, mouseY, SDL_BUTTON_LEFT);
     
+    if(mouseX != prevMouseX || mouseY != prevMouseY) {
+        if(touches == 1.0) {
+            SDL_WarpMouse(mouseX + menu.screenView->width, mouseY + menu.screenView->height);
+            //menu.handleMouseMove(touch->mouseX, touch->mouseY);
+        }else{
+            menu.handleMouseWheel(menu.mouseX + menu.screenView->width, menu.mouseY + menu.screenView->height,
+                                  (mouseY-prevMouseY) * 3.0/menu.screenView->height);
+        }
+    }
 }
 
 LeapManager leapManager;

@@ -1,7 +1,6 @@
 V8 API: Create Objects, Documentation
-Decals: Tests and V8 API
 Implement btSoftBody
-Leap Motion
+Leap Motion: GUI, V8 API
 Use C++11 Multithreading
 Windows / Linux Support
 
@@ -24,4 +23,5 @@ Skeletal animation
 
 Bugs:
 Check memory leaks
+Prohibit cyclic parent-child relationships in GUIView
 Parallax Occlusion / Position / Depth
