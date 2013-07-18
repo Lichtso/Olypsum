@@ -35,7 +35,7 @@ v8::Handle<v8::Value> ScriptGUIView::GetChild(uint32_t index, const v8::Accessor
 v8::Handle<v8::Value> ScriptGUIView::Adopt(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1 || !scriptGUIRect.isCorrectInstance(args[0]))
-        return v8::ThrowException(v8::String::New("GUIRect adopt(): Child is not a GUIRect"));
+        return v8::ThrowException(v8::String::New("GUIView adopt(): Child is not a GUIRect"));
     GUIView* objectPtr = getDataOfInstance<GUIView>(args.This());
     objectPtr->addChild(getDataOfInstance<GUIRect>(args.This()));
     return v8::Undefined();

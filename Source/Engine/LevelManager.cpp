@@ -13,6 +13,10 @@ LevelManager::LevelManager() {
 }
 
 void LevelManager::showErrorModal(const std::string& error) {
+    if(menu.screenView->modalView) return;
+    levelManager.gameStatus = noGame;
+    menu.setMenu(Menu::saveGames);
+    
     GUIFramedView* modalView = new GUIFramedView();
     modalView->width = menu.screenView->width*0.4;
     modalView->height = menu.screenView->height*0.4;
@@ -98,14 +102,14 @@ bool LevelManager::loadGame(const std::string& name) {
         showErrorModal(localization.localizeString("packageError_FilesMissing"));
         return false;
     }
-    rapidxml::xml_node<xmlUsedCharType>* statusNode = doc.first_node("Status");
-    if(strcmp(statusNode->first_node("Version")->first_attribute("value")->value(), VERSION) != 0) {
+    rapidxml::xml_node<xmlUsedCharType>* rootNode = doc.first_node("Status");
+    if(strcmp(rootNode->first_node("EngineVersion")->first_attribute("value")->value(), VERSION) != 0) {
         showErrorModal(localization.localizeString("packageError_Version"));
         return false;
     }
     saveGameName = name;
-    loadLevel(statusNode->first_node("Package")->first_attribute("value")->value(),
-              statusNode->first_node("Level")->first_attribute("value")->value());
+    loadLevel(rootNode->first_node("Package")->first_attribute("value")->value(),
+              rootNode->first_node("Level")->first_attribute("value")->value());
     return true;
 }
 
@@ -116,12 +120,12 @@ bool LevelManager::newGame(const std::string& packageName, const std::string& na
     }
     
     rapidxml::xml_document<xmlUsedCharType> doc;
-    rapidxml::xml_node<xmlUsedCharType>* statusNode = doc.allocate_node(rapidxml::node_element);
-    statusNode->name("Status");
-    doc.append_node(statusNode);
-    addXMLNode(doc, statusNode, "Version", VERSION);
-    addXMLNode(doc, statusNode, "Package", packageName.c_str());
-    addXMLNode(doc, statusNode, "Level", "start");
+    rapidxml::xml_node<xmlUsedCharType>* rootNode = doc.allocate_node(rapidxml::node_element);
+    rootNode->name("Status");
+    doc.append_node(rootNode);
+    addXMLNode(doc, rootNode, "EngineVersion", VERSION);
+    addXMLNode(doc, rootNode, "Package", packageName.c_str());
+    addXMLNode(doc, rootNode, "Level", "start");
     writeXmlFile(doc, gameDataDir+"Saves/"+name+"/Status.xml", true);
     return loadGame(name);
 }

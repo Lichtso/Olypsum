@@ -22,7 +22,8 @@ class VertexArrayObject {
         GLuint size; //!< Size in elements which it contains
         bool normalize = false; //!< If true than OpenGL will normalize it
     };
-    unsigned int elementsCount; //!< The count of elemnets to be drawn
+    unsigned int verticesCount, //!< The count of vertices
+                 indeciesCount; //!< The count of indecies
     GLenum drawType; //!< The type of 3D elements to be drawn
     VertexArrayObject();
     ~VertexArrayObject();
@@ -31,13 +32,13 @@ class VertexArrayObject {
      @param indexMode True if IBO will be used
      */
     void init(std::vector<Attribute> attributes, bool indexMode);
-    /*! Update the VBO
+    /*! Ititializes or updates the VBO
      @param count The count of elements in the buffer
      @param vertices A pointer to the array which will be copied to fill the buffer
      @param usage GL_STREAM_DRAW, GL_STATIC_DRAW or GL_DYNAMIC_DRAW
      */
     void updateVertices(unsigned int count, float* vertices, GLenum usage);
-    /*! Update the VBO
+    /*! Ititializes or updates the IBO
      @param count The count of elements in the buffer
      @param indecies A pointer to the array which will be copied to fill the buffer
      @param format GL_UNSIGNED_BYTE, GL_UNSIGNED_SHORT or GL_UNSIGNED_INT

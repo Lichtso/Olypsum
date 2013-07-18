@@ -117,14 +117,17 @@ class FileManager {
     std::map<std::string, FilePackage*> filePackages; //!< All FilePackages that are loaded
     //! Deletes all FilePackages
     void clear();
-    //! Finds a FilePackage and loads it if not already done
-    FilePackage* getPackage(const std::string& name);
-    //! Deletes a FilePackage
+    /*! Loads a FilePackage if not already done
+     @param name The name of the FilePackage
+     @return The desired FilePackage or NULL on failure
+     */
+    FilePackage* loadPackage(const std::string& name);
+    //! Deletes a FilePackage by name
     void unloadPackage(const std::string& name);
     //! Reads a resources path
     bool readResourcePath(const std::string& path, FilePackage*& filePackage, std::string& name);
     //! Returns a resources path
-    std::string getResourcePath(FilePackage* filePackage, std::string name);
+    std::string getPathOfResource(FilePackage* filePackage, std::string name);
     //Writes a resource to rapidxml::xml_node and returns it
     rapidxml::xml_node<xmlUsedCharType>* writeResource(rapidxml::xml_document<xmlUsedCharType>& doc, const char* nodeName,
                                                        FilePackage* filePackage, const std::string& name);

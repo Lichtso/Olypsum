@@ -38,6 +38,29 @@ bool FilePackage::init() {
         closedir(dirB);
     }else closedir(dir);
     
+    rapidxml::xml_document<xmlUsedCharType> doc;
+    std::unique_ptr<char[]> fileData = readXmlFile(doc, path+"/Package.xml", false);
+    if(!fileData) {
+        levelManager.showErrorModal(localization.localizeString("packageError_FilesMissing"));
+        return false;
+    }
+    rapidxml::xml_node<xmlUsedCharType> *dependenciesNode, *packageNode = doc.first_node("Package");
+    if(strcmp(packageNode->first_node("EngineVersion")->first_attribute("value")->value(), VERSION) != 0) {
+        levelManager.showErrorModal(localization.localizeString("packageError_Version"));
+        return false;
+    }
+    dependenciesNode = packageNode->first_node("Dependencies");
+    if(dependenciesNode) {
+        packageNode = dependenciesNode->first_node("Package");
+        while(packageNode) {
+            if(!fileManager.loadPackage(packageNode->first_attribute("value")->value())) {
+                levelManager.showErrorModal(localization.localizeString("packageError_ContainerMissing")+'\n'+name);
+                return false;
+            }
+            packageNode = packageNode->next_sibling("Package");
+        }
+    }
+    
     if(name == "Default") localization.strings.clear();
     localization.loadLocalization(path+"Languages/"+localization.selected+".xml");
     return true;
@@ -54,10 +77,10 @@ void FileManager::clear() {
     for(auto iterator : filePackages)
         delete iterator.second;
     filePackages.clear();
-    getPackage("Default");
+    loadPackage("Default");
 }
 
-FilePackage* FileManager::getPackage(const std::string& name) {
+FilePackage* FileManager::loadPackage(const std::string& name) {
     std::map<std::string, FilePackage*>::iterator iterator = filePackages.find(name);
     if(iterator == filePackages.end()) {
         FilePackage* package = new FilePackage(name);
@@ -79,11 +102,12 @@ void FileManager::unloadPackage(const std::string& name) {
 }
 
 bool FileManager::readResourcePath(const std::string& path, FilePackage*& filePackage, std::string& name) {
-    if(path.compare(0, 3, "../") == 0) {
-        unsigned int seperation = name.find('/', 3);
-        filePackage = getPackage(name.substr(3, seperation));
-        if(!filePackage) return false;
-        name = name.substr(seperation);
+    if(path.compare(0, 1, "/") == 0) {
+        unsigned int seperation = path.find('/', 2);
+        std::map<std::string, FilePackage*>::iterator iterator = filePackages.find(path.substr(1, seperation-1));
+        if(iterator == filePackages.end()) return false;
+        filePackage = iterator->second;
+        name = path.substr(seperation+1);
     }else{
         filePackage = levelManager.levelPackage;
         name = path;
@@ -91,7 +115,7 @@ bool FileManager::readResourcePath(const std::string& path, FilePackage*& filePa
     return true;
 }
 
-std::string FileManager::getResourcePath(FilePackage* filePackage, std::string name) {
+std::string FileManager::getPathOfResource(FilePackage* filePackage, std::string name) {
     if(filePackage == levelManager.levelPackage)
         return name;
     else
@@ -105,7 +129,7 @@ rapidxml::xml_node<xmlUsedCharType>* FileManager::writeResource(rapidxml::xml_do
     rapidxml::xml_attribute<xmlUsedCharType>* attribute;
     attribute = doc.allocate_attribute();
     attribute->name("src");
-    attribute->value(doc.allocate_string(getResourcePath(filePackage, name).c_str()));
+    attribute->value(doc.allocate_string(getPathOfResource(filePackage, name).c_str()));
     node->append_attribute(attribute);
     return node;
 }
@@ -134,7 +158,7 @@ void OptionsState::loadOptions() {
     std::unique_ptr<char[]> fileData = readXmlFile(doc, gameDataDir+"Options.xml", false);
     if(fileData) {
         rapidxml::xml_node<xmlUsedCharType>* options = doc.first_node("Options");
-        if(strcmp(options->first_node("Version")->first_attribute("value")->value(), VERSION) != 0) {
+        if(strcmp(options->first_node("EngineVersion")->first_attribute("value")->value(), VERSION) != 0) {
             saveOptions();
             return;
         }
@@ -162,9 +186,9 @@ void OptionsState::loadOptions() {
         optionsState.mouseSensitivity = readOptionValue<float>(optionGroup->first_node("mouseSensitivity"), "%f");
         optionsState.mouseSmoothing = readOptionValue<float>(optionGroup->first_node("mouseSmoothing"), "%f");
     }else saveOptions();
-    prevOptionsState = optionsState;
     
-    fileManager.getPackage("Default");
+    prevOptionsState = optionsState;
+    fileManager.clear();
 }
 
 void OptionsState::saveOptions() {
@@ -173,7 +197,7 @@ void OptionsState::saveOptions() {
     rapidxml::xml_node<xmlUsedCharType>* options = doc.allocate_node(rapidxml::node_element);
     options->name("Options");
     doc.append_node(options);
-    addXMLNode(doc, options, "Version", VERSION);
+    addXMLNode(doc, options, "EngineVersion", VERSION);
     addXMLNode(doc, options, "Language", localization.selected.c_str());
     
     rapidxml::xml_node<xmlUsedCharType>* optionGroup = doc.allocate_node(rapidxml::node_element);

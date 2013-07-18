@@ -53,7 +53,7 @@ static void getAvailableResolutions(std::vector<Resolution>& resolutions) {
     rapidxml::xml_document<xmlUsedCharType> doc;
     rapidxml::xml_node<xmlUsedCharType> *resolutionsNode, *entryNode;
     rapidxml::xml_attribute<xmlUsedCharType> *attribute;
-    std::string filePath = fileManager.getPackage("Default")->path+"Resolutions.xml";
+    std::string filePath = fileManager.loadPackage("Default")->path+"Resolutions.xml";
     std::unique_ptr<char[]> fileData = readXmlFile(doc, filePath.c_str(), false);
     if(fileData) {
         resolutionsNode = doc.first_node("Resolutions");
@@ -292,10 +292,7 @@ void Menu::clear() {
 
 void Menu::setPause(bool active) {
     if(levelManager.gameStatus == noGame) return;
-    if(active)
-        setMenu(gameEsc);
-    else
-        setMenu(inGame);
+    setMenu((active) ? gameEsc : inGame);
     
     v8::HandleScope handleScope;
     ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
@@ -308,7 +305,7 @@ void Menu::setMenu(Name menu) {
     
     if(levelManager.gameStatus == noGame && menu != loading) {
         GUIImage* image = new GUIImage();
-        image->texture = fileManager.getPackage("Default")->getResource<Texture>("background.jpg");
+        image->texture = fileManager.getResourceByPath<Texture>("/Default/background.jpg");
         image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
         if((float)image->texture->width/image->texture->height <= (float)screenView->width/screenView->height) {
             image->sizeAlignment = GUISizeAlignment::Height;
@@ -329,7 +326,7 @@ void Menu::setMenu(Name menu) {
             
             GUIImage* image = new GUIImage();
             image->sizeAlignment = GUISizeAlignment::Height;
-            image->texture = fileManager.getPackage("Default")->getResource<Texture>("logo.png");
+            image->texture = fileManager.getResourceByPath<Texture>("/Default/logo.png");
             image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGBA);
             image->width = screenView->width*0.8;
             image->posY = screenView->height*0.2;

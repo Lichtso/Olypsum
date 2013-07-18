@@ -206,15 +206,23 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
 
 bool LevelLoader::loadLevel(const std::string& levelPackage, const std::string& levelId) {
     objectManager.initGame(levelPackage);
-    levelManager.gameStatus = localGame;
+    levelManager.levelPackage = fileManager.loadPackage(levelPackage);
+    if(!levelManager.levelPackage) {
+        levelManager.showErrorModal(localization.localizeString("packageError_ContainerMissing")+'\n'+levelPackage);
+        return false;
+    }
+    scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
     
     //Load CollisionShapes
     rapidxml::xml_document<xmlUsedCharType> doc;
-    std::unique_ptr<char[]> collisionShapesData = readXmlFile(doc, levelManager.levelPackage->path+'/'+"CollisionShapes.xml", false);
-    if(!collisionShapesData) {
+    std::unique_ptr<char[]> fileData = readXmlFile(doc, levelManager.levelPackage->path+"/CollisionShapes.xml", false);
+    if(!fileData) {
         levelManager.showErrorModal(localization.localizeString("packageError_FilesMissing"));
         return false;
     }
+    
+    //Enable console log
+    levelManager.gameStatus = localGame;
     
     rapidxml::xml_node<xmlUsedCharType>* node = doc.first_node("CollisionShapes")->first_node();
     while(node) {
@@ -321,7 +329,7 @@ bool LevelLoader::loadLevel(const std::string& levelPackage, const std::string& 
         return false;
     }
     
-    //Update gameStatus and start the game
+    //Start the game
     objectManager.updateRendererSettings();
     menu.setPause(false);
     return true;

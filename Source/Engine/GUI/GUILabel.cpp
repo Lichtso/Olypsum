@@ -9,7 +9,7 @@
 #include "Menu.h"
 
 GUILabel::GUILabel() :color(Color4(0.0, 1.0)), textAlignment(TextAlignment::Middle), sizeAlignment(GUISizeAlignment::All) {
-    font = fileManager.getPackage("Default")->getResource<TextFont>("font");
+    font = fileManager.getResourceByPath<TextFont>("/Default/font");
     fontHeight = menu.screenView->height*0.04;
     height = fontHeight >> 1;
 }

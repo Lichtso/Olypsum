@@ -57,7 +57,7 @@ v8::Handle<v8::Value> ScriptModelObject::GetModel(v8::Local<v8::String> property
     std::string name;
     FilePackage* filePackage = fileManager.findResource<Model>(objectPtr->model, name);
     if(!filePackage) return v8::Undefined();
-    return handleScope.Close(v8::String::New(fileManager.getResourcePath(filePackage, name).c_str()));
+    return handleScope.Close(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
 }
 
 void ScriptModelObject::SetModel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {

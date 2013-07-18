@@ -20,7 +20,7 @@ v8::Handle<v8::Value> ScriptParticlesObject::GetTexture(v8::Local<v8::String> pr
     std::string name;
     FilePackage* filePackage = fileManager.findResource<Texture>(objectPtr->texture, name);
     if(!filePackage) return v8::Undefined();
-    return handleScope.Close(v8::String::New(fileManager.getResourcePath(filePackage, name).c_str()));
+    return handleScope.Close(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
 }
 
 void ScriptParticlesObject::SetTexture(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {

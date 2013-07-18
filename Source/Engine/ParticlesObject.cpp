@@ -268,8 +268,6 @@ bool ParticlesObject::gameTick() {
 }
 
 void ParticlesObject::draw() {
-    //modelMat.setIdentity();
-    
     if(texture->depth > 1)
         shaderPrograms[particleDrawAnimatedSP]->use();
     else
@@ -281,6 +279,7 @@ void ParticlesObject::draw() {
     if(transformAligned) {
         btMatrix3x3 viewNormalMat = getTransformation().getBasis();
         currentShaderProgram->setUniformMatrix3("viewNormalMat", &viewNormalMat, false);
+        glDisable(GL_CULL_FACE);
     }
     
     glBindVertexArray(particlesVAO[activeVAO]);
@@ -304,6 +303,7 @@ void ParticlesObject::draw() {
     
     glDrawArrays(GL_POINTS, 0, particlesCount);
     glBindVertexArray(0);
+    glEnable(GL_CULL_FACE);
 }
 
 rapidxml::xml_node<xmlUsedCharType>* ParticlesObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {

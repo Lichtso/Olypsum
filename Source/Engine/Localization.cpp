@@ -8,10 +8,10 @@
 
 #include "Localization.h"
 
-std::string LanguagesDir("Packages/Default/Languages/"), LanguagesExtension(".xml");
+std::string LanguagesExtension(".xml");
 
 bool Localization::getLocalizableLanguages(std::vector<std::string>& languages) {
-    DIR* dp = opendir(LanguagesDir.c_str());
+    DIR* dp = opendir("Packages/Default/Languages/");
     if(dp == NULL) {
         log(error_log, "Languages directory not found.");
         return false;

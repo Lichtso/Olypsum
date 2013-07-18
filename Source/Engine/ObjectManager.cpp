@@ -73,7 +73,7 @@ void ObjectManager::init() {
     attributes.push_back(attr);
     rectVAO.init(attributes, false);
     rectVAO.updateVertices(32, vertices, GL_STATIC_DRAW);
-    rectVAO.elementsCount = 4;
+    rectVAO.indeciesCount = 4;
     rectVAO.drawType = GL_TRIANGLE_STRIP;
     
     //Init Cams
@@ -126,12 +126,10 @@ void ObjectManager::clear() {
 
 void ObjectManager::initGame(const std::string& levelPackage) {
     clear();
-    levelManager.levelPackage = fileManager.getPackage(levelPackage);
     physicsWorld.reset(new btSoftRigidDynamicsWorld(collisionDispatcher, broadphase, constraintSolver, collisionConfiguration, softBodySolver));
     physicsWorld->setInternalTickCallback(calculatePhysicsTick);
     scriptManager.reset(new ScriptManager());
     sceneAmbient = btVector3(0.1, 0.1, 0.1);
-    scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
 }
 
 void ObjectManager::gameTick() {

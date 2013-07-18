@@ -63,7 +63,7 @@ v8::Handle<v8::Value> ScriptGUILabel::GetFont(v8::Local<v8::String> property, co
     std::string name;
     FilePackage* filePackage = fileManager.findResource<TextFont>(objectPtr->font, name);
     if(!filePackage) return v8::Undefined();
-    return handleScope.Close(v8::String::New(fileManager.getResourcePath(filePackage, name).c_str()));
+    return handleScope.Close(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
 }
 
 void ScriptGUILabel::SetFont(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
@@ -169,7 +169,7 @@ v8::Handle<v8::Value> ScriptGUIImage::GetImage(v8::Local<v8::String> property, c
     std::string name;
     FilePackage* filePackage = fileManager.findResource<Texture>(objectPtr->texture, name);
     if(!filePackage) return v8::Undefined();
-    return handleScope.Close(v8::String::New(fileManager.getResourcePath(filePackage, name).c_str()));
+    return handleScope.Close(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
 }
 
 void ScriptGUIImage::SetImage(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {

@@ -48,38 +48,42 @@ void VertexArrayObject::init(std::vector<Attribute> attributes, bool indexMode) 
 void VertexArrayObject::updateVertices(unsigned int count, float* vertices, GLenum usage) {
     if(!vbo) return;
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, count*sizeof(float), vertices, usage);
+    if(verticesCount == count)
+        glBufferSubData(GL_ARRAY_BUFFER, 0, count*sizeof(float), vertices);
+    else
+        glBufferData(GL_ARRAY_BUFFER, count*sizeof(float), vertices, usage);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+    verticesCount = count;
 }
 
 void VertexArrayObject::updateIndecies(unsigned int count, void* indecies, GLenum format, GLenum usage) {
     if(!ibo) return;
-    elementsCount = count;
-    indeciesFormat = format;
-    GLsizei formatSize = 0;
+    GLint newSize = count;
     switch(format) {
-        case GL_UNSIGNED_BYTE:
-            formatSize = 1;
-            break;
         case GL_UNSIGNED_SHORT:
-            formatSize = 2;
+            newSize *= 2;
             break;
         case GL_UNSIGNED_INT:
-            formatSize = 4;
+            newSize *= 4;
             break;
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, count*formatSize, indecies, usage);
+    if(indeciesCount == count && indeciesFormat == format)
+        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, newSize, indecies);
+    else
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, newSize, indecies, usage);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    indeciesCount = count;
+    indeciesFormat = format;
 }
 
 void VertexArrayObject::draw() {
     if(!vao || !vbo) return;
     glBindVertexArray(vao);
     if(ibo)
-        glDrawElements(drawType, elementsCount, indeciesFormat, NULL);
+        glDrawElements(drawType, indeciesCount, indeciesFormat, NULL);
     else
-        glDrawArrays(drawType, 0, elementsCount);
+        glDrawArrays(drawType, 0, indeciesCount);
     glBindVertexArray(0);
 }
 
