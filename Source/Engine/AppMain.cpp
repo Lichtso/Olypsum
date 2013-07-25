@@ -126,10 +126,10 @@ void AppMain(int argc, char *argv[]) {
                             menu.handleMouseDown(mouseX, mouseY, event.button.button);
                             break;
                         case SDL_BUTTON_WHEELDOWN:
-                            menu.handleMouseWheel(mouseX, mouseY, -1.0);
+                            menu.handleMouseWheel(mouseX, mouseY, 0.0, -1.0);
                             break;
                         case SDL_BUTTON_WHEELUP:
-                            menu.handleMouseWheel(mouseX, mouseY, 1.0);
+                            menu.handleMouseWheel(mouseX, mouseY, 0.0, 1.0);
                             break;
                     }
                 break;

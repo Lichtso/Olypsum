@@ -163,14 +163,19 @@ void TerrainObject::draw() {
     modelMat.setOrigin(size*-0.5);
     modelMat = getTransformation() * modelMat;
     
+    unsigned int shaderProgram;
     if(objectManager.currentShadowLight) {
-        unsigned int shaderProgram = solidShadowSP;
-        if(objectManager.currentShadowIsParabolid) shaderProgram += 4;
-        shaderPrograms[shaderProgram]->use();
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, 0);
+        shaderProgram = (objectManager.currentShadowIsParabolid) ? solidParabolidShadowSP : solidShadowSP;
+    }else
+        shaderProgram = terrainGSP;
+    
+    shaderPrograms[shaderProgram]->use();
+    currentShaderProgram->setUniformF("discardDensity", clamp(integrity+1.0F, 0.0F, 1.0F));
+    
+    if(objectManager.currentShadowLight) {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }else{
-        shaderPrograms[terrainGSP]->use();
         currentShaderProgram->setUniformVec3("textureScale", textureScale);
         diffuse->use(0);
         if(effectMap)

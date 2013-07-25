@@ -14,7 +14,7 @@
 #define jointsPerVertex 3
 #define maxJointsCount 64
 
-void Mesh::draw(ModelObject* object) {
+void Mesh::draw(RigidObject* object) {
     if(!material.diffuse) {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, 0);
@@ -830,7 +830,7 @@ FileResourcePtr<FileResource> Model::load(FilePackage* filePackageB, const std::
     return pointer;
 }
 
-void Model::draw(ModelObject* object) {
+void Model::draw(RigidObject* object) {
     for(unsigned int i = 0; i < meshes.size(); i ++) {
         if(optionsState.blendingQuality > 0 && !objectManager.currentShadowLight && meshes[i]->material.refraction > 0.0) {
             AccumulatedTransparent* transparent = new AccumulatedTransparent();

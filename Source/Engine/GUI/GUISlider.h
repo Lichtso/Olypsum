@@ -28,7 +28,7 @@ class GUISlider : public GUIRect {
     bool handleMouseDown(int mouseX, int mouseY);
     bool handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
-    bool handleMouseWheel(int mouseX, int mouseY, float delta);
+    bool handleMouseWheel(int mouseX, int mouseY, float deltaX, float deltaY);
 };
 
 #endif

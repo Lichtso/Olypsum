@@ -286,19 +286,19 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
     if(optionsState.blendingQuality > 2) {
         if(!currentReflective) {
             for(auto graphicObject : graphicObjects) {
-                ModelObject* modelObject = dynamic_cast<ModelObject*>(graphicObject);
-                if(!modelObject)
+                RigidObject* rigidObject = dynamic_cast<RigidObject*>(graphicObject);
+                if(!rigidObject)
                     continue;
-                for(Mesh* mesh : modelObject->model->meshes)
+                for(Mesh* mesh : rigidObject->model->meshes)
                     if(mesh->material.reflectivity == 0.0) {
                         continue;
                     }else if(mesh->material.reflectivity == -1.0) {
-                        auto iterator = reflectiveAccumulator.find(modelObject);
+                        auto iterator = reflectiveAccumulator.find(rigidObject);
                         
                         if(iterator == reflectiveAccumulator.end()) {
-                            PlaneReflective* reflective = new PlaneReflective(modelObject, mesh);
+                            PlaneReflective* reflective = new PlaneReflective(rigidObject, mesh);
                             if(reflective->gameTick())
-                                reflectiveAccumulator[modelObject] = reflective;
+                                reflectiveAccumulator[rigidObject] = reflective;
                         }else if(!static_cast<PlaneReflective*>(iterator->second)->gameTick()) {
                             delete iterator->second;
                             reflectiveAccumulator.erase(iterator);
@@ -374,7 +374,7 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
                 glDisable(GL_BLEND);
                 glDepthMask(GL_TRUE);
                 glFrontFace((planeReflective) ? GL_CW : GL_CCW);
-                static_cast<ModelObject*>(transparent->object)->drawAccumulatedMesh(transparent->mesh);
+                static_cast<RigidObject*>(transparent->object)->drawAccumulatedMesh(transparent->mesh);
             }else{
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

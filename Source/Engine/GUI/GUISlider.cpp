@@ -161,9 +161,10 @@ void GUISlider::handleMouseMove(int mouseX, int mouseY) {
     if(onChange) onChange(this, true);
 }
 
-bool GUISlider::handleMouseWheel(int mouseX, int mouseY, float delta) {
+bool GUISlider::handleMouseWheel(int mouseX, int mouseY, float deltaX, float deltaY) {
     if(!visible || !enabled || mouseX < -width || mouseX > width || mouseY < -barHeight || mouseY > barHeight) return false;
     
+    float delta = (orientation & GUIOrientation::Horizontal) ? deltaX : deltaY;
     value -= (steps) ? delta/(float)steps : delta*0.05;
     if(value < 0.0) value = 0.0;
     else if(value > 1.0) value = 1.0;

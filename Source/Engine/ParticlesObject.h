@@ -22,12 +22,12 @@ class ParticlesObject : public DisplayObject {
     } *particles; //!< The particles of this ParticlesObject
     GLuint particlesVAO[2], particlesVBO[2];
     bool activeVAO;
-    unsigned int particlesCount;
     ParticlesObject();
     //! Internal initialize arrays and OpenGL buffers
     void init();
     void clean();
     public:
+    unsigned int maxParticles; //!< The maximal amount of simultaneously existing particles in the system
     bool transformAligned; //!< If set to false the particles will be orientated to view
     btVector3 posMin, //!< The negative position vector relative to the system for spawning new particles
               posMax, //!< The positive position vector relative to the system for spawning new particles
@@ -39,7 +39,6 @@ class ParticlesObject : public DisplayObject {
           sizeMin, //!< The minimal size of a new particle in world units
           sizeMax, //!< The maximal size of a new particle in world units
           systemLife; //!< The life time of the entire system in seconds until it is deleted or -1.0 if it is infinite
-    unsigned int maxParticles; //!< The maximal amount of simultaneously existing particles in the system
     FileResourcePtr<Texture> texture; //!< The texture of the particles
     /*! Constructs a new particle system
      @param maxParticles The maximal amount of simultaneously existing particles in the system

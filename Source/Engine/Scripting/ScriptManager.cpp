@@ -97,7 +97,6 @@ ScriptManager::ScriptManager() {
     scriptBaseClass.init(globalTemplate);
     scriptBaseObject.init(globalTemplate);
     scriptPhysicObject.init(globalTemplate);
-    scriptModelObject.init(globalTemplate);
     scriptRigidObject.init(globalTemplate);
     scriptTerrainObject.init(globalTemplate);
     scriptCamObject.init(globalTemplate);

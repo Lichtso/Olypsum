@@ -101,15 +101,15 @@ void ParticlesObject::init() {
         glVertexAttribPointer(POSITION_ATTRIBUTE, 4, GL_FLOAT, false, 8*sizeof(float), 0);
         glVertexAttribPointer(VELOCITY_ATTRIBUTE, 4, GL_FLOAT, false, 8*sizeof(float), reinterpret_cast<float*>(4*sizeof(float)));
         glBindVertexArray(0);
-        particlesCount = maxParticles;
     }else{
         particles = new Particle[maxParticles];
-        particlesCount = 0;
+        for(unsigned int p = 0; p < maxParticles; p ++)
+            particles[p].life = -1.0;
     }
 }
 
-ParticlesObject::ParticlesObject(unsigned int maxParticlesB, btCollisionShape* collisionShape) :ParticlesObject() {
-    maxParticles = maxParticlesB;
+ParticlesObject::ParticlesObject(unsigned int _maxParticles, btCollisionShape* collisionShape) :ParticlesObject() {
+    maxParticles = _maxParticles;
     init();
     body->setCollisionShape(collisionShape);
     objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Light, 0);
@@ -216,26 +216,20 @@ bool ParticlesObject::gameTick() {
     }
     
     if(optionsState.particleCalcTarget == 1) {
-        if(systemLife == -1.0 || systemLife > lifeMax)
-            for(; particlesCount < maxParticles; particlesCount ++) {
-                Particle* particle = &particles[particlesCount];
-                particle->pos = transform(vec3rand(posMin, posMax));
-                particle->dir = transform(vec3rand(dirMin, dirMax).normalize()*(dirMax-dirMin).length()*0.5);
-                particle->life = frand(lifeMin, lifeMax);
-                particle->size = frand(sizeMin, sizeMax);
-            }
-        
+        bool respawnParticles = systemLife == -1.0 || systemLife > lifeMax;
         btVector3 forceAux = force*profiler.animationFactor;
-        for(unsigned int p = 0; p < particlesCount; p ++) {
-            particles[p].life -= profiler.animationFactor;
-            if(particles[p].life <= 0.0) {
-                memcpy(&particles[p], &particles[p+1], sizeof(Particle)*(particlesCount-p-1));
-                particlesCount --;
-                p --;
-                continue;
+        for(unsigned int p = 0; p < maxParticles; p ++) {
+            Particle& particle = particles[p];
+            if(particles[p].life > 0.0) {
+                particle.pos += particle.dir*profiler.animationFactor;
+                particle.dir += forceAux;
+                particle.life -= profiler.animationFactor;
+            }else if(respawnParticles) {
+                particle.pos = transform(vec3rand(posMin, posMax));
+                particle.dir = transform(vec3rand(dirMin, dirMax).normalize()*(dirMax-dirMin).length()*0.5);
+                particle.life = frand(lifeMin, lifeMax);
+                particle.size = frand(sizeMin, sizeMax);
             }
-            particles[p].pos += particles[p].dir*profiler.animationFactor;
-            particles[p].dir += forceAux;
         }
     }else if(optionsState.particleCalcTarget == 2) {
         shaderPrograms[particleCalculateSP]->use();
@@ -257,7 +251,7 @@ bool ParticlesObject::gameTick() {
         glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, particlesVBO[!activeVAO]);
         glBindVertexArray(particlesVAO[activeVAO]);
         glBeginTransformFeedback(GL_POINTS);
-        glDrawArrays(GL_POINTS, 0, particlesCount);
+        glDrawArrays(GL_POINTS, 0, maxParticles);
         glEndTransformFeedback();
         glBindVertexArray(0);
         glBindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, 0);
@@ -285,8 +279,8 @@ void ParticlesObject::draw() {
     glBindVertexArray(particlesVAO[activeVAO]);
     if(optionsState.particleCalcTarget == 1) {
         unsigned int index;
-        float* vertices = new float[particlesCount*8];
-        for(unsigned int p = 0; p < particlesCount; p ++) {
+        float* vertices = new float[maxParticles*8];
+        for(unsigned int p = 0; p < maxParticles; p ++) {
             index = p*8;
             vertices[index  ] = particles[p].pos.x();
             vertices[index+1] = particles[p].pos.y();
@@ -298,10 +292,10 @@ void ParticlesObject::draw() {
             vertices[index+7] = particles[p].size;
         }
         glBindBuffer(GL_ARRAY_BUFFER, particlesVBO[0]);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, particlesCount*8*sizeof(float), vertices);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, maxParticles*8*sizeof(float), vertices);
     }
     
-    glDrawArrays(GL_POINTS, 0, particlesCount);
+    glDrawArrays(GL_POINTS, 0, maxParticles);
     glBindVertexArray(0);
     glEnable(GL_CULL_FACE);
 }

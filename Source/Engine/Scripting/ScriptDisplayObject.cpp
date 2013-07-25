@@ -8,6 +8,20 @@
 
 #include "ScriptDisplayObject.h"
 
+v8::Handle<v8::Value> ScriptGraphicObject::GetIntegrity(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    GraphicObject* objectPtr = getDataOfInstance<GraphicObject>(info.This());
+    return handleScope.Close(v8::Number::New(objectPtr->integrity));
+}
+
+void ScriptGraphicObject::SetIntegrity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsNumber()) return;
+    GraphicObject* objectPtr = getDataOfInstance<GraphicObject>(info.This());
+    if(objectPtr->integrity <= 0.0) return;
+    objectPtr->integrity = fmax(0.0, value->NumberValue());
+}
+
 v8::Handle<v8::Value> ScriptGraphicObject::AttachDecal(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 3 || !args[0]->IsNumber() || !scriptMatrix4.isCorrectInstance(args[1]) || !args[2]->IsString())
@@ -30,6 +44,7 @@ ScriptGraphicObject::ScriptGraphicObject() :ScriptPhysicObject("GraphicObject") 
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
+    objectTemplate->SetAccessor(v8::String::New("integrity"), GetIntegrity, SetIntegrity);
     objectTemplate->Set(v8::String::New("attachDecal"), v8::FunctionTemplate::New(AttachDecal));
     
     functionTemplate->Inherit(scriptPhysicObject.functionTemplate);
@@ -37,96 +52,22 @@ ScriptGraphicObject::ScriptGraphicObject() :ScriptPhysicObject("GraphicObject") 
 
 
 
-v8::Handle<v8::Value> ScriptModelObject::GetIntegrity(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+v8::Handle<v8::Value> ScriptRigidObject::GetModel(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    ModelObject* objectPtr = getDataOfInstance<ModelObject>(info.This());
-    return handleScope.Close(v8::Number::New(objectPtr->integrity));
-}
-
-void ScriptModelObject::SetIntegrity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
-    v8::HandleScope handleScope;
-    if(!value->IsNumber()) return;
-    ModelObject* objectPtr = getDataOfInstance<ModelObject>(info.This());
-    if(objectPtr->integrity <= 0.0) return;
-    objectPtr->integrity = fmax(0.0, value->NumberValue());
-}
-
-v8::Handle<v8::Value> ScriptModelObject::GetModel(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
-    v8::HandleScope handleScope;
-    ModelObject* objectPtr = getDataOfInstance<ModelObject>(info.This());
+    RigidObject* objectPtr = getDataOfInstance<RigidObject>(info.This());
     std::string name;
     FilePackage* filePackage = fileManager.findResource<Model>(objectPtr->model, name);
     if(!filePackage) return v8::Undefined();
     return handleScope.Close(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
 }
 
-void ScriptModelObject::SetModel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptRigidObject::SetModel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
-    ModelObject* objectPtr = getDataOfInstance<ModelObject>(info.This());
+    RigidObject* objectPtr = getDataOfInstance<RigidObject>(info.This());
     auto model = fileManager.getResourceByPath<Model>(stdStrOfV8(value));
     if(model) objectPtr->setModel(NULL, model);
 }
-
-v8::Handle<v8::Value> ScriptModelObject::AccessTextureAnimation(const v8::Arguments& args) {
-    v8::HandleScope handleScope;
-    if(args.Length() < 1 || !args[0]->IsInt32())
-        return v8::ThrowException(v8::String::New("ModelObject getTextureAnimation: Invalid argument"));
-    ModelObject* objectPtr = getDataOfInstance<ModelObject>(args.This());
-    if(args[0]->Uint32Value() >= objectPtr->textureAnimation.size())
-        return v8::ThrowException(v8::String::New("ModelObject getTextureAnimation: Out of bounds"));
-    if(args.Length() == 2 && args[1]->IsNumber()) {
-        objectPtr->textureAnimation[args[0]->Uint32Value()] = args[1]->NumberValue();
-        return args[1];
-    }else
-        return handleScope.Close(v8::Number::New(objectPtr->textureAnimation[args[0]->Uint32Value()]));
-}
-
-v8::Handle<v8::Value> ScriptModelObject::FindBoneByPath(const v8::Arguments& args) {
-    v8::HandleScope handleScope;
-    if(args.Length() < 1)
-        return v8::ThrowException(v8::String::New("BaseObject findBoneByPath(): Too few arguments"));
-    if(!args[0]->IsArray())
-        return v8::ThrowException(v8::String::New("BaseObject findBoneByPath(): Invalid argument"));
-    
-    v8::Handle<v8::Array> path = v8::Handle<v8::Array>::Cast(args[0]);
-    ModelObject* objectPtr = getDataOfInstance<ModelObject>(args.This());
-    BoneObject* boneObject = objectPtr->getRootBone();
-    if(!boneObject) return v8::Undefined();
-    
-    for(unsigned int i = 0; i < path->Length(); i ++) {
-        bool notFound = true;
-        std::string boneName = stdStrOfV8(path->Get(i));
-        for(auto iterator : boneObject->links) {
-            if(dynamic_cast<TransformLink*>(iterator) &&
-               dynamic_cast<BoneObject*>(iterator->b) &&
-               static_cast<BoneObject*>(iterator->b)->bone->name == boneName) {
-                boneObject = static_cast<BoneObject*>(iterator->b);
-                notFound = false;
-                break;
-            }
-        }
-        
-        if(notFound)
-            return v8::Undefined();
-    }
-    
-    return handleScope.Close(boneObject->scriptInstance);
-}
-
-ScriptModelObject::ScriptModelObject() :ScriptGraphicObject("ModelObject") {
-    v8::HandleScope handleScope;
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->SetAccessor(v8::String::New("integrity"), GetIntegrity, SetIntegrity);
-    objectTemplate->SetAccessor(v8::String::New("model"), GetModel, SetModel);
-    objectTemplate->Set(v8::String::New("textureAnimation"), v8::FunctionTemplate::New(AccessTextureAnimation));
-    objectTemplate->Set(v8::String::New("findBoneByPath"), v8::FunctionTemplate::New(FindBoneByPath));
-    
-    functionTemplate->Inherit(scriptGraphicObject.functionTemplate);
-}
-
-
 
 v8::Handle<v8::Value> ScriptRigidObject::GetMass(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
@@ -295,10 +236,57 @@ v8::Handle<v8::Value> ScriptRigidObject::ApplyLinearImpulse(const v8::Arguments&
     return v8::Undefined();
 }
 
-ScriptRigidObject::ScriptRigidObject() :ScriptModelObject("RigidObject") {
+v8::Handle<v8::Value> ScriptRigidObject::FindBoneByPath(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    if(args.Length() < 1)
+        return v8::ThrowException(v8::String::New("RigidObject findBoneByPath(): Too few arguments"));
+    if(!args[0]->IsArray())
+        return v8::ThrowException(v8::String::New("RigidObject findBoneByPath(): Invalid argument"));
+    
+    v8::Handle<v8::Array> path = v8::Handle<v8::Array>::Cast(args[0]);
+    RigidObject* objectPtr = getDataOfInstance<RigidObject>(args.This());
+    BoneObject* boneObject = objectPtr->getRootBone();
+    if(!boneObject) return v8::Undefined();
+    
+    for(unsigned int i = 0; i < path->Length(); i ++) {
+        bool notFound = true;
+        std::string boneName = stdStrOfV8(path->Get(i));
+        for(auto iterator : boneObject->links) {
+            if(dynamic_cast<TransformLink*>(iterator) &&
+               dynamic_cast<BoneObject*>(iterator->b) &&
+               static_cast<BoneObject*>(iterator->b)->bone->name == boneName) {
+                boneObject = static_cast<BoneObject*>(iterator->b);
+                notFound = false;
+                break;
+            }
+        }
+        
+        if(notFound)
+            return v8::Undefined();
+    }
+    
+    return handleScope.Close(boneObject->scriptInstance);
+}
+
+v8::Handle<v8::Value> ScriptRigidObject::AccessTextureAnimation(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    if(args.Length() < 1 || !args[0]->IsInt32())
+        return v8::ThrowException(v8::String::New("RigidObject getTextureAnimation: Invalid argument"));
+    RigidObject* objectPtr = getDataOfInstance<RigidObject>(args.This());
+    if(args[0]->Uint32Value() >= objectPtr->textureAnimation.size())
+        return v8::ThrowException(v8::String::New("RigidObject getTextureAnimation: Out of bounds"));
+    if(args.Length() == 2 && args[1]->IsNumber()) {
+        objectPtr->textureAnimation[args[0]->Uint32Value()] = args[1]->NumberValue();
+        return args[1];
+    }else
+        return handleScope.Close(v8::Number::New(objectPtr->textureAnimation[args[0]->Uint32Value()]));
+}
+
+ScriptRigidObject::ScriptRigidObject() :ScriptGraphicObject("RigidObject") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
+    objectTemplate->SetAccessor(v8::String::New("model"), GetModel, SetModel);
     objectTemplate->SetAccessor(v8::String::New("mass"), GetMass, SetMass);
     objectTemplate->SetAccessor(v8::String::New("kinematic"), GetKinematic, SetKinematic);
     objectTemplate->Set(v8::String::New("angularVelocity"), v8::FunctionTemplate::New(AccessAngularVelocity));
@@ -311,8 +299,10 @@ ScriptRigidObject::ScriptRigidObject() :ScriptModelObject("RigidObject") {
     objectTemplate->Set(v8::String::New("applyImpulseAtPoint"), v8::FunctionTemplate::New(ApplyImpulseAtPoint));
     objectTemplate->Set(v8::String::New("applyAngularImpulse"), v8::FunctionTemplate::New(ApplyAngularImpulse));
     objectTemplate->Set(v8::String::New("applyLinearImpulse"), v8::FunctionTemplate::New(ApplyLinearImpulse));
+    objectTemplate->Set(v8::String::New("findBoneByPath"), v8::FunctionTemplate::New(FindBoneByPath));
+    objectTemplate->Set(v8::String::New("textureAnimation"), v8::FunctionTemplate::New(AccessTextureAnimation));
     
-    functionTemplate->Inherit(scriptModelObject.functionTemplate);
+    functionTemplate->Inherit(scriptGraphicObject.functionTemplate);
 }
 
 
@@ -367,6 +357,5 @@ ScriptTerrainObject::ScriptTerrainObject() :ScriptGraphicObject("TerrainObject")
 
 
 ScriptGraphicObject scriptGraphicObject;
-ScriptModelObject scriptModelObject;
 ScriptRigidObject scriptRigidObject;
 ScriptTerrainObject scriptTerrainObject;

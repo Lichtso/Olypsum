@@ -8,7 +8,7 @@
 
 #include "ScriptDisplayObject.h"
 
-GraphicObject::GraphicObject() {
+GraphicObject::GraphicObject() :integrity(1.0) {
     objectManager.graphicObjects.insert(this);
 }
 
@@ -30,6 +30,14 @@ void GraphicObject::removeFast() {
 }
 
 bool GraphicObject::gameTick() {
+    if(integrity <= 0.0) {
+        integrity -= profiler.animationFactor;
+        if(integrity < -1.0) {
+            removeClean();
+            return false;
+        }
+    }
+    
     foreach_e(decals, iterator) {
         (*iterator)->life -= profiler.animationFactor;
         if((*iterator)->life > 0.0) continue;
@@ -65,241 +73,28 @@ void GraphicObject::draw() {
     }
 }
 
-
-
-void ModelObject::removeClean() {
-    setModel(NULL, NULL);
-    GraphicObject::removeClean();
-}
-
-void ModelObject::removeFast() {
-    textureAnimation.clear();
-    skeletonPose.reset();
-    GraphicObject::removeFast();
-}
-
-void ModelObject::setupBones(LevelLoader* levelLoader, BaseObject* object, Bone* bone) {
-    LinkInitializer initializer;
-    initializer.object[0] = object;
-    initializer.object[1] = object = new BoneObject(bone);
-    btTransform transform = btTransform::getIdentity();
-    (new TransformLink())->init(initializer, transform);
-    if(levelLoader)
-        levelLoader->pushObject(object);
-    for(auto childBone : bone->children)
-        setupBones(levelLoader, object, childBone);
-}
-
-void ModelObject::writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver, BoneObject *object) {
-    object->write(doc, levelSaver);
-    for(unsigned int i = 0; i < object->bone->children.size(); i ++)
-        for(auto iterator : object->links) {
-            BoneObject* boneObject = dynamic_cast<BoneObject*>(iterator->b);
-            if(!boneObject || boneObject->bone != object->bone->children[i]) continue;
-            writeBones(doc, levelSaver, boneObject);
-            break;
-        }
-}
-
-void ModelObject::updateSkeletonPose(BoneObject* object, Bone* bone) {
-    skeletonPose.get()[bone->jointIndex] = object->getTransformation() * bone->absoluteInv;
-    for(auto iterator : object->links) {
-        BoneObject* boneObject = dynamic_cast<BoneObject*>(iterator->b);
-        if(boneObject && boneObject != object)
-            updateSkeletonPose(boneObject, boneObject->bone);
-    }
-}
-
-void ModelObject::newScriptInstance() {
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    v8::Local<v8::Object> instance = scriptModelObject.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
-}
-
-bool ModelObject::gameTick() {
-    if(model->skeleton) {
-        Bone* rootBone = model->skeleton->rootBone;
-        updateSkeletonPose(getRootBone(), rootBone);
-    }
-    for(unsigned int i = 0; i < textureAnimation.size(); i ++)
-        if(textureAnimation[i ++] >= 0.0)
-            textureAnimation[i ++] += profiler.animationFactor;
-    if(integrity <= 0.0) {
-        integrity -= profiler.animationFactor;
-        if(integrity < -1.0) {
-            removeClean();
-            return false;
-        }
-    }
-    return GraphicObject::gameTick();
-}
-
-BoneObject* ModelObject::getRootBone() {
-    if(model->skeleton) {
-        Bone* rootBone = model->skeleton->rootBone;
-        for(auto iterator : links) {
-            if(!dynamic_cast<TransformLink*>(iterator)) continue;
-            BoneObject* rootBoneObject = dynamic_cast<BoneObject*>(iterator->b);
-            if(rootBoneObject && rootBoneObject->bone == rootBone)
-                return rootBoneObject;
-        }
-    }
-    return NULL;
-}
-
-void ModelObject::setModel(LevelLoader* levelLoader, FileResourcePtr<Model> _model) {
-    if(model) {
-        for(unsigned int i = 0; i < model->meshes.size(); i ++)
-            if(model->meshes[i]->material.reflectivity != 0)
-                objectManager.reflectiveAccumulator.erase(this);
-        foreach_e(links, iterator)
-            if(dynamic_cast<TransformLink*>(*iterator) && dynamic_cast<BoneObject*>((*iterator)->b))
-                (*iterator)->removeClean(this);
-    }
-    textureAnimation.clear();
-    skeletonPose.reset();
-    
-    model = _model;
-    if(!model) return;
-    
-    for(unsigned int i = 0; i < model->meshes.size(); i ++)
-        if(model->meshes[i]->material.diffuse && model->meshes[i]->material.diffuse->depth > 1)
-            textureAnimation.push_back(0.0);
-    
-    if(model->skeleton) {
-        skeletonPose.reset(new btTransform[model->skeleton->bones.size()]);
-        setupBones(levelLoader, this, model->skeleton->rootBone);
-    }
-}
-
-void ModelObject::draw() {
-    if(model) {
-        modelMat = getTransformation();
-        model->draw(this);
-    }
-    GraphicObject::draw();
-}
-
-void ModelObject::drawAccumulatedMesh(Mesh* mesh) {
-    modelMat = getTransformation();
-    mesh->draw(this);
-}
-
-void ModelObject::prepareShaderProgram(Mesh* mesh) {
-    if(mesh->material.diffuse) {
-        if(mesh->material.diffuse->depth > 1) {
-            unsigned int meshIndex = 0;
-            for(unsigned int i = 0; i < model->meshes.size(); i ++) {
-                if(model->meshes[i] == mesh)
-                    break;
-                if(model->meshes[i]->material.diffuse->depth > 1)
-                    meshIndex ++;
-            }
-            mesh->material.diffuse->use(0, textureAnimation[meshIndex]);
-        }else
-            mesh->material.diffuse->use(0);
-    }
-    
-    currentShaderProgram->setUniformF("discardDensity", clamp(integrity+1.0F, 0.0F, 1.0F));
-    if(skeletonPose)
-        currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose.get(), model->skeleton->bones.size());
-}
-
-void ModelObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+void GraphicObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
     levelLoader->pushObject(this);
-    rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Model");
-    if(!parameterNode) {
-        log(error_log, "Tried to construct ModelObject without \"Model\"-node.");
-        return;
-    }
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = parameterNode->first_attribute("src");
-    if(!attribute) {
-        log(error_log, "Found \"Model\"-node without \"src\"-attribute.");
-        return;
-    }
-    setModel(levelLoader, fileManager.getResourceByPath<Model>(attribute->value()));
-    
-    if((parameterNode = node->first_node("TextureAnimation"))) {
-        XMLValueArray<float> animationTime;
-        animationTime.readString(parameterNode->value(), "%f");
-        if(animationTime.count != textureAnimation.size()) {
-            log(error_log, "Tried to construct ModelObject with invalid \"TextureAnimation\"-node.");
-            return;
-        }
-        for(unsigned int i = 0; i < textureAnimation.size(); i ++)
-            textureAnimation[i] = animationTime.data[i];
-    }
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode;
     
     if((parameterNode = node->first_node("Integrity")))
         sscanf(parameterNode->value(), "%f", &integrity);
 }
 
-rapidxml::xml_node<xmlUsedCharType>* ModelObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+rapidxml::xml_node<xmlUsedCharType>* GraphicObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
     rapidxml::xml_node<xmlUsedCharType>* node = PhysicObject::write(doc, levelSaver);
-    node->append_node(fileManager.writeResource(doc, "Model", model));
-    if(textureAnimation.size() > 0) {
-        rapidxml::xml_node<xmlUsedCharType>* textureAnimationNode = doc.allocate_node(rapidxml::node_element);
-        textureAnimationNode->name("TextureAnimation");
-        std::ostringstream data;
-        for(unsigned int i = 0; i < textureAnimation.size(); i ++) {
-            if(i > 0) data << " ";
-            data << textureAnimation[i];
-        }
-        textureAnimationNode->value(doc.allocate_string(data.str().c_str()));
-        node->append_node(textureAnimationNode);
-    }
     if(integrity != 1.0) {
         rapidxml::xml_node<xmlUsedCharType>* integrityNode = doc.allocate_node(rapidxml::node_element);
         integrityNode->name("Integrity");
         integrityNode->value(doc.allocate_string(stringOf(integrity).c_str()));
         node->append_node(integrityNode);
     }
-    if(skeletonPose)
-        writeBones(doc, levelSaver, getRootBone());
     return node;
 }
 
 
 
-Reflective::Reflective(ModelObject* objectB, Mesh* meshB) :object(objectB), mesh(meshB), buffer(NULL) {
-    
-}
-
-Reflective::~Reflective() {
-    if(buffer)
-        delete buffer;
-}
-
-PlaneReflective::PlaneReflective(ModelObject* objectB, Mesh* meshB) :Reflective(objectB, meshB) {
-    
-}
-
-bool PlaneReflective::gameTick() {
-    btBoxShape* shape = dynamic_cast<btBoxShape*>(object->getBody()->getCollisionShape());
-    if(!shape) return false;
-    
-    btTransform transform = object->getTransformation();
-    plane = transform.getBasis().getColumn(shape->getHalfExtentsWithoutMargin().minAxis());
-    plane.setW(-plane.dot(transform.getOrigin()));
-    if(plane.dot(currentCam->getTransformation().getOrigin()) < plane.w()) return false;
-    
-    if(!buffer)
-        buffer = new ColorBuffer(false, false, prevOptionsState.videoWidth, prevOptionsState.videoHeight);
-    objectManager.currentReflective = this;
-    
-    if(currentCam->doFrustumCulling())
-        return false;
-    
-    glEnable(GL_CLIP_DISTANCE0);
-    objectManager.drawFrame(buffer->texture);
-    glDisable(GL_CLIP_DISTANCE0);
-    return true;
-}
-
-
-
-SoftObject::SoftObject() {
+SoftObject::SoftObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
     //btSoftBodyHelpers
 }
 
@@ -344,14 +139,68 @@ void comMotionState::setWorldTransform(const btTransform& centerOfMassWorldTrans
 
 
 
+void RigidObject::setupBones(LevelLoader* levelLoader, BaseObject* object, Bone* bone) {
+    LinkInitializer initializer;
+    initializer.object[0] = object;
+    initializer.object[1] = object = new BoneObject(bone);
+    btTransform transform = btTransform::getIdentity();
+    (new TransformLink())->init(initializer, transform);
+    if(levelLoader)
+        levelLoader->pushObject(object);
+    for(auto childBone : bone->children)
+        setupBones(levelLoader, object, childBone);
+}
+
+void RigidObject::writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver, BoneObject *object) {
+    object->write(doc, levelSaver);
+    for(unsigned int i = 0; i < object->bone->children.size(); i ++)
+        for(auto iterator : object->links) {
+            BoneObject* boneObject = dynamic_cast<BoneObject*>(iterator->b);
+            if(!boneObject || boneObject->bone != object->bone->children[i]) continue;
+            writeBones(doc, levelSaver, boneObject);
+            break;
+        }
+}
+
+void RigidObject::updateSkeletonPose(BoneObject* object, Bone* bone) {
+    skeletonPose.get()[bone->jointIndex] = object->getTransformation() * bone->absoluteInv;
+    for(auto iterator : object->links) {
+        BoneObject* boneObject = dynamic_cast<BoneObject*>(iterator->b);
+        if(boneObject && boneObject != object)
+            updateSkeletonPose(boneObject, boneObject->bone);
+    }
+}
+
 RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
-    ModelObject::init(node, levelLoader);
-    rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("PhysicsBody");
+    GraphicObject::init(node, levelLoader);
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Model");
+    if(!parameterNode) {
+        log(error_log, "Tried to construct RigidObject without \"Model\"-node.");
+        return;
+    }
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = parameterNode->first_attribute("src");
+    if(!attribute) {
+        log(error_log, "Found \"Model\"-node without \"src\"-attribute.");
+        return;
+    }
+    if((parameterNode = node->first_node("TextureAnimation"))) {
+        XMLValueArray<float> animationTime;
+        animationTime.readString(parameterNode->value(), "%f");
+        if(animationTime.count != textureAnimation.size()) {
+            log(error_log, "Tried to construct ModelObject with invalid \"TextureAnimation\"-node.");
+            return;
+        }
+        for(unsigned int i = 0; i < textureAnimation.size(); i ++)
+            textureAnimation[i] = animationTime.data[i];
+    }
+    
+    setModel(levelLoader, fileManager.getResourceByPath<Model>(attribute->value()));
+    parameterNode = node->first_node("PhysicsBody");
     if(!parameterNode) {
         log(error_log, "Tried to construct RigidObject without \"PhysicsBody\"-node.");
         return;
     }
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = parameterNode->first_attribute("mass");
+    attribute = parameterNode->first_attribute("mass");
     if(!attribute) {
         log(error_log, "Tried to construct RigidObject without \"mass\"-attribute.");
         return;
@@ -414,6 +263,7 @@ RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
 }
 
 void RigidObject::removeClean() {
+    setModel(NULL, NULL);
     if(body) {
         btRigidBody* rigidBody = getBody();
         delete rigidBody->getMotionState();
@@ -421,17 +271,19 @@ void RigidObject::removeClean() {
         delete rigidBody;
         body = NULL;
     }
-    ModelObject::removeClean();
+    GraphicObject::removeClean();
 }
 
 void RigidObject::removeFast() {
+    textureAnimation.clear();
+    skeletonPose.reset();
     if(body) {
         btRigidBody* rigidBody = getBody();
         delete rigidBody->getMotionState();
         delete rigidBody;
         body = NULL;
     }
-    ModelObject::removeFast();
+    GraphicObject::removeFast();
 }
 
 void RigidObject::setTransformation(const btTransform& transformation) {
@@ -451,8 +303,17 @@ void RigidObject::newScriptInstance() {
     scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
+bool RigidObject::gameTick() {
+    for(unsigned int i = 0; i < textureAnimation.size(); i ++)
+        if(textureAnimation[i ++] >= 0.0)
+            textureAnimation[i ++] += profiler.animationFactor;
+    if(model->skeleton)
+        updateSkeletonPose(getRootBone(), model->skeleton->rootBone);
+    return GraphicObject::gameTick();
+}
+
 rapidxml::xml_node<xmlUsedCharType>* RigidObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
-    rapidxml::xml_node<xmlUsedCharType>* node = ModelObject::write(doc, levelSaver);
+    rapidxml::xml_node<xmlUsedCharType>* node = GraphicObject::write(doc, levelSaver);
     node->name("RigidObject");
     btRigidBody* body = getBody();
     
@@ -508,6 +369,21 @@ rapidxml::xml_node<xmlUsedCharType>* RigidObject::write(rapidxml::xml_document<x
         parameterNode->append_attribute(attribute);
     }
     
+    if(textureAnimation.size() > 0) {
+        rapidxml::xml_node<xmlUsedCharType>* textureAnimationNode = doc.allocate_node(rapidxml::node_element);
+        textureAnimationNode->name("TextureAnimation");
+        std::ostringstream data;
+        for(unsigned int i = 0; i < textureAnimation.size(); i ++) {
+            if(i > 0) data << " ";
+            data << textureAnimation[i];
+        }
+        textureAnimationNode->value(doc.allocate_string(data.str().c_str()));
+        node->append_node(textureAnimationNode);
+    }
+    node->append_node(fileManager.writeResource(doc, "Model", model));
+    if(skeletonPose)
+        writeBones(doc, levelSaver, getRootBone());
+    
     return node;
 }
 
@@ -524,4 +400,112 @@ void RigidObject::setKinematic(bool active) {
         body->setCollisionFlags(body->getCollisionFlags() & (~ btCollisionObject::CF_KINEMATIC_OBJECT));
         body->forceActivationState(ACTIVE_TAG);
     }
+}
+
+BoneObject* RigidObject::getRootBone() {
+    if(model->skeleton) {
+        Bone* rootBone = model->skeleton->rootBone;
+        for(auto iterator : links) {
+            if(!dynamic_cast<TransformLink*>(iterator)) continue;
+            BoneObject* rootBoneObject = dynamic_cast<BoneObject*>(iterator->b);
+            if(rootBoneObject && rootBoneObject->bone == rootBone)
+                return rootBoneObject;
+        }
+    }
+    return NULL;
+}
+
+void RigidObject::setModel(LevelLoader* levelLoader, FileResourcePtr<Model> _model) {
+    if(model) {
+        for(unsigned int i = 0; i < model->meshes.size(); i ++)
+            if(model->meshes[i]->material.reflectivity != 0)
+                objectManager.reflectiveAccumulator.erase(this);
+        foreach_e(links, iterator)
+        if(dynamic_cast<TransformLink*>(*iterator) && dynamic_cast<BoneObject*>((*iterator)->b))
+            (*iterator)->removeClean(this);
+    }
+    textureAnimation.clear();
+    skeletonPose.reset();
+    
+    model = _model;
+    if(!model) return;
+    
+    for(unsigned int i = 0; i < model->meshes.size(); i ++)
+        if(model->meshes[i]->material.diffuse && model->meshes[i]->material.diffuse->depth > 1)
+            textureAnimation.push_back(0.0);
+    
+    if(model->skeleton) {
+        skeletonPose.reset(new btTransform[model->skeleton->bones.size()]);
+        setupBones(levelLoader, this, model->skeleton->rootBone);
+    }
+}
+
+void RigidObject::draw() {
+    if(model) {
+        modelMat = getTransformation();
+        model->draw(this);
+    }
+    GraphicObject::draw();
+}
+
+void RigidObject::drawAccumulatedMesh(Mesh* mesh) {
+    modelMat = getTransformation();
+    mesh->draw(this);
+}
+
+void RigidObject::prepareShaderProgram(Mesh* mesh) {
+    if(mesh->material.diffuse) {
+        if(mesh->material.diffuse->depth > 1) {
+            unsigned int meshIndex = 0;
+            for(unsigned int i = 0; i < model->meshes.size(); i ++) {
+                if(model->meshes[i] == mesh)
+                    break;
+                if(model->meshes[i]->material.diffuse->depth > 1)
+                    meshIndex ++;
+            }
+            mesh->material.diffuse->use(0, textureAnimation[meshIndex]);
+        }else
+            mesh->material.diffuse->use(0);
+    }
+    
+    currentShaderProgram->setUniformF("discardDensity", clamp(integrity+1.0F, 0.0F, 1.0F));
+    if(skeletonPose)
+        currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose.get(), model->skeleton->bones.size());
+}
+
+
+
+Reflective::Reflective(RigidObject* objectB, Mesh* meshB) :object(objectB), mesh(meshB), buffer(NULL) {
+    
+}
+
+Reflective::~Reflective() {
+    if(buffer)
+        delete buffer;
+}
+
+PlaneReflective::PlaneReflective(RigidObject* objectB, Mesh* meshB) :Reflective(objectB, meshB) {
+    
+}
+
+bool PlaneReflective::gameTick() {
+    btBoxShape* shape = dynamic_cast<btBoxShape*>(object->getBody()->getCollisionShape());
+    if(!shape) return false;
+    
+    btTransform transform = object->getTransformation();
+    plane = transform.getBasis().getColumn(shape->getHalfExtentsWithoutMargin().minAxis());
+    plane.setW(-plane.dot(transform.getOrigin()));
+    if(plane.dot(currentCam->getTransformation().getOrigin()) < plane.w()) return false;
+    
+    if(!buffer)
+        buffer = new ColorBuffer(false, false, prevOptionsState.videoWidth, prevOptionsState.videoHeight);
+    objectManager.currentReflective = this;
+    
+    if(currentCam->doFrustumCulling())
+        return false;
+    
+    glEnable(GL_CLIP_DISTANCE0);
+    objectManager.drawFrame(buffer->texture);
+    glDisable(GL_CLIP_DISTANCE0);
+    return true;
 }

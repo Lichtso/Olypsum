@@ -146,12 +146,12 @@ void Menu::handleMouseMove(int mouseX, int mouseY) {
     }
 }
 
-void Menu::handleMouseWheel(int mouseX, int mouseY, float delta) {
-    if(screenView->handleMouseWheel(mouseX, mouseY, delta) || menu.current != inGame) return;
+void Menu::handleMouseWheel(int mouseX, int mouseY, float deltaX, float deltaY) {
+    if(screenView->handleMouseWheel(mouseX, mouseY, deltaX, deltaY) || menu.current != inGame) return;
     
     v8::HandleScope handleScope;
     ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
-    if(script) script->callFunction("onmousewheel", false, { v8::Number::New(delta) });
+    if(script) script->callFunction("onmousewheel", false, { v8::Number::New(deltaX), v8::Number::New(deltaY) });
 }
 
 void Menu::handleKeyDown(SDL_Event& event) {

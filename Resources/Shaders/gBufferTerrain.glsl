@@ -31,10 +31,15 @@ out vec3 normalOut;
 out vec3 positionOut;
 out vec3 specularOut;
 
+uniform float discardDensity;
 uniform sampler2DArray sampler0;
 uniform sampler2DArray sampler1;
 
+#include random.glsl
+
 void main() {
+    if(vec1Vec2Rand(vTexCoord.st) > discardDensity) discard;
+    
     float interpolZ = fract(vTexCoord.z+0.5), interpolZlow = 1.0-interpolZ;
     vec3 highCoord = vec3(vTexCoord.xy, vTexCoord.z+1.0);
     

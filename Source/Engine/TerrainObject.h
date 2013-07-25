@@ -24,7 +24,7 @@ class TerrainObject : public GraphicObject {
     public:
     btVector3 textureScale; //!< Used to scale the diffuse and specular texture in OpenGL
     FileResourcePtr<Texture> diffuse, //!< The diffuse texture
-    effectMap; //!< The specular texture
+                             effectMap; //!< The specular texture
     unsigned int width, length, bitDepth;
     float* heights;
     TerrainObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);

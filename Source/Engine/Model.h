@@ -11,7 +11,7 @@
 #ifndef Model_h
 #define Model_h
 
-class ModelObject;
+class RigidObject;
 
 //! A Mesh of a Model
 class Mesh {
@@ -26,9 +26,9 @@ class Mesh {
                                  heightMap; //!< The highmap (optional)
     } material;
     /*! Used by the engine to render this Mesh
-     @param object The parent ModelObject which is used to render the Model of this Mesh
+     @param object The parent RigidObject which is used to render the Model of this Mesh
      */
-    void draw(ModelObject* object);
+    void draw(RigidObject* object);
 };
 
 //! A Skeleton of a Model
@@ -61,7 +61,7 @@ class Model : public FileResource {
     /*! Used by the engine to render the entire model
      @param object The parent ModelObject which is used to render this Model
      */
-    void draw(ModelObject* object);
+    void draw(RigidObject* object);
 };
 
 #endif

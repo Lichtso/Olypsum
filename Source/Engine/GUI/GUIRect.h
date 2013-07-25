@@ -46,7 +46,7 @@ class GUIRect {
     virtual bool handleMouseDown(int mouseX, int mouseY);
     virtual bool handleMouseUp(int mouseX, int mouseY);
     virtual void handleMouseMove(int mouseX, int mouseY);
-    virtual bool handleMouseWheel(int mouseX, int mouseY, float delta);
+    virtual bool handleMouseWheel(int mouseX, int mouseY, float deltaX, float deltaY);
     virtual bool handleKeyDown(SDL_keysym* key);
     virtual bool handleKeyUp(SDL_keysym* key);
 };

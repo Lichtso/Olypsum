@@ -12,6 +12,8 @@
 #include "ScriptObject.h"
 
 class ScriptGraphicObject : public ScriptPhysicObject {
+    static v8::Handle<v8::Value> GetIntegrity(v8::Local<v8::String> property, const v8::AccessorInfo& info);
+    static void SetIntegrity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> AttachDecal(const v8::Arguments& args);
     protected:
     ScriptGraphicObject(const char* name) :ScriptPhysicObject(name) { }
@@ -19,22 +21,9 @@ class ScriptGraphicObject : public ScriptPhysicObject {
     ScriptGraphicObject();
 };
 
-class ScriptModelObject : public ScriptGraphicObject {
-    static v8::Handle<v8::Value> GetIntegrity(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetIntegrity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+class ScriptRigidObject : public ScriptGraphicObject {
     static v8::Handle<v8::Value> GetModel(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void SetModel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> AccessTextureAnimation(const v8::Arguments& args);
-    static v8::Handle<v8::Value> FindBoneByPath(const v8::Arguments& args);
-    protected:
-    ScriptModelObject(const char* name) :ScriptGraphicObject(name) { }
-    public:
-    ScriptModelObject();
-};
-
-class ScriptRigidObject : public ScriptModelObject {
-    static v8::Handle<v8::Value> GetCollisionShape(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetCollisionShape(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetMass(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void SetMass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
     static v8::Handle<v8::Value> GetKinematic(v8::Local<v8::String> property, const v8::AccessorInfo& info);
@@ -51,6 +40,8 @@ class ScriptRigidObject : public ScriptModelObject {
     static v8::Handle<v8::Value> ApplyImpulseAtPoint(const v8::Arguments& args);
     static v8::Handle<v8::Value> ApplyAngularImpulse(const v8::Arguments& args);
     static v8::Handle<v8::Value> ApplyLinearImpulse(const v8::Arguments& args);
+    static v8::Handle<v8::Value> FindBoneByPath(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessTextureAnimation(const v8::Arguments& args);
     public:
     ScriptRigidObject();
 };
@@ -66,7 +57,6 @@ class ScriptTerrainObject : public ScriptGraphicObject {
 };
 
 extern ScriptGraphicObject scriptGraphicObject;
-extern ScriptModelObject scriptModelObject;
 extern ScriptRigidObject scriptRigidObject;
 extern ScriptTerrainObject scriptTerrainObject;
 

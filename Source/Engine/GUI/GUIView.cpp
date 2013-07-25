@@ -76,10 +76,10 @@ void GUIView::handleMouseMove(int mouseX, int mouseY) {
         children[i]->handleMouseMove(mouseX-children[i]->posX, mouseY-children[i]->posY);
 }
 
-bool GUIView::handleMouseWheel(int mouseX, int mouseY, float delta) {
+bool GUIView::handleMouseWheel(int mouseX, int mouseY, float deltaX, float deltaY) {
     if(!visible || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
     for(int i = (int)children.size()-1; i >= 0; i --)
-        if(children[i]->handleMouseWheel(mouseX-children[i]->posX, mouseY-children[i]->posY, delta))
+        if(children[i]->handleMouseWheel(mouseX-children[i]->posX, mouseY-children[i]->posY, deltaX, deltaY))
             return true;
     return false;
 }
@@ -218,14 +218,14 @@ void GUIScreenView::handleMouseMove(int mouseX, int mouseY) {
             children[i]->handleMouseMove(mouseX-children[i]->posX, mouseY-children[i]->posY);
 }
 
-bool GUIScreenView::handleMouseWheel(int mouseX, int mouseY, float delta) {
+bool GUIScreenView::handleMouseWheel(int mouseX, int mouseY, float deltaX, float deltaY) {
     if(!visible || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
     
     if(modalView)
-        return modalView->handleMouseWheel(mouseX-modalView->posX, mouseY-modalView->posY, delta);
+        return modalView->handleMouseWheel(mouseX-modalView->posX, mouseY-modalView->posY, deltaX, deltaY);
     else
         for(int i = (int)children.size()-1; i >= 0; i --)
-            if(children[i]->handleMouseWheel(mouseX-children[i]->posX, mouseY-children[i]->posY, delta))
+            if(children[i]->handleMouseWheel(mouseX-children[i]->posX, mouseY-children[i]->posY, deltaX, deltaY))
                 return true;
     return false;
 }

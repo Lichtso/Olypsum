@@ -1,4 +1,4 @@
-V8 API: Create Objects, Documentation
+V8 API: Create/Delete Objects, Documentation
 Implement btSoftBody
 Leap Motion: GUI, V8 API
 Use C++11 Multithreading
@@ -21,6 +21,7 @@ KI and path finding
 Test:
 TransformLink with a RigidObject as child
 Skeletal animation
+Performance issue of explosions
 
 Bugs:
 Check memory leaks

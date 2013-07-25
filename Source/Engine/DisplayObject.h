@@ -54,78 +54,14 @@ class GraphicObject : public DisplayObject {
     protected:
     GraphicObject();
     public:
+    float integrity; //! Health <= 0.0: destroyed
     std::set<Decal*> decals; //!< Decals attached to this GraphicObject
     void removeClean();
     void removeFast();
     bool gameTick();
     void draw();
-};
-
-//! A GraphicObject with a Model
-/*!
- This is the basic class for all Objects with a Model.
- @warning Don't use it directly
- */
-class ModelObject : public GraphicObject {
-    std::unique_ptr<btTransform> skeletonPose; //!< Poses of the BoneObjects (if model has a skeleton) for OpenGL
-    void setupBones(LevelLoader* levelLoader, BaseObject* object, Bone* bone);
-    void writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver, BoneObject *object);
-    void updateSkeletonPose(BoneObject* object, Bone* bone);
-    protected:
-    ModelObject() :integrity(1.0) { };
-    public:
-    void removeClean();
-    void removeFast();
-    void newScriptInstance();
-    bool gameTick();
-    float integrity; //! Health <= 0.0: destroyed
-    std::vector<float> textureAnimation; //!< Animation time for each mesh;
-    FileResourcePtr<Model> model;
-    //! Finds the root bone (if model has a skeleton else returns NULL)
-    BoneObject* getRootBone();
-    //! Overwrites the model and cleans the textureAnimation
-    void setModel(LevelLoader* levelLoader, FileResourcePtr<Model> model);
-    //! Draws the entire model with all meshes
-    void draw();
-    //! Draws a single mesh
-    void drawAccumulatedMesh(Mesh* mesh);
-    //! Called by a Mesh to prepare the shader program to draw this ModelObject
-    virtual void prepareShaderProgram(Mesh* mesh);
     void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
-};
-
-//! A reflective ModelObject
-/*!
- A reflective ModelObject which is stored by the engine to be rendered at the beginning of the graphics frame
- 
- @warning Don't use it directly
- */
-class Reflective {
-    protected:
-    Reflective(ModelObject* objectB, Mesh* meshB);
-    public:
-    virtual ~Reflective();
-    ColorBuffer* buffer;
-    ModelObject* object;
-    Mesh* mesh;
-    //! Recalculates the reflection in a tick, returns false if it is out of view
-    virtual bool gameTick() = 0;
-};
-
-//! A Reflective mirroring at a given plane
-class PlaneReflective : public Reflective {
-    public:
-    btVector3 plane;
-    PlaneReflective(ModelObject* object, Mesh* mesh);
-    bool gameTick();
-};
-
-//! A Reflective mirroring the environment using a cube map
-class EnvironmentReflective : public Reflective {
-    public:
-    EnvironmentReflective(ModelObject* object, Mesh* mesh);
-    bool gameTick();
 };
 
 //! A GraphicObject with a soft-physics-body
@@ -134,7 +70,7 @@ class EnvironmentReflective : public Reflective {
  */
 class SoftObject : public GraphicObject {
     public:
-    SoftObject();
+    SoftObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     void removeClean();
     void removeFast();
     btSoftBody* getBody() {
@@ -166,9 +102,15 @@ class comMotionState : public simpleMotionState {
  This is the basic class for all Objects with a rigid-physics-body.
  TODO: Skeletal animation is not implemented yet.
  */
-class RigidObject : public ModelObject {
+class RigidObject : public GraphicObject {
+    std::unique_ptr<btTransform> skeletonPose; //!< Poses of the BoneObjects (if model has a skeleton) for OpenGL
+    void setupBones(LevelLoader* levelLoader, BaseObject* object, Bone* bone);
+    void writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver, BoneObject *object);
+    void updateSkeletonPose(BoneObject* object, Bone* bone);
     public:
     RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    FileResourcePtr<Model> model; //!< The shared model
+    std::vector<float> textureAnimation; //!< Animation time for each mesh
     void removeClean();
     void removeFast();
     void setTransformation(const btTransform& transformation);
@@ -177,11 +119,55 @@ class RigidObject : public ModelObject {
         return static_cast<btRigidBody*>(body);
     }
     void newScriptInstance();
+    bool gameTick();
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
     //! Returns true if the btCollisionObject::CF_KINEMATIC_OBJECT flag is set
     bool getKinematic();
     //! Sets or removes the btCollisionObject::CF_KINEMATIC_OBJECT flag
     void setKinematic(bool active);
+    //! Finds the root bone (if model has a skeleton else returns NULL)
+    BoneObject* getRootBone();
+    //! Overwrites the model and cleans the textureAnimation
+    void setModel(LevelLoader* levelLoader, FileResourcePtr<Model> model);
+    //! Draws the entire model with all meshes
+    void draw();
+    //! Draws a single mesh
+    void drawAccumulatedMesh(Mesh* mesh);
+    //! Called by a Mesh to prepare the shader program to draw this ModelObject
+    virtual void prepareShaderProgram(Mesh* mesh);
+};
+
+//! A reflective RigidObject
+/*!
+ A reflective RigidObject which is stored by the engine to be rendered at the beginning of the graphics frame
+ 
+ @warning Don't use it directly
+ */
+class Reflective {
+    protected:
+    Reflective(RigidObject* objectB, Mesh* meshB);
+    public:
+    virtual ~Reflective();
+    ColorBuffer* buffer;
+    RigidObject* object;
+    Mesh* mesh;
+    //! Recalculates the reflection in a tick, returns false if it is out of view
+    virtual bool gameTick() = 0;
+};
+
+//! A Reflective mirroring at a given plane
+class PlaneReflective : public Reflective {
+    public:
+    btVector3 plane;
+    PlaneReflective(RigidObject* object, Mesh* mesh);
+    bool gameTick();
+};
+
+//! A Reflective mirroring the environment using a cube map
+class EnvironmentReflective : public Reflective {
+    public:
+    EnvironmentReflective(RigidObject* object, Mesh* mesh);
+    bool gameTick();
 };
 
 #endif

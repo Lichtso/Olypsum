@@ -61,7 +61,7 @@ void GUIRect::handleMouseMove(int mouseX, int mouseY) {
     
 }
 
-bool GUIRect::handleMouseWheel(int mouseX, int mouseY, float delta) {
+bool GUIRect::handleMouseWheel(int mouseX, int mouseY, float deltaX, float deltaY) {
     return false;
 }
 

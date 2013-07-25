@@ -157,17 +157,23 @@ void GUIScrollView::handleMouseMove(int mouseX, int mouseY) {
     GUIView::handleMouseMove(mouseX+scrollPosX, mouseY-scrollPosY);
 }
 
-bool GUIScrollView::handleMouseWheel(int mouseX, int mouseY, float delta) {
+bool GUIScrollView::handleMouseWheel(int mouseX, int mouseY, float deltaX, float deltaY) {
     if(!visible || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
     for(int i = (int)children.size()-1; i >= 0; i --)
-        if(children[i]->handleMouseWheel(mouseX-children[i]->posX+scrollPosX, mouseY-children[i]->posY-scrollPosY, delta))
+        if(children[i]->handleMouseWheel(mouseX-children[i]->posX+scrollPosX, mouseY-children[i]->posY-scrollPosY, deltaX, deltaY))
             return true;
     
-    if(contentHeight < height*2) return false;
+    if(contentWidth >= width*2) {
+        scrollPosX -= deltaX*10.0*prevOptionsState.videoScale;
+        if(scrollPosX < 0) scrollPosX = 0;
+        else if(scrollPosX > contentWidth-width*2) scrollPosX = contentWidth-width*2;
+    }
     
-    scrollPosY -= delta*10.0;
-    if(scrollPosY < 0) scrollPosY = 0;
-    else if(scrollPosY > contentHeight-height*2) scrollPosY = contentHeight-height*2;
+    if(contentHeight >= height*2) {
+        scrollPosY -= deltaY*10.0*prevOptionsState.videoScale;
+        if(scrollPosY < 0) scrollPosY = 0;
+        else if(scrollPosY > contentHeight-height*2) scrollPosY = contentHeight-height*2;
+    }
     
     return true;
 }

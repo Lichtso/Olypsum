@@ -43,7 +43,7 @@ class Menu {
     void handleMouseDown(int mouseX, int mouseY, Uint8 button);
     void handleMouseUp(int mouseX, int mouseY, Uint8 button);
     void handleMouseMove(int mouseX, int mouseY);
-    void handleMouseWheel(int mouseX, int mouseY, float delta);
+    void handleMouseWheel(int mouseX, int mouseY, float deltaX, float deltaY);
     void handleKeyDown(SDL_Event& event);
     void handleKeyUp(SDL_Event& event);
     void gameTick();
