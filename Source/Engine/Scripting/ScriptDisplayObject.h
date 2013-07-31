@@ -41,7 +41,7 @@ class ScriptRigidObject : public ScriptGraphicObject {
     static v8::Handle<v8::Value> ApplyAngularImpulse(const v8::Arguments& args);
     static v8::Handle<v8::Value> ApplyLinearImpulse(const v8::Arguments& args);
     static v8::Handle<v8::Value> FindBoneByPath(const v8::Arguments& args);
-    static v8::Handle<v8::Value> AccessTextureAnimation(const v8::Arguments& args);
+    static v8::Handle<v8::Value> AccessTextureAnimationTime(const v8::Arguments& args);
     public:
     ScriptRigidObject();
 };

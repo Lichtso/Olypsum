@@ -53,7 +53,7 @@ v8::Handle<v8::Value> ScriptDirectionalLight::SetBounds(const v8::Arguments& arg
     return args.This();
 }
 
-ScriptDirectionalLight::ScriptDirectionalLight() :ScriptPhysicObject("DirectionalLight") {
+ScriptDirectionalLight::ScriptDirectionalLight() :ScriptLightObject("DirectionalLight") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
@@ -80,7 +80,7 @@ v8::Handle<v8::Value> ScriptSpotLight::SetBounds(const v8::Arguments& args) {
     return args.This();
 }
 
-ScriptSpotLight::ScriptSpotLight() :ScriptPhysicObject("SpotLight") {
+ScriptSpotLight::ScriptSpotLight() :ScriptLightObject("SpotLight") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
@@ -107,7 +107,7 @@ v8::Handle<v8::Value> ScriptPositionalLight::SetBounds(const v8::Arguments& args
     return args.This();
 }
 
-ScriptPositionalLight::ScriptPositionalLight() :ScriptPhysicObject("PositionalLight") {
+ScriptPositionalLight::ScriptPositionalLight() :ScriptLightObject("PositionalLight") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();

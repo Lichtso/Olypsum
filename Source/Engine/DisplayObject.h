@@ -110,7 +110,7 @@ class RigidObject : public GraphicObject {
     public:
     RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     FileResourcePtr<Model> model; //!< The shared model
-    std::vector<float> textureAnimation; //!< Animation time for each mesh
+    std::vector<float> textureAnimationTime; //!< Animation time for each mesh
     void removeClean();
     void removeFast();
     void setTransformation(const btTransform& transformation);

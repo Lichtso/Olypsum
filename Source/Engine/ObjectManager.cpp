@@ -29,12 +29,9 @@ ObjectManager::ObjectManager() {
     currentShadowLight = NULL;
     collisionConfiguration = new btSoftBodyRigidBodyCollisionConfiguration();
     collisionDispatcher = new btCollisionDispatcher(collisionConfiguration);
-    
-    /*PosixThreadSupport::ThreadConstructionInfo solverConstructionInfo("solver", SolverThreadFunc,
-																	  SolverlsMemoryFunc, maxNumThreads);
-	PosixThreadSupport* threadSupport = new PosixThreadSupport(solverConstructionInfo);*/
-    
-    constraintSolver = new btSequentialImpulseConstraintSolver(); //btParallelConstraintSolver();
+    PosixThreadSupport::ThreadConstructionInfo solverConstructionInfo(NULL, SolverThreadFunc, SolverlsMemoryFunc, std::thread::hardware_concurrency());
+	bulletThreadSupport = new PosixThreadSupport(solverConstructionInfo);
+    constraintSolver = new btParallelConstraintSolver(bulletThreadSupport); //btSequentialImpulseConstraintSolver();
     softBodySolver = new btDefaultSoftBodySolver(); //btOpenCLSoftBodySolver();
     broadphase = new btDbvtBroadphase();
 }
@@ -46,6 +43,7 @@ ObjectManager::~ObjectManager() {
     delete broadphase;
     delete softBodySolver;
     delete constraintSolver;
+    delete bulletThreadSupport;
     delete collisionDispatcher;
     delete collisionConfiguration;
 }

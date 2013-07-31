@@ -26,7 +26,7 @@ v8::Handle<v8::Value> ScriptBaseLink::Constructor(const v8::Arguments &args) {
         }
     }
     
-    return v8::ThrowException(v8::String::New("BaseLink Constructor: Class can't be instantiated"));
+    return v8::ThrowException(v8::String::New("BaseLink Constructor: Class can't be initialized"));
 }
 
 v8::Handle<v8::Value> ScriptBaseLink::GetObjectA(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
@@ -84,75 +84,6 @@ void ScriptPhysicLink::SetCollisionDisabled(v8::Local<v8::String> property, v8::
     getDataOfInstance<PhysicLink>(info.This())->setCollisionDisabled(value->BooleanValue());
 }
 
-v8::Handle<v8::Value> ScriptPhysicLink::GetFrame(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
-    v8::HandleScope handleScope;
-    bool isA = (stdStrOfV8(property) == "frameA");
-    btTypedConstraint* constraint = getDataOfInstance<PhysicLink>(info.This())->constraint;
-    switch(constraint->getConstraintType()) {
-        case HINGE_CONSTRAINT_TYPE: {
-            btHingeConstraint* hinge = static_cast<btHingeConstraint*>(constraint);
-            return scriptMatrix4.newInstance((isA) ? hinge->getFrameOffsetA() : hinge->getFrameOffsetB());
-        }
-        case SLIDER_CONSTRAINT_TYPE: {
-            btSliderConstraint* slider = static_cast<btSliderConstraint*>(constraint);
-            return scriptMatrix4.newInstance((isA) ? slider->getFrameOffsetA() : slider->getFrameOffsetB());
-        }
-        case D6_CONSTRAINT_TYPE:
-        case D6_SPRING_CONSTRAINT_TYPE: {
-            btGeneric6DofConstraint* dof6 = static_cast<btGeneric6DofConstraint*>(constraint);
-            return scriptMatrix4.newInstance((isA) ? dof6->getFrameOffsetA() : dof6->getFrameOffsetB());
-        }
-        case CONETWIST_CONSTRAINT_TYPE: {
-            btConeTwistConstraint* coneTwist = static_cast<btConeTwistConstraint*>(constraint);
-            return scriptMatrix4.newInstance((isA) ? coneTwist->getFrameOffsetA() : coneTwist->getFrameOffsetB());
-        }
-        default:
-            return v8::Undefined();
-    }
-}
-
-void ScriptPhysicLink::SetFrame(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
-    v8::HandleScope handleScope;
-    if(!scriptMatrix4.isCorrectInstance(value)) return;
-    
-    bool isA = (stdStrOfV8(property) == "frameA");
-    btTransform frame = scriptMatrix4.getDataOfInstance(value)->getBTTransform();
-    btTypedConstraint* constraint = getDataOfInstance<PhysicLink>(info.This())->constraint;
-    switch(constraint->getConstraintType()) {
-        case HINGE_CONSTRAINT_TYPE: {
-            btHingeConstraint* hinge = static_cast<btHingeConstraint*>(constraint);
-            if(isA)
-                hinge->setFrames(frame, hinge->getFrameOffsetB());
-            else
-                hinge->setFrames(hinge->getFrameOffsetB(), frame);
-        }
-        case SLIDER_CONSTRAINT_TYPE: {
-            btSliderConstraint* slider = static_cast<btSliderConstraint*>(constraint);
-            if(isA)
-                slider->setFrames(frame, slider->getFrameOffsetB());
-            else
-                slider->setFrames(slider->getFrameOffsetB(), frame);
-        }
-        case D6_CONSTRAINT_TYPE:
-        case D6_SPRING_CONSTRAINT_TYPE: {
-            btGeneric6DofConstraint* dof6 = static_cast<btGeneric6DofConstraint*>(constraint);
-            if(isA)
-                dof6->setFrames(frame, dof6->getFrameOffsetB());
-            else
-                dof6->setFrames(dof6->getFrameOffsetB(), frame);
-        }
-        case CONETWIST_CONSTRAINT_TYPE: {
-            btConeTwistConstraint* coneTwist = static_cast<btConeTwistConstraint*>(constraint);
-            if(isA)
-                coneTwist->setFrames(frame, coneTwist->getFrameOffsetB());
-            else
-                coneTwist->setFrames(coneTwist->getFrameOffsetB(), frame);
-        }
-        default:
-            return;
-    }
-}
-
 ScriptPhysicLink::ScriptPhysicLink() :ScriptBaseLink("PhysicLink", Constructor) {
     v8::HandleScope handleScope;
     
@@ -187,7 +118,7 @@ v8::Handle<v8::Value> ScriptPointPhysicLink::Constructor(const v8::Arguments &ar
         }
     }
     
-    return v8::ThrowException(v8::String::New("PointPhysicLink Constructor: Class can't be instantiated"));
+    return v8::ThrowException(v8::String::New("PointPhysicLink Constructor: Class can't be initialized"));
 }
 
 v8::Handle<v8::Value> ScriptPointPhysicLink::GetPoint(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
@@ -244,7 +175,7 @@ v8::Handle<v8::Value> ScriptGearPhysicLink::Constructor(const v8::Arguments &arg
         }
     }
     
-    return v8::ThrowException(v8::String::New("GearPhysicLink Constructor: Class can't be instantiated"));
+    return v8::ThrowException(v8::String::New("GearPhysicLink Constructor: Class can't be initialized"));
 }
 
 v8::Handle<v8::Value> ScriptGearPhysicLink::GetAxis(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
@@ -315,7 +246,27 @@ v8::Handle<v8::Value> ScriptHingePhysicLink::Constructor(const v8::Arguments &ar
         }
     }
     
-    return v8::ThrowException(v8::String::New("HingePhysicLink Constructor: Class can't be instantiated"));
+    return v8::ThrowException(v8::String::New("HingePhysicLink Constructor: Class can't be initialized"));
+}
+
+v8::Handle<v8::Value> ScriptHingePhysicLink::GetFrame(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    bool isA = (stdStrOfV8(property) == "frameA");
+    btHingeConstraint* hinge = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return scriptMatrix4.newInstance((isA) ? hinge->getFrameOffsetA() : hinge->getFrameOffsetB());
+}
+
+void ScriptHingePhysicLink::SetFrame(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!scriptMatrix4.isCorrectInstance(value)) return;
+    
+    bool isA = (stdStrOfV8(property) == "frameA");
+    btTransform frame = scriptMatrix4.getDataOfInstance(value)->getBTTransform();
+    btHingeConstraint* hinge = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    if(isA)
+        hinge->setFrames(frame, hinge->getFrameOffsetB());
+    else
+        hinge->setFrames(hinge->getFrameOffsetB(), frame);
 }
 
 v8::Handle<v8::Value> ScriptHingePhysicLink::GetHingeAngle(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
@@ -421,7 +372,27 @@ v8::Handle<v8::Value> ScriptSliderPhysicLink::Constructor(const v8::Arguments &a
         }
     }
     
-    return v8::ThrowException(v8::String::New("SliderPhysicLink Constructor: Class can't be instantiated"));
+    return v8::ThrowException(v8::String::New("SliderPhysicLink Constructor: Class can't be initialized"));
+}
+
+v8::Handle<v8::Value> ScriptSliderPhysicLink::GetFrame(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    bool isA = (stdStrOfV8(property) == "frameA");
+    btSliderConstraint* slider = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return scriptMatrix4.newInstance((isA) ? slider->getFrameOffsetA() : slider->getFrameOffsetB());
+}
+
+void ScriptSliderPhysicLink::SetFrame(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!scriptMatrix4.isCorrectInstance(value)) return;
+    
+    bool isA = (stdStrOfV8(property) == "frameA");
+    btTransform frame = scriptMatrix4.getDataOfInstance(value)->getBTTransform();
+    btSliderConstraint* slider = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    if(isA)
+        slider->setFrames(frame, slider->getFrameOffsetB());
+    else
+        slider->setFrames(slider->getFrameOffsetB(), frame);
 }
 
 v8::Handle<v8::Value> ScriptSliderPhysicLink::GetHingeAngle(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
@@ -588,7 +559,27 @@ v8::Handle<v8::Value> ScriptDof6PhysicLink::Constructor(const v8::Arguments &arg
         }
     }
     
-    return v8::ThrowException(v8::String::New("Dof6PhysicLink Constructor: Class can't be instantiated"));
+    return v8::ThrowException(v8::String::New("Dof6PhysicLink Constructor: Class can't be initialized"));
+}
+
+v8::Handle<v8::Value> ScriptDof6PhysicLink::GetFrame(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    bool isA = (stdStrOfV8(property) == "frameA");
+    btGeneric6DofConstraint* dof6 = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return scriptMatrix4.newInstance((isA) ? dof6->getFrameOffsetA() : dof6->getFrameOffsetB());
+}
+
+void ScriptDof6PhysicLink::SetFrame(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!scriptMatrix4.isCorrectInstance(value)) return;
+    
+    bool isA = (stdStrOfV8(property) == "frameA");
+    btTransform frame = scriptMatrix4.getDataOfInstance(value)->getBTTransform();
+    btGeneric6DofConstraint* dof6 = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    if(isA)
+        dof6->setFrames(frame, dof6->getFrameOffsetB());
+    else
+        dof6->setFrames(dof6->getFrameOffsetB(), frame);
 }
 
 v8::Handle<v8::Value> ScriptDof6PhysicLink::AccessSpringStiffness(const v8::Arguments& args) {
@@ -789,7 +780,27 @@ v8::Handle<v8::Value> ScriptConeTwistPhysicLink::Constructor(const v8::Arguments
         }
     }
     
-    return v8::ThrowException(v8::String::New("ConeTwistPhysicLink Constructor: Class can't be instantiated"));
+    return v8::ThrowException(v8::String::New("ConeTwistPhysicLink Constructor: Class can't be initialized"));
+}
+
+v8::Handle<v8::Value> ScriptConeTwistPhysicLink::GetFrame(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    bool isA = (stdStrOfV8(property) == "frameA");
+    btConeTwistConstraint* coneTwist = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return scriptMatrix4.newInstance((isA) ? coneTwist->getFrameOffsetA() : coneTwist->getFrameOffsetB());
+}
+
+void ScriptConeTwistPhysicLink::SetFrame(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!scriptMatrix4.isCorrectInstance(value)) return;
+    
+    bool isA = (stdStrOfV8(property) == "frameA");
+    btTransform frame = scriptMatrix4.getDataOfInstance(value)->getBTTransform();
+    btConeTwistConstraint* coneTwist = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    if(isA)
+        coneTwist->setFrames(frame, coneTwist->getFrameOffsetB());
+    else
+        coneTwist->setFrames(coneTwist->getFrameOffsetB(), frame);
 }
 
 v8::Handle<v8::Value> ScriptConeTwistPhysicLink::GetSwingSpan(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
@@ -865,7 +876,7 @@ v8::Handle<v8::Value> ScriptTransformLink::Constructor(const v8::Arguments &args
         }
     }
     
-    return v8::ThrowException(v8::String::New("BaseLink Constructor: Class can't be instantiated"));
+    return v8::ThrowException(v8::String::New("BaseLink Constructor: Class can't be initialized"));
 }
 
 v8::Handle<v8::Value> ScriptTransformLink::AccessTransformation(const v8::Arguments& args) {

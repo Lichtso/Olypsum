@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <fstream>
+#include <thread>
 #include <map>
 
 #include <OpenAL/al.h>
@@ -23,6 +24,8 @@
 #include <BulletSoftBody/btSoftRigidDynamicsWorld.h>
 #include <BulletSoftBody/btDefaultSoftBodySolver.h>
 #include <BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h>
+#include <BulletMultiThreaded/PosixThreadSupport.h>
+#include <BulletMultiThreaded/btParallelConstraintSolver.h>
 #include <v8.h>
 #include <Leap.h>
 #include <netLink.h>

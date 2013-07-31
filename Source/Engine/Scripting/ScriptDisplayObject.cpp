@@ -268,18 +268,18 @@ v8::Handle<v8::Value> ScriptRigidObject::FindBoneByPath(const v8::Arguments& arg
     return handleScope.Close(boneObject->scriptInstance);
 }
 
-v8::Handle<v8::Value> ScriptRigidObject::AccessTextureAnimation(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptRigidObject::AccessTextureAnimationTime(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1 || !args[0]->IsInt32())
-        return v8::ThrowException(v8::String::New("RigidObject getTextureAnimation: Invalid argument"));
+        return v8::ThrowException(v8::String::New("RigidObject getTextureAnimationTime: Invalid argument"));
     RigidObject* objectPtr = getDataOfInstance<RigidObject>(args.This());
-    if(args[0]->Uint32Value() >= objectPtr->textureAnimation.size())
-        return v8::ThrowException(v8::String::New("RigidObject getTextureAnimation: Out of bounds"));
+    if(args[0]->Uint32Value() >= objectPtr->textureAnimationTime.size())
+        return v8::ThrowException(v8::String::New("RigidObject getTextureAnimationTime: Out of bounds"));
     if(args.Length() == 2 && args[1]->IsNumber()) {
-        objectPtr->textureAnimation[args[0]->Uint32Value()] = args[1]->NumberValue();
+        objectPtr->textureAnimationTime[args[0]->Uint32Value()] = args[1]->NumberValue();
         return args[1];
     }else
-        return handleScope.Close(v8::Number::New(objectPtr->textureAnimation[args[0]->Uint32Value()]));
+        return handleScope.Close(v8::Number::New(objectPtr->textureAnimationTime[args[0]->Uint32Value()]));
 }
 
 ScriptRigidObject::ScriptRigidObject() :ScriptGraphicObject("RigidObject") {
@@ -300,7 +300,7 @@ ScriptRigidObject::ScriptRigidObject() :ScriptGraphicObject("RigidObject") {
     objectTemplate->Set(v8::String::New("applyAngularImpulse"), v8::FunctionTemplate::New(ApplyAngularImpulse));
     objectTemplate->Set(v8::String::New("applyLinearImpulse"), v8::FunctionTemplate::New(ApplyLinearImpulse));
     objectTemplate->Set(v8::String::New("findBoneByPath"), v8::FunctionTemplate::New(FindBoneByPath));
-    objectTemplate->Set(v8::String::New("textureAnimation"), v8::FunctionTemplate::New(AccessTextureAnimation));
+    objectTemplate->Set(v8::String::New("textureAnimationTime"), v8::FunctionTemplate::New(AccessTextureAnimationTime));
     
     functionTemplate->Inherit(scriptGraphicObject.functionTemplate);
 }

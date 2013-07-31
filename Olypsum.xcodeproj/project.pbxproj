@@ -780,6 +780,7 @@
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
+					"$(SRCROOT)/Libraries/bulletPhysics/src/**",
 					"$(SRCROOT)/Libraries/v8/include/**",
 					"$(SRCROOT)/Libraries/netLink/include/**",
 					"$(SRCROOT)/Libraries/LeapSDK/include",
@@ -813,6 +814,7 @@
 				);
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
+					"$(SRCROOT)/Libraries/bulletPhysics/src/**",
 					"$(SRCROOT)/Libraries/v8/include/**",
 					"$(SRCROOT)/Libraries/netLink/include/**",
 					"$(SRCROOT)/Libraries/LeapSDK/include",

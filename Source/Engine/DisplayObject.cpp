@@ -183,15 +183,15 @@ RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
         log(error_log, "Found \"Model\"-node without \"src\"-attribute.");
         return;
     }
-    if((parameterNode = node->first_node("TextureAnimation"))) {
+    if((parameterNode = node->first_node("TextureAnimationTime"))) {
         XMLValueArray<float> animationTime;
         animationTime.readString(parameterNode->value(), "%f");
-        if(animationTime.count != textureAnimation.size()) {
+        if(animationTime.count != textureAnimationTime.size()) {
             log(error_log, "Tried to construct ModelObject with invalid \"TextureAnimation\"-node.");
             return;
         }
-        for(unsigned int i = 0; i < textureAnimation.size(); i ++)
-            textureAnimation[i] = animationTime.data[i];
+        for(unsigned int i = 0; i < textureAnimationTime.size(); i ++)
+            textureAnimationTime[i] = animationTime.data[i];
     }
     
     setModel(levelLoader, fileManager.getResourceByPath<Model>(attribute->value()));
@@ -275,7 +275,7 @@ void RigidObject::removeClean() {
 }
 
 void RigidObject::removeFast() {
-    textureAnimation.clear();
+    textureAnimationTime.clear();
     skeletonPose.reset();
     if(body) {
         btRigidBody* rigidBody = getBody();
@@ -304,9 +304,9 @@ void RigidObject::newScriptInstance() {
 }
 
 bool RigidObject::gameTick() {
-    for(unsigned int i = 0; i < textureAnimation.size(); i ++)
-        if(textureAnimation[i ++] >= 0.0)
-            textureAnimation[i ++] += profiler.animationFactor;
+    for(unsigned int i = 0; i < textureAnimationTime.size(); i ++)
+        if(textureAnimationTime[i ++] >= 0.0)
+            textureAnimationTime[i ++] += profiler.animationFactor;
     if(model->skeleton)
         updateSkeletonPose(getRootBone(), model->skeleton->rootBone);
     return GraphicObject::gameTick();
@@ -369,13 +369,13 @@ rapidxml::xml_node<xmlUsedCharType>* RigidObject::write(rapidxml::xml_document<x
         parameterNode->append_attribute(attribute);
     }
     
-    if(textureAnimation.size() > 0) {
+    if(textureAnimationTime.size() > 0) {
         rapidxml::xml_node<xmlUsedCharType>* textureAnimationNode = doc.allocate_node(rapidxml::node_element);
-        textureAnimationNode->name("TextureAnimation");
+        textureAnimationNode->name("TextureAnimationTime");
         std::ostringstream data;
-        for(unsigned int i = 0; i < textureAnimation.size(); i ++) {
+        for(unsigned int i = 0; i < textureAnimationTime.size(); i ++) {
             if(i > 0) data << " ";
-            data << textureAnimation[i];
+            data << textureAnimationTime[i];
         }
         textureAnimationNode->value(doc.allocate_string(data.str().c_str()));
         node->append_node(textureAnimationNode);
@@ -424,7 +424,7 @@ void RigidObject::setModel(LevelLoader* levelLoader, FileResourcePtr<Model> _mod
         if(dynamic_cast<TransformLink*>(*iterator) && dynamic_cast<BoneObject*>((*iterator)->b))
             (*iterator)->removeClean(this);
     }
-    textureAnimation.clear();
+    textureAnimationTime.clear();
     skeletonPose.reset();
     
     model = _model;
@@ -432,7 +432,7 @@ void RigidObject::setModel(LevelLoader* levelLoader, FileResourcePtr<Model> _mod
     
     for(unsigned int i = 0; i < model->meshes.size(); i ++)
         if(model->meshes[i]->material.diffuse && model->meshes[i]->material.diffuse->depth > 1)
-            textureAnimation.push_back(0.0);
+            textureAnimationTime.push_back(0.0);
     
     if(model->skeleton) {
         skeletonPose.reset(new btTransform[model->skeleton->bones.size()]);
@@ -463,7 +463,7 @@ void RigidObject::prepareShaderProgram(Mesh* mesh) {
                 if(model->meshes[i]->material.diffuse->depth > 1)
                     meshIndex ++;
             }
-            mesh->material.diffuse->use(0, textureAnimation[meshIndex]);
+            mesh->material.diffuse->use(0, textureAnimationTime[meshIndex]);
         }else
             mesh->material.diffuse->use(0);
     }

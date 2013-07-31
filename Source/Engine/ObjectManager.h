@@ -26,6 +26,7 @@ class ObjectManager {
     std::set<SimpleObject*> simpleObjects; //! All Cams and SoundObjects in the scene
     btVector3 sceneAmbient; //! Ambient light color
     
+    PosixThreadSupport* bulletThreadSupport; //!< The physics multi thread support
     btCollisionConfiguration* collisionConfiguration; //!< The physics collision configuration
     btCollisionDispatcher* collisionDispatcher; //!< The physics collision dispatcher
     btConstraintSolver* constraintSolver; //!< The physics constraint solver
