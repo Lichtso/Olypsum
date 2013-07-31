@@ -1,7 +1,6 @@
 V8 API: Create/Delete Objects, Documentation
 Implement btSoftBody
-Leap Motion: GUI, V8 API
-Use C++11 Multithreading
+Leap Motion: V8 API
 Windows / Linux Support
 
 Not sure:
@@ -17,6 +16,7 @@ Procedural models / Plants
 3D GUI transformations
 GUILabel texture mask
 KI and path finding
+Use C++11 Multithreading
 
 Test:
 TransformLink with a RigidObject as child

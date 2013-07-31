@@ -111,8 +111,8 @@ v8::Handle<v8::Value> ScriptPointPhysicLink::Constructor(const v8::Arguments &ar
         initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
         PhysicLink* linkPtr = new PhysicLink();
         if(linkPtr->init(initializer, new btPoint2PointConstraint(*a->getBody(), *b->getBody(),
-                                                                  scriptVector3.getDataOfInstance(args[0]),
-                                                                  scriptVector3.getDataOfInstance(args[1])))) {
+                                                                  scriptVector3.getDataOfInstance(args[2]),
+                                                                  scriptVector3.getDataOfInstance(args[3])))) {
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             return args.This();
         }
@@ -167,8 +167,8 @@ v8::Handle<v8::Value> ScriptGearPhysicLink::Constructor(const v8::Arguments &arg
         initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
         PhysicLink* linkPtr = new PhysicLink();
         if(linkPtr->init(initializer, new btGearConstraint(*a->getBody(), *b->getBody(),
-                                                           scriptVector3.getDataOfInstance(args[0]),
-                                                           scriptVector3.getDataOfInstance(args[1]),
+                                                           scriptVector3.getDataOfInstance(args[2]),
+                                                           scriptVector3.getDataOfInstance(args[3]),
                                                            args[4]->NumberValue()))) {
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             return args.This();
@@ -231,15 +231,15 @@ v8::Handle<v8::Value> ScriptHingePhysicLink::Constructor(const v8::Arguments &ar
         return args.This();
     }else if(args.Length() == 4 &&
              scriptRigidObject.isCorrectInstance(args[0]) && scriptRigidObject.isCorrectInstance(args[1]) &&
-             scriptVector3.isCorrectInstance(args[2]) && scriptVector3.isCorrectInstance(args[3])) {
+             scriptMatrix4.isCorrectInstance(args[2]) && scriptMatrix4.isCorrectInstance(args[3])) {
         LinkInitializer initializer;
         RigidObject *a, *b;
         initializer.object[0] = a = scriptBaseObject.getDataOfInstance<RigidObject>(args[0]);
         initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
         PhysicLink* linkPtr = new PhysicLink();
         if(linkPtr->init(initializer, new btHingeConstraint(*a->getBody(), *b->getBody(),
-                                                            scriptMatrix4.getDataOfInstance(args[0])->getBTTransform(),
-                                                            scriptMatrix4.getDataOfInstance(args[1])->getBTTransform(),
+                                                            scriptMatrix4.getDataOfInstance(args[2])->getBTTransform(),
+                                                            scriptMatrix4.getDataOfInstance(args[3])->getBTTransform(),
                                                             true))) {
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             return args.This();
@@ -357,15 +357,15 @@ v8::Handle<v8::Value> ScriptSliderPhysicLink::Constructor(const v8::Arguments &a
         return args.This();
     }else if(args.Length() == 4 &&
              scriptRigidObject.isCorrectInstance(args[0]) && scriptRigidObject.isCorrectInstance(args[1]) &&
-             scriptVector3.isCorrectInstance(args[2]) && scriptVector3.isCorrectInstance(args[3])) {
+             scriptMatrix4.isCorrectInstance(args[2]) && scriptMatrix4.isCorrectInstance(args[3])) {
         LinkInitializer initializer;
         RigidObject *a, *b;
         initializer.object[0] = a = scriptBaseObject.getDataOfInstance<RigidObject>(args[0]);
         initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
         PhysicLink* linkPtr = new PhysicLink();
         if(linkPtr->init(initializer, new btSliderConstraint(*a->getBody(), *b->getBody(),
-                                                             scriptMatrix4.getDataOfInstance(args[0])->getBTTransform(),
-                                                             scriptMatrix4.getDataOfInstance(args[1])->getBTTransform(),
+                                                             scriptMatrix4.getDataOfInstance(args[2])->getBTTransform(),
+                                                             scriptMatrix4.getDataOfInstance(args[3])->getBTTransform(),
                                                              true))) {
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             return args.This();
@@ -539,14 +539,14 @@ v8::Handle<v8::Value> ScriptDof6PhysicLink::Constructor(const v8::Arguments &arg
         return args.This();
     }else if(args.Length() == 5 &&
              scriptRigidObject.isCorrectInstance(args[0]) && scriptRigidObject.isCorrectInstance(args[1]) &&
-             scriptVector3.isCorrectInstance(args[2]) && scriptVector3.isCorrectInstance(args[3]) &&
+             scriptMatrix4.isCorrectInstance(args[2]) && scriptMatrix4.isCorrectInstance(args[3]) &&
              args[4]->IsBoolean()) {
         LinkInitializer initializer;
         RigidObject *a, *b;
         initializer.object[0] = a = scriptBaseObject.getDataOfInstance<RigidObject>(args[0]);
         initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
-        btTransform transA = scriptMatrix4.getDataOfInstance(args[0])->getBTTransform(),
-                    transB = scriptMatrix4.getDataOfInstance(args[1])->getBTTransform();
+        btTransform transA = scriptMatrix4.getDataOfInstance(args[2])->getBTTransform(),
+                    transB = scriptMatrix4.getDataOfInstance(args[3])->getBTTransform();
         PhysicLink* linkPtr = new PhysicLink();
         btGeneric6DofConstraint* constraint;
         if(args[4]->BooleanValue())
@@ -766,15 +766,15 @@ v8::Handle<v8::Value> ScriptConeTwistPhysicLink::Constructor(const v8::Arguments
         return args.This();
     }else if(args.Length() == 4 &&
              scriptRigidObject.isCorrectInstance(args[0]) && scriptRigidObject.isCorrectInstance(args[1]) &&
-             scriptVector3.isCorrectInstance(args[2]) && scriptVector3.isCorrectInstance(args[3])) {
+             scriptMatrix4.isCorrectInstance(args[2]) && scriptMatrix4.isCorrectInstance(args[3])) {
         LinkInitializer initializer;
         RigidObject *a, *b;
         initializer.object[0] = a = scriptBaseObject.getDataOfInstance<RigidObject>(args[0]);
         initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
         PhysicLink* linkPtr = new PhysicLink();
         if(linkPtr->init(initializer, new btConeTwistConstraint(*a->getBody(), *b->getBody(),
-                                                             scriptMatrix4.getDataOfInstance(args[0])->getBTTransform(),
-                                                             scriptMatrix4.getDataOfInstance(args[1])->getBTTransform()))) {
+                                                             scriptMatrix4.getDataOfInstance(args[2])->getBTTransform(),
+                                                             scriptMatrix4.getDataOfInstance(args[3])->getBTTransform()))) {
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             return args.This();
         }
