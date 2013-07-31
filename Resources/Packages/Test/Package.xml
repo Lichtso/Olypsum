@@ -1,0 +1,6 @@
+<Package>
+	<EngineVersion value="0.0.1"/>
+	<Dependencies>
+		<Package value="Default"/>
+	</Dependencies>
+</Package>
