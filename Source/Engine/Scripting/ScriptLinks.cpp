@@ -275,60 +275,75 @@ v8::Handle<v8::Value> ScriptHingePhysicLink::GetHingeAngle(v8::Local<v8::String>
     return v8::Number::New(constraint->getHingeAngle());
 }
 
-v8::Handle<v8::Value> ScriptHingePhysicLink::AccessAngularLimitMin(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptHingePhysicLink::GetAngularLimitMin(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && !args[0]->IsNumber()) {
-        constraint->setLimit(args[0]->NumberValue(), constraint->getUpperLimit());
-        return args[0];
-    }else
-        return v8::Number::New(constraint->getLowerLimit());
+    btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return v8::Number::New(constraint->getLowerLimit());
 }
 
-v8::Handle<v8::Value> ScriptHingePhysicLink::AccessAngularLimitMax(const v8::Arguments& args) {
+void ScriptHingePhysicLink::SetAngularLimitMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && !args[0]->IsNumber()) {
-        constraint->setLimit(constraint->getLowerLimit(), args[0]->NumberValue());
-        return args[0];
-    }else
-        return v8::Number::New(constraint->getUpperLimit());
+    if(!value->IsNumber()) return;
+    btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    constraint->setLimit(value->NumberValue(), constraint->getUpperLimit());
 }
 
-v8::Handle<v8::Value> ScriptHingePhysicLink::AccessAngularMotorEnabled(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptHingePhysicLink::GetAngularLimitMax(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && !args[0]->IsBoolean()) {
-        constraint->enableAngularMotor(args[0]->BooleanValue(),
-                                       constraint->getMotorTargetVelosity(),
-                                       constraint->getMaxMotorImpulse());
-        return args[0];
-    }else
-        return v8::Number::New(constraint->getEnableAngularMotor());
+    btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return v8::Number::New(constraint->getUpperLimit());
 }
 
-v8::Handle<v8::Value> ScriptHingePhysicLink::AccessAngularMotorVelocity(const v8::Arguments& args) {
+void ScriptHingePhysicLink::SetAngularLimitMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && !args[0]->IsNumber()) {
-        constraint->enableAngularMotor(constraint->getEnableAngularMotor(),
-                                       args[0]->NumberValue(),
-                                       constraint->getMaxMotorImpulse());
-        return args[0];
-    }else
-        return v8::Number::New(constraint->getMotorTargetVelosity());
+    if(!value->IsNumber()) return;
+    btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    constraint->setLimit(constraint->getLowerLimit(), value->NumberValue());
 }
 
-v8::Handle<v8::Value> ScriptHingePhysicLink::AccessAngularMotorForce(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptHingePhysicLink::GetAngularMotorEnabled(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && !args[0]->IsNumber()) {
-        constraint->enableAngularMotor(constraint->getEnableAngularMotor(),
-                                       constraint->getMotorTargetVelosity(),
-                                       args[0]->NumberValue());
-        return args[0];
-    }else
-        return v8::Number::New(constraint->getMaxMotorImpulse());
+    btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return v8::Number::New(constraint->getEnableAngularMotor());
+}
+
+void ScriptHingePhysicLink::SetAngularMotorEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsBoolean()) return;
+    btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    constraint->enableAngularMotor(value->BooleanValue(),
+                                   constraint->getMotorTargetVelosity(),
+                                   constraint->getMaxMotorImpulse());
+}
+
+v8::Handle<v8::Value> ScriptHingePhysicLink::GetAngularMotorVelocity(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return v8::Number::New(constraint->getMotorTargetVelosity());
+}
+
+void ScriptHingePhysicLink::SetAngularMotorVelocity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsNumber()) return;
+    btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    constraint->enableAngularMotor(constraint->getEnableAngularMotor(),
+                                   value->NumberValue(),
+                                   constraint->getMaxMotorImpulse());
+}
+
+v8::Handle<v8::Value> ScriptHingePhysicLink::GetAngularMotorForce(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return v8::Number::New(constraint->getMaxMotorImpulse());
+}
+
+void ScriptHingePhysicLink::SetAngularMotorForce(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsNumber()) return;
+    btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    constraint->enableAngularMotor(constraint->getEnableAngularMotor(),
+                                   constraint->getMotorTargetVelosity(),
+                                   value->NumberValue());
 }
 
 ScriptHingePhysicLink::ScriptHingePhysicLink() :ScriptPhysicLink("HingePhysicLink", Constructor) {
@@ -338,11 +353,11 @@ ScriptHingePhysicLink::ScriptHingePhysicLink() :ScriptPhysicLink("HingePhysicLin
     objectTemplate->SetAccessor(v8::String::New("frameA"), GetFrame, SetFrame);
     objectTemplate->SetAccessor(v8::String::New("frameB"), GetFrame, SetFrame);
     objectTemplate->SetAccessor(v8::String::New("hingeAngle"), GetHingeAngle);
-    objectTemplate->Set(v8::String::New("angularLimitMin"), v8::FunctionTemplate::New(AccessAngularLimitMin));
-    objectTemplate->Set(v8::String::New("angularLimitMax"), v8::FunctionTemplate::New(AccessAngularLimitMax));
-    objectTemplate->Set(v8::String::New("angularMotorEnabled"), v8::FunctionTemplate::New(AccessAngularMotorEnabled));
-    objectTemplate->Set(v8::String::New("angularMotorVelocity"), v8::FunctionTemplate::New(AccessAngularMotorVelocity));
-    objectTemplate->Set(v8::String::New("angularMotorForce"), v8::FunctionTemplate::New(AccessAngularMotorForce));
+    objectTemplate->SetAccessor(v8::String::New("angularLimitMin"), GetAngularLimitMin, SetAngularLimitMin);
+    objectTemplate->SetAccessor(v8::String::New("angularLimitMax"), GetAngularLimitMax, SetAngularLimitMax);
+    objectTemplate->SetAccessor(v8::String::New("angularMotorEnabled"), GetAngularMotorEnabled, SetAngularMotorEnabled);
+    objectTemplate->SetAccessor(v8::String::New("angularMotorVelocity"), GetAngularMotorVelocity, SetAngularMotorVelocity);
+    objectTemplate->SetAccessor(v8::String::New("angularMotorForce"), GetAngularMotorForce, SetAngularMotorForce);
     
     functionTemplate->Inherit(scriptPhysicLink.functionTemplate);
 }
@@ -407,104 +422,134 @@ v8::Handle<v8::Value> ScriptSliderPhysicLink::GetSliderPos(v8::Local<v8::String>
     return v8::Number::New(constraint->getLinearPos());
 }
 
-v8::Handle<v8::Value> ScriptSliderPhysicLink::AccessAngularLimitMin(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptSliderPhysicLink::GetAngularLimitMin(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && !args[0]->IsNumber()) {
-        constraint->setLowerAngLimit(args[0]->NumberValue());
-        return args[0];
-    }else
-        return v8::Number::New(constraint->getLowerAngLimit());
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return v8::Number::New(constraint->getLowerAngLimit());
 }
 
-v8::Handle<v8::Value> ScriptSliderPhysicLink::AccessAngularLimitMax(const v8::Arguments& args) {
+void ScriptSliderPhysicLink::SetAngularLimitMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && !args[0]->IsNumber()) {
-        constraint->setUpperAngLimit(args[0]->NumberValue());
-        return args[0];
-    }else
-        return v8::Number::New(constraint->getUpperAngLimit());
+    if(!value->IsNumber()) return;
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    constraint->setLowerAngLimit(value->NumberValue());
 }
 
-v8::Handle<v8::Value> ScriptSliderPhysicLink::AccessLinearLimitMin(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptSliderPhysicLink::GetAngularLimitMax(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && !args[0]->IsNumber()) {
-        constraint->setLowerLinLimit(args[0]->NumberValue());
-        return args[0];
-    }else
-        return v8::Number::New(constraint->getLowerLinLimit());
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return v8::Number::New(constraint->getUpperAngLimit());
 }
 
-v8::Handle<v8::Value> ScriptSliderPhysicLink::AccessLinearLimitMax(const v8::Arguments& args) {
+void ScriptSliderPhysicLink::SetAngularLimitMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && !args[0]->IsNumber()) {
-        constraint->setUpperLinLimit(args[0]->NumberValue());
-        return args[0];
-    }else
-        return v8::Number::New(constraint->getUpperLinLimit());
+    if(!value->IsNumber()) return;
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    constraint->setUpperAngLimit(value->NumberValue());
 }
 
-v8::Handle<v8::Value> ScriptSliderPhysicLink::AccessAngularMotorEnabled(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptSliderPhysicLink::GetAngularMotorEnabled(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && !args[0]->IsBoolean()) {
-        constraint->setPoweredAngMotor(args[0]->BooleanValue());
-        return args[0];
-    }else
-        return v8::Number::New(constraint->getPoweredAngMotor());
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return v8::Number::New(constraint->getPoweredAngMotor());
 }
 
-v8::Handle<v8::Value> ScriptSliderPhysicLink::AccessAngularMotorVelocity(const v8::Arguments& args) {
+void ScriptSliderPhysicLink::SetAngularMotorEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && !args[0]->IsNumber()) {
-        constraint->setTargetAngMotorVelocity(args[0]->NumberValue());
-        return args[0];
-    }else
-        return v8::Number::New(constraint->getTargetAngMotorVelocity());
+    if(!value->IsBoolean()) return;
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    constraint->setPoweredAngMotor(value->BooleanValue());
 }
 
-v8::Handle<v8::Value> ScriptSliderPhysicLink::AccessAngularMotorForce(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptSliderPhysicLink::GetAngularMotorVelocity(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && !args[0]->IsNumber()) {
-        constraint->setMaxAngMotorForce(args[0]->NumberValue());
-        return args[0];
-    }else
-        return v8::Number::New(constraint->getMaxAngMotorForce());
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return v8::Number::New(constraint->getTargetAngMotorVelocity());
 }
 
-v8::Handle<v8::Value> ScriptSliderPhysicLink::AccessLinearMotorEnabled(const v8::Arguments& args) {
+void ScriptSliderPhysicLink::SetAngularMotorVelocity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && !args[0]->IsBoolean()) {
-        constraint->setPoweredLinMotor(args[0]->BooleanValue());
-        return args[0];
-    }else
-        return v8::Number::New(constraint->getPoweredLinMotor());
+    if(!value->IsNumber()) return;
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    constraint->setTargetAngMotorVelocity(value->NumberValue());
 }
 
-v8::Handle<v8::Value> ScriptSliderPhysicLink::AccessLinearMotorVelocity(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptSliderPhysicLink::GetAngularMotorForce(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && !args[0]->IsNumber()) {
-        constraint->setTargetLinMotorVelocity(args[0]->NumberValue());
-        return args[0];
-    }else
-        return v8::Number::New(constraint->getTargetLinMotorVelocity());
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return v8::Number::New(constraint->getMaxAngMotorForce());
 }
 
-v8::Handle<v8::Value> ScriptSliderPhysicLink::AccessLinearMotorForce(const v8::Arguments& args) {
+void ScriptSliderPhysicLink::SetAngularMotorForce(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
-    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && !args[0]->IsNumber()) {
-        constraint->setMaxLinMotorForce(args[0]->NumberValue());
-        return args[0];
-    }else
-        return v8::Number::New(constraint->getMaxLinMotorForce());
+    if(!value->IsNumber()) return;
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    constraint->setMaxAngMotorForce(value->NumberValue());
+}
+
+v8::Handle<v8::Value> ScriptSliderPhysicLink::GetLinearLimitMin(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return v8::Number::New(constraint->getLowerLinLimit());
+}
+
+void ScriptSliderPhysicLink::SetLinearLimitMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsNumber()) return;
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    constraint->setLowerLinLimit(value->NumberValue());
+}
+
+v8::Handle<v8::Value> ScriptSliderPhysicLink::GetLinearLimitMax(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return v8::Number::New(constraint->getUpperLinLimit());
+}
+
+void ScriptSliderPhysicLink::SetLinearLimitMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsNumber()) return;
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    constraint->setUpperLinLimit(value->NumberValue());
+}
+
+v8::Handle<v8::Value> ScriptSliderPhysicLink::GetLinearMotorEnabled(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return v8::Number::New(constraint->getPoweredLinMotor());
+}
+
+void ScriptSliderPhysicLink::SetLinearMotorEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsBoolean()) return;
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    constraint->setPoweredLinMotor(value->BooleanValue());
+}
+
+v8::Handle<v8::Value> ScriptSliderPhysicLink::GetLinearMotorVelocity(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return v8::Number::New(constraint->getTargetLinMotorVelocity());
+}
+
+void ScriptSliderPhysicLink::SetLinearMotorVelocity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsNumber()) return;
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    constraint->setTargetLinMotorVelocity(value->NumberValue());
+}
+
+v8::Handle<v8::Value> ScriptSliderPhysicLink::GetLinearMotorForce(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    return v8::Number::New(constraint->getMaxLinMotorForce());
+}
+
+void ScriptSliderPhysicLink::SetLinearMotorForce(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsNumber()) return;
+    btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(info.This())->constraint);
+    constraint->setMaxLinMotorForce(value->NumberValue());
 }
 
 ScriptSliderPhysicLink::ScriptSliderPhysicLink() :ScriptPhysicLink("SliderPhysicLink", Constructor) {
@@ -515,16 +560,16 @@ ScriptSliderPhysicLink::ScriptSliderPhysicLink() :ScriptPhysicLink("SliderPhysic
     objectTemplate->SetAccessor(v8::String::New("frameB"), GetFrame, SetFrame);
     objectTemplate->SetAccessor(v8::String::New("hingeAngle"), GetHingeAngle);
     objectTemplate->SetAccessor(v8::String::New("sliderPos"), GetSliderPos);
-    objectTemplate->Set(v8::String::New("angularLimitMin"), v8::FunctionTemplate::New(AccessAngularLimitMin));
-    objectTemplate->Set(v8::String::New("angularLimitMax"), v8::FunctionTemplate::New(AccessAngularLimitMax));
-    objectTemplate->Set(v8::String::New("linearLimitMin"), v8::FunctionTemplate::New(AccessLinearLimitMin));
-    objectTemplate->Set(v8::String::New("linearLimitMax"), v8::FunctionTemplate::New(AccessLinearLimitMax));
-    objectTemplate->Set(v8::String::New("angularMotorEnabled"), v8::FunctionTemplate::New(AccessAngularMotorEnabled));
-    objectTemplate->Set(v8::String::New("angularMotorVelocity"), v8::FunctionTemplate::New(AccessAngularMotorVelocity));
-    objectTemplate->Set(v8::String::New("angularMotorForce"), v8::FunctionTemplate::New(AccessAngularMotorForce));
-    objectTemplate->Set(v8::String::New("linearMotorEnabled"), v8::FunctionTemplate::New(AccessLinearMotorEnabled));
-    objectTemplate->Set(v8::String::New("linearMotorVelocity"), v8::FunctionTemplate::New(AccessLinearMotorVelocity));
-    objectTemplate->Set(v8::String::New("linearMotorForce"), v8::FunctionTemplate::New(AccessLinearMotorForce));
+    objectTemplate->SetAccessor(v8::String::New("angularLimitMin"), GetAngularLimitMin, SetAngularLimitMin);
+    objectTemplate->SetAccessor(v8::String::New("angularLimitMax"), GetAngularLimitMax, SetAngularLimitMax);
+    objectTemplate->SetAccessor(v8::String::New("angularMotorEnabled"), GetAngularMotorEnabled, SetAngularMotorEnabled);
+    objectTemplate->SetAccessor(v8::String::New("angularMotorVelocity"), GetAngularMotorVelocity, SetAngularMotorVelocity);
+    objectTemplate->SetAccessor(v8::String::New("angularMotorForce"), GetAngularMotorForce, SetAngularMotorForce);
+    objectTemplate->SetAccessor(v8::String::New("linearLimitMin"), GetLinearLimitMin, SetLinearLimitMin);
+    objectTemplate->SetAccessor(v8::String::New("linearLimitMax"), GetLinearLimitMax, SetLinearLimitMax);
+    objectTemplate->SetAccessor(v8::String::New("linearMotorEnabled"), GetLinearMotorEnabled, SetLinearMotorEnabled);
+    objectTemplate->SetAccessor(v8::String::New("linearMotorVelocity"), GetLinearMotorVelocity, SetLinearMotorVelocity);
+    objectTemplate->SetAccessor(v8::String::New("linearMotorForce"), GetLinearMotorForce, SetLinearMotorForce);
     
     functionTemplate->Inherit(scriptPhysicLink.functionTemplate);
 }
