@@ -140,6 +140,10 @@ void LightObject::deleteShadowMap() {
 
 
 DirectionalLight::DirectionalLight() {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    scriptDirectionalLight.functionTemplate->GetFunction()->NewInstance(1, &external);
+
     shadowCam.fov = 0.0;
     shadowCam.near = 1.0;
 }
@@ -154,13 +158,6 @@ DirectionalLight::DirectionalLight(rapidxml::xml_node<xmlUsedCharType>* node, Le
     vecData.readString(bounds->value(), "%f");
     setBounds(vecData.getVector3());
     LightObject::init(node, levelLoader);
-}
-
-void DirectionalLight::newScriptInstance() {
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    v8::Local<v8::Object> instance = scriptDirectionalLight.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 void DirectionalLight::setTransformation(const btTransform& transformation) {
@@ -236,6 +233,10 @@ rapidxml::xml_node<xmlUsedCharType>* DirectionalLight::write(rapidxml::xml_docum
 
 
 SpotLight::SpotLight() {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    scriptSpotLight.functionTemplate->GetFunction()->NewInstance(1, &external);
+    
     shadowCam.width = 1.0;
     shadowCam.height = 1.0;
     shadowCam.near = 0.1;
@@ -262,13 +263,6 @@ SpotLight::SpotLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* lev
     sscanf(attribute->value(), "%f", &cutoff);
     setBounds(cutoff, range);
     LightObject::init(node, levelLoader);
-}
-
-void SpotLight::newScriptInstance() {
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    v8::Local<v8::Object> instance = scriptSpotLight.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 void SpotLight::setTransformation(const btTransform& transformation) {
@@ -354,6 +348,10 @@ rapidxml::xml_node<xmlUsedCharType>* SpotLight::write(rapidxml::xml_document<xml
 
 
 PositionalLight::PositionalLight() :shadowMapB(NULL) {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    scriptPositionalLight.functionTemplate->GetFunction()->NewInstance(1, &external);
+    
     shadowCam.width = 1.0;
     shadowCam.height = 1.0;
     shadowCam.near = 0.1;
@@ -383,13 +381,6 @@ PositionalLight::PositionalLight(rapidxml::xml_node<xmlUsedCharType>* node, Leve
 
 PositionalLight::~PositionalLight() {
     if(shadowMapB) delete shadowMapB;
-}
-
-void PositionalLight::newScriptInstance() {
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    v8::Local<v8::Object> instance = scriptPositionalLight.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 void PositionalLight::setTransformation(const btTransform& transformation) {

@@ -251,7 +251,7 @@ v8::Handle<v8::Value> ScriptRigidObject::FindBoneByPath(const v8::Arguments& arg
     for(unsigned int i = 0; i < path->Length(); i ++) {
         bool notFound = true;
         std::string boneName = stdStrOfV8(path->Get(i));
-        for(auto iterator : boneObject->links) {
+        for(auto iterator : boneObject->links)
             if(dynamic_cast<TransformLink*>(iterator) &&
                dynamic_cast<BoneObject*>(iterator->b) &&
                static_cast<BoneObject*>(iterator->b)->bone->name == boneName) {
@@ -259,7 +259,6 @@ v8::Handle<v8::Value> ScriptRigidObject::FindBoneByPath(const v8::Arguments& arg
                 notFound = false;
                 break;
             }
-        }
         
         if(notFound)
             return v8::Undefined();

@@ -139,22 +139,7 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
                 return false;
             }
             
-            object->newScriptInstance();
-            rapidxml::xml_node<xmlUsedCharType>* scriptNode = node->first_node("Script");
-            if(scriptNode) {
-                attribute = scriptNode->first_attribute("src");
-                if(attribute) {
-                    FilePackage* filePackage;
-                    std::string name;
-                    if(fileManager.readResourcePath(attribute->value(), filePackage, name)) {
-                        object->scriptFile = scriptManager->getScriptFile(filePackage, name);
-                        if(object->scriptFile)
-                            object->scriptFile->callFunction("onload", true, { object->scriptInstance, scriptManager->readCdataXMLNode(node) });
-                    }
-                }else
-                    log(error_log, "Tried to construct resource without \"src\"-attribute.");
-            }
-            
+            object->initScriptNode(node);
             node = node->next_sibling();
         }
     }
@@ -175,7 +160,9 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
                 log(error_log, std::string("Tried to construct invalid Link: ")+node->name()+'.');
                 return false;
             }
+            
             link->init(node, this);
+            link->initScriptNode(node);
             node = node->next_sibling();
         }
     }

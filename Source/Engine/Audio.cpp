@@ -77,16 +77,23 @@ float SoundTrack::getLength() {
 
 
 
-SoundObject::SoundObject(SoundTrack* soundTrackB, Mode _mode) :soundTrack(soundTrackB), mode(_mode), velocity(btVector3(0, 0, 0)) {
+SoundObject::SoundObject() :velocity(btVector3(0, 0, 0)) {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    scriptSoundObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    
     objectManager.simpleObjects.insert(this);
     alGenSources(1, &ALname);
+}
+
+SoundObject::SoundObject(SoundTrack* _soundTrack, Mode _mode) :SoundObject() {
+    soundTrack = _soundTrack;
+    mode = _mode;
     alSourcei(ALname, AL_BUFFER, soundTrack->ALname);
     setPlaying(true);
 }
 
-SoundObject::SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :velocity(btVector3(0, 0, 0)) {
-    objectManager.simpleObjects.insert(this);
-    alGenSources(1, &ALname);
+SoundObject::SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :SoundObject() {
     BaseObject::init(node, levelLoader);
     
     rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("SoundTrack");
@@ -158,13 +165,6 @@ void SoundObject::removeClean() {
     alDeleteSources(1, &ALname);
     objectManager.simpleObjects.erase(this);
     SimpleObject::removeClean();
-}
-
-void SoundObject::newScriptInstance() {
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    v8::Local<v8::Object> instance = scriptSoundObject.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 bool SoundObject::gameTick() {

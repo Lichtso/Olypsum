@@ -140,11 +140,7 @@ void comMotionState::setWorldTransform(const btTransform& centerOfMassWorldTrans
 
 
 void RigidObject::setupBones(LevelLoader* levelLoader, BaseObject* object, Bone* bone) {
-    LinkInitializer initializer;
-    initializer.object[0] = object;
-    initializer.object[1] = object = new BoneObject(bone);
-    btTransform transform = btTransform::getIdentity();
-    (new TransformLink())->init(initializer, transform);
+    object = new BoneObject(bone, object);
     if(levelLoader)
         levelLoader->pushObject(object);
     for(auto childBone : bone->children)
@@ -172,6 +168,10 @@ void RigidObject::updateSkeletonPose(BoneObject* object, Bone* bone) {
 }
 
 RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    scriptRigidObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    
     GraphicObject::init(node, levelLoader);
     rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Model");
     if(!parameterNode) {
@@ -294,13 +294,6 @@ void RigidObject::setTransformation(const btTransform& transformation) {
 btTransform RigidObject::getTransformation() {
     simpleMotionState* motionState = static_cast<simpleMotionState*>(getBody()->getMotionState());
     return motionState->transformation;
-}
-
-void RigidObject::newScriptInstance() {
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    v8::Local<v8::Object> instance = scriptRigidObject.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 bool RigidObject::gameTick() {

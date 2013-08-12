@@ -28,6 +28,7 @@ class CamObject : public SimpleObject {
           far, //!< Distance of the far plane if fov < 90 else the radius of the parabolid or sphere
           width, //!< Width of the view used if fov < 90
           height;//!< Height of the view used if fov < 90
+    //! Initialize as GUI cam
     CamObject();
     CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     void removeClean();
@@ -60,7 +61,6 @@ class CamObject : public SimpleObject {
      */
     void drawDebugFrustum(Color4 color);
     bool gameTick();
-    void newScriptInstance();
     //! Sets this Cam as the currentCam
     void use();
     //! Recalculates the viewMat of this Cam

@@ -8,13 +8,6 @@
 
 #include "ScriptLinks.h"
 
-void BaseLink::newScriptInstance() {
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    v8::Local<v8::Object> instance = scriptBaseLink.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
-}
-
 void BaseLink::removeClean(BaseObject* object) {
     a->links.erase(this);
     b->links.erase(this);
@@ -41,6 +34,7 @@ bool BaseLink::init(LinkInitializer& initializer) {
         delete this;
         return false;
     }
+    
     auto iteratorA = initializer.object[0]->findLink(initializer.object[1]),
          iteratorB = initializer.object[1]->findLink(initializer.object[0]);
     if(iteratorA != initializer.object[0]->links.end() || iteratorB != initializer.object[1]->links.end()) {
@@ -54,10 +48,12 @@ bool BaseLink::init(LinkInitializer& initializer) {
             return false;
         }
     }
+    
     initializer.object[0]->links.insert(this);
     initializer.object[1]->links.insert(this);
     a = initializer.object[0];
     b = initializer.object[1];
+    
     return true;
 }
 
@@ -88,6 +84,11 @@ bool BaseLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* leve
     
     initializer.object[0] = levelLoader->getObjectLinking(initializer.index[0]);
     initializer.object[1] = levelLoader->getObjectLinking(initializer.index[1]);
+    
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    scriptBaseLink.functionTemplate->GetFunction()->NewInstance(1, &external);
+    
     return init(initializer);
 }
 
@@ -112,13 +113,6 @@ rapidxml::xml_node<xmlUsedCharType>* BaseLink::write(rapidxml::xml_document<xmlU
 
 PhysicLink::~PhysicLink() {
     delete constraint;
-}
-
-void PhysicLink::newScriptInstance() {
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    v8::Local<v8::Object> instance = scriptPhysicLink.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 void PhysicLink::setCollisionDisabled(bool collisionDisabled) {
@@ -181,6 +175,10 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         return false;
     }
     
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    v8::Local<v8::Object> instance;
+    
     if(strcmp(attribute->value(), "point") == 0) {
         parameterNode = node->first_node("Point");
         if(!parameterNode) {
@@ -202,6 +200,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         btVector3 pointB = vecData.getVector3();
         
         constraint = new btPoint2PointConstraint(*rigidA->getBody(), *rigidB->getBody(), pointA, pointB);
+        instance = scriptPointPhysicLink.functionTemplate->GetFunction()->NewInstance(1, &external);
     }else if(strcmp(attribute->value(), "gear") == 0) {
         rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Axis");
         if(!parameterNode) {
@@ -232,6 +231,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         sscanf(attribute->value(), "%f", &ratio);
         
         constraint = new btGearConstraint(*rigidA->getBody(), *rigidB->getBody(), axisA, axisB, ratio);
+        instance = scriptGearPhysicLink.functionTemplate->GetFunction()->NewInstance(1, &external);
     }else if(strcmp(attribute->value(), "hinge") == 0 || strcmp(attribute->value(), "slider") == 0) {
         parameterNode = node->first_node("Frame");
         if(!parameterNode) {
@@ -257,8 +257,11 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             frameA *= transform;
             frameB *= transform;
             constraint = hinge = new btHingeConstraint(*rigidA->getBody(), *rigidB->getBody(), frameA, frameB, true);
-        }else
+            instance = scriptHingePhysicLink.functionTemplate->GetFunction()->NewInstance(1, &external);
+        }else{
             constraint = slider = new btSliderConstraint(*rigidA->getBody(), *rigidB->getBody(), frameA, frameB, true);
+            instance = scriptSliderPhysicLink.functionTemplate->GetFunction()->NewInstance(1, &external);
+        }
         
         parameterNode = node->first_node("AngularLimit");
         if(parameterNode) {
@@ -419,6 +422,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             }
         }else
             constraint = dof6 = new btGeneric6DofConstraint(*rigidA->getBody(), *rigidB->getBody(), frameA, frameB, true);
+        instance = scriptDof6PhysicLink.functionTemplate->GetFunction()->NewInstance(1, &external);
         
         parameterNode = node->first_node("AngularLimit");
         if(parameterNode) {
@@ -527,6 +531,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         
         btConeTwistConstraint* coneTwist;
         constraint = coneTwist = new btConeTwistConstraint(*rigidA->getBody(), *rigidB->getBody(), frameA, frameB);
+        instance = scriptConeTwistPhysicLink.functionTemplate->GetFunction()->NewInstance(1, &external);
         
         parameterNode = node->first_node("AngularLimit");
         if(parameterNode) {
@@ -571,6 +576,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
     
     constraint->setUserConstraintPtr(this);
     objectManager.physicsWorld->addConstraint(constraint, node->first_node("CollisionDisabled"));
+    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
     return true;
 }
 
@@ -910,13 +916,6 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
 
 
 
-void TransformLink::newScriptInstance() {
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    v8::Local<v8::Object> instance = scriptTransformLink.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
-}
-
 void TransformLink::gameTick() {
     BoneObject* boneObject = dynamic_cast<BoneObject*>(b);
     if(boneObject) {
@@ -958,9 +957,22 @@ bool TransformLink::init(LinkInitializer& initializer, btTransform& _transform) 
     return true;
 }
 
+bool TransformLink::init(LinkInitializer& initializer) {
+    btTransform transform = btTransform::getIdentity();
+    
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    scriptTransformLink.functionTemplate->GetFunction()->NewInstance(1, &external);
+    return TransformLink::init(initializer, transform);
+}
+
 bool TransformLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
     if(!BaseLink::init(node, levelLoader) || !checkIfAttachingIsValid()) return false;
     transform = readTransformationXML(node);
+    
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    scriptTransformLink.functionTemplate->GetFunction()->NewInstance(1, &external);
     return true;
 }
 

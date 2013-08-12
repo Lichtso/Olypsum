@@ -118,7 +118,6 @@ class RigidObject : public GraphicObject {
     btRigidBody* getBody() {
         return static_cast<btRigidBody*>(body);
     }
-    void newScriptInstance();
     bool gameTick();
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
     //! Returns true if the btCollisionObject::CF_KINEMATIC_OBJECT flag is set

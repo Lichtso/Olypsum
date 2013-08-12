@@ -185,17 +185,17 @@ void main() {
     
     #if REFLECTION_TYPE == 1 //Plane Reflection
     #if BUMP_MAPPING == 0 //No normal mapping
-    specularOut += materialOut.r * texture(sampler4, gl_FragCoord.xy).rgb;
+    specularOut += materialOut.g * texture(sampler4, gl_FragCoord.xy).rgb;
     #else //Normal mapping
-    specularOut += materialOut.r * texture(sampler4, gl_FragCoord.xy-modelNormal.xy*50.0).rgb;
+    specularOut += materialOut.g * texture(sampler4, gl_FragCoord.xy-modelNormal.xy*50.0).rgb;
     #endif //Normal mapping
     #elif REFLECTION_TYPE == 2 //Environment Reflection
-    //specularOut += materialOut.r * texture(sampler4, reflect(normalOut, viewVec)).rgb;
-    specularOut += texture(sampler4, normalOut).rgb;
+    //specularOut += materialOut.g * texture(sampler4, reflect(normalOut, viewVec)).rgb;
+    specularOut += materialOut.g * texture(sampler4, normalOut).rgb;
     #endif //Environment Reflection
     
     #if REFLECTION_TYPE > 0 || BLENDING_QUALITY > 0
-    colorOut.rgb *= min(colorOut.a, 1.0-materialOut.r);
+    colorOut.rgb *= min(colorOut.a, 1.0-materialOut.g);
     #endif //Reflection
 }
 

@@ -30,8 +30,8 @@ class BaseClass {
     public:
     ScriptFile* scriptFile; //!< The script file to be called on events
     v8::Persistent<v8::Object> scriptInstance; //!< The script representation
-    //! Allocates a new BaseObject::scriptInstance (overwritten by child classes)
-    virtual void newScriptInstance();
+    //! Initialize the "Script" rapidxml::xml_node
+    void initScriptNode(rapidxml::xml_node<xmlUsedCharType>* node);
 };
 
 //! Objects basic class
@@ -43,7 +43,6 @@ class BaseClass {
 class BaseObject : public BaseClass {
     public:
     std::set<BaseLink*> links; //!< A map of LinkObject and names to connect BaseObject to others
-    void newScriptInstance();
     //! Used to remove a BaseObject from all lists correctly
     virtual void removeClean();
     //! Used to delete a BaseObject
@@ -116,8 +115,7 @@ struct Bone {
 class BoneObject : public SimpleObject {
     public:
     Bone* bone;
-    BoneObject(Bone* boneB) : bone(boneB) { }
-    void newScriptInstance();
+    BoneObject(Bone* bone, BaseObject* parentObject);
 };
 
 //! BaseObject with physics-body
@@ -140,7 +138,6 @@ class PhysicObject : public BaseObject {
     virtual btTransform getTransformation() {
         return body->getWorldTransform();
     }
-    void newScriptInstance();
     //! Activates all PhysicObjects that are touching this PhysicObject
     void updateTouchingObjects();
     //! Is called by the engine if a collision to another PhysicObject has been detected

@@ -12,6 +12,8 @@ v8::Handle<v8::Value> ScriptBaseLink::Constructor(const v8::Arguments &args) {
     v8::HandleScope handleScope;
     
     if(args.Length() == 1 && args[0]->IsExternal()) {
+        BaseLink* linkPtr = static_cast<BaseLink*>(v8::Local<v8::External>::Cast(args[0])->Value());
+        linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
         args.This()->SetInternalField(0, args[0]);
         return args.This();
     }else if(args.Length() == 2 &&
@@ -21,6 +23,7 @@ v8::Handle<v8::Value> ScriptBaseLink::Constructor(const v8::Arguments &args) {
         initializer.object[1] = scriptBaseObject.getDataOfInstance<BaseObject>(args[1]);
         BaseLink* linkPtr = new BaseLink();
         if(linkPtr->init(initializer)) {
+            linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             return args.This();
         }
@@ -113,6 +116,7 @@ v8::Handle<v8::Value> ScriptPointPhysicLink::Constructor(const v8::Arguments &ar
         if(linkPtr->init(initializer, new btPoint2PointConstraint(*a->getBody(), *b->getBody(),
                                                                   scriptVector3.getDataOfInstance(args[2]),
                                                                   scriptVector3.getDataOfInstance(args[3])))) {
+            linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             return args.This();
         }
@@ -170,6 +174,7 @@ v8::Handle<v8::Value> ScriptGearPhysicLink::Constructor(const v8::Arguments &arg
                                                            scriptVector3.getDataOfInstance(args[2]),
                                                            scriptVector3.getDataOfInstance(args[3]),
                                                            args[4]->NumberValue()))) {
+            linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             return args.This();
         }
@@ -241,6 +246,7 @@ v8::Handle<v8::Value> ScriptHingePhysicLink::Constructor(const v8::Arguments &ar
                                                             scriptMatrix4.getDataOfInstance(args[2])->getBTTransform(),
                                                             scriptMatrix4.getDataOfInstance(args[3])->getBTTransform(),
                                                             true))) {
+            linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             return args.This();
         }
@@ -382,6 +388,7 @@ v8::Handle<v8::Value> ScriptSliderPhysicLink::Constructor(const v8::Arguments &a
                                                              scriptMatrix4.getDataOfInstance(args[2])->getBTTransform(),
                                                              scriptMatrix4.getDataOfInstance(args[3])->getBTTransform(),
                                                              true))) {
+            linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             return args.This();
         }
@@ -599,6 +606,7 @@ v8::Handle<v8::Value> ScriptDof6PhysicLink::Constructor(const v8::Arguments &arg
         else
             constraint = new btGeneric6DofConstraint(*a->getBody(), *b->getBody(), transA, transB, true);
         if(linkPtr->init(initializer, constraint)) {
+            linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             return args.This();
         }
@@ -820,6 +828,7 @@ v8::Handle<v8::Value> ScriptConeTwistPhysicLink::Constructor(const v8::Arguments
         if(linkPtr->init(initializer, new btConeTwistConstraint(*a->getBody(), *b->getBody(),
                                                              scriptMatrix4.getDataOfInstance(args[2])->getBTTransform(),
                                                              scriptMatrix4.getDataOfInstance(args[3])->getBTTransform()))) {
+            linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             return args.This();
         }
@@ -905,6 +914,8 @@ v8::Handle<v8::Value> ScriptTransformLink::Constructor(const v8::Arguments &args
     v8::HandleScope handleScope;
     
     if(args.Length() == 1 && args[0]->IsExternal()) {
+        TransformLink* linkPtr = static_cast<TransformLink*>(v8::Local<v8::External>::Cast(args[0])->Value());
+        linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
         args.This()->SetInternalField(0, args[0]);
         return args.This();
     }else if(args.Length() == 3 &&

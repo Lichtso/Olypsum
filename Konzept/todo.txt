@@ -1,4 +1,7 @@
 V8 API: Create/Delete Objects, Documentation
+Improve ParticleSystem bounding volumes
+Support to load another initial container than "Containers/start.xml"
+Reform PhysicLink burstImpulse polling to a event based solution
 Implement btSoftBody
 Leap Motion: V8 API
 Windows / Linux Support
@@ -16,7 +19,7 @@ Procedural models / Plants
 3D GUI transformations
 GUILabel texture mask
 KI and path finding
-Use C++11 Multithreading
+Water physics / underwater effects
 
 Test:
 TransformLink with a RigidObject as child

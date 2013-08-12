@@ -29,7 +29,6 @@ class TerrainObject : public GraphicObject {
     float* heights;
     TerrainObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     ~TerrainObject();
-    void newScriptInstance();
     void draw();
     void updateModel();
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);

@@ -39,12 +39,17 @@ struct FrustumCullingCallback : btDbvt::ICollide {
 
 
 
-CamObject::CamObject() :fov(90.0/180.0*M_PI), near(1.0), far(10000.0), width(prevOptionsState.videoWidth>>1), height(prevOptionsState.videoHeight>>1) {
+CamObject::CamObject() :fov(0.0), near(-1.0), far(1.0), width(prevOptionsState.videoWidth>>1), height(prevOptionsState.videoHeight>>1) {
     setTransformation(btTransform::getIdentity());
+    updateViewMat();
 }
 
 CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader)
     :width(prevOptionsState.videoWidth>>1), height(prevOptionsState.videoHeight>>1) {
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    scriptCamObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    
     objectManager.simpleObjects.insert(this);
     BaseObject::init(node, levelLoader);
     
@@ -314,13 +319,6 @@ bool CamObject::gameTick() {
     alListener3f(AL_POSITION, pos.x(), pos.y(), pos.z());
     alListener3f(AL_VELOCITY, velocity.x(), velocity.y(), velocity.z());
     return SimpleObject::gameTick();
-}
-
-void CamObject::newScriptInstance() {
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    v8::Local<v8::Object> instance = scriptCamObject.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 void CamObject::use() {

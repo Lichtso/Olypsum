@@ -29,10 +29,15 @@ ObjectManager::ObjectManager() {
     currentShadowLight = NULL;
     collisionConfiguration = new btSoftBodyRigidBodyCollisionConfiguration();
     collisionDispatcher = new btCollisionDispatcher(collisionConfiguration);
-    PosixThreadSupport::ThreadConstructionInfo solverConstructionInfo(NULL, SolverThreadFunc, SolverlsMemoryFunc, std::thread::hardware_concurrency());
+    
+    /*PosixThreadSupport::ThreadConstructionInfo solverConstructionInfo(NULL, SolverThreadFunc, SolverlsMemoryFunc, std::thread::hardware_concurrency()/2);
 	bulletThreadSupport = new PosixThreadSupport(solverConstructionInfo);
-    constraintSolver = new btParallelConstraintSolver(bulletThreadSupport); //btSequentialImpulseConstraintSolver();
-    softBodySolver = new btDefaultSoftBodySolver(); //btOpenCLSoftBodySolver();
+	constraintSolver = new btParallelConstraintSolver(bulletThreadSupport);*/
+    constraintSolver = new btSequentialImpulseConstraintSolver();
+    
+    //softBodySolver = NULL;
+    softBodySolver = new btDefaultSoftBodySolver();
+    softBodyOutput = NULL;
     broadphase = new btDbvtBroadphase();
 }
 
@@ -42,10 +47,57 @@ ObjectManager::~ObjectManager() {
     
     delete broadphase;
     delete softBodySolver;
+    if(softBodyOutput) delete softBodyOutput;
     delete constraintSolver;
-    delete bulletThreadSupport;
+    //delete bulletThreadSupport;
     delete collisionDispatcher;
     delete collisionConfiguration;
+}
+
+bool ObjectManager::initOpenCL() {
+    cl_uint platformCount;
+	cl_int clError = clGetPlatformIDs(0, NULL, &platformCount);
+    if(!softBodySolver && !softBodyOutput && clError == CL_SUCCESS && platformCount > 0) {
+		cl_platform_id* platforms = new cl_platform_id[platformCount];
+		clError = clGetPlatformIDs(platformCount, platforms, NULL);
+        
+        for(int i = 0; i < platformCount; i ++) {
+			char name[128], vendor[128], version[128];
+			clError = clGetPlatformInfo(platforms[i], CL_PLATFORM_NAME, sizeof(name), name, NULL);
+            clError = clGetPlatformInfo(platforms[i], CL_PLATFORM_VENDOR, sizeof(vendor), vendor, NULL);
+            clError = clGetPlatformInfo(platforms[i], CL_PLATFORM_VERSION, sizeof(version), version, NULL);
+            log(info_log, std::string("OpenCL Platform: ")+name+", "+vendor+", "+version);
+            
+            cl_uint num_entries = 16;
+            cl_device_id devices[16];
+            cl_uint computeUnitCount;
+            cl_uint devicesCount = -1;
+            
+            clError = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_CPU, num_entries, devices, &devicesCount);
+            for(int j = 0; j < devicesCount; j ++) {
+                clGetDeviceInfo(devices[j], CL_DEVICE_NAME, sizeof(name), name, NULL);
+                clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, sizeof(vendor), vendor, NULL);
+                clGetDeviceInfo(devices[j], CL_DRIVER_VERSION, sizeof(version), version, NULL);
+                clGetDeviceInfo(devices[j], CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(computeUnitCount), &computeUnitCount, NULL);
+                log(info_log, std::string("OpenCL Device: ")+name+", "+vendor+", "+version+", "+stringOf(computeUnitCount)+" Cores");
+            }
+            
+            cl_context_properties cps[7] = {
+                CL_CONTEXT_PLATFORM, (cl_context_properties)platforms[i], 0
+                /*CL_GL_CONTEXT_KHR, (cl_context_properties)pGLContext,
+                CL_WGL_HDC_KHR, (cl_context_properties)pGLDC,
+                0*/
+            };
+            cl_context context = clCreateContext(cps, 1, &devices[0], NULL, NULL, &clError);
+            cl_command_queue commandQue = clCreateCommandQueue(context, devices[0], 0, &clError);
+            softBodySolver = new btOpenCLSoftBodySolverSIMDAware(commandQue, context);
+            softBodyOutput = new btSoftBodySolverOutputCLtoGL(commandQue, context);
+		}
+        
+        delete [] platforms;
+        return false;
+    }else
+        return false;
 }
 
 void ObjectManager::init() {
@@ -76,10 +128,10 @@ void ObjectManager::init() {
     
     //Init Cams
     guiCam = new CamObject();
-    guiCam->fov = 0.0;
-    guiCam->near = -1.0;
-    guiCam->far = 1.0;
-    guiCam->updateViewMat();
+    
+    //Show loading screen
+    loadStaticShaderPrograms();
+    menu.setMenu(Menu::Name::loading);
     
     //Init Sound
     soundDevice = alcOpenDevice(NULL);
@@ -88,9 +140,7 @@ void ObjectManager::init() {
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
     log(info_log, std::string("OpenAL sound output: ")+alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
     
-    
-    loadStaticShaderPrograms();
-    menu.setMenu(Menu::Name::loading);
+    initOpenCL();
 }
 
 void ObjectManager::clear() {

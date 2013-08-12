@@ -59,7 +59,7 @@ void AppMain(int argc, char *argv[]) {
     
     //Init OpenGL
     {
-        log(info_log, stringOf(std::thread::hardware_concurrency())+std::string(" CPUs"));
+        log(info_log, std::string("Multi Threading: ")+stringOf(std::thread::hardware_concurrency())+" CPUs");
         char* glStr = NULL;
         GLint glAuxIa, glAuxIb;
         glStr = (char*)glGetString(GL_VENDOR);

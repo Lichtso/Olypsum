@@ -13,7 +13,6 @@
 		1114B84816A88BD100B1CD41 /* BulletMultiThreaded.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B84216A88BD100B1CD41 /* BulletMultiThreaded.framework */; };
 		1114B84916A88BD100B1CD41 /* BulletSoftBody.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B84316A88BD100B1CD41 /* BulletSoftBody.framework */; };
 		1114B84A16A88BD100B1CD41 /* LinearMath.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B84416A88BD100B1CD41 /* LinearMath.framework */; };
-		1114B84B16A88BD100B1CD41 /* MiniCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B84516A88BD100B1CD41 /* MiniCL.framework */; };
 		1114B86B16A8930E00B1CD41 /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B86816A8930E00B1CD41 /* SDL_image.framework */; };
 		1114B86C16A8930E00B1CD41 /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B86916A8930E00B1CD41 /* SDL_ttf.framework */; };
 		1114B86D16A8930E00B1CD41 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B86A16A8930E00B1CD41 /* SDL.framework */; };
@@ -26,7 +25,6 @@
 		1114B87716A8937B00B1CD41 /* BulletMultiThreaded.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1114B84216A88BD100B1CD41 /* BulletMultiThreaded.framework */; };
 		1114B87816A8937B00B1CD41 /* BulletSoftBody.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1114B84316A88BD100B1CD41 /* BulletSoftBody.framework */; };
 		1114B87916A8937B00B1CD41 /* LinearMath.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1114B84416A88BD100B1CD41 /* LinearMath.framework */; };
-		1114B87A16A8937B00B1CD41 /* MiniCL.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1114B84516A88BD100B1CD41 /* MiniCL.framework */; };
 		1114B87B16A8937B00B1CD41 /* SDL_image.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1114B86816A8930E00B1CD41 /* SDL_image.framework */; };
 		1114B87C16A8937B00B1CD41 /* SDL_ttf.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1114B86916A8930E00B1CD41 /* SDL_ttf.framework */; };
 		1114B87D16A8937B00B1CD41 /* SDL.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1114B86A16A8930E00B1CD41 /* SDL.framework */; };
@@ -98,6 +96,7 @@
 		11DA1F11162DEA03007D7E6C /* Ray3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11DA1F0D162DEA03007D7E6C /* Ray3.cpp */; };
 		11DA1F12162DEA03007D7E6C /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11DA1F0F162DEA03007D7E6C /* Matrix4.cpp */; };
 		11DA1F16162DEA18007D7E6C /* LightVolume.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11DA1F14162DEA18007D7E6C /* LightVolume.cpp */; };
+		11DD0B0A17AA509900A43E39 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11DD0B0917AA509900A43E39 /* OpenCL.framework */; };
 		11EC642C178F3114007990B9 /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1160B64F178F2E57002ADF40 /* libLeap.dylib */; };
 		11EC642F178F3291007990B9 /* LeapMotion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11EC642D178F3291007990B9 /* LeapMotion.cpp */; };
 		11F1EEB8156FE49400F7275D /* ParticlesObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11F1EEB7156FE49400F7275D /* ParticlesObject.cpp */; };
@@ -121,7 +120,6 @@
 				1114B87716A8937B00B1CD41 /* BulletMultiThreaded.framework in CopyFiles */,
 				1114B87816A8937B00B1CD41 /* BulletSoftBody.framework in CopyFiles */,
 				1114B87916A8937B00B1CD41 /* LinearMath.framework in CopyFiles */,
-				1114B87A16A8937B00B1CD41 /* MiniCL.framework in CopyFiles */,
 				1114B87B16A8937B00B1CD41 /* SDL_image.framework in CopyFiles */,
 				1114B87C16A8937B00B1CD41 /* SDL_ttf.framework in CopyFiles */,
 				1114B87D16A8937B00B1CD41 /* SDL.framework in CopyFiles */,
@@ -138,7 +136,6 @@
 		1114B84216A88BD100B1CD41 /* BulletMultiThreaded.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletMultiThreaded.framework; path = /Library/Frameworks/BulletMultiThreaded.framework; sourceTree = "<absolute>"; };
 		1114B84316A88BD100B1CD41 /* BulletSoftBody.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletSoftBody.framework; path = /Library/Frameworks/BulletSoftBody.framework; sourceTree = "<absolute>"; };
 		1114B84416A88BD100B1CD41 /* LinearMath.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LinearMath.framework; path = /Library/Frameworks/LinearMath.framework; sourceTree = "<absolute>"; };
-		1114B84516A88BD100B1CD41 /* MiniCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MiniCL.framework; path = /Library/Frameworks/MiniCL.framework; sourceTree = "<absolute>"; };
 		1114B86816A8930E00B1CD41 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = /Library/Frameworks/SDL_image.framework; sourceTree = "<absolute>"; };
 		1114B86916A8930E00B1CD41 /* SDL_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_ttf.framework; path = /Library/Frameworks/SDL_ttf.framework; sourceTree = "<absolute>"; };
 		1114B86A16A8930E00B1CD41 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = /Library/Frameworks/SDL.framework; sourceTree = "<absolute>"; };
@@ -276,6 +273,7 @@
 		11DA1F10162DEA03007D7E6C /* Matrix4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Matrix4.h; sourceTree = "<group>"; };
 		11DA1F14162DEA18007D7E6C /* LightVolume.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LightVolume.cpp; sourceTree = "<group>"; };
 		11DA1F15162DEA18007D7E6C /* LightVolume.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LightVolume.h; sourceTree = "<group>"; };
+		11DD0B0917AA509900A43E39 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = System/Library/Frameworks/OpenCL.framework; sourceTree = SDKROOT; };
 		11EC642D178F3291007990B9 /* LeapMotion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LeapMotion.cpp; sourceTree = "<group>"; };
 		11EC642E178F3291007990B9 /* LeapMotion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeapMotion.h; sourceTree = "<group>"; };
 		11F1EEB5156FE48B00F7275D /* ParticlesObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParticlesObject.h; sourceTree = "<group>"; };
@@ -304,8 +302,8 @@
 				1114B84816A88BD100B1CD41 /* BulletMultiThreaded.framework in Frameworks */,
 				1114B84916A88BD100B1CD41 /* BulletSoftBody.framework in Frameworks */,
 				1114B84A16A88BD100B1CD41 /* LinearMath.framework in Frameworks */,
-				1114B84B16A88BD100B1CD41 /* MiniCL.framework in Frameworks */,
 				1118254414F2559B00F198A7 /* OpenAL.framework in Frameworks */,
+				11DD0B0A17AA509900A43E39 /* OpenCL.framework in Frameworks */,
 				1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */,
 				1118251B14F2553A00F198A7 /* Cocoa.framework in Frameworks */,
 			);
@@ -345,7 +343,6 @@
 				1114B84216A88BD100B1CD41 /* BulletMultiThreaded.framework */,
 				1114B84316A88BD100B1CD41 /* BulletSoftBody.framework */,
 				1114B84416A88BD100B1CD41 /* LinearMath.framework */,
-				1114B84516A88BD100B1CD41 /* MiniCL.framework */,
 				1114B86816A8930E00B1CD41 /* SDL_image.framework */,
 				1114B86916A8930E00B1CD41 /* SDL_ttf.framework */,
 				1114B86A16A8930E00B1CD41 /* SDL.framework */,
@@ -358,6 +355,7 @@
 			isa = PBXGroup;
 			children = (
 				1118254314F2559B00F198A7 /* OpenAL.framework */,
+				11DD0B0917AA509900A43E39 /* OpenCL.framework */,
 				1118254114F2559600F198A7 /* OpenGL.framework */,
 				1118251A14F2553A00F198A7 /* Cocoa.framework */,
 				1118251D14F2553A00F198A7 /* AppKit.framework */,
@@ -771,7 +769,10 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (
@@ -805,7 +806,10 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LOCAL_LIBRARY_DIR)/Frameworks",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (

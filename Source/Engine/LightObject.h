@@ -37,7 +37,6 @@ class DirectionalLight : public LightObject {
     public:
     DirectionalLight();
     DirectionalLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    void newScriptInstance();
     void setTransformation(const btTransform& transformation);
     void setBounds(btVector3 bounds);
     btVector3 getBounds();
@@ -51,7 +50,6 @@ class SpotLight : public LightObject {
     public:
     SpotLight();
     SpotLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    void newScriptInstance();
     void setTransformation(const btTransform& transformation);
     void setBounds(float cutoff, float range);
     float getCutoff();
@@ -67,7 +65,6 @@ class PositionalLight : public LightObject {
     public:
     PositionalLight();
     PositionalLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    void newScriptInstance();
     void setTransformation(const btTransform& transformation);
     void setBounds(bool omniDirectional, float range);
     bool getOmniDirectional();

@@ -26,16 +26,19 @@ class ObjectManager {
     std::set<SimpleObject*> simpleObjects; //! All Cams and SoundObjects in the scene
     btVector3 sceneAmbient; //! Ambient light color
     
-    PosixThreadSupport* bulletThreadSupport; //!< The physics multi thread support
+    btThreadSupportInterface* bulletThreadSupport; //!< The physics multi thread support
     btCollisionConfiguration* collisionConfiguration; //!< The physics collision configuration
     btCollisionDispatcher* collisionDispatcher; //!< The physics collision dispatcher
     btConstraintSolver* constraintSolver; //!< The physics constraint solver
     btSoftBodySolver* softBodySolver; //!< The physics soft body solver
+    btSoftBodySolverOutputCLtoGL* softBodyOutput; //!< The physics soft body output
     btBroadphaseInterface* broadphase; //!< The physics broadphase
     std::unique_ptr<btSoftRigidDynamicsWorld> physicsWorld; //!< The physics world
     
     ObjectManager();
     ~ObjectManager();
+    //! Initialize OpenCL
+    bool initOpenCL();
     //! Initialize
     void init();
     //! Deletes all Objects and the physics world

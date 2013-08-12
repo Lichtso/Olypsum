@@ -14,6 +14,8 @@ v8::Handle<v8::Value> ScriptBaseClass::Constructor(const v8::Arguments &args) {
     if(args.Length() != 1 || !args[0]->IsExternal())
         return v8::ThrowException(v8::String::New("BaseClass Constructor: Class can't be instantiated"));
     
+    BaseClass* objectPrt = static_cast<BaseClass*>(v8::Local<v8::External>::Cast(args[0])->Value());
+    objectPrt->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
     args.This()->SetInternalField(0, args[0]);
     return args.This();
 }

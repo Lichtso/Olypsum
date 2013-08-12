@@ -26,6 +26,9 @@
 #include <BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h>
 #include <BulletMultiThreaded/PosixThreadSupport.h>
 #include <BulletMultiThreaded/btParallelConstraintSolver.h>
+#include <BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolver_OpenCLSIMDAware.h>
+#include <BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolverVertexBuffer_OpenGL.h>
+#include <BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolverOutputCLtoGL.h>
 #include <v8.h>
 #include <Leap.h>
 #include <netLink.h>

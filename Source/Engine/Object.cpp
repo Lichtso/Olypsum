@@ -13,11 +13,21 @@ BaseClass::~BaseClass() {
         scriptInstance.Dispose();
 }
 
-void BaseClass::newScriptInstance() {
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    v8::Local<v8::Object> instance = scriptBaseClass.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
+void BaseClass::initScriptNode(rapidxml::xml_node<xmlUsedCharType>* node) {
+    rapidxml::xml_node<xmlUsedCharType>* scriptNode = node->first_node("Script");
+    if(!scriptNode) return;
+    
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = scriptNode->first_attribute("src");
+    if(attribute) {
+        FilePackage* filePackage;
+        std::string name;
+        if(fileManager.readResourcePath(attribute->value(), filePackage, name)) {
+            scriptFile = scriptManager->getScriptFile(filePackage, name);
+            if(scriptFile)
+                scriptFile->callFunction("onload", true, { scriptInstance, scriptManager->readCdataXMLNode(node) });
+        }
+    }else
+        log(error_log, "Tried to construct resource without \"src\"-attribute.");
 }
 
 
@@ -44,13 +54,6 @@ bool BaseObject::gameTick() {
 void BaseObject::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
     levelLoader->pushObject(this);
     setTransformation(readTransformtion(node, levelLoader));
-}
-
-void BaseObject::newScriptInstance() {
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    v8::Local<v8::Object> instance = scriptBaseObject.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 btTransform BaseObject::readTransformtion(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
@@ -88,11 +91,15 @@ std::set<BaseLink*>::iterator BaseObject::findLink(BaseObject* linked) {
 
 
 
-void BoneObject::newScriptInstance() {
+BoneObject::BoneObject(Bone* _bone, BaseObject* parentObject) : bone(_bone) {
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);
-    v8::Local<v8::Object> instance = scriptBoneObject.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
+    scriptBoneObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    
+    LinkInitializer initializer;
+    initializer.object[0] = parentObject;
+    initializer.object[1] = this;
+    (new TransformLink())->init(initializer);
 }
 
 
@@ -106,6 +113,10 @@ PhysicObject::PhysicObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoade
     body->setUserPointer(this);
     body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
     objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Zone, CollisionMask_Object);
+    
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    scriptPhysicObject.functionTemplate->GetFunction()->NewInstance(1, &external);
 }
 
 void PhysicObject::removeClean() {
@@ -126,13 +137,6 @@ void PhysicObject::removeFast() {
         delete body;
     }
     BaseObject::removeFast();
-}
-
-void PhysicObject::newScriptInstance() {
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    v8::Local<v8::Object> instance = scriptPhysicObject.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
 }
 
 void PhysicObject::updateTouchingObjects() {

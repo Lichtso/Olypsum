@@ -31,7 +31,6 @@ class BaseLink : public BaseClass {
     virtual ~BaseLink() { };
     public:
     BaseObject *a, *b; //!< The linkes BaseObjects
-    void newScriptInstance();
     //! Is called by a parent BaseObject to its children to prepare the next graphics frame
     virtual void gameTick() { };
     /*! Gets the other BaseObject
@@ -64,7 +63,6 @@ class PhysicLink : public BaseLink {
     ~PhysicLink();
     public:
     btTypedConstraint* constraint;
-    void newScriptInstance();
     //! Enables/Disables collisions between the linked objects
     void setCollisionDisabled(bool collisionDisabled);
     //! Returns if collisions between the linked objects are disabled
@@ -80,7 +78,6 @@ class PhysicLink : public BaseLink {
 class TransformLink : public BaseLink {
     public:
     btTransform transform; //!< Applied from parent to child
-    void newScriptInstance();
     void gameTick();
     /*! Used to remove a HierarchicalLink correctly.
      This will call BaseObject::remove() on the child if and only if the parameter a is the parent.
@@ -93,7 +90,10 @@ class TransformLink : public BaseLink {
     void removeFast(BaseObject* object);
     //! Returns true if a connection between the linked objects is allowed
     bool checkIfAttachingIsValid();
+    //! Initialize from ScriptTransformLink::Constructor()
     bool init(LinkInitializer& initializer, btTransform& transform);
+    //! Initialize from RigidObject::setupBones()
+    bool init(LinkInitializer& initializer);
     bool init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
