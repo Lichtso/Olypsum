@@ -87,12 +87,36 @@ void ScriptPhysicLink::SetCollisionDisabled(v8::Local<v8::String> property, v8::
     getDataOfInstance<PhysicLink>(info.This())->setCollisionDisabled(value->BooleanValue());
 }
 
+v8::Handle<v8::Value> ScriptPhysicLink::GetAppliedForceObjectA(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    return scriptVector3.newInstance(getDataOfInstance<PhysicLink>(info.This())->constraint->m_appliedForceBodyA);
+}
+
+v8::Handle<v8::Value> ScriptPhysicLink::GetAppliedTorqueObjectA(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    return scriptVector3.newInstance(getDataOfInstance<PhysicLink>(info.This())->constraint->m_appliedTorqueBodyA);
+}
+
+v8::Handle<v8::Value> ScriptPhysicLink::GetAppliedForceObjectB(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    return scriptVector3.newInstance(getDataOfInstance<PhysicLink>(info.This())->constraint->m_appliedForceBodyB);
+}
+
+v8::Handle<v8::Value> ScriptPhysicLink::GetAppliedTorqueObjectB(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
+    return scriptVector3.newInstance(getDataOfInstance<PhysicLink>(info.This())->constraint->m_appliedTorqueBodyB);
+}
+
 ScriptPhysicLink::ScriptPhysicLink() :ScriptBaseLink("PhysicLink", Constructor) {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->SetAccessor(v8::String::New("burstImpulse"), GetBurstImpulse, SetBurstImpulse);
     objectTemplate->SetAccessor(v8::String::New("collisionDisabled"), GetCollisionDisabled, SetCollisionDisabled);
+    objectTemplate->SetAccessor(v8::String::New("appliedForceObjectA"), GetAppliedForceObjectA);
+    objectTemplate->SetAccessor(v8::String::New("appliedTorqueObjectA"), GetAppliedTorqueObjectA);
+    objectTemplate->SetAccessor(v8::String::New("appliedForceObjectB"), GetAppliedForceObjectB);
+    objectTemplate->SetAccessor(v8::String::New("appliedTorqueObjectB"), GetAppliedTorqueObjectB);
     
     functionTemplate->Inherit(scriptBaseLink.functionTemplate);
 }

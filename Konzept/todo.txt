@@ -1,7 +1,5 @@
 V8 API: Create/Delete Objects, Documentation
-Improve ParticleSystem bounding volumes
 Support to load another initial container than "Containers/start.xml"
-Reform PhysicLink burstImpulse polling to a event based solution
 Implement btSoftBody
 Leap Motion: V8 API
 Windows / Linux Support

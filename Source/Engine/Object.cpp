@@ -140,6 +140,10 @@ void PhysicObject::removeFast() {
 }
 
 void PhysicObject::updateTouchingObjects() {
+    body->activate();
+    
+    if(body->getCollisionFlags() & btCollisionObject::CF_NO_CONTACT_RESPONSE) return;
+    
     unsigned int numManifolds = objectManager.collisionDispatcher->getNumManifolds();
 	for(unsigned int i = 0; i < numManifolds; i ++) {
 		btPersistentManifold* contactManifold = objectManager.collisionDispatcher->getManifoldByIndexInternal(i);
@@ -152,8 +156,6 @@ void PhysicObject::updateTouchingObjects() {
         else if(objectB == body)
             objectA->activate();
 	}
-    
-    body->activate();
 }
 
 void PhysicObject::handleCollision(btPersistentManifold* contactManifold, PhysicObject* b) {

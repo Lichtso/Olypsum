@@ -130,7 +130,7 @@ bool PhysicLink::isCollisionDisabled() {
 }
 
 void PhysicLink::gameTick() {
-    if(constraint->isEnabled()) return;
+    if(constraint->m_userConstraintPtr) return;
     
     if(scriptFile)
         scriptFile->callFunction("onburst", true, { scriptInstance });
@@ -152,7 +152,7 @@ void PhysicLink::removeClean(BaseObject* object) {
 bool PhysicLink::init(LinkInitializer& initializer, btTypedConstraint* _constraint) {
     if(!BaseLink::init(initializer)) return false;
     constraint = _constraint;
-    constraint->setUserConstraintPtr(this);
+    constraint->m_userConstraintPtr = this;
     objectManager.physicsWorld->addConstraint(constraint);
     return true;
 }
@@ -574,7 +574,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         constraint->setBreakingImpulseThreshold(value);
     }
     
-    constraint->setUserConstraintPtr(this);
+    constraint->m_userConstraintPtr = this;
     objectManager.physicsWorld->addConstraint(constraint, node->first_node("CollisionDisabled"));
     scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), instance);
     return true;
