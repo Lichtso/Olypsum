@@ -30,6 +30,7 @@ FilePackage::~FilePackage() {
 
 bool FilePackage::init() {
     path = resourcesDir+"Packages/"+name+'/';
+    
     DIR* dir = opendir(path.c_str());
     if(dir == NULL) {
         path = gameDataDir+"Packages/"+name+'/';
@@ -38,36 +39,70 @@ bool FilePackage::init() {
         closedir(dirB);
     }else closedir(dir);
     
+    hash = hashFile(path+"CollisionShapes.xml");
+    hash ^= hashDir(path+"Containers/");
+    hash ^= hashDir(path+"Scripts/");
+    hash ^= hashDir(path+"Languages/");
+    hash ^= hashScanDir(path+"Fonts/");
+    hash ^= hashScanDir(path+"Models/");
+    hash ^= hashScanDir(path+"Textures/");
+    hash ^= hashScanDir(path+"Sounds/");
+    
     rapidxml::xml_document<xmlUsedCharType> doc;
     std::unique_ptr<char[]> fileData = readXmlFile(doc, path+"/Package.xml", false);
     if(!fileData) {
-        levelManager.showErrorModal(localization.localizeString("packageError_FilesMissing"));
+        menu.setModalView("error", localization.localizeString("packageError_FilesMissing"), NULL);
         return false;
     }
-    rapidxml::xml_node<xmlUsedCharType> *dependenciesNode, *packageNode = doc.first_node("Package");
+    rapidxml::xml_node<xmlUsedCharType> *node, *packageNode = doc.first_node("Package");
     if(strcmp(packageNode->first_node("EngineVersion")->first_attribute("value")->value(), VERSION) != 0) {
-        levelManager.showErrorModal(localization.localizeString("packageError_Version"));
+        menu.setModalView("error", localization.localizeString("packageError_Version"), NULL);
         return false;
     }
-    dependenciesNode = packageNode->first_node("Dependencies");
-    if(dependenciesNode) {
-        packageNode = dependenciesNode->first_node("Package");
+    
+    std::size_t hashCmp;
+    sscanf(packageNode->first_attribute("hash")->value(), "%lx", &hashCmp);
+    if(hashCmp != hash) {
+#ifdef DEBUG
+        printf("Hash of resoucre package %s should be %lx\n", name.c_str(), hash);
+#else
+        levelManager.showErrorModal(localization.localizeString("packageError_HashCorrupted"));
+        return false;
+#endif
+    }
+    
+    node = packageNode->first_node("Description");
+    if(node) description = node->value();
+    
+    FilePackage* package;
+    node = packageNode->first_node("Dependencies");
+    if(node) {
+        packageNode = node->first_node("Package");
         while(packageNode) {
-            if(!fileManager.loadPackage(packageNode->first_attribute("value")->value())) {
-                levelManager.showErrorModal(localization.localizeString("packageError_ContainerMissing")+'\n'+name);
+            sscanf(packageNode->first_attribute("hash")->value(), "%lx", &hashCmp);
+            if(!(package = fileManager.loadPackage(packageNode->first_attribute("name")->value())) || hashCmp != package->hash) {
+                menu.setModalView("error", localization.localizeString("packageError_CouldNotLoad")+'\n'+name, NULL);
                 return false;
             }
             packageNode = packageNode->next_sibling("Package");
         }
     }
     
-    if(name == "Default") localization.strings.clear();
-    localization.loadLocalization(path+"Languages/"+localization.selected+".xml");
+    localization.loadLocalization(this);
     return true;
 }
 
-std::string FilePackage::getPathOfFile(const char* groupName, const std::string& fileName) {
-    return path+groupName+'/'+fileName;
+std::string FilePackage::getPathOfFile(const char* subdir, const std::string& fileName) {
+    return path+subdir+fileName;
+}
+
+std::string FilePackage::findFileByNameInSubdir(const char* subdir, const std::string& fileName) {
+    std::vector<std::string> files;
+    scanDir(path+subdir, files);
+    for(size_t i = 0; i < files.size(); i ++)
+        if(files[i].find(fileName) != -1)
+            return files[i];
+    return "";
 }
 
 
@@ -77,7 +112,8 @@ void FileManager::clear() {
     for(auto iterator : filePackages)
         delete iterator.second;
     filePackages.clear();
-    loadPackage("Default");
+    localization.strings.clear();
+    loadPackage("Core");
 }
 
 FilePackage* FileManager::loadPackage(const std::string& name) {
@@ -101,16 +137,24 @@ void FileManager::unloadPackage(const std::string& name) {
     filePackages.erase(iterator);
 }
 
-bool FileManager::readResourcePath(const std::string& path, FilePackage*& filePackage, std::string& name) {
-    if(path.compare(0, 1, "/") == 0) {
-        unsigned int seperation = path.find('/', 2);
-        std::map<std::string, FilePackage*>::iterator iterator = filePackages.find(path.substr(1, seperation-1));
+void FileManager::loadAllPackages() {
+    std::vector<std::string> files;
+    scanDir(resourcesDir+"Packages/", files);
+    scanDir(gameDataDir+"Packages/", files);
+    for(size_t i = 0; i < files.size(); i ++)
+        if(files[i][files[i].length()-1] == '/') {
+            files[i].pop_back();
+            loadPackage(files[i]);
+        }
+}
+
+bool FileManager::readResourcePath(FilePackage*& filePackage, std::string& name) {
+    if(name.compare(0, 1, "/") == 0) {
+        unsigned int seperation = name.find('/', 2);
+        std::map<std::string, FilePackage*>::iterator iterator = filePackages.find(name.substr(1, seperation-1));
         if(iterator == filePackages.end()) return false;
         filePackage = iterator->second;
-        name = path.substr(seperation+1);
-    }else{
-        filePackage = levelManager.levelPackage;
-        name = path;
+        name = name.substr(seperation+1);
     }
     return true;
 }

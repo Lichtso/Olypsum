@@ -11,7 +11,7 @@
 std::string LanguagesExtension(".xml");
 
 bool Localization::getLocalizableLanguages(std::vector<std::string>& languages) {
-    DIR* dp = opendir("Packages/Default/Languages/");
+    DIR* dp = opendir("Packages/Core/Languages/");
     if(dp == NULL) {
         log(error_log, "Languages directory not found.");
         return false;
@@ -30,7 +30,9 @@ bool Localization::getLocalizableLanguages(std::vector<std::string>& languages) 
     return true;
 }
 
-bool Localization::loadLocalization(std::string filePath) {
+bool Localization::loadLocalization(FilePackage* filePackage) {
+    std::string filePath = filePackage->path+"Languages/"+localization.selected+".xml";
+    
     rapidxml::xml_document<xmlUsedCharType> doc;
     std::unique_ptr<char[]> fileData = readXmlFile(doc, filePath.c_str(), false);
     if(!fileData) return false;
@@ -56,10 +58,10 @@ bool Localization::loadLocalization(std::string filePath) {
     return true;
 }
 
-std::string Localization::localizeString(const char* key) {
-    std::map<std::string, std::string>::iterator iterator = strings.find(std::string(key));
+std::string Localization::localizeString(const std::string& key) {
+    std::map<std::string, std::string>::iterator iterator = strings.find(key);
     if(iterator == strings.end()) {
-        log(error_log, std::string("No localization found for key: ")+key);
+        log(error_log, std::string("No localization found for key: ")+key.c_str());
         return key;
     }
     return iterator->second;

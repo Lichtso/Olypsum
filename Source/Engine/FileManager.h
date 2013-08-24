@@ -20,7 +20,7 @@ template<class T> class FileResourcePtr {
     inline void decrementRetain() {
         if(resource) {
             resource->retainCount --;
-            if(resource->retainCount == 0 && resource->filePackage->name != "Default")
+            if(resource->retainCount == 0 && resource->filePackage->name != "Core")
                 resource->remove();
         }
     }
@@ -77,8 +77,10 @@ class FileResource {
 //! A bundle of resources in a level package
 class FilePackage {
     public:
+    std::size_t hash; //!< Hash value of the content and file names
     std::string path, //!< The absolute path to its directory
-                name; //!< The name
+                name, //!< The name
+                description; //!< A meta info for the players
     std::map<std::string, FileResource*> resources; //!< All its loaded resources
     FilePackage(std::string name_) :name(name_) { };
     ~FilePackage();
@@ -89,7 +91,13 @@ class FilePackage {
      @param fileName The file name of the resource
      @return The absolute path
      */
-    std::string getPathOfFile(const char* groupName, const std::string& fileName);
+    std::string getPathOfFile(const char* subdir, const std::string& fileName);
+    /*! Finds the full name of the first resource containing the given fileName
+     @param subdir A child directory which contains the resource
+     @param fileName The file name of the resource
+     @return The full name
+     */
+    std::string findFileByNameInSubdir(const char* subdir, const std::string& fileName);
     //! Loads and initializes a FilePackageResource
     template <class T> FileResourcePtr<T> getResource(const std::string& fileName) {
         auto iterator = resources.find(fileName);
@@ -124,18 +132,18 @@ class FileManager {
     FilePackage* loadPackage(const std::string& name);
     //! Deletes a FilePackage by name
     void unloadPackage(const std::string& name);
+    //! Loads all available FilePackages
+    void loadAllPackages();
     //! Reads a resources path
-    bool readResourcePath(const std::string& path, FilePackage*& filePackage, std::string& name);
+    bool readResourcePath(FilePackage*& filePackage, std::string& name);
     //! Returns a resources path
     std::string getPathOfResource(FilePackage* filePackage, std::string name);
     //Writes a resource to rapidxml::xml_node and returns it
     rapidxml::xml_node<xmlUsedCharType>* writeResource(rapidxml::xml_document<xmlUsedCharType>& doc, const char* nodeName,
                                                        FilePackage* filePackage, const std::string& name);
     //! Gets a resource from a given path
-    template <class T> FileResourcePtr<T> getResourceByPath(const std::string path) {
-        FilePackage* filePackage;
-        std::string name;
-        if(!readResourcePath(path, filePackage, name)) {
+    template <class T> FileResourcePtr<T> getResourceByPath(FilePackage* filePackage, std::string name) {
+        if(!readResourcePath(filePackage, name)) {
             log(error_log, "Couldn't initialize resource.");
             return NULL;
         }

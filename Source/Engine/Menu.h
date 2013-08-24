@@ -49,6 +49,7 @@ class Menu {
     void gameTick();
     void clear();
     void setPause(bool active);
+    void setModalView(const std::string& title, const std::string& text, std::function<void(GUIButton* button)> onContinue);
     void setMenu(Name menu);
 };
 

@@ -21,7 +21,7 @@ FileResourcePtr<FileResource> TextFont::load(FilePackage* filePackageB, const st
     auto pointer = FileResource::load(filePackageB, name);
     if(ttf) return NULL;
     
-    std::string filePath = filePackage->getPathOfFile("Fonts", name)+".ttf";
+    std::string filePath = filePackage->getPathOfFile("Fonts/", name)+".ttf";
     ttf = TTF_OpenFont(filePath.c_str(), size);
     if(ttf == NULL) {
         log(error_log, std::string("Unable to load font ")+filePath.c_str()+".\n"+TTF_GetError());

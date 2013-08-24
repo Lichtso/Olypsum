@@ -33,9 +33,9 @@ void ScriptBaseClass::SetScriptClass(v8::Local<v8::String> property, v8::Local<v
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(info.This());
-    FilePackage* filePackage;
-    std::string name;
-    if(fileManager.readResourcePath(stdStrOfV8(value), filePackage, name))
+    FilePackage* filePackage = levelManager.levelPackage;
+    std::string name = stdStrOfV8(value);
+    if(fileManager.readResourcePath(filePackage, name))
         objectPtr->scriptFile = scriptManager->getScriptFile(filePackage, name);
 }
 

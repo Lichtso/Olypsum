@@ -21,7 +21,7 @@ TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelL
         log(error_log, "Found \"Diffuse\"-node without \"src\"-attribute.");
         return;
     }
-    diffuse = fileManager.getResourceByPath<Texture>(attribute->value());
+    diffuse = fileManager.getResourceByPath<Texture>(levelManager.levelPackage, attribute->value());
     diffuse->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGB);
     if(diffuse->depth <= 1) {
         log(error_log, "Tried to construct TerrainObject with invalid \"EffectMap\" texture.");
@@ -35,7 +35,7 @@ TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelL
             log(error_log, "Found \"EffectMap\"-node without \"src\"-attribute.");
             return;
         }
-        effectMap = fileManager.getResourceByPath<Texture>(attribute->value());
+        effectMap = fileManager.getResourceByPath<Texture>(levelManager.levelPackage, attribute->value());
         effectMap->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGB);
         if(effectMap->depth <= 1) {
             log(error_log, "Tried to construct TerrainObject with invalid \"EffectMap\" texture.");
@@ -50,7 +50,7 @@ TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelL
             log(error_log, "Found \"HeightsMap\"-node without \"src\"-attribute.");
             return;
         }
-        FileResourcePtr<Texture> heightMap = fileManager.getResourceByPath<Texture>(attribute->value());
+        FileResourcePtr<Texture> heightMap = fileManager.getResourceByPath<Texture>(levelManager.levelPackage, attribute->value());
         if(!heightMap) return;
         width = heightMap->width;
         length = heightMap->height;
@@ -168,18 +168,15 @@ void TerrainObject::draw() {
     shaderPrograms[shaderProgram]->use();
     currentShaderProgram->setUniformF("discardDensity", clamp(integrity+1.0F, 0.0F, 1.0F));
     
-    if(objectManager.currentShadowLight) {
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }else{
+    if(objectManager.currentShadowLight)
+        Texture::unbind(0, GL_TEXTURE_2D);
+    else{
         currentShaderProgram->setUniformVec3("textureScale", textureScale);
         diffuse->use(0);
         if(effectMap)
             effectMap->use(1);
-        else{
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-        }
+        else
+            Texture::unbind(1, GL_TEXTURE_2D_ARRAY);
     }
     
     vao.draw();

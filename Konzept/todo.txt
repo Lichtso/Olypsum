@@ -1,5 +1,7 @@
 V8 API: Create/Delete Objects, Documentation
 Support to load another initial container than "Containers/start.xml"
+Avoid reloading of levelPackage in loadLevel()
+Reform findBoneByPath() to getBoneById()
 Implement btSoftBody
 Leap Motion: V8 API
 Windows / Linux Support

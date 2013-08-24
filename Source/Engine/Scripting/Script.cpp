@@ -40,7 +40,7 @@ ScriptFile::~ScriptFile() {
 
 bool ScriptFile::load(FilePackage* filePackageB, const std::string& nameB) {
     name = nameB;
-    std::string filePath = filePackageB->getPathOfFile("Scripts", name+".js");
+    std::string filePath = filePackageB->getPathOfFile("Scripts/", name+".js");
     std::unique_ptr<char[]> data = readFile(filePath, true);
     if(!data) return false;
     v8::TryCatch tryCatch;

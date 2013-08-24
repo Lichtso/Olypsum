@@ -74,6 +74,16 @@ bool writeFile(const std::string& filePath, const std::string& content, bool log
     return true;
 }
 
+std::size_t hashFile(const std::string& filePath) {
+    std::ifstream file;
+    file.open(filePath.c_str(), std::ios_base::binary);
+    if(!file.is_open()) return 0;
+    std::stringstream stream;
+    file >> stream.rdbuf();
+    file.close();
+    return std::hash<std::string>()(stream.str());
+}
+
 bool checkDir(std::string path) {
     DIR* dir = opendir(path.c_str());
     if(dir) {
@@ -90,6 +100,44 @@ bool createDir(std::string path) {
         mkdir(path.c_str(), S_IRWXU | S_IRWXG);
         return true;
     }
+}
+
+std::size_t hashDir(std::string path) {
+    std::size_t value = 0;
+    DIR* dir = opendir(path.c_str());
+    if(dir) {
+        dirent* file;
+        while((file = readdir(dir))) {
+            if(file->d_namlen < 3 && strncmp(file->d_name, "..", file->d_namlen) == 0) continue;
+            std::string name(file->d_name, file->d_namlen);
+            name = path+name;
+            if(file->d_type == DT_DIR)
+                value ^= hashDir(name+'/');
+            else
+                value ^= hashFile(name);
+        }
+        closedir(dir);
+        return value;
+    }else
+        return 0;
+}
+
+std::size_t hashScanDir(std::string path) {
+    std::size_t value = 0;
+    DIR* dir = opendir(path.c_str());
+    if(dir) {
+        dirent* file;
+        while((file = readdir(dir))) {
+            if(file->d_namlen < 3 && strncmp(file->d_name, "..", file->d_namlen) == 0) continue;
+            std::string name(file->d_name, file->d_namlen);
+            value ^= std::hash<std::string>()(name);
+            if(file->d_type == DT_DIR)
+                value ^= hashScanDir(name+'/');
+        }
+        closedir(dir);
+        return value;
+    }else
+        return 0;
 }
 
 bool scanDir(std::string path, std::vector<std::string>& files) {

@@ -64,6 +64,18 @@ CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* lev
         return;
     }
     sscanf(attribute->value(), "%f", &fov);
+        
+    if(fov == 0.0) {
+        attribute = boundsNode->first_attribute("width");
+        if(attribute)
+            sscanf(attribute->value(), "%f", &width);
+        attribute = boundsNode->first_attribute("height");
+        if(attribute)
+            sscanf(attribute->value(), "%f", &height);
+        else
+            height = width*prevOptionsState.videoHeight/prevOptionsState.videoWidth;
+    }
+    
     attribute = boundsNode->first_attribute("near");
     if(!attribute) {
         log(error_log, "Tried to construct Cam without \"near\"-attribute.");

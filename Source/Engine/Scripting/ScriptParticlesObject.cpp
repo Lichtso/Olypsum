@@ -27,7 +27,7 @@ void ScriptParticlesObject::SetTexture(v8::Local<v8::String> property, v8::Local
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
-    auto texture = fileManager.getResourceByPath<Texture>(stdStrOfV8(value));
+    auto texture = fileManager.getResourceByPath<Texture>(levelManager.levelPackage, stdStrOfV8(value));
     if(texture) objectPtr->texture = texture;
 }
 

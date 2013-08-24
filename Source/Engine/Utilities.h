@@ -73,13 +73,29 @@ std::unique_ptr<char[]> readFile(const std::string& filePath, bool logs);
  */
 bool writeFile(const std::string& filePath, const std::string& content, bool logs);
 
+/*! Calculates the hash value of a file
+ @param filePath Input file path
+ @return Output hash value
+ */
+std::size_t hashFile(const std::string& filePath);
+
 //! Checks for a directory at a given path
 bool checkDir(std::string path);
 /*! Creates a directory at a given path
  @return Success
  */
 bool createDir(std::string path);
-/*! 
+/*! Caclulates the hash value of all files content and subfolders (recursive) of the given directory
+ @param path Input directory path
+ @return Output hash value
+ */
+std::size_t hashDir(std::string path);
+/*! Caclulates the hash value of all files names and subfolders (recursive) of the given directory
+ @param path Input directory path
+ @return Output hash value
+ */
+std::size_t hashScanDir(std::string path);
+/*! Creates a list of all files and subfolders (non recursive) in the given directory
  @param path Directory path
  @param files std::vector to store the names of the children files
  @return Success

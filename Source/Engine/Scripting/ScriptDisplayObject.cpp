@@ -30,10 +30,10 @@ v8::Handle<v8::Value> ScriptGraphicObject::AttachDecal(const v8::Arguments& args
     Decal* decal = new Decal();
     decal->life = args[0]->NumberValue();
     decal->transformation = scriptMatrix4.getDataOfInstance(args[1])->getBTTransform();
-    decal->diffuse = fileManager.getResourceByPath<Texture>(stdStrOfV8(args[2]));
+    decal->diffuse = fileManager.getResourceByPath<Texture>(levelManager.levelPackage, stdStrOfV8(args[2]));
     
     if(args.Length() > 3 && args[3]->IsString())
-        decal->heightMap = fileManager.getResourceByPath<Texture>(stdStrOfV8(args[3]));
+        decal->heightMap = fileManager.getResourceByPath<Texture>(levelManager.levelPackage, stdStrOfV8(args[3]));
     
     GraphicObject* objectPtr = getDataOfInstance<GraphicObject>(args.This());
     objectPtr->decals.insert(decal);
@@ -65,7 +65,7 @@ void ScriptRigidObject::SetModel(v8::Local<v8::String> property, v8::Local<v8::V
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     RigidObject* objectPtr = getDataOfInstance<RigidObject>(info.This());
-    auto model = fileManager.getResourceByPath<Model>(stdStrOfV8(value));
+    auto model = fileManager.getResourceByPath<Model>(levelManager.levelPackage, stdStrOfV8(value));
     if(model) objectPtr->setModel(NULL, model);
 }
 

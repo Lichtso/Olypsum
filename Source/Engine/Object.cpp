@@ -19,9 +19,9 @@ void BaseClass::initScriptNode(rapidxml::xml_node<xmlUsedCharType>* node) {
     
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = scriptNode->first_attribute("src");
     if(attribute) {
-        FilePackage* filePackage;
-        std::string name;
-        if(fileManager.readResourcePath(attribute->value(), filePackage, name)) {
+        FilePackage* filePackage = levelManager.levelPackage;
+        std::string name = attribute->value();
+        if(fileManager.readResourcePath(filePackage, name)) {
             scriptFile = scriptManager->getScriptFile(filePackage, name);
             if(scriptFile)
                 scriptFile->callFunction("onload", true, { scriptInstance, scriptManager->readCdataXMLNode(node) });
@@ -65,8 +65,7 @@ rapidxml::xml_node<xmlUsedCharType>* BaseObject::write(rapidxml::xml_document<xm
     node->name("BaseObject");
     if(scriptFile) {
         v8::Handle<v8::Value> scritData = scriptFile->callFunction("onsave", true, { scriptInstance });
-        if(!scritData.IsEmpty() && scritData->IsString())
-            scriptManager->writeCdataXMLNode(doc, stdStrOfV8(scritData));
+        scriptManager->writeCdataXMLNode(doc, node, "Data", scritData);
         node->append_node(fileManager.writeResource(doc, "Script", scriptFile->filePackage, scriptFile->name));
     }
     btTransform transform = getTransformation();

@@ -38,7 +38,7 @@ void GUIButton::updateContent() {
                                 label->color = Color4(0.94);
                             break;
                         }
-                        label->font = fileManager.getResourceByPath<TextFont>("/Default/font");
+                        label->font = fileManager.getResourceByPath<TextFont>(NULL, "/Core/font");
                     break;
                     case GUIButton::State::Pressed:
                         switch(type) {
@@ -52,7 +52,7 @@ void GUIButton::updateContent() {
                                 label->color = Color4(0.94);
                             break;
                         }
-                        label->font = fileManager.getResourceByPath<TextFont>("/Default/font_italic");
+                        label->font = fileManager.getResourceByPath<TextFont>(NULL, "/Core/font_italic");
                     break;
                 }
             else
@@ -62,17 +62,13 @@ void GUIButton::updateContent() {
         children[i]->updateContent();
         
         if(sizeAlignment & GUISizeAlignment::Width) {
-            if(children[i]->posX+children[i]->width+paddingX > width)
-                width = children[i]->posX+children[i]->width+paddingX;
-            if(children[i]->posX-children[i]->width-paddingX < -width)
-                width = children[i]->width-children[i]->posX+paddingX;
+            width = max(width, children[i]->width+paddingX+children[i]->posX);
+            width = max(width, children[i]->width+paddingX-children[i]->posX);
         }
         
         if(sizeAlignment & GUISizeAlignment::Height) {
-            if(children[i]->posY+children[i]->height+paddingY > height)
-                height = children[i]->posY+children[i]->height+paddingY;
-            if(children[i]->posY-children[i]->height-paddingY < -height)
-                height = children[i]->height-children[i]->posY+paddingY;
+            height = max(height, children[i]->height+paddingY+children[i]->posY);
+            height = max(height, children[i]->height+paddingY-children[i]->posY);
         }
     }
     

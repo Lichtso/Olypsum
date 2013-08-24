@@ -52,8 +52,7 @@ void GraphicObject::draw() {
     if(objectManager.currentShadowLight) return;
     
     btTransform transform = getTransformation();
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    Texture::unbind(1, GL_TEXTURE_2D);
     
     for(auto decal : decals) {
         modelMat = transform * decal->transformation;
@@ -194,7 +193,7 @@ RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
             textureAnimationTime[i] = animationTime.data[i];
     }
     
-    setModel(levelLoader, fileManager.getResourceByPath<Model>(attribute->value()));
+    setModel(levelLoader, fileManager.getResourceByPath<Model>(levelManager.levelPackage, attribute->value()));
     parameterNode = node->first_node("PhysicsBody");
     if(!parameterNode) {
         log(error_log, "Tried to construct RigidObject without \"PhysicsBody\"-node.");

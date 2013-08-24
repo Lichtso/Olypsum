@@ -26,9 +26,9 @@ class Localization {
      @param filePath The file path
      @return Success
      */
-    bool loadLocalization(std::string filePath);
+    bool loadLocalization(FilePackage* filePackage);
     //! Convertes a tag into a localized string
-    std::string localizeString(const char* key);
+    std::string localizeString(const std::string& key);
 };
 
 extern Localization localization;

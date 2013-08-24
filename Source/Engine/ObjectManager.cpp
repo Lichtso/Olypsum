@@ -172,7 +172,7 @@ void ObjectManager::clear() {
     mainCam = NULL;
 }
 
-void ObjectManager::initGame(const std::string& levelPackage) {
+void ObjectManager::initGame() {
     clear();
     physicsWorld.reset(new btSoftRigidDynamicsWorld(collisionDispatcher, broadphase, constraintSolver, collisionConfiguration, softBodySolver));
     physicsWorld->setInternalTickCallback(calculatePhysicsTick);

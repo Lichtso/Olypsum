@@ -42,7 +42,7 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
     if(!rawData)
         rawData = readXmlFile(doc, levelManager.levelPackage->path+"/Containers/"+name+".xml", false);
     if(!rawData) {
-        levelManager.showErrorModal(localization.localizeString("packageError_ContainerMissing")+'\n'+name);
+        menu.setModalView("error", localization.localizeString("packageError_ContainerMissing")+'\n'+name, NULL);
         return false;
     }
     rapidxml::xml_node<xmlUsedCharType>* containerNode = doc.first_node("Container");
@@ -176,11 +176,11 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
         doc.clear();
         std::string statusFilePath = gameDataDir+"Saves/"+levelManager.saveGameName+"/Status.xml";
         std::unique_ptr<char[]> fileData = readXmlFile(doc, statusFilePath, true);
-        doc.first_node("Status")->first_node("Level")->first_attribute("value")->value(name.c_str());
-        v8::Handle<v8::Value> globalData = scriptManager->readCdataXMLNode(doc.first_node("Status"));
+        node = doc.first_node("Status");
+        node->first_node("Level")->first_attribute("value")->value(name.c_str());
+        v8::Handle<v8::Value> globalData = scriptManager->readCdataXMLNode(node);
         if(!writeXmlFile(doc, statusFilePath, true))
             return false;
-        levelManager.levelId = name;
         ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
         if(script) script->callFunction("onload", false, { localData, globalData });
         if(!mainCam) {
@@ -191,11 +191,12 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
     return true;
 }
 
-bool LevelLoader::loadLevel(const std::string& levelPackage, const std::string& levelId) {
-    objectManager.initGame(levelPackage);
-    levelManager.levelPackage = fileManager.loadPackage(levelPackage);
+bool LevelLoader::loadLevel() {
+    std::string filePackage = levelManager.levelPackage->name;
+    objectManager.initGame();
+    levelManager.levelPackage = fileManager.loadPackage(filePackage);
     if(!levelManager.levelPackage) {
-        levelManager.showErrorModal(localization.localizeString("packageError_ContainerMissing")+'\n'+levelPackage);
+        menu.setModalView("error", localization.localizeString("packageError_PackageMissing")+'\n'+levelManager.levelPackage->name, NULL);
         return false;
     }
     scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
@@ -204,7 +205,7 @@ bool LevelLoader::loadLevel(const std::string& levelPackage, const std::string& 
     rapidxml::xml_document<xmlUsedCharType> doc;
     std::unique_ptr<char[]> fileData = readXmlFile(doc, levelManager.levelPackage->path+"/CollisionShapes.xml", false);
     if(!fileData) {
-        levelManager.showErrorModal(localization.localizeString("packageError_FilesMissing"));
+        menu.setModalView("error", localization.localizeString("packageError_FilesMissing"), NULL);
         return false;
     }
     
@@ -309,10 +310,10 @@ bool LevelLoader::loadLevel(const std::string& levelPackage, const std::string& 
     }
     
     //Load root conatiner
-    if(!loadContainer(levelId, true)) {
-        objectManager.clear();
-        levelManager.gameStatus = noGame;
-        menu.setMenu(Menu::saveGames);
+    if(!loadContainer(levelManager.levelContainer, true)) {
+        levelManager.clear();
+        if(!menu.screenView->modalView)
+            menu.setModalView("error", localization.localizeString("packageError_Corrupted"), NULL);
         return false;
     }
     

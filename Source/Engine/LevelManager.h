@@ -22,20 +22,15 @@ class LevelManager {
     public:
     std::map<std::string, btCollisionShape*> sharedCollisionShapes; //!< All available collision shapes
     FilePackage* levelPackage;
-    std::string saveGameName, levelId;
+    std::string saveGameName, levelContainer;
     GameStatusName gameStatus = noGame;
     
     LevelManager();
-    void showErrorModal(const std::string& error);
     btCollisionShape* getCollisionShape(const std::string& name);
     std::string getCollisionShapeName(btCollisionShape* shape);
     //! Deletes all shared objects
     void clear();
-    bool loadLevel(const std::string& levelPackage, const std::string& levelId);
-    bool saveLevel(const std::string& localData, const std::string& globalData);
-    bool loadGame(const std::string& name);
-    bool newGame(const std::string& packageName, const std::string& name);
-    bool removeGame(const std::string& name);
+    bool newGame();
 };
 
 extern LevelManager levelManager;

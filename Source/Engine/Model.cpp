@@ -15,24 +15,18 @@
 #define maxJointsCount 64
 
 void Mesh::draw(RigidObject* object) {
-    if(!material.diffuse) {
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
+    if(!material.diffuse)
+        Texture::unbind(0, GL_TEXTURE_2D);
     
     if(material.effectMap)
         material.effectMap->use(1);
-    else{
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
+    else
+        Texture::unbind(1, GL_TEXTURE_2D);
     
     if(material.heightMap)
         material.heightMap->use(2);
-    else{
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
+    else
+        Texture::unbind(2, GL_TEXTURE_2D);
     
     unsigned int shaderProgram;
     if(objectManager.currentShadowLight) {
@@ -62,7 +56,7 @@ void Mesh::draw(RigidObject* object) {
                 if(iterator != objectManager.reflectiveAccumulator.end())
                     glBindTexture(reflectionType, iterator->second->buffer->texture);
             }else
-                glBindTexture(reflectionType, 0);
+                Texture::unbind(4, reflectionType);
         }
         
         if(material.refraction > 1.0 && shaderProgram == solidAnimatedGlassMirrorGSP)
@@ -171,12 +165,12 @@ Model::~Model() {
     }
 }
 
-FileResourcePtr<FileResource> Model::load(FilePackage* filePackageB, const std::string& name) {
-    auto pointer = FileResource::load(filePackageB, name);
+FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::string& name) {
+    auto pointer = FileResource::load(_filePackage, name);
     if(meshes.size() > 0) return NULL;
     
     rapidxml::xml_document<xmlUsedCharType> doc;
-    std::unique_ptr<char[]> fileData = readXmlFile(doc, filePackage->getPathOfFile("Models", name), true);
+    std::unique_ptr<char[]> fileData = readXmlFile(doc, filePackage->getPathOfFile("Models/", name), true);
     if(!fileData) return NULL;
     
     rapidxml::xml_node<xmlUsedCharType> *collada, *library, *geometry, *meshNode, *source, *dataNode;
@@ -305,7 +299,7 @@ FileResourcePtr<FileResource> Model::load(FilePackage* filePackageB, const std::
                 if((dataNode = source->first_node("diffuse"))) {
                     std::string url = readTextureURL(samplerURLs, dataNode);
                     if(url.size() > 0) {
-                        material.diffuse = fileManager.getResourceByPath<Texture>(url);
+                        material.diffuse = fileManager.getResourceByPath<Texture>(filePackage, url);
                         material.diffuse->setAnimationFrames(readTextureFrames(dataNode->first_node("texture")));
                         material.diffuse->uploadTexture(GL_TEXTURE_2D_ARRAY, (material.refraction > 0.0) ? GL_COMPRESSED_RGBA : GL_COMPRESSED_RGB);
                     }
@@ -313,14 +307,14 @@ FileResourcePtr<FileResource> Model::load(FilePackage* filePackageB, const std::
                 if((dataNode = source->first_node("specular"))) {
                     std::string url = readTextureURL(samplerURLs, dataNode);
                     if(url.size() > 0) {
-                        material.effectMap = fileManager.getResourceByPath<Texture>(url);
+                        material.effectMap = fileManager.getResourceByPath<Texture>(filePackage, url);
                         material.effectMap->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
                     }
                 }
                 if((dataNode = source->first_node("bump"))) {
                     std::string url = readTextureURL(samplerURLs, dataNode);
                     if(url.size() > 0) {
-                        material.heightMap = fileManager.getResourceByPath<Texture>(url);
+                        material.heightMap = fileManager.getResourceByPath<Texture>(filePackage, url);
                         material.heightMap->uploadNormalMap(4.0);
                     }
                 }

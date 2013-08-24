@@ -39,6 +39,9 @@ void GUIImage::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     transform += btVector3(posX, posY, 0.0);
     modelMat.setIdentity();
     modelMat.setOrigin(transform);
-    texture->use(0);
+    if(texture)
+        texture->use(0);
+    else
+        Texture::unbind(0, GL_TEXTURE_2D);
     content.drawOnScreen(transform, 0, 0, parentClipRect);
 }

@@ -1,6 +1,4 @@
-<Package>
+<Package hash="7c922dffe6ad3d1c">
 	<EngineVersion value="0.0.1"/>
-	<Dependencies>
-		<Package value="Default"/>
-	</Dependencies>
+	<Description>A demo scene provided by Gamefortec.</Description>
 </Package>

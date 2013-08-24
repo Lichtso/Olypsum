@@ -16,6 +16,7 @@ class ScriptManager {
     static v8::Handle<v8::Value> ScriptLog(const v8::Arguments& args);
     static v8::Handle<v8::Value> ScriptRequire(const v8::Arguments& args);
     static v8::Handle<v8::Value> ScriptLoadContainer(const v8::Arguments& args);
+    static v8::Handle<v8::Value> ScriptLocalizeString(const v8::Arguments& args);
     static v8::Handle<v8::Value> ScriptSaveLevel(const v8::Arguments& args);
     static v8::Handle<v8::Value> ScriptGetLevel(v8::Local<v8::String> property, const v8::AccessorInfo& info);
     static void ScriptSetLevel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
@@ -26,7 +27,8 @@ class ScriptManager {
     std::map<std::string, AnimationProperty*> animations;
     std::set<AnimationTimer*> timers;
     static v8::Handle<v8::Value> readCdataXMLNode(rapidxml::xml_node<xmlUsedCharType>* node);
-    static rapidxml::xml_node<xmlUsedCharType>* writeCdataXMLNode(rapidxml::xml_document<xmlUsedCharType>& doc, const std::string& str);
+    static void writeCdataXMLNode(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>*& parentNode,
+                                  const char* name, v8::Handle<v8::Value> value);
     ScriptManager();
     ~ScriptManager();
     ScriptFile* getScriptFile(FilePackage* filePackage, const std::string& name);

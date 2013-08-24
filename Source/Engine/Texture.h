@@ -104,6 +104,14 @@ class Texture : public FileResource {
      @param animationTime A float that is used to store the time of animation in seconds
      */
     void use(GLuint targetIndex, float& animationTime);
+    /*! Unbindes the texture slot
+     @param targetIndex A index between 0 and x will be a texture target between GL_TEXTURE0 and GL_TEXTUREx
+     @param textureTarget The OpenGL texture target like GL_TEXTURE_2D or GL_TEXTURE_2D_ARRAY
+     */
+    static void unbind(GLuint targetIndex, GLenum textureTarget) {
+        glActiveTexture(GL_TEXTURE0+targetIndex);
+        glBindTexture(textureTarget, 0);
+    };
 };
 
 #endif

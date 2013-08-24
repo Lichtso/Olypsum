@@ -53,7 +53,7 @@ static void getAvailableResolutions(std::vector<Resolution>& resolutions) {
     rapidxml::xml_document<xmlUsedCharType> doc;
     rapidxml::xml_node<xmlUsedCharType> *resolutionsNode, *entryNode;
     rapidxml::xml_attribute<xmlUsedCharType> *attribute;
-    std::string filePath = fileManager.loadPackage("Default")->path+"Resolutions.xml";
+    std::string filePath = fileManager.loadPackage("Core")->path+"Resolutions.xml";
     std::unique_ptr<char[]> fileData = readXmlFile(doc, filePath.c_str(), false);
     if(fileData) {
         resolutionsNode = doc.first_node("Resolutions");
@@ -92,6 +92,21 @@ static void getAvailableResolutions(std::vector<Resolution>& resolutions) {
             res.height = resolutions[i].height * res.scale;
             resolutions.push_back(res);
         }
+}
+
+static GUIImage* getThumbnailOfPackage(FilePackage* package) {
+    std::string thumbnailName = package->findFileByNameInSubdir("Textures/", "thumbnail");
+    if(thumbnailName.size() > 0) {
+        FileResourcePtr<Texture> thumbnail = package->getResource<Texture>(thumbnailName);
+        if(thumbnail) {
+            GUIImage* image = new GUIImage();
+            image->sizeAlignment = GUISizeAlignment::Width;
+            image->texture = thumbnail;
+            image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGBA);
+            return image;
+        }
+    }
+    return NULL;
 }
 
 
@@ -299,13 +314,69 @@ void Menu::setPause(bool active) {
     if(script) script->callFunction("onpause", false, { v8::Boolean::New(active) });
 }
 
+void Menu::setModalView(const std::string& title, const std::string& text, std::function<void(GUIButton* button)> onContinue) {
+    if(menu.screenView->modalView) return;
+    
+    GUIFramedView* modalView = new GUIFramedView();
+    modalView->width = menu.screenView->width*0.4;
+    modalView->height = menu.screenView->height*0.4;
+    GUILabel* label = new GUILabel();
+    //label->color = Color4(1, 0, 0);
+    label->posY = modalView->height*0.65;
+    label->text = localization.localizeString(title);
+    label->fontHeight = menu.screenView->height*0.14;
+    modalView->addChild(label);
+    label = new GUILabel();
+    label->width = modalView->width*0.9;
+    label->text = text;
+    label->sizeAlignment = GUISizeAlignment::Height;
+    label->fontHeight = menu.screenView->height*0.09;
+    modalView->addChild(label);
+    
+    GUIButton* button = new GUIButton();
+    if(onContinue) {
+        button->posX = modalView->width*-0.55;
+        button->posY = modalView->height*-0.7;
+        button->width = screenView->width*0.14;
+        button->sizeAlignment = GUISizeAlignment::Height;
+        modalView->addChild(button);
+        label = new GUILabel();
+        label->text = localization.localizeString("cancel");
+        label->fontHeight = screenView->height*0.1;
+        button->addChild(label);
+        button->onClick = [](GUIButton* button) {
+            menu.screenView->setModalView(NULL);
+        };
+        
+        button = new GUIButton();
+        button->posX = modalView->width*0.55;
+        button->type = GUIButton::Type::Delete;
+        button->onClick = onContinue;
+    }else{
+        button->onClick = [](GUIButton* button) {
+            menu.screenView->setModalView(NULL);
+        };
+    }
+    button->posY = modalView->height*-0.7;
+    button->width = screenView->width*0.14;
+    button->sizeAlignment = GUISizeAlignment::Height;
+    modalView->addChild(button);
+    label = new GUILabel();
+    label->text = localization.localizeString("ok");
+    label->fontHeight = screenView->height*0.1;
+    button->addChild(label);
+    
+    screenView->setModalView(modalView);
+
+}
+
 void Menu::setMenu(Name menu) {
     if(current != none) clear();
     current = menu;
     
     if(levelManager.gameStatus == noGame && menu != loading) {
         GUIImage* image = new GUIImage();
-        image->texture = fileManager.getResourceByPath<Texture>("/Default/background.jpg");
+        image->texture = fileManager.getResourceByPath<Texture>(NULL, "/Core/background.jpg");
         image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
         if((float)image->texture->width/image->texture->height <= (float)screenView->width/screenView->height) {
             image->sizeAlignment = GUISizeAlignment::Height;
@@ -326,7 +397,7 @@ void Menu::setMenu(Name menu) {
             
             GUIImage* image = new GUIImage();
             image->sizeAlignment = GUISizeAlignment::Height;
-            image->texture = fileManager.getResourceByPath<Texture>("/Default/logo.png");
+            image->texture = fileManager.getResourceByPath<Texture>(NULL, "/Core/logo.png");
             image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGBA);
             image->width = screenView->width*0.8;
             image->posY = screenView->height*0.2;
@@ -700,7 +771,8 @@ void Menu::setMenu(Name menu) {
                 localization.getLocalizableLanguages(languages);
                 localization.strings.clear();
                 localization.selected = languages[tabs->selected];
-                localization.loadLocalization(resourcesDir+"Packages/Default/Languages/"+localization.selected+".xml");
+                for(auto packageIterator : fileManager.filePackages)
+                    localization.loadLocalization(packageIterator.second);
             };
             for(unsigned char i = 0; i < languages.size(); i ++) {
                 GUIButton* button = new GUIButton();
@@ -801,95 +873,98 @@ void Menu::setMenu(Name menu) {
             label->text = localization.localizeString("saveGames");
             label->fontHeight = screenView->height*0.2;
             screenView->addChild(label);
-            GUIScrollView* scrollView = new GUIScrollView();
-            scrollView->width = screenView->width*0.95;
-            scrollView->height = screenView->height*0.7;
-            scrollView->posY = screenView->height*0.02;
-            screenView->addChild(scrollView);
             std::vector<std::string> files;
             scanDir(gameDataDir+"Saves/", files);
+            GUIScrollView* scrollView = new GUIScrollView();
+            scrollView->width = screenView->width*0.97;
+            scrollView->height = screenView->height*0.7;
+            screenView->addChild(scrollView);
+            
+            size_t validSaveGames = 0;
             for(unsigned int i = 0; i < files.size(); i ++) {
                 if(files[i][files[i].length()-1] != '/') {
                     files.erase(files.begin()+i);
                     i --;
                     continue;
                 }
-                std::string name = files[i];
-                name.pop_back();
+                files[i].pop_back();
+                std::string name = files[i], path = gameDataDir+"Saves/"+name+'/';
+                rapidxml::xml_document<xmlUsedCharType> doc;
+                std::unique_ptr<char[]> fileData = readXmlFile(doc, gameDataDir+"Saves/"+name+'/'+"Status.xml", false);
+                if(!fileData) continue;
+                rapidxml::xml_node<xmlUsedCharType>* node = doc.first_node("Status");
+                FilePackage* package = fileManager.loadPackage(node->first_node("Package")->first_attribute("value")->value());
+                if(!package) continue;
                 
+                std::string levelContainer = node->first_node("Level")->first_attribute("value")->value();
                 GUIButton* button = new GUIButton();
-                button->posX = scrollView->width*-0.38;
-                button->posY = scrollView->height*(0.9-i*0.25);
+                button->posX = screenView->width*-0.18;
+                button->posY = scrollView->height*(0.8-validSaveGames*0.4);
+                button->onClick = [name, package, levelContainer](GUIButton* button) {
+                    levelManager.saveGameName = name;
+                    levelManager.levelPackage = package;
+                    levelManager.levelContainer = levelContainer;
+                    LevelLoader levelLoader;
+                    levelLoader.loadLevel();
+                };
                 scrollView->addChild(button);
                 GUILabel* label = new GUILabel();
                 label->text = name;
+                label->posX = screenView->width*-0.25;
+                label->posY = screenView->height*0.05;
+                label->width = screenView->width*0.3;
                 label->fontHeight = screenView->height*0.1;
-                label->width = scrollView->width*0.6;
                 label->textAlignment = GUILabel::TextAlignment::Left;
                 label->sizeAlignment = GUISizeAlignment::Height;
                 button->addChild(label);
-                button->onClick = [&menu, name](GUIButton* button) {
-                    levelManager.loadGame(name);
-                };
+                label = new GUILabel();
+                label->text = package->name;
+                label->posX = screenView->width*0.1;
+                label->posY = -screenView->height*0.05;
+                label->width = screenView->width*0.65;
+                label->fontHeight = screenView->height*0.1;
+                label->textAlignment = GUILabel::TextAlignment::Left;
+                label->sizeAlignment = GUISizeAlignment::Height;
+                button->addChild(label);
+                if((node = node->first_node("Description")) && (node = node->first_node()) && node->type() == rapidxml::node_cdata) {
+                    label = new GUILabel();
+                    label->text = node->value();
+                    label->posX = screenView->width*0.45;
+                    label->posY = screenView->height*0.05;
+                    label->width = screenView->width*0.3;
+                    label->fontHeight = screenView->height*0.1;
+                    label->textAlignment = GUILabel::TextAlignment::Right;
+                    label->sizeAlignment = GUISizeAlignment::Height;
+                    button->addChild(label);
+                }
+                GUIImage* image = getThumbnailOfPackage(package);
+                if(image) {
+                    image->height = screenView->height*0.09;
+                    image->posX = screenView->width*-0.65;
+                    button->addChild(image);
+                }
                 
                 button = new GUIButton();
-                button->posX = scrollView->width*0.75;
-                button->posY = scrollView->height*(0.9-i*0.25);
-                button->width = scrollView->width*0.2;
+                button->posX = screenView->width*0.8;
+                button->posY = scrollView->height*(0.8-validSaveGames*0.4);
+                button->width = screenView->width*0.14;
                 button->sizeAlignment = GUISizeAlignment::Height;
                 scrollView->addChild(button);
                 label = new GUILabel();
-                label->text = localization.localizeString("removeGame");
+                label->text = localization.localizeString("remove");
                 label->fontHeight = screenView->height*0.1;
                 button->addChild(label);
                 button->onClick = [this, name](GUIButton* button) {
-                    GUIFramedView* modalView = new GUIFramedView();
-                    modalView->width = screenView->width*0.4;
-                    modalView->height = screenView->height*0.4;
-                    GUILabel* label = new GUILabel();
-                    label->posY = modalView->height*0.65;
-                    label->text = localization.localizeString("removeGame");
-                    label->fontHeight = screenView->height*0.14;
-                    modalView->addChild(label);
-                    label = new GUILabel();
-                    label->width = modalView->width*0.9;
-                    label->textAlignment = GUILabel::TextAlignment::Left;
-                    label->sizeAlignment = GUISizeAlignment::Height;
-                    label->text = localization.localizeString("name")+": "+name;
-                    label->fontHeight = screenView->height*0.14;
-                    modalView->addChild(label);
-                    button = new GUIButton();
-                    button->posX = modalView->width*-0.55;
-                    button->posY = modalView->height*-0.7;
-                    button->width = screenView->width*0.14;
-                    button->sizeAlignment = GUISizeAlignment::Height;
-                    modalView->addChild(button);
-                    label = new GUILabel();
-                    label->text = localization.localizeString("cancel");
-                    label->fontHeight = screenView->height*0.1;
-                    button->addChild(label);
-                    button->onClick = [this](GUIButton* button) {
-                        screenView->setModalView(NULL);
-                    };
-                    button = new GUIButton();
-                    button->posX = modalView->width*0.55;
-                    button->posY = modalView->height*-0.7;
-                    button->width = screenView->width*0.14;
-                    button->sizeAlignment = GUISizeAlignment::Height;
-                    button->type = GUIButton::Type::Delete;
-                    modalView->addChild(button);
-                    label = new GUILabel();
-                    label->text = localization.localizeString("ok");
-                    label->fontHeight = screenView->height*0.1;
-                    button->addChild(label);
-                    button->onClick = [this, name](GUIButton* button) {
-                        levelManager.removeGame(name);
+                    setModalView("remove", localization.localizeString("name")+": "+name,
+                                 [this, name](GUIButton* button) {
+                        removeDir(gameDataDir+"Saves/"+name+'/');
                         setMenu(saveGames);
-                    };
-                    screenView->setModalView(modalView);
+                    });
                 };
+                
+                validSaveGames ++;
             }
-            scrollView->contentHeight = files.size()*0.25*scrollView->height;
+            scrollView->contentHeight = validSaveGames*0.4*scrollView->height;
             
             std::function<void(GUIButton*)> onClick[] = {
                 [this](GUIButton* button) {
@@ -914,80 +989,88 @@ void Menu::setMenu(Name menu) {
             }
         } break;
         case newGame: {
+            fileManager.loadAllPackages();
+            
             GUILabel* label = new GUILabel();
             label->posY = screenView->height*0.88;
             label->text = localization.localizeString("newGame");
             label->fontHeight = screenView->height*0.2;
             screenView->addChild(label);
+            
             GUIScrollView* scrollView = new GUIScrollView();
-            scrollView->posX = 0.0;
-            scrollView->posY = screenView->height*0.1;
-            scrollView->width = screenView->width*0.9;
-            scrollView->height = screenView->height*0.6;
+            scrollView->visible = false;
+            scrollView->width = screenView->width*0.97;
+            scrollView->height = screenView->height*0.7;
+            scrollView->contentHeight = (fileManager.filePackages.size()-1)*0.4*scrollView->height;
             screenView->addChild(scrollView);
-            GUITabs* buttonList = new GUITabs();
-            buttonList->deactivatable = false;
-            buttonList->orientation = GUIOrientation::Vertical;
-            GUIButton* button;
-            std::vector<std::string> files;
-            scanDir(resourcesDir+"Packages/", files);
-            scanDir(gameDataDir+"Packages/", files);
-            for(unsigned int i = 0; i < files.size(); i ++) {
-                if(files[i][files[i].length()-1] != '/' || files[i] == "Default/") {
-                    files.erase(files.begin()+i);
-                    i --;
-                    continue;
-                }
-                files[i].pop_back();
-                std::string name = files[i];
-                button = new GUIButton();
-                label = new GUILabel();
-                label->text = name;
-                label->fontHeight = screenView->height*0.1;
-                button->addChild(label);
-                buttonList->addChild(button);
-            }
-            buttonList->posY = scrollView->height-buttonList->height;
-            scrollView->contentHeight = buttonList->height*2;
-            scrollView->addChild(buttonList);
             
             GUITextField* textField = new GUITextField();
             label = static_cast<GUILabel*>(textField->children[0]);
+            label->text = localization.localizeString("newGame");
             textField->posX = 0.0;
             textField->posY = screenView->height*-0.8;
             textField->width = screenView->width*0.4;
             textField->height = screenView->height*0.07;
             //textField->label->fontHeight = screenView->height*0.1;
-            label->text = localization.localizeString("newGame");
-            screenView->addChild(textField);
-            std::function<void(GUIButton*)> onClick[] = {
-                [this](GUIButton* button) {
-                    setMenu(saveGames);
-                }, [files, buttonList, label](GUIButton* button) {
-                    levelManager.newGame(files[buttonList->selected], label->text);
-                }
-            };
-            const char* buttonLabels[] = { "cancel", "ok" };
-            for(unsigned char i = 0; i < 2; i ++) {
-                button = new GUIButton();
-                button->posX = screenView->width*(-0.8+i*1.6);
-                button->posY = screenView->height*-0.8;
-                button->width = screenView->width*0.14;
-                button->sizeAlignment = GUISizeAlignment::Height;
-                screenView->addChild(button);
-                label = new GUILabel();
-                label->text = localization.localizeString(buttonLabels[i]);
-                label->fontHeight = screenView->height*0.1;
-                button->addChild(label);
-                button->onClick = onClick[i];
-            }
-            button->type = GUIButton::Type::Add;
-            button->enabled = false;
-            textField->onChange = [button](GUITextField* textField) {
+            textField->onChange = [scrollView](GUITextField* textField) {
                 GUILabel* label = static_cast<GUILabel*>(textField->children[0]);
                 std::string path = gameDataDir+"Saves/"+label->text+'/';
-                button->enabled = (!checkDir(path) && label->getLength() >= 3);
-                button->updateContent();
+                scrollView->visible = !checkDir(path) && label->getLength() >= 3;
+            };
+            screenView->addChild(textField);
+            
+            size_t i = 0;
+            for(auto packageIterator : fileManager.filePackages) {
+                FilePackage* package = packageIterator.second;
+                if(package->name == "Core") continue;
+                
+                GUIButton* button = new GUIButton();
+                button->posY = scrollView->height*(0.8-(i ++)*0.4);
+                button->onClick = [package, textField](GUIButton* button) {
+                    levelManager.saveGameName = static_cast<GUILabel*>(textField->children[0])->text;
+                    levelManager.levelPackage = package;
+                    levelManager.levelContainer = "start";
+                    levelManager.newGame();
+                };
+                scrollView->addChild(button);
+                label = new GUILabel();
+                label->text = package->name;
+                label->posX = screenView->width*0.1;
+                label->posY = screenView->height*0.05;
+                label->width = screenView->width*0.8;
+                label->fontHeight = screenView->height*0.1;
+                label->textAlignment = GUILabel::TextAlignment::Left;
+                label->sizeAlignment = GUISizeAlignment::Height;
+                button->addChild(label);
+                label = new GUILabel();
+                label->text = package->description;
+                label->posX = screenView->width*0.1;
+                label->posY = -screenView->height*0.05;
+                label->width = screenView->width*0.8;
+                label->fontHeight = screenView->height*0.1;
+                label->textAlignment = GUILabel::TextAlignment::Left;
+                label->sizeAlignment = GUISizeAlignment::Height;
+                button->addChild(label);
+                GUIImage* image = getThumbnailOfPackage(package);
+                if(image) {
+                    image->height = screenView->height*0.09;
+                    image->posX = screenView->width*-0.8;
+                    button->addChild(image);
+                }
+            }
+            
+            GUIButton* button = new GUIButton();
+            button->posX = screenView->width*(0.8);
+            button->posY = screenView->height*-0.8;
+            button->width = screenView->width*0.14;
+            button->sizeAlignment = GUISizeAlignment::Height;
+            screenView->addChild(button);
+            label = new GUILabel();
+            label->text = localization.localizeString("cancel");
+            label->fontHeight = screenView->height*0.1;
+            button->addChild(label);
+            button->onClick = [this](GUIButton* button) {
+                setMenu(saveGames);
             };
         } break;
         case multiplayer: {

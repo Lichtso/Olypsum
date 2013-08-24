@@ -14,7 +14,7 @@
 class GUIButton : public GUIFramedView {
     public:
     GUISizeAlignment sizeAlignment;
-    unsigned int paddingX, paddingY;
+    int paddingX, paddingY;
     bool enabled;
     enum State {
         Released = 0,

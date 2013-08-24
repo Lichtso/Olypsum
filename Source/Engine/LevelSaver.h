@@ -18,7 +18,7 @@ class LevelSaver {
     LevelSaver();
     ~LevelSaver();
     void pushObject(BaseObject* object);
-    bool saveLevel(const std::string& localData, const std::string& globalData);
+    bool saveLevel(v8::Handle<v8::Value> localData, v8::Handle<v8::Value> globalData, v8::Handle<v8::Value> description);
 };
 
 #endif

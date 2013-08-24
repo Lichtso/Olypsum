@@ -43,10 +43,8 @@ class ObjectManager {
     void init();
     //! Deletes all Objects and the physics world
     void clear();
-    /*! Initializes a new game
-     @param levelPackage The name of the FilePackage to be used as levelPackage
-     */
-    void initGame(const std::string& levelPackage);
+    //! Initializes a new game
+    void initGame();
     //! Calculate a game tick
     void gameTick();
     //! Calculate the physics

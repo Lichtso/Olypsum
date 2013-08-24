@@ -36,7 +36,7 @@ void LevelSaver::pushObject(BaseObject* object) {
     objectCounter ++;
 }
 
-bool LevelSaver::saveLevel(const std::string& localData, const std::string& globalData) {
+bool LevelSaver::saveLevel(v8::Handle<v8::Value> localData, v8::Handle<v8::Value> globalData, v8::Handle<v8::Value> description) {
     v8::HandleScope handleScope;
     
     rapidxml::xml_document<xmlUsedCharType> doc;
@@ -48,10 +48,8 @@ bool LevelSaver::saveLevel(const std::string& localData, const std::string& glob
     rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
     node->name("Level");
     container->append_node(node);
-    rapidxml::xml_node<xmlUsedCharType>* parameterNode;
-    if(localData.size() > 0)
-        node->append_node(scriptManager->writeCdataXMLNode(doc, localData));
-    parameterNode = doc.allocate_node(rapidxml::node_element);
+    scriptManager->writeCdataXMLNode(doc, node, "Data", localData);
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode = doc.allocate_node(rapidxml::node_element);
     parameterNode->name("Gravity");
     btVector3 gravity = objectManager.physicsWorld->getGravity();
     parameterNode->value(doc.allocate_string(stringOf(gravity).c_str()));
@@ -87,18 +85,15 @@ bool LevelSaver::saveLevel(const std::string& localData, const std::string& glob
     
     std::string containersPath = gameDataDir+"Saves/"+levelManager.saveGameName+"/Containers/";
     createDir(containersPath);
-    if(!writeXmlFile(doc, containersPath+levelManager.levelId+".xml", true))
+    if(!writeXmlFile(doc, containersPath+levelManager.levelContainer+".xml", true))
         return false;
     
     doc.clear();
     std::string statusFilePath = gameDataDir+"Saves/"+levelManager.saveGameName+"/Status.xml";
     std::unique_ptr<char[]> fileData = readXmlFile(doc, statusFilePath, true);
     node = doc.first_node("Status");
-    node->first_node("Level")->first_attribute("value")->value(levelManager.levelId.c_str());
-    parameterNode = node->first_node("Data");
-    if(parameterNode)
-        node->remove_node(parameterNode);
-    if(globalData.size() > 0)
-        node->append_node(scriptManager->writeCdataXMLNode(doc, globalData));
+    node->first_node("Level")->first_attribute("value")->value(levelManager.levelContainer.c_str());
+    scriptManager->writeCdataXMLNode(doc, node, "Data", globalData);
+    scriptManager->writeCdataXMLNode(doc, node, "Description", description);
     return writeXmlFile(doc, statusFilePath, true);
 }

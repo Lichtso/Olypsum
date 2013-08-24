@@ -165,8 +165,7 @@ void GUIScreenView::draw() {
         children[i]->draw(transform, clipRect);
     
     if(modalView) {
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        Texture::unbind(0, GL_TEXTURE_2D);
         
         btVector3 halfSize(width, height, 0.0);
         modelMat.setIdentity();

@@ -21,9 +21,9 @@ v8::Handle<v8::Value> ScriptManager::ScriptRequire(const v8::Arguments& args) {
     if(args.Length() == 0)
         return v8::ThrowException(v8::String::New("require(): Too few arguments"));
     
-    FilePackage* filePackage;
-    std::string name;
-    if(!fileManager.readResourcePath(stdStrOfV8(args[0]->ToString()), filePackage, name))
+    FilePackage* filePackage = levelManager.levelPackage;
+    std::string name = stdStrOfV8(args[0]->ToString());
+    if(!fileManager.readResourcePath(filePackage, name))
         return v8::ThrowException(v8::String::New("require(): Error loading file"));
     
     return handleScope.Close(scriptManager->getScriptFile(filePackage, name)->exports);
@@ -44,26 +44,38 @@ v8::Handle<v8::Value> ScriptManager::ScriptLoadContainer(const v8::Arguments& ar
     return levelLoader.getResultsArray();
 }
 
+v8::Handle<v8::Value> ScriptManager::ScriptLocalizeString(const v8::Arguments& args) {
+    v8::HandleScope handleScope;
+    if(args.Length() < 1)
+        return v8::ThrowException(v8::String::New("localizeString(): Too few arguments"));
+    if(!args[0]->IsString())
+        return v8::ThrowException(v8::String::New("localizeString(): Invalid argument"));
+    return v8::String::New(localization.localizeString(cStrOfV8(args[0])).c_str());
+}
+
 v8::Handle<v8::Value> ScriptManager::ScriptSaveLevel(const v8::Arguments& args) {
     v8::HandleScope handleScope;
-    if(args.Length() < 2)
+    if(args.Length() < 3)
         return v8::ThrowException(v8::String::New("saveLevel(): Too few arguments"));
-    std::string localData = (args[0]->IsString()) ? stdStrOfV8(args[0]) : "",
-                globalData = (args[1]->IsString()) ? stdStrOfV8(args[1]) : "";
-    return v8::Boolean::New(levelManager.saveLevel(localData, globalData));
+    LevelSaver levelSaver;
+    return v8::Boolean::New(levelSaver.saveLevel(args[0], args[1], args[2]));
 }
 
 v8::Handle<v8::Value> ScriptManager::ScriptGetLevel(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
-    return v8::String::New(levelManager.levelId.c_str());
+    v8::HandleScope handleScope;
+    return v8::String::New(levelManager.levelContainer.c_str());
 }
 
 void ScriptManager::ScriptSetLevel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
-    levelManager.loadLevel(levelManager.levelPackage->name, stdStrOfV8(value));
+    levelManager.levelContainer = stdStrOfV8(value);
+    LevelLoader levelLoader;
+    levelLoader.loadLevel();
 }
 
 v8::Handle<v8::Value> ScriptManager::ScriptGetAnimationFactor(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+    v8::HandleScope handleScope;
     return v8::Number::New(profiler.animationFactor);
 }
 
@@ -73,13 +85,25 @@ v8::Handle<v8::Value> ScriptManager::readCdataXMLNode(rapidxml::xml_node<xmlUsed
     return v8::String::New(node->value());
 }
 
-rapidxml::xml_node<xmlUsedCharType>* ScriptManager::writeCdataXMLNode(rapidxml::xml_document<xmlUsedCharType>& doc, const std::string& str) {
-    rapidxml::xml_node<xmlUsedCharType>* data = doc.allocate_node(rapidxml::node_element);
-    data->name("Data");
-    rapidxml::xml_node<xmlUsedCharType>* cdata = doc.allocate_node(rapidxml::node_cdata);
-    cdata->value(doc.allocate_string(str.c_str()));
-    data->append_node(cdata);
-    return data;
+void ScriptManager::writeCdataXMLNode(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>*& parentNode,
+                                      const char* name, v8::Handle<v8::Value> value) {
+    rapidxml::xml_node<xmlUsedCharType>* dataNode = parentNode->first_node(name);
+    if(value.IsEmpty() || value->IsUndefined()) {
+        if(dataNode)
+            parentNode->remove_node(dataNode);
+        return;
+    }
+    if(!dataNode) {
+        dataNode = doc.allocate_node(rapidxml::node_element);
+        dataNode->name(name);
+        parentNode->append_node(dataNode);
+    }
+    rapidxml::xml_node<xmlUsedCharType>* cdata = dataNode->first_node();
+    if(!cdata) {
+        cdata = doc.allocate_node(rapidxml::node_cdata);
+        dataNode->append_node(cdata);
+    }
+    cdata->value(doc.allocate_string(cStrOfV8(value->ToString())));
 }
 
 ScriptManager::ScriptManager() {
@@ -88,6 +112,7 @@ ScriptManager::ScriptManager() {
     globalTemplate->Set(v8::String::New("log"), v8::FunctionTemplate::New(ScriptLog));
     globalTemplate->Set(v8::String::New("require"), v8::FunctionTemplate::New(ScriptRequire));
     globalTemplate->Set(v8::String::New("loadContainer"), v8::FunctionTemplate::New(ScriptLoadContainer));
+    globalTemplate->Set(v8::String::New("localizeString"), v8::FunctionTemplate::New(ScriptLocalizeString));
     globalTemplate->Set(v8::String::New("saveLevel"), v8::FunctionTemplate::New(ScriptSaveLevel));
     globalTemplate->SetAccessor(v8::String::New("levelID"), ScriptGetLevel, ScriptSetLevel);
     globalTemplate->SetAccessor(v8::String::New("animationFactor"), ScriptGetAnimationFactor);

@@ -41,7 +41,7 @@ exports.onload = function(localData, globalData) {
 };
 
 /*exports.onleave = function() {
-	saveLevel(null, null);
+	saveLevel(undefined, undefined, undefined);
 };
 
 exports.onpause = function(paused) {
