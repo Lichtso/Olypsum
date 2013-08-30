@@ -51,12 +51,12 @@ bool FilePackage::init() {
     rapidxml::xml_document<xmlUsedCharType> doc;
     std::unique_ptr<char[]> fileData = readXmlFile(doc, path+"/Package.xml", false);
     if(!fileData) {
-        menu.setModalView("error", localization.localizeString("packageError_FilesMissing"), NULL);
+        menu.setModalView("error", fileManager.localizeString("packageError_FilesMissing"), NULL);
         return false;
     }
     rapidxml::xml_node<xmlUsedCharType> *node, *packageNode = doc.first_node("Package");
     if(strcmp(packageNode->first_node("EngineVersion")->first_attribute("value")->value(), VERSION) != 0) {
-        menu.setModalView("error", localization.localizeString("packageError_Version"), NULL);
+        menu.setModalView("error", fileManager.localizeString("packageError_Version"), NULL);
         return false;
     }
     
@@ -66,7 +66,7 @@ bool FilePackage::init() {
 #ifdef DEBUG
         printf("Hash of resoucre package %s should be %lx\n", name.c_str(), hash);
 #else
-        levelManager.showErrorModal(localization.localizeString("packageError_HashCorrupted"));
+        levelManager.showErrorModal(fileManager.localizeString("packageError_HashCorrupted"));
         return false;
 #endif
     }
@@ -81,14 +81,14 @@ bool FilePackage::init() {
         while(packageNode) {
             sscanf(packageNode->first_attribute("hash")->value(), "%lx", &hashCmp);
             if(!(package = fileManager.loadPackage(packageNode->first_attribute("name")->value())) || hashCmp != package->hash) {
-                menu.setModalView("error", localization.localizeString("packageError_CouldNotLoad")+'\n'+name, NULL);
+                menu.setModalView("error", fileManager.localizeString("packageError_CouldNotLoad")+'\n'+name, NULL);
                 return false;
             }
+            dependencies.insert(package);
             packageNode = packageNode->next_sibling("Package");
         }
     }
     
-    localization.loadLocalization(this);
     return true;
 }
 
@@ -105,15 +105,68 @@ std::string FilePackage::findFileByNameInSubdir(const char* subdir, const std::s
     return "";
 }
 
+bool FilePackage::getLocalizableLanguages(std::vector<std::string>& languages) {
+    std::vector<std::string> files;
+    if(!scanDir(path+"Languages/", files)) {
+        log(error_log, "Languages directory not found.");
+        return false;
+    }
+    
+    for(size_t i = 0; i < files.size(); i ++) {
+        if(files[i].length() < 4 || files[i].compare(files[i].length()-4, 4, ".xml") != 0) continue;
+        languages.push_back(files[i].substr(0, files[i].length()-4));
+    }
+    return true;
+}
 
+bool FilePackage::loadLocalization() {
+    std::string filePath = path+"Languages/"+optionsState.language+".xml";
+    
+    rapidxml::xml_document<xmlUsedCharType> doc;
+    std::unique_ptr<char[]> fileData = readXmlFile(doc, filePath.c_str(), false);
+    if(!fileData) return false;
+    
+    rapidxml::xml_node<xmlUsedCharType> *localizationNode, *entryNode;
+    rapidxml::xml_attribute<xmlUsedCharType> *entryKeyAttribute;
+    
+    localizationNode = doc.first_node("Localization");
+    if(!localizationNode) return false;
+    
+    localization.clear();
+    entryNode = localizationNode->first_node("Entry");
+    while(entryNode) {
+        entryKeyAttribute = entryNode->first_attribute("key");
+        if(!entryKeyAttribute) return false;
+        
+        localization[std::string(entryKeyAttribute->value())] = std::string(entryNode->value());
+        entryNode = entryNode->next_sibling("Entry");
+    }
+    
+    return true;
+}
+
+
+
+static void addPackagesToKeep(std::set<FilePackage*>& packagesToKeep, FilePackage* filePackage) {
+    packagesToKeep.insert(filePackage);
+    for(auto iterator : filePackage->dependencies)
+        addPackagesToKeep(packagesToKeep, iterator);
+}
 
 void FileManager::clear() {
     menu.clear();
-    for(auto iterator : filePackages)
-        delete iterator.second;
-    filePackages.clear();
-    localization.strings.clear();
-    loadPackage("Core");
+    
+    std::set<FilePackage*> packagesToKeep;
+    addPackagesToKeep(packagesToKeep, loadPackage("Core"));
+    if(levelManager.levelPackage)
+        addPackagesToKeep(packagesToKeep, levelManager.levelPackage);
+    
+    foreach_e(filePackages, iterator)
+        if(packagesToKeep.find(iterator->second) == packagesToKeep.end()) {
+            delete iterator->second;
+            filePackages.erase(iterator);
+        }else if(iterator->second->name != "Core")
+            iterator->second->loadLocalization();
 }
 
 FilePackage* FileManager::loadPackage(const std::string& name) {
@@ -178,6 +231,16 @@ rapidxml::xml_node<xmlUsedCharType>* FileManager::writeResource(rapidxml::xml_do
     return node;
 }
 
+const std::string& FileManager::localizeString(const std::string& key) {
+    for(auto iterator : filePackages) {
+        std::map<std::string, std::string>::iterator localization = iterator.second->localization.find(key);
+        if(localization != iterator.second->localization.end())
+            return localization->second;
+    }
+    log(error_log, std::string("No localization found for key: ")+key.c_str());
+    return key;
+}
+
 
 
 static bool readOptionBool(rapidxml::xml_node<xmlUsedCharType>* option) {
@@ -196,7 +259,7 @@ static T readOptionValue(rapidxml::xml_node<xmlUsedCharType>* option, const char
 void OptionsState::loadOptions() {
     createDir(gameDataDir+"Saves/");
     createDir(gameDataDir+"Packages/");
-    localization.selected = "English";
+    language = "English";
     
     rapidxml::xml_document<xmlUsedCharType> doc;
     std::unique_ptr<char[]> fileData = readXmlFile(doc, gameDataDir+"Options.xml", false);
@@ -206,7 +269,7 @@ void OptionsState::loadOptions() {
             saveOptions();
             return;
         }
-        localization.selected = options->first_node("Language")->first_attribute("value")->value();
+        language = options->first_node("Language")->first_attribute("value")->value();
         rapidxml::xml_node<xmlUsedCharType>* optionGroup = options->first_node("Graphics");
         optionsState.screenBlurFactor = (readOptionBool(optionGroup->first_node("ScreenBlurEnabled"))) ? 0.0 : -1.0;
         optionsState.edgeSmoothEnabled = readOptionBool(optionGroup->first_node("EdgeSmoothEnabled"));
@@ -232,7 +295,7 @@ void OptionsState::loadOptions() {
     }else saveOptions();
     
     prevOptionsState = optionsState;
-    fileManager.clear();
+    fileManager.loadPackage("Core")->loadLocalization();
 }
 
 void OptionsState::saveOptions() {
@@ -242,7 +305,7 @@ void OptionsState::saveOptions() {
     options->name("Options");
     doc.append_node(options);
     addXMLNode(doc, options, "EngineVersion", VERSION);
-    addXMLNode(doc, options, "Language", localization.selected.c_str());
+    addXMLNode(doc, options, "Language", language.c_str());
     
     rapidxml::xml_node<xmlUsedCharType>* optionGroup = doc.allocate_node(rapidxml::node_element);
     optionGroup->name("Graphics");

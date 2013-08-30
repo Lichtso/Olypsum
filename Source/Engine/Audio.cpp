@@ -106,7 +106,7 @@ SoundObject::SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
         log(error_log, "Found \"SoundTrack\"-node without \"src\"-attribute.");
         return;
     }
-    setSoundTrack(fileManager.getResourceByPath<SoundTrack>(levelManager.levelPackage, attribute->value()));
+    setSoundTrack(fileManager.getResourceByPath<SoundTrack>(levelLoader->filePackage, attribute->value()));
     
     parameterNode = node->first_node("Mode");
     if(!parameterNode) {

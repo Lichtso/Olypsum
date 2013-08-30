@@ -16,6 +16,7 @@ class LevelLoader {
     std::vector<BaseObject*> objectLinkingIndex;
     std::set<std::string> containerStack;
     public:
+    FilePackage* filePackage;
     btTransform transformation;
     LevelLoader();
     v8::Handle<v8::Array> getResultsArray();

@@ -35,9 +35,9 @@ v8::Handle<v8::Value> ScriptManager::ScriptLoadContainer(const v8::Arguments& ar
         return v8::ThrowException(v8::String::New("loadContainer(): Too few arguments"));
     if(!scriptMatrix4.isCorrectInstance(args[0]) || !args[1]->IsString())
         return v8::ThrowException(v8::String::New("loadContainer(): Invalid argument"));
+    
     LevelLoader levelLoader;
     levelLoader.transformation = scriptMatrix4.getDataOfInstance(args[0])->getBTTransform();
-    
     if(!levelLoader.loadContainer(stdStrOfV8(args[1]), false))
        return v8::Undefined();
     
@@ -50,7 +50,7 @@ v8::Handle<v8::Value> ScriptManager::ScriptLocalizeString(const v8::Arguments& a
         return v8::ThrowException(v8::String::New("localizeString(): Too few arguments"));
     if(!args[0]->IsString())
         return v8::ThrowException(v8::String::New("localizeString(): Invalid argument"));
-    return v8::String::New(localization.localizeString(cStrOfV8(args[0])).c_str());
+    return v8::String::New(fileManager.localizeString(cStrOfV8(args[0])).c_str());
 }
 
 v8::Handle<v8::Value> ScriptManager::ScriptSaveLevel(const v8::Arguments& args) {

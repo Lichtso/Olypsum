@@ -236,35 +236,18 @@ v8::Handle<v8::Value> ScriptRigidObject::ApplyLinearImpulse(const v8::Arguments&
     return v8::Undefined();
 }
 
-v8::Handle<v8::Value> ScriptRigidObject::FindBoneByPath(const v8::Arguments& args) {
+v8::Handle<v8::Value> ScriptRigidObject::GetBoneByName(const v8::Arguments& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1)
-        return v8::ThrowException(v8::String::New("RigidObject findBoneByPath(): Too few arguments"));
-    if(!args[0]->IsArray())
-        return v8::ThrowException(v8::String::New("RigidObject findBoneByPath(): Invalid argument"));
+        return v8::ThrowException(v8::String::New("RigidObject getBoneByName(): Too few arguments"));
+    if(!args[0]->IsString())
+        return v8::ThrowException(v8::String::New("RigidObject getBoneByName(): Invalid argument"));
     
-    v8::Handle<v8::Array> path = v8::Handle<v8::Array>::Cast(args[0]);
     RigidObject* objectPtr = getDataOfInstance<RigidObject>(args.This());
-    BoneObject* boneObject = objectPtr->getRootBone();
-    if(!boneObject) return v8::Undefined();
-    
-    for(unsigned int i = 0; i < path->Length(); i ++) {
-        bool notFound = true;
-        std::string boneName = stdStrOfV8(path->Get(i));
-        for(auto iterator : boneObject->links)
-            if(dynamic_cast<TransformLink*>(iterator) &&
-               dynamic_cast<BoneObject*>(iterator->b) &&
-               static_cast<BoneObject*>(iterator->b)->bone->name == boneName) {
-                boneObject = static_cast<BoneObject*>(iterator->b);
-                notFound = false;
-                break;
-            }
-        
-        if(notFound)
-            return v8::Undefined();
-    }
-    
-    return handleScope.Close(boneObject->scriptInstance);
+    if(!objectPtr->skeletonPose) return v8::Undefined();
+    auto iterator = objectPtr->skeletonPose->bones.find(stdStrOfV8(args[0]));
+    if(iterator == objectPtr->skeletonPose->bones.end()) return v8::Undefined();
+    return handleScope.Close(iterator->second->scriptInstance);
 }
 
 v8::Handle<v8::Value> ScriptRigidObject::AccessTextureAnimationTime(const v8::Arguments& args) {
@@ -298,7 +281,7 @@ ScriptRigidObject::ScriptRigidObject() :ScriptGraphicObject("RigidObject") {
     objectTemplate->Set(v8::String::New("applyImpulseAtPoint"), v8::FunctionTemplate::New(ApplyImpulseAtPoint));
     objectTemplate->Set(v8::String::New("applyAngularImpulse"), v8::FunctionTemplate::New(ApplyAngularImpulse));
     objectTemplate->Set(v8::String::New("applyLinearImpulse"), v8::FunctionTemplate::New(ApplyLinearImpulse));
-    objectTemplate->Set(v8::String::New("findBoneByPath"), v8::FunctionTemplate::New(FindBoneByPath));
+    objectTemplate->Set(v8::String::New("getBoneByName"), v8::FunctionTemplate::New(GetBoneByName));
     objectTemplate->Set(v8::String::New("textureAnimationTime"), v8::FunctionTemplate::New(AccessTextureAnimationTime));
     
     functionTemplate->Inherit(scriptGraphicObject.functionTemplate);

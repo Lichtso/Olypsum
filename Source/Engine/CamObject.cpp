@@ -31,7 +31,7 @@ struct FrustumCullingCallback : btDbvt::ICollide {
         if((proxy->m_collisionFilterGroup & filterMask) == 0) return;
         
         btCollisionObject* co = static_cast<btCollisionObject*>(proxy->m_clientObject);
-        GraphicObject* go = static_cast<GraphicObject*>(co->getUserPointer());
+        DisplayObject* go = static_cast<DisplayObject*>(co->getUserPointer());
         go->inFrustum = true;
     }
 };

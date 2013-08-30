@@ -203,12 +203,7 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicObject::write(rapidxml::xml_document<
     node->append_node(physicsBody);
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
     attribute->name("collisionShape");
+    attribute->value(levelManager.getCollisionShapeName(body->getCollisionShape()).c_str());
     physicsBody->append_attribute(attribute);
-    for(auto iterator : levelManager.sharedCollisionShapes)
-        if(iterator.second == body->getCollisionShape()) {
-            attribute->value(doc.allocate_string(iterator.first.c_str()));
-            return node;
-        }
-    log(error_log, "Couldn't find collision shape of PhysicObject.");
     return node;
 }

@@ -46,7 +46,7 @@ void restartApplication() {
 int main(int argc, char *argv[]) {
     NL::init();
     
-    std::string companyDir = std::string(???)+"/Gamefortec/";
+    std::string companyDir = "~/.Gamefortec/";
     gameDataDir = companyDir+"Olypsum/";
     
     createDir(companyDir);

@@ -138,15 +138,35 @@ void comMotionState::setWorldTransform(const btTransform& centerOfMassWorldTrans
 
 
 
-void RigidObject::setupBones(LevelLoader* levelLoader, BaseObject* object, Bone* bone) {
-    object = new BoneObject(bone, object);
-    if(levelLoader)
-        levelLoader->pushObject(object);
-    for(auto childBone : bone->children)
-        setupBones(levelLoader, object, childBone);
+RigidObject::SkeletonPose::SkeletonPose(LevelLoader* levelLoader, RigidObject* object) {
+    Skeleton* skeleton = object->model->skeleton;
+    pose = new btTransform[skeleton->bones.size()];
+    rootBone = setupBones(levelLoader, object, skeleton->rootBone);
 }
 
-void RigidObject::writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver, BoneObject *object) {
+RigidObject::SkeletonPose::~SkeletonPose() {
+    delete [] pose;
+}
+
+BoneObject* RigidObject::SkeletonPose::setupBones(LevelLoader* levelLoader, BaseObject* object, Bone* bone) {
+    object = bones[bone->name] = new BoneObject(bone, object);
+    if(levelLoader) levelLoader->pushObject(object);
+    for(auto childBone : bone->children)
+        setupBones(levelLoader, object, childBone);
+    return static_cast<BoneObject*>(object);
+}
+
+void RigidObject::SkeletonPose::updateSkeletonPose(BoneObject* object, Bone* bone) {
+    pose[bone->jointIndex] = object->getTransformation() * bone->absoluteInv;
+    for(auto iterator : object->links) {
+        if(!dynamic_cast<TransformLink*>(iterator)) continue;
+        BoneObject* childObject = dynamic_cast<BoneObject*>(iterator->b);
+        if(childObject && childObject != object)
+            updateSkeletonPose(childObject, childObject->bone);
+    }
+}
+
+void RigidObject::SkeletonPose::writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver, BoneObject *object) {
     object->write(doc, levelSaver);
     for(unsigned int i = 0; i < object->bone->children.size(); i ++)
         for(auto iterator : object->links) {
@@ -157,14 +177,7 @@ void RigidObject::writeBones(rapidxml::xml_document<char> &doc, LevelSaver* leve
         }
 }
 
-void RigidObject::updateSkeletonPose(BoneObject* object, Bone* bone) {
-    skeletonPose.get()[bone->jointIndex] = object->getTransformation() * bone->absoluteInv;
-    for(auto iterator : object->links) {
-        BoneObject* boneObject = dynamic_cast<BoneObject*>(iterator->b);
-        if(boneObject && boneObject != object)
-            updateSkeletonPose(boneObject, boneObject->bone);
-    }
-}
+
 
 RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
     v8::HandleScope handleScope;
@@ -193,7 +206,7 @@ RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
             textureAnimationTime[i] = animationTime.data[i];
     }
     
-    setModel(levelLoader, fileManager.getResourceByPath<Model>(levelManager.levelPackage, attribute->value()));
+    setModel(levelLoader, fileManager.getResourceByPath<Model>(levelLoader->filePackage, attribute->value()));
     parameterNode = node->first_node("PhysicsBody");
     if(!parameterNode) {
         log(error_log, "Tried to construct RigidObject without \"PhysicsBody\"-node.");
@@ -299,8 +312,8 @@ bool RigidObject::gameTick() {
     for(unsigned int i = 0; i < textureAnimationTime.size(); i ++)
         if(textureAnimationTime[i ++] >= 0.0)
             textureAnimationTime[i ++] += profiler.animationFactor;
-    if(model->skeleton)
-        updateSkeletonPose(getRootBone(), model->skeleton->rootBone);
+    if(skeletonPose)
+        skeletonPose->updateSkeletonPose(skeletonPose->rootBone, model->skeleton->rootBone);
     return GraphicObject::gameTick();
 }
 
@@ -374,7 +387,7 @@ rapidxml::xml_node<xmlUsedCharType>* RigidObject::write(rapidxml::xml_document<x
     }
     node->append_node(fileManager.writeResource(doc, "Model", model));
     if(skeletonPose)
-        writeBones(doc, levelSaver, getRootBone());
+        skeletonPose->writeBones(doc, levelSaver, skeletonPose->rootBone);
     
     return node;
 }
@@ -392,19 +405,6 @@ void RigidObject::setKinematic(bool active) {
         body->setCollisionFlags(body->getCollisionFlags() & (~ btCollisionObject::CF_KINEMATIC_OBJECT));
         body->forceActivationState(ACTIVE_TAG);
     }
-}
-
-BoneObject* RigidObject::getRootBone() {
-    if(model->skeleton) {
-        Bone* rootBone = model->skeleton->rootBone;
-        for(auto iterator : links) {
-            if(!dynamic_cast<TransformLink*>(iterator)) continue;
-            BoneObject* rootBoneObject = dynamic_cast<BoneObject*>(iterator->b);
-            if(rootBoneObject && rootBoneObject->bone == rootBone)
-                return rootBoneObject;
-        }
-    }
-    return NULL;
 }
 
 void RigidObject::setModel(LevelLoader* levelLoader, FileResourcePtr<Model> _model) {
@@ -426,10 +426,8 @@ void RigidObject::setModel(LevelLoader* levelLoader, FileResourcePtr<Model> _mod
         if(model->meshes[i]->material.diffuse && model->meshes[i]->material.diffuse->depth > 1)
             textureAnimationTime.push_back(0.0);
     
-    if(model->skeleton) {
-        skeletonPose.reset(new btTransform[model->skeleton->bones.size()]);
-        setupBones(levelLoader, this, model->skeleton->rootBone);
-    }
+    if(model->skeleton)
+        skeletonPose.reset(new SkeletonPose(levelLoader, this));
 }
 
 void RigidObject::draw() {
@@ -462,7 +460,7 @@ void RigidObject::prepareShaderProgram(Mesh* mesh) {
     
     currentShaderProgram->setUniformF("discardDensity", clamp(integrity+1.0F, 0.0F, 1.0F));
     if(skeletonPose)
-        currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose.get(), model->skeleton->bones.size());
+        currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose->pose, model->skeleton->bones.size());
 }
 
 

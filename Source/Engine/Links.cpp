@@ -943,11 +943,15 @@ void TransformLink::removeFast(BaseObject* object) {
 }
 
 bool TransformLink::checkIfAttachingIsValid() {
-    foreach_e(b->links, iterator)
-    if(*iterator != this && (*iterator)->b == b && dynamic_cast<TransformLink*>(*iterator)) {
-        log(error_log, "Tried to attach a TransformLink to a child which already got another parent.");
+    if(dynamic_cast<GraphicObject*>(b)) {
+        log(error_log, "Tried to attach a TransformLink to a GraphicObject as child.");
         return false;
     }
+    foreach_e(b->links, iterator)
+        if(*iterator != this && (*iterator)->b == b && dynamic_cast<TransformLink*>(*iterator)) {
+            log(error_log, "Tried to attach a TransformLink to a child which already got another parent.");
+            return false;
+        }
     return true;
 }
 

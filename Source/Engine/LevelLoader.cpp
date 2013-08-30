@@ -8,7 +8,7 @@
 
 #include "AppMain.h"
 
-LevelLoader::LevelLoader() :transformation(btTransform::getIdentity()) {
+LevelLoader::LevelLoader() :transformation(btTransform::getIdentity()), filePackage(levelManager.levelPackage) {
     
 }
 
@@ -36,15 +36,20 @@ void LevelLoader::pushObject(BaseObject* object) {
 
 bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
     v8::HandleScope handleScope;
+    std::unique_ptr<char[]> rawData;
     rapidxml::xml_document<xmlUsedCharType> doc;
     
-    std::unique_ptr<char[]> rawData = readXmlFile(doc, gameDataDir+"Saves/"+levelManager.saveGameName+"/Containers/"+name+".xml", false);
-    if(!rawData)
-        rawData = readXmlFile(doc, levelManager.levelPackage->path+"/Containers/"+name+".xml", false);
+    if(isLevelRoot) {
+        rawData = readXmlFile(doc, gameDataDir+"Saves/"+levelManager.saveGameName+"/Containers/"+name+".xml", false);
+        if(!rawData)
+            rawData = readXmlFile(doc, filePackage->path+"/Containers/"+name+".xml", false);
+    }else if(fileManager.readResourcePath(filePackage, name))
+        rawData = readXmlFile(doc, filePackage->path+"/Containers/"+name+".xml", false);
     if(!rawData) {
-        menu.setModalView("error", localization.localizeString("packageError_ContainerMissing")+'\n'+name, NULL);
+        menu.setModalView("error", fileManager.localizeString("packageError_ContainerMissing")+'\n'+name, NULL);
         return false;
     }
+    
     rapidxml::xml_node<xmlUsedCharType>* containerNode = doc.first_node("Container");
     if(!containerNode) {
         log(error_log, std::string("Could not find \"Container\"-node in container: ")+name+'.');
@@ -56,7 +61,7 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
         return false;
     }
     containerStack.insert(name);
-    //Prepare object linking
+    FilePackage* prevFilePackage = filePackage;
     unsigned int objectLinkingScopePrev = objectLinkingIndex.size();
     
     //Check for Level-node
@@ -100,7 +105,7 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
         node = node->next_sibling("Container");
     }
     
-    //Prepare object linking
+    filePackage = prevFilePackage;
     objectLinkingScope = objectLinkingScopePrev;
     objectLinkingOffset = objectLinkingIndex.size();
     
@@ -192,128 +197,14 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
 }
 
 bool LevelLoader::loadLevel() {
-    std::string filePackage = levelManager.levelPackage->name;
     objectManager.initGame();
-    levelManager.levelPackage = fileManager.loadPackage(filePackage);
-    if(!levelManager.levelPackage) {
-        menu.setModalView("error", localization.localizeString("packageError_PackageMissing")+'\n'+levelManager.levelPackage->name, NULL);
-        return false;
-    }
     scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
-    
-    //Load CollisionShapes
-    rapidxml::xml_document<xmlUsedCharType> doc;
-    std::unique_ptr<char[]> fileData = readXmlFile(doc, levelManager.levelPackage->path+"/CollisionShapes.xml", false);
-    if(!fileData) {
-        menu.setModalView("error", localization.localizeString("packageError_FilesMissing"), NULL);
-        return false;
-    }
-    
-    //Enable console log
-    levelManager.gameStatus = localGame;
-    
-    rapidxml::xml_node<xmlUsedCharType>* node = doc.first_node("CollisionShapes")->first_node();
-    while(node) {
-        btCollisionShape* shape;
-        const char* name = node->first_attribute("id")->value();
-        if(strcmp(node->name(), "Cylinder") == 0 || strcmp(node->name(), "Box") == 0) {
-            XMLValueArray<float> vecData;
-            vecData.readString(node->first_attribute("size")->value(), "%f");
-            
-            if(strcmp(node->name(), "Cylinder") == 0)
-                shape = new btCylinderShape(vecData.getVector3());
-            else
-                shape = new btBoxShape(vecData.getVector3());
-        }else if(strcmp(node->name(), "Sphere") == 0) {
-            float radius;
-            sscanf(node->first_attribute("radius")->value(), "%f", &radius);
-            shape = new btSphereShape(radius);
-        }else if(strcmp(node->name(), "Capsule") == 0 || strcmp(node->name(), "Cone") == 0) {
-            bool isCapsule = (strcmp(node->name(), "Capsule") == 0);
-            float radius, length;
-            sscanf(node->first_attribute("radius")->value(), "%f", &radius);
-            sscanf(node->first_attribute("length")->value(), "%f", &length);
-            char* direction = node->first_attribute("direction")->value();
-            if(strcmp(direction, "x") == 0) {
-                if(isCapsule)
-                    shape = new btCapsuleShapeX(radius, length);
-                else
-                    shape = new btConeShapeX(radius, length);
-            }else if(strcmp(direction, "y") == 0) {
-                if(isCapsule)
-                    shape = new btCapsuleShape(radius, length);
-                else
-                    shape = new btConeShape(radius, length);
-            }else if(strcmp(direction, "z") == 0) {
-                if(isCapsule)
-                    shape = new btCapsuleShapeZ(radius, length);
-                else
-                    shape = new btConeShapeZ(radius, length);
-            }else{
-                log(error_log, std::string("Found collision shape (")+name+") with an unknown direction: "+direction+'.');
-                return false;
-            }
-        }else if(strcmp(node->name(), "SphereCompound") == 0) {
-            unsigned int count = 0;
-            rapidxml::xml_node<xmlUsedCharType>* childNode = node->first_node("Sphere");
-            while(childNode) {
-                count ++;
-                childNode = childNode->next_sibling("Sphere");
-            }
-            std::unique_ptr<btVector3[]> positions(new btVector3[count]);
-            std::unique_ptr<btScalar[]> radi(new btScalar[count]);
-            count = 0;
-            childNode = node->first_node("Sphere");
-            while(childNode) {
-                XMLValueArray<float> vecData;
-                vecData.readString(childNode->first_attribute("position")->value(), "%f");
-                positions[count] = vecData.getVector3();
-                sscanf(childNode->first_attribute("radius")->value(), "%f", &radi[count]);
-                count ++;
-                childNode = childNode->next_sibling("Sphere");
-            }
-            shape = new btMultiSphereShape(positions.get(), radi.get(), count);
-        }else if(strcmp(node->name(), "Compound") == 0) {
-            btCompoundShape* compoundShape = new btCompoundShape();
-            rapidxml::xml_node<xmlUsedCharType>* childNode = node->first_node("Child");
-            while(childNode) {
-                btCollisionShape* childShape = levelManager.getCollisionShape(childNode->first_attribute("collisionShape")->value());
-                if(!childShape) {
-                    log(error_log, std::string("Found compound collision shape (")+name+") with an invalid child.");
-                    return false;
-                }
-                btTransform transformation = readTransformationXML(childNode);
-                compoundShape->addChildShape(transformation, childShape);
-                childNode = childNode->next_sibling("Child");
-            }
-            shape = compoundShape;
-        }else if(strcmp(node->name(), "VertexCloud") == 0) {
-            XMLValueArray<btScalar> vertices;
-            sscanf(node->first_attribute("vertexCount")->value(), "%d", &vertices.count);
-            vertices.readString(node, vertices.count*3, "%f");
-            vertices.count /= 3;
-            shape = new btConvexHullShape(vertices.data, vertices.count, sizeof(btScalar)*3);
-            if(vertices.count > 100)
-                log(warning_log, std::string("Found vertex cloud shape (")+name+") with more than 100 vertices.");
-        }else if(strcmp(node->name(), "StaticPlane") == 0) {
-            btScalar distance;
-            sscanf(node->first_attribute("distance")->value(), "%f", &distance);
-            XMLValueArray<btScalar> vec;
-            vec.readString(node->value(), "%f");
-            shape = new btStaticPlaneShape(btVector3(vec.data[0], vec.data[1], vec.data[2]), distance);
-        }else{
-            log(error_log, std::string("Found collision shape (")+name+") shape with an unknown type: "+node->name()+'.');
-            return false;
-        }
-        levelManager.sharedCollisionShapes[name] = shape;
-        node = node->next_sibling();
-    }
     
     //Load root conatiner
     if(!loadContainer(levelManager.levelContainer, true)) {
         levelManager.clear();
         if(!menu.screenView->modalView)
-            menu.setModalView("error", localization.localizeString("packageError_Corrupted"), NULL);
+            menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), NULL);
         return false;
     }
     

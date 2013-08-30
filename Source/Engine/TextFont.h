@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Localization.h"
+#include "ObjectManager.h"
 
 #ifndef TextFont_h
 #define TextFont_h

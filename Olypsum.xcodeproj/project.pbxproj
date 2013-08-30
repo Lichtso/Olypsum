@@ -74,7 +74,6 @@
 		11A79B78153C2FE9002B9F0A /* GUITabs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B3D153C2FE9002B9F0A /* GUITabs.cpp */; };
 		11A79B79153C2FE9002B9F0A /* GUITextField.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B3F153C2FE9002B9F0A /* GUITextField.cpp */; };
 		11A79B7A153C2FE9002B9F0A /* GUIView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B41153C2FE9002B9F0A /* GUIView.cpp */; };
-		11A79B82153C2FE9002B9F0A /* Localization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B52153C2FE9002B9F0A /* Localization.cpp */; };
 		11A79B83153C2FE9002B9F0A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 11A79B55153C2FE9002B9F0A /* MainMenu.xib */; };
 		11A79B85153C2FE9002B9F0A /* main.mm in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B58153C2FE9002B9F0A /* main.mm */; };
 		11A79B86153C2FE9002B9F0A /* SDLMain.mm in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B5A153C2FE9002B9F0A /* SDLMain.mm */; };
@@ -228,8 +227,6 @@
 		11A79B40153C2FE9002B9F0A /* GUITextField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUITextField.h; sourceTree = "<group>"; };
 		11A79B41153C2FE9002B9F0A /* GUIView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GUIView.cpp; sourceTree = "<group>"; };
 		11A79B42153C2FE9002B9F0A /* GUIView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GUIView.h; sourceTree = "<group>"; };
-		11A79B52153C2FE9002B9F0A /* Localization.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Localization.cpp; sourceTree = "<group>"; };
-		11A79B53153C2FE9002B9F0A /* Localization.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Localization.h; sourceTree = "<group>"; };
 		11A79B56153C2FE9002B9F0A /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		11A79B57153C2FE9002B9F0A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		11A79B58153C2FE9002B9F0A /* main.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = main.mm; sourceTree = "<group>"; };
@@ -421,8 +418,6 @@
 				11BD39AC15414AA6007846B8 /* LightObject.cpp */,
 				118620471650165400A32518 /* ObjectManager.h */,
 				118620461650165400A32518 /* ObjectManager.cpp */,
-				11A79B53153C2FE9002B9F0A /* Localization.h */,
-				11A79B52153C2FE9002B9F0A /* Localization.cpp */,
 				11A79B65153C2FE9002B9F0A /* TextFont.h */,
 				11A79B64153C2FE9002B9F0A /* TextFont.cpp */,
 				11A79B26153C2FE9002B9F0A /* GUI */,
@@ -633,7 +628,6 @@
 				11A79B78153C2FE9002B9F0A /* GUITabs.cpp in Sources */,
 				11A79B79153C2FE9002B9F0A /* GUITextField.cpp in Sources */,
 				11A79B7A153C2FE9002B9F0A /* GUIView.cpp in Sources */,
-				11A79B82153C2FE9002B9F0A /* Localization.cpp in Sources */,
 				11A79B85153C2FE9002B9F0A /* main.mm in Sources */,
 				11A79B86153C2FE9002B9F0A /* SDLMain.mm in Sources */,
 				11A79B87153C2FE9002B9F0A /* Model.cpp in Sources */,

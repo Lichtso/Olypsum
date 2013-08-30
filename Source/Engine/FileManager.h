@@ -81,6 +81,8 @@ class FilePackage {
     std::string path, //!< The absolute path to its directory
                 name, //!< The name
                 description; //!< A meta info for the players
+    std::set<FilePackage*> dependencies; //!< Other FilePackages needed for this one
+    std::map<std::string, std::string> localization; //!< The localization of the selected language
     std::map<std::string, FileResource*> resources; //!< All its loaded resources
     FilePackage(std::string name_) :name(name_) { };
     ~FilePackage();
@@ -117,6 +119,15 @@ class FilePackage {
                 return iterator.first;
         return "";
     }
+    /*! Ascertains all available languages
+     @param languages A reference to a std::vector which will be used to store the result
+     @return Success
+     */
+    bool getLocalizableLanguages(std::vector<std::string>& languages);
+    /*! Loads the localization map of the selected language
+     @return Success
+     */
+    bool loadLocalization();
 };
 
 //! This class manages all FilePackages
@@ -165,11 +176,14 @@ class FileManager {
         FilePackage* filePackage = findResource<T>(resource, name);
         return writeResource(doc, nodeName, filePackage, name);
     }
+    //! Convertes a key string into a localized value string
+    const std::string& localizeString(const std::string& key);
 };
 
 //! This class manages the options
 class OptionsState {
     public:
+    std::string language;
     float anisotropy = 1.0,
           screenBlurFactor = -1.0,
           globalVolume = 0.5,

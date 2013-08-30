@@ -20,10 +20,10 @@ static void updateOptionBackButton(GUIButton* button) {
         optionsState.videoHeight != prevOptionsState.videoHeight ||
         optionsState.vSyncEnabled != prevOptionsState.vSyncEnabled)) {
         button->type = GUIButton::Type::Delete;
-        static_cast<GUILabel*>(button->children[0])->text = localization.localizeString("restart");
+        static_cast<GUILabel*>(button->children[0])->text = fileManager.localizeString("restart");
     }else{
         button->type = GUIButton::Type::Normal;
-        static_cast<GUILabel*>(button->children[0])->text = localization.localizeString("back");
+        static_cast<GUILabel*>(button->children[0])->text = fileManager.localizeString("back");
     }
 }
 
@@ -323,7 +323,7 @@ void Menu::setModalView(const std::string& title, const std::string& text, std::
     GUILabel* label = new GUILabel();
     //label->color = Color4(1, 0, 0);
     label->posY = modalView->height*0.65;
-    label->text = localization.localizeString(title);
+    label->text = fileManager.localizeString(title);
     label->fontHeight = menu.screenView->height*0.14;
     modalView->addChild(label);
     label = new GUILabel();
@@ -341,7 +341,7 @@ void Menu::setModalView(const std::string& title, const std::string& text, std::
         button->sizeAlignment = GUISizeAlignment::Height;
         modalView->addChild(button);
         label = new GUILabel();
-        label->text = localization.localizeString("cancel");
+        label->text = fileManager.localizeString("cancel");
         label->fontHeight = screenView->height*0.1;
         button->addChild(label);
         button->onClick = [](GUIButton* button) {
@@ -362,7 +362,7 @@ void Menu::setModalView(const std::string& title, const std::string& text, std::
     button->sizeAlignment = GUISizeAlignment::Height;
     modalView->addChild(button);
     label = new GUILabel();
-    label->text = localization.localizeString("ok");
+    label->text = fileManager.localizeString("ok");
     label->fontHeight = screenView->height*0.1;
     button->addChild(label);
     
@@ -404,7 +404,7 @@ void Menu::setMenu(Name menu) {
             screenView->addChild(image);
             
             GUILabel* label = new GUILabel();
-            label->text = localization.localizeString("loading");
+            label->text = fileManager.localizeString("loading");
             label->posY = screenView->height*-0.5;
             label->fontHeight = screenView->height*0.16;
             screenView->addChild(label);
@@ -438,7 +438,7 @@ void Menu::setMenu(Name menu) {
                 button->onClick = onClick[i];
                 view->addChild(button);
                 GUILabel* label = new GUILabel();
-                label->text = localization.localizeString(buttonLabels[i]);
+                label->text = fileManager.localizeString(buttonLabels[i]);
                 label->textAlignment = GUILabel::TextAlignment::Left;
                 label->fontHeight = screenView->height*0.1;
                 label->sizeAlignment = GUISizeAlignment::Height;
@@ -449,13 +449,13 @@ void Menu::setMenu(Name menu) {
         case options: {
             GUILabel* label = new GUILabel();
             label->posY = screenView->height*0.88;
-            label->text = localization.localizeString("options");
+            label->text = fileManager.localizeString("options");
             label->fontHeight = screenView->height*0.2;
             screenView->addChild(label);
             label = new GUILabel();
             label->posX = screenView->width*-0.52;
             label->posY = screenView->height*0.72;
-            label->text = localization.localizeString("graphics");
+            label->text = fileManager.localizeString("graphics");
             label->fontHeight = screenView->height*0.14;
             screenView->addChild(label);
             GUIButton* button = new GUIButton();
@@ -509,7 +509,7 @@ void Menu::setMenu(Name menu) {
                 label->posY = screenView->height*(0.54-0.12*i);
                 label->width = view->width*0.5;
                 label->fontHeight = screenView->height*0.1;
-                label->text = localization.localizeString(checkBoxLabels[i]);
+                label->text = fileManager.localizeString(checkBoxLabels[i]);
                 label->textAlignment = GUILabel::TextAlignment::Left;
                 label->sizeAlignment = GUISizeAlignment::Height;
                 view->addChild(label);
@@ -533,7 +533,7 @@ void Menu::setMenu(Name menu) {
             view->addChild(button);
             label = new GUILabel();
             label->text = stringOf(optionsState.videoWidth)+" x "+stringOf(optionsState.videoHeight);
-            if(optionsState.videoScale > 1) label->text += " ("+localization.localizeString("retina")+")";
+            if(optionsState.videoScale > 1) label->text += " ("+fileManager.localizeString("retina")+")";
             label->fontHeight = screenView->height*0.05;
             label->width = screenView->width*0.15;
             label->sizeAlignment = GUISizeAlignment::Height;
@@ -591,7 +591,7 @@ void Menu::setMenu(Name menu) {
                 label->posY = screenView->height*(-0.06-0.12*i);
                 label->width = view->width*0.5;
                 label->fontHeight = screenView->height*0.1;
-                label->text = localization.localizeString(sliderLabelsGraphics[i]);
+                label->text = fileManager.localizeString(sliderLabelsGraphics[i]);
                 label->textAlignment = GUILabel::TextAlignment::Left;
                 label->sizeAlignment = GUISizeAlignment::Height;
                 view->addChild(label);
@@ -632,7 +632,7 @@ void Menu::setMenu(Name menu) {
                 label = new GUILabel();
                 label->posX = screenView->width*0.52;
                 label->posY = screenView->height*(0.72-0.28*m);
-                label->text = localization.localizeString((m == 0) ? "sound" : "mouse");
+                label->text = fileManager.localizeString((m == 0) ? "sound" : "mouse");
                 label->fontHeight = screenView->height*0.14;
                 screenView->addChild(label);
                 view = new GUIFramedView();
@@ -647,7 +647,7 @@ void Menu::setMenu(Name menu) {
                     label->posY = screenView->height*(0.06-0.12*i);
                     label->width = view->width*0.5;
                     label->fontHeight = screenView->height*0.1;
-                    label->text = localization.localizeString(sliderLabels[i+m]);
+                    label->text = fileManager.localizeString(sliderLabels[i+m]);
                     label->textAlignment = GUILabel::TextAlignment::Left;
                     label->sizeAlignment = GUISizeAlignment::Height;
                     view->addChild(label);
@@ -669,7 +669,7 @@ void Menu::setMenu(Name menu) {
             };
             screenView->addChild(button);
             label = new GUILabel();
-            label->text = localization.localizeString("language");
+            label->text = fileManager.localizeString("language");
             label->fontHeight = screenView->height*0.1;
             label->width = screenView->width*0.15;
             label->sizeAlignment = GUISizeAlignment::Height;
@@ -678,7 +678,7 @@ void Menu::setMenu(Name menu) {
         case videoResolution: {
             GUILabel* label = new GUILabel();
             label->posY = screenView->height*0.88;
-            label->text = localization.localizeString("videoResolution");
+            label->text = fileManager.localizeString("videoResolution");
             label->fontHeight = screenView->height*0.2;
             screenView->addChild(label);
             GUIButton* button = new GUIButton();
@@ -688,7 +688,7 @@ void Menu::setMenu(Name menu) {
             };
             screenView->addChild(button);
             label = new GUILabel();
-            label->text = localization.localizeString("back");
+            label->text = fileManager.localizeString("back");
             label->fontHeight = screenView->height*0.1;
             label->width = screenView->width*0.14;
             label->sizeAlignment = GUISizeAlignment::Height;
@@ -718,10 +718,10 @@ void Menu::setMenu(Name menu) {
                 label = new GUILabel();
                 if(resolutions[i].width == screenSize[0]*resolutions[i].scale &&
                    resolutions[i].height == screenSize[1]*resolutions[i].scale)
-                    label->text = localization.localizeString("fullScreen");
+                    label->text = fileManager.localizeString("fullScreen");
                 else
                     label->text = stringOf(resolutions[i].width)+" x "+stringOf(resolutions[i].height);
-                if(resolutions[i].scale > 1) label->text += " ("+localization.localizeString("retina")+")";
+                if(resolutions[i].scale > 1) label->text += " ("+fileManager.localizeString("retina")+")";
                 label->fontHeight = screenView->height*0.06;
                 button->addChild(label);
                 tabs->addChild(button);
@@ -739,7 +739,7 @@ void Menu::setMenu(Name menu) {
         case languages: {
             GUILabel* label = new GUILabel();
             label->posY = screenView->height*0.88;
-            label->text = localization.localizeString("language");
+            label->text = fileManager.localizeString("language");
             label->fontHeight = screenView->height*0.2;
             screenView->addChild(label);
             GUIButton* button = new GUIButton();
@@ -749,14 +749,14 @@ void Menu::setMenu(Name menu) {
             };
             screenView->addChild(button);
             label = new GUILabel();
-            label->text = localization.localizeString("back");
+            label->text = fileManager.localizeString("back");
             label->fontHeight = screenView->height*0.1;
             label->width = screenView->width*0.14;
             label->sizeAlignment = GUISizeAlignment::Height;
             button->addChild(label);
             
             std::vector<std::string> languages;
-            localization.getLocalizableLanguages(languages);
+            fileManager.loadPackage("Core")->getLocalizableLanguages(languages);
             GUIScrollView* view = new GUIScrollView();
             view->width = screenView->width*0.3;
             view->height = screenView->height*0.6;
@@ -766,13 +766,10 @@ void Menu::setMenu(Name menu) {
             tabs->width = screenView->width*0.2;
             tabs->sizeAlignment = GUISizeAlignment::Height;
             tabs->orientation = GUIOrientation::Vertical;
-            tabs->onChange = [](GUITabs* tabs) {
-                std::vector<std::string> languages;
-                localization.getLocalizableLanguages(languages);
-                localization.strings.clear();
-                localization.selected = languages[tabs->selected];
+            tabs->onChange = [languages](GUITabs* tabs) {
+                optionsState.language = languages[tabs->selected];
                 for(auto packageIterator : fileManager.filePackages)
-                    localization.loadLocalization(packageIterator.second);
+                    packageIterator.second->loadLocalization();
             };
             for(unsigned char i = 0; i < languages.size(); i ++) {
                 GUIButton* button = new GUIButton();
@@ -781,7 +778,7 @@ void Menu::setMenu(Name menu) {
                 label->fontHeight = screenView->height*0.06;
                 button->addChild(label);
                 tabs->addChild(button);
-                if(languages[i] == localization.selected) {
+                if(languages[i] == optionsState.language) {
                     tabs->selected = i;
                     tabs->updateContent();
                 }
@@ -793,7 +790,7 @@ void Menu::setMenu(Name menu) {
         case credits: {
             GUILabel* label = new GUILabel();
             label->posY = screenView->height*0.88;
-            label->text = localization.localizeString("credits");
+            label->text = fileManager.localizeString("credits");
             label->fontHeight = screenView->height*0.2;
             screenView->addChild(label);
             
@@ -805,7 +802,7 @@ void Menu::setMenu(Name menu) {
             };
             screenView->addChild(button);
             label = new GUILabel();
-            label->text = localization.localizeString("back");
+            label->text = fileManager.localizeString("back");
             label->fontHeight = screenView->height*0.1;
             label->width = screenView->width*0.14;
             label->sizeAlignment = GUISizeAlignment::Height;
@@ -857,7 +854,7 @@ void Menu::setMenu(Name menu) {
                 GUIButton* button = new GUIButton();
                 button->posY = screenView->height*(0.32-0.16*i);
                 GUILabel* label = new GUILabel();
-                label->text = localization.localizeString(buttonLabels[i]);
+                label->text = fileManager.localizeString(buttonLabels[i]);
                 label->textAlignment = GUILabel::TextAlignment::Left;
                 label->fontHeight = screenView->height*0.1;
                 label->width = screenView->width*0.14;
@@ -870,7 +867,7 @@ void Menu::setMenu(Name menu) {
         case saveGames: {
             GUILabel* label = new GUILabel();
             label->posY = screenView->height*0.88;
-            label->text = localization.localizeString("saveGames");
+            label->text = fileManager.localizeString("saveGames");
             label->fontHeight = screenView->height*0.2;
             screenView->addChild(label);
             std::vector<std::string> files;
@@ -896,16 +893,12 @@ void Menu::setMenu(Name menu) {
                 FilePackage* package = fileManager.loadPackage(node->first_node("Package")->first_attribute("value")->value());
                 if(!package) continue;
                 
-                std::string levelContainer = node->first_node("Level")->first_attribute("value")->value();
+                std::string container = node->first_node("Level")->first_attribute("value")->value();
                 GUIButton* button = new GUIButton();
                 button->posX = screenView->width*-0.18;
                 button->posY = scrollView->height*(0.8-validSaveGames*0.4);
-                button->onClick = [name, package, levelContainer](GUIButton* button) {
-                    levelManager.saveGameName = name;
-                    levelManager.levelPackage = package;
-                    levelManager.levelContainer = levelContainer;
-                    LevelLoader levelLoader;
-                    levelLoader.loadLevel();
+                button->onClick = [name, package, container](GUIButton* button) {
+                    levelManager.loadGame(package, name, container);
                 };
                 scrollView->addChild(button);
                 GUILabel* label = new GUILabel();
@@ -951,11 +944,11 @@ void Menu::setMenu(Name menu) {
                 button->sizeAlignment = GUISizeAlignment::Height;
                 scrollView->addChild(button);
                 label = new GUILabel();
-                label->text = localization.localizeString("remove");
+                label->text = fileManager.localizeString("remove");
                 label->fontHeight = screenView->height*0.1;
                 button->addChild(label);
                 button->onClick = [this, name](GUIButton* button) {
-                    setModalView("remove", localization.localizeString("name")+": "+name,
+                    setModalView("remove", fileManager.localizeString("name")+": "+name,
                                  [this, name](GUIButton* button) {
                         removeDir(gameDataDir+"Saves/"+name+'/');
                         setMenu(saveGames);
@@ -982,7 +975,7 @@ void Menu::setMenu(Name menu) {
                 button->sizeAlignment = GUISizeAlignment::Height;
                 screenView->addChild(button);
                 GUILabel* label = new GUILabel();
-                label->text = localization.localizeString(buttonLabels[i]);
+                label->text = fileManager.localizeString(buttonLabels[i]);
                 label->fontHeight = screenView->height*0.1;
                 button->addChild(label);
                 button->onClick = onClick[i];
@@ -993,7 +986,7 @@ void Menu::setMenu(Name menu) {
             
             GUILabel* label = new GUILabel();
             label->posY = screenView->height*0.88;
-            label->text = localization.localizeString("newGame");
+            label->text = fileManager.localizeString("newGame");
             label->fontHeight = screenView->height*0.2;
             screenView->addChild(label);
             
@@ -1006,7 +999,7 @@ void Menu::setMenu(Name menu) {
             
             GUITextField* textField = new GUITextField();
             label = static_cast<GUILabel*>(textField->children[0]);
-            label->text = localization.localizeString("newGame");
+            label->text = fileManager.localizeString("newGame");
             textField->posX = 0.0;
             textField->posY = screenView->height*-0.8;
             textField->width = screenView->width*0.4;
@@ -1027,10 +1020,7 @@ void Menu::setMenu(Name menu) {
                 GUIButton* button = new GUIButton();
                 button->posY = scrollView->height*(0.8-(i ++)*0.4);
                 button->onClick = [package, textField](GUIButton* button) {
-                    levelManager.saveGameName = static_cast<GUILabel*>(textField->children[0])->text;
-                    levelManager.levelPackage = package;
-                    levelManager.levelContainer = "start";
-                    levelManager.newGame();
+                    levelManager.newGame(package, static_cast<GUILabel*>(textField->children[0])->text, "start");
                 };
                 scrollView->addChild(button);
                 label = new GUILabel();
@@ -1066,7 +1056,7 @@ void Menu::setMenu(Name menu) {
             button->sizeAlignment = GUISizeAlignment::Height;
             screenView->addChild(button);
             label = new GUILabel();
-            label->text = localization.localizeString("cancel");
+            label->text = fileManager.localizeString("cancel");
             label->fontHeight = screenView->height*0.1;
             button->addChild(label);
             button->onClick = [this](GUIButton* button) {
@@ -1076,7 +1066,7 @@ void Menu::setMenu(Name menu) {
         case multiplayer: {
             GUILabel* label = new GUILabel();
             label->posY = screenView->height*0.88;
-            label->text = localization.localizeString("multiplayer");
+            label->text = fileManager.localizeString("multiplayer");
             label->fontHeight = screenView->height*0.2;
             screenView->addChild(label);
             
@@ -1088,7 +1078,7 @@ void Menu::setMenu(Name menu) {
             };
             screenView->addChild(button);
             label = new GUILabel();
-            label->text = localization.localizeString("back");
+            label->text = fileManager.localizeString("back");
             label->fontHeight = screenView->height*0.1;
             label->width = screenView->width*0.14;
             label->sizeAlignment = GUISizeAlignment::Height;

@@ -103,11 +103,20 @@ class comMotionState : public simpleMotionState {
  TODO: Skeletal animation is not implemented yet.
  */
 class RigidObject : public GraphicObject {
-    std::unique_ptr<btTransform> skeletonPose; //!< Poses of the BoneObjects (if model has a skeleton) for OpenGL
-    void setupBones(LevelLoader* levelLoader, BaseObject* object, Bone* bone);
-    void writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver, BoneObject *object);
-    void updateSkeletonPose(BoneObject* object, Bone* bone);
     public:
+    //! The pose of a skeleton
+    class SkeletonPose {
+        BoneObject* setupBones(LevelLoader* levelLoader, BaseObject* object, Bone* bone);
+        public:
+        btTransform* pose;
+        BoneObject* rootBone;
+        std::map<std::string, BoneObject*> bones;
+        SkeletonPose(LevelLoader* levelLoader, RigidObject* object);
+        ~SkeletonPose();
+        void updateSkeletonPose(BoneObject* object, Bone* bone);
+        void writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver, BoneObject *object);
+    };
+    std::unique_ptr<SkeletonPose> skeletonPose; //!< Poses of the BoneObjects
     RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     FileResourcePtr<Model> model; //!< The shared model
     std::vector<float> textureAnimationTime; //!< Animation time for each mesh
@@ -124,8 +133,6 @@ class RigidObject : public GraphicObject {
     bool getKinematic();
     //! Sets or removes the btCollisionObject::CF_KINEMATIC_OBJECT flag
     void setKinematic(bool active);
-    //! Finds the root bone (if model has a skeleton else returns NULL)
-    BoneObject* getRootBone();
     //! Overwrites the model and cleans the textureAnimation
     void setModel(LevelLoader* levelLoader, FileResourcePtr<Model> model);
     //! Draws the entire model with all meshes

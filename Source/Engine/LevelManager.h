@@ -30,7 +30,8 @@ class LevelManager {
     std::string getCollisionShapeName(btCollisionShape* shape);
     //! Deletes all shared objects
     void clear();
-    bool newGame();
+    bool loadGame(FilePackage* package, const std::string& name, const std::string& container);
+    bool newGame(FilePackage* package, const std::string& name, const std::string& container);
 };
 
 extern LevelManager levelManager;

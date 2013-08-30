@@ -1,7 +1,5 @@
 V8 API: Create/Delete Objects, Documentation
 Support to load another initial container than "Containers/start.xml"
-Avoid reloading of levelPackage in loadLevel()
-Reform findBoneByPath() to getBoneById()
 Implement btSoftBody
 Leap Motion: V8 API
 Windows / Linux Support
@@ -22,11 +20,11 @@ KI and path finding
 Water physics / underwater effects
 
 Test:
-TransformLink with a RigidObject as child
 Skeletal animation
 Performance issue of explosions
 
 Bugs:
 Check memory leaks
+Prohibit cyclic FilePackage dependencies
 Prohibit cyclic parent-child relationships in GUIView
 Parallax Occlusion / Position / Depth

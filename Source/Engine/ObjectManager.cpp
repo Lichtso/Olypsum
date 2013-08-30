@@ -168,7 +168,6 @@ void ObjectManager::clear() {
     
     physicsWorld.reset();
     scriptManager.reset();
-    fileManager.clear();
     mainCam = NULL;
 }
 
@@ -178,6 +177,7 @@ void ObjectManager::initGame() {
     physicsWorld->setInternalTickCallback(calculatePhysicsTick);
     scriptManager.reset(new ScriptManager());
     sceneAmbient = btVector3(0.1, 0.1, 0.1);
+    levelManager.gameStatus = localGame; //Enable console log
 }
 
 void ObjectManager::gameTick() {
