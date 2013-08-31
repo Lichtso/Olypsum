@@ -30,23 +30,33 @@ FilePackage::~FilePackage() {
 
 bool FilePackage::init() {
     path = resourcesDir+"Packages/"+name+'/';
-    
-    DIR* dir = opendir(path.c_str());
-    if(dir == NULL) {
+    if(!checkDir(path)) {
         path = gameDataDir+"Packages/"+name+'/';
-        DIR* dirB = opendir(path.c_str());
-        if(dirB == NULL) return false;
-        closedir(dirB);
-    }else closedir(dir);
+        if(!checkDir(path))
+            return false;
+    }
+    
+    auto hashFileContent = [this](const std::string& path, std::string name) {
+        hash ^= hashFile(name);
+    };
+    
+    auto hashName = [this](const std::string& path, std::string name) {
+        hash ^= std::hash<std::string>()(name);
+    };
+    
+    auto hashDirectoryName = [this](const std::string& path, std::string name) {
+        hash ^= std::hash<std::string>()(name);
+        return true;
+    };
     
     hash = hashFile(path+"CollisionShapes.xml");
-    hash ^= hashDir(path+"Containers/");
-    hash ^= hashDir(path+"Scripts/");
-    hash ^= hashDir(path+"Languages/");
-    hash ^= hashScanDir(path+"Fonts/");
-    hash ^= hashScanDir(path+"Models/");
-    hash ^= hashScanDir(path+"Textures/");
-    hash ^= hashScanDir(path+"Sounds/");
+    hash ^= forEachInDir(path+"Containers/", hashFileContent, NULL, NULL);
+    hash ^= forEachInDir(path+"Scripts/", hashFileContent, NULL, NULL);
+    hash ^= forEachInDir(path+"Languages/", hashFileContent, NULL, NULL);
+    hash ^= forEachInDir(path+"Fonts/", hashName, hashDirectoryName, NULL);
+    hash ^= forEachInDir(path+"Models/", hashName, hashDirectoryName, NULL);
+    hash ^= forEachInDir(path+"Textures/", hashName, hashDirectoryName, NULL);
+    hash ^= forEachInDir(path+"Sounds/", hashName, hashDirectoryName, NULL);
     
     rapidxml::xml_document<xmlUsedCharType> doc;
     std::unique_ptr<char[]> fileData = readXmlFile(doc, path+"/Package.xml", false);
@@ -96,27 +106,24 @@ std::string FilePackage::getPathOfFile(const char* subdir, const std::string& fi
     return path+subdir+fileName;
 }
 
-std::string FilePackage::findFileByNameInSubdir(const char* subdir, const std::string& fileName) {
-    std::vector<std::string> files;
-    scanDir(path+subdir, files);
-    for(size_t i = 0; i < files.size(); i ++)
-        if(files[i].find(fileName) != -1)
-            return files[i];
-    return "";
+bool FilePackage::findFileByNameInSubdir(const char* directoryPath, std::string& fileName) {
+    bool found = false;
+    
+    forEachInDir(path+directoryPath, [&found, &fileName](const std::string& path, std::string name) {
+        if(!found && name.find(fileName) != -1) {
+            fileName = name;
+            found = true;
+        }
+    }, NULL, NULL);
+    
+    return found;
 }
 
 bool FilePackage::getLocalizableLanguages(std::vector<std::string>& languages) {
-    std::vector<std::string> files;
-    if(!scanDir(path+"Languages/", files)) {
-        log(error_log, "Languages directory not found.");
-        return false;
-    }
-    
-    for(size_t i = 0; i < files.size(); i ++) {
-        if(files[i].length() < 4 || files[i].compare(files[i].length()-4, 4, ".xml") != 0) continue;
-        languages.push_back(files[i].substr(0, files[i].length()-4));
-    }
-    return true;
+    return forEachInDir(path, [&languages](const std::string& directoryPath, std::string name) {
+        if(name.length() > 4 && name.compare(name.length()-4, 4, ".xml") == 0)
+            languages.push_back(name.substr(0, name.length()-4));
+    }, NULL, NULL);
 }
 
 bool FilePackage::loadLocalization() {
@@ -191,14 +198,12 @@ void FileManager::unloadPackage(const std::string& name) {
 }
 
 void FileManager::loadAllPackages() {
-    std::vector<std::string> files;
-    scanDir(resourcesDir+"Packages/", files);
-    scanDir(gameDataDir+"Packages/", files);
-    for(size_t i = 0; i < files.size(); i ++)
-        if(files[i][files[i].length()-1] == '/') {
-            files[i].pop_back();
-            loadPackage(files[i]);
-        }
+    auto enterDirectory = [](const std::string& directoryPath, std::string name) {
+        fileManager.loadPackage(name);
+        return false;
+    };
+    forEachInDir(resourcesDir+"Packages/", NULL, enterDirectory, NULL);
+    forEachInDir(gameDataDir+"Packages/", NULL, enterDirectory, NULL);
 }
 
 bool FileManager::readResourcePath(FilePackage*& filePackage, std::string& name) {

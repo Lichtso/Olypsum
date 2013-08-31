@@ -37,7 +37,8 @@ class Mesh {
  
  @warning Don't use it directly
  */
-struct Skeleton {
+class Skeleton {
+    public:
     Bone* rootBone;
     std::map<std::string, Bone*> bones;
 };

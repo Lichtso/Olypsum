@@ -95,11 +95,11 @@ class FilePackage {
      */
     std::string getPathOfFile(const char* subdir, const std::string& fileName);
     /*! Finds the full name of the first resource containing the given fileName
-     @param subdir A child directory which contains the resource
+     @param directoryPath A subdirectory which contains the resource
      @param fileName The file name of the resource
-     @return The full name
+     @return Succsess
      */
-    std::string findFileByNameInSubdir(const char* subdir, const std::string& fileName);
+    bool findFileByNameInSubdir(const char* directoryPath, std::string& fileName);
     //! Loads and initializes a FilePackageResource
     template <class T> FileResourcePtr<T> getResource(const std::string& fileName) {
         auto iterator = resources.find(fileName);

@@ -18,14 +18,17 @@
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
 #include <OpenGL/gl3.h>
+#include <SDL_image/SDL_image.h>
+#include <SDL_ttf/SDL_ttf.h>
 #else
 #include <AL/al.h>
 #include <AL/alc.h>
 #include <GL/gl.h>
+#include <SDL/SDL_image.h>
+#include <SDL/SDL_ttf.h>
 #endif
 
 #include <SDL/SDL.h>
-#include <SDL_ttf/SDL_ttf.h>
 #include <BulletCollision/btBulletCollisionCommon.h>
 #include <BulletDynamics/btBulletDynamicsCommon.h>
 #include <BulletSoftBody/btSoftRigidDynamicsWorld.h>
@@ -92,22 +95,17 @@ bool checkDir(std::string path);
  @return Success
  */
 bool createDir(std::string path);
-/*! Caclulates the hash value of all files content and subfolders (recursive) of the given directory
- @param path Input directory path
- @return Output hash value
- */
-std::size_t hashDir(std::string path);
-/*! Caclulates the hash value of all files names and subfolders (recursive) of the given directory
- @param path Input directory path
- @return Output hash value
- */
-std::size_t hashScanDir(std::string path);
-/*! Creates a list of all files and subfolders (non recursive) in the given directory
+/*! Calls a function on each file and subdirectory in the given directory
  @param path Directory path
- @param files std::vector to store the names of the children files
+ @param perFile Called per file
+ @param enterDirectory Called at entering a subdirectory, return value has to be true to process recursivly
+ @param enterDirectory Called at leaving a directory
  @return Success
-*/
-bool scanDir(std::string path, std::vector<std::string>& files);
+ */
+bool forEachInDir(std::string path,
+                  std::function<void(const std::string& directoryPath, std::string name)> perFile,
+                  std::function<bool(const std::string& directoryPath, std::string name)> enterDirectory,
+                  std::function<void(const std::string& directoryPath)> leaveDirectory);
 /*! Removes a directory at a given path
  @return Success
  */

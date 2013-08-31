@@ -102,76 +102,38 @@ bool createDir(std::string path) {
     }
 }
 
-std::size_t hashDir(std::string path) {
-    std::size_t value = 0;
+bool forEachInDir(std::string path,
+                  std::function<void(const std::string& directoryPath, std::string name)> perFile,
+                  std::function<bool(const std::string& directoryPath, std::string name)> enterDirectory,
+                  std::function<void(const std::string& directoryPath)> leaveDirectory) {
     DIR* dir = opendir(path.c_str());
     if(dir) {
         dirent* file;
         while((file = readdir(dir))) {
-            if(file->d_namlen < 3 && strncmp(file->d_name, "..", file->d_namlen) == 0) continue;
-            std::string name(file->d_name, file->d_namlen);
-            name = path+name;
-            if(file->d_type == DT_DIR)
-                value ^= hashDir(name+'/');
-            else
-                value ^= hashFile(name);
+            std::string name(file->d_name);
+            if(name.length() < 3 && (name.compare(".") == 0 || name.compare("..") == 0)) continue;
+            if(file->d_type == DT_DIR) {
+                if(enterDirectory && enterDirectory(path, name))
+                    forEachInDir(path+name+'/', perFile, enterDirectory, leaveDirectory);
+            }else if(perFile)
+                perFile(path, name);
         }
         closedir(dir);
-        return value;
-    }else
-        return 0;
-}
-
-std::size_t hashScanDir(std::string path) {
-    std::size_t value = 0;
-    DIR* dir = opendir(path.c_str());
-    if(dir) {
-        dirent* file;
-        while((file = readdir(dir))) {
-            if(file->d_namlen < 3 && strncmp(file->d_name, "..", file->d_namlen) == 0) continue;
-            std::string name(file->d_name, file->d_namlen);
-            value ^= std::hash<std::string>()(name);
-            if(file->d_type == DT_DIR)
-                value ^= hashScanDir(name+'/');
-        }
-        closedir(dir);
-        return value;
-    }else
-        return 0;
-}
-
-bool scanDir(std::string path, std::vector<std::string>& files) {
-    DIR* dir = opendir(path.c_str());
-    if(dir) {
-        dirent* file;
-        while((file = readdir(dir))) {
-            if(file->d_namlen < 3 && strncmp(file->d_name, "..", file->d_namlen) == 0) continue;
-            std::string name(file->d_name, file->d_namlen);
-            if(file->d_type == DT_DIR) name += '/';
-            files.push_back(name);
-        }
-        closedir(dir);
+        if(leaveDirectory)
+            leaveDirectory(path);
         return true;
     }else
         return false;
 }
 
 bool removeDir(std::string path) {
-    DIR* dir = opendir(path.c_str());
-    if(dir) {
-        dirent* file;
-        while((file = readdir(dir))) {
-            if(file->d_namlen < 3 && strncmp(file->d_name, "..", file->d_namlen) == 0) continue;
-            std::string filePath = path+std::string(file->d_name, file->d_namlen);
-            if(file->d_type == DT_DIR)
-                removeDir(filePath+'/');
-            else
-                remove(filePath.c_str());
-        }
-        closedir(dir);
-        return remove(path.c_str()) == 0;
-    }else
-        return false;
+    return forEachInDir(path, [](const std::string& directoryPath, std::string name) {
+        remove((directoryPath+name).c_str());
+    }, [](const std::string& directoryPath, std::string name) {
+        return true;
+    }, [](const std::string& directoryPath) {
+        remove(directoryPath.c_str());
+    });
 }
 
 std::string stringOf(int value) {

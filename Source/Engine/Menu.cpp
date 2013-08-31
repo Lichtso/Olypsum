@@ -95,9 +95,10 @@ static void getAvailableResolutions(std::vector<Resolution>& resolutions) {
 }
 
 static GUIImage* getThumbnailOfPackage(FilePackage* package) {
-    std::string thumbnailName = package->findFileByNameInSubdir("Textures/", "thumbnail");
-    if(thumbnailName.size() > 0) {
-        FileResourcePtr<Texture> thumbnail = package->getResource<Texture>(thumbnailName);
+    std::string name = "thumbnail";
+    package->findFileByNameInSubdir("Textures/", name);
+    if(name.size() > 0) {
+        FileResourcePtr<Texture> thumbnail = package->getResource<Texture>(name);
         if(thumbnail) {
             GUIImage* image = new GUIImage();
             image->sizeAlignment = GUISizeAlignment::Width;
@@ -870,28 +871,21 @@ void Menu::setMenu(Name menu) {
             label->text = fileManager.localizeString("saveGames");
             label->fontHeight = screenView->height*0.2;
             screenView->addChild(label);
-            std::vector<std::string> files;
-            scanDir(gameDataDir+"Saves/", files);
+            
             GUIScrollView* scrollView = new GUIScrollView();
             scrollView->width = screenView->width*0.97;
             scrollView->height = screenView->height*0.7;
             screenView->addChild(scrollView);
             
             size_t validSaveGames = 0;
-            for(unsigned int i = 0; i < files.size(); i ++) {
-                if(files[i][files[i].length()-1] != '/') {
-                    files.erase(files.begin()+i);
-                    i --;
-                    continue;
-                }
-                files[i].pop_back();
-                std::string name = files[i], path = gameDataDir+"Saves/"+name+'/';
+            forEachInDir(gameDataDir+"Saves/", NULL, [this, &validSaveGames, &scrollView](const std::string& directoryPath, std::string name) {
+                std::string path = gameDataDir+"Saves/"+name+'/';
                 rapidxml::xml_document<xmlUsedCharType> doc;
                 std::unique_ptr<char[]> fileData = readXmlFile(doc, gameDataDir+"Saves/"+name+'/'+"Status.xml", false);
-                if(!fileData) continue;
+                if(!fileData) return false;
                 rapidxml::xml_node<xmlUsedCharType>* node = doc.first_node("Status");
                 FilePackage* package = fileManager.loadPackage(node->first_node("Package")->first_attribute("value")->value());
-                if(!package) continue;
+                if(!package) return false;
                 
                 std::string container = node->first_node("Level")->first_attribute("value")->value();
                 GUIButton* button = new GUIButton();
@@ -956,7 +950,8 @@ void Menu::setMenu(Name menu) {
                 };
                 
                 validSaveGames ++;
-            }
+                return false;
+            }, NULL);
             scrollView->contentHeight = validSaveGames*0.4*scrollView->height;
             
             std::function<void(GUIButton*)> onClick[] = {

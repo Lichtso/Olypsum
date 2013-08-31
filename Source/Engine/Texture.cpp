@@ -6,7 +6,6 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include <SDL_image/SDL_image.h>
 #include "ShaderProgram.h"
 #include "FileManager.h"
 
