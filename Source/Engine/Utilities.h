@@ -14,9 +14,16 @@
 #include <thread>
 #include <map>
 
+#ifdef __APPLE__
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
 #include <OpenGL/gl3.h>
+#else
+#include <AL/al.h>
+#include <AL/alc.h>
+#include <GL/gl.h>
+#endif
+
 #include <SDL/SDL.h>
 #include <SDL_ttf/SDL_ttf.h>
 #include <BulletCollision/btBulletCollisionCommon.h>
@@ -24,7 +31,7 @@
 #include <BulletSoftBody/btSoftRigidDynamicsWorld.h>
 #include <BulletSoftBody/btDefaultSoftBodySolver.h>
 #include <BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h>
-#include <BulletMultiThreaded/PosixThreadSupport.h>
+//#include <BulletMultiThreaded/PosixThreadSupport.h>
 #include <BulletMultiThreaded/btParallelConstraintSolver.h>
 #include <BulletMultiThreaded/btSoftBodySolver_OpenCLSIMDAware.h>
 #include <BulletMultiThreaded/btSoftBodySolverVertexBuffer_OpenGL.h>

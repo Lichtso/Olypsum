@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include <Vorbis/vorbisfile.h>
+#include <vorbis/vorbisfile.h>
 #include "ScriptSimpleObject.h"
 
 #ifdef LITTLE_ENDIAN

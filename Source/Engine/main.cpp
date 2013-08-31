@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#ifndef __MAC_OS__
+#ifndef __APPLE__
 #include "AppMain.h"
 
 void updateVideoMode() {
