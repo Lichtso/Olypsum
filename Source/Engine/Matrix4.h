@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Ray3.h"
-
 #ifndef Matrix4_h
 #define Matrix4_h
+
+#include "Ray3.h"
 
 //! A extension of the btTransform
 /*!

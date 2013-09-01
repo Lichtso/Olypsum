@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "TerrainObject.h"
-
 #ifndef Audio_h
 #define Audio_h
+
+#include "TerrainObject.h"
 
 //! A SoundTrack used for audio playback
 /*!

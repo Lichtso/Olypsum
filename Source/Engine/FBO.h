@@ -6,13 +6,12 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "VertexArrayObject.h"
-
 #ifndef FBO_h
 #define FBO_h
-
 #define maxColorBufferCount 6
 #define gBuffersCount 9
+
+#include "VertexArrayObject.h"
 
 //! A off screen texture used for background rendering
 struct ColorBuffer {

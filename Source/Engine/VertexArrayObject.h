@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Texture.h"
-
 #ifndef VertexArrayObject_h
 #define VertexArrayObject_h
+
+#include "Texture.h"
 
 //! A universal class to manage OpenGL VAOs, VBOs and IBOs
 class VertexArrayObject {

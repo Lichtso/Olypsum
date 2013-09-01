@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "XMLUtilities.h"
-
 #ifndef Ray3_h
 #define Ray3_h
+
+#include "XMLUtilities.h"
 
 class BaseObject;
 

@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "LightVolume.h"
-
 #ifndef LightObject_h
 #define LightObject_h
+
+#include "LightVolume.h"
 
 void initLightVolumes();
 
@@ -25,7 +25,7 @@ class LightObject : public DisplayObject {
     void removeClean();
     btTransform getTransformation();
     float getRange();
-    virtual bool gameTick(bool shadowActive);
+    virtual bool generateShadowMap(bool shadowActive);
     void draw();
     virtual void deleteShadowMap();
     virtual float getPriority(btVector3 position) = 0;
@@ -40,7 +40,7 @@ class DirectionalLight : public LightObject {
     void setTransformation(const btTransform& transformation);
     void setBounds(btVector3 bounds);
     btVector3 getBounds();
-    bool gameTick(bool shadowActive);
+    bool generateShadowMap(bool shadowActive);
     void draw();
     float getPriority(btVector3 position);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
@@ -53,7 +53,7 @@ class SpotLight : public LightObject {
     void setTransformation(const btTransform& transformation);
     void setBounds(float cutoff, float range);
     float getCutoff();
-    bool gameTick(bool shadowActive);
+    bool generateShadowMap(bool shadowActive);
     void draw();
     float getPriority(btVector3 position);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
@@ -68,7 +68,7 @@ class PositionalLight : public LightObject {
     void setTransformation(const btTransform& transformation);
     void setBounds(bool omniDirectional, float range);
     bool getOmniDirectional();
-    bool gameTick(bool shadowActive);
+    bool generateShadowMap(bool shadowActive);
     void draw();
     void deleteShadowMap();
     float getPriority(btVector3 position);

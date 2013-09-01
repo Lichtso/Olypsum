@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "ObjectManager.h"
-
 #ifndef TextFont_h
 #define TextFont_h
+
+#include "ObjectManager.h"
 
 //! Used to render text and strings
 class TextFont : public FileResource {

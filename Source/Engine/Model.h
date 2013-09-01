@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "CamObject.h"
-
 #ifndef Model_h
 #define Model_h
+
+#include "CamObject.h"
 
 class RigidObject;
 

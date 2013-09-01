@@ -6,6 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#ifndef Utilities_h
+#define Utilities_h
+#define VERSION "0.0.1"
+
 #include <math.h>
 #include <dirent.h>
 #include <sys/stat.h>
@@ -42,11 +46,6 @@
 #include <v8.h>
 #include <Leap.h>
 #include <netLink.h>
-
-#ifndef Utilities_h
-#define Utilities_h
-
-#define VERSION "0.0.1"
 
 enum logMessageType {
     info_log = 0,

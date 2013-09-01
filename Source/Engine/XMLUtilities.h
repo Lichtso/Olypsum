@@ -6,14 +6,13 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#ifndef XMLUtilities_h
+#define XMLUtilities_h
+#define xmlUsedCharType char
+
 #include "rapidxml.hpp"
 #include "rapidxml_print.hpp"
 #include "Profiler.h"
-
-#ifndef XMLUtilities_h
-#define XMLUtilities_h
-
-#define xmlUsedCharType char
 
 /*! Parses the content of a file as XML
  @param doc A reference to the rapidxml::xml_document which will be used to store the content

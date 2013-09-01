@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Audio.h"
-
 #ifndef ParticlesObject_h
 #define ParticlesObject_h
+
+#include "Audio.h"
 
 //! A DisplayObject used as particle system
 class ParticlesObject : public DisplayObject {

@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Network.h"
-
 #ifndef Profiler_h
 #define Profiler_h
+
+#include "Network.h"
 
 class Profiler {
     double lastFrame, lastSection;

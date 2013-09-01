@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Matrix4.h"
-
 #ifndef FileManager_h
 #define FileManager_h
+
+#include "Matrix4.h"
 
 class FilePackage;
 class FileResource;

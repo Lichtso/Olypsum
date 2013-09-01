@@ -191,7 +191,7 @@ void ObjectManager::gameTick() {
     
     unsigned int maxShadows = 3;
     for(unsigned int i = 0; i < lightObjects.size(); i ++)
-        if(!lightObjects[i]->gameTick(i < maxShadows))
+        if(!lightObjects[i]->generateShadowMap(i < maxShadows))
             i --;
     
     currentShadowLight = NULL;

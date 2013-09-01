@@ -19,7 +19,7 @@ class GUITabs : public GUIView {
     bool deactivatable;
     std::function<void(GUITabs*)> onChange;
     GUITabs();
-    void addChild(GUIButton* child);
+    bool addChild(GUIRect* child);
     void updateContent();
     bool handleMouseDown(int mouseX, int mouseY);
     bool handleMouseUp(int mouseX, int mouseY);

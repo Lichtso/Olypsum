@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "FBO.h"
-
 #ifndef Object_h
 #define Object_h
+
+#include "FBO.h"
 
 class ScriptFile;
 class Skeleton;

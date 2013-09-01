@@ -168,7 +168,7 @@ void AppMain(int argc, char *argv[]) {
             profiler.leaveSection("Rest");
             objectManager.gameTick();
         }
-        menu.screenView->draw();
+        menu.screenView->drawScreen();
         SDL_GL_SwapBuffers();
         profiler.leaveSection("Swap Buffers");
         profiler.markFrame();

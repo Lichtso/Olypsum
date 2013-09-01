@@ -6,11 +6,8 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Links.h"
-
 #ifndef ShaderProgram_h
 #define ShaderProgram_h
-
 #define POSITION_ATTRIBUTE 0
 #define TEXTURE_COORD_ATTRIBUTE 1
 #define COLOR_ATTRIBUTE 1
@@ -18,6 +15,8 @@
 #define WEIGHT_ATTRIBUTE 3
 #define JOINT_ATTRIBUTE 4
 #define VELOCITY_ATTRIBUTE 5
+
+#include "Links.h"
 
 //! A shader program used for graphics
 class ShaderProgram {

@@ -12,12 +12,13 @@ GUITabs::GUITabs() :orientation(GUIOrientation::Vertical), sizeAlignment(GUISize
     
 }
 
-void GUITabs::addChild(GUIButton* child) {
-    if(!dynamic_cast<GUIButton*>(child)) return;
+bool GUITabs::addChild(GUIRect* child) {
+    if(!dynamic_cast<GUIButton*>(child)) return false;
     if(!deactivatable && selected < 0)
         selected = 0;
     GUIView::addChild(child);
     updateContent();
+    return true;
 }
 
 void GUITabs::updateContent() {

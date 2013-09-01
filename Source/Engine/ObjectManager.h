@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "LightObject.h"
-
 #ifndef ObjectManager_h
 #define ObjectManager_h
+
+#include "LightObject.h"
 
 //! This class manages all objects in the scene
 class ObjectManager {

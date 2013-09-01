@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Object.h"
-
 #ifndef Links_h
 #define Links_h
+
+#include "Object.h"
 
 //! A structure that contains all the information needed to construct or save a BaseLink
 class LinkInitializer {

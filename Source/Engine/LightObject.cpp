@@ -66,7 +66,7 @@ float LightObject::getRange() {
     return shadowCam.far;
 }
 
-bool LightObject::gameTick(bool shadowActive) {
+bool LightObject::generateShadowMap(bool shadowActive) {
     if(!shadowActive) return false;
     if(!shadowMap) {
         unsigned int size = min(1024U, mainFBO.maxSize);
@@ -182,9 +182,9 @@ btVector3 DirectionalLight::getBounds() {
     return btVector3(shadowCam.width, shadowCam.height, shadowCam.far);
 }
 
-bool DirectionalLight::gameTick(bool shadowActive) {
+bool DirectionalLight::generateShadowMap(bool shadowActive) {
     shadowCam.updateViewMat();
-    if(!LightObject::gameTick(shadowActive)) return true;
+    if(!LightObject::generateShadowMap(shadowActive)) return true;
     objectManager.currentShadowIsParabolid = false;
     shadowCam.use();
     
@@ -285,8 +285,8 @@ float SpotLight::getCutoff() {
     return shadowCam.fov*0.5;
 }
 
-bool SpotLight::gameTick(bool shadowActive) {
-    if(!LightObject::gameTick(shadowActive)) return true;
+bool SpotLight::generateShadowMap(bool shadowActive) {
+    if(!LightObject::generateShadowMap(shadowActive)) return true;
     objectManager.currentShadowIsParabolid = false;
     shadowCam.use();
     shadowCam.updateViewMat();
@@ -409,8 +409,8 @@ bool PositionalLight::getOmniDirectional() {
     return abs(shadowCam.fov-M_PI*2.0) < 0.001;
 }
 
-bool PositionalLight::gameTick(bool shadowActive) {
-    if(!LightObject::gameTick(shadowActive)) return true;
+bool PositionalLight::generateShadowMap(bool shadowActive) {
+    if(!LightObject::generateShadowMap(shadowActive)) return true;
     if(getOmniDirectional() && !shadowMapB && !optionsState.cubemapsEnabled) {
         unsigned int size = min(1024U, mainFBO.maxSize);
         shadowMapB = new ColorBuffer(true, false, size, size);

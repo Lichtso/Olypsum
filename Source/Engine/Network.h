@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Utilities.h"
-
 #ifndef Network_h
 #define Network_h
+
+#include "Utilities.h"
 
 class NetworkManager {
     const int udpPort = 8724, tcpPort = 8725;

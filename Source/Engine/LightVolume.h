@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "ParticlesObject.h"
-
 #ifndef LightVolume_h
 #define LightVolume_h
+
+#include "ParticlesObject.h"
 
 class LightVolume {
     protected:

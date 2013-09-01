@@ -6,12 +6,12 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "FileManager.h"
-
 #ifndef Texture_h
 #define Texture_h
 #define GL_TEXTURE_MAX_ANISOTROPY 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY 0x84FF
+
+#include "FileManager.h"
 
 //! A class to store a color used for graphics
 class Color4 {

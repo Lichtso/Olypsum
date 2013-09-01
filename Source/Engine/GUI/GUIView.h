@@ -43,9 +43,8 @@ class GUIScreenView : public GUIView {
     GUIRect *modalView, *focused;
     GUIScreenView();
     ~GUIScreenView();
-    bool getLimSize(GUIClipRect& clipRect);
     void updateContent();
-    void draw();
+    void drawScreen();
     bool handleMouseDown(int mouseX, int mouseY);
     bool handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);

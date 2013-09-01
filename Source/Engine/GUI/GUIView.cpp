@@ -130,16 +130,6 @@ GUIScreenView::~GUIScreenView() {
         scriptInstance.Dispose();
 }
 
-bool GUIScreenView::getLimSize(GUIClipRect& clipRect) {
-    width = prevOptionsState.videoWidth >> 1;
-    height = prevOptionsState.videoHeight >> 1;
-    clipRect.minPosX = -width;
-    clipRect.minPosY = -height;
-    clipRect.maxPosX = width;
-    clipRect.maxPosY = height;
-    return (clipRect.minPosX <= clipRect.maxPosX && clipRect.minPosY <= clipRect.maxPosY);
-}
-
 void GUIScreenView::updateContent() {
     width = prevOptionsState.videoWidth >> 1;
     height = prevOptionsState.videoHeight >> 1;
@@ -147,11 +137,16 @@ void GUIScreenView::updateContent() {
         children[i]->updateContent();
 }
 
-void GUIScreenView::draw() {
+void GUIScreenView::drawScreen() {
     if(!visible) return;
     
+    width = prevOptionsState.videoWidth >> 1;
+    height = prevOptionsState.videoHeight >> 1;
     GUIClipRect clipRect;
-    if(!getLimSize(clipRect)) return;
+    clipRect.minPosX = -width;
+    clipRect.minPosY = -height;
+    clipRect.maxPosX = width;
+    clipRect.maxPosY = height;
     
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

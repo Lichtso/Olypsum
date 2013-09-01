@@ -6,10 +6,10 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "ShaderProgram.h"
-
 #ifndef CamObject_h
 #define CamObject_h
+
+#include "ShaderProgram.h"
 
 enum CollisionMask {
     CollisionMask_Light = 1,
