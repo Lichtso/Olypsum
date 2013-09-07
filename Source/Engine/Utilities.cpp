@@ -136,6 +136,15 @@ bool removeDir(std::string path) {
     });
 }
 
+std::string trimPath(std::string path, size_t n) {
+    for(size_t i = 0; i < n; i ++) {
+        size_type lastSlash = path.find_last_of("/");
+        if(lastSlash == -1) break;
+        path = path.substr(0, lastSlash);
+    }
+    return path;
+}
+
 std::string stringOf(int value) {
     char buffer[32];
     sprintf(buffer, "%d", value);
@@ -193,5 +202,5 @@ double getTime() {
 #endif
 }
 
-unsigned int screenSize[3];
+unsigned int screenSize[3] = { 0, 0, 1 };
 std::string resourcesDir, gameDataDir;

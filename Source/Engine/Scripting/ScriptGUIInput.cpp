@@ -144,8 +144,3 @@ ScriptGUITextField::ScriptGUITextField() :ScriptGUIFramedView("GUITextField", Co
     
     functionTemplate->Inherit(scriptGUIFramedView.functionTemplate);
 }
-
-
-
-ScriptGUISlider scriptGUISlider;
-ScriptGUITextField scriptGUITextField;

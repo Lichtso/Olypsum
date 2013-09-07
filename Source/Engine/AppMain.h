@@ -20,7 +20,7 @@ void restartApplication();
 const SDL_VideoInfo* updateVideoModeInternal(bool& fullScreen);
 void updateVideoMode();
 
-void AppMain(int argc, char *argv[]);
+void AppMain();
 void AppTerminate();
 
 extern Uint8* keyState;

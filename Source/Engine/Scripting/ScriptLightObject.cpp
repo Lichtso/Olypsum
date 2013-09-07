@@ -116,10 +116,3 @@ ScriptPositionalLight::ScriptPositionalLight() :ScriptLightObject("PositionalLig
     
     functionTemplate->Inherit(scriptLightObject.functionTemplate);
 }
-
-
-
-ScriptLightObject scriptLightObject;
-ScriptDirectionalLight scriptDirectionalLight;
-ScriptSpotLight scriptSpotLight;
-ScriptPositionalLight scriptPositionalLight;

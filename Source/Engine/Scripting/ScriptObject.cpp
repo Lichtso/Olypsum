@@ -247,10 +247,3 @@ ScriptPhysicObject::ScriptPhysicObject() :ScriptPhysicObject("PhysicObject") {
     
     functionTemplate->Inherit(scriptBaseObject.functionTemplate);
 }
-
-
-
-ScriptBaseClass scriptBaseClass;
-ScriptBaseObject scriptBaseObject;
-ScriptBoneObject scriptBoneObject;
-ScriptPhysicObject scriptPhysicObject;

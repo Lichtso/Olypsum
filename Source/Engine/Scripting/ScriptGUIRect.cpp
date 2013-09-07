@@ -141,5 +141,3 @@ ScriptGUIRect::ScriptGUIRect() :ScriptGUIRect("GUIRect", Constructor) {
     objectTemplate->Set(v8::String::New("remove"), v8::FunctionTemplate::New(Remove));
     objectTemplate->Set(v8::String::New("updateContent"), v8::FunctionTemplate::New(UpdateContent));
 }
-
-ScriptGUIRect scriptGUIRect;

@@ -215,9 +215,3 @@ ScriptGUITabs::ScriptGUITabs() :ScriptGUIView("GUITabs", Constructor) {
     
     functionTemplate->Inherit(scriptGUIView.functionTemplate);
 }
-
-
-
-ScriptGUIButton scriptGUIButton;
-ScriptGUICheckBox scriptGUICheckBox;
-ScriptGUITabs scriptGUITabs;

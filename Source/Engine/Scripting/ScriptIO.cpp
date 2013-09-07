@@ -62,8 +62,3 @@ ScriptKeyboard::ScriptKeyboard() :ScriptClass("Keyboard", Constructor) {
     functionTemplate->Set(v8::String::New("getKeyCount"), v8::FunctionTemplate::New(GetKeyCount));
     functionTemplate->Set(v8::String::New("isKeyPressed"), v8::FunctionTemplate::New(IsKeyPressed));
 }
-
-
-
-ScriptMouse scriptMouse;
-ScriptKeyboard scriptKeyboard;

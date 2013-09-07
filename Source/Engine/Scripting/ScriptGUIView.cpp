@@ -296,10 +296,3 @@ ScriptGUIScrollView::ScriptGUIScrollView() :ScriptGUIFramedView("GUIScrollView",
     
     functionTemplate->Inherit(scriptGUIFramedView.functionTemplate);
 }
-
-
-
-ScriptGUIView scriptGUIView;
-ScriptGUIFramedView scriptGUIFramedView;
-ScriptGUIScreenView scriptGUIScreenView;
-ScriptGUIScrollView scriptGUIScrollView;

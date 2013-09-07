@@ -1,57 +1,13 @@
-/*   SDLMain.m - main entry point for our Cocoa-ized SDL app
-       Initial Version: Darrell Walisser <dwaliss1@purdue.edu>
-       Non-NIB-Code & other changes: Max Horn <max@quendi.de>
-
-    Feel free to customize this file to suit your needs
-*/
+//
+//  SDLMain.cpp
+//  Olypsum
+//
+//  Created by Alexander Meißner on 07.09.13.
+//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//
 
 #include "SDLMain.h"
 #include "AppMain.h"
-#include <sys/param.h> /* for MAXPATHLEN */
-#include <unistd.h>
-
-/* For some reaon, Apple removed setAppleMenu from the headers in 10.4,
- but the method still is there and works. To avoid warnings, we declare
- it ourselves here. */
-@interface NSApplication(SDL_Missing_Methods)
-- (void)setAppleMenu:(NSMenu *)menu;
-@end
-
-/* Use this flag to determine whether we use CPS (docking) or not */
-#define		SDL_USE_CPS		1
-#ifdef SDL_USE_CPS
-/* Portions of CPS.h */
-typedef struct CPSProcessSerNum
-{
-	UInt32		lo;
-	UInt32		hi;
-} CPSProcessSerNum;
-
-extern OSErr	CPSGetCurrentProcess( CPSProcessSerNum *psn);
-extern OSErr 	CPSEnableForegroundOperation( CPSProcessSerNum *psn, UInt32 _arg2, UInt32 _arg3, UInt32 _arg4, UInt32 _arg5);
-extern OSErr	CPSSetFrontProcess( CPSProcessSerNum *psn);
-
-#endif /* SDL_USE_CPS */
-
-static int    gArgc;
-static char  **gArgv;
-static BOOL   gFinderLaunch;
-static BOOL   gCalledAppMainline = FALSE;
-
-static NSString *getApplicationName(void)
-{
-    NSString *appName = 0;
-
-    /* Determine the application name */
-    NSDictionary *dict = (__bridge NSDictionary *)CFBundleGetInfoDictionary(CFBundleGetMainBundle());
-    if (dict)
-        appName = [dict objectForKey: @"CFBundleName"];
-    
-    if (![appName length])
-        appName = [[NSProcessInfo processInfo] processName];
-
-    return appName;
-}
 
 /* The main class of the application, the application's delegate */
 @implementation SDLMain
@@ -61,133 +17,6 @@ static NSString *getApplicationName(void)
     SDL_Event event;
     event.type = SDL_QUIT;
     SDL_PushEvent(&event);
-}
-
-/* Set the working directory to the .app's parent directory */
-- (void)setupWorkingDirectory {
-    NSString* applicationSupportFolder;
-    FSRef foundRef;
-    OSErr err = FSFindFolder(kUserDomain, kApplicationSupportFolderType, kDontCreateFolder, &foundRef);
-    if(err == noErr) {
-        unsigned char path[PATH_MAX];
-        OSStatus validPath = FSRefMakePath(&foundRef, path, sizeof(path));
-        if(validPath == noErr)
-            applicationSupportFolder = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:(const char*)path length:(NSUInteger)strlen((char*)path)];
-    }
-    
-    std::string companyDir = std::string([applicationSupportFolder cStringUsingEncoding:1])+"/Gamefortec/";
-    gameDataDir = companyDir+"Olypsum/";
-    
-    createDir(companyDir);
-    createDir(gameDataDir);
-    
-    NSString* resourceURL = [[NSBundle mainBundle] resourcePath];
-    unsigned long length = [resourceURL length]+1;
-    char buffer[length];
-    [resourceURL getCString:buffer maxLength:length encoding:NSASCIIStringEncoding];
-    resourcesDir = std::string(buffer)+'/';
-    chdir(resourcesDir.c_str());
-}
-
-static void setApplicationMenu(void) {
-    /* warning: this code is very odd */
-    NSMenu *appleMenu;
-    NSMenuItem *menuItem;
-    NSString *title;
-    NSString *appName;
-    
-    appName = getApplicationName();
-    appleMenu = [[NSMenu alloc] initWithTitle:@""];
-    
-    /* Add menu items */
-    title = [@"About " stringByAppendingString:appName];
-    [appleMenu addItemWithTitle:title action:@selector(orderFrontStandardAboutPanel:) keyEquivalent:@""];
-
-    [appleMenu addItem:[NSMenuItem separatorItem]];
-
-    title = [@"Hide " stringByAppendingString:appName];
-    [appleMenu addItemWithTitle:title action:@selector(hide:) keyEquivalent:@"h"];
-
-    menuItem = (NSMenuItem *)[appleMenu addItemWithTitle:@"Hide Others" action:@selector(hideOtherApplications:) keyEquivalent:@"h"];
-    [menuItem setKeyEquivalentModifierMask:(NSAlternateKeyMask|NSCommandKeyMask)];
-
-    [appleMenu addItemWithTitle:@"Show All" action:@selector(unhideAllApplications:) keyEquivalent:@""];
-
-    [appleMenu addItem:[NSMenuItem separatorItem]];
-
-    title = [@"Quit " stringByAppendingString:appName];
-    [appleMenu addItemWithTitle:title action:@selector(terminate:) keyEquivalent:@"q"];
-
-    
-    /* Put menu into the menubar */
-    menuItem = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
-    [menuItem setSubmenu:appleMenu];
-    [[NSApp mainMenu] addItem:menuItem];
-
-    /* Tell the application object that this is now the application menu */
-    [NSApp setAppleMenu:appleMenu];
-
-    /* Finally give up our references to the objects */
-    appleMenu = NULL;
-    menuItem = NULL;
-}
-
-/* Create a window menu */
-static void setupWindowMenu(void) {
-    NSMenu      *windowMenu;
-    NSMenuItem  *windowMenuItem;
-    NSMenuItem  *menuItem;
-
-    windowMenu = [[NSMenu alloc] initWithTitle:@"Window"];
-    
-    /* "Minimize" item */
-    menuItem = [[NSMenuItem alloc] initWithTitle:@"Minimize" action:@selector(performMiniaturize:) keyEquivalent:@"m"];
-    [windowMenu addItem:menuItem];
-    menuItem = NULL;
-    
-    /* Put menu into the menubar */
-    windowMenuItem = [[NSMenuItem alloc] initWithTitle:@"Window" action:nil keyEquivalent:@""];
-    [windowMenuItem setSubmenu:windowMenu];
-    [[NSApp mainMenu] addItem:windowMenuItem];
-    
-    /* Tell the application object that this is now the window menu */
-    [NSApp setWindowsMenu:windowMenu];
-
-    /* Finally give up our references to the objects */
-    windowMenu = NULL;
-    windowMenuItem = NULL;
-}
-
-/* Replacement for NSApplicationMain */
-static void CustomApplicationMain(int argc, char **argv) {
-    SDLMain				*sdlMain;
-
-    /* Ensure the application object is initialised */
-    [NSApplication sharedApplication];
-    
-#ifdef SDL_USE_CPS
-    {
-        CPSProcessSerNum PSN;
-        /* Tell the dock about us */
-        if (!CPSGetCurrentProcess(&PSN))
-            if (!CPSEnableForegroundOperation(&PSN,0x03,0x3C,0x2C,0x1103))
-                if (!CPSSetFrontProcess(&PSN))
-                    [NSApplication sharedApplication];
-    }
-#endif /* SDL_USE_CPS */
-
-    /* Set up the menubar */
-    [NSApp setMainMenu:[[NSMenu alloc] init]];
-    setApplicationMenu();
-    setupWindowMenu();
-
-    /* Create SDLMain and make it the app delegate */
-    sdlMain = [[SDLMain alloc] init];
-    [NSApp setDelegate:sdlMain];
-    
-    /* Start the main event loop */
-    [NSApp run];
-    sdlMain = NULL;
 }
 
 /*
@@ -207,71 +36,33 @@ static void CustomApplicationMain(int argc, char **argv) {
  */
 
 - (BOOL)application:(NSApplication *)theApplication openFile:(NSString *)filename {
-    const char *temparg;
-    size_t arglen;
-    char *arg;
-    char **newargv;
-
-    if(!gFinderLaunch)  // MacOS is passing command line args.
-        return FALSE;
-
-    if(gCalledAppMainline)  // app has started, ignore this document.
-        return FALSE;
-
-    temparg = [filename UTF8String];
-    arglen = SDL_strlen(temparg) + 1;
-    arg = (char *) SDL_malloc(arglen);
-    if(arg == NULL)
-        return FALSE;
-
-    newargv = (char **) realloc(gArgv, sizeof (char *) * (gArgc + 2));
-    if(newargv == NULL) {
-        SDL_free(arg);
-        return FALSE;
-    }
-    gArgv = newargv;
-
-    SDL_strlcpy(arg, temparg, arglen);
-    gArgv[gArgc++] = arg;
-    gArgv[gArgc] = NULL;
-    return TRUE;
+    //const char* temparg = [filename UTF8String];
+    return false;
 }
 
 
 /* Called when the internal event loop has just started running */
 - (void)applicationDidFinishLaunching:(NSNotification *) note {
-    /* Set the working directory to the .app's parent directory */
-    [self setupWorkingDirectory];
+    NSString* resourceURL = [[NSBundle mainBundle] resourcePath];
+    unsigned long length = [resourceURL length]+1;
+    char buffer[length];
+    [resourceURL getCString:buffer maxLength:length encoding:NSASCIIStringEncoding];
+    resourcesDir = std::string(buffer)+'/';
     
-    /* Hand off to main application code */
-    gCalledAppMainline = TRUE;
-    AppMain(gArgc, gArgv);
+    /*FSRef foundRef;
+    NSString* applicationSupportFolder;
+    if(FSFindFolder(kUserDomain, kApplicationSupportFolderType, kDontCreateFolder, &foundRef) == noErr) {
+        unsigned char path[PATH_MAX];
+        if(FSRefMakePath(&foundRef, path, sizeof(path)) == noErr)
+            applicationSupportFolder = [[NSFileManager defaultManager] stringWithFileSystemRepresentation:(const char*)path length:(NSUInteger)strlen((char*)path)];
+    }
+    gameDataDir = std::string([applicationSupportFolder cStringUsingEncoding:1])+"/Gamefortec/";*/
+    gameDataDir = std::string(getenv("HOME"))+"/Library/Application Support/Gamefortec/";
+    
+    AppMain();
 }
 
 @end
-
-/* Main entry point to executable - should *not* be SDL_main! */
-int sdlMacMain(int argc, char **argv) {
-    /* Copy the arguments into a global variable */
-    /* This is passed if we are launched by double-clicking */
-    if(argc >= 2 && strncmp (argv[1], "-psn", 4) == 0) {
-        gArgv = (char **) SDL_malloc(sizeof (char *) * 2);
-        gArgv[0] = argv[0];
-        gArgv[1] = NULL;
-        gArgc = 1;
-        gFinderLaunch = YES;
-    }else{
-        int i;
-        gArgc = argc;
-        gArgv = (char **) SDL_malloc(sizeof (char *) * (argc+1));
-        for(i = 0; i <= argc; i++)
-            gArgv[i] = argv[i];
-        gFinderLaunch = NO;
-    }
-    
-    NSApplicationMain(argc, (const char**) argv);
-    return 0;
-}
 
 void updateVideoMode() {
     bool fullScreen;
@@ -305,7 +96,6 @@ void updateVideoMode() {
                                                      (screenSize[1]-prevOptionsState.videoHeight/prevOptionsState.videoScale)>>1,
                                                      prevOptionsState.videoWidth/prevOptionsState.videoScale,
                                                      prevOptionsState.videoHeight/prevOptionsState.videoScale)) display:false];
-    //NSRect rect = [window convertRectToScreen:NSMakeRect(0, 0, 1, 1)];
     [window becomeKeyWindow];
 }
 
@@ -331,7 +121,6 @@ void openExternURL(const char* str) {
 }
 
 void restartApplication() {
-    //NSTask* task = [NSTask launchedTaskWithLaunchPath:[[NSBundle mainBundle] executablePath] arguments:[NSArray arrayWithObjects:nil]];
     NSDictionary *config = [NSDictionary dictionaryWithObjectsAndKeys:nil];
     NSError *error = nil;
     [[NSWorkspace sharedWorkspace] launchApplicationAtURL:[NSURL URLWithString:[[NSBundle mainBundle] executablePath]]

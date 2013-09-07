@@ -179,5 +179,3 @@ ScriptParticlesObject::ScriptParticlesObject() :ScriptPhysicObject("ParticlesObj
     
     functionTemplate->Inherit(scriptPhysicObject.functionTemplate);
 }
-
-ScriptParticlesObject scriptParticlesObject;

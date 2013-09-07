@@ -41,7 +41,11 @@ const SDL_VideoInfo* updateVideoModeInternal(bool& fullScreen) {
     return videoInfo;
 }
 
-void AppMain(int argc, char *argv[]) {
+void AppMain() {
+    createDir(gameDataDir);
+    gameDataDir += "Olypsum/";
+    createDir(gameDataDir);
+    
     optionsState.loadOptions();
     networkManager.init();
     
@@ -55,50 +59,6 @@ void AppMain(int argc, char *argv[]) {
         exit(2);
     }
     SDL_EnableUNICODE(1);
-    updateVideoMode();
-    
-    //Init OpenGL
-    {
-        log(info_log, std::string("Multi Threading: ")+stringOf(std::thread::hardware_concurrency())+" CPUs");
-        char* glStr = NULL;
-        GLint glAuxIa, glAuxIb;
-        glStr = (char*)glGetString(GL_VENDOR);
-        log(info_log, std::string("OpenGL vendor: ")+glStr);
-        glStr = (char*)glGetString(GL_RENDERER);
-        log(info_log, std::string("OpenGL renderer: ")+glStr);
-        glStr = (char*)glGetString(GL_VERSION);
-        log(info_log, std::string("OpenGL driver: ")+glStr);
-        glGetIntegerv(GL_MAJOR_VERSION, &glAuxIa);
-        glGetIntegerv(GL_MINOR_VERSION, &glAuxIb);
-        log(info_log, std::string("OpenGL version: ")+stringOf(glAuxIa)+"."+stringOf(glAuxIb));
-        if(glAuxIa < 3 || (glAuxIa == 3 && glAuxIb < 2)) {
-            log(error_log, std::string("OpenGL version 3.2 is required, Quit.")+glStr);
-            exit(5);
-        }
-#ifdef DEBUG
-        std::ostringstream stream;
-        stream << "OpenGL extensions found: ";
-        glGetIntegerv(GL_NUM_EXTENSIONS, &glAuxIa);
-        for(GLint i = 0; i < glAuxIa; i ++) {
-            glStr = (char*)glGetStringi(GL_EXTENSIONS, i);
-            stream << glStr << " ";
-        }
-        log(info_log, stream.str());
-        stream.str("");
-        stream << "OpenGL compressions found: ";
-        glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &glAuxIa);
-        GLint glCompressionFormats[glAuxIa];
-        glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS, glCompressionFormats);
-        for(GLint i = 0; i < glAuxIa; i ++)
-            stream << stringOf(glCompressionFormats[i]) << " ";
-        log(info_log, stream.str());
-#endif
-    }
-    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &optionsState.anisotropy);
-    optionsState.anisotropy = fmin(optionsState.anisotropy, pow(2.0, optionsState.surfaceQuality));
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glFrontFace(GL_CCW);
     
     //Init the rest
     objectManager.init();

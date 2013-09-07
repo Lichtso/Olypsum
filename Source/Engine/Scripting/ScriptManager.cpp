@@ -216,4 +216,47 @@ void ScriptManager::gameTick() {
         }
 }
 
+ScriptVector3 scriptVector3;
+ScriptQuaternion scriptQuaternion;
+ScriptMatrix4 scriptMatrix4;
+ScriptBaseClass scriptBaseClass;
+ScriptBaseObject scriptBaseObject;
+ScriptBoneObject scriptBoneObject;
+ScriptPhysicObject scriptPhysicObject;
+ScriptGraphicObject scriptGraphicObject;
+ScriptRigidObject scriptRigidObject;
+ScriptTerrainObject scriptTerrainObject;
+ScriptCamObject scriptCamObject;
+ScriptSoundObject scriptSoundObject;
+ScriptParticlesObject scriptParticlesObject;
+ScriptLightObject scriptLightObject;
+ScriptDirectionalLight scriptDirectionalLight;
+ScriptSpotLight scriptSpotLight;
+ScriptPositionalLight scriptPositionalLight;
+ScriptBaseLink scriptBaseLink;
+ScriptPhysicLink scriptPhysicLink;
+ScriptPointPhysicLink scriptPointPhysicLink;
+ScriptGearPhysicLink scriptGearPhysicLink;
+ScriptHingePhysicLink scriptHingePhysicLink;
+ScriptSliderPhysicLink scriptSliderPhysicLink;
+ScriptDof6PhysicLink scriptDof6PhysicLink;
+ScriptConeTwistPhysicLink scriptConeTwistPhysicLink;
+ScriptTransformLink scriptTransformLink;
+ScriptIntersection scriptIntersection;
+ScriptAnimation scriptAnimation;
+ScriptMouse scriptMouse;
+ScriptKeyboard scriptKeyboard;
+ScriptGUIRect scriptGUIRect;
+ScriptGUIView scriptGUIView;
+ScriptGUIFramedView scriptGUIFramedView;
+ScriptGUIScreenView scriptGUIScreenView;
+ScriptGUIScrollView scriptGUIScrollView;
+ScriptGUILabel scriptGUILabel;
+ScriptGUIProgressBar scriptGUIProgressBar;
+ScriptGUIImage scriptGUIImage;
+ScriptGUISlider scriptGUISlider;
+ScriptGUITextField scriptGUITextField;
+ScriptGUIButton scriptGUIButton;
+ScriptGUICheckBox scriptGUICheckBox;
+ScriptGUITabs scriptGUITabs;
 std::unique_ptr<ScriptManager> scriptManager;

@@ -832,9 +832,3 @@ ScriptMatrix4::ScriptMatrix4() :ScriptClass("Matrix4", Constructor) {
     objectTemplate->Set(v8::String::New("rotate"), v8::FunctionTemplate::New(Rotate));
     objectTemplate->Set(v8::String::New("translate"), v8::FunctionTemplate::New(Translate));
 }
-
-
-
-ScriptVector3 scriptVector3;
-ScriptQuaternion scriptQuaternion;
-ScriptMatrix4 scriptMatrix4;

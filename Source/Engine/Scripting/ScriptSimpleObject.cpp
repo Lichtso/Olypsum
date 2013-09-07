@@ -210,8 +210,3 @@ ScriptSoundObject::ScriptSoundObject() :ScriptBaseObject("SoundObject") {
     
     functionTemplate->Inherit(scriptBaseObject.functionTemplate);
 }
-
-
-
-ScriptCamObject scriptCamObject;
-ScriptSoundObject scriptSoundObject;

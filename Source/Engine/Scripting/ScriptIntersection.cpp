@@ -145,5 +145,3 @@ ScriptIntersection::ScriptIntersection() :ScriptClass("Intersection", Constructo
     functionTemplate->Set(v8::String::New("aabbIntersection"), v8::FunctionTemplate::New(AABBIntersection));
     functionTemplate->Set(v8::String::New("sphereIntersection"), v8::FunctionTemplate::New(SphereIntersection));
 }
-
-ScriptIntersection scriptIntersection;

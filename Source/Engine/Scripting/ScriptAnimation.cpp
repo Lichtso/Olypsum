@@ -281,5 +281,3 @@ ScriptAnimation::ScriptAnimation() :ScriptClass("Animation", Constructor) {
     functionTemplate->Set(v8::String::New("startTimer"), v8::FunctionTemplate::New(StartTimer));
     functionTemplate->Set(v8::String::New("stopTimer"), v8::FunctionTemplate::New(StopTimer));
 }
-
-ScriptAnimation scriptAnimation;

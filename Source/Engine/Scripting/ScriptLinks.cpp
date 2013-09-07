@@ -995,15 +995,3 @@ ScriptTransformLink::ScriptTransformLink() :ScriptBaseLink("TransformLink", Cons
     
     functionTemplate->Inherit(scriptBaseLink.functionTemplate);
 }
-
-
-
-ScriptBaseLink scriptBaseLink;
-ScriptPhysicLink scriptPhysicLink;
-ScriptPointPhysicLink scriptPointPhysicLink;
-ScriptGearPhysicLink scriptGearPhysicLink;
-ScriptHingePhysicLink scriptHingePhysicLink;
-ScriptSliderPhysicLink scriptSliderPhysicLink;
-ScriptDof6PhysicLink scriptDof6PhysicLink;
-ScriptConeTwistPhysicLink scriptConeTwistPhysicLink;
-ScriptTransformLink scriptTransformLink;

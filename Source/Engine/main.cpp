@@ -43,19 +43,19 @@ void restartApplication() {
     AppTerminate();
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, const char** argv) {
     NL::init();
     
-    std::string companyDir = "~/.Gamefortec/";
-    gameDataDir = companyDir+"Olypsum/";
+    resourcesDir = argv[0];
+    if(argv[0][0] != '/') {
+        char cwdPath[512];
+        getcwd(cwdPath, sizeof(cwdPath)/sizeof(char)-1);
+        resourcesDir = std::string(cwdPath)+resourcesDir;
+    }
+    resourcesDir = trimPath(resourcesDir.c_str(), 1)+"/Resources/";
+    gameDataDir = std::string(getenv("HOME"))+"/.Gamefortec/";
     
-    createDir(companyDir);
-    createDir(gameDataDir);
-    
-    resourcesDir = std::string(???)+"Resources/";
-    chdir(resourcesDir.c_str());
-    
-    AppMain(argc, argv);
+    AppMain();
     return 0;
 }
 

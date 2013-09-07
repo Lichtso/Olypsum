@@ -111,6 +111,11 @@ bool forEachInDir(std::string path,
  @return Success
  */
 bool removeDir(std::string path);
+/*! Removes the last part of a path until the next '/'
+ @param path The path to trim
+ @param n Repeats this n times
+ */
+std::string trimPath(std::string path, size_t n);
 
 //! Converts a int into a std::string
 std::string stringOf(int value);

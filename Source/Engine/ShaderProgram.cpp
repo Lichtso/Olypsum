@@ -52,7 +52,7 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::v
         if(pos == std::string::npos) break;
         pos += strlen(includeString);
         unsigned int macroLength = soucre.find('\n', pos)-pos;
-        std::unique_ptr<char[]> data = readFile(std::string("Shaders/")+soucre.substr(pos, macroLength), true);
+        std::unique_ptr<char[]> data = readFile(resourcesDir+"Shaders/"+soucre.substr(pos, macroLength), true);
         soucre.replace(prevPos, strlen(includeString)+macroLength, data.get());
     }
     
@@ -111,7 +111,7 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::v
 }
 
 bool ShaderProgram::loadShaderProgram(const char* fileName, std::vector<GLenum> shaderTypes, std::vector<const char*> macros) {
-    std::unique_ptr<char[]> data = readFile(std::string("Shaders/")+fileName+".glsl", true);
+    std::unique_ptr<char[]> data = readFile(resourcesDir+"Shaders/"+fileName+".glsl", true);
     
     char* dataPos = data.get();
     for(GLenum shaderType: shaderTypes) {

@@ -193,9 +193,3 @@ ScriptGUIImage::ScriptGUIImage() :ScriptGUIRect("GUIImage", Constructor) {
     
     functionTemplate->Inherit(scriptGUIRect.functionTemplate);
 }
-
-
-
-ScriptGUILabel scriptGUILabel;
-ScriptGUIProgressBar scriptGUIProgressBar;
-ScriptGUIImage scriptGUIImage;

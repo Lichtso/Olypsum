@@ -52,12 +52,12 @@
 		118620481650165400A32518 /* ObjectManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118620461650165400A32518 /* ObjectManager.cpp */; };
 		1188A5431745403900D535B2 /* ScriptAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1188A5411745403900D535B2 /* ScriptAnimation.cpp */; };
 		118B60621573E2E8004C132E /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118B60611573E2E8004C132E /* Audio.cpp */; };
+		1197492C17DB39FA00414CAA /* libv8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1197492B17DB39FA00414CAA /* libv8.dylib */; };
+		1197492D17DB3AB600414CAA /* libv8.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1197492B17DB39FA00414CAA /* libv8.dylib */; };
 		1199EC331722D205006BD235 /* ScriptIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1199EC311722D204006BD235 /* ScriptIO.cpp */; };
 		1199EC361723D795006BD235 /* ScriptGUIOutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1199EC341723D793006BD235 /* ScriptGUIOutput.cpp */; };
 		11A3255517089E2100B038D2 /* Network.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A3255317089E2100B038D2 /* Network.cpp */; };
 		11A6811F16B96CFC000E4029 /* ScriptLinearAlgebra.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A6811D16B96CFC000E4029 /* ScriptLinearAlgebra.cpp */; };
-		11A6812416B9B2B5000E4029 /* libv8.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11A6812316B9B2B5000E4029 /* libv8.dylib */; };
-		11A6812516B9B2BA000E4029 /* libv8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 11A6812316B9B2B5000E4029 /* libv8.dylib */; };
 		11A79B6A153C2FE9002B9F0A /* AppMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B20153C2FE9002B9F0A /* AppMain.cpp */; };
 		11A79B6B153C2FE9002B9F0A /* CamObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B22153C2FE9002B9F0A /* CamObject.cpp */; };
 		11A79B6C153C2FE9002B9F0A /* FileManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A79B24153C2FE9002B9F0A /* FileManager.cpp */; };
@@ -111,7 +111,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				11EC642C178F3114007990B9 /* libLeap.dylib in CopyFiles */,
-				11A6812416B9B2B5000E4029 /* libv8.dylib in CopyFiles */,
+				1197492D17DB3AB600414CAA /* libv8.dylib in CopyFiles */,
 				1114B87316A8937B00B1CD41 /* Ogg.framework in CopyFiles */,
 				1114B87416A8937B00B1CD41 /* Vorbis.framework in CopyFiles */,
 				1114B87516A8937B00B1CD41 /* BulletCollision.framework in CopyFiles */,
@@ -186,6 +186,7 @@
 		1188A5421745403900D535B2 /* ScriptAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptAnimation.h; sourceTree = "<group>"; };
 		118B60601573E2DF004C132E /* Audio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Audio.h; sourceTree = "<group>"; };
 		118B60611573E2E8004C132E /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Audio.cpp; sourceTree = "<group>"; };
+		1197492B17DB39FA00414CAA /* libv8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libv8.dylib; path = Libraries/v8/out/native/libv8.dylib; sourceTree = "<group>"; };
 		1199EC311722D204006BD235 /* ScriptIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptIO.cpp; sourceTree = "<group>"; };
 		1199EC321722D204006BD235 /* ScriptIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptIO.h; sourceTree = "<group>"; };
 		1199EC341723D793006BD235 /* ScriptGUIOutput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptGUIOutput.cpp; sourceTree = "<group>"; };
@@ -194,7 +195,6 @@
 		11A3255417089E2100B038D2 /* Network.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Network.h; sourceTree = "<group>"; };
 		11A6811D16B96CFC000E4029 /* ScriptLinearAlgebra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptLinearAlgebra.cpp; sourceTree = "<group>"; };
 		11A6811E16B96CFC000E4029 /* ScriptLinearAlgebra.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptLinearAlgebra.h; sourceTree = "<group>"; };
-		11A6812316B9B2B5000E4029 /* libv8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libv8.dylib; path = Libraries/v8/out/x64.release/libv8.dylib; sourceTree = "<group>"; };
 		11A79B20153C2FE9002B9F0A /* AppMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AppMain.cpp; sourceTree = "<group>"; };
 		11A79B21153C2FE9002B9F0A /* AppMain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppMain.h; sourceTree = "<group>"; };
 		11A79B22153C2FE9002B9F0A /* CamObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CamObject.cpp; sourceTree = "<group>"; };
@@ -288,7 +288,7 @@
 			files = (
 				11511422170CBE6700F77236 /* libNetLink.a in Frameworks */,
 				1160B650178F2E57002ADF40 /* libLeap.dylib in Frameworks */,
-				11A6812516B9B2BA000E4029 /* libv8.dylib in Frameworks */,
+				1197492C17DB39FA00414CAA /* libv8.dylib in Frameworks */,
 				1114B87016A8933200B1CD41 /* Ogg.framework in Frameworks */,
 				1114B87116A8933200B1CD41 /* Vorbis.framework in Frameworks */,
 				1114B86B16A8930E00B1CD41 /* SDL_image.framework in Frameworks */,
@@ -332,7 +332,7 @@
 			children = (
 				11511421170CBE6700F77236 /* libNetLink.a */,
 				1160B64F178F2E57002ADF40 /* libLeap.dylib */,
-				11A6812316B9B2B5000E4029 /* libv8.dylib */,
+				1197492B17DB39FA00414CAA /* libv8.dylib */,
 				1114B86E16A8933200B1CD41 /* Ogg.framework */,
 				1114B86F16A8933200B1CD41 /* Vorbis.framework */,
 				1114B84016A88BD100B1CD41 /* BulletCollision.framework */,
@@ -780,7 +780,7 @@
 				INFOPLIST_FILE = Source/Engine/macCompCode/Info.plist;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/Libraries/v8/out/x64.release",
+					"$(SRCROOT)/Libraries/v8/out/native",
 					"$(SRCROOT)/Libraries/netLink/out",
 					"$(SRCROOT)/Libraries/LeapSDK/lib",
 				);
@@ -814,7 +814,7 @@
 				INFOPLIST_FILE = Source/Engine/macCompCode/Info.plist;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/Libraries/v8/out/x64.release",
+					"$(SRCROOT)/Libraries/v8/out/native",
 					"$(SRCROOT)/Libraries/netLink/out",
 					"$(SRCROOT)/Libraries/LeapSDK/lib",
 				);

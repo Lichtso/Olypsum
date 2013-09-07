@@ -336,9 +336,3 @@ ScriptTerrainObject::ScriptTerrainObject() :ScriptGraphicObject("TerrainObject")
     
     functionTemplate->Inherit(scriptGraphicObject.functionTemplate);
 }
-
-
-
-ScriptGraphicObject scriptGraphicObject;
-ScriptRigidObject scriptRigidObject;
-ScriptTerrainObject scriptTerrainObject;
