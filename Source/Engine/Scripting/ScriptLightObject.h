@@ -12,8 +12,8 @@
 #include "ScriptParticlesObject.h"
 
 class ScriptLightObject : public ScriptPhysicObject {
-    static v8::Handle<v8::Value> GetRange(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> AccessColor(const v8::Arguments& args);
+    static void GetRange(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void AccessColor(const v8::FunctionCallbackInfo<v8::Value>& args);
     protected:
     ScriptLightObject(const char* name) :ScriptPhysicObject(name) { }
     public:
@@ -21,22 +21,22 @@ class ScriptLightObject : public ScriptPhysicObject {
 };
 
 class ScriptDirectionalLight : public ScriptLightObject {
-    static v8::Handle<v8::Value> GetBounds(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> SetBounds(const v8::Arguments& args);
+    static void GetBounds(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetBounds(const v8::FunctionCallbackInfo<v8::Value>& args);
     public:
     ScriptDirectionalLight();
 };
 
 class ScriptSpotLight : public ScriptLightObject {
-    static v8::Handle<v8::Value> GetCutoff(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> SetBounds(const v8::Arguments& args);
+    static void GetCutoff(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetBounds(const v8::FunctionCallbackInfo<v8::Value>& args);
     public:
     ScriptSpotLight();
 };
 
 class ScriptPositionalLight : public ScriptLightObject {
-    static v8::Handle<v8::Value> GetOmniDirectional(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> SetBounds(const v8::Arguments& args);
+    static void GetOmniDirectional(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetBounds(const v8::FunctionCallbackInfo<v8::Value>& args);
     public:
     ScriptPositionalLight();
 };

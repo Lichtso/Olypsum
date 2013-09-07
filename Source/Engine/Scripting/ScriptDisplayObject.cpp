@@ -8,13 +8,13 @@
 
 #include "ScriptDisplayObject.h"
 
-v8::Handle<v8::Value> ScriptGraphicObject::GetIntegrity(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptGraphicObject::GetIntegrity(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     GraphicObject* objectPtr = getDataOfInstance<GraphicObject>(info.This());
-    return handleScope.Close(v8::Number::New(objectPtr->integrity));
+    info.GetReturnValue().Set(objectPtr->integrity);
 }
 
-void ScriptGraphicObject::SetIntegrity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptGraphicObject::SetIntegrity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
     GraphicObject* objectPtr = getDataOfInstance<GraphicObject>(info.This());
@@ -22,10 +22,10 @@ void ScriptGraphicObject::SetIntegrity(v8::Local<v8::String> property, v8::Local
     objectPtr->integrity = fmax(0.0, value->NumberValue());
 }
 
-v8::Handle<v8::Value> ScriptGraphicObject::AttachDecal(const v8::Arguments& args) {
+void ScriptGraphicObject::AttachDecal(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 3 || !args[0]->IsNumber() || !scriptMatrix4.isCorrectInstance(args[1]) || !args[2]->IsString())
-        return v8::ThrowException(v8::String::New("GraphicObject attachDecal: Invalid argument"));
+        return args.ScriptException("GraphicObject attachDecal: Invalid argument");
     
     Decal* decal = new Decal();
     decal->life = args[0]->NumberValue();
@@ -37,7 +37,6 @@ v8::Handle<v8::Value> ScriptGraphicObject::AttachDecal(const v8::Arguments& args
     
     GraphicObject* objectPtr = getDataOfInstance<GraphicObject>(args.This());
     objectPtr->decals.insert(decal);
-    return v8::Undefined();
 }
 
 ScriptGraphicObject::ScriptGraphicObject() :ScriptPhysicObject("GraphicObject") {
@@ -52,16 +51,16 @@ ScriptGraphicObject::ScriptGraphicObject() :ScriptPhysicObject("GraphicObject") 
 
 
 
-v8::Handle<v8::Value> ScriptRigidObject::GetModel(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptRigidObject::GetModel(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     RigidObject* objectPtr = getDataOfInstance<RigidObject>(info.This());
     std::string name;
     FilePackage* filePackage = fileManager.findResource<Model>(objectPtr->model, name);
-    if(!filePackage) return v8::Undefined();
-    return handleScope.Close(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
+    if(filePackage)
+        info.GetReturnValue().Set(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
 }
 
-void ScriptRigidObject::SetModel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptRigidObject::SetModel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     RigidObject* objectPtr = getDataOfInstance<RigidObject>(info.This());
@@ -69,13 +68,13 @@ void ScriptRigidObject::SetModel(v8::Local<v8::String> property, v8::Local<v8::V
     if(model) objectPtr->setModel(NULL, model);
 }
 
-v8::Handle<v8::Value> ScriptRigidObject::GetMass(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptRigidObject::GetMass(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     btRigidBody* body = getDataOfInstance<RigidObject>(info.This())->getBody();
-    return handleScope.Close(v8::Number::New((body->getInvMass() == 0.0) ? 0.0 : 1.0/body->getInvMass()));
+    info.GetReturnValue().Set((body->getInvMass() == 0.0) ? 0.0 : 1.0/body->getInvMass());
 }
 
-void ScriptRigidObject::SetMass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptRigidObject::SetMass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsNumber() || value->NumberValue() < 0.0 || value->NumberValue() == NAN) return;
     btVector3 inertia;
@@ -85,20 +84,20 @@ void ScriptRigidObject::SetMass(v8::Local<v8::String> property, v8::Local<v8::Va
     body->activate();
 }
 
-v8::Handle<v8::Value> ScriptRigidObject::GetKinematic(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptRigidObject::GetKinematic(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     RigidObject* objectPtr = getDataOfInstance<RigidObject>(info.This());
-    return handleScope.Close(v8::Boolean::New(objectPtr->getKinematic()));
+    info.GetReturnValue().Set(objectPtr->getKinematic());
 }
 
-void ScriptRigidObject::SetKinematic(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptRigidObject::SetKinematic(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsBoolean()) return;
     RigidObject* objectPtr = getDataOfInstance<RigidObject>(info.This());
     objectPtr->setKinematic(value->BooleanValue());
 }
 
-v8::Handle<v8::Value> ScriptRigidObject::AccessAngularVelocity(const v8::Arguments& args) {
+void ScriptRigidObject::AccessAngularVelocity(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
     if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
@@ -107,12 +106,13 @@ v8::Handle<v8::Value> ScriptRigidObject::AccessAngularVelocity(const v8::Argumen
             body->setAngularVelocity(vec);
             body->activate();
         }
-        return args[0];
+        args.GetReturnValue().Set(args[0]);
+        return;
     }
-    return handleScope.Close(scriptVector3.newInstance(body->getAngularVelocity()));
+    args.GetReturnValue().Set(scriptVector3.newInstance(body->getAngularVelocity()));
 }
 
-v8::Handle<v8::Value> ScriptRigidObject::AccessLinearVelocity(const v8::Arguments& args) {
+void ScriptRigidObject::AccessLinearVelocity(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
     if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
@@ -121,62 +121,65 @@ v8::Handle<v8::Value> ScriptRigidObject::AccessLinearVelocity(const v8::Argument
             body->setLinearVelocity(vec);
             body->activate();
         }
-        return args[0];
+        args.GetReturnValue().Set(args[0]);
+        return;
     }
-    return handleScope.Close(scriptVector3.newInstance(body->getLinearVelocity()));
+    args.GetReturnValue().Set(scriptVector3.newInstance(body->getLinearVelocity()));
 }
 
-v8::Handle<v8::Value> ScriptRigidObject::AccessAngularFactor(const v8::Arguments& args) {
+void ScriptRigidObject::AccessAngularFactor(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
     if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
         btVector3 vec = scriptVector3.getDataOfInstance(args[0]);
         if(isValidVector(vec))
             body->setAngularFactor(vec);
-        return args[0];
+        args.GetReturnValue().Set(args[0]);
+        return;
     }
-    return handleScope.Close(scriptVector3.newInstance(body->getAngularFactor()));
+    args.GetReturnValue().Set(scriptVector3.newInstance(body->getAngularFactor()));
 }
 
-v8::Handle<v8::Value> ScriptRigidObject::AccessLinearFactor(const v8::Arguments& args) {
+void ScriptRigidObject::AccessLinearFactor(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
     if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
         btVector3 vec = scriptVector3.getDataOfInstance(args[0]);
         if(isValidVector(vec))
             body->setLinearFactor(vec);
-        return args[0];
+        args.GetReturnValue().Set(args[0]);
+        return;
     }
-    return handleScope.Close(scriptVector3.newInstance(body->getLinearFactor()));
+    args.GetReturnValue().Set(scriptVector3.newInstance(body->getLinearFactor()));
 }
 
-v8::Handle<v8::Value> ScriptRigidObject::GetAngularDamping(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptRigidObject::GetAngularDamping(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     btRigidBody* body = getDataOfInstance<RigidObject>(info.This())->getBody();
-    return handleScope.Close(v8::Number::New(body->getAngularDamping()));
+    info.GetReturnValue().Set(body->getAngularDamping());
 }
 
-void ScriptRigidObject::SetAngularDamping(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptRigidObject::SetAngularDamping(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsNumber() || value->NumberValue() == NAN) return;
     btRigidBody* body = getDataOfInstance<RigidObject>(info.This())->getBody();
     body->setAngularDamping(value->NumberValue());
 }
 
-v8::Handle<v8::Value> ScriptRigidObject::GetLinearDamping(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptRigidObject::GetLinearDamping(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     btRigidBody* body = getDataOfInstance<RigidObject>(info.This())->getBody();
-    return handleScope.Close(v8::Number::New(body->getLinearDamping()));
+    info.GetReturnValue().Set(body->getLinearDamping());
 }
 
-void ScriptRigidObject::SetLinearDamping(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptRigidObject::SetLinearDamping(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsNumber() || value->NumberValue() == NAN) return;
     btRigidBody* body = getDataOfInstance<RigidObject>(info.This())->getBody();
     body->setLinearDamping(value->NumberValue());
 }
 
-v8::Handle<v8::Value> ScriptRigidObject::AccessTransformation(const v8::Arguments& args) {
+void ScriptRigidObject::AccessTransformation(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     RigidObject* objectPtr = getDataOfInstance<RigidObject>(args.This());
     if(args.Length() == 1 && scriptMatrix4.isCorrectInstance(args[0])) {
@@ -185,17 +188,18 @@ v8::Handle<v8::Value> ScriptRigidObject::AccessTransformation(const v8::Argument
             objectPtr->setTransformation(mat->getBTTransform());
             objectPtr->setKinematic(true);
         }
-        return args[0];
+        args.GetReturnValue().Set(args[0]);
+        return;
     }else
-        return handleScope.Close(scriptMatrix4.newInstance(Matrix4(objectPtr->getTransformation())));
+        args.GetReturnValue().Set(scriptMatrix4.newInstance(Matrix4(objectPtr->getTransformation())));
 }
 
-v8::Handle<v8::Value> ScriptRigidObject::ApplyImpulseAtPoint(const v8::Arguments& args) {
+void ScriptRigidObject::ApplyImpulseAtPoint(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 2)
-        return v8::ThrowException(v8::String::New("RigidObject applyImpulseAtPoint(): Too few arguments"));
+        return args.ScriptException("RigidObject applyImpulseAtPoint(): Too few arguments");
     if(!scriptVector3.isCorrectInstance(args[0]) || !scriptVector3.isCorrectInstance(args[1]))
-        return v8::ThrowException(v8::String::New("RigidObject applyImpulseAtPoint(): Invalid argument"));
+        return args.ScriptException("RigidObject applyImpulseAtPoint(): Invalid argument");
     btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
     btVector3 vecA = scriptVector3.getDataOfInstance(args[0]),
               vecB = scriptVector3.getDataOfInstance(args[1]);
@@ -203,65 +207,62 @@ v8::Handle<v8::Value> ScriptRigidObject::ApplyImpulseAtPoint(const v8::Arguments
         body->applyImpulse(vecA, vecB);
         body->activate();
     }
-    return v8::Undefined();
 }
 
-v8::Handle<v8::Value> ScriptRigidObject::ApplyAngularImpulse(const v8::Arguments& args) {
+void ScriptRigidObject::ApplyAngularImpulse(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1)
-        return v8::ThrowException(v8::String::New("RigidObject applyAngularImpulse(): Too few arguments"));
+        return args.ScriptException("RigidObject applyAngularImpulse(): Too few arguments");
     if(!scriptVector3.isCorrectInstance(args[0]))
-        return v8::ThrowException(v8::String::New("RigidObject applyAngularImpulse(): Invalid argument"));
+        return args.ScriptException("RigidObject applyAngularImpulse(): Invalid argument");
     btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
     btVector3 vec = scriptVector3.getDataOfInstance(args[0]);
     if(isValidVector(vec)) {
         body->applyTorqueImpulse(vec);
         body->activate();
     }
-    return v8::Undefined();
 }
 
-v8::Handle<v8::Value> ScriptRigidObject::ApplyLinearImpulse(const v8::Arguments& args) {
+void ScriptRigidObject::ApplyLinearImpulse(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1)
-        return v8::ThrowException(v8::String::New("RigidObject applyLinearImpulse(): Too few arguments"));
+        return args.ScriptException("RigidObject applyLinearImpulse(): Too few arguments");
     if(!scriptVector3.isCorrectInstance(args[0]))
-        return v8::ThrowException(v8::String::New("RigidObject applyLinearImpulse(): Invalid argument"));
+        return args.ScriptException("RigidObject applyLinearImpulse(): Invalid argument");
     btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
     btVector3 vec = scriptVector3.getDataOfInstance(args[0]);
     if(isValidVector(vec)) {
         body->applyCentralImpulse(vec);
         body->activate();
-    }
-    return v8::Undefined();
-}
+    }}
 
-v8::Handle<v8::Value> ScriptRigidObject::GetBoneByName(const v8::Arguments& args) {
+void ScriptRigidObject::GetBoneByName(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1)
-        return v8::ThrowException(v8::String::New("RigidObject getBoneByName(): Too few arguments"));
+        return args.ScriptException("RigidObject getBoneByName(): Too few arguments");
     if(!args[0]->IsString())
-        return v8::ThrowException(v8::String::New("RigidObject getBoneByName(): Invalid argument"));
+        return args.ScriptException("RigidObject getBoneByName(): Invalid argument");
     
     RigidObject* objectPtr = getDataOfInstance<RigidObject>(args.This());
-    if(!objectPtr->skeletonPose) return v8::Undefined();
+    if(!objectPtr->skeletonPose) return;
     auto iterator = objectPtr->skeletonPose->bones.find(stdStrOfV8(args[0]));
-    if(iterator == objectPtr->skeletonPose->bones.end()) return v8::Undefined();
-    return handleScope.Close(iterator->second->scriptInstance);
+    if(iterator != objectPtr->skeletonPose->bones.end())
+        args.GetReturnValue().Set(iterator->second->scriptInstance);
 }
 
-v8::Handle<v8::Value> ScriptRigidObject::AccessTextureAnimationTime(const v8::Arguments& args) {
+void ScriptRigidObject::AccessTextureAnimationTime(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1 || !args[0]->IsInt32())
-        return v8::ThrowException(v8::String::New("RigidObject getTextureAnimationTime: Invalid argument"));
+        return args.ScriptException("RigidObject getTextureAnimationTime: Invalid argument");
     RigidObject* objectPtr = getDataOfInstance<RigidObject>(args.This());
     if(args[0]->Uint32Value() >= objectPtr->textureAnimationTime.size())
-        return v8::ThrowException(v8::String::New("RigidObject getTextureAnimationTime: Out of bounds"));
+        return args.ScriptException("RigidObject getTextureAnimationTime: Out of bounds");
     if(args.Length() == 2 && args[1]->IsNumber()) {
         objectPtr->textureAnimationTime[args[0]->Uint32Value()] = args[1]->NumberValue();
-        return args[1];
+        args.GetReturnValue().Set(args[1]);
+        return;
     }else
-        return handleScope.Close(v8::Number::New(objectPtr->textureAnimationTime[args[0]->Uint32Value()]));
+        args.GetReturnValue().Set(objectPtr->textureAnimationTime[args[0]->Uint32Value()]);
 }
 
 ScriptRigidObject::ScriptRigidObject() :ScriptGraphicObject("RigidObject") {
@@ -289,37 +290,36 @@ ScriptRigidObject::ScriptRigidObject() :ScriptGraphicObject("RigidObject") {
 
 
 
-v8::Handle<v8::Value> ScriptTerrainObject::GetWidth(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptTerrainObject::GetWidth(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(info.This());
-    return handleScope.Close(v8::Integer::New(objectPtr->width));
+    info.GetReturnValue().Set(objectPtr->width);
 }
 
-v8::Handle<v8::Value> ScriptTerrainObject::GetLength(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptTerrainObject::GetLength(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(info.This());
-    return handleScope.Close(v8::Integer::New(objectPtr->length));
+    info.GetReturnValue().Set(objectPtr->length);
 }
 
-v8::Handle<v8::Value> ScriptTerrainObject::GetBitDepth(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptTerrainObject::GetBitDepth(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(info.This());
-    return handleScope.Close(v8::Integer::New(objectPtr->bitDepth << 2));
+    info.GetReturnValue().Set(objectPtr->bitDepth << 2);
 }
 
-void ScriptTerrainObject::SetBitDepth(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptTerrainObject::SetBitDepth(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsInt32() || value->Uint32Value() % 4 != 0 || value->Uint32Value() == 0 || value->Uint32Value() > 8) return;
     TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(info.This());
     objectPtr->bitDepth = value->Uint32Value() >> 2;
 }
 
-v8::Handle<v8::Value> ScriptTerrainObject::UpdateModel(const v8::Arguments& args) {
+void ScriptTerrainObject::UpdateModel(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(args.This());
     objectPtr->updateModel();
     objectPtr->updateTouchingObjects();
-    return v8::Undefined();
 }
 
 ScriptTerrainObject::ScriptTerrainObject() :ScriptGraphicObject("TerrainObject") {
@@ -327,7 +327,8 @@ ScriptTerrainObject::ScriptTerrainObject() :ScriptGraphicObject("TerrainObject")
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->SetAccessor(v8::String::New("collisionShape"),
-                                static_cast<v8::AccessorGetter>(NULL), static_cast<v8::AccessorSetter>(NULL));
+                                static_cast<v8::AccessorGetterCallback>(NULL),
+                                static_cast<v8::AccessorSetterCallback>(NULL));
     objectTemplate->SetAccessor(v8::String::New("width"), GetWidth);
     objectTemplate->SetAccessor(v8::String::New("length"), GetLength);
     objectTemplate->SetAccessor(v8::String::New("bitDepth"), GetBitDepth, SetBitDepth);

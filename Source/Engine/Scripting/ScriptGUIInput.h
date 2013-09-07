@@ -12,29 +12,29 @@
 #include "ScriptGUIOutput.h"
 
 class ScriptGUISlider : public ScriptGUIRect {
-    static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetValue(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetValue(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetSteps(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetSteps(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetEnabled(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetValue(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetValue(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetSteps(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetSteps(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
     protected:
-    ScriptGUISlider(const char* name, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args)) :ScriptGUIRect(name, constructor) { }
+    ScriptGUISlider(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :ScriptGUIRect(name, constructor) { }
     public:
     ScriptGUISlider();
 };
 
 class ScriptGUITextField : public ScriptGUIFramedView {
-    static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetCursorX(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetCursorX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetEnabled(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetText(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetText(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetCursorX(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetCursorX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetText(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetText(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
     protected:
-    ScriptGUITextField(const char* name, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args)) :ScriptGUIFramedView(name, constructor) { }
+    ScriptGUITextField(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :ScriptGUIFramedView(name, constructor) { }
     public:
     ScriptGUITextField();
 };

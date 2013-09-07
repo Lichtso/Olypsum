@@ -28,11 +28,11 @@ void setClipboardText(const char* str) {
 }
 
 std::string getClipboardText() {
-    
+    return "";
 }
 
 bool hasClipboardText() {
-    
+    return false;
 }
 
 void openExternURL(const char* str) {

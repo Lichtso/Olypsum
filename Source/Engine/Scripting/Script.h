@@ -8,6 +8,7 @@
 
 #ifndef Script_h
 #define Script_h
+#define ScriptException(str) GetReturnValue().Set(v8::ThrowException(v8::String::New(str)))
 
 #include "LeapMotion.h"
 
@@ -35,7 +36,7 @@ class ScriptFile : public Script {
 
 class ScriptClass {
     protected:
-    ScriptClass(const char* name, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args));
+    ScriptClass(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args));
     public:
     const char* name;
     v8::Persistent<v8::FunctionTemplate> functionTemplate;

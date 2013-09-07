@@ -8,27 +8,27 @@
 
 #include "AppMain.h"
 
-v8::Handle<v8::Value> ScriptMouse::Constructor(const v8::Arguments &args) {
+void ScriptMouse::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    return v8::ThrowException(v8::String::New("Mouse Constructor: Class can't be instantiated"));
+    return args.ScriptException("Mouse Constructor: Class can't be instantiated");
 }
 
-v8::Handle<v8::Value> ScriptMouse::AccessX(const v8::Arguments& args) {
+void ScriptMouse::AccessX(const v8::FunctionCallbackInfo<v8::Value>& args) {
     if(args.Length() == 1 && args[0]->IsNumber() && args[0]->NumberValue() >= -menu.screenView->width && args[0]->NumberValue() <= menu.screenView->width)
         menu.mouseX = args[0]->NumberValue();
-    return v8::Number::New(menu.mouseX);
+    args.GetReturnValue().Set(menu.mouseX);
 }
 
-v8::Handle<v8::Value> ScriptMouse::AccessY(const v8::Arguments& args) {
+void ScriptMouse::AccessY(const v8::FunctionCallbackInfo<v8::Value>& args) {
     if(args.Length() == 1 && args[0]->IsNumber() && args[0]->NumberValue() >= -menu.screenView->height && args[0]->NumberValue() <= menu.screenView->height)
         menu.mouseY = args[0]->NumberValue();
-    return v8::Number::New(menu.mouseY);
+    args.GetReturnValue().Set(menu.mouseY);
 }
 
-v8::Handle<v8::Value> ScriptMouse::AccessFixed(const v8::Arguments& args) {
+void ScriptMouse::AccessFixed(const v8::FunctionCallbackInfo<v8::Value>& args) {
     if(args.Length() == 1 && args[0]->IsBoolean())
         menu.mouseFixed = args[0]->NumberValue();
-    return v8::Boolean::New(menu.mouseFixed);
+    args.GetReturnValue().Set(menu.mouseFixed);
 }
 
 ScriptMouse::ScriptMouse() :ScriptClass("Mouse", Constructor) {
@@ -41,19 +41,19 @@ ScriptMouse::ScriptMouse() :ScriptClass("Mouse", Constructor) {
 
 
 
-v8::Handle<v8::Value> ScriptKeyboard::Constructor(const v8::Arguments &args) {
+void ScriptKeyboard::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    return v8::ThrowException(v8::String::New("Keyboard Constructor: Class can't be instantiated"));
+    return args.ScriptException("Keyboard Constructor: Class can't be instantiated");
 }
 
-v8::Handle<v8::Value> ScriptKeyboard::GetKeyCount(const v8::Arguments& args) {
-    return v8::Integer::New(keyStateSize);
+void ScriptKeyboard::GetKeyCount(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    args.GetReturnValue().Set(keyStateSize);
 }
 
-v8::Handle<v8::Value> ScriptKeyboard::IsKeyPressed(const v8::Arguments& args) {
+void ScriptKeyboard::IsKeyPressed(const v8::FunctionCallbackInfo<v8::Value>& args) {
     if(args.Length() < 1 || !args[0]->IntegerValue() || args[0]->IntegerValue() >= keyStateSize)
-        return v8::ThrowException(v8::String::New("Keyboard isKeyPressed(): Invalid argument"));
-    return v8::Boolean::New(keyState[args[0]->IntegerValue()]);
+        return args.ScriptException("Keyboard isKeyPressed(): Invalid argument");
+    args.GetReturnValue().Set(keyState[args[0]->IntegerValue()]);
 }
 
 ScriptKeyboard::ScriptKeyboard() :ScriptClass("Keyboard", Constructor) {

@@ -8,65 +8,63 @@
 
 #include "AppMain.h"
 
-v8::Handle<v8::Value> ScriptManager::ScriptLog(const v8::Arguments& args) {
+void ScriptManager::ScriptLog(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() == 0)
-        return v8::ThrowException(v8::String::New("log(): Too few arguments"));
+        return args.ScriptException("log(): Too few arguments");
     log(script_log, stdStrOfV8(args[0]));
-    return v8::Undefined();
 }
 
-v8::Handle<v8::Value> ScriptManager::ScriptRequire(const v8::Arguments& args) {
+void ScriptManager::ScriptRequire(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() == 0)
-        return v8::ThrowException(v8::String::New("require(): Too few arguments"));
+        return args.ScriptException("require(): Too few arguments");
     
     FilePackage* filePackage = levelManager.levelPackage;
     std::string name = stdStrOfV8(args[0]->ToString());
     if(!fileManager.readResourcePath(filePackage, name))
-        return v8::ThrowException(v8::String::New("require(): Error loading file"));
-    
-    return handleScope.Close(scriptManager->getScriptFile(filePackage, name)->exports);
+        return args.ScriptException("require(): Error loading file");
+    else
+        args.GetReturnValue().Set(scriptManager->getScriptFile(filePackage, name)->exports);
 }
 
-v8::Handle<v8::Value> ScriptManager::ScriptLoadContainer(const v8::Arguments& args) {
+void ScriptManager::ScriptLoadContainer(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 2)
-        return v8::ThrowException(v8::String::New("loadContainer(): Too few arguments"));
+        return args.ScriptException("loadContainer(): Too few arguments");
     if(!scriptMatrix4.isCorrectInstance(args[0]) || !args[1]->IsString())
-        return v8::ThrowException(v8::String::New("loadContainer(): Invalid argument"));
+        return args.ScriptException("loadContainer(): Invalid argument");
     
     LevelLoader levelLoader;
     levelLoader.transformation = scriptMatrix4.getDataOfInstance(args[0])->getBTTransform();
-    if(!levelLoader.loadContainer(stdStrOfV8(args[1]), false))
-       return v8::Undefined();
-    
-    return levelLoader.getResultsArray();
+    if(levelLoader.loadContainer(stdStrOfV8(args[1]), false))
+        args.GetReturnValue().Set(levelLoader.getResultsArray());
 }
 
-v8::Handle<v8::Value> ScriptManager::ScriptLocalizeString(const v8::Arguments& args) {
+void ScriptManager::ScriptLocalizeString(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1)
-        return v8::ThrowException(v8::String::New("localizeString(): Too few arguments"));
+        return args.ScriptException("localizeString(): Too few arguments");
     if(!args[0]->IsString())
-        return v8::ThrowException(v8::String::New("localizeString(): Invalid argument"));
-    return v8::String::New(fileManager.localizeString(cStrOfV8(args[0])).c_str());
+        return args.ScriptException("localizeString(): Invalid argument");
+    else
+        args.GetReturnValue().Set(v8::String::New(fileManager.localizeString(cStrOfV8(args[0])).c_str()));
 }
 
-v8::Handle<v8::Value> ScriptManager::ScriptSaveLevel(const v8::Arguments& args) {
+void ScriptManager::ScriptSaveLevel(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 3)
-        return v8::ThrowException(v8::String::New("saveLevel(): Too few arguments"));
+        return args.ScriptException("saveLevel(): Too few arguments");
     LevelSaver levelSaver;
-    return v8::Boolean::New(levelSaver.saveLevel(args[0], args[1], args[2]));
+    args.GetReturnValue().Set(levelSaver.saveLevel(args[0], args[1], args[2]));
 }
 
-v8::Handle<v8::Value> ScriptManager::ScriptGetLevel(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptManager::ScriptGetLevel(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
-    return v8::String::New(levelManager.levelContainer.c_str());
+    info.GetReturnValue().Set(v8::String::New(levelManager.levelContainer.c_str()));
 }
 
-void ScriptManager::ScriptSetLevel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptManager::ScriptSetLevel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     levelManager.levelContainer = stdStrOfV8(value);
@@ -74,9 +72,9 @@ void ScriptManager::ScriptSetLevel(v8::Local<v8::String> property, v8::Local<v8:
     levelLoader.loadLevel();
 }
 
-v8::Handle<v8::Value> ScriptManager::ScriptGetAnimationFactor(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptManager::ScriptGetAnimationFactor(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
-    return v8::Number::New(profiler.animationFactor);
+    info.GetReturnValue().Set(profiler.animationFactor);
 }
 
 v8::Handle<v8::Value> ScriptManager::readCdataXMLNode(rapidxml::xml_node<xmlUsedCharType>* node) {

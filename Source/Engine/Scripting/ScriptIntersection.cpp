@@ -8,18 +8,18 @@
 
 #include "ScriptIntersection.h"
 
-v8::Handle<v8::Value> ScriptIntersection::Constructor(const v8::Arguments &args) {
+void ScriptIntersection::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    return v8::ThrowException(v8::String::New("Intersection Constructor: Class can't be instantiated"));
+    return args.ScriptException("Intersection Constructor: Class can't be instantiated");
 }
 
-v8::Handle<v8::Value> ScriptIntersection::RayCast(const v8::Arguments& args) {
+void ScriptIntersection::RayCast(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 4)
-        return v8::ThrowException(v8::String::New("rayCast(): Too few arguments"));
+        return args.ScriptException("rayCast(): Too few arguments");
     if(!scriptVector3.isCorrectInstance(args[0]) || !scriptVector3.isCorrectInstance(args[1]) ||
        !args[2]->IsInt32() || !args[3]->IsBoolean())
-        return v8::ThrowException(v8::String::New("rayCast(): Invalid argument"));
+        return args.ScriptException("rayCast(): Invalid argument");
     
     Ray3 ray(scriptVector3.getDataOfInstance(args[0]), scriptVector3.getDataOfInstance(args[1]));
     v8::Handle<v8::Array> objects, points, normals;
@@ -54,7 +54,7 @@ v8::Handle<v8::Value> ScriptIntersection::RayCast(const v8::Arguments& args) {
     result->Set(v8::String::New("objects"), objects);
     result->Set(v8::String::New("points"), points);
     result->Set(v8::String::New("normals"), normals);
-    return handleScope.Close(result);
+    args.GetReturnValue().Set(result);
 }
 
 //! @cond
@@ -96,12 +96,12 @@ struct	ContactResultCallback : btCollisionWorld::ContactResultCallback {
 };
 //! @endcond
 
-v8::Handle<v8::Value> ScriptIntersection::AABBIntersection(const v8::Arguments& args) {
+void ScriptIntersection::AABBIntersection(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 3)
-        return v8::ThrowException(v8::String::New("aabbIntersection(): Too few arguments"));
+        return args.ScriptException("aabbIntersection(): Too few arguments");
     if(!scriptVector3.isCorrectInstance(args[0]) || !scriptVector3.isCorrectInstance(args[1]) || !args[2]->IsInt32())
-        return v8::ThrowException(v8::String::New("aabbIntersection(): Invalid argument"));
+        return args.ScriptException("aabbIntersection(): Invalid argument");
     
     IntersectionCallback resultCallback(args[2]->Uint32Value());
     btDbvtBroadphase* broadphase = static_cast<btDbvtBroadphase*>(objectManager.broadphase);
@@ -111,15 +111,15 @@ v8::Handle<v8::Value> ScriptIntersection::AABBIntersection(const v8::Arguments& 
     v8::Handle<v8::Array> objects = v8::Array::New(resultCallback.hits.size());
     for(auto hit : resultCallback.hits)
         objects->Set(i ++, hit->scriptInstance);
-    return handleScope.Close(objects);
+    args.GetReturnValue().Set(objects);
 }
 
-v8::Handle<v8::Value> ScriptIntersection::SphereIntersection(const v8::Arguments& args) {
+void ScriptIntersection::SphereIntersection(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 3)
-        return v8::ThrowException(v8::String::New("sphereIntersection(): Too few arguments"));
+        return args.ScriptException("sphereIntersection(): Too few arguments");
     if(!scriptVector3.isCorrectInstance(args[0]) || !args[1]->IsNumber() || !args[2]->IsInt32())
-        return v8::ThrowException(v8::String::New("sphereIntersection(): Invalid argument"));
+        return args.ScriptException("sphereIntersection(): Invalid argument");
     
     btTransform tmpTransform;
     tmpTransform.setOrigin(scriptVector3.getDataOfInstance(args[0]));
@@ -135,7 +135,7 @@ v8::Handle<v8::Value> ScriptIntersection::SphereIntersection(const v8::Arguments
     v8::Handle<v8::Array> objects = v8::Array::New(resultCallback.hits.size());
     for(auto hit : resultCallback.hits)
         objects->Set(i ++, hit->scriptInstance);
-    return handleScope.Close(objects);
+    args.GetReturnValue().Set(objects);
 }
 
 ScriptIntersection::ScriptIntersection() :ScriptClass("Intersection", Constructor) {

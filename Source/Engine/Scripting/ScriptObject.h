@@ -12,11 +12,11 @@
 #include "ScriptLinearAlgebra.h"
 
 class ScriptBaseClass : public ScriptClass {
-    static v8::Handle<v8::Value> GetScriptClass(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static void GetScriptClass(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
     protected:
-    static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
-    ScriptBaseClass(const char* name, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args) = Constructor);
+    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptBaseClass(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args) = Constructor);
     public:
     template<typename T> static T* getDataOfInstance(const v8::Local<v8::Value>& value) {
         v8::HandleScope handleScope;
@@ -28,11 +28,11 @@ class ScriptBaseClass : public ScriptClass {
 };
 
 class ScriptBaseObject : public ScriptBaseClass {
-    static v8::Handle<v8::Value> AccessTransformation(const v8::Arguments& args);
-    static v8::Handle<v8::Value> RemoveLink(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetLink(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetLinkCount(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetParentLink(const v8::Arguments& args);
+    static void AccessTransformation(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void RemoveLink(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetLink(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetLinkCount(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetParentLink(const v8::FunctionCallbackInfo<v8::Value>& args);
     protected:
     ScriptBaseObject(const char* name) :ScriptBaseClass(name) { }
     public:
@@ -41,17 +41,17 @@ class ScriptBaseObject : public ScriptBaseClass {
 
 class ScriptBoneObject : public ScriptBaseObject {
     protected:
-    static v8::Handle<v8::Value> GetName(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetChildren(const v8::Arguments& args);
+    static void GetName(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void GetChildren(const v8::FunctionCallbackInfo<v8::Value>& args);
     ScriptBoneObject(const char* name) :ScriptBaseObject(name) { }
     public:
     ScriptBoneObject();
 };
 
 class ScriptPhysicObject : public ScriptBaseObject {
-    static v8::Handle<v8::Value> GetCollisionShape(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetCollisionShape(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetCollisionShapeInfo(const v8::Arguments& args);
+    static void GetCollisionShape(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetCollisionShape(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetCollisionShapeInfo(const v8::FunctionCallbackInfo<v8::Value>& args);
     protected:
     ScriptPhysicObject(const char* name) :ScriptBaseObject(name) { }
     public:

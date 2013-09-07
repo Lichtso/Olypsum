@@ -76,7 +76,7 @@ bool FilePackage::init() {
 #ifdef DEBUG
         printf("Hash of resoucre package %s should be %lx\n", name.c_str(), hash);
 #else
-        levelManager.showErrorModal(fileManager.localizeString("packageError_HashCorrupted"));
+        menu.setModalView("error", fileManager.localizeString("packageError_HashCorrupted"), NULL);
         return false;
 #endif
     }

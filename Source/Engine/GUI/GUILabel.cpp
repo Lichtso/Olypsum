@@ -29,7 +29,7 @@ void GUILabel::addSegment(unsigned int& newWidth, unsigned int& newHeight, std::
         line.content.width = 0.5*line.scale*line.content.width;
         newWidth = fmax(newWidth, line.content.width);
     }else{
-        line.texture = NULL;
+        line.texture = 0;
         line.scale = 0.0;
         line.content.width = 0;
     }

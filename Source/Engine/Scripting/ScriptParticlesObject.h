@@ -12,26 +12,26 @@
 #include "ScriptSimpleObject.h"
 
 class ScriptParticlesObject : public ScriptPhysicObject {
-    static v8::Handle<v8::Value> GetMaxParticles(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetTexture(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetTexture(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetTransformAligned(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetTransformAligned(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetSystemLife(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetSystemLife(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetLifeMin(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetLifeMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetLifeMax(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetLifeMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetSizeMin(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetSizeMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetSizeMax(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetSizeMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> AccessForce(const v8::Arguments& args);
-    static v8::Handle<v8::Value> AccessPosMin(const v8::Arguments& args);
-    static v8::Handle<v8::Value> AccessPosMax(const v8::Arguments& args);
-    static v8::Handle<v8::Value> AccessDirMin(const v8::Arguments& args);
-    static v8::Handle<v8::Value> AccessDirMax(const v8::Arguments& args);
+    static void GetMaxParticles(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void GetTexture(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetTexture(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetTransformAligned(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetTransformAligned(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetSystemLife(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetSystemLife(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetLifeMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetLifeMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetLifeMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetLifeMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetSizeMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetSizeMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetSizeMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetSizeMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void AccessForce(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AccessPosMin(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AccessPosMax(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AccessDirMin(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AccessDirMax(const v8::FunctionCallbackInfo<v8::Value>& args);
     public:
     ScriptParticlesObject();
 };

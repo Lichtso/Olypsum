@@ -88,7 +88,7 @@ v8::Handle<v8::Value> ScriptFile::callFunction(const char* functionName, bool re
 
 
 
-ScriptClass::ScriptClass(const char* nameB, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args)) :name(nameB) {
+ScriptClass::ScriptClass(const char* nameB, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :name(nameB) {
     v8::HandleScope handleScope;
     functionTemplate = v8::Persistent<v8::FunctionTemplate>::New(v8::Isolate::GetCurrent(), v8::FunctionTemplate::New(constructor));
     functionTemplate->SetClassName(v8::String::New(name));

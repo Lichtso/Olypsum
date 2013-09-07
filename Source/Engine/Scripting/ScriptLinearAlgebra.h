@@ -12,27 +12,27 @@
 #include "Script.h"
 
 class ScriptVector3 : public ScriptClass {
-    static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
-    static v8::Handle<v8::Value> ToString(const v8::Arguments& args);
-    static v8::Handle<v8::Value> ToJSON(const v8::Arguments& args);
-    static v8::Handle<v8::Value> IndexedPropertyGetter(uint32_t index, const v8::AccessorInfo &info);
-    static v8::Handle<v8::Value> IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
-    static v8::Handle<v8::Value> GetAngle(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetSum(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetDifference(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetProduct(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetQuotient(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetDotProduct(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetCrossProduct(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetLength(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetNormalized(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetInterpolation(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Sum(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Subtract(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Multiply(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Divide(const v8::Arguments& args);
-    static v8::Handle<v8::Value> CrossProduct(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Normalize(const v8::Arguments& args);
+    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void ToString(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void ToJSON(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void IndexedPropertyGetter(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void GetAngle(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetSum(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetDifference(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetProduct(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetQuotient(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetDotProduct(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetCrossProduct(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetLength(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetNormalized(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetInterpolation(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void Sum(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void Subtract(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void Multiply(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void Divide(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void CrossProduct(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void Normalize(const v8::FunctionCallbackInfo<v8::Value>& args);
     public:
     static btVector3 getDataOfInstance(const v8::Local<v8::Value>& object);
     static void setDataToInstance(const v8::Local<v8::Value>& object, const btVector3& vec);
@@ -41,26 +41,26 @@ class ScriptVector3 : public ScriptClass {
 };
 
 class ScriptQuaternion : public ScriptClass {
-    static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
-    static v8::Handle<v8::Value> toString(const v8::Arguments& args);
-    static v8::Handle<v8::Value> toJSON(const v8::Arguments& args);
-    static v8::Handle<v8::Value> IndexedPropertyGetter(uint32_t index, const v8::AccessorInfo &info);
-    static v8::Handle<v8::Value> IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::AccessorInfo &info);
-    static v8::Handle<v8::Value> GetAngle(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetAxis(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetInverse(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetSum(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetDifference(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetProduct(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetDotProduct(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetLength(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetNormalized(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetInterpolation(const v8::Arguments& args);
-    static v8::Handle<v8::Value> SetRotation(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Sum(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Subtract(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Multiply(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Normalize(const v8::Arguments& args);
+    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void toString(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void toJSON(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void IndexedPropertyGetter(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void GetAngle(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetAxis(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetInverse(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetSum(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetDifference(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetProduct(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetDotProduct(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetLength(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetNormalized(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetInterpolation(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void SetRotation(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void Sum(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void Subtract(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void Multiply(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void Normalize(const v8::FunctionCallbackInfo<v8::Value>& args);
     public:
     static btQuaternion getDataOfInstance(const v8::Local<v8::Value>& object);
     static void setDataToInstance(const v8::Local<v8::Value>& object, const btQuaternion& quaternion);
@@ -69,24 +69,24 @@ class ScriptQuaternion : public ScriptClass {
 };
 
 class ScriptMatrix4 : public ScriptClass {
-    static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
+    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void Destructor(v8::Isolate* isolate, v8::Persistent<v8::Object>* value, void* data);
-    static v8::Handle<v8::Value> toString(const v8::Arguments& args);
-    static v8::Handle<v8::Value> toJSON(const v8::Arguments& args);
-    static v8::Handle<v8::Value> AccessRowX(const v8::Arguments& args);
-    static v8::Handle<v8::Value> AccessRowY(const v8::Arguments& args);
-    static v8::Handle<v8::Value> AccessRowZ(const v8::Arguments& args);
-    static v8::Handle<v8::Value> AccessRowW(const v8::Arguments& args);
-    static v8::Handle<v8::Value> AccessRotation(const v8::Arguments& args);
-    static v8::Handle<v8::Value> SetIdentity(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetInverse(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetProduct(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetRotatedVector(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetTransformedVector(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Multiply(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Scale(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Rotate(const v8::Arguments& args);
-    static v8::Handle<v8::Value> Translate(const v8::Arguments& args);
+    static void toString(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void toJSON(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AccessRowX(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AccessRowY(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AccessRowZ(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AccessRowW(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AccessRotation(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void SetIdentity(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetInverse(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetProduct(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetRotatedVector(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetTransformedVector(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void Multiply(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void Scale(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void Rotate(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void Translate(const v8::FunctionCallbackInfo<v8::Value>& args);
     public:
     static Matrix4* getDataOfInstance(const v8::Local<v8::Value>& object);
     static void setDataToInstance(const v8::Local<v8::Value>& object, const Matrix4& mat);

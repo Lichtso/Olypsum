@@ -8,96 +8,95 @@
 
 #include "ScriptManager.h"
 
-v8::Handle<v8::Value> ScriptCamObject::GetFov(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptCamObject::GetFov(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
-    return handleScope.Close(v8::Number::New(objectPtr->fov));
+    info.GetReturnValue().Set(objectPtr->fov);
 }
 
-void ScriptCamObject::SetFov(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptCamObject::SetFov(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
     CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
     objectPtr->fov = value->NumberValue();
 }
 
-v8::Handle<v8::Value> ScriptCamObject::GetNear(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptCamObject::GetNear(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
-    return handleScope.Close(v8::Number::New(objectPtr->near));
+    info.GetReturnValue().Set(objectPtr->near);
 }
 
-void ScriptCamObject::SetNear(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptCamObject::SetNear(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
     CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
     objectPtr->near = value->NumberValue();
 }
 
-v8::Handle<v8::Value> ScriptCamObject::GetFar(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptCamObject::GetFar(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
-    return handleScope.Close(v8::Number::New(objectPtr->far));
+    info.GetReturnValue().Set(objectPtr->far);
 }
 
-void ScriptCamObject::SetFar(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptCamObject::SetFar(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
     CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
     objectPtr->far = value->NumberValue();
 }
 
-v8::Handle<v8::Value> ScriptCamObject::GetWidth(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptCamObject::GetWidth(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
-    return handleScope.Close(v8::Number::New(objectPtr->width));
+    info.GetReturnValue().Set(objectPtr->width);
 }
 
-void ScriptCamObject::SetWidth(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptCamObject::SetWidth(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
     CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
     objectPtr->width = value->NumberValue();
 }
 
-v8::Handle<v8::Value> ScriptCamObject::GetHeight(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptCamObject::GetHeight(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
-    return handleScope.Close(v8::Number::New(objectPtr->height));
+    info.GetReturnValue().Set(objectPtr->height);
 }
 
-void ScriptCamObject::SetHeight(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptCamObject::SetHeight(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
     CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
     objectPtr->height = value->NumberValue();
 }
 
-v8::Handle<v8::Value> ScriptCamObject::GetViewRay(const v8::Arguments& args) {
+void ScriptCamObject::GetViewRay(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 2)
-        return v8::ThrowException(v8::String::New("getViewRay(): Too few arguments"));
+        return args.ScriptException("getViewRay(): Too few arguments");
     if(!args[0]->IsNumber() || !args[1]->IsNumber())
-        return v8::ThrowException(v8::String::New("getViewRay(): Invalid argument"));
+        return args.ScriptException("getViewRay(): Invalid argument");
     CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
     Ray3 ray = objectPtr->getRayAt(args[0]->NumberValue(), args[1]->NumberValue());
     
     v8::Handle<v8::Object> result = v8::Object::New();
     result->Set(v8::String::New("origin"), scriptVector3.newInstance(ray.origin));
     result->Set(v8::String::New("direction"), scriptVector3.newInstance(ray.direction));
-    return handleScope.Close(result);
+    args.GetReturnValue().Set(result);
 }
 
-v8::Handle<v8::Value> ScriptCamObject::SetMainCam(const v8::Arguments& args) {
+void ScriptCamObject::SetMainCam(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     mainCam = getDataOfInstance<CamObject>(args.This());
-    return v8::Undefined();
 }
 
-v8::Handle<v8::Value> ScriptCamObject::GetMainCam(const v8::Arguments& args) {
+void ScriptCamObject::GetMainCam(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     v8::Handle<v8::Object> result = mainCam->scriptInstance;
-    return handleScope.Close(result);
+    args.GetReturnValue().Set(result);
 }
 
 ScriptCamObject::ScriptCamObject() :ScriptBaseObject("CamObject") {
@@ -117,16 +116,16 @@ ScriptCamObject::ScriptCamObject() :ScriptBaseObject("CamObject") {
 }
 
 
-v8::Handle<v8::Value> ScriptSoundObject::GetSoundTrack(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptSoundObject::GetSoundTrack(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
     std::string name;
     FilePackage* filePackage = fileManager.findResource<SoundTrack>(objectPtr->soundTrack, name);
-    if(!filePackage) return v8::Undefined();
-    return handleScope.Close(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
+    if(filePackage)
+        info.GetReturnValue().Set(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
 }
 
-void ScriptSoundObject::SetSoundTrack(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptSoundObject::SetSoundTrack(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
@@ -134,59 +133,59 @@ void ScriptSoundObject::SetSoundTrack(v8::Local<v8::String> property, v8::Local<
     if(soundTrack) objectPtr->setSoundTrack(soundTrack);
 }
 
-v8::Handle<v8::Value> ScriptSoundObject::GetTimeOffset(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptSoundObject::GetTimeOffset(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
-    return handleScope.Close(v8::Number::New(objectPtr->getTimeOffset()));
+    info.GetReturnValue().Set(objectPtr->getTimeOffset());
 }
 
-void ScriptSoundObject::SetTimeOffset(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptSoundObject::SetTimeOffset(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
     SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
     objectPtr->setTimeOffset(value->NumberValue());
 }
 
-v8::Handle<v8::Value> ScriptSoundObject::GetVolume(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptSoundObject::GetVolume(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
-    return handleScope.Close(v8::Number::New(objectPtr->getVolume()));
+    info.GetReturnValue().Set(objectPtr->getVolume());
 }
 
-void ScriptSoundObject::SetVolume(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptSoundObject::SetVolume(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
     SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
     objectPtr->setVolume(value->NumberValue());
 }
 
-v8::Handle<v8::Value> ScriptSoundObject::GetPlaying(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptSoundObject::GetPlaying(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
-    return handleScope.Close(v8::Boolean::New(objectPtr->getPlaying()));
+    info.GetReturnValue().Set(objectPtr->getPlaying());
 }
 
-void ScriptSoundObject::SetPlaying(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptSoundObject::SetPlaying(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsBoolean()) return;
     SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
     objectPtr->setPlaying(value->BooleanValue());
 }
 
-v8::Handle<v8::Value> ScriptSoundObject::GetMode(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptSoundObject::GetMode(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
     switch(objectPtr->mode) {
         case SoundObject::Mode::Looping:
-            return handleScope.Close(v8::String::New("looping"));
+            info.GetReturnValue().Set(v8::String::New("looping"));
         case SoundObject::Mode::Hold:
-            return handleScope.Close(v8::String::New("hold"));
+            info.GetReturnValue().Set(v8::String::New("hold"));
         case SoundObject::Mode::Dispose:
-            return handleScope.Close(v8::String::New("dispose"));
+            info.GetReturnValue().Set(v8::String::New("dispose"));
     }
 }
 
-void ScriptSoundObject::SetMode(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptSoundObject::SetMode(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());

@@ -12,39 +12,39 @@
 #include "ScriptGUIInput.h"
 
 class ScriptGUIButton : public ScriptGUIFramedView {
-    static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetPaddingX(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetPaddingX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetPaddingY(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetPaddingY(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetEnabled(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetState(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetState(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetType(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetType(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetPaddingX(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetPaddingX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetPaddingY(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetPaddingY(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetState(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetState(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetType(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetType(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
     protected:
-    ScriptGUIButton(const char* name, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args)) :ScriptGUIFramedView(name, constructor) { }
+    ScriptGUIButton(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :ScriptGUIFramedView(name, constructor) { }
     public:
     ScriptGUIButton();
 };
 
 class ScriptGUICheckBox : public ScriptGUIButton {
-    static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
+    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
     protected:
-    ScriptGUICheckBox(const char* name, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args)) :ScriptGUIButton(name, constructor) { }
+    ScriptGUICheckBox(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :ScriptGUIButton(name, constructor) { }
     public:
     ScriptGUICheckBox();
 };
 
 class ScriptGUITabs : public ScriptGUIView {
-    static v8::Handle<v8::Value> Constructor(const v8::Arguments& args);
-    static v8::Handle<v8::Value> GetSelected(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetSelected(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
-    static v8::Handle<v8::Value> GetDeactivatable(v8::Local<v8::String> property, const v8::AccessorInfo& info);
-    static void SetDeactivatable(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info);
+    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetSelected(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetSelected(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetDeactivatable(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetDeactivatable(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
     protected:
-    ScriptGUITabs(const char* name, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args)) :ScriptGUIView(name, constructor) { }
+    ScriptGUITabs(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :ScriptGUIView(name, constructor) { }
     public:
     ScriptGUITabs();
 };

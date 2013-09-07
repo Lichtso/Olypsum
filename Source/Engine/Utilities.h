@@ -19,15 +19,16 @@
 #include <map>
 
 #ifdef __APPLE__
+#include <OpenGL/gl3.h>
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
-#include <OpenGL/gl3.h>
 #include <SDL_image/SDL_image.h>
 #include <SDL_ttf/SDL_ttf.h>
 #else
+#define GL_GLEXT_PROTOTYPES
+#include <GL/gl.h>
 #include <AL/al.h>
 #include <AL/alc.h>
-#include <GL/gl.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_ttf.h>
 #endif
@@ -43,9 +44,10 @@
 #include <BulletMultiThreaded/btSoftBodySolver_OpenCLSIMDAware.h>
 #include <BulletMultiThreaded/btSoftBodySolverVertexBuffer_OpenGL.h>
 #include <BulletMultiThreaded/btSoftBodySolverOutputCLtoGL.h>
-#include <v8.h>
 #include <Leap.h>
 #include <netLink.h>
+#define V8_USE_UNSAFE_HANDLES 1
+#include <v8.h>
 
 enum logMessageType {
     info_log = 0,

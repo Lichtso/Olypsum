@@ -8,72 +8,75 @@
 
 #include "ScriptGUIButton.h"
 
-v8::Handle<v8::Value> ScriptGUIButton::Constructor(const v8::Arguments &args) {
+void ScriptGUIButton::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     
     if(args.Length() != 1 || !scriptGUIView.isCorrectInstance(args[0]))
-        return v8::ThrowException(v8::String::New("GUIButton Constructor: Invalid argument"));
+        return args.ScriptException("GUIButton Constructor: Invalid argument");
     
     GUIButton* objectPtr = new GUIButton();
     objectPtr->onClick = [](GUIButton* objectPtr) {
         callFunction(objectPtr->scriptInstance, "onclick", { });
     };
-    return initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr);
+    args.GetReturnValue().Set(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
 }
 
-v8::Handle<v8::Value> ScriptGUIButton::GetPaddingX(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptGUIButton::GetPaddingX(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     GUIButton* objectPtr = getDataOfInstance<GUIButton>(info.This());
-    return v8::Integer::New(objectPtr->paddingX);
+    info.GetReturnValue().Set(objectPtr->paddingX);
 }
 
-void ScriptGUIButton::SetPaddingX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptGUIButton::SetPaddingX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IntegerValue() || value->IntegerValue() < 0) return;
     GUIButton* objectPtr = getDataOfInstance<GUIButton>(info.This());
     objectPtr->paddingX = value->IntegerValue();
 }
 
-v8::Handle<v8::Value> ScriptGUIButton::GetPaddingY(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptGUIButton::GetPaddingY(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     GUIButton* objectPtr = getDataOfInstance<GUIButton>(info.This());
-    return v8::Integer::New(objectPtr->paddingY);
+    info.GetReturnValue().Set(objectPtr->paddingY);
 }
 
-void ScriptGUIButton::SetPaddingY(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptGUIButton::SetPaddingY(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IntegerValue() || value->IntegerValue() < 0) return;
     GUIButton* objectPtr = getDataOfInstance<GUIButton>(info.This());
     objectPtr->paddingY = value->IntegerValue();
 }
 
-v8::Handle<v8::Value> ScriptGUIButton::GetEnabled(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptGUIButton::GetEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     GUIButton* objectPtr = getDataOfInstance<GUIButton>(info.This());
-    return v8::Boolean::New(objectPtr->enabled);
+    info.GetReturnValue().Set(objectPtr->enabled);
 }
 
-void ScriptGUIButton::SetEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptGUIButton::SetEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsBoolean()) return;
     GUIButton* objectPtr = getDataOfInstance<GUIButton>(info.This());
     objectPtr->enabled = value->BooleanValue();
 }
 
-v8::Handle<v8::Value> ScriptGUIButton::GetState(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptGUIButton::GetState(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     GUIButton* objectPtr = getDataOfInstance<GUIButton>(info.This());
     switch(objectPtr->state) {
         case GUIButton::State::Released:
-            return handleScope.Close(v8::String::New("released"));
+            info.GetReturnValue().Set(v8::String::New("released"));
+            return;
         case GUIButton::State::Highlighted:
-            return handleScope.Close(v8::String::New("highlighted"));
+            info.GetReturnValue().Set(v8::String::New("highlighted"));
+            return;
         case GUIButton::State::Pressed:
-            return handleScope.Close(v8::String::New("pressed"));
+            info.GetReturnValue().Set(v8::String::New("pressed"));
+            return;
     }
 }
 
-void ScriptGUIButton::SetState(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptGUIButton::SetState(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     GUIButton* objectPtr = getDataOfInstance<GUIButton>(info.This());
@@ -86,24 +89,29 @@ void ScriptGUIButton::SetState(v8::Local<v8::String> property, v8::Local<v8::Val
         objectPtr->state = GUIButton::State::Pressed;
 }
 
-v8::Handle<v8::Value> ScriptGUIButton::GetType(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptGUIButton::GetType(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     GUIButton* objectPtr = getDataOfInstance<GUIButton>(info.This());
     switch(objectPtr->type) {
         case GUIButton::Type::Normal:
-            return handleScope.Close(v8::String::New("normal"));
+            info.GetReturnValue().Set(v8::String::New("normal"));
+            return;
         case GUIButton::Type::Delete:
-            return handleScope.Close(v8::String::New("delete"));
+            info.GetReturnValue().Set(v8::String::New("delete"));
+            return;
         case GUIButton::Type::Add:
-            return handleScope.Close(v8::String::New("add"));
+            info.GetReturnValue().Set(v8::String::New("add"));
+            return;
         case GUIButton::Type::Edit:
-            return handleScope.Close(v8::String::New("edit"));
+            info.GetReturnValue().Set(v8::String::New("edit"));
+            return;
         case GUIButton::Type::Lockable:
-            return handleScope.Close(v8::String::New("lockable"));
+            info.GetReturnValue().Set(v8::String::New("lockable"));
+            return;
     }
 }
 
-void ScriptGUIButton::SetType(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptGUIButton::SetType(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     GUIButton* objectPtr = getDataOfInstance<GUIButton>(info.This());
@@ -136,17 +144,17 @@ ScriptGUIButton::ScriptGUIButton() :ScriptGUIFramedView("GUIButton", Constructor
 
 
 
-v8::Handle<v8::Value> ScriptGUICheckBox::Constructor(const v8::Arguments &args) {
+void ScriptGUICheckBox::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     
     if(args.Length() != 1 || !scriptGUIView.isCorrectInstance(args[0]))
-        return v8::ThrowException(v8::String::New("GUICheckBox Constructor: Invalid argument"));
+        return args.ScriptException("GUICheckBox Constructor: Invalid argument");
     
     GUICheckBox* objectPtr = new GUICheckBox();
     objectPtr->onClick = [](GUICheckBox* objectPtr) {
         callFunction(objectPtr->scriptInstance, "onclick", { });
     };
-    return initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr);
+    args.GetReturnValue().Set(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
 }
 
 ScriptGUICheckBox::ScriptGUICheckBox() :ScriptGUIButton("GUICheckBox", Constructor) {
@@ -157,39 +165,39 @@ ScriptGUICheckBox::ScriptGUICheckBox() :ScriptGUIButton("GUICheckBox", Construct
 
 
 
-v8::Handle<v8::Value> ScriptGUITabs::Constructor(const v8::Arguments &args) {
+void ScriptGUITabs::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     
     if(args.Length() != 1 || !scriptGUIView.isCorrectInstance(args[0]))
-        return v8::ThrowException(v8::String::New("GUITabs Constructor: Invalid argument"));
+        return args.ScriptException("GUITabs Constructor: Invalid argument");
     
     GUITabs* objectPtr = new GUITabs();
     objectPtr->onChange = [](GUITabs* objectPtr) {
         callFunction(objectPtr->scriptInstance, "onchange", { });
     };
-    return initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr);
+    args.GetReturnValue().Set(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
 }
 
-v8::Handle<v8::Value> ScriptGUITabs::GetSelected(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptGUITabs::GetSelected(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     GUITabs* objectPtr = getDataOfInstance<GUITabs>(info.This());
-    return v8::Integer::New(objectPtr->selected);
+    info.GetReturnValue().Set(objectPtr->selected);
 }
 
-void ScriptGUITabs::SetSelected(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptGUITabs::SetSelected(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IntegerValue() || value->IntegerValue() < -1) return;
     GUITabs* objectPtr = getDataOfInstance<GUITabs>(info.This());
     objectPtr->selected = value->IntegerValue();
 }
 
-v8::Handle<v8::Value> ScriptGUITabs::GetDeactivatable(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptGUITabs::GetDeactivatable(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     GUITabs* objectPtr = getDataOfInstance<GUITabs>(info.This());
-    return v8::Boolean::New(objectPtr->deactivatable);
+    info.GetReturnValue().Set(objectPtr->deactivatable);
 }
 
-void ScriptGUITabs::SetDeactivatable(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptGUITabs::SetDeactivatable(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->BooleanValue()) return;
     GUITabs* objectPtr = getDataOfInstance<GUITabs>(info.This());

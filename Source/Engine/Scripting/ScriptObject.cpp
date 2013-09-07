@@ -8,28 +8,28 @@
 
 #include "ScriptManager.h"
 
-v8::Handle<v8::Value> ScriptBaseClass::Constructor(const v8::Arguments &args) {
+void ScriptBaseClass::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     
     if(args.Length() != 1 || !args[0]->IsExternal())
-        return v8::ThrowException(v8::String::New("BaseClass Constructor: Class can't be instantiated"));
+        return args.ScriptException("BaseClass Constructor: Class can't be instantiated");
     
     BaseClass* objectPrt = static_cast<BaseClass*>(v8::Local<v8::External>::Cast(args[0])->Value());
     objectPrt->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
     args.This()->SetInternalField(0, args[0]);
-    return args.This();
+    args.GetReturnValue().Set(args.This());
 }
 
-v8::Handle<v8::Value> ScriptBaseClass::GetScriptClass(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptBaseClass::GetScriptClass(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(info.This());
     std::string path = objectPtr->scriptFile->name;
     if(objectPtr->scriptFile->filePackage != levelManager.levelPackage)
         path = std::string("../")+objectPtr->scriptFile->filePackage->name+'/'+path;
-    return handleScope.Close(v8::String::New(path.c_str()));
+    info.GetReturnValue().Set(v8::String::New(path.c_str()));
 }
 
-void ScriptBaseClass::SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptBaseClass::SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(info.This());
@@ -39,7 +39,7 @@ void ScriptBaseClass::SetScriptClass(v8::Local<v8::String> property, v8::Local<v
         objectPtr->scriptFile = scriptManager->getScriptFile(filePackage, name);
 }
 
-ScriptBaseClass::ScriptBaseClass(const char* name, v8::Handle<v8::Value>(constructor)(const v8::Arguments& args)) :ScriptClass(name, constructor) {
+ScriptBaseClass::ScriptBaseClass(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :ScriptClass(name, constructor) {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> instanceTemplate = functionTemplate->InstanceTemplate();
@@ -55,57 +55,56 @@ ScriptBaseClass::ScriptBaseClass() :ScriptBaseClass("BaseClass") {
 
 
 
-v8::Handle<v8::Value> ScriptBaseObject::AccessTransformation(const v8::Arguments& args) {
+void ScriptBaseObject::AccessTransformation(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
     if(args.Length() == 1 && scriptMatrix4.isCorrectInstance(args[0])) {
         Matrix4* mat = scriptMatrix4.getDataOfInstance(args[0]);
         if(mat->isValid())
             objectPtr->setTransformation(mat->getBTTransform());
-        return args[0];
+        args.GetReturnValue().Set(args[0]);
+        return;
     }else
-        return handleScope.Close(scriptMatrix4.newInstance(Matrix4(objectPtr->getTransformation())));
+        args.GetReturnValue().Set(scriptMatrix4.newInstance(Matrix4(objectPtr->getTransformation())));
 }
 
-v8::Handle<v8::Value> ScriptBaseObject::RemoveLink(const v8::Arguments& args) {
+void ScriptBaseObject::RemoveLink(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1)
-        return v8::ThrowException(v8::String::New("BaseObject removeLink(): Too few arguments"));
+        return args.ScriptException("BaseObject removeLink(): Too few arguments");
     if(!args[0]->IsUint32())
-        return v8::ThrowException(v8::String::New("BaseObject removeLink(): Invalid argument"));
+        return args.ScriptException("BaseObject removeLink(): Invalid argument");
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
     if(args[0]->IntegerValue() >= objectPtr->links.size())
-        return v8::ThrowException(v8::String::New("BaseObject removeLink(): Out of bounds"));
-    if(!link) return v8::Boolean::New(false);
+        return args.ScriptException("BaseObject removeLink(): Out of bounds");
     (*std::next(objectPtr->links.begin(), args[0]->IntegerValue()))->removeClean(objectPtr);
-    return v8::Boolean::New(true);
+    args.GetReturnValue().Set(true);
 }
 
-v8::Handle<v8::Value> ScriptBaseObject::GetLink(const v8::Arguments& args) {
+void ScriptBaseObject::GetLink(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 1)
-        return v8::ThrowException(v8::String::New("BaseObject getLink(): Too few arguments"));
+        return args.ScriptException("BaseObject getLink(): Too few arguments");
     if(!args[0]->IsUint32())
-        return v8::ThrowException(v8::String::New("BaseObject getLink(): Invalid argument"));
+        return args.ScriptException("BaseObject getLink(): Invalid argument");
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
     if(args[0]->IntegerValue() >= objectPtr->links.size())
-        return v8::ThrowException(v8::String::New("BaseObject getLink(): Out of bounds"));
-    if(!link) return v8::Boolean::New(false);
-    return handleScope.Close((*std::next(objectPtr->links.begin(), args[0]->IntegerValue()))->scriptInstance);
+        return args.ScriptException("BaseObject getLink(): Out of bounds");
+    args.GetReturnValue().Set((*std::next(objectPtr->links.begin(), args[0]->IntegerValue()))->scriptInstance);
 }
 
-v8::Handle<v8::Value> ScriptBaseObject::GetLinkCount(const v8::Arguments& args) {
+void ScriptBaseObject::GetLinkCount(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
-    return handleScope.Close(v8::Integer::New(objectPtr->links.size()));
+    args.GetReturnValue().Set(v8::Integer::New(objectPtr->links.size()));
 }
 
-v8::Handle<v8::Value> ScriptBaseObject::GetParentLink(const v8::Arguments& args) {
+void ScriptBaseObject::GetParentLink(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
     auto iterator = objectPtr->findParentLink();
-    if(iterator == objectPtr->links.end()) return v8::Undefined();
-    return handleScope.Close((*iterator)->scriptInstance);
+    if(iterator != objectPtr->links.end())
+        args.GetReturnValue().Set((*iterator)->scriptInstance);
 }
 
 ScriptBaseObject::ScriptBaseObject() :ScriptBaseClass("BaseObject") {
@@ -123,19 +122,19 @@ ScriptBaseObject::ScriptBaseObject() :ScriptBaseClass("BaseObject") {
 
 
 
-v8::Handle<v8::Value> ScriptBoneObject::GetName(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptBoneObject::GetName(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     BoneObject* objectPtr = getDataOfInstance<BoneObject>(info.This());
-    return handleScope.Close(v8::String::New(objectPtr->bone->name.c_str()));
+    info.GetReturnValue().Set(v8::String::New(objectPtr->bone->name.c_str()));
 }
 
-v8::Handle<v8::Value> ScriptBoneObject::GetChildren(const v8::Arguments& args) {
+void ScriptBoneObject::GetChildren(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     Bone* bone = getDataOfInstance<BoneObject>(args.This())->bone;
     v8::Handle<v8::Array> array = v8::Array::New(bone->children.size());
     for(unsigned int i = 0; i < bone->children.size(); i ++)
         array->Set(i, v8::String::New(bone->children[i]->name.c_str()));
-    return handleScope.Close(array);
+    args.GetReturnValue().Set(array);
 }
 
 ScriptBoneObject::ScriptBoneObject() :ScriptBaseObject("BoneObject") {
@@ -148,15 +147,15 @@ ScriptBoneObject::ScriptBoneObject() :ScriptBaseObject("BoneObject") {
 
 
 
-v8::Handle<v8::Value> ScriptPhysicObject::GetCollisionShape(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+void ScriptPhysicObject::GetCollisionShape(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(info.This())->getBody();
     std::string buffer = levelManager.getCollisionShapeName(physicBody->getCollisionShape());
-    if(buffer.size() == 0) return v8::Undefined();
-    return handleScope.Close(v8::String::New(buffer.c_str()));
+    if(buffer.size() > 0)
+        info.GetReturnValue().Set(v8::String::New(buffer.c_str()));
 }
 
-void ScriptPhysicObject::SetCollisionShape(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::AccessorInfo& info) {
+void ScriptPhysicObject::SetCollisionShape(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     btCollisionShape* shape = levelManager.getCollisionShape(stdStrOfV8(value));
@@ -167,7 +166,7 @@ void ScriptPhysicObject::SetCollisionShape(v8::Local<v8::String> property, v8::L
     }
 }
 
-v8::Handle<v8::Value> ScriptPhysicObject::GetCollisionShapeInfo(const v8::Arguments& args) {
+void ScriptPhysicObject::GetCollisionShapeInfo(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     btCollisionShape* shape = getDataOfInstance<PhysicObject>(args.This())->getBody()->getCollisionShape();
     v8::Handle<v8::Object> result = v8::Object::New();
@@ -236,7 +235,7 @@ v8::Handle<v8::Value> ScriptPhysicObject::GetCollisionShapeInfo(const v8::Argume
             result->Set(v8::String::New("size"), scriptVector3.newInstance(size));
         } break;
     }
-    return handleScope.Close(result);
+    args.GetReturnValue().Set(result);
 }
 
 ScriptPhysicObject::ScriptPhysicObject() :ScriptPhysicObject("PhysicObject") {

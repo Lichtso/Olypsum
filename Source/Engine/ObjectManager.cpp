@@ -417,7 +417,7 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
                 if(optionsState.blendingQuality > 1) {
                     glActiveTexture((transparent->mesh) ? GL_TEXTURE3 : GL_TEXTURE1);
                     glBindTexture(GL_TEXTURE_RECTANGLE, buffersCombine[3]);
-                    sp ++;
+                    sp = deferredCombine2SP;
                 }
                 glDisable(GL_BLEND);
                 glDepthMask(GL_TRUE);
