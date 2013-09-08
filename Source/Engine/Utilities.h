@@ -111,9 +111,9 @@ bool forEachInDir(std::string path,
  @return Success
  */
 bool removeDir(std::string path);
-/*! Removes the last part of a path until the next '/'
+/*! Removes all unnecessary parts like './' and '//' and the last part of a path until the next '/'
  @param path The path to trim
- @param n Repeats this n times
+ @param n How many '/' to remove from the end
  */
 std::string trimPath(std::string path, size_t n);
 

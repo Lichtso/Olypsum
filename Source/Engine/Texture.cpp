@@ -72,7 +72,7 @@ void Texture::loadRandom() {
     }
     
     SDL_LockSurface(surface);
-    unsigned char* pixels = (unsigned char*) surface->pixels;
+    unsigned short* pixels = static_cast<unsigned short*>(surface->pixels);
     for(unsigned int i = 0; i < 3*width*height; i ++)
         pixels[i] = rand()%255;
     SDL_UnlockSurface(surface);
@@ -91,9 +91,9 @@ GLenum Texture::getSurfacesGLFormat() {
         case 16:
             return GL_RG;
         case 24:
-            return GL_BGR;
+            return (surface->format->Rshift == 0) ? GL_RGB : GL_BGR;
         case 32:
-            return GL_BGRA;
+            return (surface->format->Rshift == 0) ? GL_RGBA : GL_BGRA;
         default:
             log(error_log, "Unsupported bit-depth of texture.");
             return GL_NONE;

@@ -50,9 +50,9 @@ int main(int argc, const char** argv) {
     if(argv[0][0] != '/') {
         char cwdPath[512];
         getcwd(cwdPath, sizeof(cwdPath)/sizeof(char)-1);
-        resourcesDir = std::string(cwdPath)+resourcesDir;
+        resourcesDir = std::string(cwdPath)+'/'+resourcesDir;
     }
-    resourcesDir = trimPath(resourcesDir.c_str(), 1)+"/Resources/";
+    resourcesDir = trimPath(resourcesDir.c_str(), 2)+"/Resources/";
     gameDataDir = std::string(getenv("HOME"))+"/.Gamefortec/";
     
     AppMain();

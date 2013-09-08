@@ -102,7 +102,6 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::v
             logStr = seperatorC;
         }
         
-        //log(shader_log, infoLog);
 		return false;
 	}
 	glAttachShader(GLname, shaderId);

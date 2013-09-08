@@ -137,10 +137,16 @@ bool removeDir(std::string path) {
 }
 
 std::string trimPath(std::string path, size_t n) {
+    while(true) {
+        size_type index = path.find("./");
+        if(index == -1) index = path.find("//");
+        if(index == -1) break;
+        path = path.erase(index, 2);
+    }
     for(size_t i = 0; i < n; i ++) {
-        size_type lastSlash = path.find_last_of("/");
-        if(lastSlash == -1) break;
-        path = path.substr(0, lastSlash);
+        size_type index = path.find_last_of("/");
+        if(index == -1) break;
+        path = path.substr(0, index);
     }
     return path;
 }

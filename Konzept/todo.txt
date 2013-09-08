@@ -1,8 +1,8 @@
+Ubuntu port: shader errors, clipboard, restart, application bundle, dynamic libs
 V8 API: Create/Delete Objects, Documentation
 Support to load another initial container than "Containers/start.xml"
 Implement btSoftBody
 Leap Motion: V8 API
-Windows / Linux Support
 
 Not sure:
 PCSS
@@ -18,6 +18,7 @@ Procedural models / Plants
 GUILabel texture mask
 KI and path finding
 Water physics / underwater effects
+Windows port
 
 Test:
 Skeletal animation
