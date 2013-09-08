@@ -1,25 +1,24 @@
 const float InverseMaxInt = 1.0 / 4294967295.0;
 
+int int2Rand(in int a, in int b) {
+    int i=(a^int(12345391))*b;
+    i^=(i<<6)^(i>>26);
+    i*=b;
+    return i+(i<<5)^(i>>12);
+}
+
 #ifdef GL_VERTEX_SHADER
 int genSeed() {
-    return gl_VertexID*int(1000*animationFactor);
+    return gl_VertexID*int(1000.0*animationFactor);
 }
 #else
 int genSeed() {
-    int seed = (int(gl_FragCoord.x)^12345391)*2654435769;
-    seed^=(seed<<6)^(seed>>26);
-    seed*=int(gl_FragCoord.y);
-    return seed+(seed<<5)^(seed>>12);
+	return int2Rand(int(gl_FragCoord.x), int(gl_FragCoord.y));
 }
 #endif
 
 float vec1SeedRand(inout int seed, float max) {
-    int i=(seed^12345391)*2654435769;
-    i^=(i<<6)^(i>>26);
-    i*=2654435769;
-    i+=(i<<5)^(i>>12);
-    seed ++;
-    return float(max * i) * InverseMaxInt;
+    return float(max * int2Rand(seed ++, int(2654435769))) * InverseMaxInt;
 }
 
 vec2 vec2SeedRand(inout int seed, vec2 max) {

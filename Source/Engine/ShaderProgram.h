@@ -77,9 +77,9 @@ enum ShaderProgramName {
     //Static Shaders
     normalMapGenSP = 0,
     blurSP,
-    spotShadowCircleLightSP,
+    circleMaskSP,
     spriteSP,
-    colorSP,
+    monochromeSP,
     deferredCombineSP,
     deferredCombine1SP,
     deferredCombine2SP,
@@ -161,9 +161,9 @@ enum ShaderProgramName {
     ssaoCombineSP,
     edgeSmoothSP,
     depthOfFieldSP,
-    particleCalculateSP,
-    particleDrawSP,
-    particleDrawAnimatedSP
+    advanceParticlesSP,
+    particlesSP,
+    particlesAnimatedSP
 };
 
 //! Compiles all shader programs which are not influenced by graphic options

@@ -229,7 +229,7 @@ bool ParticlesObject::gameTick() {
             }
         }
     }else if(optionsState.particleCalcTarget == 2) {
-        shaderPrograms[particleCalculateSP]->use();
+        shaderPrograms[advanceParticlesSP]->use();
         currentShaderProgram->setUniformMatrix4("modelMat", &transform);
         currentShaderProgram->setUniformMatrix3("normalMat", &transform.getBasis(), false);
         currentShaderProgram->setUniformF("respawnParticles", (systemLife == -1.0 || systemLife > lifeMax) ? 1.0 : 0.0);
@@ -260,9 +260,9 @@ bool ParticlesObject::gameTick() {
 
 void ParticlesObject::draw() {
     if(texture->depth > 1)
-        shaderPrograms[particleDrawAnimatedSP]->use();
+        shaderPrograms[particlesAnimatedSP]->use();
     else
-        shaderPrograms[particleDrawSP]->use();
+        shaderPrograms[particlesSP]->use();
     texture->use(0);
     
     currentShaderProgram->setUniformF("textureZScale", (float)texture->depth/lifeMax);

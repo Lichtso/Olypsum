@@ -24,8 +24,8 @@ void LightVolume::init() {
 }
 
 void LightVolume::drawDebug(Color4 color) {
-    shaderPrograms[colorSP]->use();
-    shaderPrograms[colorSP]->setUniformVec3("color", color.getVector());
+    shaderPrograms[monochromeSP]->use();
+    shaderPrograms[monochromeSP]->setUniformVec3("color", color.getVector());
     vao.draw();
 }
 

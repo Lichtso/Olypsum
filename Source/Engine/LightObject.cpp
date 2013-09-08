@@ -294,7 +294,7 @@ bool SpotLight::generateShadowMap(bool shadowActive) {
     glDisable(GL_BLEND);
     mainFBO.renderInTexture(shadowMap, GL_TEXTURE_2D);
     //Render circle mask
-    shaderPrograms[spotShadowCircleLightSP]->use();
+    shaderPrograms[circleMaskSP]->use();
     rectVAO.draw();
     objectManager.drawShadowCasters();
     

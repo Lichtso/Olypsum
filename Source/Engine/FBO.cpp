@@ -202,8 +202,6 @@ void FBO::renderInBuffers(bool fillScreen, GLuint* inBuffers, unsigned char inBu
     }
     
     if(!fillScreen) return;
-    modelMat.setIdentity();
-    currentShaderProgram->setUniformMatrix4("modelViewMat", &modelMat);
     rectVAO.draw();
 }
 
