@@ -15,6 +15,15 @@ struct Resolution {
     unsigned int width = 0, height = 0, scale = 1;
 };
 
+static void openExternURL(std::string str) {
+#ifdef __APPLE__
+    str = std::string("open \"")+str+"\"";
+#else
+    str = std::string("xdg-open \"")+str+"\"";
+#endif
+    std::system(str.c_str());
+}
+
 static void updateOptionBackButton(GUIButton* button) {
     if((optionsState.videoWidth != prevOptionsState.videoWidth ||
         optionsState.videoHeight != prevOptionsState.videoHeight ||
@@ -878,10 +887,10 @@ void Menu::setMenu(Name menu) {
             screenView->addChild(scrollView);
             
             size_t validSaveGames = 0;
-            forEachInDir(gameDataDir+"Saves/", NULL, [this, &validSaveGames, &scrollView](const std::string& directoryPath, std::string name) {
-                std::string path = gameDataDir+"Saves/"+name+'/';
+            forEachInDir(supportPath+"Saves/", NULL, [this, &validSaveGames, &scrollView](const std::string& directoryPath, std::string name) {
+                std::string path = supportPath+"Saves/"+name+'/';
                 rapidxml::xml_document<xmlUsedCharType> doc;
-                std::unique_ptr<char[]> fileData = readXmlFile(doc, gameDataDir+"Saves/"+name+'/'+"Status.xml", false);
+                std::unique_ptr<char[]> fileData = readXmlFile(doc, supportPath+"Saves/"+name+'/'+"Status.xml", false);
                 if(!fileData) return false;
                 rapidxml::xml_node<xmlUsedCharType>* node = doc.first_node("Status");
                 FilePackage* package = fileManager.loadPackage(node->first_node("Package")->first_attribute("value")->value());
@@ -944,7 +953,7 @@ void Menu::setMenu(Name menu) {
                 button->onClick = [this, name](GUIButton* button) {
                     setModalView("remove", fileManager.localizeString("name")+": "+name,
                                  [this, name](GUIButton* button) {
-                        removeDir(gameDataDir+"Saves/"+name+'/');
+                        removeDir(supportPath+"Saves/"+name+'/');
                         setMenu(saveGames);
                     });
                 };
@@ -1002,7 +1011,7 @@ void Menu::setMenu(Name menu) {
             //textField->label->fontHeight = screenView->height*0.1;
             textField->onChange = [scrollView](GUITextField* textField) {
                 GUILabel* label = static_cast<GUILabel*>(textField->children[0]);
-                std::string path = gameDataDir+"Saves/"+label->text+'/';
+                std::string path = supportPath+"Saves/"+label->text+'/';
                 scrollView->visible = !checkDir(path) && label->getLength() >= 3;
             };
             screenView->addChild(textField);
@@ -1044,19 +1053,27 @@ void Menu::setMenu(Name menu) {
                 }
             }
             
-            GUIButton* button = new GUIButton();
-            button->posX = screenView->width*(0.8);
-            button->posY = screenView->height*-0.8;
-            button->width = screenView->width*0.14;
-            button->sizeAlignment = GUISizeAlignment::Height;
-            screenView->addChild(button);
-            label = new GUILabel();
-            label->text = fileManager.localizeString("cancel");
-            label->fontHeight = screenView->height*0.1;
-            button->addChild(label);
-            button->onClick = [this](GUIButton* button) {
-                setMenu(saveGames);
+            std::function<void(GUIButton*)> onClick[] = {
+                [this](GUIButton* button) {
+                    openExternURL((std::string("file://")+supportPath+"Packages").c_str());
+                }, [this](GUIButton* button) {
+                    setMenu(saveGames);
+                }
             };
+            const char* buttonLabels[] = { "packages", "cancel" };
+            for(unsigned char i = 0; i < 2; i ++) {
+                GUIButton* button = new GUIButton();
+                button->posX = screenView->width*(-0.8+i*1.6);
+                button->posY = screenView->height*-0.8;
+                button->width = screenView->width*0.14;
+                button->sizeAlignment = GUISizeAlignment::Height;
+                screenView->addChild(button);
+                GUILabel* label = new GUILabel();
+                label->text = fileManager.localizeString(buttonLabels[i]);
+                label->fontHeight = screenView->height*0.1;
+                button->addChild(label);
+                button->onClick = onClick[i];
+            }
         } break;
         case multiplayer: {
             GUILabel* label = new GUILabel();

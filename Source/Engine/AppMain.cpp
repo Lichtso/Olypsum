@@ -42,15 +42,25 @@ const SDL_VideoInfo* updateVideoModeInternal(bool& fullScreen) {
 }
 
 void AppMain() {
-    createDir(gameDataDir);
-    gameDataDir += "Olypsum/";
-    createDir(gameDataDir);
+    if(*resourcesPath.begin() != '/') {
+        char cwdPath[512];
+        getcwd(cwdPath, sizeof(cwdPath)/sizeof(char)-1);
+        resourcesPath = std::string(cwdPath)+'/'+resourcesPath;
+    }
+    executablePath = trimPath(resourcesPath, 0);
+    resourcesPath = trimPath(resourcesPath, 2)+"/Resources/";
     
-    optionsState.loadOptions();
-    networkManager.init();
+#ifdef __APPLE__
+    supportPath = std::string(getenv("HOME"))+"/Library/Application Support/Gamefortec";
+#else
+    supportPath = std::string(getenv("HOME"))+"/.Gamefortec";
+#endif
+    supportPath = trimPath(supportPath, 0)+'/';
+    createDir(supportPath);
+    supportPath += "Olypsum/";
+    createDir(supportPath);
     
-    //Init SDL
-    if(SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO) < 0) {
+    if(SDL_Init(SDL_INIT_VIDEO) < 0) {
         log(error_log, "Couldn't init SDL, Quit.");
         exit(1);
     }
@@ -60,7 +70,8 @@ void AppMain() {
     }
     SDL_EnableUNICODE(1);
     
-    //Init the rest
+    optionsState.loadOptions();
+    networkManager.init();
     objectManager.init();
     
     SDL_Event event;

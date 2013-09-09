@@ -145,7 +145,6 @@
 		1118251614F2553A00F198A7 /* Olypsum.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Olypsum.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1118251A14F2553A00F198A7 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		1118251D14F2553A00F198A7 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
-		1118251E14F2553A00F198A7 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		1118251F14F2553A00F198A7 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1118254114F2559600F198A7 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		1118254314F2559B00F198A7 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
@@ -356,7 +355,6 @@
 				1118254114F2559600F198A7 /* OpenGL.framework */,
 				1118251A14F2553A00F198A7 /* Cocoa.framework */,
 				1118251D14F2553A00F198A7 /* AppKit.framework */,
-				1118251E14F2553A00F198A7 /* CoreData.framework */,
 				1118251F14F2553A00F198A7 /* Foundation.framework */,
 			);
 			name = "Other Frameworks";

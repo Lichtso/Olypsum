@@ -52,7 +52,7 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::v
         if(pos == std::string::npos) break;
         pos += strlen(includeString);
         unsigned int macroLength = soucre.find('\n', pos)-pos;
-        std::unique_ptr<char[]> data = readFile(resourcesDir+"Shaders/"+soucre.substr(pos, macroLength), true);
+        std::unique_ptr<char[]> data = readFile(resourcesPath+"Shaders/"+soucre.substr(pos, macroLength), true);
         soucre.replace(prevPos, strlen(includeString)+macroLength, data.get());
     }
     
@@ -63,45 +63,7 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::v
 	char infoLog[infoLogLength];
 	glGetShaderInfoLog(shaderId, infoLogLength, &infoLogLength, (GLchar*) &infoLog);
 	if(infoLogLength > 0) {
-        log(shader_log, infoLog);
-        
-        char* logStr = infoLog;
-        int col, row;
-        while(strncmp(logStr, "ERROR: ", 7) == 0) {
-            char* seperatorA = strchr(logStr+7, ':');
-            *(seperatorA ++) = 0;
-            sscanf(logStr+7, "%d", &col);
-            char* seperatorB = strchr(seperatorA, ':');
-            *(seperatorB ++) = 0;
-            sscanf(seperatorA, "%d", &row);
-            char* seperatorC = strchr(seperatorB, '\n');
-            *(seperatorC ++) = 0;
-            
-            const char *pos, *begin = NULL, *end = NULL, *middle = NULL;
-            unsigned int line = 0;
-            for(pos = soucre.c_str(); *pos != 0; pos ++) {
-                if(*pos != '\n') continue;
-                line ++;
-                if(!begin && line >= row-3) {
-                    begin = pos;
-                }else if(line == row-1) {
-                    middle = pos+1;
-                }else if(!end && line >= row+3) {
-                    end = pos;
-                    break;
-                }
-            }
-            if(!middle) middle = begin;
-            if(!end) end = pos;
-            char linesBuffer[end-begin+1];
-            memcpy(linesBuffer, begin, end-begin);
-            linesBuffer[middle-begin] = '>';
-            linesBuffer[end-begin] = 0;
-            
-            log(shader_log, std::string("ERROR: ")+seperatorB+" (Line "+stringOf(row)+")\n"+linesBuffer+"\n");
-            logStr = seperatorC;
-        }
-        
+        log(shader_log, std::string(infoLog)+soucreStr+"\n");
 		return false;
 	}
 	glAttachShader(GLname, shaderId);
@@ -110,7 +72,7 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::v
 }
 
 bool ShaderProgram::loadShaderProgram(const char* fileName, std::vector<GLenum> shaderTypes, std::vector<const char*> macros) {
-    std::unique_ptr<char[]> data = readFile(resourcesDir+"Shaders/"+fileName+".glsl", true);
+    std::unique_ptr<char[]> data = readFile(resourcesPath+"Shaders/"+fileName+".glsl", true);
     
     char* dataPos = data.get();
     for(GLenum shaderType: shaderTypes) {

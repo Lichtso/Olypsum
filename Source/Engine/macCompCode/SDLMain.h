@@ -8,9 +8,8 @@
 
 #ifndef SDLMain_h
 #define SDLMain_h
-#include <Cocoa/Cocoa.h>
+#include "AppMain.h"
 #include <AppKit/AppKit.h>
-#include <Foundation/Foundation.h>
 
 @interface SDLMain : NSObject <NSApplicationDelegate>
     

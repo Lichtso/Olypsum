@@ -83,13 +83,13 @@ bool LevelSaver::saveLevel(v8::Handle<v8::Value> localData, v8::Handle<v8::Value
     for(auto iterator : linkingMap)
         node->append_node(iterator.first->write(doc, iterator.second));
     
-    std::string containersPath = gameDataDir+"Saves/"+levelManager.saveGameName+"/Containers/";
+    std::string containersPath = supportPath+"Saves/"+levelManager.saveGameName+"/Containers/";
     createDir(containersPath);
     if(!writeXmlFile(doc, containersPath+levelManager.levelContainer+".xml", true))
         return false;
     
     doc.clear();
-    std::string statusFilePath = gameDataDir+"Saves/"+levelManager.saveGameName+"/Status.xml";
+    std::string statusFilePath = supportPath+"Saves/"+levelManager.saveGameName+"/Status.xml";
     std::unique_ptr<char[]> fileData = readXmlFile(doc, statusFilePath, true);
     node = doc.first_node("Status");
     node->first_node("Level")->first_attribute("value")->value(levelManager.levelContainer.c_str());

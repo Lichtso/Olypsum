@@ -17,9 +17,9 @@
 class Color4 {
     public:
     float r, //!< The red channel (0.0 - 1.0)
-    g, //!< The green channel (0.0 - 1.0)
-    b, //!< The blue channel (0.0 - 1.0)
-    a; //!< The transparency channel (0.0 - 1.0)
+          g, //!< The green channel (0.0 - 1.0)
+          b, //!< The blue channel (0.0 - 1.0)
+          a; //!< The transparency channel (0.0 - 1.0)
     //! A black color
     Color4() : r(0), g(0), b(0), a(1) {};
     //! A gray color

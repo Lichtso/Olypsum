@@ -40,6 +40,7 @@
 	<Entry key="name">Name</Entry>
 	<Entry key="newGame">New Game</Entry>
 	<Entry key="remove">Remove</Entry>
+    <Entry key="packages">Packages</Entry>
 	<Entry key="packageError_ContainerMissing">Could not find container by name:</Entry>
 	<Entry key="packageError_CouldNotLoad">Could not load level package by name:</Entry>
 	<Entry key="packageError_HashCorrupted">Could not load level package,

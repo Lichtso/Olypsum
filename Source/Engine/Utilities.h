@@ -111,9 +111,10 @@ bool forEachInDir(std::string path,
  @return Success
  */
 bool removeDir(std::string path);
-/*! Removes all unnecessary parts like './' and '//' and the last part of a path until the next '/'
+
+/*! Normalizes the path and removes n directory names
  @param path The path to trim
- @param n How many '/' to remove from the end
+ @param n How many directory names to remove from the end
  */
 std::string trimPath(std::string path, size_t n);
 
@@ -172,6 +173,6 @@ inline btVector3 leapToBullet(Leap::Vector vec) {
 double getTime();
 
 extern unsigned int screenSize[3];
-extern std::string resourcesDir, gameDataDir;
+extern std::string executablePath, resourcesPath, supportPath;
 
 #endif

@@ -40,7 +40,7 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
     rapidxml::xml_document<xmlUsedCharType> doc;
     
     if(isLevelRoot) {
-        rawData = readXmlFile(doc, gameDataDir+"Saves/"+levelManager.saveGameName+"/Containers/"+name+".xml", false);
+        rawData = readXmlFile(doc, supportPath+"Saves/"+levelManager.saveGameName+"/Containers/"+name+".xml", false);
         if(!rawData)
             rawData = readXmlFile(doc, filePackage->path+"/Containers/"+name+".xml", false);
     }else if(fileManager.readResourcePath(filePackage, name))
@@ -179,7 +179,7 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
     if(levelNode) {
         v8::Handle<v8::Value> localData = scriptManager->readCdataXMLNode(levelNode);
         doc.clear();
-        std::string statusFilePath = gameDataDir+"Saves/"+levelManager.saveGameName+"/Status.xml";
+        std::string statusFilePath = supportPath+"Saves/"+levelManager.saveGameName+"/Status.xml";
         std::unique_ptr<char[]> fileData = readXmlFile(doc, statusFilePath, true);
         node = doc.first_node("Status");
         node->first_node("Level")->first_attribute("value")->value(name.c_str());

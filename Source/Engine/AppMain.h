@@ -11,7 +11,6 @@
 
 #include "ScriptManager.h"
 
-void openExternURL(const char* str);
 void setClipboardText(const char* str);
 std::string getClipboardText();
 bool hasClipboardText();

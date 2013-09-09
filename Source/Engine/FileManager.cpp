@@ -29,15 +29,15 @@ FilePackage::~FilePackage() {
 }
 
 bool FilePackage::init() {
-    path = resourcesDir+"Packages/"+name+'/';
+    path = resourcesPath+"Packages/"+name+'/';
     if(!checkDir(path)) {
-        path = gameDataDir+"Packages/"+name+'/';
+        path = supportPath+"Packages/"+name+'/';
         if(!checkDir(path))
             return false;
     }
     
     auto hashFileContent = [this](const std::string& path, std::string name) {
-        hash ^= hashFile(name);
+        hash ^= hashFile(path+name);
     };
     
     auto hashName = [this](const std::string& path, std::string name) {
@@ -120,7 +120,7 @@ bool FilePackage::findFileByNameInSubdir(const char* directoryPath, std::string&
 }
 
 bool FilePackage::getLocalizableLanguages(std::vector<std::string>& languages) {
-    return forEachInDir(path, [&languages](const std::string& directoryPath, std::string name) {
+    return forEachInDir(path+"Languages/", [&languages](const std::string& directoryPath, std::string name) {
         if(name.length() > 4 && name.compare(name.length()-4, 4, ".xml") == 0)
             languages.push_back(name.substr(0, name.length()-4));
     }, NULL, NULL);
@@ -202,8 +202,8 @@ void FileManager::loadAllPackages() {
         fileManager.loadPackage(name);
         return false;
     };
-    forEachInDir(resourcesDir+"Packages/", NULL, enterDirectory, NULL);
-    forEachInDir(gameDataDir+"Packages/", NULL, enterDirectory, NULL);
+    forEachInDir(resourcesPath+"Packages/", NULL, enterDirectory, NULL);
+    forEachInDir(supportPath+"Packages/", NULL, enterDirectory, NULL);
 }
 
 bool FileManager::readResourcePath(FilePackage*& filePackage, std::string& name) {
@@ -262,12 +262,12 @@ static T readOptionValue(rapidxml::xml_node<xmlUsedCharType>* option, const char
 }
 
 void OptionsState::loadOptions() {
-    createDir(gameDataDir+"Saves/");
-    createDir(gameDataDir+"Packages/");
+    createDir(supportPath+"Saves/");
+    createDir(supportPath+"Packages/");
     language = "English";
     
     rapidxml::xml_document<xmlUsedCharType> doc;
-    std::unique_ptr<char[]> fileData = readXmlFile(doc, gameDataDir+"Options.xml", false);
+    std::unique_ptr<char[]> fileData = readXmlFile(doc, supportPath+"Options.xml", false);
     if(fileData) {
         rapidxml::xml_node<xmlUsedCharType>* options = doc.first_node("Options");
         if(strcmp(options->first_node("EngineVersion")->first_attribute("value")->value(), VERSION) != 0) {
@@ -359,7 +359,7 @@ void OptionsState::saveOptions() {
     sprintf(&str[68], "%1.5f", optionsState.mouseSmoothing);
     addXMLNode(doc, optionGroup, "mouseSmoothing", &str[68]);
     
-    writeXmlFile(doc, gameDataDir+"Options.xml", true);
+    writeXmlFile(doc, supportPath+"Options.xml", true);
 }
 
 FileManager fileManager;

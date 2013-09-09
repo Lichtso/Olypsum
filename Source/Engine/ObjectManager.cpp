@@ -103,7 +103,7 @@ bool ObjectManager::initOpenCL() {
 void ObjectManager::init() {
     updateVideoMode();
     
-    //Init OpenGL
+    log(info_log, std::string("Engine Version: ")+VERSION);
     log(info_log, std::string("Multi Threading: ")+stringOf(std::thread::hardware_concurrency())+" CPUs");
     char* glStr = NULL;
     GLint glAuxIa, glAuxIb;
@@ -140,6 +140,7 @@ void ObjectManager::init() {
     log(info_log, stream.str());
 #endif
     
+    //Init OpenGL
     glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &optionsState.anisotropy);
     optionsState.anisotropy = fmin(optionsState.anisotropy, pow(2.0, optionsState.surfaceQuality));
     glEnable(GL_DEPTH_TEST);

@@ -171,7 +171,7 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
 }
 
 bool LevelManager::newGame(FilePackage* package, const std::string& name, const std::string& container) {
-    if(!createDir(gameDataDir+"Saves/"+name+'/'))
+    if(!createDir(supportPath+"Saves/"+name+'/'))
         return false;
     
     rapidxml::xml_document<xmlUsedCharType> doc;
@@ -181,7 +181,7 @@ bool LevelManager::newGame(FilePackage* package, const std::string& name, const 
     addXMLNode(doc, rootNode, "EngineVersion", VERSION);
     addXMLNode(doc, rootNode, "Package", package->name.c_str());
     addXMLNode(doc, rootNode, "Level", container.c_str());
-    writeXmlFile(doc, gameDataDir+"Saves/"+name+"/Status.xml", true);
+    writeXmlFile(doc, supportPath+"Saves/"+name+"/Status.xml", true);
     
     return loadGame(package, name, container);
 }

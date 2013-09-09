@@ -21,7 +21,7 @@ void log(logMessageType type, std::string message) {
             typeStr = "ERROR: ";
             break;
         case shader_log:
-            typeStr = "SHADER-";
+            typeStr = "SHADER: ";
             break;
         case script_log:
             typeStr = "SCRIPT: ";
@@ -137,18 +137,34 @@ bool removeDir(std::string path) {
 }
 
 std::string trimPath(std::string path, size_t n) {
-    while(true) {
-        size_type index = path.find("./");
-        if(index == -1) index = path.find("//");
-        if(index == -1) break;
-        path = path.erase(index, 2);
+    std::stringstream ss(path);
+    std::vector<std::string> tokens;
+    std::string token;
+    
+    while(std::getline(ss, token, '/')) {
+        if(token == ".") continue;
+        
+        if(tokens.size() > 0) {
+            if(token.size() == 0) continue;
+            
+            if(token == ".." && tokens[tokens.size()-1] != "..") {
+                tokens.pop_back();
+                continue;
+            }
+        }
+        
+        tokens.push_back(token);
     }
-    for(size_t i = 0; i < n; i ++) {
-        size_type index = path.find_last_of("/");
-        if(index == -1) break;
-        path = path.substr(0, index);
+    
+    ss.clear();
+    ss.str("");
+    for(size_t i = 0; i < tokens.size()-n; i ++) {
+        if(i > 0)
+            ss << '/';
+        ss << tokens[i];
     }
-    return path;
+    
+    return ss.str();
 }
 
 std::string stringOf(int value) {
@@ -209,4 +225,4 @@ double getTime() {
 }
 
 unsigned int screenSize[3] = { 0, 0, 1 };
-std::string resourcesDir, gameDataDir;
+std::string executablePath, resourcesPath, supportPath;

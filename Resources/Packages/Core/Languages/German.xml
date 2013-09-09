@@ -40,6 +40,7 @@
 	<Entry key="name">Name</Entry>
 	<Entry key="newGame">Neues Spiel</Entry>
 	<Entry key="remove">Löschen</Entry>
+    <Entry key="packages">Levelpacks</Entry>
 	<Entry key="packageError_ContainerMissing">Dieser Kontainer konnte nicht gefunden werden:</Entry>
 	<Entry key="packageError_CouldNotLoad">Dieses Levelpack konnte nicht geladen werden:</Entry>
 	<Entry key="packageError_HashCorrupted">Das Levelpack konnte nicht geladen werden,

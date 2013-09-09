@@ -11,7 +11,6 @@
 
 void updateVideoMode() {
     bool fullScreen;
-    screenSize[2] = 1;
     const SDL_VideoInfo* videoInfo = updateVideoModeInternal(fullScreen);
     SDL_Surface* screen = SDL_SetVideoMode(optionsState.videoWidth,
                                            optionsState.videoHeight,
@@ -35,26 +34,13 @@ bool hasClipboardText() {
     return false;
 }
 
-void openExternURL(const char* str) {
-    
-}
-
 void restartApplication() {
+    std::system((executablePath+std::string(" &")).c_str());
     AppTerminate();
 }
 
 int main(int argc, const char** argv) {
-    NL::init();
-    
-    resourcesDir = argv[0];
-    if(argv[0][0] != '/') {
-        char cwdPath[512];
-        getcwd(cwdPath, sizeof(cwdPath)/sizeof(char)-1);
-        resourcesDir = std::string(cwdPath)+'/'+resourcesDir;
-    }
-    resourcesDir = trimPath(resourcesDir.c_str(), 2)+"/Resources/";
-    gameDataDir = std::string(getenv("HOME"))+"/.Gamefortec/";
-    
+    resourcesPath = argv[0];
     AppMain();
     return 0;
 }
