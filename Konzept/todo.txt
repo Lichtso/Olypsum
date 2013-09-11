@@ -1,4 +1,5 @@
-Ubuntu port: Shadowmap/Screen size, clipboard, restart, application bundle, dynamic libs
+Upgrade to SDL 2.0
+Ubuntu port: Shadowmap lookup errors, clipboard, application bundle, dynamic libs
 V8 API: Create/Delete Objects, Documentation
 Support to load another initial container than "Containers/start.xml"
 Implement btSoftBody

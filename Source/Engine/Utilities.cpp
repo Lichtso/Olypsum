@@ -107,23 +107,30 @@ bool forEachInDir(std::string path,
                   std::function<bool(const std::string& directoryPath, std::string name)> enterDirectory,
                   std::function<void(const std::string& directoryPath)> leaveDirectory) {
     DIR* dir = opendir(path.c_str());
-    if(dir) {
-        dirent* file;
-        while((file = readdir(dir))) {
-            std::string name(file->d_name);
-            if(name.length() < 3 && (name.compare(".") == 0 || name.compare("..") == 0)) continue;
-            if(file->d_type == DT_DIR) {
-                if(enterDirectory && enterDirectory(path, name))
-                    forEachInDir(path+name+'/', perFile, enterDirectory, leaveDirectory);
-            }else if(perFile)
-                perFile(path, name);
-        }
-        closedir(dir);
-        if(leaveDirectory)
-            leaveDirectory(path);
-        return true;
-    }else
-        return false;
+    if(!dir) return false;
+    
+    dirent* item;
+    std::set<std::string> items;
+    while((item = readdir(dir))) {
+        std::string name(item->d_name);
+        if(*name.begin() == '.') continue;
+        if(item->d_type == DT_DIR)
+            name += '/';
+        items.insert(name);
+    }
+    
+    for(std::string name : items) {
+        if(*(name.end()-1) == '/') {
+            if(enterDirectory && enterDirectory(path, name))
+                forEachInDir(path+name, perFile, enterDirectory, leaveDirectory);
+        }else if(perFile)
+            perFile(path, name);
+    }
+    
+    closedir(dir);
+    if(leaveDirectory)
+        leaveDirectory(path);
+    return true;
 }
 
 bool removeDir(std::string path) {

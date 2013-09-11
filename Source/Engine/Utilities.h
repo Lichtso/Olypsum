@@ -96,11 +96,12 @@ bool checkDir(std::string path);
  @return Success
  */
 bool createDir(std::string path);
-/*! Calls a function on each file and subdirectory in the given directory
+/*! Calls a function on each file (that isn't hidden by '.') and subdirectory (name ends with '/') in the given directory.
+ The fies and subdirectories are processed in alphabetical order.
  @param path Directory path
  @param perFile Called per file
  @param enterDirectory Called at entering a subdirectory, return value has to be true to process recursivly
- @param enterDirectory Called at leaving a directory
+ @param leaveDirectory Called at leaving a directory
  @return Success
  */
 bool forEachInDir(std::string path,

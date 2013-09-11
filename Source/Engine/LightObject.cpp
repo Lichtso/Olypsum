@@ -69,8 +69,9 @@ float LightObject::getRange() {
 bool LightObject::generateShadowMap(bool shadowActive) {
     if(!shadowActive) return false;
     if(!shadowMap) {
-        unsigned int size = min(1024U, mainFBO.maxSize);
-        shadowMap = new ColorBuffer(true, optionsState.cubemapsEnabled && dynamic_cast<PositionalLight*>(this), size, size);
+        shadowMap = new ColorBuffer(true,
+                                    optionsState.cubemapsEnabled && dynamic_cast<PositionalLight*>(this),
+                                    mainFBO.shadowMapSize, mainFBO.shadowMapSize);
         if(glGetError() == GL_OUT_OF_MEMORY) {
             log(warning_log, "GL_OUT_OF_MEMORY");
             deleteShadowMap();
@@ -412,8 +413,8 @@ bool PositionalLight::getOmniDirectional() {
 bool PositionalLight::generateShadowMap(bool shadowActive) {
     if(!LightObject::generateShadowMap(shadowActive)) return true;
     if(getOmniDirectional() && !shadowMapB && !optionsState.cubemapsEnabled) {
-        unsigned int size = min(1024U, mainFBO.maxSize);
-        shadowMapB = new ColorBuffer(true, false, size, size);
+        shadowMapB = new ColorBuffer(true, false,
+                                     mainFBO.shadowMapSize, mainFBO.shadowMapSize);
         if(glGetError() == GL_OUT_OF_MEMORY) {
             log(warning_log, "GL_OUT_OF_MEMORY");
             delete shadowMapB;

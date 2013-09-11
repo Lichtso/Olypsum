@@ -78,8 +78,7 @@ void FBO::initBuffer(unsigned int index) {
 }
 
 void FBO::init() {
-    maxSize = max(prevOptionsState.videoWidth, prevOptionsState.videoHeight);
-    maxSize = pow(2, ceil(log(maxSize) / log(2)));
+    shadowMapSize = pow(2, ceil(log(max(prevOptionsState.videoWidth, prevOptionsState.videoHeight)) / log(2)));
     
     for(unsigned char i = 0; i < gBuffersCount; i ++)
         if(gBuffers[i])
@@ -111,9 +110,9 @@ void FBO::init() {
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB32F,
                  prevOptionsState.videoWidth, prevOptionsState.videoHeight,
                  0, GL_RGB, GL_FLOAT, NULL);
-    initBuffer(specularDBuffer); //Needs maxSize because it is used as color buffer for shadow map calculations
+    initBuffer(specularDBuffer); //Needs shadowMapSize because it is used as color buffer for shadow map calculations
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB,
-                 maxSize, maxSize,
+                 shadowMapSize, shadowMapSize,
                  0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     initBuffer(diffuseDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB16F,
@@ -135,6 +134,7 @@ void FBO::init() {
     
     glBindTexture(GL_TEXTURE_RECTANGLE, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    shadowMapSize = min(1024U, shadowMapSize);
 }
 
 void FBO::copyBuffer(GLuint source, GLuint destination) {

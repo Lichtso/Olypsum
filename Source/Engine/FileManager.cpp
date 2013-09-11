@@ -50,8 +50,8 @@ bool FilePackage::init() {
     };
     
     hash = hashFile(path+"CollisionShapes.xml");
-    hash ^= forEachInDir(path+"Containers/", hashFileContent, NULL, NULL);
-    hash ^= forEachInDir(path+"Scripts/", hashFileContent, NULL, NULL);
+    hash ^= forEachInDir(path+"Containers/", hashFileContent, hashDirectoryName, NULL);
+    hash ^= forEachInDir(path+"Scripts/", hashFileContent, hashDirectoryName, NULL);
     hash ^= forEachInDir(path+"Languages/", hashFileContent, NULL, NULL);
     hash ^= forEachInDir(path+"Fonts/", hashName, hashDirectoryName, NULL);
     hash ^= forEachInDir(path+"Models/", hashName, hashDirectoryName, NULL);
@@ -199,6 +199,7 @@ void FileManager::unloadPackage(const std::string& name) {
 
 void FileManager::loadAllPackages() {
     auto enterDirectory = [](const std::string& directoryPath, std::string name) {
+        name.pop_back();
         fileManager.loadPackage(name);
         return false;
     };

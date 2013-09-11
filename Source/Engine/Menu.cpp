@@ -241,8 +241,10 @@ void Menu::gameTick() {
     
     switch(current) {
         case loading: {
-            if(loadingScreen == loadingScreenTime)
+            if(loadingScreen == loadingScreenTime) {
                 loadDynamicShaderPrograms();
+                profiler.markFrame();
+            }
             
             loadingScreen -= profiler.animationFactor;
             GUIProgressBar* progressBar = static_cast<GUIProgressBar*>(screenView->children[0]);
@@ -888,13 +890,14 @@ void Menu::setMenu(Name menu) {
             
             size_t validSaveGames = 0;
             forEachInDir(supportPath+"Saves/", NULL, [this, &validSaveGames, &scrollView](const std::string& directoryPath, std::string name) {
-                std::string path = supportPath+"Saves/"+name+'/';
+                std::string path = supportPath+"Saves/"+name;
                 rapidxml::xml_document<xmlUsedCharType> doc;
-                std::unique_ptr<char[]> fileData = readXmlFile(doc, supportPath+"Saves/"+name+'/'+"Status.xml", false);
+                std::unique_ptr<char[]> fileData = readXmlFile(doc, supportPath+"Saves/"+name+"Status.xml", false);
                 if(!fileData) return false;
                 rapidxml::xml_node<xmlUsedCharType>* node = doc.first_node("Status");
                 FilePackage* package = fileManager.loadPackage(node->first_node("Package")->first_attribute("value")->value());
                 if(!package) return false;
+                name.pop_back();
                 
                 std::string container = node->first_node("Level")->first_attribute("value")->value();
                 GUIButton* button = new GUIButton();

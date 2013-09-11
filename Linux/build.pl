@@ -12,7 +12,7 @@ my($RULES) = join("\n", map { "%.bc: $_%.cpp\n\t\$(COMPILER) -c -emit-llvm \$(HE
 open(MFILE, ">Makefile") || die("Can\'t open Makefile $!");
 
 print MFILE <<EOF;
-COMPILER := clang++ -stdlib=libc++ -std=c++11
+COMPILER := clang++ -stdlib=libc++ -std=c++11 -DDEBUG
 HEADERS := $HEADERS -I../Libraries/LeapSDK/include/ -I../Libraries/netLink/include/ -I/usr/local/include/bullet/
 LINKER := -o Olypsum.out -L/usr/lib/Leap/ -lLeap -lv8 -lopenal -lvorbis -lvorbisfile -lGL -lSDL -lSDL_image -lSDL_ttf -lLinearMath -lBulletCollision -lBulletDynamics -lBulletSoftBody -lBulletMultiThreaded ../Libraries/netLink/out/libNetLink.bc
 SOURCES := $SOURCES
