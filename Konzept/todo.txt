@@ -1,5 +1,4 @@
-SDL2: GUI rescale: rect borders, retina options, test Leap Motion
-Ubuntu port: Clipboard, application bundle, dynamic libs
+Ubuntu port: SDL2, application bundle, dynamic libs
 V8 API: Create/Delete Objects, Documentation
 Support to load another initial container than "Containers/start.xml"
 Implement btSoftBody
@@ -28,6 +27,8 @@ Performance issue of explosions
 
 Bugs:
 Check memory leaks
+GUIRoundedRect border: odd size screen resolution
+GUILabel: line warp and segmentation
 Ubuntu NVIDIA diver shadow map lookup bug
 Prohibit cyclic FilePackage dependencies
 Prohibit cyclic parent-child relationships in GUIView

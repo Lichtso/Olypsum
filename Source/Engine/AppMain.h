@@ -11,6 +11,7 @@
 
 #include "ScriptManager.h"
 
+float getMaxVideoScale();
 void AppMain();
 void AppTerminate();
 

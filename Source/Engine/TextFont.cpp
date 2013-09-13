@@ -8,7 +8,7 @@
 
 #include "TextFont.h"
 
-TextFont::TextFont() :ttf(NULL), size(optionsState.videoWidth*0.04) {
+TextFont::TextFont() :ttf(NULL), size(optionsState.videoWidth*optionsState.videoScale*0.04) {
     
 }
 

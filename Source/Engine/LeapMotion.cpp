@@ -48,8 +48,8 @@ void LeapManager::gameTick() {
                 Leap::Vector position = pointable.stabilizedTipPosition();
                 //Leap::Vector position = screen.intersect(pointable.stabilizedTipPosition(), pointable.direction(), true);
                 
-                mouseX += position.x * 0.003F * optionsState.videoWidth;
-                mouseY += (position.y-200.0F) * 0.005F * optionsState.videoHeight;
+                mouseX += position.x * 0.006F * menu.screenView->width;
+                mouseY += (position.y-200.0F) * 0.01F * menu.screenView->height;
                 zone += pointable.touchZone();
             }
             
@@ -59,8 +59,8 @@ void LeapManager::gameTick() {
                 zone = Leap::Pointable::Zone::ZONE_NONE;
             else if(pointables > 0) {
                 float factor = 1.0 / pointables;
-                menu.mouseX = clamp((int) (mouseX * factor), -menu.screenView->width, menu.screenView->width);
-                menu.mouseY = clamp((int) (mouseY * factor), -menu.screenView->height, menu.screenView->height);
+                mouseX = clamp((int) (mouseX * factor), 1-menu.screenView->width, menu.screenView->width-1);
+                mouseY = clamp((int) (mouseY * factor), 1-menu.screenView->height, menu.screenView->height-1);
                 zone *= factor;
                 
                 if(pointables == 1 && (mouseX != prevMouseX || mouseY != prevMouseY))
@@ -68,7 +68,8 @@ void LeapManager::gameTick() {
                                           (mouseX + menu.screenView->width)/optionsState.videoScale,
                                           (menu.screenView->height - mouseY)/optionsState.videoScale);
                 else if(pointables > 1)
-                    menu.handleMouseWheel((prevMouseX-mouseX)*1.0/menu.screenView->width, (mouseY-prevMouseY)*1.0/menu.screenView->height);
+                    menu.handleMouseWheel((float)(prevMouseX-mouseX)/menu.screenView->width,
+                                          (float)(mouseY-prevMouseY)/menu.screenView->height);
             }
         }
     }

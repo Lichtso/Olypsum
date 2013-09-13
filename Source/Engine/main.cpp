@@ -9,6 +9,10 @@
 #ifndef __APPLE__
 #include "AppMain.h"
 
+float getMaxVideoScale() {
+    return 1.0;
+}
+
 int main(int argc, const char** argv) {
     resourcesPath = argv[0];
     AppMain();

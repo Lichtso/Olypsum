@@ -24,10 +24,9 @@ class CamObject : public SimpleObject {
     public:
     Matrix4 viewMat; //!< Projection matrix used for OpenGL
     float fov, //!< Field of view, = 0 : Ortho, < 90 : Perspective, = 90 : Parabolid, = 180 : Sphere
+          aspect, //! width/height (only used if fov < 90)
           near, //!< Distance of the near plane if fov < 90
-          far, //!< Distance of the far plane if fov < 90 else the radius of the parabolid or sphere
-          width, //!< Width of the view used if fov < 90
-          height;//!< Height of the view used if fov < 90
+          far; //!< Distance of the far plane if fov < 90 else the radius of the parabolid or sphere
     //! Initialize as GUI cam
     CamObject();
     CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);

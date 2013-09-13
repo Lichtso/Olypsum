@@ -39,11 +39,12 @@ struct FrustumCullingCallback : btDbvt::ICollide {
 
 
 
-CamObject::CamObject() :fov(0.0), near(-1.0), far(1.0) {
+CamObject::CamObject() :fov(-1.0), aspect(1.0), near(-1.0), far(1.0) {
     setTransformation(btTransform::getIdentity());
 }
 
-CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader)
+    :aspect((float)optionsState.videoWidth/optionsState.videoHeight) {
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);
     scriptCamObject.functionTemplate->GetFunction()->NewInstance(1, &external);
@@ -62,17 +63,6 @@ CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* lev
         return;
     }
     sscanf(attribute->value(), "%f", &fov);
-        
-    if(fov == 0.0) {
-        attribute = boundsNode->first_attribute("width");
-        if(attribute)
-            sscanf(attribute->value(), "%f", &width);
-        attribute = boundsNode->first_attribute("height");
-        if(attribute)
-            sscanf(attribute->value(), "%f", &height);
-        else
-            height = width*menu.screenView->height/menu.screenView->width;
-    }
     
     attribute = boundsNode->first_attribute("near");
     if(!attribute) {
@@ -115,13 +105,13 @@ Ray3 CamObject::getRelativeRayAt(float x, float y) {
     Ray3 ray;
     if(fov > 0.0) { //Perspective
         float aux = tan(fov*0.5);
-        ray.direction.setX(x*aux*menu.screenView->width/menu.screenView->height);
+        ray.direction.setX(x*aux*aspect);
         ray.direction.setY(-y*aux);
         ray.direction.setZ(-1.0);
         ray.origin = ray.direction*near;
     }else{ //Ortho
         ray.direction = btVector3(0, 0, -1);
-        ray.origin = btVector3(x*width, -y*height, -near);
+        ray.origin = btVector3(-x*fov*aspect, y*fov, -near);
     }
     return ray;
 }
@@ -170,10 +160,10 @@ bool CamObject::doFrustumCulling() {
             if(planeReflective)
                 for(char i = 2; i < 6; i ++)
                     planes_n[i] *= -1.0;
-            planes_o[2] = -planes_n[2].dot(virtualMat.w-planes_n[2]*width);
-            planes_o[3] = -planes_n[3].dot(virtualMat.w-planes_n[3]*width);
-            planes_o[4] = -planes_n[4].dot(virtualMat.w-planes_n[4]*height);
-            planes_o[5] = -planes_n[5].dot(virtualMat.w-planes_n[5]*height);
+            planes_o[2] = -planes_n[2].dot(virtualMat.w+planes_n[2]*fov*aspect);
+            planes_o[3] = -planes_n[3].dot(virtualMat.w+planes_n[3]*fov*aspect);
+            planes_o[4] = -planes_n[4].dot(virtualMat.w+planes_n[4]*fov);
+            planes_o[5] = -planes_n[5].dot(virtualMat.w+planes_n[5]*fov);
         }
         
         if(planeReflective) {
@@ -214,14 +204,11 @@ bool CamObject::doFrustumCulling() {
                         planes_o[plane+2] = -planes_n[plane+2].dot(virtualMat.w);
                     }else if(behindFrustumPlane == 8)
                         return true; //Invalid frustum
-                    
-                    //if(profiler.isFirstFrameInSec()) //TODO: Debug
-                    //    controlsMangager->consoleAdd(stringOf(behindFrustumPlane) + ": " + stringOf(planes_n[plane+2]) +" | "+ stringOf(bestFactor), 0.9);
                 }
             }else //Ortho
                 for(char plane = 0; plane < 4; plane ++) {
                     int behindFrustumPlane = 0;
-                    float bestFactor = ((plane < 2) ? width : height), startFactor = -bestFactor;
+                    float bestFactor = ((plane < 2) ? -fov*aspect : -fov), startFactor = -bestFactor;
                     btVector3 compareAxis = axes[(plane+2)%4];
                     for(char i = 0; i < 8; i ++) {
                         float factor = compareAxis.dot(points[i]-virtualMat.w);
@@ -339,10 +326,10 @@ void CamObject::use() {
 void CamObject::updateViewMat() {
     viewMat = getCamMatrix().getInverse();
     
-    if(fov == 0.0) //Ortho
-        viewMat.ortho(width, height, near, far);
+    if(fov < 0.0) //Ortho
+        viewMat.ortho(-fov*aspect, -fov, near, far);
     else if(fov < M_PI) //Perspective
-        viewMat.perspective(fov, (float)menu.screenView->width/menu.screenView->height, near, far);
+        viewMat.perspective(fov, aspect, near, far);
 }
 
 rapidxml::xml_node<xmlUsedCharType>* CamObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {

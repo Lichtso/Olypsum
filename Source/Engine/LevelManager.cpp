@@ -165,6 +165,7 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
         }
     }
     
+    mainFBO.init();
     LevelLoader levelLoader;
     return levelLoader.loadLevel();
 }

@@ -131,8 +131,11 @@ GUIScreenView::~GUIScreenView() {
 }
 
 void GUIScreenView::updateContent() {
-    guiCam->width = width = (optionsState.videoWidth >> 1) * optionsState.videoScale;
-    guiCam->height = height = (optionsState.videoHeight >> 1) * optionsState.videoScale;
+    width = (optionsState.videoWidth >> 1) * optionsState.videoScale;
+    height = (optionsState.videoHeight >> 1) * optionsState.videoScale;
+    
+    guiCam->fov = -height;
+    guiCam->aspect = (float)width/height;
     guiCam->updateViewMat();
     
     for(unsigned int i = 0; i < children.size(); i ++)

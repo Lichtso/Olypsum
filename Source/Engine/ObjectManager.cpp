@@ -188,7 +188,7 @@ void ObjectManager::gameTick() {
     lightPrioritySorter.position = mainCam->getTransformation().getOrigin();
     std::sort(lightObjects.begin(), lightObjects.end(), lightPrioritySorter);
     
-    unsigned int maxShadows = 3;
+    unsigned int maxShadows = (optionsState.shadowQuality > 0) ? 3 : 0;
     for(unsigned int i = 0; i < lightObjects.size(); i ++)
         if(!lightObjects[i]->generateShadowMap(i < maxShadows))
             i --;
@@ -375,13 +375,14 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
     currentCam->updateViewMat();
     
     //Push ParticlesObjects in transparentAccumulator
-    for(auto particlesObject : particlesObjects)
-        if(particlesObject->inFrustum) {
-            AccumulatedTransparent* transparent = new AccumulatedTransparent();
-            transparent->object = particlesObject;
-            transparent->mesh = NULL;
-            transparentAccumulator.push_back(transparent);
-        }
+    if(optionsState.blendingQuality > 0)
+        for(auto particlesObject : particlesObjects)
+            if(particlesObject->inFrustum) {
+                AccumulatedTransparent* transparent = new AccumulatedTransparent();
+                transparent->object = particlesObject;
+                transparent->mesh = NULL;
+                transparentAccumulator.push_back(transparent);
+            }
     
     //Draw GraphicObjects
     for(auto graphicObject : graphicObjects)
@@ -391,7 +392,7 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
     //Illuminate non transparent
     illuminate();
     glDisable(GL_BLEND);
-    shaderPrograms[deferredCombineSP]->use();
+    shaderPrograms[deferredCombineSP0]->use();
     mainFBO.renderInBuffers(true, buffersCombine, 3, &buffersCombine[1], (renderTarget || transparentAccumulator.size() > 0) ? 1 : 0);
     
     //Draw transparent
@@ -446,8 +447,8 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
 
 void ObjectManager::updateRendererSettings() {
     for(unsigned int i = 0; i < 3; i ++) {
-        shaderPrograms[deferredCombineSP+i]->use();
-        shaderPrograms[deferredCombineSP+i]->setUniformVec3("sceneAmbient", sceneAmbient);
+        shaderPrograms[deferredCombineSP0+i]->use();
+        shaderPrograms[deferredCombineSP0+i]->setUniformVec3("sceneAmbient", sceneAmbient);
     }
 }
 

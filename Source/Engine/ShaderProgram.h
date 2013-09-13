@@ -44,6 +44,8 @@ class ShaderProgram {
 	bool link();
     //! Sets this ShaderProgram as the currentShaderProgram and updates the transformation uniforms
 	void use();
+    //! Is this ShaderProgram linked and ready
+	bool linked();
     //! Looks up the GLname of a given uniform
     GLint getUniformLocation(const char* name);
     //! Checks if a uniform existis
@@ -80,7 +82,7 @@ enum ShaderProgramName {
     circleMaskSP,
     spriteSP,
     monochromeSP,
-    deferredCombineSP,
+    deferredCombineSP0,
     deferredCombine1SP,
     deferredCombine2SP,
     //G-Buffer Shaders
@@ -166,10 +168,19 @@ enum ShaderProgramName {
     particlesAnimatedSP
 };
 
-//! Compiles all shader programs which are not influenced by graphic options
+//! Compiles all shader programs which are not influenced by any graphic options
 void loadStaticShaderPrograms();
 
-//! (Re)compiles all shader programs which change their behavior with graphic options
-void loadDynamicShaderPrograms();
+//! (Re)compiles all gBuffer related shader programs
+void updateGBufferShaderPrograms();
+
+//! (Re)compiles all shadow casting light sources related shader programs
+void updateIlluminationShaderPrograms();
+
+//! (Re)compiles all SSAO related shader programs
+void updateSSAOShaderPrograms();
+
+//! (Re)compiles the depthOfFieldSP
+void updateDOFShaderProgram();
 
 #endif

@@ -11,10 +11,6 @@
 const float loadingScreenTime = 3.0;
 float loadingScreen = loadingScreenTime;
 
-struct Resolution {
-    unsigned int width = 0, height = 0, scale = 1;
-};
-
 static void openExternURL(std::string str) {
 #ifdef __APPLE__
     str = std::string("open \"")+str+"\"";
@@ -24,16 +20,7 @@ static void openExternURL(std::string str) {
     std::system(str.c_str());
 }
 
-static void updateGraphicOptions() {
-    if(levelManager.gameStatus == noGame) return;
-    loadDynamicShaderPrograms();
-    for(auto lightObject : objectManager.lightObjects)
-        lightObject->deleteShadowMap();
-}
-
 static void leaveOptionsMenu(GUIButton* button) {
-    optionsState.saveOptions();
-    updateGraphicOptions();
     menu.setMenu((levelManager.gameStatus == noGame) ? Menu::Name::main : Menu::Name::gameEsc);
 }
 
@@ -57,6 +44,48 @@ static GUIImage* getThumbnailOfPackage(FilePackage* package) {
 
 Menu::Menu() :current(none), screenView(NULL) {
     
+}
+
+void Menu::updateWindow() {
+    SDL_DisplayMode desktopDisplay;
+    Uint32 windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+    SDL_GetDesktopDisplayMode(0, &desktopDisplay);
+    
+    if(optionsState.videoWidth == desktopDisplay.w && optionsState.videoHeight == desktopDisplay.h)
+        windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+    
+    if(optionsState.videoScale > 1)
+        windowFlags |= SDL_WINDOW_HIDPI;
+    
+    if(mainWindow) SDL_HideWindow(mainWindow);
+    SDL_Window* newWindow = SDL_CreateWindow("Olypsum", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                                             optionsState.videoWidth, optionsState.videoHeight, windowFlags);
+    
+    if(mainWindow) SDL_DestroyWindow(mainWindow);
+    mainWindow = newWindow;
+    SDL_RaiseWindow(mainWindow);
+    if(glContext)
+        SDL_GL_MakeCurrent(mainWindow, glContext);
+    else {
+        glContext = SDL_GL_CreateContext(mainWindow);
+        SDL_GL_SetSwapInterval(optionsState.vSyncEnabled);
+    }
+    
+    float videoScale = 1.0;
+    SDL_GetWindowScale(mainWindow, &videoScale, &videoScale);
+    optionsState.videoScale = videoScale;
+}
+
+void Menu::updateVideoResulution() {
+    SDL_GetWindowSize(mainWindow, &optionsState.videoWidth, &optionsState.videoHeight);
+    if(levelManager.gameStatus != noGame) {
+        mainFBO.init();
+        mainCam->aspect = (float)optionsState.videoWidth/optionsState.videoHeight;
+        mainCam->updateViewMat();
+        for(auto lightObject : objectManager.lightObjects)
+            lightObject->deleteShadowMap();
+    }
+    menu.setMenu(menu.current);
 }
 
 void Menu::consoleAdd(const std::string& message, float duration) {
@@ -155,10 +184,14 @@ void Menu::gameTick() {
     
     switch(current) {
         case loading: {
-            if(loadingScreen == loadingScreenTime) {
-                loadDynamicShaderPrograms();
-                profiler.markFrame();
-            }
+            if(!shaderPrograms[solidGSP]->linked())
+                updateGBufferShaderPrograms();
+            else if(!shaderPrograms[directionalShadowLightSP]->linked())
+                updateIlluminationShaderPrograms();
+            else if(!shaderPrograms[ssaoSP]->linked())
+                updateSSAOShaderPrograms();
+            else if(!shaderPrograms[depthOfFieldSP]->linked())
+                updateDOFShaderProgram();
             
             loadingScreen -= profiler.animationFactor;
             GUIProgressBar* progressBar = static_cast<GUIProgressBar*>(screenView->children[0]);
@@ -376,47 +409,39 @@ void Menu::setMenu(Name menu) {
             label->text = fileManager.localizeString("options");
             label->fontHeight = screenView->height*0.2;
             screenView->addChild(label);
+            
             label = new GUILabel();
-            label->posX = screenView->width*-0.52;
-            label->posY = screenView->height*0.72;
+            label->posX = screenView->width*-0.5;
+            label->posY = screenView->height*0.65;
             label->text = fileManager.localizeString("graphics");
             label->fontHeight = screenView->height*0.14;
             screenView->addChild(label);
-            GUIButton* button = new GUIButton();
-            button->posY = screenView->height*-0.8;
-            button->onClick = leaveOptionsMenu;
-            screenView->addChild(button);
-            label = new GUILabel();
-            label->text = fileManager.localizeString("back");
-            label->fontHeight = screenView->height*0.1;
-            label->width = screenView->width*0.14;
-            label->sizeAlignment = GUISizeAlignment::Height;
-            button->addChild(label);
             
             GUIFramedView* view = new GUIFramedView();
             view->width = screenView->width*0.4;
             view->height = screenView->height*0.5;
-            view->posX = screenView->width*-0.52;
+            view->posX = screenView->width*-0.5;
             screenView->addChild(view);
             
             std::function<void(GUICheckBox*)> onClick[] = {
-                [button](GUICheckBox* checkBox) {
+                [](GUICheckBox* checkBox) {
                     optionsState.vSyncEnabled = (checkBox->state == GUIButton::State::Pressed);
                     SDL_GL_SetSwapInterval(optionsState.vSyncEnabled);
-                }, [button](GUICheckBox* checkBox) {
+                }, [this](GUICheckBox* checkBox) {
                     SDL_SetWindowFullscreen(mainWindow, (SDL_GetWindowFlags(mainWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP)
                                             ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
-                }, [button](GUICheckBox* checkBox) {
-                    
+                    updateVideoResulution();
+                }, [this](GUICheckBox* checkBox) {
+                    optionsState.videoScale = (optionsState.videoScale > 1) ? 1 : 2;
+                    updateWindow();
+                    updateVideoResulution();
                 }, [](GUICheckBox* checkBox) {
                     optionsState.cubemapsEnabled = (checkBox->state == GUIButton::State::Pressed);
-                    updateGraphicOptions();
+                    updateIlluminationShaderPrograms();
                 }, [](GUICheckBox* checkBox) {
                     optionsState.edgeSmoothEnabled = (checkBox->state == GUIButton::State::Pressed);
-                    updateGraphicOptions();
                 }, [](GUICheckBox* checkBox) {
                     optionsState.screenBlurFactor = (checkBox->state == GUIButton::State::Pressed) ? 0.0 : -1.0;
-                    updateGraphicOptions();
                 }
             };
             bool checkBoxActive[] = {
@@ -450,31 +475,16 @@ void Menu::setMenu(Name menu) {
                 checkBox->posY = label->posY;
                 checkBox->onClick = onClick[i];
                 checkBox->state = (checkBoxActive[i]) ? GUIButton::State::Pressed : GUIButton::State::Released;
-                if(i == 2) checkBox->enabled = false;
+                checkBox->enabled = (i != 2 || getMaxVideoScale() > 1.0);
                 view->addChild(checkBox);
             }
-            
-            /*button = new GUIButton();
-            button->posX = view->width*-0.52;
-            button->posY = screenView->height*(0.06);
-            button->onClick = [this](GUIButton* button) {
-                SDL_SetWindowFullscreen(mainWindow, (SDL_GetWindowFlags(mainWindow)
-                                        & SDL_WINDOW_FULLSCREEN_DESKTOP) ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
-            };
-            view->addChild(button);
-            label = new GUILabel();
-            label->text = fileManager.localizeString("fullScreen");
-            label->fontHeight = screenView->height*0.05;
-            label->width = screenView->width*0.15;
-            label->sizeAlignment = GUISizeAlignment::Height;
-            button->addChild(label);*/
             
             unsigned int sliderSteps[] = { 3, 3, 4, 4, 3 };
             std::function<void(GUISlider*, bool)> onChangeGraphics[] = {
                 [](GUISlider* slider, bool dragging) {
                     if(dragging) return;
                     optionsState.depthOfFieldQuality = slider->value*3.0;
-                    updateGraphicOptions();
+                    updateDOFShaderProgram();
                 }, [](GUISlider* slider, bool dragging) {
                     if(dragging) return;
                     optionsState.surfaceQuality = slider->value*3.0;
@@ -486,19 +496,19 @@ void Menu::setMenu(Name menu) {
                             if(texture)
                                 texture->updateFilters();
                         }
-                    updateGraphicOptions();
+                    updateGBufferShaderPrograms();
                 }, [](GUISlider* slider, bool dragging) {
                     if(dragging) return;
                     optionsState.shadowQuality = slider->value*4.0;
-                    updateGraphicOptions();
+                    updateIlluminationShaderPrograms();
                 }, [](GUISlider* slider, bool dragging) {
                     if(dragging) return;
                     optionsState.ssaoQuality = slider->value*4.0;
-                    updateGraphicOptions();
+                    updateSSAOShaderPrograms();
                 }, [](GUISlider* slider, bool dragging) {
                     if(dragging) return;
                     optionsState.blendingQuality = slider->value*3.0;
-                    updateGraphicOptions();
+                    updateGBufferShaderPrograms();
                 }
             };
             unsigned char sliderValuesGraphics[] = {
@@ -560,16 +570,16 @@ void Menu::setMenu(Name menu) {
             };
             for(char m = 0; m < 4; m += 2) {
                 label = new GUILabel();
-                label->posX = screenView->width*0.52;
-                label->posY = screenView->height*(0.72-0.28*m);
+                label->posX = screenView->width*0.5;
+                label->posY = screenView->height*(0.65-0.35*m);
                 label->text = fileManager.localizeString((m == 0) ? "sound" : "mouse");
                 label->fontHeight = screenView->height*0.14;
                 screenView->addChild(label);
                 view = new GUIFramedView();
                 view->width = screenView->width*0.4;
-                view->height = screenView->height*0.16;
-                view->posX = screenView->width*0.52;
-                view->posY = screenView->height*(0.46-0.28*m);
+                view->height = screenView->height*0.15;
+                view->posX = screenView->width*0.5;
+                view->posY = screenView->height*(0.35-0.35*m);
                 screenView->addChild(view);
                 for(unsigned char i = 0; i < 2; i ++) {
                     label = new GUILabel();
@@ -591,9 +601,20 @@ void Menu::setMenu(Name menu) {
                 }
             }
             
+            GUIButton* button = new GUIButton();
+            button->posX = screenView->width*-0.5;
+            button->posY = screenView->height*-0.8;
+            button->onClick = leaveOptionsMenu;
+            screenView->addChild(button);
+            label = new GUILabel();
+            label->text = fileManager.localizeString("back");
+            label->fontHeight = screenView->height*0.1;
+            label->width = screenView->width*0.14;
+            label->sizeAlignment = GUISizeAlignment::Height;
+            button->addChild(label);
             button = new GUIButton();
-            button->posX = screenView->width*0.52;
-            button->posY = screenView->height*-0.48;
+            button->posX = screenView->width*0.5;
+            button->posY = screenView->height*-0.8;
             button->onClick = [this](GUIButton* button) {
                 setMenu(languages);
             };
@@ -663,8 +684,41 @@ void Menu::setMenu(Name menu) {
             label->fontHeight = screenView->height*0.2;
             screenView->addChild(label);
             
+            GUIScrollView* view = new GUIScrollView();
+            view->width = screenView->width*0.7;
+            view->height = screenView->height*0.6;
+            view->content.innerShadow = view->content.cornerRadius * 0.5;
+            screenView->addChild(view);
+            
+            label = new GUILabel();
+            label->text = std::string("Engine: Alexander Meißner\nDeveloper Kit: Noah Hummel\n© 2012, Gamefortec");
+            label->posY = view->height*0.6;
+            label->width = screenView->width*0.8;
+            label->fontHeight = screenView->height*0.1;
+            label->sizeAlignment = GUISizeAlignment::Height;
+            view->addChild(label);
+            
             GUIButton* button = new GUIButton();
-            button->posX = screenView->width*-0.4;
+            button->posY = screenView->height*0.14;
+            button->onClick = [](GUIButton* button) {
+                openExternURL("http://gamefortec.net/");
+            };
+            view->addChild(button);
+            label = new GUILabel();
+            label->text = "http://gamefortec.net/";
+            label->fontHeight = screenView->height*0.1;
+            label->sizeAlignment = GUISizeAlignment::All;
+            button->addChild(label);
+            
+            label = new GUILabel();
+            label->text = std::string("Using: SDL2, SDL2-TTF, SDL2-Image,\nBullet Physics: © 2012, Advanced Micro Devices, Inc.\nOgg / Vorbis: © 2012, Xiph.Org Foundation\nLeap SDK: © 2012, Leap Motion, Inc.\nV8: © 2012, Google, Inc.");
+            label->posY = -view->height*0.5;
+            label->width = screenView->width*0.8;
+            label->fontHeight = screenView->height*0.1;
+            label->sizeAlignment = GUISizeAlignment::Height;
+            view->addChild(label);
+            
+            button = new GUIButton();
             button->posY = screenView->height*-0.8;
             button->onClick = [this](GUIButton* button) {
                 setMenu(main);
@@ -676,26 +730,6 @@ void Menu::setMenu(Name menu) {
             label->width = screenView->width*0.14;
             label->sizeAlignment = GUISizeAlignment::Height;
             button->addChild(label);
-            
-            button = new GUIButton();
-            button->posX = screenView->width*0.4;
-            button->posY = screenView->height*-0.8;
-            button->onClick = [](GUIButton* button) {
-                openExternURL("http://gamefortec.net/");
-            };
-            screenView->addChild(button);
-            label = new GUILabel();
-            label->text = "http://gamefortec.net/";
-            label->fontHeight = screenView->height*0.1;
-            label->sizeAlignment = GUISizeAlignment::All;
-            button->addChild(label);
-            
-            label = new GUILabel();
-            label->text = std::string("Core Software: Alexander Meißner\nSupporting Software: Noah Hummel");
-            label->width = screenView->width*0.8;
-            label->fontHeight = screenView->height*0.1;
-            label->sizeAlignment = GUISizeAlignment::Height;
-            screenView->addChild(label);
         } break;
         case inGame: {
             GUIView* view = new GUIView();

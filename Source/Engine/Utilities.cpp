@@ -231,8 +231,8 @@ double getTime() {
 #endif
 }
 
-const Uint8* keyState;
-int keyStateSize;
-SDL_Window* mainWindow;
-SDL_GLContext glContext;
+const Uint8* keyState = NULL;
+int keyStateSize = 0;
+SDL_Window* mainWindow = NULL;
+SDL_GLContext glContext = NULL;
 std::string executablePath, resourcesPath, supportPath;

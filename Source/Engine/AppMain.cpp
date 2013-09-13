@@ -50,26 +50,9 @@ void AppMain() {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+        SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
         
-        SDL_DisplayMode desktopDisplay;
-        Uint32 windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
-        SDL_GetDesktopDisplayMode(0, &desktopDisplay);
-        
-        if(optionsState.videoWidth == desktopDisplay.w && optionsState.videoHeight == desktopDisplay.h)
-            windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-        
-        if(optionsState.videoScale > 1)
-            windowFlags |= SDL_WINDOW_HIDPI;
-        
-        mainWindow = SDL_CreateWindow("Olypsum", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                      optionsState.videoWidth, optionsState.videoHeight, windowFlags);
-        
-        float videoScale = 1.0;
-        SDL_GetWindowScale(mainWindow, &videoScale, &videoScale);
-        optionsState.videoScale = videoScale;
-        
-        glContext = SDL_GL_CreateContext(mainWindow);
-        SDL_GL_SetSwapInterval(optionsState.vSyncEnabled);
+        menu.updateWindow();
     
         log(info_log, std::string("Engine Version: ")+VERSION);
         log(info_log, std::string("Multi Threading: ")+stringOf(std::thread::hardware_concurrency())+" CPUs");
@@ -129,21 +112,8 @@ void AppMain() {
                                 menu.setPause(true);
                         break;
                         case SDL_WINDOWEVENT_RESIZED:
-                            SDL_GetWindowSize(mainWindow, &optionsState.videoWidth, &optionsState.videoHeight);
-                            menu.setMenu(menu.current);
-                            mainFBO.init();
-                            if(menu.current == Menu::inGame) {
-                                mainCam->updateViewMat();
-                                for(auto lightObject : objectManager.lightObjects)
-                                    lightObject->deleteShadowMap();
-                            }
+                            menu.updateVideoResulution();
                         break;
-                        /*case SDL_WINDOWEVENT_MAXIMIZED: {
-                            int w, h;
-                            SDL_GetWindowSize(mainWindow, &w, &h);
-                            if(w != optionsState.videoWidth && h != optionsState.videoHeight)
-                                SDL_SetWindowFullscreen(mainWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
-                        } break;*/
                     }
                 break;
                 case SDL_KEYDOWN:

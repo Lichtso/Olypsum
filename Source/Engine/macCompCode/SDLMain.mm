@@ -18,4 +18,8 @@
     AppMain();
 }
 
+float getMaxVideoScale() {
+    return [[NSScreen mainScreen] backingScaleFactor];
+}
+
 @end

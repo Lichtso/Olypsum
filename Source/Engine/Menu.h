@@ -37,6 +37,8 @@ class Menu {
     bool  mouseFixed = true;
     
     Menu();
+    void updateWindow();
+    void updateVideoResulution();
     void consoleAdd(const std::string& message, float duration = 10.0);
     void handleMouseDown(Uint8 button);
     void handleMouseUp(Uint8 button);

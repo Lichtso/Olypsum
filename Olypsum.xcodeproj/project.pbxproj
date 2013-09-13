@@ -41,6 +41,9 @@
 		11511420170C1A0E00F77236 /* ScriptIntersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */; };
 		11511422170CBE6700F77236 /* libNetLink.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11511421170CBE6700F77236 /* libNetLink.a */; };
 		11511425170D9B7C00F77236 /* ScriptDisplayObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11511423170D9B7B00F77236 /* ScriptDisplayObject.cpp */; };
+		1157447217E2F78F00416B67 /* SDL2.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1149A7DA17E111D20038015E /* SDL2.framework */; };
+		1157447317E2F78F00416B67 /* SDL2_image.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1149A7DC17E111D90038015E /* SDL2_image.framework */; };
+		1157447417E2F78F00416B67 /* SDL2_ttf.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1149A7DD17E111D90038015E /* SDL2_ttf.framework */; };
 		1160B650178F2E57002ADF40 /* libLeap.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1160B64F178F2E57002ADF40 /* libLeap.dylib */; };
 		11623857171DF1050027561B /* ScriptGUIRect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11623855171DF1050027561B /* ScriptGUIRect.cpp */; };
 		11648F6E153DEE63004CA74D /* FBO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11648F6D153DEE63004CA74D /* FBO.cpp */; };
@@ -116,6 +119,9 @@
 				1114B87716A8937B00B1CD41 /* BulletMultiThreaded.framework in CopyFiles */,
 				1114B87816A8937B00B1CD41 /* BulletSoftBody.framework in CopyFiles */,
 				1114B87916A8937B00B1CD41 /* LinearMath.framework in CopyFiles */,
+				1157447217E2F78F00416B67 /* SDL2.framework in CopyFiles */,
+				1157447317E2F78F00416B67 /* SDL2_image.framework in CopyFiles */,
+				1157447417E2F78F00416B67 /* SDL2_ttf.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

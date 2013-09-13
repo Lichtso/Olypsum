@@ -47,32 +47,6 @@ void ScriptCamObject::SetFar(v8::Local<v8::String> property, v8::Local<v8::Value
     objectPtr->far = value->NumberValue();
 }
 
-void ScriptCamObject::GetWidth(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
-    v8::HandleScope handleScope;
-    CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->width);
-}
-
-void ScriptCamObject::SetWidth(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
-    v8::HandleScope handleScope;
-    if(!value->IsNumber()) return;
-    CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
-    objectPtr->width = value->NumberValue();
-}
-
-void ScriptCamObject::GetHeight(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
-    v8::HandleScope handleScope;
-    CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->height);
-}
-
-void ScriptCamObject::SetHeight(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
-    v8::HandleScope handleScope;
-    if(!value->IsNumber()) return;
-    CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
-    objectPtr->height = value->NumberValue();
-}
-
 void ScriptCamObject::GetViewRay(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 2)
@@ -106,8 +80,6 @@ ScriptCamObject::ScriptCamObject() :ScriptBaseObject("CamObject") {
     objectTemplate->SetAccessor(v8::String::New("fov"), GetFov, SetFov);
     objectTemplate->SetAccessor(v8::String::New("near"), GetNear, SetNear);
     objectTemplate->SetAccessor(v8::String::New("far"), GetFar, SetFar);
-    objectTemplate->SetAccessor(v8::String::New("width"), GetWidth, SetWidth);
-    objectTemplate->SetAccessor(v8::String::New("height"), GetHeight, SetHeight);
     objectTemplate->Set(v8::String::New("getViewRay"), v8::FunctionTemplate::New(GetViewRay));
     objectTemplate->Set(v8::String::New("setMainCam"), v8::FunctionTemplate::New(SetMainCam));
     

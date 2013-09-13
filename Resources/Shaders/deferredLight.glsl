@@ -30,7 +30,11 @@ uniform sampler2DShadow sampler4;
 #elif SHADOWS_ACTIVE == 3
 uniform samplerCubeShadow sampler3;
 uniform vec2 shadowDepthTransform;
-uniform vec3 shadowReflector[6];
+vec3 shadowReflector[6] = vec3[](
+    vec3(0.0, 1.0, 0.0), vec3(0.0, 0.0, 1.0),
+    vec3(1.0, 0.0, 0.0), vec3(0.0, 0.0, 1.0),
+    vec3(0.0, 1.0, 0.0), vec3(1.0, 0.0, 0.0)
+);
 #endif
 uniform mat4 lShadowMat;
 

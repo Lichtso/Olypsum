@@ -67,17 +67,15 @@ float LightObject::getRange() {
 }
 
 bool LightObject::generateShadowMap(bool shadowActive) {
-    if(!shadowActive) return false;
-    if(!shadowMap) {
-        shadowMap = new ColorBuffer(true,
-                                    optionsState.cubemapsEnabled && dynamic_cast<PositionalLight*>(this),
-                                    mainFBO.shadowMapSize, mainFBO.shadowMapSize);
-        if(glGetError() == GL_OUT_OF_MEMORY) {
-            log(warning_log, "GL_OUT_OF_MEMORY");
+    if(!shadowActive) {
+        if(shadowMap)
             deleteShadowMap();
-            return false;
-        }
+        return false;
     }
+    if(!shadowMap)
+        shadowMap = new ColorBuffer(true, optionsState.cubemapsEnabled && dynamic_cast<PositionalLight*>(this),
+                                    mainFBO.shadowMapSize, mainFBO.shadowMapSize);
+    shadowCam.use();
     objectManager.currentShadowLight = this;
     return DisplayObject::gameTick();
 }
@@ -145,7 +143,6 @@ DirectionalLight::DirectionalLight() {
     v8::Handle<v8::Value> external = v8::External::New(this);
     scriptDirectionalLight.functionTemplate->GetFunction()->NewInstance(1, &external);
 
-    shadowCam.fov = 0.0;
     shadowCam.near = 1.0;
 }
 
@@ -170,8 +167,8 @@ void DirectionalLight::setTransformation(const btTransform& transformation) {
 }
 
 void DirectionalLight::setBounds(btVector3 bounds) {
-    shadowCam.width = bounds.x();
-    shadowCam.height = bounds.y();
+    shadowCam.fov = -bounds.y();
+    shadowCam.aspect = bounds.x()/bounds.y();
     shadowCam.far = bounds.z();
     shadowCam.near = bounds.z()*0.01;
     
@@ -180,14 +177,13 @@ void DirectionalLight::setBounds(btVector3 bounds) {
 }
 
 btVector3 DirectionalLight::getBounds() {
-    return btVector3(shadowCam.width, shadowCam.height, shadowCam.far);
+    return btVector3(-shadowCam.fov*shadowCam.aspect, -shadowCam.fov, shadowCam.far);
 }
 
 bool DirectionalLight::generateShadowMap(bool shadowActive) {
     shadowCam.updateViewMat();
     if(!LightObject::generateShadowMap(shadowActive)) return true;
     objectManager.currentShadowIsParabolid = false;
-    shadowCam.use();
     
     glDisable(GL_BLEND);
     mainFBO.renderInTexture(shadowMap, GL_TEXTURE_2D);
@@ -197,7 +193,7 @@ bool DirectionalLight::generateShadowMap(bool shadowActive) {
 
 void DirectionalLight::draw() {
     modelMat.setIdentity();
-    modelMat.setBasis(modelMat.getBasis().scaled(btVector3(shadowCam.width, shadowCam.height, shadowCam.far*0.5)));
+    modelMat.setBasis(modelMat.getBasis().scaled(btVector3(-shadowCam.fov*shadowCam.aspect, -shadowCam.fov, shadowCam.far*0.5)));
     modelMat.setOrigin(btVector3(0.0, 0.0, -shadowCam.far*0.5));
     modelMat = shadowCam.getTransformation()*modelMat;
     
@@ -225,7 +221,7 @@ rapidxml::xml_node<xmlUsedCharType>* DirectionalLight::write(rapidxml::xml_docum
     rapidxml::xml_node<xmlUsedCharType>* boundsNode = doc.allocate_node(rapidxml::node_element);
     boundsNode->name("Bounds");
     char buffer[64];
-    sprintf(buffer, "%f %f %f", shadowCam.width, shadowCam.height, shadowCam.far);
+    sprintf(buffer, "%f %f %f", -shadowCam.fov*shadowCam.aspect, -shadowCam.fov, shadowCam.far);
     boundsNode->value(doc.allocate_string(buffer));
     node->append_node(boundsNode);
     return node;
@@ -238,8 +234,6 @@ SpotLight::SpotLight() {
     v8::Handle<v8::Value> external = v8::External::New(this);
     scriptSpotLight.functionTemplate->GetFunction()->NewInstance(1, &external);
     
-    shadowCam.width = 1.0;
-    shadowCam.height = 1.0;
     shadowCam.near = 0.1;
 }
 
@@ -275,7 +269,6 @@ void SpotLight::setTransformation(const btTransform& transformation) {
 }
 
 void SpotLight::setBounds(float cutoff, float range) {
-    shadowCam.width = shadowCam.height = 1.0;
     shadowCam.fov = cutoff;
     shadowCam.far = range;
     
@@ -289,7 +282,6 @@ float SpotLight::getCutoff() {
 bool SpotLight::generateShadowMap(bool shadowActive) {
     if(!LightObject::generateShadowMap(shadowActive)) return true;
     objectManager.currentShadowIsParabolid = false;
-    shadowCam.use();
     shadowCam.updateViewMat();
     
     glDisable(GL_BLEND);
@@ -353,8 +345,6 @@ PositionalLight::PositionalLight() :shadowMapB(NULL) {
     v8::Handle<v8::Value> external = v8::External::New(this);
     scriptPositionalLight.functionTemplate->GetFunction()->NewInstance(1, &external);
     
-    shadowCam.width = 1.0;
-    shadowCam.height = 1.0;
     shadowCam.near = 0.1;
 }
 
@@ -412,16 +402,6 @@ bool PositionalLight::getOmniDirectional() {
 
 bool PositionalLight::generateShadowMap(bool shadowActive) {
     if(!LightObject::generateShadowMap(shadowActive)) return true;
-    if(getOmniDirectional() && !shadowMapB && !optionsState.cubemapsEnabled) {
-        shadowMapB = new ColorBuffer(true, false,
-                                     mainFBO.shadowMapSize, mainFBO.shadowMapSize);
-        if(glGetError() == GL_OUT_OF_MEMORY) {
-            log(warning_log, "GL_OUT_OF_MEMORY");
-            delete shadowMapB;
-            shadowMapB = NULL;
-        }
-    }
-    shadowCam.use();
     shadowCam.updateViewMat();
     Matrix4 viewMat = shadowCam.viewMat;
     
@@ -464,6 +444,9 @@ bool PositionalLight::generateShadowMap(bool shadowActive) {
         shadowCam.viewMat = viewMat;
         shadowCam.fov = fov;
     }else{
+        if(getOmniDirectional() && !shadowMapB)
+            shadowMapB = new ColorBuffer(true, false, mainFBO.shadowMapSize, mainFBO.shadowMapSize);
+        
         glEnable(GL_CLIP_DISTANCE0);
         objectManager.currentShadowIsParabolid = true;
         shaderPrograms[solidParabolidShadowSP]->use();

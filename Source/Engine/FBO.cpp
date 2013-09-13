@@ -36,6 +36,8 @@ ColorBuffer::ColorBuffer(bool shadowMapB, bool cubeMapB, unsigned int widthB, un
         }else
             glTexImage2D(textureTarget, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     }
+    if(glGetError() == GL_OUT_OF_MEMORY)
+        log(warning_log, "GL_OUT_OF_MEMORY");
 }
 
 ColorBuffer::~ColorBuffer() {
