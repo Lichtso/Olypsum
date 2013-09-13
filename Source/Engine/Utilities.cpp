@@ -231,5 +231,8 @@ double getTime() {
 #endif
 }
 
-unsigned int screenSize[3] = { 0, 0, 1 };
+const Uint8* keyState;
+int keyStateSize;
+SDL_Window* mainWindow;
+SDL_GLContext glContext;
 std::string executablePath, resourcesPath, supportPath;

@@ -22,8 +22,8 @@
 #include <OpenGL/gl3.h>
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>
-#include <SDL_image/SDL_image.h>
-#include <SDL_ttf/SDL_ttf.h>
+#include <SDL2_image/SDL_image.h>
+#include <SDL2_ttf/SDL_ttf.h>
 #else
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
@@ -33,7 +33,7 @@
 #include <SDL/SDL_ttf.h>
 #endif
 
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 #include <BulletCollision/btBulletCollisionCommon.h>
 #include <BulletDynamics/btBulletDynamicsCommon.h>
 #include <BulletSoftBody/btSoftRigidDynamicsWorld.h>
@@ -173,7 +173,10 @@ inline btVector3 leapToBullet(Leap::Vector vec) {
 //! System time in seconds
 double getTime();
 
-extern unsigned int screenSize[3];
+extern const Uint8* keyState;
+extern int keyStateSize;
+extern SDL_Window* mainWindow;
+extern SDL_GLContext glContext;
 extern std::string executablePath, resourcesPath, supportPath;
 
 #endif

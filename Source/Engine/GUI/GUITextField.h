@@ -30,7 +30,7 @@ class GUITextField : public GUIFramedView {
     void draw(btVector3 transform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
-    bool handleKeyDown(SDL_keysym* key);
+    bool handleKeyDown(SDL_Keycode key);
     //! Sets the offset of the cursorX in UTF8 characters
     void setCursorX(unsigned int cursorX);
     //! Returns the offset of the cursorX in UTF8 characters

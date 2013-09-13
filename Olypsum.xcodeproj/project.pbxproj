@@ -13,9 +13,6 @@
 		1114B84816A88BD100B1CD41 /* BulletMultiThreaded.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B84216A88BD100B1CD41 /* BulletMultiThreaded.framework */; };
 		1114B84916A88BD100B1CD41 /* BulletSoftBody.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B84316A88BD100B1CD41 /* BulletSoftBody.framework */; };
 		1114B84A16A88BD100B1CD41 /* LinearMath.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B84416A88BD100B1CD41 /* LinearMath.framework */; };
-		1114B86B16A8930E00B1CD41 /* SDL_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B86816A8930E00B1CD41 /* SDL_image.framework */; };
-		1114B86C16A8930E00B1CD41 /* SDL_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B86916A8930E00B1CD41 /* SDL_ttf.framework */; };
-		1114B86D16A8930E00B1CD41 /* SDL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B86A16A8930E00B1CD41 /* SDL.framework */; };
 		1114B87016A8933200B1CD41 /* Ogg.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B86E16A8933200B1CD41 /* Ogg.framework */; };
 		1114B87116A8933200B1CD41 /* Vorbis.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B86F16A8933200B1CD41 /* Vorbis.framework */; };
 		1114B87316A8937B00B1CD41 /* Ogg.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1114B86E16A8933200B1CD41 /* Ogg.framework */; };
@@ -25,9 +22,6 @@
 		1114B87716A8937B00B1CD41 /* BulletMultiThreaded.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1114B84216A88BD100B1CD41 /* BulletMultiThreaded.framework */; };
 		1114B87816A8937B00B1CD41 /* BulletSoftBody.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1114B84316A88BD100B1CD41 /* BulletSoftBody.framework */; };
 		1114B87916A8937B00B1CD41 /* LinearMath.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1114B84416A88BD100B1CD41 /* LinearMath.framework */; };
-		1114B87B16A8937B00B1CD41 /* SDL_image.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1114B86816A8930E00B1CD41 /* SDL_image.framework */; };
-		1114B87C16A8937B00B1CD41 /* SDL_ttf.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1114B86916A8930E00B1CD41 /* SDL_ttf.framework */; };
-		1114B87D16A8937B00B1CD41 /* SDL.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1114B86A16A8930E00B1CD41 /* SDL.framework */; };
 		1115463916A0BA4200F27340 /* VertexArrayObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1115463716A0BA4200F27340 /* VertexArrayObject.cpp */; };
 		1118251B14F2553A00F198A7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118251A14F2553A00F198A7 /* Cocoa.framework */; };
 		1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254114F2559600F198A7 /* OpenGL.framework */; };
@@ -40,6 +34,9 @@
 		1130ECBB15BC1CA600203C2E /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1130ECBA15BC1CA600203C2E /* Menu.cpp */; };
 		11329D5A16BD8A2A000CC025 /* Profiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11329D5816BD8A29000CC025 /* Profiler.cpp */; };
 		1145E3C5170ECEBB00480189 /* ScriptSimpleObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1145E3C3170ECEBB00480189 /* ScriptSimpleObject.cpp */; };
+		1149A7DB17E111D20038015E /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1149A7DA17E111D20038015E /* SDL2.framework */; };
+		1149A7DE17E111DA0038015E /* SDL2_image.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1149A7DC17E111D90038015E /* SDL2_image.framework */; };
+		1149A7DF17E111DA0038015E /* SDL2_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1149A7DD17E111D90038015E /* SDL2_ttf.framework */; };
 		114A0E6B169064E800D2CE9C /* LevelSaver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 114A0E69169064E800D2CE9C /* LevelSaver.cpp */; };
 		11511420170C1A0E00F77236 /* ScriptIntersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */; };
 		11511422170CBE6700F77236 /* libNetLink.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11511421170CBE6700F77236 /* libNetLink.a */; };
@@ -119,9 +116,6 @@
 				1114B87716A8937B00B1CD41 /* BulletMultiThreaded.framework in CopyFiles */,
 				1114B87816A8937B00B1CD41 /* BulletSoftBody.framework in CopyFiles */,
 				1114B87916A8937B00B1CD41 /* LinearMath.framework in CopyFiles */,
-				1114B87B16A8937B00B1CD41 /* SDL_image.framework in CopyFiles */,
-				1114B87C16A8937B00B1CD41 /* SDL_ttf.framework in CopyFiles */,
-				1114B87D16A8937B00B1CD41 /* SDL.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -135,9 +129,6 @@
 		1114B84216A88BD100B1CD41 /* BulletMultiThreaded.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletMultiThreaded.framework; path = /Library/Frameworks/BulletMultiThreaded.framework; sourceTree = "<absolute>"; };
 		1114B84316A88BD100B1CD41 /* BulletSoftBody.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletSoftBody.framework; path = /Library/Frameworks/BulletSoftBody.framework; sourceTree = "<absolute>"; };
 		1114B84416A88BD100B1CD41 /* LinearMath.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LinearMath.framework; path = /Library/Frameworks/LinearMath.framework; sourceTree = "<absolute>"; };
-		1114B86816A8930E00B1CD41 /* SDL_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_image.framework; path = /Library/Frameworks/SDL_image.framework; sourceTree = "<absolute>"; };
-		1114B86916A8930E00B1CD41 /* SDL_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL_ttf.framework; path = /Library/Frameworks/SDL_ttf.framework; sourceTree = "<absolute>"; };
-		1114B86A16A8930E00B1CD41 /* SDL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL.framework; path = /Library/Frameworks/SDL.framework; sourceTree = "<absolute>"; };
 		1114B86E16A8933200B1CD41 /* Ogg.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Ogg.framework; path = /Library/Frameworks/Ogg.framework; sourceTree = "<absolute>"; };
 		1114B86F16A8933200B1CD41 /* Vorbis.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Vorbis.framework; path = /Library/Frameworks/Vorbis.framework; sourceTree = "<absolute>"; };
 		1115463716A0BA4200F27340 /* VertexArrayObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VertexArrayObject.cpp; sourceTree = "<group>"; };
@@ -163,6 +154,9 @@
 		11329D5916BD8A2A000CC025 /* Profiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Profiler.h; sourceTree = "<group>"; };
 		1145E3C3170ECEBB00480189 /* ScriptSimpleObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptSimpleObject.cpp; sourceTree = "<group>"; };
 		1145E3C4170ECEBB00480189 /* ScriptSimpleObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptSimpleObject.h; sourceTree = "<group>"; };
+		1149A7DA17E111D20038015E /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = ../../../../Library/Frameworks/SDL2.framework; sourceTree = "<group>"; };
+		1149A7DC17E111D90038015E /* SDL2_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_image.framework; path = ../../../../Library/Frameworks/SDL2_image.framework; sourceTree = "<group>"; };
+		1149A7DD17E111D90038015E /* SDL2_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_ttf.framework; path = ../../../../Library/Frameworks/SDL2_ttf.framework; sourceTree = "<group>"; };
 		114A0E69169064E800D2CE9C /* LevelSaver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelSaver.cpp; sourceTree = "<group>"; };
 		114A0E6A169064E800D2CE9C /* LevelSaver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LevelSaver.h; sourceTree = "<group>"; };
 		1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptIntersection.cpp; sourceTree = "<group>"; };
@@ -285,15 +279,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1149A7DB17E111D20038015E /* SDL2.framework in Frameworks */,
 				11511422170CBE6700F77236 /* libNetLink.a in Frameworks */,
 				1160B650178F2E57002ADF40 /* libLeap.dylib in Frameworks */,
 				1197492C17DB39FA00414CAA /* libv8.dylib in Frameworks */,
 				1114B87016A8933200B1CD41 /* Ogg.framework in Frameworks */,
 				1114B87116A8933200B1CD41 /* Vorbis.framework in Frameworks */,
-				1114B86B16A8930E00B1CD41 /* SDL_image.framework in Frameworks */,
-				1114B86C16A8930E00B1CD41 /* SDL_ttf.framework in Frameworks */,
-				1114B86D16A8930E00B1CD41 /* SDL.framework in Frameworks */,
 				1114B84616A88BD100B1CD41 /* BulletCollision.framework in Frameworks */,
+				1149A7DE17E111DA0038015E /* SDL2_image.framework in Frameworks */,
+				1149A7DF17E111DA0038015E /* SDL2_ttf.framework in Frameworks */,
 				1114B84716A88BD100B1CD41 /* BulletDynamics.framework in Frameworks */,
 				1114B84816A88BD100B1CD41 /* BulletMultiThreaded.framework in Frameworks */,
 				1114B84916A88BD100B1CD41 /* BulletSoftBody.framework in Frameworks */,
@@ -339,9 +333,9 @@
 				1114B84216A88BD100B1CD41 /* BulletMultiThreaded.framework */,
 				1114B84316A88BD100B1CD41 /* BulletSoftBody.framework */,
 				1114B84416A88BD100B1CD41 /* LinearMath.framework */,
-				1114B86816A8930E00B1CD41 /* SDL_image.framework */,
-				1114B86916A8930E00B1CD41 /* SDL_ttf.framework */,
-				1114B86A16A8930E00B1CD41 /* SDL.framework */,
+				1149A7DA17E111D20038015E /* SDL2.framework */,
+				1149A7DC17E111D90038015E /* SDL2_image.framework */,
+				1149A7DD17E111D90038015E /* SDL2_ttf.framework */,
 				1118251C14F2553A00F198A7 /* Other Frameworks */,
 			);
 			name = Frameworks;

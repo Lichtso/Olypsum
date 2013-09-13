@@ -38,7 +38,6 @@ class GUILabel : public GUIRect {
     ~GUILabel();
     void updateContent();
     void draw(btVector3 transform, GUIClipRect& parentClipRect);
-    bool handleMouseDown(int mouseX, int mouseY);
     void getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int& posX, int& posY);
     unsigned int getCharCountThatFitsIn(unsigned int width, const std::string& text);
     //! Returns the size in UTF8 characters of text

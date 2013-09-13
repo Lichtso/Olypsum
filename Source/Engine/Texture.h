@@ -55,7 +55,7 @@ class Color4 {
         B.r = r*255;
         B.g = g*255;
         B.b = b*255;
-        B.unused = a*255;
+        B.a = a*255;
         return B;
     }
 };

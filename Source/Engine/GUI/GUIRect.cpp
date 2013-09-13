@@ -54,21 +54,6 @@ bool GUIRect::handleMouseDown(int mouseX, int mouseY) {
 }
 
 bool GUIRect::handleMouseUp(int mouseX, int mouseY) {
-    return false;
-}
-
-void GUIRect::handleMouseMove(int mouseX, int mouseY) {
-    
-}
-
-bool GUIRect::handleMouseWheel(int mouseX, int mouseY, float deltaX, float deltaY) {
-    return false;
-}
-
-bool GUIRect::handleKeyDown(SDL_keysym* key) {
-    return false;
-}
-
-bool GUIRect::handleKeyUp(SDL_keysym* key) {
-    return false;
+    if(!visible || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) return false;
+    return true;
 }

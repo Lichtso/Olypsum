@@ -78,7 +78,9 @@ void FBO::initBuffer(unsigned int index) {
 }
 
 void FBO::init() {
-    shadowMapSize = pow(2, ceil(log(max(prevOptionsState.videoWidth, prevOptionsState.videoHeight)) / log(2)));
+    unsigned int width = optionsState.videoWidth * optionsState.videoScale,
+                 height = optionsState.videoHeight * optionsState.videoScale;
+    shadowMapSize = pow(2, ceil(log(max(width, height)) / log(2)));
     
     for(unsigned char i = 0; i < gBuffersCount; i ++)
         if(gBuffers[i])
@@ -92,23 +94,23 @@ void FBO::init() {
     
     initBuffer(depthDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_DEPTH_COMPONENT16,
-                 prevOptionsState.videoWidth, prevOptionsState.videoHeight,
+                 width, height,
                  0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     initBuffer(colorDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB,
-                 prevOptionsState.videoWidth, prevOptionsState.videoHeight,
+                 width, height,
                  0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     initBuffer(materialDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB,
-                 prevOptionsState.videoWidth, prevOptionsState.videoHeight,
+                 width, height,
                  0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     initBuffer(normalDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB16F,
-                 prevOptionsState.videoWidth, prevOptionsState.videoHeight,
+                 width, height,
                  0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(positionDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB32F,
-                 prevOptionsState.videoWidth, prevOptionsState.videoHeight,
+                 width, height,
                  0, GL_RGB, GL_FLOAT, NULL);
     initBuffer(specularDBuffer); //Needs shadowMapSize because it is used as color buffer for shadow map calculations
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB,
@@ -116,17 +118,16 @@ void FBO::init() {
                  0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     initBuffer(diffuseDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGB16F,
-                 prevOptionsState.videoWidth, prevOptionsState.videoHeight,
+                 width, height,
                  0, GL_RGB, GL_UNSIGNED_SHORT, NULL);
     initBuffer(transparentDBuffer);
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA,
-                 prevOptionsState.videoWidth, prevOptionsState.videoHeight,
+                 width, height,
                  0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     if(optionsState.ssaoQuality) {
         initBuffer(ssaoDBuffer);
         glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_R16F,
-                     prevOptionsState.videoWidth / prevOptionsState.videoScale,
-                     prevOptionsState.videoHeight / prevOptionsState.videoScale,
+                     optionsState.videoWidth, optionsState.videoHeight,
                      0, GL_RED, GL_FLOAT, NULL);
         glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -152,8 +153,8 @@ void FBO::copyBuffer(GLuint source, GLuint destination) {
     }
     glReadBuffer((source == 0) ? GL_BACK : GL_COLOR_ATTACHMENT0);
     glDrawBuffer((destination == 0) ? GL_BACK : GL_COLOR_ATTACHMENT1);
-    glBlitFramebuffer(0, 0, prevOptionsState.videoWidth, prevOptionsState.videoHeight,
-                      0, 0, prevOptionsState.videoWidth, prevOptionsState.videoHeight,
+    glBlitFramebuffer(0, 0, optionsState.videoWidth*optionsState.videoScale, optionsState.videoHeight*optionsState.videoScale,
+                      0, 0, optionsState.videoWidth*optionsState.videoScale, optionsState.videoHeight*optionsState.videoScale,
                       GL_COLOR_BUFFER_BIT, GL_NEAREST);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -161,7 +162,7 @@ void FBO::copyBuffer(GLuint source, GLuint destination) {
 
 void FBO::renderInGBuffers(GLuint colorBuffer, bool specular) {
     glClearColor(0, 0, 0, 0);
-    glViewport(0, 0, prevOptionsState.videoWidth, prevOptionsState.videoHeight);
+    glViewport(0, 0, optionsState.videoWidth*optionsState.videoScale, optionsState.videoHeight*optionsState.videoScale);
     glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
     GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
     

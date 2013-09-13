@@ -8,7 +8,7 @@
 
 #include "TextFont.h"
 
-TextFont::TextFont() :ttf(NULL), size(prevOptionsState.videoWidth*0.04) {
+TextFont::TextFont() :ttf(NULL), size(optionsState.videoWidth*0.04) {
     
 }
 
@@ -55,7 +55,7 @@ GLuint TextFont::renderStringToTexture(const char* str, Color4 color, bool antia
                 pixelsB[index  ] = charColor.r;
                 pixelsB[index+1] = charColor.g;
                 pixelsB[index+2] = charColor.b;
-                pixelsB[index+3] = charColor.unused;
+                pixelsB[index+3] = charColor.a;
             }
         SDL_FreeSurface(surfaceA);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surfaceB->w, surfaceB->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, surfaceB->pixels);
@@ -123,7 +123,7 @@ void TextFont::renderStringToSurface(const char* str, SDL_Surface* surfaceB, int
                 pixelsB[indexB  ] = charColor.b;
                 pixelsB[indexB+1] = charColor.g;
                 pixelsB[indexB+2] = charColor.r;
-                pixelsB[indexB+3] = charColor.unused;
+                pixelsB[indexB+3] = charColor.a;
             }
     }
     

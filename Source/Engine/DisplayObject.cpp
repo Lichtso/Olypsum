@@ -488,7 +488,7 @@ bool PlaneReflective::gameTick() {
     if(plane.dot(currentCam->getTransformation().getOrigin()) < plane.w()) return false;
     
     if(!buffer)
-        buffer = new ColorBuffer(false, false, prevOptionsState.videoWidth, prevOptionsState.videoHeight);
+        buffer = new ColorBuffer(false, false, optionsState.videoWidth, optionsState.videoHeight);
     objectManager.currentReflective = this;
     
     if(currentCam->doFrustumCulling())

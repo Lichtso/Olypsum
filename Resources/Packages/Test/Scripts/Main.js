@@ -55,27 +55,28 @@ exports.onpause = function(paused) {
 };*/
 
 exports.ongametick = function() {
+	if(gamePaused) return;
 	var Cam = require('Cam');
 
 	var transform = Cam.camObject.transformation(),
 		speed = animationFactor*5.0;
 
-	if(Keyboard.isKeyPressed(97)) //A
+	if(Keyboard.isKeyPressed(4)) //A
 		transform.w(transform.w().add(transform.x().mult(-speed)));
-	else if(Keyboard.isKeyPressed(100)) //D
+	else if(Keyboard.isKeyPressed(7)) //D
 		transform.w(transform.w().add(transform.x().mult(speed)));
 
-	if(Keyboard.isKeyPressed(101)) //E
+	if(Keyboard.isKeyPressed(8)) //E
 		transform.w(transform.w().add(transform.y().mult(-speed)));
-	else if(Keyboard.isKeyPressed(113)) //Q
+	else if(Keyboard.isKeyPressed(20)) //Q
 		transform.w(transform.w().add(transform.y().mult(speed)));
 
-	if(Keyboard.isKeyPressed(119)) //W
+	if(Keyboard.isKeyPressed(26)) //W
 		transform.w(transform.w().add(transform.z().mult(-speed)));
-	else if(Keyboard.isKeyPressed(115)) //S
+	else if(Keyboard.isKeyPressed(22)) //S
 		transform.w(transform.w().add(transform.z().mult(speed)));
 
-	if(!Keyboard.isKeyPressed(308)) { //Alt left
+	if(!Keyboard.isKeyPressed(225)) { //Shift left
 		var rotation = transform.rotation(), up = new Vector3(0.0, 1.0, 0.0);
 		transform.rotation(rotation.getProduct(new Quaternion(-Mouse.x()*0.01, Mouse.y()*0.01, 0.0)));
 		transform.y(up);
@@ -95,7 +96,7 @@ exports.ongametick = function() {
         velocity.mult(1.0/speed);
         speed = Math.min(speed*5.0, 10.0);
         
-        if(Keyboard.isKeyPressed(308)) //Alt left
+        if(Keyboard.isKeyPressed(225)) //Shift left
             exports.grabbedObject.angularVelocity(camTransform.getRotated(new Vector3(-Mouse.y()*0.1, Mouse.x()*0.1, 0.0)));
         else
             exports.grabbedObject.angularVelocity(new Vector3(0.0, 0.0, 0.0));

@@ -131,8 +131,10 @@ GUIScreenView::~GUIScreenView() {
 }
 
 void GUIScreenView::updateContent() {
-    width = prevOptionsState.videoWidth >> 1;
-    height = prevOptionsState.videoHeight >> 1;
+    guiCam->width = width = (optionsState.videoWidth >> 1) * optionsState.videoScale;
+    guiCam->height = height = (optionsState.videoHeight >> 1) * optionsState.videoScale;
+    guiCam->updateViewMat();
+    
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->updateContent();
 }
@@ -140,8 +142,6 @@ void GUIScreenView::updateContent() {
 void GUIScreenView::drawScreen() {
     if(!visible) return;
     
-    width = prevOptionsState.videoWidth >> 1;
-    height = prevOptionsState.videoHeight >> 1;
     GUIClipRect clipRect;
     clipRect.minPosX = -width;
     clipRect.minPosY = -height;
@@ -224,12 +224,12 @@ bool GUIScreenView::handleMouseWheel(int mouseX, int mouseY, float deltaX, float
     return false;
 }
 
-bool GUIScreenView::handleKeyDown(SDL_keysym* key) {
+bool GUIScreenView::handleKeyDown(SDL_Keycode key) {
     if(!focused) return false;
     return focused->handleKeyDown(key);
 }
 
-bool GUIScreenView::handleKeyUp(SDL_keysym* key) {
+bool GUIScreenView::handleKeyUp(SDL_Keycode key) {
     if(!focused) return false;
     return focused->handleKeyUp(key);
 }

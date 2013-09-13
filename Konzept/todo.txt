@@ -1,11 +1,12 @@
-Upgrade to SDL 2.0
-Ubuntu port: Shadowmap lookup errors, clipboard, application bundle, dynamic libs
+SDL2: GUI rescale: rect borders, retina options, test Leap Motion
+Ubuntu port: Clipboard, application bundle, dynamic libs
 V8 API: Create/Delete Objects, Documentation
 Support to load another initial container than "Containers/start.xml"
 Implement btSoftBody
 Leap Motion: V8 API
 
 Not sure:
+Split screen support
 PCSS
 Fog
 Enviornment maping
@@ -27,6 +28,7 @@ Performance issue of explosions
 
 Bugs:
 Check memory leaks
+Ubuntu NVIDIA diver shadow map lookup bug
 Prohibit cyclic FilePackage dependencies
 Prohibit cyclic parent-child relationships in GUIView
 Parallax Occlusion / Position / Depth

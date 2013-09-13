@@ -49,8 +49,8 @@ class GUIScreenView : public GUIView {
     bool handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
     bool handleMouseWheel(int mouseX, int mouseY, float deltaX, float deltaY);
-    bool handleKeyDown(SDL_keysym* key);
-    bool handleKeyUp(SDL_keysym* key);
+    bool handleKeyDown(SDL_Keycode key);
+    bool handleKeyUp(SDL_Keycode key);
     void setModalView(GUIRect* modalView);
 };
 

@@ -106,11 +106,11 @@ void GUITextField::draw(btVector3 transform, GUIClipRect& parentClipRect) {
     bool cursorActive = getFocus();
     if(cursorActive) {
         if(fmod(cursorDrawTick, 0.25) >= 0.2) {
-            if(keyState[SDLK_BACKSPACE])
+            if(keyState[SDL_SCANCODE_BACKSPACE])
                 removeChar();
-            else if(keyState[SDLK_LEFT])
+            else if(keyState[SDL_SCANCODE_LEFT])
                 moveCursorLeft();
-            else if(keyState[SDLK_RIGHT])
+            else if(keyState[SDL_SCANCODE_RIGHT])
                 moveCursorRight();
         }
         
@@ -164,16 +164,16 @@ void GUITextField::handleMouseMove(int mouseX, int mouseY) {
     if(prevHighlighted != highlighted) updateContent();
 }
 
-bool GUITextField::handleKeyDown(SDL_keysym* key) {
-    if(keyState[SDLK_LMETA] || keyState[SDLK_RMETA]) {
-        switch(key->sym) {
+bool GUITextField::handleKeyDown(SDL_Keycode key) {
+    if(keyState[SDL_SCANCODE_LGUI] || keyState[SDL_SCANCODE_RGUI]) {
+        switch(key) {
             case SDLK_c:
-                setClipboardText(static_cast<GUILabel*>(children[0])->text.c_str());
+                SDL_SetClipboardText(static_cast<GUILabel*>(children[0])->text.c_str());
                 break;
-            case SDLK_v: {
-                if(!hasClipboardText()) break;
-                insertStr(getClipboardText().c_str());
-            } break;
+            case SDLK_v:
+                if(SDL_HasClipboardText())
+                    insertStr(SDL_GetClipboardText());
+                break;
             default:
                 
                 break;
@@ -181,38 +181,38 @@ bool GUITextField::handleKeyDown(SDL_keysym* key) {
         return true;
     }
     
-    switch(key->sym) {
+    switch(key) {
         case SDLK_TAB:
         case SDLK_RETURN:
         case SDLK_ESCAPE:
             setFocus(false);
-        break;
+            break;
         case SDLK_UP:
             cursorX = 0;
             cursorDrawTick = 0.0;
-        break;
+            break;
         case SDLK_DOWN:
             cursorX = static_cast<GUILabel*>(children[0])->text.size();
             cursorDrawTick = 0.0;
-        break;
+            break;
         case SDLK_BACKSPACE:
             removeChar();
-        break;
+            break;
         case SDLK_LEFT:
             moveCursorLeft();
-        break;
+            break;
         case SDLK_RIGHT:
             moveCursorRight();
-        break;
+            break;
         default: {
-            char str[] = { (char)(key->unicode & 0xFF), 0, 0, 0 };
-            if(key->unicode > 0x07FF) {
-                str[0] = 0xE0 | ((key->unicode >> 12) & 0x0F);
-                str[1] = 0x80 | ((key->unicode >> 6) & 0x3F);
-                str[2] = 0x80 | (key->unicode & 0x3F);
-            }else if(key->unicode > 0x007F) {
-                str[0] = 0xC0 | ((key->unicode >> 6) & 0x1F);
-                str[1] = 0x80 | (key->unicode & 0x3F);
+            char str[] = { (char)(key & 0xFF), 0, 0, 0 };
+            if(key > 0x07FF) {
+                str[0] = 0xE0 | ((key >> 12) & 0x0F);
+                str[1] = 0x80 | ((key >> 6) & 0x3F);
+                str[2] = 0x80 | (key & 0x3F);
+            }else if(key > 0x007F) {
+                str[0] = 0xC0 | ((key >> 6) & 0x1F);
+                str[1] = 0x80 | (key & 0x3F);
             }
             insertStr(str);
         } break;

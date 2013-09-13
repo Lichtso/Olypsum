@@ -12,7 +12,6 @@
 #include "LevelManager.h"
 
 class Menu {
-    float mouseVelocityX = 0.0, mouseVelocityY = 0.0;
     public:
     GUIScreenView* screenView;
     enum Name {
@@ -20,7 +19,6 @@ class Menu {
         loading,
         main,
         options,
-        videoResolution,
         languages,
         credits,
         inGame,
@@ -28,24 +26,23 @@ class Menu {
         saveGames,
         newGame,
         multiplayer
-    } current;
+    } current = none;
     struct ConsoleEntry {
         std::string message;
         float timeLeft;
     };
     std::vector<ConsoleEntry> consoleMessages;
-    float mouseX = 0.0, mouseY = 0.0;
-    bool mouseFixed = true;
+    float mouseX = 0.0, mouseY = 0.0,
+          mouseVelocityX = 0.0, mouseVelocityY = 0.0;
+    bool  mouseFixed = true;
     
     Menu();
     void consoleAdd(const std::string& message, float duration = 10.0);
-    void handleActiveEvent(bool active);
-    void handleMouseDown(int mouseX, int mouseY, Uint8 button);
-    void handleMouseUp(int mouseX, int mouseY, Uint8 button);
-    void handleMouseMove(int mouseX, int mouseY);
-    void handleMouseWheel(int mouseX, int mouseY, float deltaX, float deltaY);
-    void handleKeyDown(SDL_Event& event);
-    void handleKeyUp(SDL_Event& event);
+    void handleMouseDown(Uint8 button);
+    void handleMouseUp(Uint8 button);
+    void handleMouseWheel(float deltaX, float deltaY);
+    void handleKeyDown(SDL_Keycode key);
+    void handleKeyUp(SDL_Keycode key);
     void gameTick();
     void clear();
     void setPause(bool active);

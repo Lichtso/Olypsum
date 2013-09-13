@@ -287,11 +287,11 @@ void OptionsState::loadOptions() {
         optionsState.ssaoQuality = readOptionValue<unsigned int>(optionGroup->first_node("SsaoQuality"), "%d");
         optionsState.blendingQuality = readOptionValue<unsigned int>(optionGroup->first_node("BlendingQuality"), "%d");
         if(optionGroup->first_node("VideoWidth"))
-            optionsState.videoWidth = readOptionValue<unsigned int>(optionGroup->first_node("VideoWidth"), "%d");
+            optionsState.videoWidth = max(optionsState.videoWidth, readOptionValue<int>(optionGroup->first_node("VideoWidth"), "%d"));
         if(optionGroup->first_node("VideoHeight"))
-            optionsState.videoHeight = readOptionValue<unsigned int>(optionGroup->first_node("VideoHeight"), "%d");
+            optionsState.videoHeight = max(optionsState.videoHeight, readOptionValue<int>(optionGroup->first_node("VideoHeight"), "%d"));
         if(optionGroup->first_node("VideoScale"))
-            optionsState.videoScale = readOptionValue<unsigned int>(optionGroup->first_node("VideoScale"), "%d");
+            optionsState.videoScale = readOptionValue<int>(optionGroup->first_node("VideoScale"), "%d");
         optionGroup = options->first_node("Sound");
         optionsState.globalVolume = readOptionValue<float>(optionGroup->first_node("globalVolume"), "%f");
         optionsState.musicVolume = readOptionValue<float>(optionGroup->first_node("musicVolume"), "%f");
@@ -300,7 +300,6 @@ void OptionsState::loadOptions() {
         optionsState.mouseSmoothing = readOptionValue<float>(optionGroup->first_node("mouseSmoothing"), "%f");
     }else saveOptions();
     
-    prevOptionsState = optionsState;
     fileManager.loadPackage("Core")->loadLocalization();
 }
 
@@ -321,13 +320,10 @@ void OptionsState::saveOptions() {
     addXMLNode(doc, optionGroup, "CubemapsEnabled", (optionsState.cubemapsEnabled) ? "true" : "false");
     addXMLNode(doc, optionGroup, "VSyncEnabled", (optionsState.vSyncEnabled) ? "true" : "false");
     
-    if(optionsState.videoWidth/optionsState.videoScale != screenSize[0] ||
-       optionsState.videoHeight/optionsState.videoScale != screenSize[1]) {
-        sprintf(&str[0], "%d", optionsState.videoWidth/optionsState.videoScale);
-        addXMLNode(doc, optionGroup, "VideoWidth", &str[0]);
-        sprintf(&str[8], "%d", optionsState.videoHeight/optionsState.videoScale);
-        addXMLNode(doc, optionGroup, "VideoHeight", &str[8]);
-    }
+    sprintf(&str[0], "%d", optionsState.videoWidth);
+    addXMLNode(doc, optionGroup, "VideoWidth", &str[0]);
+    sprintf(&str[8], "%d", optionsState.videoHeight);
+    addXMLNode(doc, optionGroup, "VideoHeight", &str[8]);
     if(optionsState.videoScale > 1) {
         sprintf(&str[16], "%d", optionsState.videoScale);
         addXMLNode(doc, optionGroup, "VideoScale", &str[16]);
@@ -364,4 +360,4 @@ void OptionsState::saveOptions() {
 }
 
 FileManager fileManager;
-OptionsState optionsState, prevOptionsState;
+OptionsState optionsState;

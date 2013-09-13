@@ -116,12 +116,10 @@ void GUITabs::updateContent() {
 bool GUITabs::handleMouseDown(int mouseXo, int mouseYo) {
     if(!visible || mouseXo < -width || mouseXo > width || mouseYo < -height || mouseYo > height) return false;
     
-    GUIButton* button;
-    int mouseX, mouseY;
     for(int i = children.size()-1; i >= 0; i --) {
-        button = (GUIButton*)children[i];
-        mouseX = mouseXo-button->posX;
-        mouseY = mouseYo-button->posY;
+        GUIButton* button = (GUIButton*)children[i];
+        int mouseX = mouseXo-button->posX;
+        int mouseY = mouseYo-button->posY;
         if(mouseX < -button->width || mouseX > button->width || mouseY < -button->height
            || mouseY > button->height || !button->enabled) continue;
         
@@ -155,13 +153,11 @@ bool GUITabs::handleMouseUp(int mouseX, int mouseY) {
 void GUITabs::handleMouseMove(int mouseXo, int mouseYo) {
     if(!visible) return;
     
-    GUIButton* button;
-    int mouseX, mouseY;
     for(int i = (int)children.size()-1; i >= 0; i --) {
-        button = (GUIButton*) children[i];
+        GUIButton* button = (GUIButton*) children[i];
         if(!button->enabled || button->state == GUIButton::State::Pressed) continue;
-        mouseX = mouseXo-button->posX;
-        mouseY = mouseYo-button->posY;
+        int mouseX = mouseXo-button->posX;
+        int mouseY = mouseYo-button->posY;
         
         GUIButton::State prevState = button->state;
         if(mouseX < -button->width || mouseX > button->width || mouseY < -button->height || mouseY > button->height) {

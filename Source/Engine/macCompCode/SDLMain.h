@@ -15,6 +15,4 @@
     
 @end
 
-void updateVideoMode();
-
 #endif

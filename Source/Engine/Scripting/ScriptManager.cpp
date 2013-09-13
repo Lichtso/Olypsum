@@ -59,6 +59,11 @@ void ScriptManager::ScriptSaveLevel(const v8::FunctionCallbackInfo<v8::Value>& a
     args.GetReturnValue().Set(levelSaver.saveLevel(args[0], args[1], args[2]));
 }
 
+void ScriptManager::ScriptGetGamePaused(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+    v8::HandleScope handleScope;
+    info.GetReturnValue().Set(menu.current != Menu::inGame);
+}
+
 void ScriptManager::ScriptGetLevel(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     info.GetReturnValue().Set(v8::String::New(levelManager.levelContainer.c_str()));
@@ -112,6 +117,7 @@ ScriptManager::ScriptManager() {
     globalTemplate->Set(v8::String::New("loadContainer"), v8::FunctionTemplate::New(ScriptLoadContainer));
     globalTemplate->Set(v8::String::New("localizeString"), v8::FunctionTemplate::New(ScriptLocalizeString));
     globalTemplate->Set(v8::String::New("saveLevel"), v8::FunctionTemplate::New(ScriptSaveLevel));
+    globalTemplate->SetAccessor(v8::String::New("gamePaused"), ScriptGetGamePaused);
     globalTemplate->SetAccessor(v8::String::New("levelID"), ScriptGetLevel, ScriptSetLevel);
     globalTemplate->SetAccessor(v8::String::New("animationFactor"), ScriptGetAnimationFactor);
     scriptVector3.init(globalTemplate);

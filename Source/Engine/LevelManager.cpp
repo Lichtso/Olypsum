@@ -39,7 +39,6 @@ void LevelManager::clear() {
     sharedCollisionShapes.clear();
     objectManager.clear();
     fileManager.clear();
-    menu.setMenu(Menu::Name::saveGames);
 }
 
 bool LevelManager::loadGame(FilePackage* package, const std::string& name, const std::string& container) {

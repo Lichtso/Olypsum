@@ -36,11 +36,10 @@ void LeapManager::gameTick() {
         if(frame.isValid() && lastFrameID != frame.id()) {
             lastFrameID = frame.id();
             if(frame.pointables().count() <= 1) {
-                prevMouseX = mouseX;
-                prevMouseY = mouseY;
+                prevMouseX = menu.mouseX;
+                prevMouseY = menu.mouseY;
             }
-            mouseX = 0;
-            mouseY = 0;
+            float mouseX = 0, mouseY = 0;
             unsigned int pointables = frame.pointables().count();
             
             for(int i = 0; i < pointables; i ++) {
@@ -49,8 +48,8 @@ void LeapManager::gameTick() {
                 Leap::Vector position = pointable.stabilizedTipPosition();
                 //Leap::Vector position = screen.intersect(pointable.stabilizedTipPosition(), pointable.direction(), true);
                 
-                mouseX += position.x * 0.003F * prevOptionsState.videoWidth;
-                mouseY += (position.y-200.0F) * 0.005F * prevOptionsState.videoHeight;
+                mouseX += position.x * 0.003F * optionsState.videoWidth;
+                mouseY += (position.y-200.0F) * 0.005F * optionsState.videoHeight;
                 zone += pointable.touchZone();
             }
             
@@ -60,22 +59,24 @@ void LeapManager::gameTick() {
                 zone = Leap::Pointable::Zone::ZONE_NONE;
             else if(pointables > 0) {
                 float factor = 1.0 / pointables;
-                mouseX = clamp((int) (mouseX * factor), -menu.screenView->width, menu.screenView->width);
-                mouseY = clamp((int) (mouseY * factor), -menu.screenView->height, menu.screenView->height);
+                menu.mouseX = clamp((int) (mouseX * factor), -menu.screenView->width, menu.screenView->width);
+                menu.mouseY = clamp((int) (mouseY * factor), -menu.screenView->height, menu.screenView->height);
                 zone *= factor;
                 
                 if(pointables == 1 && (mouseX != prevMouseX || mouseY != prevMouseY))
-                    SDL_WarpMouse((mouseX + menu.screenView->width)/prevOptionsState.videoScale, (menu.screenView->height - mouseY)/prevOptionsState.videoScale);
+                    SDL_WarpMouseInWindow(mainWindow,
+                                          (mouseX + menu.screenView->width)/optionsState.videoScale,
+                                          (menu.screenView->height - mouseY)/optionsState.videoScale);
                 else if(pointables > 1)
-                    menu.handleMouseWheel(prevMouseX, prevMouseY, (prevMouseX-mouseX)*1.0/menu.screenView->width, (mouseY-prevMouseY)*1.0/menu.screenView->height);
+                    menu.handleMouseWheel((prevMouseX-mouseX)*1.0/menu.screenView->width, (mouseY-prevMouseY)*1.0/menu.screenView->height);
             }
         }
     }
     
     if(zone == Leap::Pointable::Zone::ZONE_TOUCHING && prevZone != Leap::Pointable::Zone::ZONE_TOUCHING)
-        menu.handleMouseDown(mouseX, mouseY, SDL_BUTTON_LEFT);
+        menu.handleMouseDown(SDL_BUTTON_LEFT);
     else if(zone != Leap::Pointable::Zone::ZONE_TOUCHING && prevZone == Leap::Pointable::Zone::ZONE_TOUCHING)
-        menu.handleMouseUp(mouseX, mouseY, SDL_BUTTON_LEFT);
+        menu.handleMouseUp(SDL_BUTTON_LEFT);
 }
 
 LeapManager leapManager;

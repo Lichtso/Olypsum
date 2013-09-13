@@ -39,13 +39,11 @@ struct FrustumCullingCallback : btDbvt::ICollide {
 
 
 
-CamObject::CamObject() :fov(0.0), near(-1.0), far(1.0), width(prevOptionsState.videoWidth>>1), height(prevOptionsState.videoHeight>>1) {
+CamObject::CamObject() :fov(0.0), near(-1.0), far(1.0) {
     setTransformation(btTransform::getIdentity());
-    updateViewMat();
 }
 
-CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader)
-    :width(prevOptionsState.videoWidth>>1), height(prevOptionsState.videoHeight>>1) {
+CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);
     scriptCamObject.functionTemplate->GetFunction()->NewInstance(1, &external);
@@ -73,7 +71,7 @@ CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* lev
         if(attribute)
             sscanf(attribute->value(), "%f", &height);
         else
-            height = width*prevOptionsState.videoHeight/prevOptionsState.videoWidth;
+            height = width*menu.screenView->height/menu.screenView->width;
     }
     
     attribute = boundsNode->first_attribute("near");
@@ -89,6 +87,7 @@ CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* lev
     }
     sscanf(attribute->value(), "%f", &far);
     
+    updateViewMat();
     if(!mainCam) mainCam = this;
 }
 
@@ -116,7 +115,7 @@ Ray3 CamObject::getRelativeRayAt(float x, float y) {
     Ray3 ray;
     if(fov > 0.0) { //Perspective
         float aux = tan(fov*0.5);
-        ray.direction.setX(x*aux*(width/height));
+        ray.direction.setX(x*aux*menu.screenView->width/menu.screenView->height);
         ray.direction.setY(-y*aux);
         ray.direction.setZ(-1.0);
         ray.origin = ray.direction*near;
@@ -343,7 +342,7 @@ void CamObject::updateViewMat() {
     if(fov == 0.0) //Ortho
         viewMat.ortho(width, height, near, far);
     else if(fov < M_PI) //Perspective
-        viewMat.perspective(fov, width/height, near, far);
+        viewMat.perspective(fov, (float)menu.screenView->width/menu.screenView->height, near, far);
 }
 
 rapidxml::xml_node<xmlUsedCharType>* CamObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {

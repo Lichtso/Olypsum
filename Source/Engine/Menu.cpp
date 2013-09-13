@@ -24,83 +24,17 @@ static void openExternURL(std::string str) {
     std::system(str.c_str());
 }
 
-static void updateOptionBackButton(GUIButton* button) {
-    if((optionsState.videoWidth != prevOptionsState.videoWidth ||
-        optionsState.videoHeight != prevOptionsState.videoHeight ||
-        optionsState.vSyncEnabled != prevOptionsState.vSyncEnabled)) {
-        button->type = GUIButton::Type::Delete;
-        static_cast<GUILabel*>(button->children[0])->text = fileManager.localizeString("restart");
-    }else{
-        button->type = GUIButton::Type::Normal;
-        static_cast<GUILabel*>(button->children[0])->text = fileManager.localizeString("back");
-    }
-}
-
 static void updateGraphicOptions() {
     if(levelManager.gameStatus == noGame) return;
     loadDynamicShaderPrograms();
-    if(prevOptionsState.cubemapsEnabled == optionsState.cubemapsEnabled &&
-       optionsState.shadowQuality > 0) return;
-    prevOptionsState.cubemapsEnabled = optionsState.cubemapsEnabled;
     for(auto lightObject : objectManager.lightObjects)
         lightObject->deleteShadowMap();
 }
 
 static void leaveOptionsMenu(GUIButton* button) {
     optionsState.saveOptions();
-    if(optionsState.videoWidth != prevOptionsState.videoWidth ||
-       optionsState.videoHeight != prevOptionsState.videoHeight ||
-       optionsState.vSyncEnabled != prevOptionsState.vSyncEnabled)
-        restartApplication();
     updateGraphicOptions();
     menu.setMenu((levelManager.gameStatus == noGame) ? Menu::Name::main : Menu::Name::gameEsc);
-}
-
-static void getAvailableResolutions(std::vector<Resolution>& resolutions) {
-    bool addFullScreen = true;
-    
-    rapidxml::xml_document<xmlUsedCharType> doc;
-    rapidxml::xml_node<xmlUsedCharType> *resolutionsNode, *entryNode;
-    rapidxml::xml_attribute<xmlUsedCharType> *attribute;
-    std::string filePath = fileManager.loadPackage("Core")->path+"Resolutions.xml";
-    std::unique_ptr<char[]> fileData = readXmlFile(doc, filePath.c_str(), false);
-    if(fileData) {
-        resolutionsNode = doc.first_node("Resolutions");
-        if(resolutionsNode) {
-            entryNode = resolutionsNode->first_node("Entry");
-            while(entryNode) {
-                Resolution res;
-                attribute = entryNode->first_attribute("width");
-                if(attribute)
-                    sscanf(attribute->value(), "%d", &res.width);
-                attribute = entryNode->first_attribute("height");
-                if(attribute)
-                    sscanf(attribute->value(), "%d", &res.height);
-                if(addFullScreen && res.width == screenSize[0] && res.height == screenSize[1])
-                    addFullScreen = false;
-                if(res.width <= screenSize[0] && res.height <= screenSize[1])
-                    resolutions.push_back(res);
-                entryNode = entryNode->next_sibling("Entry");
-            }
-        }
-    }
-    
-    if(addFullScreen) {
-        Resolution res;
-        res.width = screenSize[0];
-        res.height = screenSize[1];
-        resolutions.push_back(res);
-    }
-    
-    unsigned int resolutionCount = resolutions.size();
-    if(screenSize[2] > 1)
-        for(unsigned int i = 0; i < resolutionCount; i ++) {
-            Resolution res;
-            res.scale = screenSize[2];
-            res.width = resolutions[i].width * res.scale;
-            res.height = resolutions[i].height * res.scale;
-            resolutions.push_back(res);
-        }
 }
 
 static GUIImage* getThumbnailOfPackage(FilePackage* package) {
@@ -135,12 +69,7 @@ void Menu::consoleAdd(const std::string& message, float duration) {
     consoleMessages.push_back(entry);
 }
 
-void Menu::handleActiveEvent(bool active) {
-    if(!active && menu.current == Menu::Name::inGame)
-        menu.setPause(true);
-}
-
-void Menu::handleMouseDown(int mouseX, int mouseY, Uint8 button) {
+void Menu::handleMouseDown(Uint8 button) {
     if((button == SDL_BUTTON_LEFT && screenView->handleMouseDown(mouseX, mouseY))
        || menu.current != inGame) return;
     
@@ -149,7 +78,7 @@ void Menu::handleMouseDown(int mouseX, int mouseY, Uint8 button) {
     if(script) script->callFunction("onmousedown", false, { v8::Number::New(button) });
 }
 
-void Menu::handleMouseUp(int mouseX, int mouseY, Uint8 button) {
+void Menu::handleMouseUp(Uint8 button) {
     if(screenView->handleMouseUp(mouseX, mouseY) || menu.current != inGame) return;
     
     v8::HandleScope handleScope;
@@ -157,21 +86,7 @@ void Menu::handleMouseUp(int mouseX, int mouseY, Uint8 button) {
     if(script) script->callFunction("onmouseup", false, { v8::Number::New(button) });
 }
 
-void Menu::handleMouseMove(int mouseX, int mouseY) {
-    screenView->handleMouseMove(mouseX, mouseY);
-    
-    if(menu.current != inGame) return;
-    
-    this->mouseX = mouseX;
-    this->mouseY = mouseY;
-    if((this->mouseX != 0 || this->mouseY != 0) && mouseFixed) {
-        SDL_WarpMouse(screenView->width / prevOptionsState.videoScale, screenView->height / prevOptionsState.videoScale);
-        mouseVelocityX += optionsState.mouseSensitivity*this->mouseX;
-        mouseVelocityY += optionsState.mouseSensitivity*this->mouseY;
-    }
-}
-
-void Menu::handleMouseWheel(int mouseX, int mouseY, float deltaX, float deltaY) {
+void Menu::handleMouseWheel(float deltaX, float deltaY) {
     if(screenView->handleMouseWheel(mouseX, mouseY, deltaX, deltaY) || menu.current != inGame) return;
     
     v8::HandleScope handleScope;
@@ -179,18 +94,18 @@ void Menu::handleMouseWheel(int mouseX, int mouseY, float deltaX, float deltaY) 
     if(script) script->callFunction("onmousewheel", false, { v8::Number::New(deltaX), v8::Number::New(deltaY) });
 }
 
-void Menu::handleKeyDown(SDL_Event& event) {
-    if(screenView->handleKeyDown(&event.key.keysym) || menu.current != inGame) return;
+void Menu::handleKeyDown(SDL_Keycode key) {
+    if(screenView->handleKeyDown(key) || menu.current != inGame) return;
     
     v8::HandleScope handleScope;
     ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
-    if(script) script->callFunction("onkeydown", false, { v8::Integer::New(event.key.keysym.sym) });
+    if(script) script->callFunction("onkeydown", false, { v8::Integer::New(key) });
 }
 
-void Menu::handleKeyUp(SDL_Event& event) {
-    if(screenView->handleKeyUp(&event.key.keysym)) return;
+void Menu::handleKeyUp(SDL_Keycode key) {
+    if(screenView->handleKeyUp(key)) return;
     
-    if(event.key.keysym.sym == SDLK_ESCAPE) {
+    if(key == SDLK_ESCAPE) {
         switch(current) {
             case none:
             case loading:
@@ -200,7 +115,6 @@ void Menu::handleKeyUp(SDL_Event& event) {
             case options:
                 leaveOptionsMenu(NULL);
                 return;
-            case videoResolution:
             case languages:
                 setMenu(options);
                 return;
@@ -225,7 +139,7 @@ void Menu::handleKeyUp(SDL_Event& event) {
     if(menu.current == inGame) {
         v8::HandleScope handleScope;
         ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
-        if(script) script->callFunction("onkeyup", false, { v8::Integer::New(event.key.keysym.sym) });
+        if(script) script->callFunction("onkeyup", false, { v8::Integer::New(key) });
     }
 }
 
@@ -297,15 +211,14 @@ void Menu::gameTick() {
                 mouseY = optionsState.mouseSmoothing*mouseVelocityY;
                 mouseVelocityX -= mouseX;
                 mouseVelocityY -= mouseY;
-                SDL_ShowCursor(0);
+                SDL_SetRelativeMouseMode(SDL_TRUE);
             }else{
                 mouseVelocityX = 0.0;
                 mouseVelocityY = 0.0;
-                SDL_ShowCursor(1);
+                SDL_SetRelativeMouseMode(SDL_FALSE);
             }
         } break;
         default:
-            SDL_ShowCursor(1);
             break;
     }
 }
@@ -323,7 +236,7 @@ void Menu::setPause(bool active) {
     
     v8::HandleScope handleScope;
     ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
-    if(script) script->callFunction("onpause", false, { v8::Boolean::New(active) });
+    if(script) script->callFunction("onpause", false, { });
 }
 
 void Menu::setModalView(const std::string& title, const std::string& text, std::function<void(GUIButton* button)> onContinue) {
@@ -383,7 +296,7 @@ void Menu::setModalView(const std::string& title, const std::string& text, std::
 }
 
 void Menu::setMenu(Name menu) {
-    if(current != none) clear();
+    clear();
     current = menu;
     
     if(levelManager.gameStatus == noGame && menu != loading) {
@@ -434,7 +347,6 @@ void Menu::setMenu(Name menu) {
                 }, [this](GUIButton* button) {
                     setMenu(multiplayer);
                 }, [this](GUIButton* button) {
-                    prevOptionsState = optionsState;
                     setMenu(options);
                 }, [this](GUIButton* button) {
                     setMenu(credits);
@@ -475,20 +387,28 @@ void Menu::setMenu(Name menu) {
             button->onClick = leaveOptionsMenu;
             screenView->addChild(button);
             label = new GUILabel();
+            label->text = fileManager.localizeString("back");
             label->fontHeight = screenView->height*0.1;
             label->width = screenView->width*0.14;
             label->sizeAlignment = GUISizeAlignment::Height;
             button->addChild(label);
-            updateOptionBackButton(button);
             
             GUIFramedView* view = new GUIFramedView();
-            view->width = screenView->width*0.42;
-            view->height = screenView->height*0.62;
+            view->width = screenView->width*0.4;
+            view->height = screenView->height*0.5;
             view->posX = screenView->width*-0.52;
             screenView->addChild(view);
             
             std::function<void(GUICheckBox*)> onClick[] = {
-                [](GUICheckBox* checkBox) {
+                [button](GUICheckBox* checkBox) {
+                    optionsState.vSyncEnabled = (checkBox->state == GUIButton::State::Pressed);
+                    SDL_GL_SetSwapInterval(optionsState.vSyncEnabled);
+                }, [button](GUICheckBox* checkBox) {
+                    SDL_SetWindowFullscreen(mainWindow, (SDL_GetWindowFlags(mainWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP)
+                                            ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
+                }, [button](GUICheckBox* checkBox) {
+                    
+                }, [](GUICheckBox* checkBox) {
                     optionsState.cubemapsEnabled = (checkBox->state == GUIButton::State::Pressed);
                     updateGraphicOptions();
                 }, [](GUICheckBox* checkBox) {
@@ -497,59 +417,57 @@ void Menu::setMenu(Name menu) {
                 }, [](GUICheckBox* checkBox) {
                     optionsState.screenBlurFactor = (checkBox->state == GUIButton::State::Pressed) ? 0.0 : -1.0;
                     updateGraphicOptions();
-                }, [button](GUICheckBox* checkBox) {
-                    optionsState.vSyncEnabled = (checkBox->state == GUIButton::State::Pressed);
-                    updateOptionBackButton(button);
                 }
             };
             bool checkBoxActive[] = {
+                optionsState.vSyncEnabled,
+                (SDL_GetWindowFlags(mainWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP) > 0,
+                (optionsState.videoScale > 1),
                 optionsState.cubemapsEnabled,
                 optionsState.edgeSmoothEnabled,
-                (optionsState.screenBlurFactor > -1.0),
-                optionsState.vSyncEnabled
+                (optionsState.screenBlurFactor > -1.0)
             };
             const char* checkBoxLabels[] = {
+                "vSyncEnabled",
+                "fullScreen",
+                "retina",
                 "cubemapsEnabled",
                 "edgeSmoothEnabled",
-                "screenBlurEnabled",
-                "vSyncEnabled",
-                "videoResolution"
+                "screenBlurEnabled"
             };
-            for(unsigned char i = 0; i < 5; i ++) {
+            for(unsigned char i = 0; i < 6; i ++) {
                 label = new GUILabel();
-                label->posX = view->width*0.45;
-                label->posY = screenView->height*(0.54-0.12*i);
+                label->posX = view->width*((i < 3) ? -0.25 : 0.55);
+                label->posY = screenView->height*(0.42-0.12*(i%3));
                 label->width = view->width*0.5;
                 label->fontHeight = screenView->height*0.1;
                 label->text = fileManager.localizeString(checkBoxLabels[i]);
                 label->textAlignment = GUILabel::TextAlignment::Left;
                 label->sizeAlignment = GUISizeAlignment::Height;
                 view->addChild(label);
-                if(i == 4) continue;
                 GUICheckBox* checkBox = new GUICheckBox();
-                checkBox->posX = view->width*-0.52;
+                checkBox->posX = view->width*((i < 3) ? -0.85 : -0.07);
                 checkBox->posY = label->posY;
                 checkBox->onClick = onClick[i];
-                checkBox->enabled = (i != 3 || levelManager.gameStatus == noGame);
                 checkBox->state = (checkBoxActive[i]) ? GUIButton::State::Pressed : GUIButton::State::Released;
+                if(i == 2) checkBox->enabled = false;
                 view->addChild(checkBox);
             }
             
-            button = new GUIButton();
+            /*button = new GUIButton();
             button->posX = view->width*-0.52;
             button->posY = screenView->height*(0.06);
             button->onClick = [this](GUIButton* button) {
-                setMenu(videoResolution);
+                SDL_SetWindowFullscreen(mainWindow, (SDL_GetWindowFlags(mainWindow)
+                                        & SDL_WINDOW_FULLSCREEN_DESKTOP) ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
             };
-            button->enabled = (levelManager.gameStatus == noGame);
             view->addChild(button);
             label = new GUILabel();
-            label->text = stringOf(optionsState.videoWidth)+" x "+stringOf(optionsState.videoHeight);
-            if(optionsState.videoScale > 1) label->text += " ("+fileManager.localizeString("retina")+")";
+            label->text = fileManager.localizeString("fullScreen");
             label->fontHeight = screenView->height*0.05;
             label->width = screenView->width*0.15;
             label->sizeAlignment = GUISizeAlignment::Height;
-            button->addChild(label);
+            button->addChild(label);*/
             
             unsigned int sliderSteps[] = { 3, 3, 4, 4, 3 };
             std::function<void(GUISlider*, bool)> onChangeGraphics[] = {
@@ -599,8 +517,8 @@ void Menu::setMenu(Name menu) {
             };
             for(unsigned char i = 0; i < 5; i ++) {
                 label = new GUILabel();
-                label->posX = view->width*0.45;
-                label->posY = screenView->height*(-0.06-0.12*i);
+                label->posX = view->width*0.55;
+                label->posY = screenView->height*(0.06-0.12*i);
                 label->width = view->width*0.5;
                 label->fontHeight = screenView->height*0.1;
                 label->text = fileManager.localizeString(sliderLabelsGraphics[i]);
@@ -608,7 +526,7 @@ void Menu::setMenu(Name menu) {
                 label->sizeAlignment = GUISizeAlignment::Height;
                 view->addChild(label);
                 GUISlider* slider = new GUISlider();
-                slider->posX = view->width*-0.52;
+                slider->posX = view->width*-0.45;
                 slider->posY = label->posY;
                 slider->width = view->width*0.4;
                 slider->value = (float)sliderValuesGraphics[i]/(float)sliderSteps[i];
@@ -648,7 +566,7 @@ void Menu::setMenu(Name menu) {
                 label->fontHeight = screenView->height*0.14;
                 screenView->addChild(label);
                 view = new GUIFramedView();
-                view->width = screenView->width*0.42;
+                view->width = screenView->width*0.4;
                 view->height = screenView->height*0.16;
                 view->posX = screenView->width*0.52;
                 view->posY = screenView->height*(0.46-0.28*m);
@@ -686,67 +604,6 @@ void Menu::setMenu(Name menu) {
             label->width = screenView->width*0.15;
             label->sizeAlignment = GUISizeAlignment::Height;
             button->addChild(label);
-        } break;
-        case videoResolution: {
-            GUILabel* label = new GUILabel();
-            label->posY = screenView->height*0.88;
-            label->text = fileManager.localizeString("videoResolution");
-            label->fontHeight = screenView->height*0.2;
-            screenView->addChild(label);
-            GUIButton* button = new GUIButton();
-            button->posY = screenView->height*-0.8;
-            button->onClick = [this](GUIButton* button) {
-                setMenu(options);
-            };
-            screenView->addChild(button);
-            label = new GUILabel();
-            label->text = fileManager.localizeString("back");
-            label->fontHeight = screenView->height*0.1;
-            label->width = screenView->width*0.14;
-            label->sizeAlignment = GUISizeAlignment::Height;
-            button->addChild(label);
-            
-            std::vector<Resolution> resolutions;
-            getAvailableResolutions(resolutions);
-            
-            GUIScrollView* view = new GUIScrollView();
-            view->width = screenView->width*0.3;
-            view->height = screenView->height*0.6;
-            screenView->addChild(view);
-            GUITabs* tabs = new GUITabs();
-            tabs->deactivatable = false;
-            tabs->width = screenView->width*0.2;
-            tabs->sizeAlignment = GUISizeAlignment::Height;
-            tabs->orientation = GUIOrientation::Vertical;
-            tabs->onChange = [](GUITabs* tabs) {
-                std::vector<Resolution> resolutions;
-                getAvailableResolutions(resolutions);
-                optionsState.videoWidth = resolutions[tabs->selected].width;
-                optionsState.videoHeight = resolutions[tabs->selected].height;
-                optionsState.videoScale = resolutions[tabs->selected].scale;
-            };
-            for(unsigned char i = 0; i < resolutions.size(); i ++) {
-                GUIButton* button = new GUIButton();
-                label = new GUILabel();
-                if(resolutions[i].width == screenSize[0]*resolutions[i].scale &&
-                   resolutions[i].height == screenSize[1]*resolutions[i].scale)
-                    label->text = fileManager.localizeString("fullScreen");
-                else
-                    label->text = stringOf(resolutions[i].width)+" x "+stringOf(resolutions[i].height);
-                if(resolutions[i].scale > 1) label->text += " ("+fileManager.localizeString("retina")+")";
-                label->fontHeight = screenView->height*0.06;
-                button->addChild(label);
-                tabs->addChild(button);
-                if(resolutions[i].width == optionsState.videoWidth &&
-                   resolutions[i].height == optionsState.videoHeight &&
-                   resolutions[i].scale == optionsState.videoScale) {
-                    tabs->selected = i;
-                    tabs->updateContent();
-                }
-            }
-            view->addChild(tabs);
-            tabs->posY = view->height-tabs->height;
-            view->contentHeight = tabs->height*2;
         } break;
         case languages: {
             GUILabel* label = new GUILabel();
@@ -849,13 +706,16 @@ void Menu::setMenu(Name menu) {
             screenView->addChild(view);
         } break;
         case gameEsc: {
+            SDL_SetRelativeMouseMode(SDL_FALSE);
+            SDL_WarpMouseInWindow(mainWindow, optionsState.videoWidth >> 1, optionsState.videoHeight >> 1);
             std::function<void(GUIButton*)> onClick[] = {
                 [this](GUIButton* button) {
                     setMenu(inGame);
                 }, [this](GUIButton* button) {
                     setMenu(options);
-                }, [](GUIButton* button) {
+                }, [this](GUIButton* button) {
                     levelManager.clear();
+                    setMenu(main);
                 }, [](GUIButton* button) {
                     levelManager.clear();
                     AppTerminate();

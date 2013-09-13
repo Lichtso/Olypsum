@@ -45,10 +45,16 @@ class GUIRect {
     virtual void draw(btVector3 transform, GUIClipRect& parentClipRect) = 0;
     virtual bool handleMouseDown(int mouseX, int mouseY);
     virtual bool handleMouseUp(int mouseX, int mouseY);
-    virtual void handleMouseMove(int mouseX, int mouseY);
-    virtual bool handleMouseWheel(int mouseX, int mouseY, float deltaX, float deltaY);
-    virtual bool handleKeyDown(SDL_keysym* key);
-    virtual bool handleKeyUp(SDL_keysym* key);
+    virtual void handleMouseMove(int mouseX, int mouseY) { };
+    virtual bool handleMouseWheel(int mouseX, int mouseY, float deltaX, float deltaY) {
+        return false;
+    };
+    virtual bool handleKeyDown(SDL_Keycode key) {
+        return false;
+    };
+    virtual bool handleKeyUp(SDL_Keycode key) {
+        return false;
+    };
 };
 
 #endif

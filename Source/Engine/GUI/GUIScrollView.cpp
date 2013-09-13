@@ -164,13 +164,13 @@ bool GUIScrollView::handleMouseWheel(int mouseX, int mouseY, float deltaX, float
             return true;
     
     if(contentWidth >= width*2) {
-        scrollPosX -= deltaX*10.0*prevOptionsState.videoScale;
+        scrollPosX -= deltaX*10.0*optionsState.videoScale;
         if(scrollPosX < 0) scrollPosX = 0;
         else if(scrollPosX > contentWidth-width*2) scrollPosX = contentWidth-width*2;
     }
     
     if(contentHeight >= height*2) {
-        scrollPosY -= deltaY*10.0*prevOptionsState.videoScale;
+        scrollPosY -= deltaY*10.0*optionsState.videoScale;
         if(scrollPosY < 0) scrollPosY = 0;
         else if(scrollPosY > contentHeight-height*2) scrollPosY = contentHeight-height*2;
     }

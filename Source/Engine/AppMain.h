@@ -11,18 +11,7 @@
 
 #include "ScriptManager.h"
 
-void setClipboardText(const char* str);
-std::string getClipboardText();
-bool hasClipboardText();
-void restartApplication();
-
-const SDL_VideoInfo* updateVideoModeInternal(bool& fullScreen);
-void updateVideoMode();
-
 void AppMain();
 void AppTerminate();
-
-extern Uint8* keyState;
-extern int keyStateSize;
 
 #endif

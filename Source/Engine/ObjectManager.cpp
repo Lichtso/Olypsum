@@ -101,52 +101,6 @@ bool ObjectManager::initOpenCL() {
 }
 
 void ObjectManager::init() {
-    updateVideoMode();
-    
-    log(info_log, std::string("Engine Version: ")+VERSION);
-    log(info_log, std::string("Multi Threading: ")+stringOf(std::thread::hardware_concurrency())+" CPUs");
-    char* glStr = NULL;
-    GLint glAuxIa, glAuxIb;
-    glStr = (char*)glGetString(GL_VENDOR);
-    log(info_log, std::string("OpenGL vendor: ")+glStr);
-    glStr = (char*)glGetString(GL_RENDERER);
-    log(info_log, std::string("OpenGL renderer: ")+glStr);
-    glStr = (char*)glGetString(GL_VERSION);
-    log(info_log, std::string("OpenGL driver: ")+glStr);
-    glGetIntegerv(GL_MAJOR_VERSION, &glAuxIa);
-    glGetIntegerv(GL_MINOR_VERSION, &glAuxIb);
-    log(info_log, std::string("OpenGL version: ")+stringOf(glAuxIa)+"."+stringOf(glAuxIb));
-    if(glAuxIa < 3 || (glAuxIa == 3 && glAuxIb < 2)) {
-        log(error_log, std::string("OpenGL version 3.2 is required, Quit.")+glStr);
-        exit(5);
-    }
-    
-#ifdef DEBUG
-    std::ostringstream stream;
-    stream << "OpenGL extensions found: ";
-    glGetIntegerv(GL_NUM_EXTENSIONS, &glAuxIa);
-    for(GLint i = 0; i < glAuxIa; i ++) {
-        glStr = (char*)glGetStringi(GL_EXTENSIONS, i);
-        stream << glStr << " ";
-    }
-    log(info_log, stream.str());
-    stream.str("");
-    stream << "OpenGL compressions found: ";
-    glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &glAuxIa);
-    GLint glCompressionFormats[glAuxIa];
-    glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS, glCompressionFormats);
-    for(GLint i = 0; i < glAuxIa; i ++)
-        stream << stringOf(glCompressionFormats[i]) << " ";
-    log(info_log, stream.str());
-#endif
-    
-    //Init OpenGL
-    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &optionsState.anisotropy);
-    optionsState.anisotropy = fmin(optionsState.anisotropy, pow(2.0, optionsState.surfaceQuality));
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glFrontFace(GL_CCW);
-    
     //Init VAOs
     initLightVolumes();
     
@@ -172,21 +126,20 @@ void ObjectManager::init() {
     rectVAO.indeciesCount = 4;
     rectVAO.drawType = GL_TRIANGLE_STRIP;
     
-    //Init Cams
-    guiCam = new CamObject();
+    //Init OpenCL
+    initOpenCL();
     
-    //Show loading screen
-    loadStaticShaderPrograms();
-    menu.setMenu(Menu::Name::loading);
-    
-    //Init Sound
+    //Init OpenAL
     soundDevice = alcOpenDevice(NULL);
     soundContext = alcCreateContext(soundDevice, NULL);
     alcMakeContextCurrent(soundContext);
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
     log(info_log, std::string("OpenAL sound output: ")+alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
     
-    initOpenCL();
+    //Show loading screen
+    guiCam = new CamObject();
+    loadStaticShaderPrograms();
+    menu.setMenu(Menu::Name::loading);
 }
 
 void ObjectManager::clear() {
@@ -244,7 +197,7 @@ void ObjectManager::gameTick() {
     currentShadowIsParabolid = false;
     profiler.leaveSection("Calculate shadows");
     
-    //Draw not transparent
+    //Draw scene
     mainCam->use();
     bool keepInColorBuffer = optionsState.screenBlurFactor > 0.0 || optionsState.edgeSmoothEnabled || optionsState.depthOfFieldQuality;
     drawFrame((keepInColorBuffer) ? mainFBO.gBuffers[colorDBuffer] : 0);
@@ -259,9 +212,9 @@ void ObjectManager::gameTick() {
         
         glDisable(GL_BLEND);
         shaderPrograms[ssaoSP]->use();
-        glViewport(0, 0, prevOptionsState.videoWidth / prevOptionsState.videoScale, prevOptionsState.videoHeight / prevOptionsState.videoScale);
+        glViewport(0, 0, optionsState.videoWidth, optionsState.videoHeight);
         mainFBO.renderInBuffers(true, buffersSSAO, 1, &buffersSSAO[1], 1);
-        glViewport(0, 0, prevOptionsState.videoWidth, prevOptionsState.videoHeight);
+        glViewport(0, 0, optionsState.videoWidth*optionsState.videoScale, optionsState.videoHeight*optionsState.videoScale);
         
         glEnable(GL_BLEND);
         glBlendFunc(GL_DST_COLOR, GL_ZERO);
@@ -280,7 +233,7 @@ void ObjectManager::gameTick() {
     if(optionsState.screenBlurFactor > 0.0) {
         glDisable(GL_BLEND);
         shaderPrograms[blurSP]->use();
-        currentShaderProgram->setUniformF("processingValue", optionsState.screenBlurFactor * prevOptionsState.videoScale);
+        currentShaderProgram->setUniformF("processingValue", optionsState.screenBlurFactor * optionsState.videoScale);
         mainFBO.renderInBuffers(true, &buffersPostRenderer[1], 1, 0, 0);
         profiler.leaveSection("Apply screen blur");
     }else{
@@ -298,8 +251,6 @@ void ObjectManager::gameTick() {
             profiler.leaveSection("Apply depth of field");
         }
     }
-    
-    profiler.leaveSection("Draw post effects");
     
     //Calculate Physics
     physicsWorld->stepSimulation(profiler.animationFactor, 4, 1.0/60.0); //Try to maintain 60 FPS

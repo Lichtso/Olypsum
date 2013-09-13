@@ -8,40 +8,8 @@
 
 #include "AppMain.h"
 
-const SDL_VideoInfo* updateVideoModeInternal(bool& fullScreen) {
-    const SDL_VideoInfo* videoInfo = SDL_GetVideoInfo();
-    if(!videoInfo) {
-        log(error_log, "Coudn't get video information, Quit.");
-        exit(3);
-    }
-    screenSize[0] = videoInfo->current_w;
-    screenSize[1] = videoInfo->current_h;
-    
-    if(optionsState.videoScale > screenSize[2])
-        optionsState.videoScale = screenSize[2];
-    if(optionsState.videoWidth > videoInfo->current_w || optionsState.videoHeight > videoInfo->current_h) {
-        optionsState.videoWidth = videoInfo->current_w;
-        optionsState.videoHeight = videoInfo->current_h;
-    }
-    fullScreen = optionsState.videoWidth == videoInfo->current_w && optionsState.videoHeight == videoInfo->current_h;
-    optionsState.videoWidth *= optionsState.videoScale;
-    optionsState.videoHeight *= optionsState.videoScale;
-    prevOptionsState = optionsState;
-    menu.clear();
-    
-    SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-    SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, optionsState.vSyncEnabled);
-    SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    //SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8)
-    
-    return videoInfo;
-}
-
 void AppMain() {
+    //Init paths
     if(*resourcesPath.begin() != '/') {
         char cwdPath[512];
         getcwd(cwdPath, sizeof(cwdPath)/sizeof(char)-1);
@@ -59,58 +27,149 @@ void AppMain() {
     createDir(supportPath);
     supportPath += "Olypsum/";
     createDir(supportPath);
+    optionsState.loadOptions();
     
+    //Init SDL
     if(SDL_Init(SDL_INIT_VIDEO) < 0) {
         log(error_log, "Couldn't init SDL, Quit.");
         exit(1);
     }
+    SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
     if(TTF_Init() == -1) {
         log(error_log, "Coudn't init TTF lib, Quit.");
         exit(2);
     }
-    SDL_EnableUNICODE(1);
     
-    optionsState.loadOptions();
+    //Init OpenGL
+    {
+        SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+        SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+        SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+        
+        SDL_DisplayMode desktopDisplay;
+        Uint32 windowFlags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE;
+        SDL_GetDesktopDisplayMode(0, &desktopDisplay);
+        
+        if(optionsState.videoWidth == desktopDisplay.w && optionsState.videoHeight == desktopDisplay.h)
+            windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+        
+        if(optionsState.videoScale > 1)
+            windowFlags |= SDL_WINDOW_HIDPI;
+        
+        mainWindow = SDL_CreateWindow("Olypsum", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                                      optionsState.videoWidth, optionsState.videoHeight, windowFlags);
+        
+        float videoScale = 1.0;
+        SDL_GetWindowScale(mainWindow, &videoScale, &videoScale);
+        optionsState.videoScale = videoScale;
+        
+        glContext = SDL_GL_CreateContext(mainWindow);
+        SDL_GL_SetSwapInterval(optionsState.vSyncEnabled);
+    
+        log(info_log, std::string("Engine Version: ")+VERSION);
+        log(info_log, std::string("Multi Threading: ")+stringOf(std::thread::hardware_concurrency())+" CPUs");
+        char* glStr = NULL;
+        GLint glAuxIa, glAuxIb;
+        glStr = (char*)glGetString(GL_VENDOR);
+        log(info_log, std::string("OpenGL vendor: ")+glStr);
+        glStr = (char*)glGetString(GL_RENDERER);
+        log(info_log, std::string("OpenGL renderer: ")+glStr);
+        glStr = (char*)glGetString(GL_VERSION);
+        log(info_log, std::string("OpenGL driver: ")+glStr);
+        glGetIntegerv(GL_MAJOR_VERSION, &glAuxIa);
+        glGetIntegerv(GL_MINOR_VERSION, &glAuxIb);
+        log(info_log, std::string("OpenGL version: ")+stringOf(glAuxIa)+"."+stringOf(glAuxIb));
+        if(glAuxIa < 3 || (glAuxIa == 3 && glAuxIb < 2)) {
+            log(error_log, "OpenGL version 3.2 is required, Quit.");
+            exit(5);
+        }
+    
+    #ifdef DEBUG
+        std::ostringstream stream;
+        stream << "OpenGL extensions found: ";
+        glGetIntegerv(GL_NUM_EXTENSIONS, &glAuxIa);
+        for(GLint i = 0; i < glAuxIa; i ++) {
+            glStr = (char*)glGetStringi(GL_EXTENSIONS, i);
+            stream << glStr << " ";
+        }
+        log(info_log, stream.str());
+        stream.str("");
+        stream << "OpenGL compressions found: ";
+        glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &glAuxIa);
+        GLint glCompressionFormats[glAuxIa];
+        glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS, glCompressionFormats);
+        for(GLint i = 0; i < glAuxIa; i ++)
+            stream << stringOf(glCompressionFormats[i]) << " ";
+        log(info_log, stream.str());
+    #endif
+    }
+    
+    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &optionsState.anisotropy);
+    optionsState.anisotropy = fmin(optionsState.anisotropy, pow(2.0, optionsState.surfaceQuality));
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CCW);
+    
     networkManager.init();
     objectManager.init();
     
     SDL_Event event;
     while(true) {
         while(SDL_PollEvent(&event)) {
-            int mouseX = event.button.x*prevOptionsState.videoScale - menu.screenView->width,
-                mouseY = menu.screenView->height - event.button.y*prevOptionsState.videoScale;
-            
             switch(event.type) {
-                case SDL_ACTIVEEVENT:
-                    menu.handleActiveEvent(event.active.gain);
-                break;
-                case SDL_KEYDOWN:
-                    menu.handleKeyDown(event);
-                break;
-                case SDL_KEYUP:
-                    menu.handleKeyUp(event);
-                break;
-                case SDL_MOUSEBUTTONDOWN:
-                    switch(event.button.button) {
-                        case SDL_BUTTON_LEFT:
-                        case SDL_BUTTON_MIDDLE:
-                        case SDL_BUTTON_RIGHT:
-                            menu.handleMouseDown(mouseX, mouseY, event.button.button);
-                            break;
-                        case SDL_BUTTON_WHEELDOWN:
-                            menu.handleMouseWheel(mouseX, mouseY, 0.0, -1.0);
-                            break;
-                        case SDL_BUTTON_WHEELUP:
-                            menu.handleMouseWheel(mouseX, mouseY, 0.0, 1.0);
-                            break;
+                case SDL_WINDOWEVENT:
+                    switch (event.window.event) {
+                        case SDL_WINDOWEVENT_FOCUS_LOST:
+                            if(menu.current == Menu::inGame)
+                                menu.setPause(true);
+                        break;
+                        case SDL_WINDOWEVENT_RESIZED:
+                            SDL_GetWindowSize(mainWindow, &optionsState.videoWidth, &optionsState.videoHeight);
+                            menu.setMenu(menu.current);
+                            mainFBO.init();
+                            if(menu.current == Menu::inGame) {
+                                mainCam->updateViewMat();
+                                for(auto lightObject : objectManager.lightObjects)
+                                    lightObject->deleteShadowMap();
+                            }
+                        break;
+                        /*case SDL_WINDOWEVENT_MAXIMIZED: {
+                            int w, h;
+                            SDL_GetWindowSize(mainWindow, &w, &h);
+                            if(w != optionsState.videoWidth && h != optionsState.videoHeight)
+                                SDL_SetWindowFullscreen(mainWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                        } break;*/
                     }
                 break;
+                case SDL_KEYDOWN:
+                    menu.handleKeyDown(event.key.keysym.sym);
+                break;
+                case SDL_KEYUP:
+                    menu.handleKeyUp(event.key.keysym.sym);
+                break;
+                case SDL_MOUSEBUTTONDOWN:
+                    menu.handleMouseDown(event.button.button);
+                break;
                 case SDL_MOUSEBUTTONUP:
-                    if(event.button.button == SDL_BUTTON_WHEELDOWN || event.button.button == SDL_BUTTON_WHEELUP) break;
-                    menu.handleMouseUp(mouseX, mouseY, event.button.button);
+                    menu.handleMouseUp(event.button.button);
+                break;
+                case SDL_MOUSEWHEEL:
+                    menu.handleMouseWheel(event.wheel.x, event.wheel.y);
                 break;
                 case SDL_MOUSEMOTION:
-                    menu.handleMouseMove(mouseX, mouseY);
+                    if(menu.current == Menu::inGame && menu.mouseFixed) {
+                        menu.mouseVelocityX += optionsState.mouseSensitivity*event.motion.xrel*optionsState.videoScale;
+                        menu.mouseVelocityY -= optionsState.mouseSensitivity*event.motion.yrel*optionsState.videoScale;
+                    }else{
+                        menu.mouseX = event.motion.x*optionsState.videoScale - menu.screenView->width;
+                        menu.mouseY = menu.screenView->height - event.motion.y*optionsState.videoScale;
+                        menu.screenView->handleMouseMove(menu.mouseX, menu.mouseY);
+                    }
                 break;
                 case SDL_QUIT:
                     AppTerminate();
@@ -119,7 +178,7 @@ void AppMain() {
                 break;
             }
         }
-        keyState = SDL_GetKeyState(&keyStateSize);
+        keyState = SDL_GetKeyboardState(&keyStateSize);
         
         if(menu.current == Menu::Name::inGame && profiler.isFirstFrameInSec()) {
             char str[64];
@@ -132,7 +191,7 @@ void AppMain() {
         menu.gameTick();
         if(levelManager.gameStatus == noGame) {
             glClearColor(1, 1, 1, 1);
-            glViewport(0, 0, prevOptionsState.videoWidth, prevOptionsState.videoHeight);
+            glViewport(0, 0, optionsState.videoWidth*optionsState.videoScale, optionsState.videoHeight*optionsState.videoScale);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             glClear(GL_COLOR_BUFFER_BIT);
         }else{
@@ -140,17 +199,18 @@ void AppMain() {
             objectManager.gameTick();
         }
         menu.screenView->drawScreen();
-        SDL_GL_SwapBuffers();
+        SDL_GL_SwapWindow(mainWindow);
         profiler.leaveSection("Swap Buffers");
         profiler.markFrame();
     }
 }
 
 void AppTerminate() {
+    optionsState.saveOptions();
+    SDL_GL_DeleteContext(glContext);
+    SDL_SetWindowFullscreen(mainWindow, 0);
+    SDL_DestroyWindow(mainWindow);
     TTF_Quit();
     SDL_Quit();
     exit(0);
 }
-
-Uint8* keyState;
-int keyStateSize;

@@ -193,8 +193,8 @@ class OptionsState {
     bool edgeSmoothEnabled = false,
          cubemapsEnabled = false,
          vSyncEnabled = true;
-    int videoWidth = 65535,
-        videoHeight = 65535,
+    int videoWidth = 640,
+        videoHeight = 480,
         videoScale = 1;
     unsigned char depthOfFieldQuality = 0,
                   surfaceQuality = 1,
@@ -209,6 +209,6 @@ class OptionsState {
 };
 
 extern FileManager fileManager;
-extern OptionsState optionsState, prevOptionsState;
+extern OptionsState optionsState;
 
 #endif
