@@ -1,4 +1,4 @@
-Ubuntu port: SDL2, application bundle, dynamic libs
+Ubuntu port: application bundle
 V8 API: Create/Delete Objects, Documentation
 Support to load another initial container than "Containers/start.xml"
 Implement btSoftBody
@@ -29,7 +29,6 @@ Bugs:
 Check memory leaks
 GUIRoundedRect border: odd size screen resolution
 GUILabel: line warp and segmentation
-Ubuntu NVIDIA diver shadow map lookup bug
 Prohibit cyclic FilePackage dependencies
 Prohibit cyclic parent-child relationships in GUIView
 Parallax Occlusion / Position / Depth

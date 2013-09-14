@@ -29,8 +29,8 @@
 #include <GL/gl.h>
 #include <AL/al.h>
 #include <AL/alc.h>
-#include <SDL/SDL_image.h>
-#include <SDL/SDL_ttf.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
 #endif
 
 #include <SDL2/SDL.h>
