@@ -1,13 +1,13 @@
-Ubuntu port: application bundle
+Application Icon
 V8 API: Create/Delete Objects, Documentation
-Support to load another initial container than "Containers/start.xml"
 Implement btSoftBody
 Leap Motion: V8 API
 
 Not sure:
+Water physics
+Fog / underwater effects
 Split screen support
 PCSS
-Fog
 Enviornment maping
 Light scattering / HDRR
 Magnetic Attraction PhysicLink
@@ -18,15 +18,14 @@ Procedural models / Plants
 3D GUI transformations
 GUILabel texture mask
 KI and path finding
-Water physics / underwater effects
 Windows port
 
 Test:
+Ubuntu .deb package
 Skeletal animation
 Performance issue of explosions
 
 Bugs:
-Check memory leaks
 GUIRoundedRect border: odd size screen resolution
 GUILabel: line warp and segmentation
 Prohibit cyclic FilePackage dependencies

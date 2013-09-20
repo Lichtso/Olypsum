@@ -19,10 +19,10 @@ btCollisionShape* LevelManager::getCollisionShape(const std::string& name) {
     return NULL;
 }
 
-std::string LevelManager::getCollisionShapeName(btCollisionShape* shape) {
-    for(auto iterator : sharedCollisionShapes)
-        if(iterator.second == shape)
-            return iterator.first;
+const char* LevelManager::getCollisionShapeName(btCollisionShape* shape) {
+    foreach_e(sharedCollisionShapes, iterator)
+        if(iterator->second == shape)
+            return iterator->first.c_str();
     return "";
 }
 
@@ -49,14 +49,9 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
     
     //Load CollisionShapes
     for(auto packageIterator : fileManager.filePackages) {
-        if(packageIterator.second->name == "Core") continue;
-        
         rapidxml::xml_document<xmlUsedCharType> doc;
         std::unique_ptr<char[]> fileData = readXmlFile(doc, packageIterator.second->path+"/CollisionShapes.xml", false);
-        if(!fileData) {
-            menu.setModalView("error", fileManager.localizeString("packageError_FilesMissing"), NULL);
-            return false;
-        }
+        if(!fileData) continue;
         
         rapidxml::xml_node<xmlUsedCharType>* node = doc.first_node("CollisionShapes")->first_node();
         while(node) {
@@ -170,7 +165,7 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
     return levelLoader.loadLevel();
 }
 
-bool LevelManager::newGame(FilePackage* package, const std::string& name, const std::string& container) {
+bool LevelManager::newGame(FilePackage* package, const std::string& name) {
     if(!createDir(supportPath+"Saves/"+name+'/'))
         return false;
     
@@ -180,10 +175,10 @@ bool LevelManager::newGame(FilePackage* package, const std::string& name, const 
     doc.append_node(rootNode);
     addXMLNode(doc, rootNode, "EngineVersion", VERSION);
     addXMLNode(doc, rootNode, "Package", package->name.c_str());
-    addXMLNode(doc, rootNode, "Level", container.c_str());
+    addXMLNode(doc, rootNode, "Level", package->initialContainer.c_str());
     writeXmlFile(doc, supportPath+"Saves/"+name+"/Status.xml", true);
     
-    return loadGame(package, name, container);
+    return loadGame(package, name, package->initialContainer);
 }
 
 LevelManager levelManager;

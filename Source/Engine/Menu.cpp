@@ -123,8 +123,8 @@ void Menu::handleMouseWheel(float deltaX, float deltaY) {
     if(script) script->callFunction("onmousewheel", false, { v8::Number::New(deltaX), v8::Number::New(deltaY) });
 }
 
-void Menu::handleKeyDown(SDL_Keycode key) {
-    if(screenView->handleKeyDown(key) || menu.current != inGame) return;
+void Menu::handleKeyDown(SDL_Keycode key, const char* text) {
+    if(screenView->handleKeyDown(key, text) || menu.current != inGame) return;
     
     v8::HandleScope handleScope;
     ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
@@ -402,6 +402,16 @@ void Menu::setMenu(Name menu) {
                 label->width = view->width+view->content.innerShadow*2.2-button->paddingX*1.0;
                 button->addChild(label);
             }
+            
+            GUILabel* label = new GUILabel();
+            label->text = fileManager.localizeString("version")+": "+VERSION;
+            label->textAlignment = GUILabel::TextAlignment::Left;
+            label->sizeAlignment = GUISizeAlignment::Height;
+            label->width = screenView->width*0.4;
+            label->posX = screenView->width*-0.59;
+            label->posY = screenView->height*-0.96;
+            label->fontHeight = screenView->height*0.08;
+            screenView->addChild(label);
         } break;
         case options: {
             GUILabel* label = new GUILabel();
@@ -789,11 +799,11 @@ void Menu::setMenu(Name menu) {
                 std::unique_ptr<char[]> fileData = readXmlFile(doc, supportPath+"Saves/"+name+"Status.xml", false);
                 if(!fileData) return false;
                 rapidxml::xml_node<xmlUsedCharType>* node = doc.first_node("Status");
-                FilePackage* package = fileManager.loadPackage(node->first_node("Package")->first_attribute("value")->value());
+                FilePackage* package = fileManager.loadPackage(node->first_node("Package")->first_attribute()->value());
                 if(!package) return false;
                 name.pop_back();
                 
-                std::string container = node->first_node("Level")->first_attribute("value")->value();
+                std::string container = node->first_node("Level")->first_attribute()->value();
                 GUIButton* button = new GUIButton();
                 button->posX = screenView->width*-0.18;
                 button->posY = scrollView->height*(0.8-validSaveGames*0.4);
@@ -921,7 +931,7 @@ void Menu::setMenu(Name menu) {
                 GUIButton* button = new GUIButton();
                 button->posY = scrollView->height*(0.8-(i ++)*0.4);
                 button->onClick = [package, textField](GUIButton* button) {
-                    levelManager.newGame(package, static_cast<GUILabel*>(textField->children[0])->text, "start");
+                    levelManager.newGame(package, static_cast<GUILabel*>(textField->children[0])->text);
                 };
                 scrollView->addChild(button);
                 label = new GUILabel();

@@ -203,7 +203,7 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicObject::write(rapidxml::xml_document<
     node->append_node(physicsBody);
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
     attribute->name("collisionShape");
-    attribute->value(levelManager.getCollisionShapeName(body->getCollisionShape()).c_str());
+    attribute->value(levelManager.getCollisionShapeName(body->getCollisionShape()));
     physicsBody->append_attribute(attribute);
     return node;
 }

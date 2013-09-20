@@ -49,7 +49,7 @@ class GUIRect {
     virtual bool handleMouseWheel(int mouseX, int mouseY, float deltaX, float deltaY) {
         return false;
     };
-    virtual bool handleKeyDown(SDL_Keycode key) {
+    virtual bool handleKeyDown(SDL_Keycode key, const char* text) {
         return false;
     };
     virtual bool handleKeyUp(SDL_Keycode key) {

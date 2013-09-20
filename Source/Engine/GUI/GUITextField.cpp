@@ -164,7 +164,7 @@ void GUITextField::handleMouseMove(int mouseX, int mouseY) {
     if(prevHighlighted != highlighted) updateContent();
 }
 
-bool GUITextField::handleKeyDown(SDL_Keycode key) {
+bool GUITextField::handleKeyDown(SDL_Keycode key, const char* text) {
     if(keyState[SDL_SCANCODE_LGUI] || keyState[SDL_SCANCODE_RGUI]) {
         switch(key) {
             case SDLK_c:
@@ -204,18 +204,9 @@ bool GUITextField::handleKeyDown(SDL_Keycode key) {
         case SDLK_RIGHT:
             moveCursorRight();
             break;
-        default: {
-            char str[] = { (char)(key & 0xFF), 0, 0, 0 };
-            if(key > 0x07FF) {
-                str[0] = 0xE0 | ((key >> 12) & 0x0F);
-                str[1] = 0x80 | ((key >> 6) & 0x3F);
-                str[2] = 0x80 | (key & 0x3F);
-            }else if(key > 0x007F) {
-                str[0] = 0xC0 | ((key >> 6) & 0x1F);
-                str[1] = 0x80 | (key & 0x3F);
-            }
-            insertStr(str);
-        } break;
+        default:
+            insertStr(text);
+        break;
     }
     return true;
 }

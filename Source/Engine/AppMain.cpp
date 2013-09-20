@@ -116,9 +116,13 @@ void AppMain() {
                         break;
                     }
                 break;
-                case SDL_KEYDOWN:
-                    menu.handleKeyDown(event.key.keysym.sym);
-                break;
+                case SDL_KEYDOWN: {
+                    SDL_Keycode keycode = event.key.keysym.sym;
+                    if(SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_TEXTINPUT, SDL_TEXTINPUT))
+                        menu.handleKeyDown(keycode, event.text.text);
+                    else
+                        menu.handleKeyDown(keycode, "");
+                } break;
                 case SDL_KEYUP:
                     menu.handleKeyUp(event.key.keysym.sym);
                 break;

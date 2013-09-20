@@ -98,6 +98,7 @@
 		11DD0B0A17AA509900A43E39 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11DD0B0917AA509900A43E39 /* OpenCL.framework */; };
 		11EC642C178F3114007990B9 /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1160B64F178F2E57002ADF40 /* libLeap.dylib */; };
 		11EC642F178F3291007990B9 /* LeapMotion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11EC642D178F3291007990B9 /* LeapMotion.cpp */; };
+		11ECD34117EC9E7F00D6F865 /* Icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 11ECD33F17EC9E7200D6F865 /* Icon.icns */; };
 		11F1EEB8156FE49400F7275D /* ParticlesObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11F1EEB7156FE49400F7275D /* ParticlesObject.cpp */; };
 		11FE8AB216B5A3F400B682D0 /* ScriptManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11FE8AB016B5A3F400B682D0 /* ScriptManager.cpp */; };
 		11FE8AB516B719CE00B682D0 /* Script.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11FE8AB316B719CE00B682D0 /* Script.cpp */; };
@@ -272,6 +273,7 @@
 		11DD0B0917AA509900A43E39 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = System/Library/Frameworks/OpenCL.framework; sourceTree = SDKROOT; };
 		11EC642D178F3291007990B9 /* LeapMotion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LeapMotion.cpp; sourceTree = "<group>"; };
 		11EC642E178F3291007990B9 /* LeapMotion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeapMotion.h; sourceTree = "<group>"; };
+		11ECD33F17EC9E7200D6F865 /* Icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Icon.icns; sourceTree = "<group>"; };
 		11F1EEB5156FE48B00F7275D /* ParticlesObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParticlesObject.h; sourceTree = "<group>"; };
 		11F1EEB7156FE49400F7275D /* ParticlesObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParticlesObject.cpp; sourceTree = "<group>"; };
 		11FE8AB016B5A3F400B682D0 /* ScriptManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptManager.cpp; sourceTree = "<group>"; };
@@ -285,15 +287,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1149A7DB17E111D20038015E /* SDL2.framework in Frameworks */,
 				11511422170CBE6700F77236 /* libNetLink.a in Frameworks */,
 				1160B650178F2E57002ADF40 /* libLeap.dylib in Frameworks */,
 				1197492C17DB39FA00414CAA /* libv8.dylib in Frameworks */,
 				1114B87016A8933200B1CD41 /* Ogg.framework in Frameworks */,
 				1114B87116A8933200B1CD41 /* Vorbis.framework in Frameworks */,
-				1114B84616A88BD100B1CD41 /* BulletCollision.framework in Frameworks */,
+				1149A7DB17E111D20038015E /* SDL2.framework in Frameworks */,
 				1149A7DE17E111DA0038015E /* SDL2_image.framework in Frameworks */,
 				1149A7DF17E111DA0038015E /* SDL2_ttf.framework in Frameworks */,
+				1114B84616A88BD100B1CD41 /* BulletCollision.framework in Frameworks */,
 				1114B84716A88BD100B1CD41 /* BulletDynamics.framework in Frameworks */,
 				1114B84816A88BD100B1CD41 /* BulletMultiThreaded.framework in Frameworks */,
 				1114B84916A88BD100B1CD41 /* BulletSoftBody.framework in Frameworks */,
@@ -497,6 +499,7 @@
 		11D74B4216270A5A000EEB50 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				11ECD33F17EC9E7200D6F865 /* Icon.icns */,
 				11D74B4416270A65000EEB50 /* Packages */,
 				11D74B4516270A65000EEB50 /* Shaders */,
 			);
@@ -595,6 +598,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				11ECD34117EC9E7F00D6F865 /* Icon.icns in Resources */,
 				11A79B83153C2FE9002B9F0A /* MainMenu.xib in Resources */,
 				11D74B4716270A65000EEB50 /* Packages in Resources */,
 				11D74B4816270A65000EEB50 /* Shaders in Resources */,
@@ -703,6 +707,7 @@
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_OPTIMIZATION_LEVEL = s;
 				GCC_PREPROCESSOR_DEFINITIONS = (
+					"VERSION='\"0.0.1\"'",
 					"DEBUG=1",
 					"$(inherited)",
 				);

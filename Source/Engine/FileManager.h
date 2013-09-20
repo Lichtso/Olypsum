@@ -80,6 +80,7 @@ class FilePackage {
     std::size_t hash; //!< Hash value of the content and file names
     std::string path, //!< The absolute path to its directory
                 name, //!< The name
+                initialContainer, //!< The name of the container, which is loaded at the beginning of a new game
                 description; //!< A meta info for the players
     std::set<FilePackage*> dependencies; //!< Other FilePackages needed for this one
     std::map<std::string, std::string> localization; //!< The localization of the selected language

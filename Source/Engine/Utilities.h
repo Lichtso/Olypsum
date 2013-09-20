@@ -8,7 +8,6 @@
 
 #ifndef Utilities_h
 #define Utilities_h
-#define VERSION "0.0.1"
 
 #include <math.h>
 #include <dirent.h>
@@ -172,6 +171,13 @@ inline btVector3 leapToBullet(Leap::Vector vec) {
 
 //! System time in seconds
 double getTime();
+
+/*! Compares two version strings
+ @param a Version string (e.g. "1.0.0")
+ @param b Version string (e.g. "1.0.0")
+ @return -1: a < b, 0: a == b, 1: a > b
+ */
+char compareVersions(std::string a, std::string b);
 
 extern const Uint8* keyState;
 extern int keyStateSize;

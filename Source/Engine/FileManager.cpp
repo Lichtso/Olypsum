@@ -65,7 +65,7 @@ bool FilePackage::init() {
         return false;
     }
     rapidxml::xml_node<xmlUsedCharType> *node, *packageNode = doc.first_node("Package");
-    if(strcmp(packageNode->first_node("EngineVersion")->first_attribute("value")->value(), VERSION) != 0) {
+    if(compareVersions(packageNode->first_node("EngineVersion")->first_attribute()->value(), VERSION) == -1) {
         menu.setModalView("error", fileManager.localizeString("packageError_Version"), NULL);
         return false;
     }
@@ -82,7 +82,14 @@ bool FilePackage::init() {
     }
     
     node = packageNode->first_node("Description");
-    if(node) description = node->value();
+    if(node) {
+        if(node->first_node() && node->first_node()->type() == rapidxml::node_cdata)
+            node = node->first_node();
+        description = node->value();
+    }
+    
+    node = packageNode->first_node("InitialContainer");
+    if(node) initialContainer = node->first_attribute()->value();
     
     FilePackage* package;
     node = packageNode->first_node("Dependencies");
@@ -222,7 +229,7 @@ std::string FileManager::getPathOfResource(FilePackage* filePackage, std::string
     if(filePackage == levelManager.levelPackage)
         return name;
     else
-        return std::string("../")+filePackage->name+'/'+name;
+        return std::string("/")+filePackage->name+'/'+name;
 }
 
 rapidxml::xml_node<xmlUsedCharType>* FileManager::writeResource(rapidxml::xml_document<xmlUsedCharType>& doc, const char* nodeName,
@@ -250,13 +257,13 @@ const std::string& FileManager::localizeString(const std::string& key) {
 
 
 static bool readOptionBool(rapidxml::xml_node<xmlUsedCharType>* option) {
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = option->first_attribute("value");
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = option->first_attribute();
     return strcmp(attribute->value(), "true") == 0;
 }
 
 template <class T>
 static T readOptionValue(rapidxml::xml_node<xmlUsedCharType>* option, const char* format) {
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = option->first_attribute("value");
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = option->first_attribute();
     T value;
     sscanf(attribute->value(), format, &value);
     return value;
@@ -271,11 +278,11 @@ void OptionsState::loadOptions() {
     std::unique_ptr<char[]> fileData = readXmlFile(doc, supportPath+"Options.xml", false);
     if(fileData) {
         rapidxml::xml_node<xmlUsedCharType>* options = doc.first_node("Options");
-        if(strcmp(options->first_node("EngineVersion")->first_attribute("value")->value(), VERSION) != 0) {
+        if(compareVersions(options->first_node("EngineVersion")->first_attribute()->value(), VERSION) == -1) {
             saveOptions();
             return;
         }
-        language = options->first_node("Language")->first_attribute("value")->value();
+        language = options->first_node("Language")->first_attribute()->value();
         rapidxml::xml_node<xmlUsedCharType>* optionGroup = options->first_node("Graphics");
         optionsState.screenBlurFactor = (readOptionBool(optionGroup->first_node("ScreenBlurEnabled"))) ? 0.0 : -1.0;
         optionsState.edgeSmoothEnabled = readOptionBool(optionGroup->first_node("EdgeSmoothEnabled"));

@@ -227,9 +227,9 @@ bool GUIScreenView::handleMouseWheel(int mouseX, int mouseY, float deltaX, float
     return false;
 }
 
-bool GUIScreenView::handleKeyDown(SDL_Keycode key) {
+bool GUIScreenView::handleKeyDown(SDL_Keycode key, const char* text) {
     if(!focused) return false;
-    return focused->handleKeyDown(key);
+    return focused->handleKeyDown(key, text);
 }
 
 bool GUIScreenView::handleKeyUp(SDL_Keycode key) {

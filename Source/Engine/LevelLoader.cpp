@@ -182,7 +182,7 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
         std::string statusFilePath = supportPath+"Saves/"+levelManager.saveGameName+"/Status.xml";
         std::unique_ptr<char[]> fileData = readXmlFile(doc, statusFilePath, true);
         node = doc.first_node("Status");
-        node->first_node("Level")->first_attribute("value")->value(name.c_str());
+        node->first_node("Level")->first_attribute()->value(name.c_str());
         v8::Handle<v8::Value> globalData = scriptManager->readCdataXMLNode(node);
         if(!writeXmlFile(doc, statusFilePath, true))
             return false;

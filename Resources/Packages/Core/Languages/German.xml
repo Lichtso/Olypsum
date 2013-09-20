@@ -1,6 +1,7 @@
 <Localization>
 	<Entry key="olypsum">Olypsum</Entry>
 	<Entry key="loading">Lade ...</Entry>
+    <Entry key="version">Version</Entry>
 	<Entry key="saveGames">Spielstände</Entry>
 	<Entry key="multiplayer">Mehrspieler</Entry>
 	<Entry key="options">Optionen</Entry>

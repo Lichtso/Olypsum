@@ -43,7 +43,7 @@ class Menu {
     void handleMouseDown(Uint8 button);
     void handleMouseUp(Uint8 button);
     void handleMouseWheel(float deltaX, float deltaY);
-    void handleKeyDown(SDL_Keycode key);
+    void handleKeyDown(SDL_Keycode key, const char* text);
     void handleKeyUp(SDL_Keycode key);
     void gameTick();
     void clear();

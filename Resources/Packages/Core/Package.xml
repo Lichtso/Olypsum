@@ -1,4 +1,6 @@
-<Package hash="dd0c189f4029a518">
+<Package hash="d6ba8d8e562a4ecb">
 	<EngineVersion value="0.0.1"/>
-	<Description>Engine core resources</Description>
+	<Description>
+		<![CDATA[Engine core resources]]>
+	</Description>
 </Package>

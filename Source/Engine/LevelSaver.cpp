@@ -92,7 +92,8 @@ bool LevelSaver::saveLevel(v8::Handle<v8::Value> localData, v8::Handle<v8::Value
     std::string statusFilePath = supportPath+"Saves/"+levelManager.saveGameName+"/Status.xml";
     std::unique_ptr<char[]> fileData = readXmlFile(doc, statusFilePath, true);
     node = doc.first_node("Status");
-    node->first_node("Level")->first_attribute("value")->value(levelManager.levelContainer.c_str());
+    node->first_node("EngineVersion")->first_attribute()->value(VERSION);
+    node->first_node("Level")->first_attribute()->value(levelManager.levelContainer.c_str());
     scriptManager->writeCdataXMLNode(doc, node, "Data", globalData);
     scriptManager->writeCdataXMLNode(doc, node, "Description", description);
     return writeXmlFile(doc, statusFilePath, true);

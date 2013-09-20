@@ -231,6 +231,32 @@ double getTime() {
 #endif
 }
 
+char compareVersions(std::string strA, std::string strB) {
+    std::stringstream ss(strA);
+    std::vector<int> a;
+    std::string token;
+    while(std::getline(ss, token, '.')) {
+        int number;
+        sscanf(token.c_str(), "%d", &number);
+        a.push_back(number);
+    }
+    
+    ss.clear();
+    ss.str(strB);
+    int i = 0;
+    while(std::getline(ss, token, '.')) {
+        int number;
+        sscanf(token.c_str(), "%d", &number);
+        if(a.size() <= i || a[i] < number)
+            return -1;
+        else if(a[i] > number)
+            return 1;
+        i ++;
+    }
+    
+    return (a.size() > i) ? 1 : 0;
+}
+
 const Uint8* keyState = NULL;
 int keyStateSize = 0;
 SDL_Window* mainWindow = NULL;

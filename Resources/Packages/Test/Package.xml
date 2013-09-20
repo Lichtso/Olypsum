@@ -1,4 +1,7 @@
 <Package hash="5ccdc3c32bdd2714">
 	<EngineVersion value="0.0.1"/>
-	<Description>A demo scene provided by Gamefortec.</Description>
+	<InitialContainer value="start"/>
+	<Description>
+		<![CDATA[A demo scene provided by Gamefortec.]]>
+	</Description>
 </Package>
