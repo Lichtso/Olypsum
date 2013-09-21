@@ -59,6 +59,41 @@ void ScriptManager::ScriptSaveLevel(const v8::FunctionCallbackInfo<v8::Value>& a
     args.GetReturnValue().Set(levelSaver.saveLevel(args[0], args[1], args[2]));
 }
 
+void ScriptManager::ScriptAccessSceneProperty(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::HandleScope handleScope;
+    if(args.Length() == 0)
+        return args.ScriptException("accessSceneProperty(): Too few arguments");
+    if(!args[0]->IsString())
+        return args.ScriptException("accessSceneProperty(): Invalid argument");
+    const char* key = cStrOfV8(args[0]);
+    
+    if(strcmp(key, "Gravity") == 0) {
+        if(args.Length() > 1 && scriptVector3.isCorrectInstance(args[1])) {
+            objectManager.physicsWorld->setGravity(scriptVector3.getDataOfInstance(args[1]));
+            args.GetReturnValue().Set(args[1]);
+        }else
+            args.GetReturnValue().Set(scriptVector3.newInstance(objectManager.physicsWorld->getGravity()));
+    }else if(strcmp(key, "Ambient") == 0) {
+        if(args.Length() > 1 && scriptVector3.isCorrectInstance(args[1])) {
+            objectManager.sceneAmbient = scriptVector3.getDataOfInstance(args[1]);
+            args.GetReturnValue().Set(args[1]);
+        }else
+            args.GetReturnValue().Set(scriptVector3.newInstance(objectManager.sceneAmbient));
+    }else if(strcmp(key, "FogColor") == 0) {
+        if(args.Length() > 1 && scriptVector3.isCorrectInstance(args[1])) {
+            objectManager.sceneFogColor = scriptVector3.getDataOfInstance(args[1]);
+            args.GetReturnValue().Set(args[1]);
+        }else
+            args.GetReturnValue().Set(scriptVector3.newInstance(objectManager.sceneFogColor));
+    }else if(strcmp(key, "FogDistance") == 0) {
+        if(args.Length() > 1 && args[1]->IsNumber()) {
+            objectManager.sceneFogDistance = args[1]->NumberValue();
+            args.GetReturnValue().Set(args[1]);
+        }else
+            args.GetReturnValue().Set(objectManager.sceneFogDistance);
+    }
+}
+
 void ScriptManager::ScriptGetGamePaused(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     info.GetReturnValue().Set(menu.current != Menu::inGame);
@@ -117,6 +152,7 @@ ScriptManager::ScriptManager() {
     globalTemplate->Set(v8::String::New("loadContainer"), v8::FunctionTemplate::New(ScriptLoadContainer));
     globalTemplate->Set(v8::String::New("localizeString"), v8::FunctionTemplate::New(ScriptLocalizeString));
     globalTemplate->Set(v8::String::New("saveLevel"), v8::FunctionTemplate::New(ScriptSaveLevel));
+    globalTemplate->Set(v8::String::New("accessSceneProperty"), v8::FunctionTemplate::New(ScriptAccessSceneProperty));
     globalTemplate->SetAccessor(v8::String::New("gamePaused"), ScriptGetGamePaused);
     globalTemplate->SetAccessor(v8::String::New("levelID"), ScriptGetLevel, ScriptSetLevel);
     globalTemplate->SetAccessor(v8::String::New("animationFactor"), ScriptGetAnimationFactor);

@@ -65,6 +65,7 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
     unsigned int objectLinkingScopePrev = objectLinkingIndex.size();
     
     //Check for Level-node
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute;
     rapidxml::xml_node<xmlUsedCharType>* levelNode = containerNode->first_node("Level");
     if(levelNode) {
         if(!isLevelRoot) {
@@ -84,13 +85,23 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
             vecData.readString(parameterNode->value(), "%f");
             objectManager.sceneAmbient = vecData.getVector3();
         }
+        parameterNode = levelNode->first_node("Fog");
+        if(parameterNode) {
+            attribute = parameterNode->first_attribute("color");
+            if(attribute) {
+                vecData.readString(attribute->value(), "%f");
+                objectManager.sceneFogColor = vecData.getVector3();
+            }
+            attribute = parameterNode->first_attribute("distance");
+            if(attribute)
+                sscanf(attribute->value(), "%f", &objectManager.sceneFogDistance);
+        }
     }else if(isLevelRoot) {
         log(error_log, "Root container does not contain a \"Level\"-node.");
         return false;
     }
     
     //Load containers
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute;
     rapidxml::xml_node<xmlUsedCharType>* node = containerNode->first_node("Container");
     while(node) {
         attribute = node->first_attribute("src");

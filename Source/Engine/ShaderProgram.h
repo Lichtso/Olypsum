@@ -73,7 +73,7 @@ class ShaderProgram {
 };
 
 extern btTransform modelMat;
-extern ShaderProgram *shaderPrograms[80], *currentShaderProgram;
+extern ShaderProgram *shaderPrograms[81], *currentShaderProgram;
 
 enum ShaderProgramName {
     //Static Shaders
@@ -163,6 +163,7 @@ enum ShaderProgramName {
     ssaoCombineSP,
     edgeSmoothSP,
     depthOfFieldSP,
+    depthOfFieldFogSP,
     advanceParticlesSP,
     particlesSP,
     particlesAnimatedSP

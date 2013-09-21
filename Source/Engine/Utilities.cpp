@@ -139,7 +139,7 @@ bool removeDir(std::string path) {
     }, [](const std::string& directoryPath, std::string name) {
         return true;
     }, [](const std::string& directoryPath) {
-        remove(directoryPath.c_str());
+        remove((directoryPath+'/').c_str());
     });
 }
 

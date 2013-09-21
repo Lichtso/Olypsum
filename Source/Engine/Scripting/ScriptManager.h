@@ -18,6 +18,7 @@ class ScriptManager {
     static void ScriptLoadContainer(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void ScriptLocalizeString(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void ScriptSaveLevel(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void ScriptAccessSceneProperty(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void ScriptGetGamePaused(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
     static void ScriptGetLevel(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
     static void ScriptSetLevel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);

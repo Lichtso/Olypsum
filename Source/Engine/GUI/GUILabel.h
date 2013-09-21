@@ -39,6 +39,7 @@ class GUILabel : public GUIRect {
     void updateContent();
     void draw(btVector3 transform, GUIClipRect& parentClipRect);
     void getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int& posX, int& posY);
+    //! Returns the number of characters that fit in the given width
     unsigned int getCharCountThatFitsIn(unsigned int width, const std::string& text);
     //! Returns the size in UTF8 characters of text
     unsigned int getLength();

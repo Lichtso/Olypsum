@@ -97,10 +97,15 @@ bool FilePackage::init() {
         packageNode = node->first_node("Package");
         while(packageNode) {
             sscanf(packageNode->first_attribute("hash")->value(), "%lx", &hashCmp);
-            if(!(package = fileManager.loadPackage(packageNode->first_attribute("name")->value())) || hashCmp != package->hash) {
+            std::string dependencyName = packageNode->first_attribute("name")->value();
+            if(dependencyName == name)
+                log(warning_log, std::string("Package ")+name+" dependens on its self.");
+            
+            if(!(package = fileManager.loadPackage(dependencyName)) || hashCmp != package->hash) {
                 menu.setModalView("error", fileManager.localizeString("packageError_CouldNotLoad")+'\n'+name, NULL);
                 return false;
             }
+            
             dependencies.insert(package);
             packageNode = packageNode->next_sibling("Package");
         }
@@ -186,13 +191,13 @@ void FileManager::clear() {
 FilePackage* FileManager::loadPackage(const std::string& name) {
     std::map<std::string, FilePackage*>::iterator iterator = filePackages.find(name);
     if(iterator == filePackages.end()) {
-        FilePackage* package = new FilePackage(name);
+        FilePackage* package = fileManager.filePackages[name] = new FilePackage(name);
         if(!package->init()) {
             delete package;
+            filePackages.erase(name);
             return NULL;
-        }
-        filePackages[name] = package;
-        return package;
+        }else
+            return package;
     }
     return iterator->second;
 }

@@ -1,19 +1,17 @@
-Application Icon
 V8 API: Create/Delete Objects, Documentation
 Implement btSoftBody
 Leap Motion: V8 API
 
 Not sure:
 Water physics
-Fog / underwater effects
 Split screen support
-PCSS
 Enviornment maping
 Light scattering / HDRR
+PCSS
 Magnetic Attraction PhysicLink
 Gear Rack PhysicLink
-Networking / Multiplayer
 Destructible objects / Voronoi
+Networking / Multiplayer
 Procedural models / Plants
 3D GUI transformations
 GUILabel texture mask
@@ -27,7 +25,4 @@ Performance issue of explosions
 
 Bugs:
 GUIRoundedRect border: odd size screen resolution
-GUILabel: line warp and segmentation
-Prohibit cyclic FilePackage dependencies
-Prohibit cyclic parent-child relationships in GUIView
 Parallax Occlusion / Position / Depth

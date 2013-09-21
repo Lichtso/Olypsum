@@ -188,7 +188,7 @@ void Menu::gameTick() {
                 updateGBufferShaderPrograms();
             else if(!shaderPrograms[directionalShadowLightSP]->linked())
                 updateIlluminationShaderPrograms();
-            else if(!shaderPrograms[ssaoSP]->linked())
+            else if(optionsState.ssaoQuality && !shaderPrograms[ssaoSP]->linked())
                 updateSSAOShaderPrograms();
             else if(!shaderPrograms[depthOfFieldSP]->linked())
                 updateDOFShaderProgram();

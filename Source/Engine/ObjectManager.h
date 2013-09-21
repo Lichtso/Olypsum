@@ -24,9 +24,10 @@ class ObjectManager {
     std::set<GraphicObject*> graphicObjects; //!< All GraphicObjects (without ParticlesObjects) in the scene
     std::set<ParticlesObject*> particlesObjects; //! All ParticlesObjects in the scene
     std::set<SimpleObject*> simpleObjects; //! All Cams and SoundObjects in the scene
-    btVector3 sceneAmbient; //! Ambient light color
+    btVector3 sceneAmbient, //! Ambient light color
+              sceneFogColor; //! Fog color afloat
+    float sceneFogDistance; //! Fog distance afloat
     
-    btThreadSupportInterface* bulletThreadSupport; //!< The physics multi thread support
     btCollisionConfiguration* collisionConfiguration; //!< The physics collision configuration
     btCollisionDispatcher* collisionDispatcher; //!< The physics collision dispatcher
     btConstraintSolver* constraintSolver; //!< The physics constraint solver

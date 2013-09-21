@@ -29,10 +29,6 @@ ObjectManager::ObjectManager() {
     currentShadowLight = NULL;
     collisionConfiguration = new btSoftBodyRigidBodyCollisionConfiguration();
     collisionDispatcher = new btCollisionDispatcher(collisionConfiguration);
-    
-    /*PosixThreadSupport::ThreadConstructionInfo solverConstructionInfo(NULL, SolverThreadFunc, SolverlsMemoryFunc, std::thread::hardware_concurrency()/2);
-	bulletThreadSupport = new PosixThreadSupport(solverConstructionInfo);
-	constraintSolver = new btParallelConstraintSolver(bulletThreadSupport);*/
     constraintSolver = new btSequentialImpulseConstraintSolver();
     
     //softBodySolver = NULL;
@@ -49,7 +45,6 @@ ObjectManager::~ObjectManager() {
     delete softBodySolver;
     if(softBodyOutput) delete softBodyOutput;
     delete constraintSolver;
-    //delete bulletThreadSupport;
     delete collisionDispatcher;
     delete collisionConfiguration;
 }
@@ -176,6 +171,8 @@ void ObjectManager::initGame() {
     physicsWorld->setInternalTickCallback(calculatePhysicsTick);
     scriptManager.reset(new ScriptManager());
     sceneAmbient = btVector3(0.1, 0.1, 0.1);
+    sceneFogColor = btVector3(0.8, 0.8, 0.8);
+    sceneFogDistance = 0.0;
     levelManager.gameStatus = localGame; //Enable console log
 }
 
@@ -199,7 +196,8 @@ void ObjectManager::gameTick() {
     
     //Draw scene
     mainCam->use();
-    bool keepInColorBuffer = optionsState.screenBlurFactor > 0.0 || optionsState.edgeSmoothEnabled || optionsState.depthOfFieldQuality;
+    bool keepInColorBuffer = optionsState.screenBlurFactor > 0.0 || optionsState.edgeSmoothEnabled ||
+                             sceneFogDistance > 0.0 || optionsState.depthOfFieldQuality;
     drawFrame((keepInColorBuffer) ? mainFBO.gBuffers[colorDBuffer] : 0);
     profiler.leaveSection("Draw top frame");
     
@@ -241,11 +239,18 @@ void ObjectManager::gameTick() {
         
         if(optionsState.edgeSmoothEnabled) {
             shaderPrograms[edgeSmoothSP]->use();
-            mainFBO.renderInBuffers(true, buffersPostRenderer, 2, &buffersPostRenderer[1], (optionsState.depthOfFieldQuality) ? 1 : 0);
+            mainFBO.renderInBuffers(true, buffersPostRenderer, 2, &buffersPostRenderer[1],
+                                    (sceneFogDistance > 0.0 || optionsState.depthOfFieldQuality) ? 1 : 0);
             profiler.leaveSection("Apply edge smooth");
         }
         
-        if(optionsState.depthOfFieldQuality) {
+        if(sceneFogDistance > 0.0) {
+            shaderPrograms[depthOfFieldFogSP]->use();
+            currentShaderProgram->setUniformVec3("fogColor", sceneFogColor);
+            currentShaderProgram->setUniformF("fogDistance", sceneFogDistance);
+            mainFBO.renderInBuffers(true, buffersPostRenderer, 2, 0, 0);
+            profiler.leaveSection("Apply depth of field and fog");
+        }else if(optionsState.depthOfFieldQuality) {
             shaderPrograms[depthOfFieldSP]->use();
             mainFBO.renderInBuffers(true, buffersPostRenderer, 2, 0, 0);
             profiler.leaveSection("Apply depth of field");

@@ -483,13 +483,13 @@ void updateIlluminationShaderPrograms() {
 }
 
 void updateSSAOShaderPrograms() {
-    if(optionsState.ssaoQuality == 0) return;
+    if(!optionsState.ssaoQuality) return;
     
     char scaleMacro[32], ssaoQualityMacro[32];
     sprintf(scaleMacro, "SSAO_SCALE %f", optionsState.videoScale*2.0);
     sprintf(ssaoQualityMacro, "SSAO_QUALITY %d", optionsState.ssaoQuality);
     
-    shaderPrograms[ssaoSP]->loadShaderProgram("postSSAO", shaderTypeVertexFragment, { ssaoQualityMacro, scaleMacro });
+    shaderPrograms[ssaoSP]->loadShaderProgram("postSSAO1", shaderTypeVertexFragment, { ssaoQualityMacro, scaleMacro });
     shaderPrograms[ssaoSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[ssaoSP]->addFragDataLocations(colorFragOut);
     shaderPrograms[ssaoSP]->link();
@@ -508,19 +508,25 @@ void updateSSAOShaderPrograms() {
     }
     glUniform2fv(glGetUniformLocation(shaderPrograms[ssaoSP]->GLname, "pSphere"), samples, pSphere);
     
-    shaderPrograms[ssaoCombineSP]->loadShaderProgram("deferredSSAO", shaderTypeVertexFragment, { ssaoQualityMacro, scaleMacro });
+    shaderPrograms[ssaoCombineSP]->loadShaderProgram("postSSAO2", shaderTypeVertexFragment, { ssaoQualityMacro, scaleMacro });
     shaderPrograms[ssaoCombineSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[ssaoCombineSP]->addFragDataLocations(colorFragOut);
     shaderPrograms[ssaoCombineSP]->link();
 }
 
 void updateDOFShaderProgram() {
-    if(optionsState.depthOfFieldQuality == 0) return;
-    
     char depthOfFieldMacro[32];
     sprintf(depthOfFieldMacro, "DOF_QUALITY %d", optionsState.depthOfFieldQuality);
-    shaderPrograms[depthOfFieldSP]->loadShaderProgram("postDepthOfField", shaderTypeVertexFragment, { depthOfFieldMacro });
-    shaderPrograms[depthOfFieldSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[depthOfFieldSP]->addFragDataLocations(colorFragOut);
-    shaderPrograms[depthOfFieldSP]->link();
+    
+    shaderPrograms[depthOfFieldFogSP]->loadShaderProgram("postDepthOfField", shaderTypeVertexFragment, { depthOfFieldMacro, "FOG_ACTIVE 1" });
+    shaderPrograms[depthOfFieldFogSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[depthOfFieldFogSP]->addFragDataLocations(colorFragOut);
+    shaderPrograms[depthOfFieldFogSP]->link();
+    
+    if(optionsState.depthOfFieldQuality) {
+        shaderPrograms[depthOfFieldSP]->loadShaderProgram("postDepthOfField", shaderTypeVertexFragment, { depthOfFieldMacro, "FOG_ACTIVE 0"  });
+        shaderPrograms[depthOfFieldSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+        shaderPrograms[depthOfFieldSP]->addFragDataLocations(colorFragOut);
+        shaderPrograms[depthOfFieldSP]->link();
+    }
 }

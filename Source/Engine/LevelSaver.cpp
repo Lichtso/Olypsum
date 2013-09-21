@@ -45,6 +45,7 @@ bool LevelSaver::saveLevel(v8::Handle<v8::Value> localData, v8::Handle<v8::Value
     doc.append_node(container);
     
     //Write level tag
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute;
     rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
     node->name("Level");
     container->append_node(node);
@@ -58,6 +59,19 @@ bool LevelSaver::saveLevel(v8::Handle<v8::Value> localData, v8::Handle<v8::Value
     parameterNode->name("Ambient");
     parameterNode->value(doc.allocate_string(stringOf(objectManager.sceneAmbient).c_str()));
     node->append_node(parameterNode);
+    if(objectManager.sceneFogDistance > 0.0) {
+        parameterNode = doc.allocate_node(rapidxml::node_element);
+        parameterNode->name("Fog");
+        node->append_node(parameterNode);
+        attribute = doc.allocate_attribute();
+        attribute->name("color");
+        attribute->value(doc.allocate_string(stringOf(objectManager.sceneFogColor).c_str()));
+        parameterNode->append_attribute(attribute);
+        attribute = doc.allocate_attribute();
+        attribute->name("distance");
+        attribute->value(doc.allocate_string(stringOf(objectManager.sceneFogDistance).c_str()));
+        parameterNode->append_attribute(attribute);
+    }
     
     //Save objects
     node = doc.allocate_node(rapidxml::node_element);

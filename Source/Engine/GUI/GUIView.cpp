@@ -18,6 +18,13 @@ GUIView::~GUIView() {
 }
 
 bool GUIView::addChild(GUIRect* child) {
+    GUIRect* node = this;
+    while(node) {
+        if(node == child)
+            return false;
+        node = node->parent;
+    }
+    
     if(child->parent)
         child->parent->children.erase(child->parent->children.begin()+child->parent->getIndexOfChild(child));
     

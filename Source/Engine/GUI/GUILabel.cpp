@@ -42,8 +42,11 @@ void GUILabel::addLine(unsigned int& newWidth, unsigned int& newHeight, std::str
     if(sizeAlignment & GUISizeAlignment::Width)
         return addSegment(newWidth, newHeight, text);
     
+    if(text.size() == 0)
+        addSegment(newWidth, newHeight, "");
+    
     while(text.size() > 0) {
-        unsigned int length = max(1U, getCharCountThatFitsIn(width, text));
+        unsigned int length = max(1U, getCharCountThatFitsIn(width << 1, text));
         addSegment(newWidth, newHeight, text.substr(0, length));
         text = text.substr(length);
     }
@@ -135,15 +138,15 @@ void GUILabel::getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int&
 }
 
 unsigned int GUILabel::getCharCountThatFitsIn(unsigned int warpWidth, const std::string& text) {
-    int l = text.size()/2, w, h;
+    int l = 0.5+text.size()/2.0, w, h;
     for(unsigned int size = l; size >= 1; size >>= 1) {
         std::string segment = text.substr(0, l);
         font->calculateTextSize(segment.c_str(), w, h);
-        if(0.5*fontHeight/h*w > warpWidth)
+        if((float)fontHeight/h*w > warpWidth)
             l -= size;
         else
             l += size;
-        if(l > text.size())
+        if(l >= text.size())
             return text.size();
     }
     return l;
