@@ -1,8 +1,10 @@
 V8 API: Create/Delete Objects, Documentation
 Implement btSoftBody
 Leap Motion: V8 API
+Improve: SSAO Quality, Logarithmic Depth Buffer
 
 Not sure:
+Logarithmic Shadow Mapping
 Water physics
 Split screen support
 Enviornment maping

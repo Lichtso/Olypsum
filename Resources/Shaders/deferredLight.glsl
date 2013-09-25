@@ -1,9 +1,11 @@
 in vec3 position;
 
 uniform mat4 modelViewMat;
+uniform float depthNear, depthFar;
 
 void main() {
     gl_Position = vec4(position, 1.0)*modelViewMat;
+    gl_Position.z = log2(max(gl_Position.w+depthNear, 0.5))*depthFar*gl_Position.w-gl_Position.w;
 }
 
 #separator

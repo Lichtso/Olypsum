@@ -4,6 +4,7 @@ uniform mat4 modelViewMat;
 uniform mat4 modelMat;
 uniform mat3 normalMat;
 uniform vec3 textureScale;
+uniform float depthNear, depthFar;
 uniform vec4 clipPlane[1];
 
 out vec3 vPosition;
@@ -13,6 +14,7 @@ out float gl_ClipDistance[1];
 
 void main() {
     gl_Position = vec4(position, 1.0)*modelViewMat;
+    gl_Position.z = log2(max(gl_Position.w+depthNear, 0.5))*depthFar*gl_Position.w-gl_Position.w;
 	vPosition = (vec4(position, 1.0)*modelMat).xyz;
     gl_ClipDistance[0] = dot(vec4(vPosition, 1.0), clipPlane[0]);
     vNormal = normal*normalMat;

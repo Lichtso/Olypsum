@@ -253,7 +253,7 @@ rapidxml::xml_node<xmlUsedCharType>* TerrainObject::write(rapidxml::xml_document
     for(unsigned int i = 0; i < width * length; i ++) {
         data.fill('0');
         data.width(bitDepth);
-        data << (unsigned int)(scale*heights[i]);
+        data << (unsigned int) ceil(scale*heights[i]);
     }
     heightsNode->value(doc.allocate_string(data.str().c_str()));
     node->append_node(heightsNode);

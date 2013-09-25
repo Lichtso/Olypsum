@@ -185,7 +185,6 @@ bool DirectionalLight::generateShadowMap(bool shadowActive) {
     if(!LightObject::generateShadowMap(shadowActive)) return true;
     objectManager.currentShadowIsParabolid = false;
     
-    glDisable(GL_BLEND);
     mainFBO.renderInTexture(shadowMap, GL_TEXTURE_2D);
     objectManager.drawShadowCasters();
     return true;
@@ -284,7 +283,6 @@ bool SpotLight::generateShadowMap(bool shadowActive) {
     objectManager.currentShadowIsParabolid = false;
     shadowCam.updateViewMat();
     
-    glDisable(GL_BLEND);
     mainFBO.renderInTexture(shadowMap, GL_TEXTURE_2D);
     //Render circle mask
     shaderPrograms[circleMaskSP]->use();
@@ -405,7 +403,6 @@ bool PositionalLight::generateShadowMap(bool shadowActive) {
     shadowCam.updateViewMat();
     Matrix4 viewMat = shadowCam.viewMat;
     
-    glDisable(GL_BLEND);
     if(optionsState.cubemapsEnabled) {
         objectManager.currentShadowIsParabolid = false;
         float fov = shadowCam.fov;

@@ -126,14 +126,12 @@ void FBO::init() {
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA,
                  width, height,
                  0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    if(optionsState.ssaoQuality) {
-        initBuffer(ssaoDBuffer);
-        glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_R16F,
-                     optionsState.videoWidth, optionsState.videoHeight,
-                     0, GL_RED, GL_FLOAT, NULL);
-        glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    }
+    initBuffer(ssaoDBuffer);
+    glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_R16F,
+                 optionsState.videoWidth, optionsState.videoHeight,
+                 0, GL_RED, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
     glBindTexture(GL_TEXTURE_RECTANGLE, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

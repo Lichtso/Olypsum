@@ -12,6 +12,7 @@ uniform mat4 modelViewMat;
 uniform mat4 modelMat;
 uniform mat3 normalMat;
 #endif
+uniform float depthNear, depthFar;
 uniform vec4 clipPlane[1];
 
 #if BUMP_MAPPING > 0
@@ -31,13 +32,14 @@ void main() {
     mat += weights[1]*jointMats[int(joints[1])];
     mat += weights[2]*jointMats[int(joints[2])];
     vec4 pos = vec4(position, 1.0) * mat;
+    pos /= pos.w;
     gl_Position = pos * viewMat;
     #if BUMP_MAPPING
-    gPosition = pos.xyz/pos.w;
+    gPosition = pos.xyz;
     gNormal = normalize((vec4(normal, 0.0) * mat).xyz);
     gTexCoord = texCoord;
     #else
-    vPosition = pos.xyz/pos.w;
+    vPosition = pos.xyz;
     vNormal = normalize((vec4(normal, 0.0) * mat).xyz);
     vTexCoord = texCoord;
     gl_ClipDistance[0] = dot(vec4(vPosition, 1.0), clipPlane[0]);
@@ -55,11 +57,13 @@ void main() {
     gl_ClipDistance[0] = dot(vec4(vPosition, 1.0), clipPlane[0]);
     #endif
     #endif
+    gl_Position.z = log2(max(gl_Position.w+depthNear, 0.5))*depthFar*gl_Position.w-gl_Position.w;
 }
 
 #separator
 
 #define M_PI 3.14159265358979323846
+//#extension GL_ARB_conservative_depth : enable
 
 in vec3 vPosition;
 in vec2 vTexCoord;
@@ -93,6 +97,7 @@ uniform samplerCube sampler4;
 uniform float discardDensity;
 uniform vec3 camPos;
 uniform mat3 viewNormalMat;
+uniform float depthNear, depthFar;
 
 #include random.glsl
 
@@ -107,25 +112,6 @@ void setColor(vec2 texCoord) {
     materialOut = texture(sampler1, texCoord).rgb; //Material
     specularOut = colorOut.rgb*materialOut.b; //Emission
 }
-
-#if BUMP_MAPPING == 3
-void LinearParallax(inout vec3 texCoord, vec3 viewVec, float steps) {
-	for(float i = 0.0; i < steps; i ++) {
-		if(texCoord.z >= texture(sampler2, texCoord.xy).a)
-            return;
-        texCoord += viewVec;
-    }
-}
-
-void BinaryParallax(inout vec3 texCoord, vec3 viewVec) {
-	for(int i = 0; i < 6; i ++) {
-		if(texCoord.z < texture(sampler2, texCoord.xy).a)
-            texCoord += viewVec;
-		viewVec *= 0.5;
-		texCoord -= viewVec;
-	}
-}
-#endif
 
 void main() {
     if(vec1Vec2Rand(vTexCoord.st) > discardDensity) discard;
@@ -151,18 +137,28 @@ void main() {
     viewVec.xy = vec2(dot(viewVec, vTangent), dot(viewVec, vBitangent));
     vec2 texCoord = vTexCoord-viewVec.xy*texture(sampler2, vTexCoord).a*0.07;
     #elif BUMP_MAPPING == 3 //Parallax occlusion
-    viewVec = vec3(dot(viewVec, vTangent), dot(viewVec, vBitangent), dot(viewVec, normalOut));
-    float steps = floor((1.0 - viewVec.z) * 18.0) + 2.0;
-    viewVec.xy *= -0.04/viewVec.z;
-    viewVec.z = 1.0;
-    viewVec /= steps;
-    vec3 texCoord = vec3(vTexCoord, 0.0);
-    LinearParallax(texCoord, viewVec, steps);
-	BinaryParallax(texCoord, viewVec);
+    vec3 texCoord = vec3(vTexCoord, 0.0), delta = vec3(dot(viewVec, vTangent), dot(viewVec, vBitangent), dot(viewVec, normalOut));
+    float depth, factor = 0.1, steps = mix(20.0, 2.0, delta.z);
+    delta.xy *= -factor / delta.z;
+    delta.z = 1.0;
+    delta /= steps;
+    while(true) { //Linear Search
+        depth = texture(sampler2, texCoord.xy).a;
+        if(depth <= texCoord.z) break;
+        texCoord += delta;
+    }
+    for(int i = 0; i < 6; i ++) { //Binary Search
+        depth = texture(sampler2, texCoord.xy).a;
+		if(depth > texCoord.z)
+            texCoord += delta;
+		delta *= 0.5;
+		texCoord -= delta;
+	}
+    //positionOut -= viewVec*depth*factor; //Position
+    //gl_FragDepth = dot(camPos-positionOut, viewNormalMat[2]);
+    //gl_FragDepth = log2(max(gl_FragDepth+depthNear, 0.5))*depthFar*gl_FragDepth-gl_FragDepth; //Depth
     #endif //Parallax occlusion
     setColor(texCoord.xy);
-    //positionOut += ; //Position
-    //gl_FragDepth = ; //Depth
     vec3 modelNormal = texture(sampler2, texCoord.xy).xyz;
     modelNormal.xy = modelNormal.xy*2.0-vec2(1.0);
     #endif //Parallax

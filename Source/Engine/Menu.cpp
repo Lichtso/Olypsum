@@ -74,6 +74,7 @@ void Menu::updateWindow() {
     float videoScale = 1.0;
     SDL_GetWindowScale(mainWindow, &videoScale, &videoScale);
     optionsState.videoScale = videoScale;
+    updateSSAOShaderPrograms();
 }
 
 void Menu::updateVideoResulution() {

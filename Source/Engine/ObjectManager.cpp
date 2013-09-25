@@ -313,6 +313,7 @@ void ObjectManager::drawShadowCasters() {
     currentCam->doFrustumCulling();
     
     //Draw GraphicObjects
+    glDisable(GL_BLEND);
     for(auto graphicObject : graphicObjects)
         if(graphicObject->inFrustum)
             graphicObject->draw();
