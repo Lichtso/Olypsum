@@ -4,7 +4,7 @@ uniform mat4 modelViewMat;
 uniform float depthNear, depthFar;
 
 void main() {
-    gl_Position = vec4(position, 1.0)*modelViewMat;
+    gl_Position = modelViewMat*vec4(position, 1.0);
     gl_Position.z = log2(max(gl_Position.w+depthNear, 0.5))*depthFar*gl_Position.w-gl_Position.w;
 }
 
@@ -13,7 +13,7 @@ void main() {
 out vec3 diffuseOut;
 out vec3 specularOut;
 
-uniform vec3 camPos;
+uniform mat4 camMat;
 uniform float lInvRange;
 uniform vec3 lColor, lDirection;
 #if LIGHT_TYPE > 1
@@ -81,7 +81,7 @@ void main() {
          material = texture(sampler2, gl_FragCoord.xy).rgb;
     
     #if SHADOW_QUALITY > 0 || LIGHT_TYPE == 1
-    vec4 shadowCoord = vec4(pos, 1.0) * lShadowMat;
+    vec4 shadowCoord = lShadowMat*vec4(pos, 1.0);
     #if LIGHT_TYPE < 3
     shadowCoord.z = (shadowCoord.w+shadowCoord.z)*0.5+depthOffset;
     #endif
@@ -150,5 +150,5 @@ void main() {
     
     intensity *= intensity;
     diffuseOut = lColor*intensity*max(dot(lightDir, normal), 0.0);
-    specularOut = lColor*intensity*pow(max(dot(reflect(lightDir, normal), normalize(pos-camPos)), 0.0), material.r*19.0+1.0)*material.g;
+    specularOut = lColor*intensity*pow(max(dot(reflect(lightDir, normal), normalize(pos-camMat[3].xyz)), 0.0), material.r*19.0+1.0)*material.g;
 }

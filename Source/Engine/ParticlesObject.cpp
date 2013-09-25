@@ -231,7 +231,7 @@ bool ParticlesObject::gameTick() {
     }else if(optionsState.particleCalcTarget == 2) {
         shaderPrograms[advanceParticlesSP]->use();
         currentShaderProgram->setUniformMatrix4("modelMat", &transform);
-        currentShaderProgram->setUniformMatrix3("normalMat", &transform.getBasis(), false);
+        currentShaderProgram->setUniformMatrix3("normalMat", &transform.getBasis());
         currentShaderProgram->setUniformF("respawnParticles", (systemLife == -1.0 || systemLife > lifeMax) ? 1.0 : 0.0);
         currentShaderProgram->setUniformF("animationFactor", profiler.animationFactor);
         currentShaderProgram->setUniformF("lifeCenter", (lifeMax+lifeMin)*0.5);
@@ -269,7 +269,7 @@ void ParticlesObject::draw() {
     currentShaderProgram->setUniformF("textureAScale", 5.0/lifeMin);
     if(transformAligned) {
         btMatrix3x3 viewNormalMat = getTransformation().getBasis();
-        currentShaderProgram->setUniformMatrix3("viewNormalMat", &viewNormalMat, false);
+        currentShaderProgram->setUniformMatrix3("viewNormalMat", &viewNormalMat);
         glDisable(GL_CULL_FACE);
     }
     

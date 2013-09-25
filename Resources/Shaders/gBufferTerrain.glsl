@@ -13,11 +13,11 @@ out vec3 vNormal;
 out float gl_ClipDistance[1];
 
 void main() {
-    gl_Position = vec4(position, 1.0)*modelViewMat;
+    gl_Position = modelViewMat*vec4(position, 1.0);
     gl_Position.z = log2(max(gl_Position.w+depthNear, 0.5))*depthFar*gl_Position.w-gl_Position.w;
-	vPosition = (vec4(position, 1.0)*modelMat).xyz;
+	vPosition = (modelMat*vec4(position, 1.0)).xyz;
     gl_ClipDistance[0] = dot(vec4(vPosition, 1.0), clipPlane[0]);
-    vNormal = normal*normalMat;
+    vNormal = normalMat*normal;
     vTexCoord = position * textureScale;
     vTexCoord.z -= 0.5;
 }

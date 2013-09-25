@@ -26,9 +26,9 @@ void main() {
         vVelocity.w = velocity.w;
     }else if(respawnParticles == 1.0) {
         int seed = genSeed();
-        vPosition.xyz = (vec4(vec3SeedRand(seed, posRange)+posCenter, 1.0)*modelMat).xyz;
+        vPosition.xyz = (modelMat*vec4(vec3SeedRand(seed, posRange)+posCenter, 1.0)).xyz;
         vPosition.w = vec1SeedRand(seed, lifeRange)+lifeCenter;
-        vVelocity.xyz = normalize(vec3SeedRand(seed, dirRange)+dirCenter)*length(dirRange)*0.5*normalMat;
+        vVelocity.xyz = normalMat*(normalize(vec3SeedRand(seed, dirRange)+dirCenter)*length(dirRange)*0.5);
         vVelocity.w = vec1SeedRand(seed, sizeRange)+sizeCenter;
     }
 }

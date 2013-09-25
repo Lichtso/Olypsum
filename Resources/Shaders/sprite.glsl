@@ -5,8 +5,8 @@ uniform mat4 modelViewMat;
 uniform mat3 textureMat;
 
 void main() {
-    gl_Position = vec4(position, 0.0, 1.0)*modelViewMat;
-    vTexCoord = (vec3(position, 1.0)*textureMat).xy;
+    gl_Position = modelViewMat*vec4(position, 0.0, 1.0);
+    vTexCoord = (textureMat*vec3(position, 1.0)).xy;
 }
 
 #separator

@@ -68,20 +68,20 @@ btTransform Matrix4::getBTTransform() const {
 
 void Matrix4::getOpenGLMatrix(btScalar* matData) const {
     matData[0] = x.x();
-    matData[1] = y.x();
-    matData[2] = z.x();
-    matData[3] = w.x();
-    matData[4] = x.y();
+    matData[1] = x.y();
+    matData[2] = x.z();
+    matData[3] = x.w();
+    matData[4] = y.x();
     matData[5] = y.y();
-    matData[6] = z.y();
-    matData[7] = w.y();
-    matData[8] = x.z();
-    matData[9] = y.z();
+    matData[6] = y.z();
+    matData[7] = y.w();
+    matData[8] = z.x();
+    matData[9] = z.y();
     matData[10] = z.z();
-    matData[11] = w.z();
-    matData[12] = x.w();
-    matData[13] = y.w();
-    matData[14] = z.w();
+    matData[11] = z.w();
+    matData[12] = w.x();
+    matData[13] = w.y();
+    matData[14] = w.z();
     matData[15] = w.w();
 }
 
