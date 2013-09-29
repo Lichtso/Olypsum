@@ -204,6 +204,7 @@ void ObjectManager::gameTick() {
     //Apply post effect shaders
     if(optionsState.ssaoQuality) {
         GLuint buffersSSAO[] = {
+            mainFBO.gBuffers[normalDBuffer],
             mainFBO.gBuffers[depthDBuffer],
             mainFBO.gBuffers[ssaoDBuffer]
         };
@@ -211,13 +212,13 @@ void ObjectManager::gameTick() {
         glDisable(GL_BLEND);
         shaderPrograms[ssaoSP]->use();
         glViewport(0, 0, optionsState.videoWidth, optionsState.videoHeight);
-        mainFBO.renderInBuffers(true, buffersSSAO, 1, &buffersSSAO[1], 1);
+        mainFBO.renderInBuffers(true, buffersSSAO, 2, &buffersSSAO[2], 1);
         glViewport(0, 0, optionsState.videoWidth*optionsState.videoScale, optionsState.videoHeight*optionsState.videoScale);
         
         glEnable(GL_BLEND);
         glBlendFunc(GL_DST_COLOR, GL_ZERO);
         shaderPrograms[ssaoCombineSP]->use();
-        mainFBO.renderInBuffers(true, buffersSSAO, 2, &mainFBO.gBuffers[colorDBuffer], (keepInColorBuffer) ? 1 : 0);
+        mainFBO.renderInBuffers(true, &buffersSSAO[1], 2, &mainFBO.gBuffers[colorDBuffer], (keepInColorBuffer) ? 1 : 0);
         glDisable(GL_BLEND);
         
         profiler.leaveSection("Apply SSAO");

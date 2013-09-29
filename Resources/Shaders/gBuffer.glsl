@@ -12,7 +12,6 @@ uniform mat4 modelViewMat;
 uniform mat4 modelMat;
 uniform mat3 normalMat;
 #endif
-uniform float depthNear, depthFar;
 uniform vec4 clipPlane[1];
 
 #if BUMP_MAPPING > 0
@@ -37,27 +36,26 @@ void main() {
     #if BUMP_MAPPING
     gPosition = pos.xyz;
     gNormal = normalize((mat*vec4(normal, 0.0)).xyz);
-    gTexCoord = texCoord;
     #else
     vPosition = pos.xyz;
     vNormal = normalize((mat*vec4(normal, 0.0)).xyz);
-    vTexCoord = texCoord;
-    gl_ClipDistance[0] = dot(vec4(vPosition, 1.0), clipPlane[0]);
     #endif
     #else
     gl_Position = modelViewMat*vec4(position, 1.0);
     #if BUMP_MAPPING
     gPosition = (modelMat*vec4(position, 1.0)).xyz;
     gNormal = normalMat*normal;
-    gTexCoord = texCoord;
     #else
 	vPosition = (modelMat*vec4(position, 1.0)).xyz;
     vNormal = normalMat*normal;
+    #endif
+    #endif
+    #if BUMP_MAPPING
+    gTexCoord = texCoord;
+    #else
     vTexCoord = texCoord;
     gl_ClipDistance[0] = dot(vec4(vPosition, 1.0), clipPlane[0]);
     #endif
-    #endif
-    gl_Position.z = log2(max(gl_Position.w+depthNear, 0.5))*depthFar*gl_Position.w-gl_Position.w;
 }
 
 #separator
@@ -119,8 +117,9 @@ void main() {
     setColor(vTexCoord);
     #endif //No parallax
     vec3 viewVec = normalize(camMat[3].xyz-vPosition);
-    normalOut = normalize(vNormal); //Normal
-    positionOut = vPosition; //Position
+    normalOut = normalize(vNormal);
+    positionOut = vPosition;
+    gl_FragDepth = log2(max(1.0/gl_FragCoord.w+depthNear, 0.5))*depthFar*0.5;
     
     #if BUMP_MAPPING > 0
     #if BUMP_MAPPING == 1 //Normal mapping
@@ -146,19 +145,18 @@ void main() {
         if(depth <= texCoord.z) break;
         texCoord += delta;
     }
-    for(int i = 0; i < 6; i ++) { //Binary Search
+    for(int i = 0; i < 5; i ++) { //Binary Search
         depth = texture(sampler2, texCoord.xy).a;
 		if(depth > texCoord.z)
             texCoord += delta;
 		delta *= 0.5;
 		texCoord -= delta;
 	}
-    //positionOut -= viewVec*depth*factor; //Position
+    //positionOut -= viewVec*length(texCoord.xy-vTexCoord)*factor;
     //gl_FragDepth = dot(camMat[3].xyz-positionOut, camMat[2].xyz);
-    //gl_FragDepth = log2(max(gl_FragDepth+depthNear, 0.5))*depthFar*gl_FragDepth-gl_FragDepth; //Depth
+    //gl_FragDepth = log2(max(gl_FragDepth+depthNear, 0.5))*depthFar*0.5;
     #endif //Parallax occlusion
     setColor(texCoord.xy);
-    //colorOut.rgb = vec3(dot(camMat[3].xyz-positionOut, camMat[2].xyz));
     vec3 modelNormal = texture(sampler2, texCoord.xy).xyz;
     modelNormal.xy = modelNormal.xy*2.0-vec2(1.0);
     #endif //Parallax

@@ -481,7 +481,7 @@ void updateSSAOShaderPrograms() {
     if(!optionsState.ssaoQuality) return;
     
     char scaleMacro[32], ssaoQualityMacro[32];
-    sprintf(scaleMacro, "SSAO_SCALE %f", optionsState.videoScale*2.0);
+    sprintf(scaleMacro, "SSAO_SCALE %f", (float)optionsState.videoScale);
     sprintf(ssaoQualityMacro, "SSAO_QUALITY %d", optionsState.ssaoQuality);
     
     shaderPrograms[ssaoSP]->loadShaderProgram("postSSAO1", shaderTypeVertexFragment, { ssaoQualityMacro, scaleMacro });
@@ -491,17 +491,16 @@ void updateSSAOShaderPrograms() {
     shaderPrograms[ssaoSP]->use();
     
     unsigned char samples = 32;
-    float pSphere[samples*2];
-    for(unsigned char i = 0; i < samples*2; i ++)
-        pSphere[i] = frand(-1.0, 1.0);
+    float pSphere[samples*3];
     for(unsigned char i = 0; i < samples; i ++) {
-        btVector3 vec(pSphere[i*2], pSphere[i*2+1], 0.0);
+        btVector3 vec(frand(-1.0, 1.0), frand(-1.0, 1.0), frand(0.0, 1.0));
         vec.normalize();
         vec *= frand(0.1, 1.0);
-        pSphere[i*2  ] = vec.x();
-        pSphere[i*2+1] = vec.y();
+        pSphere[i*3  ] = vec.x();
+        pSphere[i*3+1] = vec.y();
+        pSphere[i*3+2] = vec.y();
     }
-    glUniform2fv(glGetUniformLocation(shaderPrograms[ssaoSP]->GLname, "pSphere"), samples, pSphere);
+    glUniform3fv(glGetUniformLocation(shaderPrograms[ssaoSP]->GLname, "pSphere"), samples, pSphere);
     
     shaderPrograms[ssaoCombineSP]->loadShaderProgram("postSSAO2", shaderTypeVertexFragment, { ssaoQualityMacro, scaleMacro });
     shaderPrograms[ssaoCombineSP]->addAttribute(POSITION_ATTRIBUTE, "position");

@@ -4,7 +4,6 @@ uniform mat4 modelViewMat;
 uniform mat4 modelMat;
 uniform mat3 normalMat;
 uniform vec3 textureScale;
-uniform float depthNear, depthFar;
 uniform vec4 clipPlane[1];
 
 out vec3 vPosition;
@@ -14,7 +13,6 @@ out float gl_ClipDistance[1];
 
 void main() {
     gl_Position = modelViewMat*vec4(position, 1.0);
-    gl_Position.z = log2(max(gl_Position.w+depthNear, 0.5))*depthFar*gl_Position.w-gl_Position.w;
 	vPosition = (modelMat*vec4(position, 1.0)).xyz;
     gl_ClipDistance[0] = dot(vec4(vPosition, 1.0), clipPlane[0]);
     vNormal = normalMat*normal;
@@ -34,6 +32,7 @@ out vec3 positionOut;
 out vec3 specularOut;
 
 uniform float discardDensity;
+uniform float depthNear, depthFar;
 uniform sampler2DArray sampler0;
 uniform sampler2DArray sampler1;
 
@@ -46,14 +45,15 @@ void main() {
     vec3 highCoord = vec3(vTexCoord.xy, vTexCoord.z+1.0);
     
     vec4 color = texture(sampler0, vTexCoord)*interpolZlow
-                +texture(sampler0, highCoord)*interpolZ; //Color
+                +texture(sampler0, highCoord)*interpolZ;
     if(color.a < 0.0039) discard;
     colorOut = color.rgb;
     
-    materialOut = texture(sampler1, vTexCoord).rgb*interpolZlow; //Material
+    materialOut = texture(sampler1, vTexCoord).rgb*interpolZlow;
     materialOut += texture(sampler1, highCoord).rgb*interpolZ;
     
-    normalOut = normalize(vNormal); //Normal
-	positionOut = vPosition; //Position
-    specularOut = vec3(0.0); //Emission
+    normalOut = normalize(vNormal);
+	positionOut = vPosition;
+    gl_FragDepth = log2(max(1.0/gl_FragCoord.w+depthNear, 0.5))*depthFar*0.5;
+    specularOut = vec3(0.0);
 }

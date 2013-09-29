@@ -1,7 +1,6 @@
 V8 API: Create/Delete Objects, Documentation
 Implement btSoftBody
 Leap Motion: V8 API
-Improve: SSAO Quality, Logarithmic Depth Buffer
 
 Not sure:
 Logarithmic Shadow Mapping
@@ -27,4 +26,4 @@ Performance issue of explosions
 
 Bugs:
 GUIRoundedRect border: odd size screen resolution
-Parallax Occlusion / Position / Depth
+Parallax Occlusion / Position

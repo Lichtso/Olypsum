@@ -15,11 +15,6 @@ void main() {
 
 #separator
 
-#if TEXTURE_ANIMATION == 0
-uniform sampler2D sampler0;
-#else
-uniform sampler2DArray sampler0;
-#endif
 in vec3 vPosition;
 in vec4 vTexCoord;
 in vec3 vNormal;
@@ -27,6 +22,12 @@ out vec4 colorOut;
 out vec4 materialOut;
 out vec4 normalOut;
 out vec4 positionOut;
+uniform float depthNear, depthFar;
+#if TEXTURE_ANIMATION == 0
+uniform sampler2D sampler0;
+#else
+uniform sampler2DArray sampler0;
+#endif
 
 void main() {
     #if TEXTURE_ANIMATION == 0 //2D texture
@@ -42,6 +43,7 @@ void main() {
     materialOut = vec4(0.0, 0.0, 0.0, 1.0);
     normalOut = vec4(vNormal, colorOut.a);
     positionOut = vec4(vPosition, colorOut.a);
+    gl_FragDepth = log2(max(1.0/gl_FragCoord.w+depthNear, 0.5))*depthFar*0.5; //Depth
 }
 
 #separator
@@ -51,7 +53,6 @@ layout(triangle_strip, max_vertices = 4) out;
 
 uniform mat4 viewMat;
 uniform mat4 camMat;
-uniform float depthNear, depthFar;
 uniform vec4 clipPlane[1];
 in vec3 gPosition[1];
 in vec2 gLife[1];
@@ -69,28 +70,24 @@ void main() {
     
     vPosition = gPosition[0]-rightVec+upVec;
     gl_Position = viewMat*vec4(vPosition.xyz, 1.0);
-    gl_Position.z = log2(max(gl_Position.w+depthNear, 0.5))*depthFar*gl_Position.w-gl_Position.w;
 	vTexCoord = vec4(0.0, 0.0, gLife[0]);
     gl_ClipDistance[0] = dot(vec4(vPosition.xyz, 1.0), clipPlane[0]);
 	EmitVertex();
     
     vPosition = gPosition[0]-rightVec-upVec;
     gl_Position = viewMat*vec4(vPosition.xyz, 1.0);
-    gl_Position.z = log2(max(gl_Position.w+depthNear, 0.5))*depthFar*gl_Position.w-gl_Position.w;
 	vTexCoord = vec4(0.0, 1.0, gLife[0]);
     gl_ClipDistance[0] = dot(vec4(vPosition.xyz, 1.0), clipPlane[0]);
 	EmitVertex();
     
     vPosition = gPosition[0]+rightVec+upVec;
     gl_Position = viewMat*vec4(vPosition.xyz, 1.0);
-    gl_Position.z = log2(max(gl_Position.w+depthNear, 0.5))*depthFar*gl_Position.w-gl_Position.w;
 	vTexCoord = vec4(1.0, 0.0, gLife[0]);
     gl_ClipDistance[0] = dot(vec4(vPosition.xyz, 1.0), clipPlane[0]);
 	EmitVertex();
     
     vPosition = gPosition[0]+rightVec-upVec;
     gl_Position = viewMat*vec4(vPosition.xyz, 1.0);
-    gl_Position.z = log2(max(gl_Position.w+depthNear, 0.5))*depthFar*gl_Position.w-gl_Position.w;
 	vTexCoord = vec4(1.0, 1.0, gLife[0]);
     gl_ClipDistance[0] = dot(vec4(vPosition.xyz, 1.0), clipPlane[0]);
 	EmitVertex();

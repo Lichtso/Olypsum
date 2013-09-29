@@ -1,11 +1,9 @@
 in vec3 position;
 
 uniform mat4 modelViewMat;
-uniform float depthNear, depthFar;
 
 void main() {
     gl_Position = modelViewMat*vec4(position, 1.0);
-    gl_Position.z = log2(max(gl_Position.w+depthNear, 0.5))*depthFar*gl_Position.w-gl_Position.w;
 }
 
 #separator
@@ -14,6 +12,7 @@ out vec3 diffuseOut;
 out vec3 specularOut;
 
 uniform mat4 camMat;
+uniform float depthNear, depthFar;
 uniform float lInvRange;
 uniform vec3 lColor, lDirection;
 #if LIGHT_TYPE > 1
@@ -151,4 +150,5 @@ void main() {
     intensity *= intensity;
     diffuseOut = lColor*intensity*max(dot(lightDir, normal), 0.0);
     specularOut = lColor*intensity*pow(max(dot(reflect(lightDir, normal), normalize(pos-camMat[3].xyz)), 0.0), material.r*19.0+1.0)*material.g;
+    gl_FragDepth = log2(max(1.0/gl_FragCoord.w+depthNear, 0.5))*depthFar*0.5;
 }
