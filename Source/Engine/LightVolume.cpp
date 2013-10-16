@@ -16,11 +16,11 @@ void LightVolume::init() {
     attributes.push_back(attr);
     vao.init(attributes, true);
     
-    unsigned int verticesCount, trianglesCount;
+    unsigned int verticesCount, elementsCount;
     std::unique_ptr<float[]> vertices = getVertices(verticesCount);
     vao.updateVertices(verticesCount*3, vertices.get(), GL_STATIC_DRAW);
-    std::unique_ptr<unsigned int[]> indecies = getIndecies(trianglesCount);
-    vao.updateIndecies(trianglesCount*3, indecies.get(), GL_UNSIGNED_INT, GL_STATIC_DRAW);
+    std::unique_ptr<unsigned int[]> indecies = getIndecies(elementsCount);
+    vao.updateIndecies(elementsCount, indecies.get(), GL_UNSIGNED_INT, GL_STATIC_DRAW);
 }
 
 void LightVolume::drawDebug(Color4 color) {
@@ -68,9 +68,9 @@ std::unique_ptr<float[]> LightBoxVolume::getVertices(unsigned int& verticesCount
     return vertices;
 }
 
-std::unique_ptr<unsigned int[]> LightBoxVolume::getIndecies(unsigned int& trianglesCount) {
-    trianglesCount = boxTrianglesCount;
-    std::unique_ptr<unsigned int[]> indecies(new unsigned int[trianglesCount*3]);
+std::unique_ptr<unsigned int[]> LightBoxVolume::getIndecies(unsigned int& elementsCount) {
+    elementsCount = boxTrianglesCount*3;
+    std::unique_ptr<unsigned int[]> indecies(new unsigned int[elementsCount]);
     memcpy(indecies.get(), staticBoxIndecies, sizeof(staticBoxIndecies));
     return indecies;
 }
@@ -98,10 +98,11 @@ std::unique_ptr<float[]> FrustumVolume::getVertices(unsigned int& verticesCount)
     return vertices;
 }
 
-std::unique_ptr<unsigned int[]> FrustumVolume::getIndecies(unsigned int& trianglesCount) {
-    trianglesCount = boxTrianglesCount;
-    std::unique_ptr<unsigned int[]> indecies(new unsigned int[trianglesCount*3]);
-    memcpy(indecies.get(), staticBoxIndecies, sizeof(staticBoxIndecies));
+std::unique_ptr<unsigned int[]> FrustumVolume::getIndecies(unsigned int& elementsCount) {
+    vao.drawType = GL_LINES;
+    elementsCount = boxTrianglesCount*2;
+    std::unique_ptr<unsigned int[]> indecies(new unsigned int[elementsCount]);
+    memcpy(indecies.get(), staticBoxWireFrame, sizeof(staticBoxWireFrame));
     return indecies;
 }
 
@@ -137,9 +138,9 @@ std::unique_ptr<float[]> LightSphereVolume::getVertices(unsigned int& verticesCo
     return vertices;
 }
 
-std::unique_ptr<unsigned int[]> LightSphereVolume::getIndecies(unsigned int& trianglesCount) {
-    trianglesCount = sphereTrianglesCount(accuracyX, accuracyY);
-    std::unique_ptr<unsigned int[]> indecies(new unsigned int[trianglesCount*3]);
+std::unique_ptr<unsigned int[]> LightSphereVolume::getIndecies(unsigned int& elementsCount) {
+    elementsCount = sphereTrianglesCount(accuracyX, accuracyY)*3;
+    std::unique_ptr<unsigned int[]> indecies(new unsigned int[elementsCount]);
     unsigned int index = 0, referenceVertex;
     for(unsigned char x = 0; x < accuracyX; x ++) {
         indecies[index ++] = 0;
@@ -201,9 +202,9 @@ std::unique_ptr<float[]> LightParabolidVolume::getVertices(unsigned int& vertice
     return vertices;
 }
 
-std::unique_ptr<unsigned int[]> LightParabolidVolume::getIndecies(unsigned int& trianglesCount) {
-    trianglesCount = parabolidTrianglesCount(accuracyX, accuracyY);
-    std::unique_ptr<unsigned int[]> indecies(new unsigned int[trianglesCount*3]);
+std::unique_ptr<unsigned int[]> LightParabolidVolume::getIndecies(unsigned int& elementsCount) {
+    elementsCount = parabolidTrianglesCount(accuracyX, accuracyY)*3;
+    std::unique_ptr<unsigned int[]> indecies(new unsigned int[elementsCount]);
     unsigned int index = 0, referenceVertex;
     for(unsigned char x = 0; x < accuracyX; x ++) {
         indecies[index ++] = 0;

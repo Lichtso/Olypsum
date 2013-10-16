@@ -49,12 +49,14 @@ void Mesh::draw(RigidObject* object) {
             reflectionType = GL_TEXTURE_CUBE_MAP;
             shaderProgram += 32;
         }
-        glActiveTexture(GL_TEXTURE4);
+        
         if(reflectionType != 0) {
             if(!objectManager.currentReflective && optionsState.blendingQuality > 2) {
                 auto iterator = objectManager.reflectiveAccumulator.find(object);
-                if(iterator != objectManager.reflectiveAccumulator.end())
+                if(iterator != objectManager.reflectiveAccumulator.end()) {
+                    glActiveTexture(GL_TEXTURE4);
                     glBindTexture(reflectionType, iterator->second->buffer->texture);
+                }
             }else
                 Texture::unbind(4, reflectionType);
         }

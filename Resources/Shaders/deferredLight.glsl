@@ -148,7 +148,13 @@ void main() {
     #endif //Shadows disabled
     
     intensity *= intensity;
-    diffuseOut = lColor*intensity*max(dot(lightDir, normal), 0.0);
-    specularOut = lColor*intensity*pow(max(dot(reflect(lightDir, normal), normalize(pos-camMat[3].xyz)), 0.0), material.r*19.0+1.0)*material.g;
+    float diffuse = dot(lightDir, normal);
+    if(diffuse > 0.0) {
+        diffuseOut = lColor*intensity*diffuse;
+        specularOut = lColor*intensity*pow(max(dot(reflect(lightDir, normal), normalize(pos-camMat[3].xyz)), 0.0), material.r*19.0+1.0)*material.g;
+    }else{
+        diffuseOut = vec3(0.0);
+        specularOut = vec3(0.0);
+    }
     gl_FragDepth = log2(max(1.0/gl_FragCoord.w+depthNear, 0.5))*depthFar*0.5;
 }

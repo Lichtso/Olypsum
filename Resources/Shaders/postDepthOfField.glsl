@@ -19,7 +19,7 @@ void main() {
     colorOut = vec3(0.0);
 	for(float x = -blurWidth; x <= blurWidth; x ++)
         for(float y = -blurWidth; y <= blurWidth; y ++)
-            colorOut += texture(sampler1, gl_FragCoord.xy+vec2(x, y)*factor*6.0).rgb;
+            colorOut += texture(sampler1, gl_FragCoord.xy+vec2(x, y)*factor*3.0).rgb;
     colorOut *= blurInverse;
     
     #if FOG_ACTIVE == 1

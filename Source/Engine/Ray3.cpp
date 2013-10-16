@@ -12,6 +12,18 @@ Ray3::Ray3(btVector3 originB, btVector3 directionB) :origin(originB), direction(
     
 }
 
+float Ray3::getDistToPlane(btVector3 normal, float dist) {
+    float determinant = normal.dot(direction);
+    if(determinant == 0.0) return NAN;
+    return -(normal.dot(origin)-dist)/determinant;
+}
+
+btVector3 Ray3::getHitPointPlane(btVector3 normal, float dist) {
+    float determinant = normal.dot(direction);
+    if(determinant == 0.0) return origin;
+    return origin-(normal.dot(origin)-dist)/determinant*direction;
+}
+
 unsigned int Ray3::hitTestNearest(short filterMask, BaseObject*& object, btVector3& point, btVector3& normal) {
     btCollisionWorld::ClosestRayResultCallback rayCallback(origin, origin+direction);
     rayCallback.m_collisionFilterGroup = 0xFFFF;

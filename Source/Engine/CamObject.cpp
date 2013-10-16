@@ -202,8 +202,7 @@ bool CamObject::doFrustumCulling() {
                     if(behindFrustumPlane == 0) { //New frustum plane
                         planes_n[plane+2] = bestNormal.normalize();
                         planes_o[plane+2] = -planes_n[plane+2].dot(virtualMat.w);
-                    }else if(behindFrustumPlane == 8)
-                        return true; //Invalid frustum
+                    }
                 }
             }else //Ortho
                 for(char plane = 0; plane < 4; plane ++) {
@@ -220,13 +219,12 @@ bool CamObject::doFrustumCulling() {
                     
                     if(behindFrustumPlane == 0) { //New frustum plane
                         planes_o[plane+2] = -planes_n[plane+2].dot(virtualMat.w+planes_n[plane+2]*bestFactor);
-                    }else if(behindFrustumPlane == 8)
-                        return true; //Invalid frustum
+                    }
                 }
             
             //Set mirror plane as front plane
             planes_n[0] = planeReflective->plane;
-            planes_o[0] = -planes_n[0].dot(planeReflective->plane*planeReflective->plane.w());
+            planes_o[0] = planeReflective->plane.w();
         }
     }else{
         if(abs(fov-M_PI) < 0.001)

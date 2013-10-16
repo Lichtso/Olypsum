@@ -25,5 +25,6 @@ Skeletal animation
 Performance issue of explosions
 
 Bugs:
+Frustum culling of translated mirrors
 GUIRoundedRect border: odd size screen resolution
 Parallax Occlusion / Position

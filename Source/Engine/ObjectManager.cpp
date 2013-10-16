@@ -346,7 +346,6 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
                         continue;
                     }else if(mesh->material.reflectivity == -1.0) {
                         auto iterator = reflectiveAccumulator.find(rigidObject);
-                        
                         if(iterator == reflectiveAccumulator.end()) {
                             PlaneReflective* reflective = new PlaneReflective(rigidObject, mesh);
                             if(reflective->gameTick())
@@ -420,7 +419,7 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
             glEnable(GL_DEPTH_TEST);
             if(transparent->mesh) {
                 if(optionsState.blendingQuality > 1) {
-                    glActiveTexture((transparent->mesh) ? GL_TEXTURE3 : GL_TEXTURE1);
+                    glActiveTexture(GL_TEXTURE3);
                     glBindTexture(GL_TEXTURE_RECTANGLE, buffersCombine[3]);
                     sp = deferredCombine2SP;
                 }

@@ -8,8 +8,8 @@
 
 #include "VertexArrayObject.h"
 
-VertexArrayObject::VertexArrayObject() :vao(0), vbo(0), ibo(0) {
-    drawType = GL_TRIANGLES;
+VertexArrayObject::VertexArrayObject() :vao(0), vbo(0), ibo(0), drawType(GL_TRIANGLES) {
+    
 }
 
 VertexArrayObject::~VertexArrayObject() {

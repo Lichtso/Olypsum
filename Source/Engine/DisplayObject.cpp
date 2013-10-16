@@ -485,7 +485,7 @@ bool PlaneReflective::gameTick() {
     btTransform transform = object->getTransformation();
     plane = transform.getBasis().getColumn(shape->getHalfExtentsWithoutMargin().minAxis());
     plane.setW(-plane.dot(transform.getOrigin()));
-    if(plane.dot(currentCam->getTransformation().getOrigin()) < plane.w()) return false;
+    if(plane.dot(currentCam->getTransformation().getOrigin()) < -plane.w()) return false;
     
     if(!buffer)
         buffer = new ColorBuffer(false, false, optionsState.videoWidth, optionsState.videoHeight);
