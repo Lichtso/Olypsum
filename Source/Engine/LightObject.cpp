@@ -8,15 +8,10 @@
 
 #include "ScriptManager.h"
 
-#define coneAccuracy 12
-#define sphereAccuracyX 10
-#define sphereAccuracyY 6
-#define parabolidAccuracyY 4
-
 LightBoxVolume lightBox(btVector3(1, 1, 1));
-LightSphereVolume lightSphere(1, sphereAccuracyX, sphereAccuracyY);
-LightParabolidVolume lightCone(1, coneAccuracy, 0);
-LightParabolidVolume lightParabolid(1, sphereAccuracyX, parabolidAccuracyY);
+LightSphereVolume lightSphere(1, 10, 6);
+LightParabolidVolume lightCone(1, 12, 0);
+LightParabolidVolume lightParabolid(1, 10, 4);
 
 void initLightVolumes() {
     lightBox.init();
@@ -66,7 +61,7 @@ float LightObject::getRange() {
     return shadowCam.far;
 }
 
-bool LightObject::generateShadowMap(bool shadowActive) {
+bool LightObject::updateShadowMap(bool shadowActive) {
     if(!shadowActive) {
         if(shadowMap)
             deleteShadowMap();
@@ -180,9 +175,9 @@ btVector3 DirectionalLight::getBounds() {
     return btVector3(-shadowCam.fov*shadowCam.aspect, -shadowCam.fov, shadowCam.far);
 }
 
-bool DirectionalLight::generateShadowMap(bool shadowActive) {
+bool DirectionalLight::updateShadowMap(bool shadowActive) {
     shadowCam.updateViewMat();
-    if(!LightObject::generateShadowMap(shadowActive)) return true;
+    if(!LightObject::updateShadowMap(shadowActive)) return true;
     objectManager.currentShadowIsParabolid = false;
     
     mainFBO.renderInTexture(shadowMap, GL_TEXTURE_2D);
@@ -278,8 +273,8 @@ float SpotLight::getCutoff() {
     return shadowCam.fov*0.5;
 }
 
-bool SpotLight::generateShadowMap(bool shadowActive) {
-    if(!LightObject::generateShadowMap(shadowActive)) return true;
+bool SpotLight::updateShadowMap(bool shadowActive) {
+    if(!LightObject::updateShadowMap(shadowActive)) return true;
     objectManager.currentShadowIsParabolid = false;
     shadowCam.updateViewMat();
     
@@ -398,8 +393,8 @@ bool PositionalLight::getOmniDirectional() {
     return abs(shadowCam.fov-M_PI*2.0) < 0.001;
 }
 
-bool PositionalLight::generateShadowMap(bool shadowActive) {
-    if(!LightObject::generateShadowMap(shadowActive)) return true;
+bool PositionalLight::updateShadowMap(bool shadowActive) {
+    if(!LightObject::updateShadowMap(shadowActive)) return true;
     shadowCam.updateViewMat();
     Matrix4 viewMat = shadowCam.viewMat;
     

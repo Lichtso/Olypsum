@@ -11,8 +11,13 @@
 
 #include "ScriptManager.h"
 
+//! Returns the highest available video scale factor of the mainWindow
 float getMaxVideoScale();
+
+//! Initializes and starts the main run loop
 void AppMain();
+
+//! Saves the options, cleans up and quits
 void AppTerminate();
 
 #endif

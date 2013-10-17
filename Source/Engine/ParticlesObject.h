@@ -21,7 +21,7 @@ class ParticlesObject : public VisualObject {
               size; //!< The size in world units
     } *particles; //!< The particles of this ParticlesObject
     GLuint particlesVAO[2], particlesVBO[2];
-    bool activeVAO;
+    bool activeVAO; //!< Used to swap the VAO/VBOs when calculating particles on the GPU
     ParticlesObject();
     //! Internal initialize arrays and OpenGL buffers
     void init();

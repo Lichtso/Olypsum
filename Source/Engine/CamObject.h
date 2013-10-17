@@ -67,6 +67,8 @@ class CamObject : public SimpleObject {
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
-extern CamObject *mainCam, *guiCam, *currentCam;
+extern CamObject *mainCam, //!< The viewer CamObject delivered by the loaded Game
+                 *guiCam, //!< A ortho CamObject to render the GUI
+                 *currentCam; //!< The active CamObject
 
 #endif

@@ -72,8 +72,9 @@ class ShaderProgram {
     void setUniformMatrix4(const char* name, const btTransform* mat, unsigned int count);
 };
 
-extern btTransform modelMat;
-extern ShaderProgram *shaderPrograms[81], *currentShaderProgram;
+extern btTransform modelMat; //!< The model transformation to be set in the next ShaderProgram::use() call
+extern ShaderProgram *shaderPrograms[81], //!< All available ShaderPrograms
+                     *currentShaderProgram; //!< The active ShaderProgram
 
 enum ShaderProgramName {
     //Static Shaders

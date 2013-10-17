@@ -154,9 +154,9 @@ class Reflective {
     Reflective(RigidObject* objectB, Mesh* meshB);
     public:
     virtual ~Reflective();
-    ColorBuffer* buffer;
-    RigidObject* object;
-    Mesh* mesh;
+    ColorBuffer* buffer; //!< The ColorBuffer used to store the reflection
+    RigidObject* object; //!< The mirroring RigidObject
+    Mesh* mesh; //!< The mirroring Mesh of the object
     //! Recalculates the reflection in a tick, returns false if it is out of view
     virtual bool gameTick() = 0;
 };
@@ -164,7 +164,7 @@ class Reflective {
 //! A Reflective mirroring at a given plane
 class PlaneReflective : public Reflective {
     public:
-    btVector3 plane;
+    btVector3 plane; //!< The at the origin reflected plane of the mirror
     PlaneReflective(RigidObject* object, Mesh* mesh);
     bool gameTick();
 };

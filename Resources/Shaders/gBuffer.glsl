@@ -119,7 +119,7 @@ void main() {
     vec3 viewVec = normalize(camMat[3].xyz-vPosition);
     normalOut = normalize(vNormal);
     positionOut = vPosition;
-    gl_FragDepth = log2(max(1.0/gl_FragCoord.w+depthNear, 0.5))*depthFar*0.5;
+    //gl_FragDepth = log2(max(1.0/gl_FragCoord.w+depthNear, 0.5))*depthFar*0.5;
     
     #if BUMP_MAPPING > 0
     #if BUMP_MAPPING == 1 //Normal mapping

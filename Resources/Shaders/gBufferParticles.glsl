@@ -43,7 +43,7 @@ void main() {
     materialOut = vec4(0.0, 0.0, 0.0, 1.0);
     normalOut = vec4(vNormal, colorOut.a);
     positionOut = vec4(vPosition, colorOut.a);
-    gl_FragDepth = log2(max(1.0/gl_FragCoord.w+depthNear, 0.5))*depthFar*0.5; //Depth
+    //gl_FragDepth = log2(max(1.0/gl_FragCoord.w+depthNear, 0.5))*depthFar*0.5; //Depth
 }
 
 #separator

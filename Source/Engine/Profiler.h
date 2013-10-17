@@ -17,8 +17,10 @@ class Profiler {
     unsigned int newFPS;
     float lastSec;
     public:
+    //! A profiled section in a frame
     struct Section {
-        float time, secAverage;
+        float time, //! The duration of this section in the current frame
+              secAverage; //! The average duration of this section in the current second
     };
     std::map<const char*, Section> sections;
     float animationFactor; //!< Seconds since last frame

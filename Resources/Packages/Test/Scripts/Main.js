@@ -104,11 +104,11 @@ exports.ongametick = function() {
 	}
 };
 
-exports.onmousewheel = function(delta) {
+exports.onmousewheel = function(deltaX, deltaY) {
 	if(exports.grabbedObject != null) {
 		var length = exports.grabbedVector.getLength();
 		exports.grabbedVector.mult(1.0/length);
-		length = Math.max(1.0, length-delta*0.5);
+		length = Math.max(1.0, length-deltaY*0.5);
 		exports.grabbedVector.mult(length);
 	}
 };

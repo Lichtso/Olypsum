@@ -156,5 +156,5 @@ void main() {
         diffuseOut = vec3(0.0);
         specularOut = vec3(0.0);
     }
-    gl_FragDepth = log2(max(1.0/gl_FragCoord.w+depthNear, 0.5))*depthFar*0.5;
+    //gl_FragDepth = log2(max(1.0/gl_FragCoord.w+depthNear, 0.5))*depthFar*0.5;
 }
