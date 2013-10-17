@@ -45,12 +45,12 @@ class CamObject : public SimpleObject {
      @return A new ray
      */
     Ray3 getRayAt(float x, float y);
-    /*! Sets the DisplayObject::inFrustum flag for each DisplayObject which is in the frustum of this Cam
+    /*! Sets the VisualObject::inFrustum flag for each VisualObject which is in the frustum of this Cam
      @return true if the frustum was invalid (in case of a mirror outside the view)
      */
     bool doFrustumCulling();
-    /*! Tests if a DisplayObject is behind the near plane of this cam. Used by the engine to cull LightVolumes.
-     @param node The btDbvtProxy of the DisplayObject to be tested
+    /*! Tests if a VisualObject is behind the near plane of this cam. Used by the engine to cull LightVolumes.
+     @param node The btDbvtProxy of the VisualObject to be tested
      @see LightObject
      */
     bool testInverseNearPlaneHit(btDbvtProxy* node);

@@ -148,9 +148,9 @@ void ObjectManager::clear() {
         delete transparentAccumulator[i];
     transparentAccumulator.clear();
     
-    for(auto graphicObject : graphicObjects)
-        graphicObject->removeFast();
-    graphicObjects.clear();
+    for(auto matterObject : matterObjects)
+        matterObject->removeFast();
+    matterObjects.clear();
     
     for(auto particlesObject : particlesObjects)
         particlesObject->removeFast();
@@ -262,8 +262,8 @@ void ObjectManager::gameTick() {
     physicsWorld->stepSimulation(profiler.animationFactor, 4, 1.0/60.0); //Try to maintain 60 FPS
     profiler.leaveSection("Calculate physics");
     
-    //Calculate GraphicObjects
-    foreach_e(graphicObjects, iterator)
+    //Calculate MatterObjects
+    foreach_e(matterObjects, iterator)
         (*iterator)->gameTick();
     
     //Calculate SimpleObjects
@@ -313,11 +313,11 @@ void ObjectManager::physicsTick() {
 void ObjectManager::drawShadowCasters() {
     currentCam->doFrustumCulling();
     
-    //Draw GraphicObjects
+    //Draw MatterObjects
     glDisable(GL_BLEND);
-    for(auto graphicObject : graphicObjects)
-        if(graphicObject->inFrustum)
-            graphicObject->draw();
+    for(auto matterObject : matterObjects)
+        if(matterObject->inFrustum)
+            matterObject->draw();
 }
 
 void ObjectManager::illuminate() {
@@ -337,8 +337,8 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
     //Render Mirrors
     if(optionsState.blendingQuality > 2) {
         if(!currentReflective) {
-            for(auto graphicObject : graphicObjects) {
-                RigidObject* rigidObject = dynamic_cast<RigidObject*>(graphicObject);
+            for(auto matterObject : matterObjects) {
+                RigidObject* rigidObject = dynamic_cast<RigidObject*>(matterObject);
                 if(!rigidObject)
                     continue;
                 for(Mesh* mesh : rigidObject->model->meshes)
@@ -390,10 +390,10 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
                 transparentAccumulator.push_back(transparent);
             }
     
-    //Draw GraphicObjects
-    for(auto graphicObject : graphicObjects)
-        if(graphicObject->inFrustum)
-            graphicObject->draw();
+    //Draw MatterObjects
+    for(auto matterObject : matterObjects)
+        if(matterObject->inFrustum)
+            matterObject->draw();
     
     //Illuminate non transparent
     illuminate();

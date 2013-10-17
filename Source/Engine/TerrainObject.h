@@ -9,14 +9,14 @@
 #ifndef HeightMap_h
 #define HeightMap_h
 
-#include "DisplayObject.h"
+#include "VisualObject.h"
 
-//! A GraphicObject used to describe a terrain
+//! A MatterObject used to describe a terrain
 /*!
  Used to make a terrain.
  This class manages its own collision shape and drawing
  */
-class TerrainObject : public GraphicObject {
+class TerrainObject : public MatterObject {
     VertexArrayObject vao; //!< VertexArrayObject used for OpenGL
     //! Internally used by updateModel()
     btVector3 getVertexAt(float* vertices, unsigned int x, unsigned int y);

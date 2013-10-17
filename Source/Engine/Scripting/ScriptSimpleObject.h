@@ -9,7 +9,7 @@
 #ifndef ScriptSimpleObject_h
 #define ScriptSimpleObject_h
 
-#include "ScriptDisplayObject.h"
+#include "ScriptVisualObject.h"
 
 class ScriptCamObject : public ScriptBaseObject {
     static void GetFov(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);

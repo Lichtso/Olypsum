@@ -943,8 +943,8 @@ void TransformLink::removeFast(BaseObject* object) {
 }
 
 bool TransformLink::checkIfAttachingIsValid() {
-    if(dynamic_cast<GraphicObject*>(b)) {
-        log(error_log, "Tried to attach a TransformLink to a GraphicObject as child.");
+    if(dynamic_cast<MatterObject*>(b)) {
+        log(error_log, "Tried to attach a TransformLink to a MatterObject as child.");
         return false;
     }
     foreach_e(b->links, iterator)

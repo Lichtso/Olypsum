@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "ScriptDisplayObject.h"
+#include "ScriptVisualObject.h"
 
 TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelLoader) :heights(NULL) {
     levelLoader->pushObject(this);
@@ -180,7 +180,7 @@ void TerrainObject::draw() {
     }
     
     vao.draw();
-    GraphicObject::draw();
+    MatterObject::draw();
 }
 
 btVector3 TerrainObject::getVertexAt(float* vertices, unsigned int x, unsigned int y) {

@@ -87,8 +87,8 @@ bool LevelSaver::saveLevel(v8::Handle<v8::Value> localData, v8::Handle<v8::Value
     for(auto simpleObject : objectManager.simpleObjects)
         node->append_node(simpleObject->write(doc, this));
     
-    for(auto graphicObject : objectManager.graphicObjects)
-        node->append_node(graphicObject->write(doc, this));
+    for(auto matterObject : objectManager.matterObjects)
+        node->append_node(matterObject->write(doc, this));
     
     //Save links
     node = doc.allocate_node(rapidxml::node_element);

@@ -13,7 +13,7 @@
 
 void initLightVolumes();
 
-class LightObject : public DisplayObject {
+class LightObject : public VisualObject {
     protected:
     ColorBuffer* shadowMap;
     void setPhysicsShape(btCollisionShape* shape);

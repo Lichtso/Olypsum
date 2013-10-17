@@ -157,14 +157,17 @@ template <class T> inline const T clamp(T x, T a, T b) {
 	return (x<a)?a:((x>b)?b:x);
 }
 
+//! Generates a random number between min and max
 template <class T> inline const T frand(T min, T max) {
     return ((max-min)*((T)rand()/RAND_MAX))+min;
 }
 
+//! Generates a random btVector3 between min and max
 inline btVector3 vec3rand(btVector3 min, btVector3 max) {
     return btVector3(frand(min.x(), max.x()), frand(min.y(), max.y()), frand(min.z(), max.z()));
 }
 
+//! Convertes a Leap::Vector to a btVector3
 inline btVector3 leapToBullet(Leap::Vector vec) {
     return btVector3(vec.x, vec.y, vec.z);
 }

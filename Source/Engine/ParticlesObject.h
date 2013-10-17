@@ -11,8 +11,8 @@
 
 #include "Audio.h"
 
-//! A DisplayObject used as particle system
-class ParticlesObject : public DisplayObject {
+//! A VisualObject used as particle system
+class ParticlesObject : public VisualObject {
     //! A Particle of a ParticlesObject
     struct Particle {
         btVector3 pos, //!< Its position

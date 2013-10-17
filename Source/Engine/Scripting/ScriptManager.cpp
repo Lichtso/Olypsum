@@ -265,7 +265,7 @@ ScriptBaseClass scriptBaseClass;
 ScriptBaseObject scriptBaseObject;
 ScriptBoneObject scriptBoneObject;
 ScriptPhysicObject scriptPhysicObject;
-ScriptGraphicObject scriptGraphicObject;
+ScriptMatterObject scriptMatterObject;
 ScriptRigidObject scriptRigidObject;
 ScriptTerrainObject scriptTerrainObject;
 ScriptCamObject scriptCamObject;

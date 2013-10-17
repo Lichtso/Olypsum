@@ -55,7 +55,7 @@ void LightObject::removeClean() {
             objectManager.lightObjects.erase(objectManager.lightObjects.begin()+i);
             break;
         }
-    DisplayObject::removeClean();
+    VisualObject::removeClean();
 }
 
 btTransform LightObject::getTransformation() {
@@ -77,7 +77,7 @@ bool LightObject::generateShadowMap(bool shadowActive) {
                                     mainFBO.shadowMapSize, mainFBO.shadowMapSize);
     shadowCam.use();
     objectManager.currentShadowLight = this;
-    return DisplayObject::gameTick();
+    return VisualObject::gameTick();
 }
 
 void LightObject::draw() {

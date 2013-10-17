@@ -184,12 +184,12 @@ void ParticlesObject::clean() {
 void ParticlesObject::removeClean() {
     objectManager.particlesObjects.erase(this);
     clean();
-    DisplayObject::removeClean();
+    VisualObject::removeClean();
 }
 
 void ParticlesObject::removeFast() {
     clean();
-    DisplayObject::removeFast();
+    VisualObject::removeFast();
 }
 
 void ParticlesObject::setTransformation(const btTransform& transformation) {
@@ -255,7 +255,7 @@ bool ParticlesObject::gameTick() {
         activeVAO = !activeVAO;
     }
     
-    return DisplayObject::gameTick();
+    return VisualObject::gameTick();
 }
 
 void ParticlesObject::draw() {

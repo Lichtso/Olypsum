@@ -31,8 +31,8 @@ struct FrustumCullingCallback : btDbvt::ICollide {
         if((proxy->m_collisionFilterGroup & filterMask) == 0) return;
         
         btCollisionObject* co = static_cast<btCollisionObject*>(proxy->m_clientObject);
-        DisplayObject* go = static_cast<DisplayObject*>(co->getUserPointer());
-        go->inFrustum = true;
+        VisualObject* vo = static_cast<VisualObject*>(co->getUserPointer());
+        vo->inFrustum = true;
     }
 };
 //! @endcond
@@ -243,8 +243,8 @@ bool CamObject::doFrustumCulling() {
     
     short int filterMask = CollisionMask_Static | CollisionMask_Object;
     
-    for(auto graphicObject : objectManager.graphicObjects)
-        graphicObject->inFrustum = false;
+    for(auto matterObject : objectManager.matterObjects)
+        matterObject->inFrustum = false;
     
     if(!objectManager.currentShadowLight) {
         for(auto particlesObject : objectManager.particlesObjects)
