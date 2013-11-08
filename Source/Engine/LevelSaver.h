@@ -16,7 +16,6 @@ class LevelSaver {
     std::map<BaseLink*, LinkInitializer*> linkingMap;
     public:
     LevelSaver();
-    ~LevelSaver();
     void pushObject(BaseObject* object);
     bool saveLevel(v8::Handle<v8::Value> localData, v8::Handle<v8::Value> globalData, v8::Handle<v8::Value> description);
 };

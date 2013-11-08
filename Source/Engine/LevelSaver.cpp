@@ -12,11 +12,6 @@ LevelSaver::LevelSaver() :objectCounter(0) {
     
 }
 
-LevelSaver::~LevelSaver() {
-    for(auto iterator : linkingMap)
-        delete iterator.second;
-}
-
 void LevelSaver::pushObject(BaseObject* object) {
     for(auto iteratorInObject : object->links) {
         auto iteratorInSet = linkingMap.find(iteratorInObject);
@@ -94,9 +89,12 @@ bool LevelSaver::saveLevel(v8::Handle<v8::Value> localData, v8::Handle<v8::Value
     node = doc.allocate_node(rapidxml::node_element);
     node->name("Links");
     container->append_node(node);
-    for(auto iterator : linkingMap)
+    for(auto iterator : linkingMap) {
         node->append_node(iterator.first->write(doc, iterator.second));
-    
+        delete iterator.second;
+    }
+    linkingMap.clear();
+
     std::string containersPath = supportPath+"Saves/"+levelManager.saveGameName+"/Containers/";
     createDir(containersPath);
     if(!writeXmlFile(doc, containersPath+levelManager.levelContainer+".xml", true))
