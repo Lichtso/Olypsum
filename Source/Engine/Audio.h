@@ -51,7 +51,6 @@ class SoundObject : public SimpleObject {
     } mode;
     SoundObject(SoundTrack* soundTrack, Mode mode);
     SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    void removeClean();
     bool gameTick();
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
     /*! Adds a SoundTrack to this SoundObject

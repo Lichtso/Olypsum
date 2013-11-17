@@ -8,6 +8,35 @@
 
 #include "ScriptManager.h"
 
+static v8::Handle<v8::Value> accessProperty(v8::Handle<v8::Object> object, const char* property, v8::Handle<v8::Value> setValue) {
+    v8::Handle<v8::Value> returnValue, key = v8::String::New(property);
+    std::smatch match;
+    const std::regex regex("(.+)\\[([0-9]+)\\]");
+    if(std::regex_match(std::string(property), match, regex)) {
+        returnValue = object->Get(*match[0].str().c_str());
+        unsigned int index = 0;
+        sscanf(match[1].str().c_str(), "%d", &index);
+        if(returnValue->IsArray()) {
+            v8::Handle<v8::Array> array = v8::Handle<v8::Array>::Cast(returnValue);
+            returnValue = array->Get(index);
+            if(!setValue.IsEmpty())
+                array->Set(index, setValue);
+        }else if(returnValue->IsFunction()) {
+            v8::Handle<v8::Function> function = v8::Handle<v8::Function>::Cast(returnValue);
+            v8::Handle<v8::Value> arguments[] = { v8::Uint32::New(index), setValue };
+            returnValue = function->CallAsFunction(object, (setValue.IsEmpty())?1:2, arguments);
+        }
+    }else{
+        returnValue = object->Get(key);
+        if(returnValue->IsFunction()) {
+            v8::Handle<v8::Function> function = v8::Handle<v8::Function>::Cast(returnValue);
+            returnValue = function->CallAsFunction(object, (setValue.IsEmpty())?0:1, &setValue);
+        }else if(!setValue.IsEmpty())
+            object->Set(key, setValue);
+    }
+    return returnValue;
+}
+
 AnimationFrame::AnimationFrame(float _acceleration, float _duration, v8::Handle<v8::Value> _value)
     :acceleration(_acceleration), duration(_duration),
     value(v8::Persistent<v8::Value>::New(v8::Isolate::GetCurrent(), _value)) {
@@ -25,7 +54,7 @@ bool AnimationTrack::update(const char* property) {
     if(frames.size() <= 1 || frames[0].value.IsEmpty() || frames[1].value.IsEmpty())
         return false;
     
-    float t = time / frames[1].duration, t2 = t*t, t3 = t2*t;
+    float t = min(time / frames[1].duration, 1.0F), t2 = t*t, t3 = t2*t;
     t = 3.0*t2-2.0*t3+(t3-2.0*t2+t)*frames[0].acceleration+(t3-t2)*frames[1].acceleration;
     
     v8::Handle<v8::Value> value;
@@ -53,19 +82,13 @@ bool AnimationTrack::update(const char* property) {
     }else
         return false;
     
-    v8::Handle<v8::Function> function = v8::Handle<v8::Function>::Cast(object->Get(v8::String::New(property)));
-    if(!function.IsEmpty())
-        function->CallAsFunction(object, 1, &value);
-    else
-        object->Set(v8::String::New(property), value);
-    
-    return true;
+    return !accessProperty(object, property, value).IsEmpty();
 }
 
 bool AnimationTrack::gameTick(const char* property) {
+    time += profiler.animationFactor;
     if(!update(property)) return false;
     
-    time += profiler.animationFactor;
     while(time >= frames[1].duration && frames.size() > 1) {
         time -= frames[1].duration;
         if(looping) {
@@ -141,9 +164,9 @@ void ScriptAnimation::Constructor(const v8::FunctionCallbackInfo<v8::Value>& arg
 void ScriptAnimation::AddFrames(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 6)
-        return args.ScriptException("addFrames(): Too few arguments");
+        return args.ScriptException("Animation addFrames(): Too few arguments");
     if(!args[0]->IsObject() || !args[1]->IsString()|| !args[2]->IsBoolean() || !args[3]->IsArray() || !args[4]->IsArray() || !args[5]->IsArray())
-        return args.ScriptException("addFrames(): Invalid argument");
+        return args.ScriptException("Animation addFrames(): Invalid argument");
     
     std::string property = stdStrOfV8(args[1]);
     AnimationProperty* animationProperty;
@@ -166,22 +189,18 @@ void ScriptAnimation::AddFrames(const v8::FunctionCallbackInfo<v8::Value>& args)
                           values = v8::Handle<v8::Array>::Cast(args[5]);
     
     if(accelerations->Length() != durations->Length() || accelerations->Length() != values->Length())
-        return args.ScriptException("addFrames(): Invalid frames");
+        return args.ScriptException("Animation addFrames(): Invalid frames");
     
     if(accelerations->Length() == 0)
         return;
     
-    v8::Handle<v8::Value> defaultValue = args[0]->ToObject()->Get(args[1]);
-    if(defaultValue->IsFunction()) {
-        v8::Handle<v8::Function> function = v8::Handle<v8::Function>::Cast(defaultValue);
-        defaultValue = function->CallAsFunction(args[0]->ToObject(), 0, NULL);
-    }
+    v8::Handle<v8::Value> defaultValue = accessProperty(args[0]->ToObject(), cStrOfV8(args[1]), v8::Undefined());
     if(defaultValue.IsEmpty())
-        return args.ScriptException("addFrames(): Invalid property");
+        return args.ScriptException("Animation addFrames(): Invalid property");
     
     for(unsigned int i = 0; i < accelerations->Length(); i ++) {
         if(!accelerations->Get(i)->IsNumber() || !durations->Get(i)->IsNumber())
-            return args.ScriptException("addFrames(): Invalid frame");
+            return args.ScriptException("Animation addFrames(): Invalid frame");
         
         track->frames.push_back(AnimationFrame(accelerations->Get(i)->NumberValue(), durations->Get(i)->NumberValue(),
                                               (values->Get(i)->IsNull()) ? defaultValue : values->Get(i)));
@@ -192,23 +211,23 @@ void ScriptAnimation::AddFrames(const v8::FunctionCallbackInfo<v8::Value>& args)
 void ScriptAnimation::RemoveFrames(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 4)
-        return args.ScriptException("removeFrames(): Too few arguments");
+        return args.ScriptException("Animation removeFrames(): Too few arguments");
     if(!args[0]->IsObject() || !args[1]->IsString() ||
        !args[2]->IsUint32() || !args[3]->IsInt32() || args[3]->IntegerValue() <= 0)
-        return args.ScriptException("removeFrames(): Invalid argument");
+        return args.ScriptException("Animation removeFrames(): Invalid argument");
     
     std::string property = stdStrOfV8(args[1]);
     auto iterator = scriptManager->animations.find(property);
     if(iterator == scriptManager->animations.end())
-        return args.ScriptException("removeFrames(): Invalid track");
+        return args.ScriptException("Animation removeFrames(): Invalid track");
     
     AnimationProperty* animationProperty = iterator->second;
     AnimationTrack* track = animationProperty->find(args[0]->ToObject());
     if(!track)
-        return args.ScriptException("removeFrames(): Invalid track");
+        return args.ScriptException("Animation removeFrames(): Invalid track");
     
     if(track->frames.size() <= args[2]->IntegerValue()+args[3]->IntegerValue())
-        return args.ScriptException("removeFrames(): Out of bounds");
+        return args.ScriptException("Animation removeFrames(): Out of bounds");
     
     if(args[3]->IntegerValue() >= track->frames.size()-2) {
         animationProperty->tracks.erase(animationProperty->tracks.begin()+animationProperty->find(track));
@@ -223,9 +242,9 @@ void ScriptAnimation::RemoveFrames(const v8::FunctionCallbackInfo<v8::Value>& ar
 void ScriptAnimation::GetTrackInfo(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 2)
-        return args.ScriptException("getTrackInfo(): Too few arguments");
+        return args.ScriptException("Animation getTrackInfo(): Too few arguments");
     if(!args[0]->IsObject() || !args[1]->IsString())
-        return args.ScriptException("getTrackInfo(): Invalid argument");
+        return args.ScriptException("Animation getTrackInfo(): Invalid argument");
     
     std::string property = stdStrOfV8(args[1]);
     auto iterator = scriptManager->animations.find(property);
@@ -247,9 +266,9 @@ void ScriptAnimation::GetTrackInfo(const v8::FunctionCallbackInfo<v8::Value>& ar
 void ScriptAnimation::StartTimer(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 2)
-        return args.ScriptException("startTimer(): Too few arguments");
+        return args.ScriptException("Animation startTimer(): Too few arguments");
     if(!args[0]->IsFunction() || !args[1]->IsNumber())
-        return args.ScriptException("startTimer(): Invalid argument");
+        return args.ScriptException("Animation startTimer(): Invalid argument");
     
     AnimationTimer* interval = new AnimationTimer(v8::Handle<v8::Function>::Cast(args[0]), args[1]->NumberValue());
     scriptManager->timers.insert(interval);
@@ -259,9 +278,9 @@ void ScriptAnimation::StartTimer(const v8::FunctionCallbackInfo<v8::Value>& args
 void ScriptAnimation::StopTimer(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() == 0)
-        return args.ScriptException("stopTimer(): Too few arguments");
+        return args.ScriptException("Animation stopTimer(): Too few arguments");
     if(!args[0]->IsFunction())
-        return args.ScriptException("stopTimer(): Invalid argument");
+        return args.ScriptException("Animation stopTimer(): Invalid argument");
     
     for(auto interval : scriptManager->timers)
         if(interval->function == args[0]) {

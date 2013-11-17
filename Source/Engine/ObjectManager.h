@@ -23,7 +23,7 @@ class ObjectManager {
     std::vector<LightObject*> lightObjects; //!< All light sources of the scene
     std::set<MatterObject*> matterObjects; //!< All MatterObjects in the scene
     std::set<ParticlesObject*> particlesObjects; //! All ParticlesObjects in the scene
-    std::set<SimpleObject*> simpleObjects; //! All Cams and SoundObjects in the scene
+    std::set<SimpleObject*> simpleObjects; //! All SimpleObjects in the scene
     btVector3 sceneAmbient, //! Ambient light color
               sceneFogColor; //! Fog color afloat
     float sceneFogDistance; //! Fog distance afloat

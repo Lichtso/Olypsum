@@ -41,6 +41,10 @@ class Color4 {
         a = B.a;
         return *this;
     }
+    //! Converts this Color4 to gray scale float
+    float getGrayScale() {
+        return (r+g+b)/3.0;
+    }
     //! Converts this Color4 to a btVector3
     btVector3 getVector() {
         return btVector3(r, g, b);

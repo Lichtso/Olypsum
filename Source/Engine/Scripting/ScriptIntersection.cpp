@@ -16,10 +16,10 @@ void ScriptIntersection::Constructor(const v8::FunctionCallbackInfo<v8::Value>& 
 void ScriptIntersection::RayCast(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 4)
-        return args.ScriptException("rayCast(): Too few arguments");
+        return args.ScriptException("Intersection rayCast(): Too few arguments");
     if(!scriptVector3.isCorrectInstance(args[0]) || !scriptVector3.isCorrectInstance(args[1]) ||
        !args[2]->IsInt32() || !args[3]->IsBoolean())
-        return args.ScriptException("rayCast(): Invalid argument");
+        return args.ScriptException("Intersection rayCast(): Invalid argument");
     
     Ray3 ray(scriptVector3.getDataOfInstance(args[0]), scriptVector3.getDataOfInstance(args[1]));
     v8::Handle<v8::Array> objects, points, normals;
@@ -99,9 +99,9 @@ struct	ContactResultCallback : btCollisionWorld::ContactResultCallback {
 void ScriptIntersection::AABBIntersection(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 3)
-        return args.ScriptException("aabbIntersection(): Too few arguments");
+        return args.ScriptException("Intersection aabbIntersection(): Too few arguments");
     if(!scriptVector3.isCorrectInstance(args[0]) || !scriptVector3.isCorrectInstance(args[1]) || !args[2]->IsInt32())
-        return args.ScriptException("aabbIntersection(): Invalid argument");
+        return args.ScriptException("Intersection aabbIntersection(): Invalid argument");
     
     IntersectionCallback resultCallback(args[2]->Uint32Value());
     btDbvtBroadphase* broadphase = static_cast<btDbvtBroadphase*>(objectManager.broadphase);
@@ -117,9 +117,9 @@ void ScriptIntersection::AABBIntersection(const v8::FunctionCallbackInfo<v8::Val
 void ScriptIntersection::SphereIntersection(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 3)
-        return args.ScriptException("sphereIntersection(): Too few arguments");
+        return args.ScriptException("Intersection sphereIntersection(): Too few arguments");
     if(!scriptVector3.isCorrectInstance(args[0]) || !args[1]->IsNumber() || !args[2]->IsInt32())
-        return args.ScriptException("sphereIntersection(): Invalid argument");
+        return args.ScriptException("Intersection sphereIntersection(): Invalid argument");
     
     btTransform tmpTransform;
     tmpTransform.setOrigin(scriptVector3.getDataOfInstance(args[0]));

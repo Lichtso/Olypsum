@@ -78,12 +78,8 @@ float SoundTrack::getLength() {
 
 
 SoundObject::SoundObject() :velocity(btVector3(0, 0, 0)) {
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    scriptSoundObject.functionTemplate->GetFunction()->NewInstance(1, &external);
-    
-    objectManager.simpleObjects.insert(this);
     alGenSources(1, &ALname);
+    objectManager.simpleObjects.insert(this);
 }
 
 SoundObject::SoundObject(SoundTrack* _soundTrack, Mode _mode) :SoundObject() {
@@ -94,7 +90,7 @@ SoundObject::SoundObject(SoundTrack* _soundTrack, Mode _mode) :SoundObject() {
 }
 
 SoundObject::SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :SoundObject() {
-    BaseObject::init(node, levelLoader);
+    SimpleObject::init(node, levelLoader);
     
     rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("SoundTrack");
     if(!parameterNode) {
@@ -155,16 +151,14 @@ SoundObject::SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
         sscanf(attribute->value(), "%f", &time);
         setTimeOffset(time);
     }
+    
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    scriptSoundObject.functionTemplate->GetFunction()->NewInstance(1, &external);
 }
 
 SoundObject::~SoundObject() {
     alDeleteSources(1, &ALname);
-}
-
-void SoundObject::removeClean() {
-    alDeleteSources(1, &ALname);
-    objectManager.simpleObjects.erase(this);
-    SimpleObject::removeClean();
 }
 
 bool SoundObject::gameTick() {
@@ -185,7 +179,7 @@ bool SoundObject::gameTick() {
 }
 
 rapidxml::xml_node<xmlUsedCharType>* SoundObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
-    rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
+    rapidxml::xml_node<xmlUsedCharType>* node = SimpleObject::write(doc, levelSaver);
     
     node->name("SoundObject");
     node->append_node(fileManager.writeResource(doc, "SoundTrack", soundTrack));

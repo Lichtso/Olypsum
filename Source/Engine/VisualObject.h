@@ -100,23 +100,10 @@ class comMotionState : public simpleMotionState {
 //! A MatterObject with a rigid-physics-body
 /*!
  This is the basic class for all Objects with a rigid-physics-body.
- TODO: Skeletal animation is not implemented yet.
  */
 class RigidObject : public MatterObject {
     public:
-    //! The pose of a skeleton
-    class SkeletonPose {
-        BoneObject* setupBones(LevelLoader* levelLoader, BaseObject* object, Bone* bone);
-        public:
-        btTransform* pose;
-        BoneObject* rootBone;
-        std::map<std::string, BoneObject*> bones;
-        SkeletonPose(LevelLoader* levelLoader, RigidObject* object);
-        ~SkeletonPose();
-        void updateSkeletonPose(BoneObject* object, Bone* bone);
-        void writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver, BoneObject *object);
-    };
-    std::unique_ptr<SkeletonPose> skeletonPose; //!< Poses of the BoneObjects
+    std::unique_ptr<btTransform> skeletonPose; //!< Pose of the skeleton if the model has one
     RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     FileResourcePtr<Model> model; //!< The shared model
     std::vector<float> textureAnimationTime; //!< Animation time for each mesh
@@ -133,14 +120,21 @@ class RigidObject : public MatterObject {
     bool getKinematic();
     //! Sets or removes the btCollisionObject::CF_KINEMATIC_OBJECT flag
     void setKinematic(bool active);
-    //! Overwrites the model and cleans the textureAnimation
+    //! Removes the model, textureAnimation, skeletonPose and all childs connected via BoneLinks
+    void removeModel();
+    //! Overwrites the model
     void setModel(LevelLoader* levelLoader, FileResourcePtr<Model> model);
     //! Draws the entire model with all meshes
     void draw();
     //! Draws a single mesh
     void drawAccumulatedMesh(Mesh* mesh);
     //! Called by a Mesh to prepare the shader program to draw this ModelObject
-    virtual void prepareShaderProgram(Mesh* mesh);
+    void prepareShaderProgram(Mesh* mesh);
+    /*! Returns the BoneLink of a given bone name
+     @param name The name of the bone in the COLLADA model
+     @return BoneLink if present or NULL if not
+     */
+    BoneLink* findBoneLinkOfName(const char* name);
 };
 
 //! A reflective RigidObject

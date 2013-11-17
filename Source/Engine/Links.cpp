@@ -8,51 +8,45 @@
 
 #include "ScriptLinks.h"
 
-void BaseLink::removeClean(BaseObject* object) {
+void BaseLink::removeClean() {
     a->links.erase(this);
     b->links.erase(this);
     delete this;
 }
 
-void BaseLink::removeFast(BaseObject* object) {
-    /*if(!a || !b)
-        delete this;
-    else if(a == object)
-        a = NULL;
-    else
-        b = NULL;*/
-    
+void BaseLink::removeFast() {
     if(!b)
         delete this;
     else
         b = NULL;
 }
 
-bool BaseLink::init(LinkInitializer& initializer) {
+bool BaseLink::isAttachingIsValid(LinkInitializer& initializer) {
     if(initializer.object[0] == initializer.object[1]) {
-        log(error_log, "Tried link object with its self.");
+        log(error_log, "Tried to link a object with it self.");
+        return false;
+    }
+    
+    auto iteratorA = initializer.object[0]->findLinkTo(initializer.object[1]),
+    iteratorB = initializer.object[1]->findLinkTo(initializer.object[0]);
+    if(iteratorA != initializer.object[0]->links.end() || iteratorB != initializer.object[1]->links.end()) {
+        log(error_log, "Tried to overwrite link.");
+        return false;
+    }
+    
+    return true;
+}
+
+bool BaseLink::init(LinkInitializer& initializer) {
+    if(!isAttachingIsValid(initializer)) {
         delete this;
         return false;
     }
     
-    auto iteratorA = initializer.object[0]->findLink(initializer.object[1]),
-         iteratorB = initializer.object[1]->findLink(initializer.object[0]);
-    if(iteratorA != initializer.object[0]->links.end() || iteratorB != initializer.object[1]->links.end()) {
-        if(*iteratorA == *iteratorB && dynamic_cast<TransformLink*>(*iteratorA)) {
-            delete *iteratorA;
-            initializer.object[0]->links.erase(iteratorA);
-            initializer.object[1]->links.erase(iteratorB);
-        }else{
-            log(error_log, "Tried to overwrite link.");
-            delete this;
-            return false;
-        }
-    }
-    
-    initializer.object[0]->links.insert(this);
-    initializer.object[1]->links.insert(this);
     a = initializer.object[0];
     b = initializer.object[1];
+    a->links.insert(this);
+    b->links.insert(this);
     
     return true;
 }
@@ -135,10 +129,10 @@ void PhysicLink::gameTick() {
     if(scriptFile)
         scriptFile->callFunction("onburst", true, { scriptInstance });
     
-    removeClean(NULL);
+    removeClean();
 }
 
-void PhysicLink::removeClean(BaseObject* object) {
+void PhysicLink::removeClean() {
     objectManager.physicsWorld->removeConstraint(constraint);
     
     btRigidBody* body = static_cast<RigidObject*>(a)->getBody();
@@ -146,7 +140,7 @@ void PhysicLink::removeClean(BaseObject* object) {
     body = static_cast<RigidObject*>(b)->getBody();
     if(body) body->activate();
     
-    BaseLink::removeClean(object);
+    BaseLink::removeClean();
 }
 
 bool PhysicLink::init(LinkInitializer& initializer, btTypedConstraint* _constraint) {
@@ -164,14 +158,14 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("type");
     if(!attribute) {
         log(error_log, "Tried to construct PhysicLink without \"type\"-attribute.");
-        delete this;
+        removeClean();
         return false;
     }
     
     RigidObject *rigidA = dynamic_cast<RigidObject*>(a), *rigidB = dynamic_cast<RigidObject*>(b);
     if(!rigidA || !rigidB) {
         log(error_log, "Tried to construct PhysicLink with objects which aren't RigidObjects.");
-        delete this;
+        removeClean();
         return false;
     }
     
@@ -183,7 +177,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         parameterNode = node->first_node("Point");
         if(!parameterNode) {
             log(error_log, "Tried to construct Point-PhysicLink without first \"Point\"-node.");
-            delete this;
+            removeClean();
             return false;
         }
         XMLValueArray<float> vecData;
@@ -193,7 +187,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         parameterNode = parameterNode->next_sibling("Point");
         if(!parameterNode) {
             log(error_log, "Tried to construct Point-PhysicLink without second \"Point\"-node.");
-            delete this;
+            removeClean();
             return false;
         }
         vecData.readString(parameterNode->value(), "%f");
@@ -205,7 +199,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Axis");
         if(!parameterNode) {
             log(error_log, "Tried to construct Gear-PhysicLink without first \"Axis\"-node.");
-            delete this;
+            removeClean();
             return false;
         }
         XMLValueArray<float> vecData;
@@ -215,7 +209,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         parameterNode = parameterNode->next_sibling("Axis");
         if(!parameterNode) {
             log(error_log, "Tried to construct Gear-PhysicLink without second \"Axis\"-node.");
-            delete this;
+            removeClean();
             return false;
         }
         vecData.readString(parameterNode->value(), "%f");
@@ -224,7 +218,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         attribute = node->first_attribute("ratio");
         if(!attribute) {
             log(error_log, "Tried to construct Gear-PhysicLink without \"ratio\"-attribute.");
-            delete this;
+            removeClean();
             return false;
         }
         float ratio;
@@ -236,14 +230,14 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         parameterNode = node->first_node("Frame");
         if(!parameterNode) {
             log(error_log, "Tried to construct Hinge/Slider-PhysicLink without first \"Frame\"-node.");
-            delete this;
+            removeClean();
             return false;
         }
         btTransform frameA = readTransformationXML(parameterNode);
         parameterNode = parameterNode->next_sibling("Frame");
         if(!parameterNode) {
             log(error_log, "Tried to construct Hinge/Slider-PhysicLink without second \"Frame\"-node.");
-            delete this;
+            removeClean();
             return false;
         }
         btTransform frameB = readTransformationXML(parameterNode);
@@ -269,14 +263,14 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             attribute = parameterNode->first_attribute("min");
             if(!attribute) {
                 log(error_log, "Tried to construct Hinge/Slider-PhysicLink-AngularLimit without \"min\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             sscanf(attribute->value(), "%f", &min);
             attribute = parameterNode->first_attribute("max");
             if(!attribute) {
                 log(error_log, "Tried to construct Hinge/Slider-PhysicLink-AngularLimit without \"max\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             sscanf(attribute->value(), "%f", &max);
@@ -294,14 +288,14 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             attribute = parameterNode->first_attribute("min");
             if(!attribute) {
                 log(error_log, "Tried to construct Slider-PhysicLink-LinearLimit without \"min\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             sscanf(attribute->value(), "%f", &min);
             attribute = parameterNode->first_attribute("max");
             if(!attribute) {
                 log(error_log, "Tried to construct Slider-PhysicLink-LinearLimit without \"max\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             sscanf(attribute->value(), "%f", &max);
@@ -314,7 +308,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             attribute = parameterNode->first_attribute("enabled");
             if(!attribute) {
                 log(error_log, "Tried to construct Hinge/Slider-PhysicLink-AngularMotor without \"enabled\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             bool enabled = (strcmp(attribute->value(), "true") == 0);
@@ -322,14 +316,14 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             attribute = parameterNode->first_attribute("velocity");
             if(!attribute) {
                 log(error_log, "Tried to construct Hinge/Slider-PhysicLink-AngularMotor without \"velocity\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             sscanf(attribute->value(), "%f", &velocity);
             attribute = parameterNode->first_attribute("force");
             if(!attribute) {
                 log(error_log, "Tried to construct Hinge/Slider-PhysicLink-AngularMotor without \"force\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             sscanf(attribute->value(), "%f", &force);
@@ -347,7 +341,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             attribute = parameterNode->first_attribute("enabled");
             if(!attribute) {
                 log(error_log, "Tried to construct Slider-PhysicLink-LinearMotor without \"enabled\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             bool enabled = (strcmp(attribute->value(), "true") == 0);
@@ -355,14 +349,14 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             attribute = parameterNode->first_attribute("velocity");
             if(!attribute) {
                 log(error_log, "Tried to construct Slider-PhysicLink-LinearMotor without \"velocity\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             sscanf(attribute->value(), "%f", &velocity);
             attribute = parameterNode->first_attribute("force");
             if(!attribute) {
                 log(error_log, "Tried to construct Slider-PhysicLink-LinearMotor without \"force\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             sscanf(attribute->value(), "%f", &force);
@@ -374,14 +368,14 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         parameterNode = node->first_node("Frame");
         if(!parameterNode) {
             log(error_log, "Tried to construct DOF6-PhysicLink without first \"Frame\"-node.");
-            delete this;
+            removeClean();
             return false;
         }
         btTransform frameA = readTransformationXML(parameterNode);
         parameterNode = parameterNode->next_sibling("Frame");
         if(!parameterNode) {
             log(error_log, "Tried to construct DOF6-PhysicLink without second \"Frame\"-node.");
-            delete this;
+            removeClean();
             return false;
         }
         btTransform frameB = readTransformationXML(parameterNode);
@@ -398,7 +392,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
                 attribute = parameterNode->first_attribute("index");
                 if(!attribute) {
                     log(error_log, "Tried to construct DOF6-PhysicLink-Spring without \"index\"-attribute.");
-                    delete this;
+                    removeClean();
                     return false;
                 }
                 sscanf(attribute->value(), "%d", &index);
@@ -429,7 +423,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             attribute = parameterNode->first_attribute("min");
             if(!attribute) {
                 log(error_log, "Tried to construct DOF6-PhysicLink-AngularLimit without \"min\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             vecData.readString(attribute->value(), "%f");
@@ -437,7 +431,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             attribute = parameterNode->first_attribute("max");
             if(!attribute) {
                 log(error_log, "Tried to construct DOF6-PhysicLink-AngularLimit without \"max\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             vecData.readString(attribute->value(), "%f");
@@ -449,7 +443,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             attribute = parameterNode->first_attribute("min");
             if(!attribute) {
                 log(error_log, "Tried to construct DOF6-PhysicLink-LinearLimit without \"min\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             vecData.readString(attribute->value(), "%f");
@@ -457,7 +451,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             attribute = parameterNode->first_attribute("max");
             if(!attribute) {
                 log(error_log, "Tried to construct DOF6-PhysicLink-LinearLimit without \"max\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             vecData.readString(attribute->value(), "%f");
@@ -473,7 +467,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             attribute = parameterNode->first_attribute("index");
             if(!attribute) {
                 log(error_log, "Tried to construct DOF6-PhysicLink-Motor without \"index\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             sscanf(attribute->value(), "%d", &index);
@@ -492,21 +486,21 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             attribute = parameterNode->first_attribute("enabled");
             if(!attribute) {
                 log(error_log, "Tried to construct DOF6-PhysicLink-Motor without \"enabled\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             *enabled = (strcmp(attribute->value(), "true") == 0);
             attribute = parameterNode->first_attribute("velocity");
             if(!attribute) {
                 log(error_log, "Tried to construct DOF6-PhysicLink-Motor without \"velocity\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             sscanf(attribute->value(), "%f", velocity);
             attribute = parameterNode->first_attribute("force");
             if(!attribute) {
                 log(error_log, "Tried to construct DOF6-PhysicLink-Motor without \"force\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             sscanf(attribute->value(), "%f", force);
@@ -517,14 +511,14 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         parameterNode = node->first_node("Frame");
         if(!parameterNode) {
             log(error_log, "Tried to construct ConeTwist-PhysicLink without first \"Frame\"-node.");
-            delete this;
+            removeClean();
             return false;
         }
         btTransform frameA = readTransformationXML(parameterNode);
         parameterNode = parameterNode->next_sibling("Frame");
         if(!parameterNode) {
             log(error_log, "Tried to construct ConeTwist-PhysicLink without second \"Frame\"-node.");
-            delete this;
+            removeClean();
             return false;
         }
         btTransform frameB = readTransformationXML(parameterNode);
@@ -539,7 +533,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             attribute = parameterNode->first_attribute("swingSpanA");
             if(!attribute) {
                 log(error_log, "Tried to construct ConeTwist-PhysicLink-AngularLimit without \"swingSpanA\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             sscanf(attribute->value(), "%f", &value);
@@ -547,7 +541,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             attribute = parameterNode->first_attribute("swingSpanB");
             if(!attribute) {
                 log(error_log, "Tried to construct ConeTwist-PhysicLink-AngularLimit without \"swingSpanB\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             sscanf(attribute->value(), "%f", &value);
@@ -555,7 +549,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             attribute = parameterNode->first_attribute("twistSpan");
             if(!attribute) {
                 log(error_log, "Tried to construct ConeTwist-PhysicLink-AngularLimit without \"twistSpan\"-attribute.");
-                delete this;
+                removeClean();
                 return false;
             }
             sscanf(attribute->value(), "%f", &value);
@@ -563,7 +557,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         }
     }else{
         log(error_log, std::string("Tried to construct PhysicLink with invalid \"type\"-attribute: ")+attribute->value()+'.');
-        delete this;
+        removeClean();
         return false;
     }
     
@@ -917,62 +911,45 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
 
 
 void TransformLink::gameTick() {
-    BoneObject* boneObject = dynamic_cast<BoneObject*>(b);
-    if(boneObject) {
-        b->setTransformation(a->getTransformation()*(boneObject->bone->relativeMat*transform));
-        boneObject->gameTick();
-    }else
-        b->setTransformation(a->getTransformation()*transform);
+    btTransform transform = transformations[0];
+    for(unsigned int i = 1; i < transformations.size(); i ++)
+        transform *= transformations[i];
+    b->setTransformation(a->getTransformation()*transform);
 }
 
-void TransformLink::removeClean(BaseObject* object) {
-    a->links.erase(a->links.find(this));
-    b->links.erase(b->links.find(this));
-    if(object != b)
-        b->removeClean();
-    delete this;
-}
-
-void TransformLink::removeFast(BaseObject* object) {
-    if(object != b && dynamic_cast<BoneObject*>(b)) {
-        b->links.erase(b->links.find(this));
-        b->removeFast();
-        delete this;
-    }else
-        BaseLink::removeFast(object);
-}
-
-bool TransformLink::checkIfAttachingIsValid() {
-    if(dynamic_cast<MatterObject*>(b)) {
+bool TransformLink::isAttachingIsValid(LinkInitializer& initializer) {
+    if(!BaseLink::isAttachingIsValid(initializer)) return false;
+    if(dynamic_cast<MatterObject*>(initializer.object[1])) {
         log(error_log, "Tried to attach a TransformLink to a MatterObject as child.");
         return false;
     }
-    foreach_e(b->links, iterator)
-        if(*iterator != this && (*iterator)->b == b && dynamic_cast<TransformLink*>(*iterator)) {
+    foreach_e(initializer.object[1]->links, iterator)
+        if(*iterator != this && (*iterator)->b == initializer.object[1] && dynamic_cast<TransformLink*>(*iterator)) {
             log(error_log, "Tried to attach a TransformLink to a child which already got another parent.");
             return false;
         }
     return true;
 }
 
-bool TransformLink::init(LinkInitializer& initializer, btTransform& _transform) {
-    if(!BaseLink::init(initializer) || !checkIfAttachingIsValid()) return false;
-    transform = _transform;
+bool TransformLink::init(LinkInitializer& initializer, const std::vector<btTransform>& _transformations) {
+    if(!BaseLink::init(initializer)) return false;
+    transformations = _transformations;
     return true;
 }
 
-bool TransformLink::init(LinkInitializer& initializer) {
-    btTransform transform = btTransform::getIdentity();
-    
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    scriptTransformLink.functionTemplate->GetFunction()->NewInstance(1, &external);
-    return TransformLink::init(initializer, transform);
-}
-
 bool TransformLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
-    if(!BaseLink::init(node, levelLoader) || !checkIfAttachingIsValid()) return false;
-    transform = readTransformationXML(node);
+    if(!BaseLink::init(node, levelLoader)) return false;
+    
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Frame");
+    while(parameterNode) {
+        transformations.push_back(readTransformationXML(parameterNode));
+        parameterNode = parameterNode->next_sibling("Frame");
+    }
+    if(transformations.size() == 0) {
+        log(error_log, "Tried to construct TransformLink without \"Frame\"-node.");
+        removeClean();
+        return false;
+    }
     
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);
@@ -981,8 +958,75 @@ bool TransformLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
 }
 
 rapidxml::xml_node<xmlUsedCharType>* TransformLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver) {
-    rapidxml::xml_node<xmlUsedCharType>* node = BaseLink::write(doc, linkSaver);
+    rapidxml::xml_node<xmlUsedCharType> *parameterNode, *node = BaseLink::write(doc, linkSaver);
     node->name("TransformLink");
-    node->append_node(writeTransformationXML(doc, transform));
+    for(btTransform transformation : transformations) {
+        parameterNode = doc.allocate_node(rapidxml::node_element);
+        parameterNode->name("Frame");
+        parameterNode->append_node(writeTransformationXML(doc, transformation));
+        node->append_node(parameterNode);
+    }
+    return node;
+}
+
+
+
+Bone* BoneLink::getBoneByName(const char* name) {
+    Skeleton* skeleton = ((RigidObject*)a)->model->skeleton;
+    if(skeleton) return NULL;
+    auto iterator = skeleton->bones.find(name);
+    if(iterator == skeleton->bones.end()) return NULL;
+    return iterator->second;
+}
+
+void BoneLink::gameTick() {
+    ((RigidObject*)a)->skeletonPose.get()[bone->jointIndex] = b->getTransformation() * bone->absoluteInv;
+}
+
+bool BoneLink::isAttachingIsValid(LinkInitializer& initializer) {
+    if(!BaseLink::isAttachingIsValid(initializer)) return false;
+    if(!dynamic_cast<RigidObject*>(initializer.object[0])) {
+        log(error_log, "Tried to attach a BoneLink to non RigidObject as parent.");
+        return false;
+    }
+    foreach_e(initializer.object[1]->links, iterator)
+        if(*iterator != this && dynamic_cast<BoneLink*>(*iterator)) {
+            log(error_log, "Tried to attach a BoneLink to a child which already got a BoneLink.");
+            return false;
+        }
+    return true;
+}
+
+bool BoneLink::init(LinkInitializer& initializer, Bone* _bone) {
+    if(!BaseLink::init(initializer)) return false;
+    bone = _bone;
+    return true;
+}
+
+bool BoneLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+    if(!BaseLink::init(node, levelLoader)) return false;
+    
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("bone");
+    if(!attribute) {
+        log(error_log, "Tried to construct BoneLink without \"bone\"-attribute.");
+        removeClean();
+        return false;
+    }
+    bone = getBoneByName(attribute->value());
+    
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    scriptBoneLink.functionTemplate->GetFunction()->NewInstance(1, &external);
+    return true;
+}
+
+rapidxml::xml_node<xmlUsedCharType>* BoneLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = BaseLink::write(doc, linkSaver);
+    node->name("BoneLink");
+    
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    attribute->name("bone");
+    attribute->value(bone->name.c_str());
+    node->append_attribute(attribute);
     return node;
 }

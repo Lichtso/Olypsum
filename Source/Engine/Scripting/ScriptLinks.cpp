@@ -28,7 +28,8 @@ void ScriptBaseLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             args.GetReturnValue().Set(args.This());
             return;
-        }
+        }else
+            return args.ScriptException("BaseLink Constructor: Invalid argument");
     }
     
     return args.ScriptException("BaseLink Constructor: Class can't be initialized");
@@ -147,7 +148,8 @@ void ScriptPointPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             args.GetReturnValue().Set(args.This());
             return;
-        }
+        }else
+            return args.ScriptException("PointPhysicLink Constructor: Invalid argument");
     }
     
     return args.ScriptException("PointPhysicLink Constructor: Class can't be initialized");
@@ -207,7 +209,8 @@ void ScriptGearPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             args.GetReturnValue().Set(args.This());
             return;
-        }
+        }else
+            return args.ScriptException("GearPhysicLink Constructor: Invalid argument");
     }
     
     return args.ScriptException("GearPhysicLink Constructor: Class can't be initialized");
@@ -281,7 +284,8 @@ void ScriptHingePhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             args.GetReturnValue().Set(args.This());
             return;
-        }
+        }else
+            return args.ScriptException("HingePhysicLink Constructor: Invalid argument");
     }
     
     return args.ScriptException("HingePhysicLink Constructor: Class can't be initialized");
@@ -425,7 +429,8 @@ void ScriptSliderPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Valu
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             args.GetReturnValue().Set(args.This());
             return;
-        }
+        }else
+            return args.ScriptException("SliderPhysicLink Constructor: Invalid argument");
     }
     
     return args.ScriptException("SliderPhysicLink Constructor: Class can't be initialized");
@@ -645,7 +650,8 @@ void ScriptDof6PhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             args.GetReturnValue().Set(args.This());
             return;
-        }
+        }else
+            return args.ScriptException("Dof6PhysicLink Constructor: Invalid argument");
     }
     
     return args.ScriptException("Dof6PhysicLink Constructor: Class can't be initialized");
@@ -869,7 +875,8 @@ void ScriptConeTwistPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::V
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             args.GetReturnValue().Set(args.This());
             return;
-        }
+        }else
+            return args.ScriptException("ConeTwistPhysicLink Constructor: Invalid argument");
     }
     
     return args.ScriptException("ConeTwistPhysicLink Constructor: Class can't be initialized");
@@ -957,34 +964,44 @@ void ScriptTransformLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>&
         args.This()->SetInternalField(0, args[0]);
         args.GetReturnValue().Set(args.This());
         return;
-    }else if(args.Length() == 3 &&
-             scriptBaseObject.isCorrectInstance(args[0]) && scriptBaseObject.isCorrectInstance(args[1]) &&
-             scriptMatrix4.isCorrectInstance(args[2])) {
+    }else if(args.Length() > 2 &&
+             scriptBaseObject.isCorrectInstance(args[0]) && scriptBaseObject.isCorrectInstance(args[1])) {
         LinkInitializer initializer;
         initializer.object[0] = scriptBaseObject.getDataOfInstance<BaseObject>(args[0]);
         initializer.object[1] = scriptBaseObject.getDataOfInstance<BaseObject>(args[1]);
         TransformLink* linkPtr = new TransformLink();
-        btTransform transform = scriptMatrix4.getDataOfInstance(args[2])->getBTTransform();
-        if(linkPtr->init(initializer, transform)) {
+        std::vector<btTransform> transformations;
+        for(unsigned int i = 2; i < args.Length(); i ++) {
+            if(!scriptMatrix4.isCorrectInstance(args[i]))
+                return args.ScriptException("TransformLink Constructor: Invalid argument");
+            transformations.push_back(scriptMatrix4.getDataOfInstance(args[i])->getBTTransform());
+        }
+        if(linkPtr->init(initializer, transformations)) {
             args.This()->SetInternalField(0, v8::External::New(linkPtr));
             args.GetReturnValue().Set(args.This());
             return;
-        }
+        }else
+            return args.ScriptException("TransformLink Constructor: Invalid argument");
     }
     
-    return args.ScriptException("BaseLink Constructor: Class can't be initialized");
+    return args.ScriptException("TransformLink Constructor: Class can't be initialized");
 }
 
 void ScriptTransformLink::AccessTransformation(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     TransformLink* linkPtr = getDataOfInstance<TransformLink>(args.This());
-    if(args.Length() == 1 && scriptMatrix4.isCorrectInstance(args[0])) {
-        Matrix4* mat = scriptMatrix4.getDataOfInstance(args[0]);
+    if(args.Length() == 0)
+        return args.ScriptException("TransformLink transformation(): Too few arguments");
+    if(!args[0]->IsNumber() || args[0]->Uint32Value() >= linkPtr->transformations.size())
+        return args.ScriptException("TransformLink transformation(): Invalid argument");
+    btTransform& transform = linkPtr->transformations[args[0]->Uint32Value()];
+    if(args.Length() == 2 && scriptMatrix4.isCorrectInstance(args[1])) {
+        Matrix4* mat = scriptMatrix4.getDataOfInstance(args[1]);
         if(mat->isValid())
-            linkPtr->transform = mat->getBTTransform();
-        args.GetReturnValue().Set(args[0]);
+            transform = mat->getBTTransform();
+        args.GetReturnValue().Set(args[1]);
     }else
-        args.GetReturnValue().Set(scriptMatrix4.newInstance(Matrix4(linkPtr->transform)));
+        args.GetReturnValue().Set(scriptMatrix4.newInstance(Matrix4(transform)));
 }
 
 ScriptTransformLink::ScriptTransformLink() :ScriptBaseLink("TransformLink", Constructor) {
@@ -992,6 +1009,83 @@ ScriptTransformLink::ScriptTransformLink() :ScriptBaseLink("TransformLink", Cons
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->Set(v8::String::New("transformation"), v8::FunctionTemplate::New(AccessTransformation));
+    
+    functionTemplate->Inherit(scriptBaseLink.functionTemplate);
+}
+
+
+
+void ScriptBoneLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::HandleScope handleScope;
+    
+    if(args.Length() == 1 && args[0]->IsExternal()) {
+        BoneLink* linkPtr = static_cast<BoneLink*>(v8::Local<v8::External>::Cast(args[0])->Value());
+        linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
+        args.This()->SetInternalField(0, args[0]);
+        args.GetReturnValue().Set(args.This());
+        return;
+    }else if(args.Length() == 3 &&
+             scriptBaseObject.isCorrectInstance(args[0]) && scriptBaseObject.isCorrectInstance(args[1]) &&
+             args[2]->IsString()) {
+        LinkInitializer initializer;
+        initializer.object[0] = scriptBaseObject.getDataOfInstance<BaseObject>(args[0]);
+        initializer.object[1] = scriptBaseObject.getDataOfInstance<BaseObject>(args[1]);
+        BoneLink* linkPtr = new BoneLink();
+        if(linkPtr->init(initializer, linkPtr->getBoneByName(cStrOfV8(args[2])))) {
+            args.This()->SetInternalField(0, v8::External::New(linkPtr));
+            args.GetReturnValue().Set(args.This());
+            return;
+        }else
+            return args.ScriptException("BoneLink Constructor: Invalid argument");
+    }
+    
+    return args.ScriptException("BoneLink Constructor: Class can't be initialized");
+}
+
+void ScriptBoneLink::GetBone(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+    v8::HandleScope handleScope;
+    BoneLink* linkPtr = getDataOfInstance<BoneLink>(info.This());
+    info.GetReturnValue().Set(v8::String::New(linkPtr->bone->name.c_str()));
+}
+
+void ScriptBoneLink::SetBone(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+    v8::HandleScope handleScope;
+    if(!value->IsString()) return;
+    BoneLink* linkPtr = getDataOfInstance<BoneLink>(info.This());
+    Bone* bone = linkPtr->getBoneByName(cStrOfV8(value));
+    if(bone) linkPtr->bone = bone;
+}
+
+void ScriptBoneLink::GetBoneChildren(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::HandleScope handleScope;
+    BoneLink* linkPtr = getDataOfInstance<BoneLink>(args.This());
+    unsigned int i = 0;
+    v8::Handle<v8::Array> objects = v8::Array::New(linkPtr->bone->children.size());
+    for(auto child : linkPtr->bone->children)
+        objects->Set(i ++, v8::String::New(child->name.c_str()));
+    args.GetReturnValue().Set(objects);
+}
+
+void ScriptBoneLink::GetRelativeMat(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::HandleScope handleScope;
+    BoneLink* linkPtr = getDataOfInstance<BoneLink>(args.This());
+    args.GetReturnValue().Set(scriptMatrix4.newInstance(Matrix4(linkPtr->bone->relativeMat)));
+}
+
+void ScriptBoneLink::GetAbsoluteMat(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::HandleScope handleScope;
+    BoneLink* linkPtr = getDataOfInstance<BoneLink>(args.This());
+    args.GetReturnValue().Set(scriptMatrix4.newInstance(Matrix4(linkPtr->bone->absoluteInv)));
+}
+
+ScriptBoneLink::ScriptBoneLink() :ScriptBaseLink("BoneLink", Constructor) {
+    v8::HandleScope handleScope;
+    
+    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
+    objectTemplate->SetAccessor(v8::String::New("bone"), GetBone, SetBone);
+    objectTemplate->Set(v8::String::New("getBoneChildren"), v8::FunctionTemplate::New(GetBoneChildren));
+    objectTemplate->Set(v8::String::New("getRelativeMat"), v8::FunctionTemplate::New(GetRelativeMat));
+    objectTemplate->Set(v8::String::New("getAbsoluteMat"), v8::FunctionTemplate::New(GetAbsoluteMat));
     
     functionTemplate->Inherit(scriptBaseLink.functionTemplate);
 }

@@ -61,8 +61,10 @@
 			<AngularLimit min="1.0" max="-1.0" />
 		</PhysicLink>
 		<TransformLink>
-			<Objects indexA="2" indexB="28"/>
-			<Translate>0.0 7.0 1.0</Translate>
+			<Objects indexA="2" indexB="3"/>
+			<Frame>
+				<Translate>0.0 7.0 1.0</Translate>
+			</Frame>
 		</TransformLink>
 	</Links>
 </Container>

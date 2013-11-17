@@ -106,10 +106,6 @@ void ParticlesObject::init() {
         for(unsigned int p = 0; p < maxParticles; p ++)
             particles[p].life = -1.0;
     }
-    
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    scriptParticlesObject.functionTemplate->GetFunction()->NewInstance(1, &external);
 }
 
 ParticlesObject::ParticlesObject(unsigned int _maxParticles, btCollisionShape* collisionShape) :ParticlesObject() {
@@ -162,6 +158,10 @@ ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, Leve
     }
     texture = fileManager.getResourceByPath<Texture>(levelLoader->filePackage, attribute->value());
     texture->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGBA);
+    
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    scriptParticlesObject.functionTemplate->GetFunction()->NewInstance(1, &external);
 }
 
 void ParticlesObject::clean() {
@@ -204,7 +204,7 @@ bool ParticlesObject::gameTick() {
     btTransform transform = getTransformation();
     
     if(optionsState.particleCalcTarget == 0) systemLife = 0.0;
-    if(systemLife > -1.0) {
+    if(systemLife >= 0.0) {
         systemLife -= profiler.animationFactor;
         if(systemLife <= 0.0) {
             removeClean();

@@ -30,8 +30,12 @@ class BaseClass {
     public:
     ScriptFile* scriptFile; //!< The script file to be called on events
     v8::Persistent<v8::Object> scriptInstance; //!< The script representation
+    //! Used to remove a BaseClass correctly
+    virtual void removeClean() { };
+    //! Used to delete a LinkObject quickly
+    virtual void removeFast() { };
     //! Initialize the "Script" rapidxml::xml_node
-    void initScriptNode(rapidxml::xml_node<xmlUsedCharType>* node);
+    void initScriptNode(FilePackage* filePackage, rapidxml::xml_node<xmlUsedCharType>* node);
 };
 
 //! Objects basic class
@@ -43,10 +47,8 @@ class BaseClass {
 class BaseObject : public BaseClass {
     public:
     std::set<BaseLink*> links; //!< A map of LinkObject and names to connect BaseObject to others
-    //! Used to remove a BaseObject from all lists correctly
-    virtual void removeClean();
-    //! Used to delete a BaseObject
-    virtual void removeFast();
+    void removeClean();
+    void removeFast();
     /*! Used to update the transfomation of this object
      @param transformation The new transformation
      */
@@ -66,14 +68,10 @@ class BaseObject : public BaseClass {
     //! Writes its self to rapidxml::xml_node and returns it
     virtual rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
     /*! Returns the iterator of a BaseLink
-     @return TransformLink between this and parent or links.end()
-     */
-    std::set<BaseLink*>::iterator findParentLink();
-    /*! Returns the iterator of a BaseLink
      @param linked BaseObject* to search for
      @return BaseLink between this and linked or links.end()
     */
-    std::set<BaseLink*>::iterator findLink(BaseObject* linked);
+    std::set<BaseLink*>::iterator findLinkTo(BaseObject* linked);
 };
 
 //! BaseObject without physics-body, only transformation
@@ -85,11 +83,10 @@ class BaseObject : public BaseClass {
 class SimpleObject : public BaseObject {
     protected:
     btTransform transformation; //!< The transformation in the world
-    SimpleObject() { }
-    SimpleObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
-        BaseObject::init(node, levelLoader);
-    }
+    SimpleObject() { };
     public:
+    SimpleObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    void removeClean();
     void setTransformation(const btTransform& t) {
         transformation = t;
     }
@@ -109,13 +106,6 @@ struct Bone {
     unsigned int jointIndex; //!< The index of this Bone in the matrix array used for OpenGL
     std::string name; //!< A human readable name of this Bone found in the COLLADA-file
     std::vector<Bone*> children; //!< A array of all children of this Bone
-};
-
-//! SimpleObject used for the bones in ModelObject
-class BoneObject : public SimpleObject {
-    public:
-    Bone* bone;
-    BoneObject(Bone* bone, BaseObject* parentObject);
 };
 
 //! BaseObject with physics-body

@@ -138,81 +138,15 @@ void comMotionState::setWorldTransform(const btTransform& centerOfMassWorldTrans
 
 
 
-RigidObject::SkeletonPose::SkeletonPose(LevelLoader* levelLoader, RigidObject* object) {
-    Skeleton* skeleton = object->model->skeleton;
-    pose = new btTransform[skeleton->bones.size()];
-    rootBone = setupBones(levelLoader, object, skeleton->rootBone);
-}
-
-RigidObject::SkeletonPose::~SkeletonPose() {
-    delete [] pose;
-}
-
-BoneObject* RigidObject::SkeletonPose::setupBones(LevelLoader* levelLoader, BaseObject* object, Bone* bone) {
-    object = bones[bone->name] = new BoneObject(bone, object);
-    if(levelLoader) levelLoader->pushObject(object);
-    for(auto childBone : bone->children)
-        setupBones(levelLoader, object, childBone);
-    return static_cast<BoneObject*>(object);
-}
-
-void RigidObject::SkeletonPose::updateSkeletonPose(BoneObject* object, Bone* bone) {
-    pose[bone->jointIndex] = object->getTransformation() * bone->absoluteInv;
-    for(auto iterator : object->links) {
-        if(!dynamic_cast<TransformLink*>(iterator)) continue;
-        BoneObject* childObject = dynamic_cast<BoneObject*>(iterator->b);
-        if(childObject && childObject != object)
-            updateSkeletonPose(childObject, childObject->bone);
-    }
-}
-
-void RigidObject::SkeletonPose::writeBones(rapidxml::xml_document<char> &doc, LevelSaver* levelSaver, BoneObject *object) {
-    object->write(doc, levelSaver);
-    for(unsigned int i = 0; i < object->bone->children.size(); i ++)
-        for(auto iterator : object->links) {
-            BoneObject* boneObject = dynamic_cast<BoneObject*>(iterator->b);
-            if(!boneObject || boneObject->bone != object->bone->children[i]) continue;
-            writeBones(doc, levelSaver, boneObject);
-            break;
-        }
-}
-
-
-
 RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    scriptRigidObject.functionTemplate->GetFunction()->NewInstance(1, &external);
-    
     MatterObject::init(node, levelLoader);
-    rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Model");
-    if(!parameterNode) {
-        log(error_log, "Tried to construct RigidObject without \"Model\"-node.");
-        return;
-    }
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = parameterNode->first_attribute("src");
-    if(!attribute) {
-        log(error_log, "Found \"Model\"-node without \"src\"-attribute.");
-        return;
-    }
-    if((parameterNode = node->first_node("TextureAnimationTime"))) {
-        XMLValueArray<float> animationTime;
-        animationTime.readString(parameterNode->value(), "%f");
-        if(animationTime.count != textureAnimationTime.size()) {
-            log(error_log, "Tried to construct ModelObject with invalid \"TextureAnimation\"-node.");
-            return;
-        }
-        for(unsigned int i = 0; i < textureAnimationTime.size(); i ++)
-            textureAnimationTime[i] = animationTime.data[i];
-    }
     
-    setModel(levelLoader, fileManager.getResourceByPath<Model>(levelLoader->filePackage, attribute->value()));
-    parameterNode = node->first_node("PhysicsBody");
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("PhysicsBody");
     if(!parameterNode) {
         log(error_log, "Tried to construct RigidObject without \"PhysicsBody\"-node.");
         return;
     }
-    attribute = parameterNode->first_attribute("mass");
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = parameterNode->first_attribute("mass");
     if(!attribute) {
         log(error_log, "Tried to construct RigidObject without \"mass\"-attribute.");
         return;
@@ -272,10 +206,34 @@ RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
         sscanf(attribute->value(), "%f", &value);
         body->setAngularDamping(value);
     }
+    
+    parameterNode = node->first_node("Model");
+    if(parameterNode) {
+        attribute = parameterNode->first_attribute("src");
+        if(!attribute) {
+            log(error_log, "Found \"Model\"-node without \"src\"-attribute.");
+            return;
+        }
+        if((parameterNode = node->first_node("TextureAnimationTime"))) {
+            XMLValueArray<float> animationTime;
+            animationTime.readString(parameterNode->value(), "%f");
+            if(animationTime.count != textureAnimationTime.size()) {
+                log(error_log, "Tried to construct ModelObject with invalid \"TextureAnimation\"-node.");
+                return;
+            }
+            for(unsigned int i = 0; i < textureAnimationTime.size(); i ++)
+                textureAnimationTime[i] = animationTime.data[i];
+        }
+        setModel(levelLoader, fileManager.getResourceByPath<Model>(levelLoader->filePackage, attribute->value()));
+    }
+    
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    scriptRigidObject.functionTemplate->GetFunction()->NewInstance(1, &external);
 }
 
 void RigidObject::removeClean() {
-    setModel(NULL, NULL);
+    removeModel();
     if(body) {
         btRigidBody* rigidBody = getBody();
         delete rigidBody->getMotionState();
@@ -312,8 +270,11 @@ bool RigidObject::gameTick() {
     for(unsigned int i = 0; i < textureAnimationTime.size(); i ++)
         if(textureAnimationTime[i ++] >= 0.0)
             textureAnimationTime[i ++] += profiler.animationFactor;
-    if(skeletonPose)
-        skeletonPose->updateSkeletonPose(skeletonPose->rootBone, model->skeleton->rootBone);
+    if(skeletonPose) {
+        btTransform transform = getTransformation();
+        for(unsigned int i = 0; i < model->skeleton->bones.size(); i ++)
+            skeletonPose.get()[i] = transform;
+    }
     return MatterObject::gameTick();
 }
 
@@ -374,20 +335,20 @@ rapidxml::xml_node<xmlUsedCharType>* RigidObject::write(rapidxml::xml_document<x
         parameterNode->append_attribute(attribute);
     }
     
-    if(textureAnimationTime.size() > 0) {
-        rapidxml::xml_node<xmlUsedCharType>* textureAnimationNode = doc.allocate_node(rapidxml::node_element);
-        textureAnimationNode->name("TextureAnimationTime");
-        std::ostringstream data;
-        for(unsigned int i = 0; i < textureAnimationTime.size(); i ++) {
-            if(i > 0) data << " ";
-            data << textureAnimationTime[i];
+    if(model) {
+        node->append_node(fileManager.writeResource(doc, "Model", model));
+        if(textureAnimationTime.size() > 0) {
+            rapidxml::xml_node<xmlUsedCharType>* textureAnimationNode = doc.allocate_node(rapidxml::node_element);
+            textureAnimationNode->name("TextureAnimationTime");
+            std::ostringstream data;
+            for(unsigned int i = 0; i < textureAnimationTime.size(); i ++) {
+                if(i > 0) data << " ";
+                data << textureAnimationTime[i];
+            }
+            textureAnimationNode->value(doc.allocate_string(data.str().c_str()));
+            node->append_node(textureAnimationNode);
         }
-        textureAnimationNode->value(doc.allocate_string(data.str().c_str()));
-        node->append_node(textureAnimationNode);
     }
-    node->append_node(fileManager.writeResource(doc, "Model", model));
-    if(skeletonPose)
-        skeletonPose->writeBones(doc, levelSaver, skeletonPose->rootBone);
     
     return node;
 }
@@ -407,18 +368,22 @@ void RigidObject::setKinematic(bool active) {
     }
 }
 
-void RigidObject::setModel(LevelLoader* levelLoader, FileResourcePtr<Model> _model) {
-    if(model) {
-        for(unsigned int i = 0; i < model->meshes.size(); i ++)
-            if(model->meshes[i]->material.reflectivity != 0)
-                objectManager.reflectiveAccumulator.erase(this);
-        foreach_e(links, iterator)
-        if(dynamic_cast<TransformLink*>(*iterator) && dynamic_cast<BoneObject*>((*iterator)->b))
-            (*iterator)->removeClean(this);
-    }
+void RigidObject::removeModel() {
+    if(!model) return;
+    for(unsigned int i = 0; i < model->meshes.size(); i ++)
+        if(model->meshes[i]->material.reflectivity != 0)
+            objectManager.reflectiveAccumulator.erase(this);
+    foreach_e(links, iterator)
+        if(dynamic_cast<BoneLink*>(*iterator)) {
+            (*iterator)->b->removeClean();
+            (*iterator)->removeClean();
+        }
     textureAnimationTime.clear();
     skeletonPose.reset();
-    
+}
+
+void RigidObject::setModel(LevelLoader* levelLoader, FileResourcePtr<Model> _model) {
+    removeModel();
     model = _model;
     if(!model) return;
     
@@ -427,7 +392,7 @@ void RigidObject::setModel(LevelLoader* levelLoader, FileResourcePtr<Model> _mod
             textureAnimationTime.push_back(0.0);
     
     if(model->skeleton)
-        skeletonPose.reset(new SkeletonPose(levelLoader, this));
+        skeletonPose.reset(new btTransform[model->skeleton->bones.size()]);
 }
 
 void RigidObject::draw() {
@@ -460,7 +425,19 @@ void RigidObject::prepareShaderProgram(Mesh* mesh) {
     
     currentShaderProgram->setUniformF("discardDensity", clamp(integrity+1.0F, 0.0F, 1.0F));
     if(skeletonPose)
-        currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose->pose, model->skeleton->bones.size());
+        currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose.get(), model->skeleton->bones.size());
+}
+
+BoneLink* RigidObject::findBoneLinkOfName(const char* name) {
+    if(!skeletonPose) return NULL;
+    auto bones = model->skeleton->bones;
+    auto iterator = bones.find(name);
+    if(iterator == bones.end()) return NULL;
+    Bone* bone = iterator->second;
+    for(auto link : links)
+        if(dynamic_cast<BoneLink*>(link) && ((BoneLink*)link)->bone == bone)
+            return (BoneLink*)link;
+    return NULL;
 }
 
 

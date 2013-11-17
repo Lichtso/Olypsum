@@ -11,7 +11,14 @@
 
 #include "ScriptVisualObject.h"
 
-class ScriptCamObject : public ScriptBaseObject {
+class ScriptSimpleObject : public ScriptBaseObject {
+    protected:
+    ScriptSimpleObject(const char* name) :ScriptBaseObject(name) { }
+    public:
+    ScriptSimpleObject();
+};
+
+class ScriptCamObject : public ScriptSimpleObject {
     static void GetFov(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
     static void SetFov(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
     static void GetNear(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
@@ -25,7 +32,7 @@ class ScriptCamObject : public ScriptBaseObject {
     ScriptCamObject();
 };
 
-class ScriptSoundObject : public ScriptBaseObject {
+class ScriptSoundObject : public ScriptSimpleObject {
     static void GetSoundTrack(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
     static void SetSoundTrack(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
     static void GetTimeOffset(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
@@ -40,6 +47,7 @@ class ScriptSoundObject : public ScriptBaseObject {
     ScriptSoundObject();
 };
 
+extern ScriptSimpleObject scriptSimpleObject;
 extern ScriptCamObject scriptCamObject;
 extern ScriptSoundObject scriptSoundObject;
 

@@ -15,6 +15,7 @@
 #include <sys/time.h>
 #include <fstream>
 #include <thread>
+#include <regex>
 #include <map>
 
 #ifdef __APPLE__

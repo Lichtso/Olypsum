@@ -8,6 +8,15 @@
 
 #include "ScriptManager.h"
 
+ScriptSimpleObject::ScriptSimpleObject() :ScriptBaseObject("SimpleObject") {
+    v8::HandleScope handleScope;
+    
+    //v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
+    functionTemplate->Inherit(scriptBaseClass.functionTemplate);
+}
+
+
+
 void ScriptCamObject::GetFov(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
     CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
@@ -50,9 +59,9 @@ void ScriptCamObject::SetFar(v8::Local<v8::String> property, v8::Local<v8::Value
 void ScriptCamObject::GetViewRay(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(args.Length() < 2)
-        return args.ScriptException("getViewRay(): Too few arguments");
+        return args.ScriptException("CamObject getViewRay(): Too few arguments");
     if(!args[0]->IsNumber() || !args[1]->IsNumber())
-        return args.ScriptException("getViewRay(): Invalid argument");
+        return args.ScriptException("CamObject getViewRay(): Invalid argument");
     CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
     Ray3 ray = objectPtr->getRayAt(args[0]->NumberValue(), args[1]->NumberValue());
     
@@ -73,7 +82,7 @@ void ScriptCamObject::GetMainCam(const v8::FunctionCallbackInfo<v8::Value>& args
     args.GetReturnValue().Set(result);
 }
 
-ScriptCamObject::ScriptCamObject() :ScriptBaseObject("CamObject") {
+ScriptCamObject::ScriptCamObject() :ScriptSimpleObject("CamObject") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
@@ -170,7 +179,7 @@ void ScriptSoundObject::SetMode(v8::Local<v8::String> property, v8::Local<v8::Va
         objectPtr->mode = SoundObject::Mode::Dispose;
 }
 
-ScriptSoundObject::ScriptSoundObject() :ScriptBaseObject("SoundObject") {
+ScriptSoundObject::ScriptSoundObject() :ScriptSimpleObject("SoundObject") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();

@@ -13,13 +13,12 @@ BaseClass::~BaseClass() {
         scriptInstance.Dispose();
 }
 
-void BaseClass::initScriptNode(rapidxml::xml_node<xmlUsedCharType>* node) {
+void BaseClass::initScriptNode(FilePackage* filePackage, rapidxml::xml_node<xmlUsedCharType>* node) {
     rapidxml::xml_node<xmlUsedCharType>* scriptNode = node->first_node("Script");
     if(!scriptNode) return;
     
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = scriptNode->first_attribute("src");
     if(attribute) {
-        FilePackage* filePackage = levelManager.levelPackage;
         std::string name = attribute->value();
         if(fileManager.readResourcePath(filePackage, name)) {
             scriptFile = scriptManager->getScriptFile(filePackage, name);
@@ -33,20 +32,25 @@ void BaseClass::initScriptNode(rapidxml::xml_node<xmlUsedCharType>* node) {
 
 
 void BaseObject::removeClean() {
-    while(links.size() > 0)
-        (*links.begin())->removeClean(this);
+    while(links.size() > 0) {
+        BaseLink* link = *links.begin();
+        if(dynamic_cast<TransformLink*>(link) && link->b != this)
+            link->b->removeClean();
+        else
+            link->removeClean();
+    }
     delete this;
 }
 
 void BaseObject::removeFast() {
     foreach_e(links, iterator)
-        (*iterator)->removeFast(this);
+        (*iterator)->removeFast();
     delete this;
 }
 
 bool BaseObject::gameTick() {
     foreach_e(links, iterator)
-        if((*iterator)->b != this || !dynamic_cast<TransformLink*>(*iterator)) //Don't process parent
+        if((*iterator)->a == this)
             (*iterator)->gameTick();
     return true;
 }
@@ -74,14 +78,7 @@ rapidxml::xml_node<xmlUsedCharType>* BaseObject::write(rapidxml::xml_document<xm
     return node;
 }
 
-std::set<BaseLink*>::iterator BaseObject::findParentLink() {
-    for(std::set<BaseLink*>::iterator i = links.begin(); i != links.end(); i ++)
-        if(dynamic_cast<TransformLink*>(*i) && (*i)->b == this)
-            return i;
-    return links.end();
-}
-
-std::set<BaseLink*>::iterator BaseObject::findLink(BaseObject* linked) {
+std::set<BaseLink*>::iterator BaseObject::findLinkTo(BaseObject* linked) {
     for(std::set<BaseLink*>::iterator i = links.begin(); i != links.end(); i ++)
         if((*i)->getOther(this) == linked)
             return i;
@@ -90,15 +87,17 @@ std::set<BaseLink*>::iterator BaseObject::findLink(BaseObject* linked) {
 
 
 
-BoneObject::BoneObject(Bone* _bone, BaseObject* parentObject) : bone(_bone) {
+SimpleObject::SimpleObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :SimpleObject() {
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);
-    scriptBoneObject.functionTemplate->GetFunction()->NewInstance(1, &external);
-    
-    LinkInitializer initializer;
-    initializer.object[0] = parentObject;
-    initializer.object[1] = this;
-    (new TransformLink())->init(initializer);
+    scriptBaseObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    objectManager.simpleObjects.insert(this);
+    BaseObject::init(node, levelLoader);
+}
+
+void SimpleObject::removeClean() {
+    objectManager.simpleObjects.erase(this);
+    BaseObject::removeClean();
 }
 
 

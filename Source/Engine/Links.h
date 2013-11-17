@@ -32,6 +32,8 @@ class BaseLink : public BaseClass {
     virtual ~BaseLink() { };
     public:
     BaseObject *a, *b; //!< The linkes BaseObjects
+    void removeClean();
+    void removeFast();
     //! Is called by a parent BaseObject to its children to prepare the next graphics frame
     virtual void gameTick() { };
     /*! Gets the other BaseObject
@@ -41,14 +43,8 @@ class BaseLink : public BaseClass {
     BaseObject* getOther(BaseObject* object) {
         return (object == b) ? a : b;
     }
-    /*! Used to remove a LinkObject correctly
-     @param object One of the two BaseObject passed in the constructor. Either a or b
-     */
-    virtual void removeClean(BaseObject* object);
-    /*! Used to delete a LinkObject
-     @param object One of the two BaseObject passed in the constructor. Either a or b
-     */
-    virtual void removeFast(BaseObject* object);
+    //! Returns true if a connection between the objects is allowed
+    virtual bool isAttachingIsValid(LinkInitializer& initializer);
     /*! Initialize from LinkInitializer. Returns success
      @param initializer A LinkInitializer which contains the objects and names to be linked together
      */
@@ -69,32 +65,32 @@ class PhysicLink : public BaseLink {
     //! Returns if collisions between the linked objects are disabled
     bool isCollisionDisabled();
     void gameTick();
-    void removeClean(BaseObject* object);
+    void removeClean();
     bool init(LinkInitializer& initializer, btTypedConstraint* constraint);
     bool init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
 
-//! A BaseLink with a parent child relationship
+//! A BaseLink with a parent manipulating the transformation of a child
 class TransformLink : public BaseLink {
     public:
-    btTransform transform; //!< Applied from parent to child
+    std::vector<btTransform> transformations; //!< Transformation stack applied from parent to child
     void gameTick();
-    /*! Used to remove a HierarchicalLink correctly.
-     This will call BaseObject::remove() on the child if and only if the parameter a is the parent.
-     @param a One of the two BaseObject passed in the constructor. Either parent or child
-     @param iteratorInA the iterator of this LinkObject in the BaseObject::links map of the first parameter
-     
-     @warning This method calls remove() on the child object but only if it is called from the parent
-     */
-    void removeClean(BaseObject* object);
-    void removeFast(BaseObject* object);
-    //! Returns true if a connection between the linked objects is allowed
-    bool checkIfAttachingIsValid();
-    //! Initialize from ScriptTransformLink::Constructor()
-    bool init(LinkInitializer& initializer, btTransform& transform);
-    //! Initialize from RigidObject::setupBones()
-    bool init(LinkInitializer& initializer);
+    bool isAttachingIsValid(LinkInitializer& initializer);
+    bool init(LinkInitializer& initializer, const std::vector<btTransform>& transformations);
+    bool init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
+};
+
+//! A BaseLink for skeletal animation
+class BoneLink : public BaseLink {
+    public:
+    Bone* bone; //!< Bone which applies the transformation
+    //! Gets a bone by the name in the model of object a
+    Bone* getBoneByName(const char* name);
+    void gameTick();
+    bool isAttachingIsValid(LinkInitializer& initializer);
+    bool init(LinkInitializer& initializer, Bone* bone);
     bool init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };

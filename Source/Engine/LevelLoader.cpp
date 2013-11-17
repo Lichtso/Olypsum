@@ -146,16 +146,18 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
                 object = new ParticlesObject(node, this);
             }else if(strcmp(node->name(), "SoundObject") == 0) {
                 object = new SoundObject(node, this);
-            }else if(strcmp(node->name(), "TerrainObject") == 0) {
-                object = new TerrainObject(node, this);
+            }else if(strcmp(node->name(), "SimpleObject") == 0) {
+                object = new SimpleObject(node, this);
             }else if(strcmp(node->name(), "CamObject") == 0) {
                 object = new CamObject(node, this);
+            }else if(strcmp(node->name(), "TerrainObject") == 0) {
+                object = new TerrainObject(node, this);
             }else{
                 log(error_log, std::string("Tried to construct invalid Object: ")+node->name()+'.');
                 return false;
             }
             
-            object->initScriptNode(node);
+            object->initScriptNode(filePackage, node);
             node = node->next_sibling();
         }
     }
@@ -172,13 +174,15 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
                 link = new PhysicLink();
             }else if(strcmp(node->name(), "TransformLink") == 0) {
                 link = new TransformLink();
+            }else if(strcmp(node->name(), "BoneLink") == 0) {
+                link = new BoneLink();
             }else{
                 log(error_log, std::string("Tried to construct invalid Link: ")+node->name()+'.');
                 return false;
             }
             
             link->init(node, this);
-            link->initScriptNode(node);
+            link->initScriptNode(filePackage, node);
             node = node->next_sibling();
         }
     }

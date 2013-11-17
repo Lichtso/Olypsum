@@ -14,6 +14,7 @@
 class ScriptBaseClass : public ScriptClass {
     static void GetScriptClass(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
     static void SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void Delete(const v8::FunctionCallbackInfo<v8::Value>& args);
     protected:
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
     ScriptBaseClass(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args) = Constructor);
@@ -29,23 +30,14 @@ class ScriptBaseClass : public ScriptClass {
 
 class ScriptBaseObject : public ScriptBaseClass {
     static void AccessTransformation(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void RemoveLink(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetLink(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetLinkCount(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetParentLink(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetTransformUpLink(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetBoneUpLink(const v8::FunctionCallbackInfo<v8::Value>& args);
     protected:
     ScriptBaseObject(const char* name) :ScriptBaseClass(name) { }
     public:
     ScriptBaseObject();
-};
-
-class ScriptBoneObject : public ScriptBaseObject {
-    protected:
-    static void GetName(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void GetChildren(const v8::FunctionCallbackInfo<v8::Value>& args);
-    ScriptBoneObject(const char* name) :ScriptBaseObject(name) { }
-    public:
-    ScriptBoneObject();
 };
 
 class ScriptPhysicObject : public ScriptBaseObject {
@@ -60,7 +52,6 @@ class ScriptPhysicObject : public ScriptBaseObject {
 
 extern ScriptBaseClass scriptBaseClass;
 extern ScriptBaseObject scriptBaseObject;
-extern ScriptBoneObject scriptBoneObject;
 extern ScriptPhysicObject scriptPhysicObject;
 
 #endif

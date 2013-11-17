@@ -71,14 +71,17 @@ bool FilePackage::init() {
     }
     
     std::size_t hashCmp;
-    sscanf(packageNode->first_attribute("hash")->value(), "%lx", &hashCmp);
-    if(hashCmp != hash) {
-#ifdef DEBUG
-        printf("Hash of resoucre package %s should be %lx\n", name.c_str(), hash);
-#else
-        menu.setModalView("error", fileManager.localizeString("packageError_HashCorrupted"), NULL);
-        return false;
-#endif
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = packageNode->first_attribute("hash");
+    if(attribute) {
+        sscanf(attribute->value(), "%lx", &hashCmp);
+        if(hashCmp != hash) {
+            #ifdef DEBUG
+            printf("Hash of resoucre package %s should be %lx\n", name.c_str(), hash);
+            #else
+            menu.setModalView("error", fileManager.localizeString("packageError_HashCorrupted"), NULL);
+            return false;
+            #endif
+        }
     }
     
     node = packageNode->first_node("Description");
@@ -96,8 +99,13 @@ bool FilePackage::init() {
     if(node) {
         packageNode = node->first_node("Package");
         while(packageNode) {
-            sscanf(packageNode->first_attribute("hash")->value(), "%lx", &hashCmp);
-            std::string dependencyName = packageNode->first_attribute("name")->value();
+            attribute = packageNode->first_attribute("hash");
+            if(!attribute) continue;
+            sscanf(attribute->value(), "%lx", &hashCmp);
+            
+            attribute = packageNode->first_attribute("name");
+            if(!attribute) continue;
+            std::string dependencyName = attribute->value();
             if(dependencyName == name)
                 log(warning_log, std::string("Package ")+name+" dependens on its self.");
             

@@ -45,12 +45,7 @@ CamObject::CamObject() :fov(-1.0), aspect(1.0), near(-1.0), far(1.0) {
 
 CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader)
     :aspect((float)optionsState.videoWidth/optionsState.videoHeight) {
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    scriptCamObject.functionTemplate->GetFunction()->NewInstance(1, &external);
-    
-    objectManager.simpleObjects.insert(this);
-    BaseObject::init(node, levelLoader);
+    SimpleObject::init(node, levelLoader);
     
     rapidxml::xml_node<xmlUsedCharType>* boundsNode = node->first_node("Bounds");
     if(!boundsNode) {
@@ -79,12 +74,16 @@ CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* lev
     
     updateViewMat();
     if(!mainCam) mainCam = this;
+        
+    v8::HandleScope handleScope;
+    v8::Handle<v8::Value> external = v8::External::New(this);
+    scriptCamObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    objectManager.simpleObjects.insert(this);
 }
 
 void CamObject::removeClean() {
     if(mainCam == this) mainCam = NULL;
     if(currentCam == this) currentCam = NULL;
-    objectManager.simpleObjects.erase(this);
     SimpleObject::removeClean();
 }
 
@@ -314,7 +313,7 @@ void CamObject::updateViewMat() {
 }
 
 rapidxml::xml_node<xmlUsedCharType>* CamObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
-    rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
+    rapidxml::xml_node<xmlUsedCharType>* node = SimpleObject::write(doc, levelSaver);
     node->name("CamObject");
     
     rapidxml::xml_node<xmlUsedCharType>* boundsNode = doc.allocate_node(rapidxml::node_element);

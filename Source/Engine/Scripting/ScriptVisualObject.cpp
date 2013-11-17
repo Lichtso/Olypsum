@@ -234,7 +234,8 @@ void ScriptRigidObject::ApplyLinearImpulse(const v8::FunctionCallbackInfo<v8::Va
     if(isValidVector(vec)) {
         body->applyCentralImpulse(vec);
         body->activate();
-    }}
+    }
+}
 
 void ScriptRigidObject::GetBoneByName(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
@@ -244,10 +245,9 @@ void ScriptRigidObject::GetBoneByName(const v8::FunctionCallbackInfo<v8::Value>&
         return args.ScriptException("RigidObject getBoneByName(): Invalid argument");
     
     RigidObject* objectPtr = getDataOfInstance<RigidObject>(args.This());
-    if(!objectPtr->skeletonPose) return;
-    auto iterator = objectPtr->skeletonPose->bones.find(stdStrOfV8(args[0]));
-    if(iterator != objectPtr->skeletonPose->bones.end())
-        args.GetReturnValue().Set(iterator->second->scriptInstance);
+    BoneLink* linkPrt = objectPtr->findBoneLinkOfName(cStrOfV8(args[0]));
+    if(linkPrt)
+        args.GetReturnValue().Set(linkPrt->b->scriptInstance);
 }
 
 void ScriptRigidObject::AccessTextureAnimationTime(const v8::FunctionCallbackInfo<v8::Value>& args) {

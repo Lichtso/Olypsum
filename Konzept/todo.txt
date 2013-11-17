@@ -1,8 +1,6 @@
-V8 API: Create/Delete Objects, Documentation
+V8 API: Create Objects
 Implement btSoftBody
 Leap Motion: V8 API
-
-Not sure:
 Logarithmic Shadow Mapping
 Water physics
 Split screen support

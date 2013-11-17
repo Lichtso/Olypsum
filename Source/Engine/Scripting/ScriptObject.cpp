@@ -22,7 +22,7 @@ void ScriptBaseClass::Constructor(const v8::FunctionCallbackInfo<v8::Value>& arg
 
 void ScriptBaseClass::GetScriptClass(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
     v8::HandleScope handleScope;
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(info.This());
+    BaseClass* objectPtr = getDataOfInstance<BaseClass>(info.This());
     std::string path = objectPtr->scriptFile->name;
     if(objectPtr->scriptFile->filePackage != levelManager.levelPackage)
         path = std::string("../")+objectPtr->scriptFile->filePackage->name+'/'+path;
@@ -32,11 +32,16 @@ void ScriptBaseClass::GetScriptClass(v8::Local<v8::String> property, const v8::P
 void ScriptBaseClass::SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(info.This());
+    BaseClass* objectPtr = getDataOfInstance<BaseClass>(info.This());
     FilePackage* filePackage = levelManager.levelPackage;
     std::string name = stdStrOfV8(value);
     if(fileManager.readResourcePath(filePackage, name))
         objectPtr->scriptFile = scriptManager->getScriptFile(filePackage, name);
+}
+
+void ScriptBaseClass::Delete(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::HandleScope handleScope;
+    getDataOfInstance<BaseClass>(args.This())->removeClean();
 }
 
 ScriptBaseClass::ScriptBaseClass(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :ScriptClass(name, constructor) {
@@ -51,6 +56,7 @@ ScriptBaseClass::ScriptBaseClass() :ScriptBaseClass("BaseClass") {
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->SetAccessor(v8::String::New("scriptClass"), GetScriptClass, SetScriptClass);
+    objectTemplate->Set(v8::String::New("delete"), v8::FunctionTemplate::New(Delete));
 }
 
 
@@ -66,19 +72,6 @@ void ScriptBaseObject::AccessTransformation(const v8::FunctionCallbackInfo<v8::V
         return;
     }else
         args.GetReturnValue().Set(scriptMatrix4.newInstance(Matrix4(objectPtr->getTransformation())));
-}
-
-void ScriptBaseObject::RemoveLink(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
-    if(args.Length() < 1)
-        return args.ScriptException("BaseObject removeLink(): Too few arguments");
-    if(!args[0]->IsUint32())
-        return args.ScriptException("BaseObject removeLink(): Invalid argument");
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
-    if(args[0]->IntegerValue() >= objectPtr->links.size())
-        return args.ScriptException("BaseObject removeLink(): Out of bounds");
-    (*std::next(objectPtr->links.begin(), args[0]->IntegerValue()))->removeClean(objectPtr);
-    args.GetReturnValue().Set(true);
 }
 
 void ScriptBaseObject::GetLink(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -99,12 +92,24 @@ void ScriptBaseObject::GetLinkCount(const v8::FunctionCallbackInfo<v8::Value>& a
     args.GetReturnValue().Set(v8::Integer::New(objectPtr->links.size()));
 }
 
-void ScriptBaseObject::GetParentLink(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void ScriptBaseObject::GetTransformUpLink(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
-    auto iterator = objectPtr->findParentLink();
-    if(iterator != objectPtr->links.end())
-        args.GetReturnValue().Set((*iterator)->scriptInstance);
+    for(std::set<BaseLink*>::iterator i = objectPtr->links.begin(); i != objectPtr->links.end(); i ++)
+        if(dynamic_cast<TransformLink*>(*i) && (*i)->b == objectPtr) {
+            args.GetReturnValue().Set((*i)->scriptInstance);
+            return;
+        }
+}
+
+void ScriptBaseObject::GetBoneUpLink(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    v8::HandleScope handleScope;
+    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
+    for(std::set<BaseLink*>::iterator i = objectPtr->links.begin(); i != objectPtr->links.end(); i ++)
+        if(dynamic_cast<BoneLink*>(*i) && (*i)->b == objectPtr) {
+            args.GetReturnValue().Set((*i)->scriptInstance);
+            return;
+        }
 }
 
 ScriptBaseObject::ScriptBaseObject() :ScriptBaseClass("BaseObject") {
@@ -112,37 +117,12 @@ ScriptBaseObject::ScriptBaseObject() :ScriptBaseClass("BaseObject") {
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
     objectTemplate->Set(v8::String::New("transformation"), v8::FunctionTemplate::New(AccessTransformation));
-    objectTemplate->Set(v8::String::New("removeLink"), v8::FunctionTemplate::New(RemoveLink));
     objectTemplate->Set(v8::String::New("getLink"), v8::FunctionTemplate::New(GetLink));
     objectTemplate->Set(v8::String::New("getLinkCount"), v8::FunctionTemplate::New(GetLinkCount));
-    objectTemplate->Set(v8::String::New("getParentLink"), v8::FunctionTemplate::New(GetLink));
+    objectTemplate->Set(v8::String::New("getTransformUpLink"), v8::FunctionTemplate::New(GetTransformUpLink));
+    objectTemplate->Set(v8::String::New("getBoneUpLink"), v8::FunctionTemplate::New(GetBoneUpLink));
     
     functionTemplate->Inherit(scriptBaseClass.functionTemplate);
-}
-
-
-
-void ScriptBoneObject::GetName(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
-    v8::HandleScope handleScope;
-    BoneObject* objectPtr = getDataOfInstance<BoneObject>(info.This());
-    info.GetReturnValue().Set(v8::String::New(objectPtr->bone->name.c_str()));
-}
-
-void ScriptBoneObject::GetChildren(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
-    Bone* bone = getDataOfInstance<BoneObject>(args.This())->bone;
-    v8::Handle<v8::Array> array = v8::Array::New(bone->children.size());
-    for(unsigned int i = 0; i < bone->children.size(); i ++)
-        array->Set(i, v8::String::New(bone->children[i]->name.c_str()));
-    args.GetReturnValue().Set(array);
-}
-
-ScriptBoneObject::ScriptBoneObject() :ScriptBaseObject("BoneObject") {
-    v8::HandleScope handleScope;
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->SetAccessor(v8::String::New("name"), GetName);
-    objectTemplate->Set(v8::String::New("getChildren"), v8::FunctionTemplate::New(GetChildren));
 }
 
 

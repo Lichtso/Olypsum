@@ -144,6 +144,17 @@ class ScriptTransformLink : public ScriptBaseLink {
     ScriptTransformLink();
 };
 
+class ScriptBoneLink : public ScriptBaseLink {
+    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetBone(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void SetBone(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetBoneChildren(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetRelativeMat(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetAbsoluteMat(const v8::FunctionCallbackInfo<v8::Value>& args);
+    public:
+    ScriptBoneLink();
+};
+
 extern ScriptBaseLink scriptBaseLink;
 extern ScriptPhysicLink scriptPhysicLink;
 extern ScriptPointPhysicLink scriptPointPhysicLink;
@@ -153,5 +164,6 @@ extern ScriptSliderPhysicLink scriptSliderPhysicLink;
 extern ScriptDof6PhysicLink scriptDof6PhysicLink;
 extern ScriptConeTwistPhysicLink scriptConeTwistPhysicLink;
 extern ScriptTransformLink scriptTransformLink;
+extern ScriptBoneLink scriptBoneLink;
 
 #endif
