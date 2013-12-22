@@ -218,7 +218,7 @@ bool LevelLoader::loadLevel() {
     //Load root conatiner
     if(!loadContainer(levelManager.levelContainer, true)) {
         levelManager.clear();
-        menu.setMenu(Menu::Name::saveGames);
+        menu.setSaveGamesMenu();
         if(!menu.screenView->modalView)
             menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), NULL);
         return false;
@@ -226,6 +226,6 @@ bool LevelLoader::loadLevel() {
     
     //Start the game
     objectManager.updateRendererSettings();
-    menu.setPause(false);
+    menu.setInGameMenu();
     return true;
 }

@@ -134,7 +134,7 @@ void ObjectManager::init() {
     //Show loading screen
     guiCam = new CamObject();
     loadStaticShaderPrograms();
-    menu.setMenu(Menu::Name::loading);
+    menu.setLoadingMenu();
 }
 
 void ObjectManager::clear() {

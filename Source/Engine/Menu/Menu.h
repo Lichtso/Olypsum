@@ -12,6 +12,8 @@
 #include "LevelManager.h"
 
 class Menu {
+    static void openExternURL(std::string str);
+    static void leaveOptionsMenu(GUIButton* button);
     public:
     GUIScreenView* screenView;
     enum Name {
@@ -46,10 +48,20 @@ class Menu {
     void handleKeyDown(SDL_Keycode key, const char* text);
     void handleKeyUp(SDL_Keycode key);
     void gameTick();
-    void clear();
-    void setPause(bool active);
+    void sendPauseEvent();
     void setModalView(const std::string& title, const std::string& text, std::function<void(GUIButton* button)> onContinue);
-    void setMenu(Name menu);
+    void clear();
+    void clearAndAddBackground();
+    void setLoadingMenu();
+    void setMainMenu();
+    void setOptionsMenu();
+    void setLanguagesMenu();
+    void setCreditsMenu();
+    void setInGameMenu();
+    void setGameEscMenu();
+    void setSaveGamesMenu();
+    void setNewGameMenu();
+    void setMultiplayerMenu();
 };
 
 extern Menu menu;

@@ -32,6 +32,9 @@
 	<Entry key="retina">Retina</Entry>
 	<Entry key="on">An</Entry>
 	<Entry key="off">Aus</Entry>
+	<Entry key="ipV4">IP v4</Entry>
+	<Entry key="ipV6">IP v6</Entry>
+	<Entry key="auto">Auto</Entry>
 	<Entry key="info">Info</Entry>
 	<Entry key="warning">Warnung</Entry>
 	<Entry key="error">Fehler</Entry>

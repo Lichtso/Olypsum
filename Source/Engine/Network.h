@@ -13,10 +13,10 @@
 
 class NetworkManager {
     const int udpPort = 8724, tcpPort = 8725;
-    const char* scanIPv4 = "224.0.1.0";
+    const char* scanIPv4 = "224.0.0.1";
     const char* scanIPv6 = "FF02:0001::";
-    NL::Socket udpSocket;
-    NL::SocketManager socketManager;
+    netLink::Socket* udpSocket;
+    netLink::SocketManager socketManager;
     
     public:
     void init();

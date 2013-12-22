@@ -1,6 +1,5 @@
 V8 API: Create Objects
 Implement btSoftBody
-Leap Motion: V8 API
 Logarithmic Shadow Mapping
 Water physics
 Split screen support

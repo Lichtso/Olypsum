@@ -10,7 +10,7 @@
 
 GUIButton::GUIButton() :sizeAlignment(GUISizeAlignment::All), type(GUIButton::Type::Normal), enabled(true), state(GUIButton::State::Released) {
     paddingX = menu.screenView->width*0.012;
-    paddingY = menu.screenView->width*0.006;
+    paddingY = menu.screenView->height*0.01;
 }
 
 void GUIButton::updateContent() {

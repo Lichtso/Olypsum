@@ -108,8 +108,10 @@ void AppMain() {
                 case SDL_WINDOWEVENT:
                     switch (event.window.event) {
                         case SDL_WINDOWEVENT_FOCUS_LOST:
-                            if(menu.current == Menu::inGame)
-                                menu.setPause(true);
+                            if(menu.current == Menu::inGame) {
+                                menu.setGameEscMenu();
+                                menu.sendPauseEvent();
+                            }
                         break;
                         case SDL_WINDOWEVENT_RESIZED:
                             menu.updateVideoResulution();
