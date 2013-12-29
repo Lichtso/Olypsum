@@ -168,7 +168,6 @@ void Menu::setNewGameMenu() {
     textField->posY = screenView->height*-0.8;
     textField->width = screenView->width*0.4;
     textField->height = screenView->height*0.07;
-    //textField->label->fontHeight = screenView->height*0.1;
     textField->onChange = [scrollView](GUITextField* textField) {
         GUILabel* label = static_cast<GUILabel*>(textField->children[0]);
         std::string path = supportPath+"Saves/"+label->text+'/';

@@ -184,7 +184,7 @@ class FileManager {
 //! This class manages the options
 class OptionsState {
     public:
-    std::string language;
+    std::string language, nickname, ipVersion = "auto";
     float anisotropy = 1.0,
           screenBlurFactor = -1.0,
           globalVolume = 0.5,

@@ -170,7 +170,7 @@ void Menu::handleKeyUp(SDL_Keycode key) {
                 setOptionsMenu();
                 return;
             case multiplayer:
-                networkManager.setLocalScan(false);
+                networkManager.disable();
             case credits:
             case saveGames:
                 setMainMenu();

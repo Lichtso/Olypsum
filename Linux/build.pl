@@ -4,7 +4,7 @@ use strict;
 my($version) = "0.0.1";
 my(@libs) = qw(/usr/lib/libc++.so.1 /usr/lib/x86_64-linux-gnu/libopenal.so.1 /usr/lib/libv8.so /usr/lib/Leap/libLeap.so /usr/local/lib/libSDL2-2.0.so.0 /usr/local/lib/libSDL2_ttf-2.0.so.0 /usr/local/lib/libSDL2_image-2.0.so.0 /usr/local/lib/libBulletCollision.so.2.81  /usr/local/lib/libBulletDynamics.so.2.81 /usr/local/lib/libBulletSoftBody.so.2.81 /usr/local/lib/libBulletMultiThreaded.so.2.81 /usr/local/lib/libLinearMath.so.2.81);
 my(@files)=`(cd ../Source/Engine/; find . -iname "*.cpp" -type f)`;
-my(@sourceDirs)= qw(../Source/Engine/ ../Source/Engine/rapidxml-1.13/ ../Source/Engine/GUI/ ../Source/Engine/Scripting/);
+my(@sourceDirs)= qw(../Source/Engine/ ../Source/Engine/rapidxml-1.13/ ../Source/Engine/GUI/ ../Source/Engine/Menu/ ../Source/Engine/Scripting/);
 my($SOURCES) = join(' ', map { chomp $_; $_ =~ s/^\.\///; $_; } @files);
 my($OBJS) = join(' ', map { $_ =~ s/cpp$/bc/; $_ =~ s/^[^\/]+\///; "build/".$_; } @files);
 my($HEADERS) = join(' ', map { "-I" . $_; } @sourceDirs);

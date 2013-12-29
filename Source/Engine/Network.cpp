@@ -9,20 +9,17 @@
 #include "Menu.h"
 
 void NetworkManager::init() {
-    udpSocket = new netLink::Socket();
-    udpSocket->setInputBufferSize(128);
-    udpSocket->setOutputBufferSize(128);
-    udpSocket->initAsUdpPeer("::0", udpPort);
-    socketManager.sockets.insert(udpSocket);
     socketManager.onReceive = [this](netLink::SocketManager* manager, netLink::Socket* socket) {
-        socket->advanceToNextPacket();
-        netLink::MsgPack::Stream stream(udpSocket);
-        printf("UDP received MAP: %lu\n", stream.readMap());
-        std::string str;
-        stream >> str;
-        printf("UDP received STR: %s\n", str.c_str());
-        stream >> str;
-        printf("UDP received STR: %s\n", str.c_str());
+        try {
+            socket->advanceInputBuffer();
+            MsgPack::Deserializer deserializer(socket);
+            deserializer.deserialize([this](std::unique_ptr<MsgPack::Element> parsed) {
+                std::cout << "Received: " << *parsed << "\n";
+                return false;
+            });
+        }catch(netLink::Exception exc) {
+            printf("Exception %d\n", exc.code);
+        }
     };
 }
 
@@ -31,24 +28,42 @@ void NetworkManager::gameTick() {
     profiler.leaveSection("Networking");
 }
 
-void NetworkManager::setLocalScan(bool active) {
-    udpSocket->setMulticastGroup(scanIPv6, active);
+void NetworkManager::enable() {
+    if(udpSocket) disable();
     
-    if(!active) return;
+    udpSocket.reset(new netLink::Socket());
+    udpSocket->setInputBufferSize(10000);
+    udpSocket->setOutputBufferSize(10000);
+    socketManager.sockets.insert(udpSocket);
     
-    char buffer[128];
-    FILE* f = popen("hostname", "r");
-    fgets(buffer, 128, f);
-    pclose(f);
-    size_t len = strlen(buffer)-1;
-    buffer[len] = 0;
-    udpSocket->hostRemote = scanIPv6;
+    if(optionsState.ipVersion == "ipV4")
+        udpSocket->initAsUdpPeer("0.0.0.0", udpPort);
+    else if(optionsState.ipVersion == "ipV6")
+        udpSocket->initAsUdpPeer("::0", udpPort);
+    else
+        udpSocket->initAsUdpPeer("*", udpPort);
+    
+    udpSocket->hostRemote = (udpSocket->getIPVersion() == netLink::IPv4) ? scanIPv4 : scanIPv6;
     udpSocket->portRemote = udpPort;
-    netLink::MsgPack::Stream stream(udpSocket);
-    stream.writeMap(1);
-    stream << "name";
-    stream << buffer;
-    udpSocket->pubsync();
+    udpSocket->setMulticastGroup(udpSocket->hostRemote, true);
+    
+    try {
+        MsgPack::Serializer serializer(udpSocket.get());
+        serializer << new MsgPack::MapHeader(1);
+        serializer << "nickname";
+        serializer << optionsState.nickname;
+        serializer.serialize();
+        udpSocket->pubsync();
+    }catch(netLink::Exception exc) {
+        printf("Exception %d\n", exc.code);
+    }
+}
+
+void NetworkManager::disable() {
+    if(udpSocket) {
+        socketManager.sockets.erase(udpSocket);
+        udpSocket.reset();
+    }
 }
 
 NetworkManager networkManager;

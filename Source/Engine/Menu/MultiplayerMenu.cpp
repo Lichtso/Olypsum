@@ -12,17 +12,41 @@ void Menu::setMultiplayerMenu() {
     clearAndAddBackground();
     current = multiplayer;
     
+    if(optionsState.nickname.size() == 0) {
+        char username[128], hostname[128], nickname[256];
+        FILE* f = popen("whoami", "r");
+        fgets(username, 128, f);
+        pclose(f);
+        size_t len = strlen(username)-1;
+        username[len] = 0;
+        
+        f = popen("hostname -s", "r");
+        fgets(hostname, 128, f);
+        pclose(f);
+        len = strlen(hostname)-1;
+        hostname[len] = 0;
+        
+        sprintf(nickname, "%s@%s", username, hostname);
+        optionsState.nickname = nickname;
+    }
+    
     GUILabel* label = new GUILabel();
     label->posY = screenView->height*0.88;
     label->text = fileManager.localizeString("multiplayer");
     label->fontHeight = screenView->height*0.2;
     screenView->addChild(label);
     
+    GUIScrollView* view = new GUIScrollView();
+    view->width = screenView->width*0.8;
+    view->height = screenView->height*0.6;
+    view->content.innerShadow = view->content.cornerRadius * 0.5;
+    screenView->addChild(view);
+    
     GUIButton* button = new GUIButton();
-    button->posX = screenView->width*-0.4;
+    button->posX = screenView->width*-0.6;
     button->posY = screenView->height*-0.8;
     button->onClick = [this](GUIButton* button) {
-        networkManager.setLocalScan(false);
+        networkManager.disable();
         setMainMenu();
     };
     screenView->addChild(button);
@@ -33,24 +57,30 @@ void Menu::setMultiplayerMenu() {
     label->sizeAlignment = GUISizeAlignment::Height;
     button->addChild(label);
     
-    GUIScrollView* view = new GUIScrollView();
-    view->width = screenView->width*0.7;
-    view->height = screenView->height*0.6;
-    view->content.innerShadow = view->content.cornerRadius * 0.5;
-    screenView->addChild(view);
+    GUITextField* textField = new GUITextField();
+    label = static_cast<GUILabel*>(textField->children[0]);
+    label->text = optionsState.nickname;
+    textField->posY = screenView->height*-0.8;
+    textField->width = screenView->width*0.3;
+    textField->height = screenView->height*0.07;
+    textField->onChange = [label](GUITextField* textField) {
+        optionsState.nickname = label->text;
+    };
+    screenView->addChild(textField);
     
     GUITabs* tabs = new GUITabs();
-    tabs->posX = screenView->width*0.4;
+    tabs->posX = screenView->width*0.6;
     tabs->posY = screenView->height*-0.8;
     tabs->deactivatable = false;
     tabs->width = screenView->width*0.152;
     tabs->height = screenView->height*0.06;
     tabs->sizeAlignment = GUISizeAlignment::None;
     tabs->orientation = GUIOrientation::Horizontal;
-    tabs->onChange = [](GUITabs* tabs) {
-        
-    };
     std::vector<std::string> options = { "ipV4", "auto", "ipV6" };
+    tabs->onChange = [options](GUITabs* tabs) {
+        optionsState.ipVersion = options[tabs->selected];
+        networkManager.enable();
+    };
     for(unsigned char i = 0; i < options.size(); i ++) {
         GUIButton* button = new GUIButton();
         label = new GUILabel();
@@ -58,10 +88,11 @@ void Menu::setMultiplayerMenu() {
         label->fontHeight = screenView->height*0.06;
         button->addChild(label);
         tabs->addChild(button);
+        if(options[i] == optionsState.ipVersion)
+            tabs->selected = i;
     }
-    tabs->selected = 1;
     screenView->addChild(tabs);
     
     screenView->updateContent();
-    networkManager.setLocalScan(true);
+    networkManager.enable();
 }

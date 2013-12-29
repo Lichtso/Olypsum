@@ -291,34 +291,37 @@ void OptionsState::loadOptions() {
     std::unique_ptr<char[]> fileData = readXmlFile(doc, supportPath+"Options.xml", false);
     if(fileData) {
         rapidxml::xml_node<xmlUsedCharType>* options = doc.first_node("Options");
-        if(compareVersions(options->first_node("EngineVersion")->first_attribute()->value(), VERSION) == -1) {
+        if(compareVersions(options->first_node("EngineVersion")->first_attribute()->value(), VERSION) >= 0) {
+            language = options->first_node("Language")->first_attribute()->value();
+            rapidxml::xml_node<xmlUsedCharType>* optionGroup = options->first_node("Multiplayer");
+            nickname = optionGroup->first_node("Nickname")->first_attribute()->value();
+            ipVersion = optionGroup->first_node("IpVersion")->first_attribute()->value();
+            optionGroup = options->first_node("Graphics");
+            optionsState.screenBlurFactor = (readOptionBool(optionGroup->first_node("ScreenBlurEnabled"))) ? 0.0 : -1.0;
+            optionsState.edgeSmoothEnabled = readOptionBool(optionGroup->first_node("EdgeSmoothEnabled"));
+            optionsState.cubemapsEnabled = readOptionBool(optionGroup->first_node("CubemapsEnabled"));
+            optionsState.vSyncEnabled = readOptionBool(optionGroup->first_node("VSyncEnabled"));
+            optionsState.depthOfFieldQuality = readOptionValue<unsigned int>(optionGroup->first_node("DepthOfFieldQuality"), "%d");
+            optionsState.surfaceQuality = readOptionValue<unsigned int>(optionGroup->first_node("SurfaceQuality"), "%d");
+            optionsState.shadowQuality = readOptionValue<unsigned int>(optionGroup->first_node("ShadowQuality"), "%d");
+            optionsState.ssaoQuality = readOptionValue<unsigned int>(optionGroup->first_node("SsaoQuality"), "%d");
+            optionsState.blendingQuality = readOptionValue<unsigned int>(optionGroup->first_node("BlendingQuality"), "%d");
+            if(optionGroup->first_node("VideoWidth"))
+                optionsState.videoWidth = max(optionsState.videoWidth, readOptionValue<int>(optionGroup->first_node("VideoWidth"), "%d"));
+            if(optionGroup->first_node("VideoHeight"))
+                optionsState.videoHeight = max(optionsState.videoHeight, readOptionValue<int>(optionGroup->first_node("VideoHeight"), "%d"));
+            if(optionGroup->first_node("VideoScale"))
+                optionsState.videoScale = readOptionValue<int>(optionGroup->first_node("VideoScale"), "%d");
+            optionGroup = options->first_node("Sound");
+            optionsState.globalVolume = readOptionValue<float>(optionGroup->first_node("globalVolume"), "%f");
+            optionsState.musicVolume = readOptionValue<float>(optionGroup->first_node("musicVolume"), "%f");
+            optionGroup = options->first_node("Mouse");
+            optionsState.mouseSensitivity = readOptionValue<float>(optionGroup->first_node("mouseSensitivity"), "%f");
+            optionsState.mouseSmoothing = readOptionValue<float>(optionGroup->first_node("mouseSmoothing"), "%f");
+        }else
             saveOptions();
-            return;
-        }
-        language = options->first_node("Language")->first_attribute()->value();
-        rapidxml::xml_node<xmlUsedCharType>* optionGroup = options->first_node("Graphics");
-        optionsState.screenBlurFactor = (readOptionBool(optionGroup->first_node("ScreenBlurEnabled"))) ? 0.0 : -1.0;
-        optionsState.edgeSmoothEnabled = readOptionBool(optionGroup->first_node("EdgeSmoothEnabled"));
-        optionsState.cubemapsEnabled = readOptionBool(optionGroup->first_node("CubemapsEnabled"));
-        optionsState.vSyncEnabled = readOptionBool(optionGroup->first_node("VSyncEnabled"));
-        optionsState.depthOfFieldQuality = readOptionValue<unsigned int>(optionGroup->first_node("DepthOfFieldQuality"), "%d");
-        optionsState.surfaceQuality = readOptionValue<unsigned int>(optionGroup->first_node("SurfaceQuality"), "%d");
-        optionsState.shadowQuality = readOptionValue<unsigned int>(optionGroup->first_node("ShadowQuality"), "%d");
-        optionsState.ssaoQuality = readOptionValue<unsigned int>(optionGroup->first_node("SsaoQuality"), "%d");
-        optionsState.blendingQuality = readOptionValue<unsigned int>(optionGroup->first_node("BlendingQuality"), "%d");
-        if(optionGroup->first_node("VideoWidth"))
-            optionsState.videoWidth = max(optionsState.videoWidth, readOptionValue<int>(optionGroup->first_node("VideoWidth"), "%d"));
-        if(optionGroup->first_node("VideoHeight"))
-            optionsState.videoHeight = max(optionsState.videoHeight, readOptionValue<int>(optionGroup->first_node("VideoHeight"), "%d"));
-        if(optionGroup->first_node("VideoScale"))
-            optionsState.videoScale = readOptionValue<int>(optionGroup->first_node("VideoScale"), "%d");
-        optionGroup = options->first_node("Sound");
-        optionsState.globalVolume = readOptionValue<float>(optionGroup->first_node("globalVolume"), "%f");
-        optionsState.musicVolume = readOptionValue<float>(optionGroup->first_node("musicVolume"), "%f");
-        optionGroup = options->first_node("Mouse");
-        optionsState.mouseSensitivity = readOptionValue<float>(optionGroup->first_node("mouseSensitivity"), "%f");
-        optionsState.mouseSmoothing = readOptionValue<float>(optionGroup->first_node("mouseSmoothing"), "%f");
-    }else saveOptions();
+    }else
+        saveOptions();
     
     fileManager.loadPackage("Core")->loadLocalization();
 }
@@ -333,6 +336,12 @@ void OptionsState::saveOptions() {
     addXMLNode(doc, options, "Language", language.c_str());
     
     rapidxml::xml_node<xmlUsedCharType>* optionGroup = doc.allocate_node(rapidxml::node_element);
+    optionGroup->name("Multiplayer");
+    options->append_node(optionGroup);
+    addXMLNode(doc, optionGroup, "Nickname", nickname.c_str());
+    addXMLNode(doc, optionGroup, "IpVersion", ipVersion.c_str());
+    
+    optionGroup = doc.allocate_node(rapidxml::node_element);
     optionGroup->name("Graphics");
     options->append_node(optionGroup);
     addXMLNode(doc, optionGroup, "ScreenBlurEnabled", (optionsState.screenBlurFactor > -1.0) ? "true" : "false");

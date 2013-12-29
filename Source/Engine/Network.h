@@ -15,13 +15,14 @@ class NetworkManager {
     const int udpPort = 8724, tcpPort = 8725;
     const char* scanIPv4 = "224.0.0.1";
     const char* scanIPv6 = "FF02:0001::";
-    netLink::Socket* udpSocket;
+    std::shared_ptr<netLink::Socket> udpSocket;
     netLink::SocketManager socketManager;
     
     public:
     void init();
     void gameTick();
-    void setLocalScan(bool active);
+    void enable();
+    void disable();
 };
 
 extern NetworkManager networkManager;
