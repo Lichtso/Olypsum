@@ -9,7 +9,7 @@
 #ifndef Object_h
 #define Object_h
 
-#include "FBO.h"
+#include "Script.h"
 
 class ScriptFile;
 class Skeleton;
@@ -28,7 +28,7 @@ class BaseClass {
     BaseClass() :scriptFile(NULL) { }
     virtual ~BaseClass();
     public:
-    ScriptFile* scriptFile; //!< The script file to be called on events
+    FileResourcePtr<ScriptFile> scriptFile; //!< The script file to be called on events
     v8::Persistent<v8::Object> scriptInstance; //!< The script representation
     //! Used to remove a BaseClass correctly
     virtual void removeClean() { };

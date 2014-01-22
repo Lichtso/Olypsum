@@ -10,27 +10,17 @@
 #define Script_h
 #define ScriptException(str) GetReturnValue().Set(v8::ThrowException(v8::String::New(str)))
 
-#include "LeapMotion.h"
+#include "FBO.h"
 
-class Script {
-    protected:
-    Script();
-    public:
-    v8::Persistent<v8::Script> script;
-    Script(const std::string& sourceCode, const std::string& name);
-    ~Script();
-    v8::Handle<v8::Value> run();
-};
-
-class ScriptFile : public Script {
+class ScriptFile : public FileResource {
     public:
     ~ScriptFile();
-    FilePackage* filePackage;
-    std::string name;
-    v8::Persistent<v8::Context> context;
     v8::Persistent<v8::Object> exports;
-    bool load(FilePackage* filePackage, const std::string& name);
+    v8::Persistent<v8::Script> script;
+    v8::Persistent<v8::Context> context;
+    FileResourcePtr<FileResource> load(FilePackage* filePackage, const std::string& name);
     bool checkFunction(const char* functionName);
+    v8::Handle<v8::Value> run();
     v8::Handle<v8::Value> callFunction(const char* functionName, bool recvFirstArg, std::vector<v8::Handle<v8::Value>> args);
 };
 

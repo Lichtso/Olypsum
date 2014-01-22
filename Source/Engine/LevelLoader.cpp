@@ -45,6 +45,7 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
             rawData = readXmlFile(doc, filePackage->path+"/Containers/"+name+".xml", false);
     }else if(fileManager.readResourcePath(filePackage, name))
         rawData = readXmlFile(doc, filePackage->path+"/Containers/"+name+".xml", false);
+    
     if(!rawData) {
         menu.setModalView("error", fileManager.localizeString("packageError_ContainerMissing")+'\n'+name, NULL);
         return false;
@@ -201,8 +202,7 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
         v8::Handle<v8::Value> globalData = scriptManager->readCdataXMLNode(node);
         if(!writeXmlFile(doc, statusFilePath, true))
             return false;
-        ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
-        if(script) script->callFunction("onload", false, { localData, globalData });
+        levelManager.mainScript->callFunction("onload", false, { localData, globalData });
         if(!mainCam) {
             log(error_log, "No CamObject was set as mainCam.");
             return false;
@@ -213,7 +213,6 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
 
 bool LevelLoader::loadLevel() {
     objectManager.initGame();
-    scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
     
     //Load root conatiner
     if(!loadContainer(levelManager.levelContainer, true)) {

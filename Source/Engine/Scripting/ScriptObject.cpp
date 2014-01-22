@@ -34,9 +34,9 @@ void ScriptBaseClass::SetScriptClass(v8::Local<v8::String> property, v8::Local<v
     if(!value->IsString()) return;
     BaseClass* objectPtr = getDataOfInstance<BaseClass>(info.This());
     FilePackage* filePackage = levelManager.levelPackage;
-    std::string name = stdStrOfV8(value);
-    if(fileManager.readResourcePath(filePackage, name))
-        objectPtr->scriptFile = scriptManager->getScriptFile(filePackage, name);
+    FileResourcePtr<ScriptFile> scriptFile = fileManager.getResourceByPath<ScriptFile>(filePackage, stdStrOfV8(value));
+    if(scriptFile)
+        objectPtr->scriptFile = scriptFile;
 }
 
 void ScriptBaseClass::Delete(const v8::FunctionCallbackInfo<v8::Value>& args) {

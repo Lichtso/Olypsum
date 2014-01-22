@@ -22,10 +22,11 @@ void ScriptManager::ScriptRequire(const v8::FunctionCallbackInfo<v8::Value>& arg
     
     FilePackage* filePackage = levelManager.levelPackage;
     std::string name = stdStrOfV8(args[0]->ToString());
-    if(!fileManager.readResourcePath(filePackage, name))
+    FileResourcePtr<ScriptFile> scriptFile = fileManager.getResourceByPath<ScriptFile>(filePackage, stdStrOfV8(args[0]->ToString()));
+    if(!scriptFile)
         return args.ScriptException("require(): Error loading file");
     else
-        args.GetReturnValue().Set(scriptManager->getScriptFile(filePackage, name)->exports);
+        args.GetReturnValue().Set(scriptFile->exports);
 }
 
 void ScriptManager::ScriptLoadContainer(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -202,21 +203,9 @@ ScriptManager::ScriptManager() {
 }
 
 ScriptManager::~ScriptManager() {
-    for(auto iterator : loadedScripts)
-        delete iterator.second;
     for(auto iterator : animations)
         delete iterator.second;
     globalTemplate.Dispose();
-}
-
-ScriptFile* ScriptManager::getScriptFile(FilePackage* filePackage, const std::string& name) {
-    auto iterator = loadedScripts.find(name);
-    if(iterator != loadedScripts.end())
-        return iterator->second;
-    ScriptFile* script = new ScriptFile();
-    script->load(filePackage, name);
-    loadedScripts[name] = script;
-    return script;
 }
 
 bool ScriptManager::tryCatch(v8::TryCatch* tryCatch) {

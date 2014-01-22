@@ -80,7 +80,7 @@ class Texture : public FileResource {
     SDL_Surface* surface; //!< The SDL_Surface if the Texture is present in the RAM
     Texture();
     ~Texture();
-    FileResourcePtr<FileResource> load(FilePackage* filePackageB, const std::string& name);
+    FileResourcePtr<FileResource> load(FilePackage* filePackage, const std::string& name);
     //! Prepare to be uploaded as a 3D Texture, returns success
     bool setAnimationFrames(std::vector<AnimationFrame> frames);
     //! Loads random data in a SDL_Surface

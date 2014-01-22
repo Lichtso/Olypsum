@@ -23,15 +23,15 @@ SoundTrack::~SoundTrack() {
     if(ALname) alDeleteBuffers(1, &ALname);
 }
 
-FileResourcePtr<FileResource> SoundTrack::load(FilePackage* filePackageB, const std::string& name) {
-    auto pointer = FileResource::load(filePackageB, name);
-    if(ALname) return FileResourcePtr<FileResource>();
+FileResourcePtr<FileResource> SoundTrack::load(FilePackage* _filePackage, const std::string& name) {
+    auto pointer = FileResource::load(_filePackage, name);
+    if(ALname) return NULL;
     
-    std::string filePath = filePackageB->getPathOfFile("Sounds/", name);
+    std::string filePath = filePackage->getPathOfFile("Sounds/", name);
     FILE* fp = fopen(filePath.c_str(), "r");
     if(!fp) {
         log(error_log, std::string("The file ")+filePath+" couldn't be found.");
-        return FileResourcePtr<FileResource>();
+        return NULL;
     }
     
     OggVorbis_File vf;
@@ -39,7 +39,7 @@ FileResourcePtr<FileResource> SoundTrack::load(FilePackage* filePackageB, const 
         log(error_log, std::string("The file ")+filePath+" is not a valid ogg file.");
         ov_clear(&vf);
         fclose(fp);
-        return FileResourcePtr<FileResource>();
+        return NULL;
     }
     
     int section = 0, bytesRead, bufferSize = ov_pcm_total(&vf, 0)*2*ov_info(&vf, 0)->channels;

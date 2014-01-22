@@ -17,8 +17,8 @@ TextFont::~TextFont() {
         TTF_CloseFont(ttf);
 }
 
-FileResourcePtr<FileResource> TextFont::load(FilePackage* filePackageB, const std::string& name) {
-    auto pointer = FileResource::load(filePackageB, name);
+FileResourcePtr<FileResource> TextFont::load(FilePackage* _filePackage, const std::string& name) {
+    auto pointer = FileResource::load(_filePackage, name);
     if(ttf) return NULL;
     
     std::string filePath = filePackage->getPathOfFile("Fonts/", name)+".ttf";

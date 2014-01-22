@@ -161,7 +161,6 @@ void ObjectManager::clear() {
     simpleObjects.clear();
     
     physicsWorld.reset();
-    scriptManager.reset();
     mainCam = NULL;
 }
 
@@ -169,7 +168,6 @@ void ObjectManager::initGame() {
     clear();
     physicsWorld.reset(new btSoftRigidDynamicsWorld(collisionDispatcher, broadphase, constraintSolver, collisionConfiguration, softBodySolver));
     physicsWorld->setInternalTickCallback(calculatePhysicsTick);
-    scriptManager.reset(new ScriptManager());
     sceneAmbient = btVector3(0.1, 0.1, 0.1);
     sceneFogColor = btVector3(0.8, 0.8, 0.8);
     sceneFogDistance = 0.0;
@@ -281,8 +279,7 @@ void ObjectManager::gameTick() {
     //Script Animations
     scriptManager->gameTick();
     
-    ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
-    if(script) script->callFunction("ongametick", false, { });
+    levelManager.mainScript->callFunction("ongametick", false, { });
     profiler.leaveSection("Execute script: ongametick()");
 }
 
@@ -306,8 +303,7 @@ void ObjectManager::physicsTick() {
         userObjectB->handleCollision(contactManifold, userObjectA);
 	}
     
-    ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
-    if(script) script->callFunction("onphysicstick", false, { });
+    levelManager.mainScript->callFunction("onphysicstick", false, { });
 }
 
 void ObjectManager::drawShadowCasters() {

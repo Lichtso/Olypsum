@@ -27,12 +27,11 @@ const char* LevelManager::getCollisionShapeName(btCollisionShape* shape) {
 }
 
 void LevelManager::clear() {
-    if(scriptManager) {
-        ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
-        if(script) script->callFunction("onleave", false, { });
-    }
+    if(scriptManager)
+        levelManager.mainScript->callFunction("onleave", false, { });
     saveGameName = levelContainer = "";
     levelPackage = NULL;
+    mainScript = NULL;
     gameStatus = noGame;
     for(auto iterator: sharedCollisionShapes)
         delete iterator.second;
@@ -171,6 +170,8 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
     }
     
     mainFBO.init();
+    scriptManager.reset(new ScriptManager());
+    mainScript = fileManager.getResourceByPath<ScriptFile>(package, "Main");
     LevelLoader levelLoader;
     return levelLoader.loadLevel();
 }

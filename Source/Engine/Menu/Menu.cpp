@@ -125,32 +125,28 @@ void Menu::handleMouseDown(Uint8 button) {
        || menu.current != inGame) return;
     
     v8::HandleScope handleScope;
-    ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
-    if(script) script->callFunction("onmousedown", false, { v8::Number::New(button) });
+    levelManager.mainScript->callFunction("onmousedown", false, { v8::Number::New(button) });
 }
 
 void Menu::handleMouseUp(Uint8 button) {
     if(screenView->handleMouseUp(mouseX, mouseY) || menu.current != inGame) return;
     
     v8::HandleScope handleScope;
-    ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
-    if(script) script->callFunction("onmouseup", false, { v8::Number::New(button) });
+    levelManager.mainScript->callFunction("onmouseup", false, { v8::Number::New(button) });
 }
 
 void Menu::handleMouseWheel(float deltaX, float deltaY) {
     if(screenView->handleMouseWheel(mouseX, mouseY, deltaX, deltaY) || menu.current != inGame) return;
     
     v8::HandleScope handleScope;
-    ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
-    if(script) script->callFunction("onmousewheel", false, { v8::Number::New(deltaX), v8::Number::New(deltaY) });
+    levelManager.mainScript->callFunction("onmousewheel", false, { v8::Number::New(deltaX), v8::Number::New(deltaY) });
 }
 
 void Menu::handleKeyDown(SDL_Keycode key, const char* text) {
     if(screenView->handleKeyDown(key, text) || menu.current != inGame) return;
     
     v8::HandleScope handleScope;
-    ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
-    if(script) script->callFunction("onkeydown", false, { v8::Integer::New(key) });
+    levelManager.mainScript->callFunction("onkeydown", false, { v8::Integer::New(key) });
 }
 
 void Menu::handleKeyUp(SDL_Keycode key) {
@@ -191,8 +187,7 @@ void Menu::handleKeyUp(SDL_Keycode key) {
     
     if(menu.current == inGame) {
         v8::HandleScope handleScope;
-        ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
-        if(script) script->callFunction("onkeyup", false, { v8::Integer::New(key) });
+        levelManager.mainScript->callFunction("onkeyup", false, { v8::Integer::New(key) });
     }
 }
 
@@ -281,9 +276,7 @@ void Menu::gameTick() {
 }
 
 void Menu::sendPauseEvent() {
-    v8::HandleScope handleScope;
-    ScriptFile* script = scriptManager->getScriptFile(levelManager.levelPackage, MainScriptFileName);
-    if(script) script->callFunction("onpause", false, { });
+    levelManager.mainScript->callFunction("onpause", false, { });
 }
 
 void Menu::setModalView(const std::string& title, const std::string& text, std::function<void(GUIButton* button)> onContinue) {
@@ -353,7 +346,7 @@ void Menu::clearAndAddBackground() {
     clear();
     
     GUIImage* image = new GUIImage();
-    image->texture = fileManager.getResourceByPath<Texture>(NULL, "/Core/background.jpg");
+    image->texture = fileManager.getResourceByPath<Texture>(NULL, "Core/background.jpg");
     image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
     if((float)image->texture->width/image->texture->height <= (float)screenView->width/screenView->height) {
         image->sizeAlignment = GUISizeAlignment::Height;
@@ -376,7 +369,7 @@ void Menu::setLoadingMenu() {
     
     GUIImage* image = new GUIImage();
     image->sizeAlignment = GUISizeAlignment::Height;
-    image->texture = fileManager.getResourceByPath<Texture>(NULL, "/Core/logo.png");
+    image->texture = fileManager.getResourceByPath<Texture>(NULL, "Core/logo.png");
     image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGBA);
     image->width = screenView->width*0.8;
     image->posY = screenView->height*0.2;
@@ -430,12 +423,12 @@ void Menu::setMainMenu() {
     }
     
     GUILabel* label = new GUILabel();
-    label->text = fileManager.localizeString("version")+": "+VERSION;
+    label->text = fileManager.localizeString("version")+": "+VERSION+" (Alpha)\nDO NOT DISTRIBUTE!";
     label->textAlignment = GUILabel::TextAlignment::Left;
     label->sizeAlignment = GUISizeAlignment::Height;
     label->width = screenView->width*0.4;
     label->posX = screenView->width*-0.59;
-    label->posY = screenView->height*-0.96;
+    label->posY = screenView->height*-0.92;
     label->fontHeight = screenView->height*0.08;
     screenView->addChild(label);
     

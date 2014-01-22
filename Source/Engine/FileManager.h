@@ -20,7 +20,7 @@ template<class T> class FileResourcePtr {
     inline void decrementRetain() {
         if(resource) {
             resource->retainCount --;
-            if(resource->retainCount == 0 && resource->filePackage->name != "Core")
+            if(resource->retainCount == 0)
                 resource->remove();
         }
     }
@@ -32,6 +32,8 @@ template<class T> class FileResourcePtr {
     FileResourcePtr() :resource(NULL) { }
     FileResourcePtr(T* resource_) :resource(resource_) {
         incrementRetain();
+        if(resource && resource->filePackage->name == "Core")
+            incrementRetain();
     }
     template<class U> FileResourcePtr(U* resource_) :FileResourcePtr(static_cast<T*>(resource_)) { }
     template<class U> FileResourcePtr(const FileResourcePtr<U>& ptr) :FileResourcePtr(*ptr) { }

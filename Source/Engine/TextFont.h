@@ -18,7 +18,7 @@ class TextFont : public FileResource {
     unsigned int size; //!< The font size in pixels
     TextFont();
     ~TextFont();
-    FileResourcePtr<FileResource> load(FilePackage* filePackageB, const std::string& name);
+    FileResourcePtr<FileResource> load(FilePackage* filePackage, const std::string& name);
     /*! Renders a string into a OpenGL texture
      @param str The string to be rendered
      @param color The color of the string used for filling

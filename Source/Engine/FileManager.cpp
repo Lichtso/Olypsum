@@ -8,9 +8,9 @@
 
 #include "Menu.h"
 
-FileResourcePtr<FileResource> FileResource::load(FilePackage* filePackageB, const std::string& nameB) {
-    filePackage = filePackageB;
-    name = nameB;
+FileResourcePtr<FileResource> FileResource::load(FilePackage* _filePackage, const std::string& _name) {
+    filePackage = _filePackage;
+    name = _name;
     filePackage->resources[name] = this;
     return this;
 }
@@ -64,8 +64,10 @@ bool FilePackage::init() {
         menu.setModalView("error", fileManager.localizeString("packageError_FilesMissing"), NULL);
         return false;
     }
-    rapidxml::xml_node<xmlUsedCharType> *node, *packageNode = doc.first_node("Package");
-    if(compareVersions(packageNode->first_node("EngineVersion")->first_attribute()->value(), VERSION) == -1) {
+    rapidxml::xml_node<xmlUsedCharType> *node,
+                                        *packageNode = doc.first_node("Package"),
+                                        *version = packageNode->first_node("EngineVersion");
+    if(version && compareVersions(version->first_attribute()->value(), VERSION) == -1) {
         menu.setModalView("error", fileManager.localizeString("packageError_Version"), NULL);
         return false;
     }
@@ -228,9 +230,9 @@ void FileManager::loadAllPackages() {
 }
 
 bool FileManager::readResourcePath(FilePackage*& filePackage, std::string& name) {
-    if(name.compare(0, 1, "/") == 0) {
-        unsigned int seperation = name.find('/', 2);
-        auto iterator = filePackages.find(name.substr(1, seperation-1));
+    size_type seperation = name.find('/');
+    if(seperation > -1) {
+        auto iterator = filePackages.find(name.substr(0, seperation));
         if(iterator == filePackages.end()) return false;
         filePackage = iterator->second;
         name = name.substr(seperation+1);
@@ -242,7 +244,7 @@ std::string FileManager::getPathOfResource(FilePackage* filePackage, std::string
     if(filePackage == levelManager.levelPackage)
         return name;
     else
-        return std::string("/")+filePackage->name+'/'+name;
+        return filePackage->name+'/'+name;
 }
 
 rapidxml::xml_node<xmlUsedCharType>* FileManager::writeResource(rapidxml::xml_document<xmlUsedCharType>& doc, const char* nodeName,

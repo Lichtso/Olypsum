@@ -8,7 +8,6 @@
 
 #ifndef ScriptManager_h
 #define ScriptManager_h
-#define MainScriptFileName "Main"
 
 #include "ScriptGUIButton.h"
 
@@ -25,7 +24,6 @@ class ScriptManager {
     static void ScriptGetAnimationFactor(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
     public:
     v8::Persistent<v8::ObjectTemplate> globalTemplate;
-    std::unordered_map<std::string, ScriptFile*> loadedScripts;
     std::unordered_map<std::string, AnimationProperty*> animations;
     std::unordered_set<AnimationTimer*> timers;
     static v8::Handle<v8::Value> readCdataXMLNode(rapidxml::xml_node<xmlUsedCharType>* node);
@@ -33,7 +31,6 @@ class ScriptManager {
                                   const char* name, v8::Handle<v8::Value> value);
     ScriptManager();
     ~ScriptManager();
-    ScriptFile* getScriptFile(FilePackage* filePackage, const std::string& name);
     bool tryCatch(v8::TryCatch* tryCatch);
     void gameTick();
 };

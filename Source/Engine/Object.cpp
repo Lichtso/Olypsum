@@ -19,12 +19,9 @@ void BaseClass::initScriptNode(FilePackage* filePackage, rapidxml::xml_node<xmlU
     
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = scriptNode->first_attribute("src");
     if(attribute) {
-        std::string name = attribute->value();
-        if(fileManager.readResourcePath(filePackage, name)) {
-            scriptFile = scriptManager->getScriptFile(filePackage, name);
-            if(scriptFile)
-                scriptFile->callFunction("onload", true, { scriptInstance, scriptManager->readCdataXMLNode(node) });
-        }
+        scriptFile = fileManager.getResourceByPath<ScriptFile>(filePackage, attribute->value());
+        if(scriptFile)
+            scriptFile->callFunction("onload", true, { scriptInstance, scriptManager->readCdataXMLNode(node) });
     }else
         log(error_log, "Tried to construct resource without \"src\"-attribute.");
 }

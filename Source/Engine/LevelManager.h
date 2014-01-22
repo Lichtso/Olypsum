@@ -22,6 +22,7 @@ class LevelManager {
     public:
     std::unordered_map<std::string, btCollisionShape*> sharedCollisionShapes; //!< All available collision shapes
     FilePackage* levelPackage;
+    FileResourcePtr<ScriptFile> mainScript;
     std::string saveGameName, levelContainer;
     GameStatusName gameStatus = noGame;
     
