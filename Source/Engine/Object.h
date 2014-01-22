@@ -46,7 +46,7 @@ class BaseClass {
  */
 class BaseObject : public BaseClass {
     public:
-    std::set<BaseLink*> links; //!< A map of LinkObject and names to connect BaseObject to others
+    std::unordered_set<BaseLink*> links; //!< A map of LinkObject and names to connect BaseObject to others
     void removeClean();
     void removeFast();
     /*! Used to update the transfomation of this object
@@ -71,7 +71,7 @@ class BaseObject : public BaseClass {
      @param linked BaseObject* to search for
      @return BaseLink between this and linked or links.end()
     */
-    std::set<BaseLink*>::iterator findLinkTo(BaseObject* linked);
+    std::unordered_set<BaseLink*>::iterator findLinkTo(BaseObject* linked);
 };
 
 //! BaseObject without physics-body, only transformation

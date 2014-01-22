@@ -22,7 +22,7 @@ class Profiler {
         float time, //! The duration of this section in the current frame
               secAverage; //! The average duration of this section in the current second
     };
-    std::map<const char*, Section> sections;
+    std::unordered_map<const char*, Section> sections;
     float animationFactor; //!< Seconds since last frame
     unsigned int FPS; //!< Frames in last second
     Profiler();

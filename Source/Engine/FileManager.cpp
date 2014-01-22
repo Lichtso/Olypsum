@@ -174,7 +174,7 @@ bool FilePackage::loadLocalization() {
 
 
 
-static void addPackagesToKeep(std::set<FilePackage*>& packagesToKeep, FilePackage* filePackage) {
+static void addPackagesToKeep(std::unordered_set<FilePackage*>& packagesToKeep, FilePackage* filePackage) {
     packagesToKeep.insert(filePackage);
     for(auto iterator : filePackage->dependencies)
         addPackagesToKeep(packagesToKeep, iterator);
@@ -183,7 +183,7 @@ static void addPackagesToKeep(std::set<FilePackage*>& packagesToKeep, FilePackag
 void FileManager::clear() {
     menu.clear();
     
-    std::set<FilePackage*> packagesToKeep;
+    std::unordered_set<FilePackage*> packagesToKeep;
     addPackagesToKeep(packagesToKeep, loadPackage("Core"));
     if(levelManager.levelPackage)
         addPackagesToKeep(packagesToKeep, levelManager.levelPackage);
@@ -197,7 +197,7 @@ void FileManager::clear() {
 }
 
 FilePackage* FileManager::loadPackage(const std::string& name) {
-    std::map<std::string, FilePackage*>::iterator iterator = filePackages.find(name);
+    auto iterator = filePackages.find(name);
     if(iterator == filePackages.end()) {
         FilePackage* package = fileManager.filePackages[name] = new FilePackage(name);
         if(!package->init()) {
@@ -211,7 +211,7 @@ FilePackage* FileManager::loadPackage(const std::string& name) {
 }
 
 void FileManager::unloadPackage(const std::string& name) {
-    std::map<std::string, FilePackage*>::iterator iterator = filePackages.find(name);
+    auto iterator = filePackages.find(name);
     if(iterator == filePackages.end()) return;
     delete iterator->second;
     filePackages.erase(iterator);
@@ -230,7 +230,7 @@ void FileManager::loadAllPackages() {
 bool FileManager::readResourcePath(FilePackage*& filePackage, std::string& name) {
     if(name.compare(0, 1, "/") == 0) {
         unsigned int seperation = name.find('/', 2);
-        std::map<std::string, FilePackage*>::iterator iterator = filePackages.find(name.substr(1, seperation-1));
+        auto iterator = filePackages.find(name.substr(1, seperation-1));
         if(iterator == filePackages.end()) return false;
         filePackage = iterator->second;
         name = name.substr(seperation+1);
@@ -259,7 +259,7 @@ rapidxml::xml_node<xmlUsedCharType>* FileManager::writeResource(rapidxml::xml_do
 
 const std::string& FileManager::localizeString(const std::string& key) {
     for(auto iterator : filePackages) {
-        std::map<std::string, std::string>::iterator localization = iterator.second->localization.find(key);
+        auto localization = iterator.second->localization.find(key);
         if(localization != iterator.second->localization.end())
             return localization->second;
     }

@@ -25,9 +25,9 @@ class ScriptManager {
     static void ScriptGetAnimationFactor(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
     public:
     v8::Persistent<v8::ObjectTemplate> globalTemplate;
-    std::map<std::string, ScriptFile*> loadedScripts;
-    std::map<std::string, AnimationProperty*> animations;
-    std::set<AnimationTimer*> timers;
+    std::unordered_map<std::string, ScriptFile*> loadedScripts;
+    std::unordered_map<std::string, AnimationProperty*> animations;
+    std::unordered_set<AnimationTimer*> timers;
     static v8::Handle<v8::Value> readCdataXMLNode(rapidxml::xml_node<xmlUsedCharType>* node);
     static void writeCdataXMLNode(rapidxml::xml_document<xmlUsedCharType>& doc, rapidxml::xml_node<xmlUsedCharType>*& parentNode,
                                   const char* name, v8::Handle<v8::Value> value);

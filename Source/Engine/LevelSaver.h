@@ -13,7 +13,7 @@
 
 class LevelSaver {
     int objectCounter;
-    std::map<BaseLink*, LinkInitializer*> linkingMap;
+    std::unordered_map<BaseLink*, LinkInitializer*> linkingMap;
     public:
     LevelSaver();
     void pushObject(BaseObject* object);

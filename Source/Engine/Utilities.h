@@ -9,14 +9,15 @@
 #ifndef Utilities_h
 #define Utilities_h
 
-#include <math.h>
+//#include <math.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <fstream>
 #include <thread>
 #include <regex>
-#include <map>
+#include <unordered_map>
+#include <unordered_set>
 
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>

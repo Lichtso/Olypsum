@@ -55,7 +55,7 @@ class MatterObject : public VisualObject {
     MatterObject();
     public:
     float integrity; //! Health <= 0.0: destroyed
-    std::set<Decal*> decals; //!< Decals attached to this MatterObject
+    std::unordered_set<Decal*> decals; //!< Decals attached to this MatterObject
     void removeClean();
     void removeFast();
     bool gameTick();

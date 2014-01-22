@@ -18,12 +18,12 @@ class ObjectManager {
     LightObject* currentShadowLight; //!< The active light during a shadow map generation
     Reflective* currentReflective; //!< The active reflector during a reflection of the scene
     
-    std::map<RigidObject*, Reflective*> reflectiveAccumulator; //!< Stores the mirrors for deferred rendering
+    std::unordered_map<RigidObject*, Reflective*> reflectiveAccumulator; //!< Stores the mirrors for deferred rendering
     std::vector<AccumulatedTransparent*> transparentAccumulator; //!< Stores the transparent objects for deferred rendering
     std::vector<LightObject*> lightObjects; //!< All light sources of the scene
-    std::set<MatterObject*> matterObjects; //!< All MatterObjects in the scene
-    std::set<ParticlesObject*> particlesObjects; //! All ParticlesObjects in the scene
-    std::set<SimpleObject*> simpleObjects; //! All SimpleObjects in the scene
+    std::unordered_set<MatterObject*> matterObjects; //!< All MatterObjects in the scene
+    std::unordered_set<ParticlesObject*> particlesObjects; //! All ParticlesObjects in the scene
+    std::unordered_set<SimpleObject*> simpleObjects; //! All SimpleObjects in the scene
     btVector3 sceneAmbient, //! Ambient light color
               sceneFogColor; //! Fog color afloat
     float sceneFogDistance; //! Fog distance afloat

@@ -4,10 +4,6 @@
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
-  <library_cameras>
-  </library_cameras>
-  <library_lights>
-  </library_lights>
   <library_images>
     <image id="concrete_png" name="concrete_png">
       <init_from>concrete.png</init_from>

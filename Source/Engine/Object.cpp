@@ -78,8 +78,8 @@ rapidxml::xml_node<xmlUsedCharType>* BaseObject::write(rapidxml::xml_document<xm
     return node;
 }
 
-std::set<BaseLink*>::iterator BaseObject::findLinkTo(BaseObject* linked) {
-    for(std::set<BaseLink*>::iterator i = links.begin(); i != links.end(); i ++)
+std::unordered_set<BaseLink*>::iterator BaseObject::findLinkTo(BaseObject* linked) {
+    foreach_e(links, i)
         if((*i)->getOther(this) == linked)
             return i;
     return links.end();

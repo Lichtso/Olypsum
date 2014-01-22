@@ -110,7 +110,7 @@ bool forEachInDir(std::string path,
     if(!dir) return false;
     
     dirent* item;
-    std::set<std::string> items;
+    std::unordered_set<std::string> items;
     while((item = readdir(dir))) {
         std::string name(item->d_name);
         if(*name.begin() == '.') continue;

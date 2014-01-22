@@ -66,10 +66,20 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
             if(strcmp(node->name(), "Cylinder") == 0 || strcmp(node->name(), "Box") == 0) {
                 XMLValueArray<float> vecData;
                 vecData.readString(node->first_attribute("size")->value(), "%f");
-                
-                if(strcmp(node->name(), "Cylinder") == 0)
-                    shape = new btCylinderShape(vecData.getVector3());
-                else
+                if(strcmp(node->name(), "Cylinder") == 0) {
+                    char* direction = node->first_attribute("direction")->value();
+                    if(strcmp(direction, "x") == 0)
+                        shape = new btCylinderShapeX(vecData.getVector3());
+                    else if(strcmp(direction, "y") == 0)
+                        shape = new btCylinderShape(vecData.getVector3());
+                    else if(strcmp(direction, "z") == 0)
+                        shape = new btCylinderShapeZ(vecData.getVector3());
+                    else{
+                        log(error_log, std::string("Found collision shape (")+name+") with an unknown direction: "+direction+'.');
+                        menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), NULL);
+                        return false;
+                    }
+                }else
                     shape = new btBoxShape(vecData.getVector3());
             }else if(strcmp(node->name(), "Sphere") == 0) {
                 float radius;

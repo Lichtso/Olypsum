@@ -1,5 +1,5 @@
 <CollisionShapes>
-	<Cylinder id="cylinder0" size="0.5 0.5 0.5"/>
+	<Cylinder id="cylinder0" size="0.5 0.5 0.5" direction="y"/>
 	<Box id="box0" size="0.5 0.5 0.5"/>
 	<Box id="mirrorBox" size="0.1 5.0 8.0"/>
 	<Box id="manBox" size="1.0 1.0 0.25"/>

@@ -10,10 +10,6 @@
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
-  <library_cameras>
-  </library_cameras>
-  <library_lights>
-  </library_lights>
   <library_images>
     <image id="woodenBoxDiffuse_jpg" name="woodenBoxDiffuse_jpg">
       <init_from>woodenBoxDiffuse.jpg</init_from>

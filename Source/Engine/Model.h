@@ -40,7 +40,7 @@ class Mesh {
 class Skeleton {
     public:
     Bone* rootBone;
-    std::map<std::string, Bone*> bones;
+    std::unordered_map<std::string, Bone*> bones;
 };
 
 //! A Model used for graphics

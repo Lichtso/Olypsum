@@ -20,7 +20,7 @@
 
 //! A shader program used for graphics
 class ShaderProgram {
-    std::map<const char*, GLint> cachedUniforms;
+    std::unordered_map<const char*, GLint> cachedUniforms;
     public:
 	GLuint GLname; //!< The OpenGL identifier
 	ShaderProgram();

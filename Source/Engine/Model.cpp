@@ -14,6 +14,14 @@
 #define jointsPerVertex 3
 #define maxJointsCount 64
 
+//! @cond
+struct VertexReference {
+    XMLValueArray<float>* source;
+    unsigned int offset;
+    char* name;
+};
+//! @endcond
+
 void Mesh::draw(RigidObject* object) {
     if(!material.diffuse)
         Texture::unbind(0, GL_TEXTURE_2D);
@@ -69,14 +77,6 @@ void Mesh::draw(RigidObject* object) {
     object->prepareShaderProgram(this);
     vao.draw();
 }
-
-//! @cond
-struct VertexReference {
-    XMLValueArray<float>* source;
-    unsigned int offset;
-    char* name;
-};
-//! @endcond
 
 static Bone* readBone(Skeleton& skeleton, btTransform& parentTrans, bool isRoot, rapidxml::xml_node<xmlUsedCharType>* dataNode) {
     btTransform absoluteMat;
@@ -136,12 +136,12 @@ static std::vector<Texture::AnimationFrame> readTextureFrames(rapidxml::xml_node
     return frameVec;
 }
 
-static std::string readTextureURL(std::map<std::string, std::string> samplerURLs, rapidxml::xml_node<xmlUsedCharType>* dataNode) {
+static std::string readTextureURL(std::unordered_map<std::string, std::string> samplerURLs, rapidxml::xml_node<xmlUsedCharType>* dataNode) {
     dataNode = dataNode->first_node("texture");
     if(dataNode) {
         rapidxml::xml_attribute<xmlUsedCharType>* dataAttribute = dataNode->first_attribute("texture");
         if(!dataAttribute) return std::string();
-        std::map<std::string, std::string>::iterator iterator = samplerURLs.find(dataAttribute->value());
+        auto iterator = samplerURLs.find(dataAttribute->value());
         if(iterator == samplerURLs.end()) {
             log(error_log, std::string("No sampler by id ")+dataAttribute->value()+" found.");
             return std::string();
@@ -160,7 +160,7 @@ Model::~Model() {
         delete meshes[i];
     
     if(skeleton) {
-        std::map<std::string, Bone*>::iterator iterator;
+        std::unordered_map<std::string, Bone*>::iterator iterator;
         for(iterator = skeleton->bones.begin(); iterator != skeleton->bones.end(); iterator ++)
             delete iterator->second;
         delete skeleton;
@@ -177,12 +177,12 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
     
     rapidxml::xml_node<xmlUsedCharType> *collada, *library, *geometry, *meshNode, *source, *dataNode;
     rapidxml::xml_attribute<xmlUsedCharType> *dataAttribute;
-    std::map<std::string, std::string> textureURLs;
-    std::map<std::string, Mesh::Material> materials;
+    std::unordered_map<std::string, std::string> textureURLs;
+    std::unordered_map<std::string, Mesh::Material> materials;
+    std::unordered_map<std::string, btTransform> transformations;
+    btTransform modelTransform;
     XMLValueArray<float> skinData;
     char upAxis = AXIS_Y, *id;
-    btTransform modelTransformMat;
-    Mesh* mesh;
     
     collada = doc.first_node("COLLADA");
     if(!collada) goto endParsingXML;
@@ -192,21 +192,20 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
     if(dataNode) {
         dataNode = dataNode->first_node("up_axis");
         if(!dataNode) goto endParsingXML;
-        if(strcmp(dataNode->value(), "X_UP") == 0) {
+        if(strcmp(dataNode->value(), "X_UP") == 0)
             upAxis = AXIS_X;
-        }else if(strcmp(dataNode->value(), "Y_UP") == 0) {
+        else if(strcmp(dataNode->value(), "Y_UP") == 0)
             upAxis = AXIS_Y;
-        }else if(strcmp(dataNode->value(), "Z_UP") == 0) {
+        else if(strcmp(dataNode->value(), "Z_UP") == 0)
             upAxis = AXIS_Z;
-        }
     }
-    modelTransformMat.setIdentity();
+    modelTransform.setIdentity();
     if(upAxis == AXIS_X)
-        modelTransformMat.setBasis(btMatrix3x3(btVector3(0, 1, 0),
+        modelTransform.setBasis(btMatrix3x3(btVector3(0, 1, 0),
                                                btVector3(1, 0, 0),
                                                btVector3(0, 0, -1)));
     else if(upAxis == AXIS_Z)
-        modelTransformMat.setBasis(btMatrix3x3(btVector3(-1, 0, 0),
+        modelTransform.setBasis(btMatrix3x3(btVector3(-1, 0, 0),
                                                btVector3(0, 0, 1),
                                                btVector3(0, 1, 0)));
     
@@ -235,7 +234,7 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
             Mesh::Material material;
             meshNode = geometry->first_node("profile_COMMON");
             if(!meshNode) goto endParsingXML;
-            std::map<std::string, std::string> surfaceURLs, samplerURLs;
+            std::unordered_map<std::string, std::string> surfaceURLs, samplerURLs;
             
             //Find Surfaces
             source = meshNode->first_node("newparam");
@@ -247,7 +246,7 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
                     dataNode = dataNode->first_node("init_from");
                     dataAttribute = source->first_attribute("sid");
                     if(!dataNode || !dataAttribute) break;
-                    std::map<std::string, std::string>::iterator iterator = textureURLs.find(dataNode->value());
+                    auto iterator = textureURLs.find(dataNode->value());
                     if(iterator == textureURLs.end()) {
                         log(error_log, std::string("No texture by id ")+dataNode->value()+" found.");
                         goto endParsingXML;
@@ -265,7 +264,7 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
                     dataNode = dataNode->first_node("source");
                     dataAttribute = source->first_attribute("sid");
                     if(!dataNode || !dataAttribute) break;
-                    std::map<std::string, std::string>::iterator iterator = surfaceURLs.find(dataNode->value());
+                    auto iterator = surfaceURLs.find(dataNode->value());
                     if(iterator == surfaceURLs.end()) {
                         log(error_log, std::string("No surface by id ")+dataNode->value()+" found.");
                         goto endParsingXML;
@@ -339,13 +338,12 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
             if(!meshNode) goto endParsingXML;
             dataAttribute = meshNode->first_attribute("url");
             if(!dataAttribute) goto endParsingXML;
-            std::map<std::string, Mesh::Material>::iterator iterator = materials.find(dataAttribute->value()+1);
+            auto iterator = materials.find(dataAttribute->value()+1);
             if(iterator == materials.end()) {
                 log(error_log, std::string("No material by id ")+(dataAttribute->value()+1)+" found.");
                 goto endParsingXML;
             }
             materials[id] = iterator->second;
-            materials.erase(iterator);
             geometry = geometry->next_sibling("material");
         }
     }
@@ -356,10 +354,18 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
         while(geometry) {
             meshNode = geometry->first_node("node");
             while(meshNode) {
-                //Map Materials
+                //Get Transformation
+                btTransform transform = modelTransform * readTransformationXML(meshNode);
+                
                 source = meshNode->first_node("instance_controller");
                 if(!source) source = meshNode->first_node("instance_geometry");
                 if(source) {
+                    dataAttribute = source->first_attribute("url");
+                    if(!dataAttribute) goto endParsingXML;
+                    id = dataAttribute->value()+1;
+                    transformations[id] = transform;
+                    
+                    //Map Materials
                     dataNode = source->first_node("bind_material");
                     if(dataNode) {
                         dataNode = dataNode->first_node("technique_common");
@@ -371,7 +377,7 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
                         id = dataAttribute->value();
                         dataAttribute = dataNode->first_attribute("target");
                         if(!dataAttribute) goto endParsingXML;
-                        std::map<std::string, Mesh::Material>::iterator iterator = materials.find(dataAttribute->value()+1);
+                        auto iterator = materials.find(dataAttribute->value()+1);
                         if(iterator == materials.end()) {
                             log(error_log, std::string("No material by id ")+(dataAttribute->value()+1)+" found.");
                             goto endParsingXML;
@@ -390,7 +396,7 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
                             goto endParsingXML;
                         }
                         skeleton = new Skeleton();
-                        skeleton->rootBone = readBone(*skeleton, modelTransformMat, true, source);
+                        skeleton->rootBone = readBone(*skeleton, transform, true, source);
                         if(skeleton->bones.size() > maxJointsCount) {
                             char buffer[128];
                             sprintf(buffer, "More joints (%lu) found than supported (%d).\n", skeleton->bones.size(), maxJointsCount);
@@ -414,8 +420,16 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
             log(error_log, "Controller found but no skeleton loaded.");
             goto endParsingXML;
         }
+        dataAttribute = geometry->first_attribute("id");
+        if(!dataAttribute) goto endParsingXML;
+        auto iterator = transformations.find(dataAttribute->value());
+        
         meshNode = geometry->first_node("skin");
         if(!meshNode) goto endParsingXML;
+        dataAttribute = meshNode->first_attribute("source");
+        if(!dataAttribute) goto endParsingXML;
+        if(iterator != transformations.end())
+            transformations[dataAttribute->value()+1] = iterator->second;
         
         std::vector<Bone*> boneIndexMap(skeleton->bones.size());
         XMLValueArray<float> weightData;
@@ -451,7 +465,7 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
                 for(unsigned int i = 0; i < skeleton->bones.size(); i ++) {
                     dataStr = strchr(lastPos, ' ');
                     if(dataStr) *dataStr = 0;
-                    std::map<std::string, Bone*>::iterator boneIterator = skeleton->bones.find(lastPos);
+                    auto boneIterator = skeleton->bones.find(lastPos);
                     if(boneIterator == skeleton->bones.end()) {
                         log(error_log, std::string("No bone by name ")+lastPos+" found.");
                         goto endParsingXML;
@@ -549,11 +563,15 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
     
     geometry = library->first_node("geometry");
     while(geometry) {
+        dataAttribute = geometry->first_attribute("id");
+        if(!dataAttribute) goto endParsingXML;
+        auto iterator = transformations.find(dataAttribute->value());
+        btTransform transform = (iterator == transformations.end()) ? modelTransform : iterator->second;
         meshNode = geometry->first_node("mesh");
         if(!meshNode) goto endParsingXML;
         
         //Load Sources
-        std::map<std::string, XMLValueArray<float>*> floatArrays;
+        std::unordered_map<std::string, XMLValueArray<float>*> floatArrays;
         source = meshNode->first_node("source");
         while(source) {
             XMLValueArray<float>* floatArray = new XMLValueArray<float>();
@@ -572,7 +590,7 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
             
             if(floatArray->stride == 3 && upAxis != AXIS_Y) {
                 for(unsigned int i = 0; i < floatArray->count/floatArray->stride; i ++) {
-                    btVector3 vec = modelTransformMat * btVector3(floatArray->data[i*3], floatArray->data[i*3+1], floatArray->data[i*3+2]);
+                    btVector3 vec = transform * btVector3(floatArray->data[i*3], floatArray->data[i*3+1], floatArray->data[i*3+2]);
                     floatArray->data[i*3  ] = vec.x();
                     floatArray->data[i*3+1] = vec.y();
                     floatArray->data[i*3+2] = vec.z();
@@ -588,11 +606,12 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
             if(floatArray->stride == 2)
                 for(unsigned int i = 0; i < floatArray->count; i ++)
                     floatArray->data[i*2+1] = 1.0-floatArray->data[i*2+1];
+            
             source = source->next_sibling("source");
         }
         
         //Load Vertices
-        std::map<std::string, std::vector<VertexReference>*> vertexReferenceArrays;
+        std::unordered_map<std::string, std::vector<VertexReference>*> vertexReferenceArrays;
         source = meshNode->first_node("vertices");
         while(source) {
             dataAttribute = source->first_attribute("id");
@@ -620,22 +639,23 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
         while(source) {
             dataAttribute = source->first_attribute("count");
             if(!dataAttribute) goto endParsingXML;
-            mesh = new Mesh();
+            Mesh* mesh = new Mesh();
             meshes.push_back(mesh);
             sscanf(dataAttribute->value(), "%d", &mesh->vao.indeciesCount);
             
             //Set material
             dataAttribute = source->first_attribute("material");
-            if(!dataAttribute) goto endParsingXML;
-            std::map<std::string, Mesh::Material>::iterator material = materials.find(dataAttribute->value());
-            if(material == materials.end()) {
-                log(error_log, std::string("No material by id ")+dataAttribute->value()+" found.");
-                goto endParsingXML;
+            if(dataAttribute) {
+                auto material = materials.find(dataAttribute->value());
+                if(material == materials.end()) {
+                    log(error_log, std::string("No material by id ")+dataAttribute->value()+" found.");
+                    goto endParsingXML;
+                }
+                mesh->material = material->second;
             }
-            mesh->material = material->second;
             
             unsigned int dataIndex, valueIndex, indexCount = 0, strideIndex = 0;
-            std::map<std::string, VertexReference> vertexReferences;
+            std::unordered_map<std::string, VertexReference> vertexReferences;
             dataNode = source->first_node("input");
             while(dataNode) {
                 unsigned int offset;
@@ -669,7 +689,7 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
                 goto endParsingXML;
             }
             
-            std::map<std::string, VertexReference>::iterator iterator;
+            std::unordered_map<std::string, VertexReference>::iterator iterator;
             if(skeleton) {
                 iterator = vertexReferences.find("POSITION");
                 if(iterator == vertexReferences.end()) goto endParsingXML;

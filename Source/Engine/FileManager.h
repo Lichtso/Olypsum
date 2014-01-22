@@ -82,9 +82,9 @@ class FilePackage {
                 name, //!< The name
                 initialContainer, //!< The name of the container, which is loaded at the beginning of a new game
                 description; //!< A meta info for the players
-    std::set<FilePackage*> dependencies; //!< Other FilePackages needed for this one
-    std::map<std::string, std::string> localization; //!< The localization of the selected language
-    std::map<std::string, FileResource*> resources; //!< All its loaded resources
+    std::unordered_set<FilePackage*> dependencies; //!< Other FilePackages needed for this one
+    std::unordered_map<std::string, std::string> localization; //!< The localization of the selected language
+    std::unordered_map<std::string, FileResource*> resources; //!< All its loaded resources
     FilePackage(std::string name_) :name(name_) { };
     ~FilePackage();
     //! Initialize, returns Success
@@ -134,7 +134,7 @@ class FilePackage {
 //! This class manages all FilePackages
 class FileManager {
     public:
-    std::map<std::string, FilePackage*> filePackages; //!< All FilePackages that are loaded
+    std::unordered_map<std::string, FilePackage*> filePackages; //!< All FilePackages that are loaded
     //! Deletes all FilePackages
     void clear();
     /*! Loads a FilePackage if not already done

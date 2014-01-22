@@ -95,7 +95,7 @@ void ScriptBaseObject::GetLinkCount(const v8::FunctionCallbackInfo<v8::Value>& a
 void ScriptBaseObject::GetTransformUpLink(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
-    for(std::set<BaseLink*>::iterator i = objectPtr->links.begin(); i != objectPtr->links.end(); i ++)
+    foreach_e(objectPtr->links, i)
         if(dynamic_cast<TransformLink*>(*i) && (*i)->b == objectPtr) {
             args.GetReturnValue().Set((*i)->scriptInstance);
             return;
@@ -105,7 +105,7 @@ void ScriptBaseObject::GetTransformUpLink(const v8::FunctionCallbackInfo<v8::Val
 void ScriptBaseObject::GetBoneUpLink(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
-    for(std::set<BaseLink*>::iterator i = objectPtr->links.begin(); i != objectPtr->links.end(); i ++)
+    foreach_e(objectPtr->links, i)
         if(dynamic_cast<BoneLink*>(*i) && (*i)->b == objectPtr) {
             args.GetReturnValue().Set((*i)->scriptInstance);
             return;

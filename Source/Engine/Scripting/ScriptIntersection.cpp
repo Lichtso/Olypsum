@@ -60,7 +60,7 @@ void ScriptIntersection::RayCast(const v8::FunctionCallbackInfo<v8::Value>& args
 //! @cond
 struct IntersectionCallback : btBroadphaseAabbCallback {
     short int m_collisionFilterMask;
-    std::set<BaseObject*> hits;
+    std::unordered_set<BaseObject*> hits;
     
     IntersectionCallback(short int filterMask) : m_collisionFilterMask(filterMask) {
         
@@ -77,7 +77,7 @@ struct IntersectionCallback : btBroadphaseAabbCallback {
 
 struct	ContactResultCallback : btCollisionWorld::ContactResultCallback {
     short int filterMask;
-    std::set<BaseObject*> hits;
+    std::unordered_set<BaseObject*> hits;
     
     ContactResultCallback(short _filterMask) :filterMask(_filterMask) { }
     

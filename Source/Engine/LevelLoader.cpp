@@ -113,10 +113,10 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
         transformation *= readTransformationXML(node);
         if(!loadContainer(attribute->value(), false)) return false;
         transformation = parentTransform;
+        filePackage = prevFilePackage;
         node = node->next_sibling("Container");
     }
     
-    filePackage = prevFilePackage;
     objectLinkingScope = objectLinkingScopePrev;
     objectLinkingOffset = objectLinkingIndex.size();
     
