@@ -382,9 +382,9 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         
         XMLValueArray<float> vecData;
         btGeneric6DofConstraint* dof6;
-        btGeneric6DofSpringConstraint* springDof6 = NULL;
-        parameterNode = parameterNode->first_node("Spring");
+        parameterNode = node->first_node("Spring");
         if(parameterNode) {
+            btGeneric6DofSpringConstraint* springDof6;
             constraint = dof6 = springDof6 = new btGeneric6DofSpringConstraint(*rigidA->getBody(), *rigidB->getBody(), frameA, frameB, true);
             float value;
             unsigned int index;

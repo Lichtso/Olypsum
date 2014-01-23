@@ -13,16 +13,16 @@
 
 class ScriptGUIButton : public ScriptGUIFramedView {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetPaddingX(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetPaddingX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetPaddingY(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetPaddingY(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetState(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetState(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetType(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetType(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetPaddingX(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetPaddingX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetPaddingY(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetPaddingY(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetState(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetState(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetType(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetType(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     protected:
     ScriptGUIButton(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :ScriptGUIFramedView(name, constructor) { }
     public:
@@ -39,10 +39,10 @@ class ScriptGUICheckBox : public ScriptGUIButton {
 
 class ScriptGUITabs : public ScriptGUIView {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetSelected(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetSelected(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetDeactivatable(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetDeactivatable(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetSelected(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetSelected(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetDeactivatable(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetDeactivatable(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     protected:
     ScriptGUITabs(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :ScriptGUIView(name, constructor) { }
     public:

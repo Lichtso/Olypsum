@@ -12,8 +12,8 @@
 #include "ScriptLinearAlgebra.h"
 
 class ScriptBaseClass : public ScriptClass {
-    static void GetScriptClass(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetScriptClass(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void Delete(const v8::FunctionCallbackInfo<v8::Value>& args);
     protected:
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
@@ -41,8 +41,8 @@ class ScriptBaseObject : public ScriptBaseClass {
 };
 
 class ScriptPhysicObject : public ScriptBaseObject {
-    static void GetCollisionShape(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetCollisionShape(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetCollisionShape(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetCollisionShape(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetCollisionShapeInfo(const v8::FunctionCallbackInfo<v8::Value>& args);
     protected:
     ScriptPhysicObject(const char* name) :ScriptBaseObject(name) { }

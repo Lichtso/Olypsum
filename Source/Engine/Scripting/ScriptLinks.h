@@ -13,8 +13,8 @@
 
 class ScriptBaseLink : public ScriptBaseClass {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetObjectA(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void GetObjectB(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void GetObjectA(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void GetObjectB(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     protected:
     ScriptBaseLink(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args))
                     :ScriptBaseClass(name, constructor) { }
@@ -24,14 +24,14 @@ class ScriptBaseLink : public ScriptBaseClass {
 
 class ScriptPhysicLink : public ScriptBaseLink {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetBurstImpulse(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetBurstImpulse(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetCollisionDisabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetCollisionDisabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetAppliedForceObjectA(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void GetAppliedTorqueObjectA(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void GetAppliedForceObjectB(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void GetAppliedTorqueObjectB(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void GetBurstImpulse(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetBurstImpulse(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetCollisionDisabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetCollisionDisabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void AppliedForceObjectA(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AppliedTorqueObjectA(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AppliedForceObjectB(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AppliedTorqueObjectB(const v8::FunctionCallbackInfo<v8::Value>& args);
     protected:
     ScriptPhysicLink(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args))
                     :ScriptBaseLink(name, constructor) { }
@@ -41,75 +41,77 @@ class ScriptPhysicLink : public ScriptBaseLink {
 
 class ScriptPointPhysicLink : public ScriptPhysicLink {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetPoint(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetPoint(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void AccessPointA(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AccessPointB(const v8::FunctionCallbackInfo<v8::Value>& args);
     public:
     ScriptPointPhysicLink();
 };
 
 class ScriptGearPhysicLink : public ScriptPhysicLink {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetAxis(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetAxis(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetRatio(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetRatio(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void AccessAxisA(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AccessAxisB(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetRatio(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetRatio(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     public:
     ScriptGearPhysicLink();
 };
 
 class ScriptHingePhysicLink : public ScriptPhysicLink {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetFrame(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetFrame(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetHingeAngle(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void GetAngularLimitMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetAngularLimitMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetAngularLimitMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetAngularLimitMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetAngularMotorEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetAngularMotorEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetAngularMotorVelocity(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetAngularMotorVelocity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetAngularMotorForce(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetAngularMotorForce(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void AccessFrameA(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AccessFrameB(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetHingeAngle(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void GetAngularLimitMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetAngularLimitMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetAngularLimitMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetAngularLimitMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetAngularMotorEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetAngularMotorEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetAngularMotorVelocity(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetAngularMotorVelocity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetAngularMotorForce(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetAngularMotorForce(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     public:
     ScriptHingePhysicLink();
 };
 
 class ScriptSliderPhysicLink : public ScriptPhysicLink {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetFrame(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetFrame(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetHingeAngle(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void GetSliderPos(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void GetAngularLimitMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetAngularLimitMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetAngularLimitMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetAngularLimitMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetAngularMotorEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetAngularMotorEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetAngularMotorVelocity(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetAngularMotorVelocity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetAngularMotorForce(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetAngularMotorForce(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetLinearLimitMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetLinearLimitMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetLinearLimitMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetLinearLimitMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetLinearMotorEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetLinearMotorEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetLinearMotorVelocity(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetLinearMotorVelocity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetLinearMotorForce(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetLinearMotorForce(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void AccessFrameA(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AccessFrameB(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetHingeAngle(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void GetSliderPos(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void GetAngularLimitMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetAngularLimitMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetAngularLimitMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetAngularLimitMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetAngularMotorEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetAngularMotorEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetAngularMotorVelocity(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetAngularMotorVelocity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetAngularMotorForce(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetAngularMotorForce(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetLinearLimitMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetLinearLimitMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetLinearLimitMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetLinearLimitMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetLinearMotorEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetLinearMotorEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetLinearMotorVelocity(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetLinearMotorVelocity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetLinearMotorForce(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetLinearMotorForce(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     public:
     ScriptSliderPhysicLink();
 };
 
 class ScriptDof6PhysicLink : public ScriptPhysicLink {
+    static btGeneric6DofSpringConstraint* EnableSpring(PhysicLink* link);
+    static btGeneric6DofSpringConstraint* DisableSpring(PhysicLink* link);
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetFrame(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetFrame(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void AccessFrameA(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AccessFrameB(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void AccessSpringStiffness(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void AccessSpringDamping(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void AccessSpringEquilibrium(const v8::FunctionCallbackInfo<v8::Value>& args);
@@ -126,13 +128,13 @@ class ScriptDof6PhysicLink : public ScriptPhysicLink {
 
 class ScriptConeTwistPhysicLink : public ScriptPhysicLink {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetFrame(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetFrame(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetSwingSpan(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetSwingSpan(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetTwistSpan(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetTwistSpan(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void GetTwistAngle(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void AccessFrameA(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AccessFrameB(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void GetSwingSpan(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetSwingSpan(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetTwistSpan(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetTwistSpan(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetTwistAngle(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     public:
     ScriptConeTwistPhysicLink();
 };
@@ -146,8 +148,8 @@ class ScriptTransformLink : public ScriptBaseLink {
 
 class ScriptBoneLink : public ScriptBaseLink {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetBone(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void SetBone(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
+    static void GetBone(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetBone(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetBoneChildren(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetRelativeMat(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetAbsoluteMat(const v8::FunctionCallbackInfo<v8::Value>& args);

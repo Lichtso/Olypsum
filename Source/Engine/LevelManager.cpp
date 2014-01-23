@@ -8,6 +8,14 @@
 
 #include "AppMain.h"
 
+//! @cond
+struct Compound {
+    typedef std::pair<std::string, btTransform> Element;
+    std::unordered_set<Element*> elements;
+    std::string name;
+};
+//! @endcond
+
 LevelManager::LevelManager() {
     
 }
@@ -47,6 +55,8 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
     fileManager.clear();
     
     //Load CollisionShapes
+    std::unordered_set<Compound*> compounds;
+    
     for(auto packageIterator : fileManager.filePackages) {
         rapidxml::xml_document<xmlUsedCharType> doc;
         std::unique_ptr<char[]> fileData = readXmlFile(doc, packageIterator.second->path+"/CollisionShapes.xml", false);
@@ -54,7 +64,6 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
         
         rapidxml::xml_node<xmlUsedCharType>* node = doc.first_node("CollisionShapes")->first_node();
         while(node) {
-            btCollisionShape* shape;
             const char* name = node->first_attribute("id")->value();
             if(sharedCollisionShapes.find(name) != sharedCollisionShapes.end()) {
                 log(error_log, std::string("Tried to overwrite collision shape by id: ")+name+".");
@@ -68,22 +77,22 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
                 if(strcmp(node->name(), "Cylinder") == 0) {
                     char* direction = node->first_attribute("direction")->value();
                     if(strcmp(direction, "x") == 0)
-                        shape = new btCylinderShapeX(vecData.getVector3());
+                        sharedCollisionShapes[name] = new btCylinderShapeX(vecData.getVector3());
                     else if(strcmp(direction, "y") == 0)
-                        shape = new btCylinderShape(vecData.getVector3());
+                        sharedCollisionShapes[name] = new btCylinderShape(vecData.getVector3());
                     else if(strcmp(direction, "z") == 0)
-                        shape = new btCylinderShapeZ(vecData.getVector3());
+                        sharedCollisionShapes[name] = new btCylinderShapeZ(vecData.getVector3());
                     else{
                         log(error_log, std::string("Found collision shape (")+name+") with an unknown direction: "+direction+'.');
                         menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), NULL);
                         return false;
                     }
                 }else
-                    shape = new btBoxShape(vecData.getVector3());
+                    sharedCollisionShapes[name] = new btBoxShape(vecData.getVector3());
             }else if(strcmp(node->name(), "Sphere") == 0) {
                 float radius;
                 sscanf(node->first_attribute("radius")->value(), "%f", &radius);
-                shape = new btSphereShape(radius);
+                sharedCollisionShapes[name] = new btSphereShape(radius);
             }else if(strcmp(node->name(), "Capsule") == 0 || strcmp(node->name(), "Cone") == 0) {
                 bool isCapsule = (strcmp(node->name(), "Capsule") == 0);
                 float radius, length;
@@ -92,19 +101,19 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
                 char* direction = node->first_attribute("direction")->value();
                 if(strcmp(direction, "x") == 0) {
                     if(isCapsule)
-                        shape = new btCapsuleShapeX(radius, length);
+                        sharedCollisionShapes[name] = new btCapsuleShapeX(radius, length);
                     else
-                        shape = new btConeShapeX(radius, length);
+                        sharedCollisionShapes[name] = new btConeShapeX(radius, length);
                 }else if(strcmp(direction, "y") == 0) {
                     if(isCapsule)
-                        shape = new btCapsuleShape(radius, length);
+                        sharedCollisionShapes[name] = new btCapsuleShape(radius, length);
                     else
-                        shape = new btConeShape(radius, length);
+                        sharedCollisionShapes[name] = new btConeShape(radius, length);
                 }else if(strcmp(direction, "z") == 0) {
                     if(isCapsule)
-                        shape = new btCapsuleShapeZ(radius, length);
+                        sharedCollisionShapes[name] = new btCapsuleShapeZ(radius, length);
                     else
-                        shape = new btConeShapeZ(radius, length);
+                        sharedCollisionShapes[name] = new btConeShapeZ(radius, length);
                 }else{
                     log(error_log, std::string("Found collision shape (")+name+") with an unknown direction: "+direction+'.');
                     menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), NULL);
@@ -129,28 +138,22 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
                     count ++;
                     childNode = childNode->next_sibling("Sphere");
                 }
-                shape = new btMultiSphereShape(positions.get(), radi.get(), count);
+                sharedCollisionShapes[name] = new btMultiSphereShape(positions.get(), radi.get(), count);
             }else if(strcmp(node->name(), "Compound") == 0) {
-                btCompoundShape* compoundShape = new btCompoundShape();
+                Compound* compound = new Compound();
                 rapidxml::xml_node<xmlUsedCharType>* childNode = node->first_node("Child");
                 while(childNode) {
-                    btCollisionShape* childShape = getCollisionShape(childNode->first_attribute("collisionShape")->value());
-                    if(!childShape) {
-                        log(error_log, std::string("Found compound collision shape (")+name+") with an invalid child.");
-                        menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), NULL);
-                        return false;
-                    }
-                    btTransform transformation = readTransformationXML(childNode);
-                    compoundShape->addChildShape(transformation, childShape);
+                    compound->elements.insert(new Compound::Element(childNode->first_attribute("collisionShape")->value(), readTransformationXML(childNode)));
                     childNode = childNode->next_sibling("Child");
                 }
-                shape = compoundShape;
+                compound->name = name;
+                compounds.insert(compound);
             }else if(strcmp(node->name(), "VertexCloud") == 0) {
                 XMLValueArray<btScalar> vertices;
                 sscanf(node->first_attribute("vertexCount")->value(), "%d", &vertices.count);
                 vertices.readString(node, vertices.count*3, "%f");
                 vertices.count /= 3;
-                shape = new btConvexHullShape(vertices.data, vertices.count, sizeof(btScalar)*3);
+                sharedCollisionShapes[name] = new btConvexHullShape(vertices.data, vertices.count, sizeof(btScalar)*3);
                 if(vertices.count > 100)
                     log(warning_log, std::string("Found vertex cloud shape (")+name+") with more than 100 vertices.");
             }else if(strcmp(node->name(), "StaticPlane") == 0) {
@@ -158,15 +161,30 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
                 sscanf(node->first_attribute("distance")->value(), "%f", &distance);
                 XMLValueArray<btScalar> vec;
                 vec.readString(node->value(), "%f");
-                shape = new btStaticPlaneShape(btVector3(vec.data[0], vec.data[1], vec.data[2]), distance);
+                sharedCollisionShapes[name] = new btStaticPlaneShape(btVector3(vec.data[0], vec.data[1], vec.data[2]), distance);
             }else{
                 log(error_log, std::string("Found collision shape (")+name+") shape with an unknown type: "+node->name()+'.');
                 menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), NULL);
                 return false;
             }
-            sharedCollisionShapes[name] = shape;
             node = node->next_sibling();
         }
+    }
+    
+    foreach_e(compounds, compound) {
+        btCompoundShape* compoundShape = new btCompoundShape();
+        foreach_e((*compound)->elements, compoundElement) {
+            btCollisionShape* childShape = getCollisionShape((*compoundElement)->first);
+            if(!childShape) {
+                log(error_log, std::string("Found compound collision shape (")+(*compoundElement)->first+") with an invalid child.");
+                menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), NULL);
+                return false;
+            }
+            compoundShape->addChildShape((*compoundElement)->second, childShape);
+            delete *compoundElement;
+        }
+        sharedCollisionShapes[(*compound)->name] = compoundShape;
+        delete *compound;
     }
     
     mainFBO.init();

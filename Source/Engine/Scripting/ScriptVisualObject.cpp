@@ -8,16 +8,16 @@
 
 #include "ScriptVisualObject.h"
 
-void ScriptMatterObject::GetIntegrity(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptMatterObject::GetIntegrity(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    MatterObject* objectPtr = getDataOfInstance<MatterObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->integrity);
+    MatterObject* objectPtr = getDataOfInstance<MatterObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->integrity);
 }
 
-void ScriptMatterObject::SetIntegrity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptMatterObject::SetIntegrity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
-    MatterObject* objectPtr = getDataOfInstance<MatterObject>(info.This());
+    MatterObject* objectPtr = getDataOfInstance<MatterObject>(args.This());
     if(objectPtr->integrity <= 0.0) return;
     objectPtr->integrity = fmax(0.0, value->NumberValue());
 }
@@ -51,49 +51,49 @@ ScriptMatterObject::ScriptMatterObject() :ScriptPhysicObject("MatterObject") {
 
 
 
-void ScriptRigidObject::GetModel(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptRigidObject::GetModel(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    RigidObject* objectPtr = getDataOfInstance<RigidObject>(info.This());
+    RigidObject* objectPtr = getDataOfInstance<RigidObject>(args.This());
     std::string name;
     FilePackage* filePackage = fileManager.findResource<Model>(objectPtr->model, name);
     if(filePackage)
-        info.GetReturnValue().Set(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
+        args.GetReturnValue().Set(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
 }
 
-void ScriptRigidObject::SetModel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptRigidObject::SetModel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
-    RigidObject* objectPtr = getDataOfInstance<RigidObject>(info.This());
+    RigidObject* objectPtr = getDataOfInstance<RigidObject>(args.This());
     auto model = fileManager.getResourceByPath<Model>(levelManager.levelPackage, stdStrOfV8(value));
     if(model) objectPtr->setModel(NULL, model);
 }
 
-void ScriptRigidObject::GetMass(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptRigidObject::GetMass(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    btRigidBody* body = getDataOfInstance<RigidObject>(info.This())->getBody();
-    info.GetReturnValue().Set((body->getInvMass() == 0.0) ? 0.0 : 1.0/body->getInvMass());
+    btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
+    args.GetReturnValue().Set((body->getInvMass() == 0.0) ? 0.0 : 1.0/body->getInvMass());
 }
 
-void ScriptRigidObject::SetMass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptRigidObject::SetMass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsNumber() || value->NumberValue() < 0.0 || value->NumberValue() == NAN) return;
     btVector3 inertia;
-    btRigidBody* body = getDataOfInstance<RigidObject>(info.This())->getBody();
+    btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
     body->getCollisionShape()->calculateLocalInertia(value->NumberValue(), inertia);
     body->setMassProps(value->NumberValue(), inertia);
     body->activate();
 }
 
-void ScriptRigidObject::GetKinematic(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptRigidObject::GetKinematic(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    RigidObject* objectPtr = getDataOfInstance<RigidObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->getKinematic());
+    RigidObject* objectPtr = getDataOfInstance<RigidObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->getKinematic());
 }
 
-void ScriptRigidObject::SetKinematic(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptRigidObject::SetKinematic(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsBoolean()) return;
-    RigidObject* objectPtr = getDataOfInstance<RigidObject>(info.This());
+    RigidObject* objectPtr = getDataOfInstance<RigidObject>(args.This());
     objectPtr->setKinematic(value->BooleanValue());
 }
 
@@ -153,29 +153,29 @@ void ScriptRigidObject::AccessLinearFactor(const v8::FunctionCallbackInfo<v8::Va
     args.GetReturnValue().Set(scriptVector3.newInstance(body->getLinearFactor()));
 }
 
-void ScriptRigidObject::GetAngularDamping(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptRigidObject::GetAngularDamping(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    btRigidBody* body = getDataOfInstance<RigidObject>(info.This())->getBody();
-    info.GetReturnValue().Set(body->getAngularDamping());
+    btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
+    args.GetReturnValue().Set(body->getAngularDamping());
 }
 
-void ScriptRigidObject::SetAngularDamping(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptRigidObject::SetAngularDamping(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsNumber() || value->NumberValue() == NAN) return;
-    btRigidBody* body = getDataOfInstance<RigidObject>(info.This())->getBody();
+    btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
     body->setAngularDamping(value->NumberValue());
 }
 
-void ScriptRigidObject::GetLinearDamping(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptRigidObject::GetLinearDamping(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    btRigidBody* body = getDataOfInstance<RigidObject>(info.This())->getBody();
-    info.GetReturnValue().Set(body->getLinearDamping());
+    btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
+    args.GetReturnValue().Set(body->getLinearDamping());
 }
 
-void ScriptRigidObject::SetLinearDamping(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptRigidObject::SetLinearDamping(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsNumber() || value->NumberValue() == NAN) return;
-    btRigidBody* body = getDataOfInstance<RigidObject>(info.This())->getBody();
+    btRigidBody* body = getDataOfInstance<RigidObject>(args.This())->getBody();
     body->setLinearDamping(value->NumberValue());
 }
 
@@ -290,28 +290,28 @@ ScriptRigidObject::ScriptRigidObject() :ScriptMatterObject("RigidObject") {
 
 
 
-void ScriptTerrainObject::GetWidth(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptTerrainObject::GetWidth(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->width);
+    TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->width);
 }
 
-void ScriptTerrainObject::GetLength(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptTerrainObject::GetLength(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->length);
+    TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->length);
 }
 
-void ScriptTerrainObject::GetBitDepth(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptTerrainObject::GetBitDepth(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->bitDepth << 2);
+    TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->bitDepth << 2);
 }
 
-void ScriptTerrainObject::SetBitDepth(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptTerrainObject::SetBitDepth(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsInt32() || value->Uint32Value() % 4 != 0 || value->Uint32Value() == 0 || value->Uint32Value() > 8) return;
-    TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(info.This());
+    TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(args.This());
     objectPtr->bitDepth = value->Uint32Value() >> 2;
 }
 

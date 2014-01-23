@@ -18,18 +18,18 @@ void ScriptGUIView::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args)
     args.GetReturnValue().Set(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
 }
 
-void ScriptGUIView::GetChildCount(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUIView::GetChildCount(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUIView* objectPtr = getDataOfInstance<GUIView>(info.This());
-    info.GetReturnValue().Set(v8::Integer::New(objectPtr->children.size()));
+    GUIView* objectPtr = getDataOfInstance<GUIView>(args.This());
+    args.GetReturnValue().Set(v8::Integer::New(objectPtr->children.size()));
 }
 
-void ScriptGUIView::GetChild(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUIView::GetChild(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUIView* objectPtr = getDataOfInstance<GUIView>(info.This());
+    GUIView* objectPtr = getDataOfInstance<GUIView>(args.This());
     if(index >= objectPtr->children.size())
-        return info.ScriptException("GUIView []: Invalid argument");
-    info.GetReturnValue().Set(objectPtr->children[index]->scriptInstance);
+        return args.ScriptException("GUIView []: Invalid argument");
+    args.GetReturnValue().Set(objectPtr->children[index]->scriptInstance);
 }
 
 void ScriptGUIView::Adopt(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -93,29 +93,29 @@ void ScriptGUIFramedView::AccessBorderColor(const v8::FunctionCallbackInfo<v8::V
         args.GetReturnValue().Set(scriptQuaternion.newInstance(objectPtr->content.borderColor.getQuaternion()));
 }
 
-void ScriptGUIFramedView::GetInnerShadow(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUIFramedView::GetInnerShadow(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUIFramedView* objectPtr = getDataOfInstance<GUIFramedView>(info.This());
-    info.GetReturnValue().Set(objectPtr->content.innerShadow);
+    GUIFramedView* objectPtr = getDataOfInstance<GUIFramedView>(args.This());
+    args.GetReturnValue().Set(objectPtr->content.innerShadow);
 }
 
-void ScriptGUIFramedView::SetInnerShadow(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUIFramedView::SetInnerShadow(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsInt32()) return;
-    GUIFramedView* objectPtr = getDataOfInstance<GUIFramedView>(info.This());
+    GUIFramedView* objectPtr = getDataOfInstance<GUIFramedView>(args.This());
     objectPtr->content.innerShadow = value->IntegerValue();
 }
 
-void ScriptGUIFramedView::GetCornerRadius(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUIFramedView::GetCornerRadius(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUIFramedView* objectPtr = getDataOfInstance<GUIFramedView>(info.This());
-    info.GetReturnValue().Set(objectPtr->content.cornerRadius);
+    GUIFramedView* objectPtr = getDataOfInstance<GUIFramedView>(args.This());
+    args.GetReturnValue().Set(objectPtr->content.cornerRadius);
 }
 
-void ScriptGUIFramedView::SetCornerRadius(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUIFramedView::SetCornerRadius(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsInt32() || value->IntegerValue() < 0) return;
-    GUIFramedView* objectPtr = getDataOfInstance<GUIFramedView>(info.This());
+    GUIFramedView* objectPtr = getDataOfInstance<GUIFramedView>(args.This());
     objectPtr->content.cornerRadius = value->IntegerValue();
 }
 
@@ -156,27 +156,27 @@ void ScriptGUIScreenView::Constructor(const v8::FunctionCallbackInfo<v8::Value>&
     args.GetReturnValue().Set(args.This());
 }
 
-void ScriptGUIScreenView::GetModalView(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUIScreenView::GetModalView(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUIScreenView* objectPtr = getDataOfInstance<GUIScreenView>(info.This());
+    GUIScreenView* objectPtr = getDataOfInstance<GUIScreenView>(args.This());
     if(objectPtr->modalView)
-        info.GetReturnValue().Set(objectPtr->modalView->scriptInstance);
+        args.GetReturnValue().Set(objectPtr->modalView->scriptInstance);
 }
 
-void ScriptGUIScreenView::SetModalView(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUIScreenView::SetModalView(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
-    GUIScreenView* objectPtr = getDataOfInstance<GUIScreenView>(info.This());
+    GUIScreenView* objectPtr = getDataOfInstance<GUIScreenView>(args.This());
     if(property.IsEmpty() || !scriptGUIView.isCorrectInstance(property))
         objectPtr->setModalView(NULL);
     else
         objectPtr->setModalView(scriptGUIView.getDataOfInstance<GUIView>(property));
 }
 
-void ScriptGUIScreenView::GetFocused(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUIScreenView::GetFocused(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUIScreenView* objectPtr = getDataOfInstance<GUIScreenView>(info.This());
+    GUIScreenView* objectPtr = getDataOfInstance<GUIScreenView>(args.This());
     if(objectPtr->focused)
-        info.GetReturnValue().Set(objectPtr->focused->scriptInstance);
+        args.GetReturnValue().Set(objectPtr->focused->scriptInstance);
 }
 
 ScriptGUIScreenView::ScriptGUIScreenView() :ScriptGUIView("GUIScreenView", Constructor) {
@@ -205,81 +205,81 @@ void ScriptGUIScrollView::Constructor(const v8::FunctionCallbackInfo<v8::Value>&
     args.GetReturnValue().Set(args.This());
 }
 
-void ScriptGUIScrollView::GetSliderX(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUIScrollView::GetSliderX(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(info.This());
-    info.GetReturnValue().Set(objectPtr->sliderX);
+    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(args.This());
+    args.GetReturnValue().Set(objectPtr->sliderX);
 }
 
-void ScriptGUIScrollView::SetSliderX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUIScrollView::SetSliderX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsBoolean()) return;
-    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(info.This());
+    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(args.This());
     objectPtr->sliderX = value->BooleanValue();
 }
 
-void ScriptGUIScrollView::GetSliderY(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUIScrollView::GetSliderY(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(info.This());
-    info.GetReturnValue().Set(objectPtr->sliderY);
+    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(args.This());
+    args.GetReturnValue().Set(objectPtr->sliderY);
 }
 
-void ScriptGUIScrollView::SetSliderY(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUIScrollView::SetSliderY(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsBoolean()) return;
-    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(info.This());
+    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(args.This());
     objectPtr->sliderY = value->BooleanValue();
 }
 
-void ScriptGUIScrollView::GetScrollX(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUIScrollView::GetScrollX(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(info.This());
-    info.GetReturnValue().Set(objectPtr->scrollPosX);
+    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(args.This());
+    args.GetReturnValue().Set(objectPtr->scrollPosX);
 }
 
-void ScriptGUIScrollView::SetScrollX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUIScrollView::SetScrollX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsInt32()) return;
-    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(info.This());
+    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(args.This());
     objectPtr->scrollPosX = value->IntegerValue();
 }
 
-void ScriptGUIScrollView::GetScrollY(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUIScrollView::GetScrollY(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(info.This());
-    info.GetReturnValue().Set(objectPtr->scrollPosY);
+    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(args.This());
+    args.GetReturnValue().Set(objectPtr->scrollPosY);
 }
 
-void ScriptGUIScrollView::SetScrollY(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUIScrollView::SetScrollY(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsInt32()) return;
-    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(info.This());
+    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(args.This());
     objectPtr->scrollPosY = value->IntegerValue();
 }
 
-void ScriptGUIScrollView::GetContentWidth(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUIScrollView::GetContentWidth(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(info.This());
-    info.GetReturnValue().Set(objectPtr->contentWidth);
+    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(args.This());
+    args.GetReturnValue().Set(objectPtr->contentWidth);
 }
 
-void ScriptGUIScrollView::SetContentWidth(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUIScrollView::SetContentWidth(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsInt32() || value->IntegerValue() < 0) return;
-    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(info.This());
+    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(args.This());
     objectPtr->contentWidth = value->IntegerValue();
 }
 
-void ScriptGUIScrollView::GetContentHeight(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUIScrollView::GetContentHeight(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(info.This());
-    info.GetReturnValue().Set(objectPtr->contentHeight);
+    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(args.This());
+    args.GetReturnValue().Set(objectPtr->contentHeight);
 }
 
-void ScriptGUIScrollView::SetContentHeight(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUIScrollView::SetContentHeight(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsInt32() || value->IntegerValue() < 0) return;
-    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(info.This());
+    GUIScrollView* objectPtr = getDataOfInstance<GUIScrollView>(args.This());
     objectPtr->contentHeight = value->IntegerValue();
 }
 

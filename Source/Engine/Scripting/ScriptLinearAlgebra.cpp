@@ -66,21 +66,21 @@ void ScriptVector3::ToJSON(const v8::FunctionCallbackInfo<v8::Value>& args) {
     args.GetReturnValue().Set(array);
 }
 
-void ScriptVector3::IndexedPropertyGetter(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptVector3::IndexedPropertyGetter(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(index > 2)
-        return info.ScriptException("Vector3 []: Invalid index");
+        return args.ScriptException("Vector3 []: Invalid index");
     const char* names[] = { "x", "y", "z" };
-    info.GetReturnValue().Set(info.This()->GetRealNamedProperty(v8::String::New(names[index])));
+    args.GetReturnValue().Set(args.This()->GetRealNamedProperty(v8::String::New(names[index])));
 }
 
-void ScriptVector3::IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptVector3::IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(index > 2)
-        return info.ScriptException("Vector3 []: Invalid index");
+        return args.ScriptException("Vector3 []: Invalid index");
     const char* names[] = { "x", "y", "z" };
-    info.This()->Set(v8::String::New(names[index]), value);
-    info.GetReturnValue().Set(value);
+    args.This()->Set(v8::String::New(names[index]), value);
+    args.GetReturnValue().Set(value);
 }
 
 void ScriptVector3::GetAngle(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -372,21 +372,21 @@ void ScriptQuaternion::toJSON(const v8::FunctionCallbackInfo<v8::Value>& args) {
     args.GetReturnValue().Set(array);
 }
 
-void ScriptQuaternion::IndexedPropertyGetter(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptQuaternion::IndexedPropertyGetter(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(index > 3)
-        return info.ScriptException("Quaternion []: Invalid index");
+        return args.ScriptException("Quaternion []: Invalid index");
     const char* names[] = { "x", "y", "z", "w" };
-    info.GetReturnValue().Set(info.This()->GetRealNamedProperty(v8::String::New(names[index])));
+    args.GetReturnValue().Set(args.This()->GetRealNamedProperty(v8::String::New(names[index])));
 }
 
-void ScriptQuaternion::IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptQuaternion::IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     if(index > 3)
-        return info.ScriptException("Quaternion []: Invalid index");
+        return args.ScriptException("Quaternion []: Invalid index");
     const char* names[] = { "x", "y", "z", "w" };
-    info.This()->Set(v8::String::New(names[index]), value);
-    info.GetReturnValue().Set(value);
+    args.This()->Set(v8::String::New(names[index]), value);
+    args.GetReturnValue().Set(value);
 }
 
 void ScriptQuaternion::GetAngle(const v8::FunctionCallbackInfo<v8::Value>& args) {

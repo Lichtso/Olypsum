@@ -8,104 +8,104 @@
 
 #include "ScriptParticlesObject.h"
 
-void ScriptParticlesObject::GetMaxParticles(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptParticlesObject::GetMaxParticles(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->maxParticles);
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->maxParticles);
 }
 
-void ScriptParticlesObject::GetTexture(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptParticlesObject::GetTexture(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
     std::string name;
     FilePackage* filePackage = fileManager.findResource<Texture>(objectPtr->texture, name);
     if(!filePackage) return;
-    info.GetReturnValue().Set(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
+    args.GetReturnValue().Set(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
 }
 
-void ScriptParticlesObject::SetTexture(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptParticlesObject::SetTexture(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
     auto texture = fileManager.getResourceByPath<Texture>(levelManager.levelPackage, stdStrOfV8(value));
     if(texture) objectPtr->texture = texture;
 }
 
-void ScriptParticlesObject::GetTransformAligned(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptParticlesObject::GetTransformAligned(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->transformAligned);
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->transformAligned);
 }
 
-void ScriptParticlesObject::SetTransformAligned(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptParticlesObject::SetTransformAligned(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsBoolean()) return;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
     objectPtr->transformAligned = value->BooleanValue();
 }
 
-void ScriptParticlesObject::GetSystemLife(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptParticlesObject::GetSystemLife(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->systemLife);
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->systemLife);
 }
 
-void ScriptParticlesObject::SetSystemLife(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptParticlesObject::SetSystemLife(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
     objectPtr->systemLife = value->NumberValue();
 }
 
-void ScriptParticlesObject::GetLifeMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptParticlesObject::GetLifeMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->lifeMin);
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->lifeMin);
 }
 
-void ScriptParticlesObject::SetLifeMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptParticlesObject::SetLifeMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
     objectPtr->lifeMin = value->NumberValue();
 }
 
-void ScriptParticlesObject::GetLifeMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptParticlesObject::GetLifeMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->lifeMax);
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->lifeMax);
 }
 
-void ScriptParticlesObject::SetLifeMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptParticlesObject::SetLifeMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
     objectPtr->lifeMax = value->NumberValue();
 }
 
-void ScriptParticlesObject::GetSizeMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptParticlesObject::GetSizeMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->sizeMin);
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->sizeMin);
 }
 
-void ScriptParticlesObject::SetSizeMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptParticlesObject::SetSizeMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
     objectPtr->sizeMin = value->NumberValue();
 }
 
-void ScriptParticlesObject::GetSizeMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptParticlesObject::GetSizeMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->sizeMax);
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->sizeMax);
 }
 
-void ScriptParticlesObject::SetSizeMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptParticlesObject::SetSizeMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(info.This());
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
     objectPtr->sizeMax = value->NumberValue();
 }
 

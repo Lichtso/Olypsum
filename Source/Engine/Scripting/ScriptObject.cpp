@@ -20,19 +20,19 @@ void ScriptBaseClass::Constructor(const v8::FunctionCallbackInfo<v8::Value>& arg
     args.GetReturnValue().Set(args.This());
 }
 
-void ScriptBaseClass::GetScriptClass(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptBaseClass::GetScriptClass(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    BaseClass* objectPtr = getDataOfInstance<BaseClass>(info.This());
+    BaseClass* objectPtr = getDataOfInstance<BaseClass>(args.This());
     std::string path = objectPtr->scriptFile->name;
     if(objectPtr->scriptFile->filePackage != levelManager.levelPackage)
         path = std::string("../")+objectPtr->scriptFile->filePackage->name+'/'+path;
-    info.GetReturnValue().Set(v8::String::New(path.c_str()));
+    args.GetReturnValue().Set(v8::String::New(path.c_str()));
 }
 
-void ScriptBaseClass::SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptBaseClass::SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
-    BaseClass* objectPtr = getDataOfInstance<BaseClass>(info.This());
+    BaseClass* objectPtr = getDataOfInstance<BaseClass>(args.This());
     FilePackage* filePackage = levelManager.levelPackage;
     FileResourcePtr<ScriptFile> scriptFile = fileManager.getResourceByPath<ScriptFile>(filePackage, stdStrOfV8(value));
     if(scriptFile)
@@ -127,20 +127,20 @@ ScriptBaseObject::ScriptBaseObject() :ScriptBaseClass("BaseObject") {
 
 
 
-void ScriptPhysicObject::GetCollisionShape(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptPhysicObject::GetCollisionShape(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(info.This())->getBody();
+    btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(args.This())->getBody();
     std::string buffer = levelManager.getCollisionShapeName(physicBody->getCollisionShape());
     if(buffer.size() > 0)
-        info.GetReturnValue().Set(v8::String::New(buffer.c_str()));
+        args.GetReturnValue().Set(v8::String::New(buffer.c_str()));
 }
 
-void ScriptPhysicObject::SetCollisionShape(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptPhysicObject::SetCollisionShape(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     btCollisionShape* shape = levelManager.getCollisionShape(stdStrOfV8(value));
     if(shape) {
-        PhysicObject* objectPtr = getDataOfInstance<PhysicObject>(info.This());
+        PhysicObject* objectPtr = getDataOfInstance<PhysicObject>(args.This());
         objectPtr->getBody()->setCollisionShape(shape);
         objectPtr->updateTouchingObjects();
     }
@@ -154,6 +154,12 @@ void ScriptPhysicObject::GetCollisionShapeInfo(const v8::FunctionCallbackInfo<v8
     switch(shape->getShapeType()) {
         case CYLINDER_SHAPE_PROXYTYPE: {
             result->Set(v8::String::New("size"), scriptVector3.newInstance(static_cast<btCylinderShape*>(shape)->getHalfExtentsWithMargin()));
+            if(dynamic_cast<btCylinderShapeX*>(shape))
+                result->Set(v8::String::New("direction"), v8::String::New("x"));
+            else if(dynamic_cast<btCylinderShapeZ*>(shape))
+            result->Set(v8::String::New("direction"), v8::String::New("z"));
+            else
+                result->Set(v8::String::New("direction"), v8::String::New("y"));
         } break;
         case BOX_SHAPE_PROXYTYPE: {
             result->Set(v8::String::New("size"), scriptVector3.newInstance(static_cast<btBoxShape*>(shape)->getHalfExtentsWithMargin()));
@@ -165,11 +171,23 @@ void ScriptPhysicObject::GetCollisionShapeInfo(const v8::FunctionCallbackInfo<v8
             btCapsuleShape* capsuleShape = static_cast<btCapsuleShape*>(shape);
             result->Set(v8::String::New("radius"), v8::Number::New(capsuleShape->getRadius()));
             result->Set(v8::String::New("length"), v8::Number::New(capsuleShape->getHalfHeight()));
+            if(dynamic_cast<btCapsuleShapeX*>(shape))
+                result->Set(v8::String::New("direction"), v8::String::New("x"));
+            else if(dynamic_cast<btCapsuleShapeZ*>(shape))
+                result->Set(v8::String::New("direction"), v8::String::New("z"));
+            else
+                result->Set(v8::String::New("direction"), v8::String::New("y"));
         } break;
         case CONE_SHAPE_PROXYTYPE: {
             btConeShape* coneShape = static_cast<btConeShape*>(shape);
             result->Set(v8::String::New("radius"), v8::Number::New(coneShape->getRadius()));
             result->Set(v8::String::New("length"), v8::Number::New(coneShape->getHeight()));
+            if(dynamic_cast<btConeShapeX*>(shape))
+                result->Set(v8::String::New("direction"), v8::String::New("x"));
+            else if(dynamic_cast<btConeShapeZ*>(shape))
+                result->Set(v8::String::New("direction"), v8::String::New("z"));
+            else
+                result->Set(v8::String::New("direction"), v8::String::New("y"));
         } break;
         case MULTI_SPHERE_SHAPE_PROXYTYPE: {
             btMultiSphereShape* multiSphereShape = static_cast<btMultiSphereShape*>(shape);

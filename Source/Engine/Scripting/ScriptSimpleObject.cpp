@@ -17,42 +17,42 @@ ScriptSimpleObject::ScriptSimpleObject() :ScriptBaseObject("SimpleObject") {
 
 
 
-void ScriptCamObject::GetFov(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptCamObject::GetFov(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->fov);
+    CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->fov);
 }
 
-void ScriptCamObject::SetFov(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptCamObject::SetFov(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
-    CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
+    CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
     objectPtr->fov = value->NumberValue();
 }
 
-void ScriptCamObject::GetNear(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptCamObject::GetNear(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->near);
+    CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->near);
 }
 
-void ScriptCamObject::SetNear(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptCamObject::SetNear(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
-    CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
+    CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
     objectPtr->near = value->NumberValue();
 }
 
-void ScriptCamObject::GetFar(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptCamObject::GetFar(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->far);
+    CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->far);
 }
 
-void ScriptCamObject::SetFar(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptCamObject::SetFar(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
-    CamObject* objectPtr = getDataOfInstance<CamObject>(info.This());
+    CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
     objectPtr->far = value->NumberValue();
 }
 
@@ -97,79 +97,79 @@ ScriptCamObject::ScriptCamObject() :ScriptSimpleObject("CamObject") {
 }
 
 
-void ScriptSoundObject::GetSoundTrack(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptSoundObject::GetSoundTrack(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
     std::string name;
     FilePackage* filePackage = fileManager.findResource<SoundTrack>(objectPtr->soundTrack, name);
     if(filePackage)
-        info.GetReturnValue().Set(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
+        args.GetReturnValue().Set(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
 }
 
-void ScriptSoundObject::SetSoundTrack(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptSoundObject::SetSoundTrack(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
     auto soundTrack = fileManager.getResourceByPath<SoundTrack>(levelManager.levelPackage, stdStrOfV8(value));
     if(soundTrack) objectPtr->setSoundTrack(soundTrack);
 }
 
-void ScriptSoundObject::GetTimeOffset(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptSoundObject::GetTimeOffset(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->getTimeOffset());
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->getTimeOffset());
 }
 
-void ScriptSoundObject::SetTimeOffset(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptSoundObject::SetTimeOffset(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
     objectPtr->setTimeOffset(value->NumberValue());
 }
 
-void ScriptSoundObject::GetVolume(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptSoundObject::GetVolume(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->getVolume());
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->getVolume());
 }
 
-void ScriptSoundObject::SetVolume(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptSoundObject::SetVolume(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsNumber()) return;
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
     objectPtr->setVolume(value->NumberValue());
 }
 
-void ScriptSoundObject::GetPlaying(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptSoundObject::GetPlaying(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->getPlaying());
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->getPlaying());
 }
 
-void ScriptSoundObject::SetPlaying(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptSoundObject::SetPlaying(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsBoolean()) return;
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
     objectPtr->setPlaying(value->BooleanValue());
 }
 
-void ScriptSoundObject::GetMode(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptSoundObject::GetMode(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
     switch(objectPtr->mode) {
         case SoundObject::Mode::Looping:
-            info.GetReturnValue().Set(v8::String::New("looping"));
+            args.GetReturnValue().Set(v8::String::New("looping"));
         case SoundObject::Mode::Hold:
-            info.GetReturnValue().Set(v8::String::New("hold"));
+            args.GetReturnValue().Set(v8::String::New("hold"));
         case SoundObject::Mode::Dispose:
-            info.GetReturnValue().Set(v8::String::New("dispose"));
+            args.GetReturnValue().Set(v8::String::New("dispose"));
     }
 }
 
-void ScriptSoundObject::SetMode(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptSoundObject::SetMode(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(info.This());
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
     const char* str = cStrOfV8(value);
     if(strcmp(str, "looping") == 0)
         objectPtr->mode = SoundObject::Mode::Looping;

@@ -18,26 +18,26 @@ void ScriptGUILabel::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args
     args.GetReturnValue().Set(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
 }
 
-void ScriptGUILabel::GetTextAlignment(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUILabel::GetTextAlignment(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUILabel* objectPtr = getDataOfInstance<GUILabel>(info.This());
+    GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
     switch(objectPtr->textAlignment) {
         case GUILabel::TextAlignment::Left:
-            info.GetReturnValue().Set(v8::String::New("left"));
+            args.GetReturnValue().Set(v8::String::New("left"));
             return;
         case GUILabel::TextAlignment::Middle:
-            info.GetReturnValue().Set(v8::String::New("middle"));
+            args.GetReturnValue().Set(v8::String::New("middle"));
             return;
         case GUILabel::TextAlignment::Right:
-            info.GetReturnValue().Set(v8::String::New("right"));
+            args.GetReturnValue().Set(v8::String::New("right"));
             return;
     }
 }
 
-void ScriptGUILabel::SetTextAlignment(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUILabel::SetTextAlignment(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
-    GUILabel* objectPtr = getDataOfInstance<GUILabel>(info.This());
+    GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
     const char* str = cStrOfV8(value);
     if(strcmp(str, "left") == 0)
         objectPtr->textAlignment = GUILabel::TextAlignment::Left;
@@ -47,46 +47,46 @@ void ScriptGUILabel::SetTextAlignment(v8::Local<v8::String> property, v8::Local<
         objectPtr->textAlignment = GUILabel::TextAlignment::Right;
 }
 
-void ScriptGUILabel::GetText(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUILabel::GetText(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUILabel* objectPtr = getDataOfInstance<GUILabel>(info.This());
-    info.GetReturnValue().Set(v8::String::New(objectPtr->text.c_str()));
+    GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
+    args.GetReturnValue().Set(v8::String::New(objectPtr->text.c_str()));
 }
 
-void ScriptGUILabel::SetText(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUILabel::SetText(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
-    GUILabel* objectPtr = getDataOfInstance<GUILabel>(info.This());
+    GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
     objectPtr->text = stdStrOfV8(value);
 }
 
-void ScriptGUILabel::GetFont(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUILabel::GetFont(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUILabel* objectPtr = getDataOfInstance<GUILabel>(info.This());
+    GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
     std::string name;
     FilePackage* filePackage = fileManager.findResource<TextFont>(objectPtr->font, name);
     if(filePackage)
-        info.GetReturnValue().Set(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
+        args.GetReturnValue().Set(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
 }
 
-void ScriptGUILabel::SetFont(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUILabel::SetFont(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
-    GUILabel* objectPtr = getDataOfInstance<GUILabel>(info.This());
+    GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
     auto font = fileManager.getResourceByPath<TextFont>(levelManager.levelPackage, stdStrOfV8(value));
     if(font) objectPtr->font = font;
 }
 
-void ScriptGUILabel::GetFontHeight(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUILabel::GetFontHeight(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUILabel* objectPtr = getDataOfInstance<GUILabel>(info.This());
-    info.GetReturnValue().Set(objectPtr->fontHeight);
+    GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
+    args.GetReturnValue().Set(objectPtr->fontHeight);
 }
 
-void ScriptGUILabel::SetFontHeight(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUILabel::SetFontHeight(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsInt32() || value->IntegerValue() < 0) return;
-    GUILabel* objectPtr = getDataOfInstance<GUILabel>(info.This());
+    GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
     objectPtr->fontHeight = value->IntegerValue();
 }
 
@@ -127,16 +127,16 @@ void ScriptGUIProgressBar::Constructor(const v8::FunctionCallbackInfo<v8::Value>
     args.GetReturnValue().Set(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
 }
 
-void ScriptGUIProgressBar::GetValue(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUIProgressBar::GetValue(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUIProgressBar* objectPtr = getDataOfInstance<GUIProgressBar>(info.This());
-    info.GetReturnValue().Set(objectPtr->value);
+    GUIProgressBar* objectPtr = getDataOfInstance<GUIProgressBar>(args.This());
+    args.GetReturnValue().Set(objectPtr->value);
 }
 
-void ScriptGUIProgressBar::SetValue(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUIProgressBar::SetValue(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->NumberValue()) return;
-    GUIProgressBar* objectPtr = getDataOfInstance<GUIProgressBar>(info.This());
+    GUIProgressBar* objectPtr = getDataOfInstance<GUIProgressBar>(args.This());
     objectPtr->value = clamp(value->NumberValue(), 0.0, 1.0);
 }
 
@@ -167,19 +167,19 @@ void ScriptGUIImage::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args
     args.GetReturnValue().Set(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
 }
 
-void ScriptGUIImage::GetImage(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUIImage::GetImage(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUIImage* objectPtr = getDataOfInstance<GUIImage>(info.This());
+    GUIImage* objectPtr = getDataOfInstance<GUIImage>(args.This());
     std::string name;
     FilePackage* filePackage = fileManager.findResource<Texture>(objectPtr->texture, name);
     if(filePackage)
-        info.GetReturnValue().Set(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
+        args.GetReturnValue().Set(v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str()));
 }
 
-void ScriptGUIImage::SetImage(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUIImage::SetImage(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
-    GUIImage* objectPtr = getDataOfInstance<GUIImage>(info.This());
+    GUIImage* objectPtr = getDataOfInstance<GUIImage>(args.This());
     auto image = fileManager.getResourceByPath<Texture>(levelManager.levelPackage, stdStrOfV8(value));
     if(image) objectPtr->texture = image;
 }

@@ -29,7 +29,8 @@ FileResourcePtr<FileResource> ScriptFile::load(FilePackage* _filePackage, const 
     context->Enter();
     context->Global()->Set(v8::String::New("exports"), v8::Object::New());
     
-    v8::Local<v8::Script> scriptLocal = v8::Script::Compile(v8::String::New(data.get()), v8::String::New(name.c_str()));
+    v8::Local<v8::String> scriptName = v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str());
+    v8::Local<v8::Script> scriptLocal = v8::Script::Compile(v8::String::New(data.get()), scriptName);
     if(scriptManager->tryCatch(&tryCatch)) {
         script = v8::Persistent<v8::Script>::New(v8::Isolate::GetCurrent(), scriptLocal);
         v8::Handle<v8::Object>::Cast(run());

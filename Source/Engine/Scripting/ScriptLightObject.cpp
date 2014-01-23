@@ -8,10 +8,10 @@
 
 #include "ScriptLightObject.h"
 
-void ScriptLightObject::GetRange(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptLightObject::GetRange(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    LightObject* objectPtr = getDataOfInstance<LightObject>(info.This());
-    info.GetReturnValue().Set(objectPtr->getRange());
+    LightObject* objectPtr = getDataOfInstance<LightObject>(args.This());
+    args.GetReturnValue().Set(objectPtr->getRange());
 }
 
 void ScriptLightObject::AccessColor(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -38,10 +38,10 @@ ScriptLightObject::ScriptLightObject() :ScriptPhysicObject("LightObject") {
 
 
 
-void ScriptDirectionalLight::GetBounds(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptDirectionalLight::GetBounds(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    DirectionalLight* objectPtr = getDataOfInstance<DirectionalLight>(info.This());
-    info.GetReturnValue().Set(scriptVector3.newInstance(objectPtr->getBounds()));
+    DirectionalLight* objectPtr = getDataOfInstance<DirectionalLight>(args.This());
+    args.GetReturnValue().Set(scriptVector3.newInstance(objectPtr->getBounds()));
 }
 
 void ScriptDirectionalLight::SetBounds(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -65,10 +65,10 @@ ScriptDirectionalLight::ScriptDirectionalLight() :ScriptLightObject("Directional
 
 
 
-void ScriptSpotLight::GetCutoff(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptSpotLight::GetCutoff(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    SpotLight* objectPtr = getDataOfInstance<SpotLight>(info.This());
-    info.GetReturnValue().Set(objectPtr->getCutoff());
+    SpotLight* objectPtr = getDataOfInstance<SpotLight>(args.This());
+    args.GetReturnValue().Set(objectPtr->getCutoff());
 }
 
 void ScriptSpotLight::SetBounds(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -92,10 +92,10 @@ ScriptSpotLight::ScriptSpotLight() :ScriptLightObject("SpotLight") {
 
 
 
-void ScriptPositionalLight::GetOmniDirectional(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptPositionalLight::GetOmniDirectional(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    PositionalLight* objectPtr = getDataOfInstance<PositionalLight>(info.This());
-    info.GetReturnValue().Set(objectPtr->getOmniDirectional());
+    PositionalLight* objectPtr = getDataOfInstance<PositionalLight>(args.This());
+    args.GetReturnValue().Set(objectPtr->getOmniDirectional());
 }
 
 void ScriptPositionalLight::SetBounds(const v8::FunctionCallbackInfo<v8::Value>& args) {

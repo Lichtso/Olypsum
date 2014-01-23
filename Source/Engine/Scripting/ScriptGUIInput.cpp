@@ -21,42 +21,42 @@ void ScriptGUISlider::Constructor(const v8::FunctionCallbackInfo<v8::Value>& arg
     args.GetReturnValue().Set(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
 }
 
-void ScriptGUISlider::GetValue(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUISlider::GetValue(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUISlider* objectPtr = getDataOfInstance<GUISlider>(info.This());
-    info.GetReturnValue().Set(objectPtr->value);
+    GUISlider* objectPtr = getDataOfInstance<GUISlider>(args.This());
+    args.GetReturnValue().Set(objectPtr->value);
 }
 
-void ScriptGUISlider::SetValue(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUISlider::SetValue(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->NumberValue()) return;
-    GUISlider* objectPtr = getDataOfInstance<GUISlider>(info.This());
+    GUISlider* objectPtr = getDataOfInstance<GUISlider>(args.This());
     objectPtr->value = clamp(value->NumberValue(), 0.0, 1.0);
 }
 
-void ScriptGUISlider::GetSteps(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUISlider::GetSteps(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUISlider* objectPtr = getDataOfInstance<GUISlider>(info.This());
-    info.GetReturnValue().Set(objectPtr->steps);
+    GUISlider* objectPtr = getDataOfInstance<GUISlider>(args.This());
+    args.GetReturnValue().Set(objectPtr->steps);
 }
 
-void ScriptGUISlider::SetSteps(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUISlider::SetSteps(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsInt32() || value->IntegerValue() < 0) return;
-    GUISlider* objectPtr = getDataOfInstance<GUISlider>(info.This());
+    GUISlider* objectPtr = getDataOfInstance<GUISlider>(args.This());
     objectPtr->steps = value->IntegerValue();
 }
 
-void ScriptGUISlider::GetEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUISlider::GetEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUISlider* objectPtr = getDataOfInstance<GUISlider>(info.This());
-    info.GetReturnValue().Set(objectPtr->enabled);
+    GUISlider* objectPtr = getDataOfInstance<GUISlider>(args.This());
+    args.GetReturnValue().Set(objectPtr->enabled);
 }
 
-void ScriptGUISlider::SetEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUISlider::SetEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsBoolean()) return;
-    GUISlider* objectPtr = getDataOfInstance<GUISlider>(info.This());
+    GUISlider* objectPtr = getDataOfInstance<GUISlider>(args.This());
     objectPtr->enabled = value->BooleanValue();
 }
 
@@ -93,43 +93,43 @@ void ScriptGUITextField::Constructor(const v8::FunctionCallbackInfo<v8::Value>& 
     args.GetReturnValue().Set(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
 }
 
-void ScriptGUITextField::GetCursorX(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUITextField::GetCursorX(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUITextField* objectPtr = getDataOfInstance<GUITextField>(info.This());
-    info.GetReturnValue().Set(objectPtr->getCursorX());
+    GUITextField* objectPtr = getDataOfInstance<GUITextField>(args.This());
+    args.GetReturnValue().Set(objectPtr->getCursorX());
 }
 
-void ScriptGUITextField::SetCursorX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUITextField::SetCursorX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
-    GUITextField* objectPtr = getDataOfInstance<GUITextField>(info.This());
+    GUITextField* objectPtr = getDataOfInstance<GUITextField>(args.This());
     if(!value->IsInt32() || value->IntegerValue() < 0) return;
     objectPtr->setCursorX(value->IntegerValue());
 }
 
-void ScriptGUITextField::GetEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUITextField::GetEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUITextField* objectPtr = getDataOfInstance<GUITextField>(info.This());
-    info.GetReturnValue().Set(objectPtr->enabled);
+    GUITextField* objectPtr = getDataOfInstance<GUITextField>(args.This());
+    args.GetReturnValue().Set(objectPtr->enabled);
 }
 
-void ScriptGUITextField::SetEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUITextField::SetEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsBoolean()) return;
-    GUITextField* objectPtr = getDataOfInstance<GUITextField>(info.This());
+    GUITextField* objectPtr = getDataOfInstance<GUITextField>(args.This());
     objectPtr->enabled = value->BooleanValue();
 }
 
-void ScriptGUITextField::GetText(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptGUITextField::GetText(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    GUITextField* objectPtr = getDataOfInstance<GUITextField>(info.This());
+    GUITextField* objectPtr = getDataOfInstance<GUITextField>(args.This());
     GUILabel* label = static_cast<GUILabel*>(objectPtr->children[0]);
-    info.GetReturnValue().Set(v8::String::New(label->text.c_str()));
+    args.GetReturnValue().Set(v8::String::New(label->text.c_str()));
 }
 
-void ScriptGUITextField::SetText(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptGUITextField::SetText(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
-    GUITextField* objectPtr = getDataOfInstance<GUITextField>(info.This());
+    GUITextField* objectPtr = getDataOfInstance<GUITextField>(args.This());
     GUILabel* label = static_cast<GUILabel*>(objectPtr->children[0]);
     label->text = stdStrOfV8(value);
 }

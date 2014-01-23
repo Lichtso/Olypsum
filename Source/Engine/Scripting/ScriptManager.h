@@ -18,10 +18,10 @@ class ScriptManager {
     static void ScriptLocalizeString(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void ScriptSaveLevel(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void ScriptAccessSceneProperty(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void ScriptGetGamePaused(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void ScriptGetLevel(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void ScriptSetLevel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info);
-    static void ScriptGetAnimationFactor(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void ScriptGetGamePaused(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void ScriptGetLevel(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void ScriptSetLevel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void ScriptGetAnimationFactor(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     public:
     v8::Persistent<v8::ObjectTemplate> globalTemplate;
     std::unordered_map<std::string, AnimationProperty*> animations;

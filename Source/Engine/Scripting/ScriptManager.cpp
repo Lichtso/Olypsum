@@ -95,17 +95,17 @@ void ScriptManager::ScriptAccessSceneProperty(const v8::FunctionCallbackInfo<v8:
     }
 }
 
-void ScriptManager::ScriptGetGamePaused(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptManager::ScriptGetGamePaused(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    info.GetReturnValue().Set(menu.current != Menu::inGame);
+    args.GetReturnValue().Set(menu.current != Menu::inGame);
 }
 
-void ScriptManager::ScriptGetLevel(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptManager::ScriptGetLevel(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    info.GetReturnValue().Set(v8::String::New(levelManager.levelContainer.c_str()));
+    args.GetReturnValue().Set(v8::String::New(levelManager.levelContainer.c_str()));
 }
 
-void ScriptManager::ScriptSetLevel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& info) {
+void ScriptManager::ScriptSetLevel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     v8::HandleScope handleScope;
     if(!value->IsString()) return;
     levelManager.levelContainer = stdStrOfV8(value);
@@ -113,9 +113,9 @@ void ScriptManager::ScriptSetLevel(v8::Local<v8::String> property, v8::Local<v8:
     levelLoader.loadLevel();
 }
 
-void ScriptManager::ScriptGetAnimationFactor(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& info) {
+void ScriptManager::ScriptGetAnimationFactor(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
-    info.GetReturnValue().Set(profiler.animationFactor);
+    args.GetReturnValue().Set(profiler.animationFactor);
 }
 
 v8::Handle<v8::Value> ScriptManager::readCdataXMLNode(rapidxml::xml_node<xmlUsedCharType>* node) {

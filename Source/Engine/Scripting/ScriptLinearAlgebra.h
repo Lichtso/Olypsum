@@ -15,8 +15,8 @@ class ScriptVector3 : public ScriptClass {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void ToString(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void ToJSON(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void IndexedPropertyGetter(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void IndexedPropertyGetter(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void GetAngle(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetSum(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetDifference(const v8::FunctionCallbackInfo<v8::Value>& args);
@@ -44,8 +44,8 @@ class ScriptQuaternion : public ScriptClass {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void toString(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void toJSON(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void IndexedPropertyGetter(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& info);
-    static void IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<v8::Value>& info);
+    static void IndexedPropertyGetter(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void GetAngle(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetAxis(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetInverse(const v8::FunctionCallbackInfo<v8::Value>& args);
