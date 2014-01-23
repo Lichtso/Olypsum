@@ -21,8 +21,7 @@ class ScriptLightObject : public ScriptPhysicObject {
 };
 
 class ScriptDirectionalLight : public ScriptLightObject {
-    static void GetBounds(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
-    static void SetBounds(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void AccessBounds(const v8::FunctionCallbackInfo<v8::Value>& args);
     public:
     ScriptDirectionalLight();
 };

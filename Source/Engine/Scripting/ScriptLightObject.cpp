@@ -38,27 +38,21 @@ ScriptLightObject::ScriptLightObject() :ScriptPhysicObject("LightObject") {
 
 
 
-void ScriptDirectionalLight::GetBounds(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
+void ScriptDirectionalLight::AccessBounds(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::HandleScope handleScope;
     DirectionalLight* objectPtr = getDataOfInstance<DirectionalLight>(args.This());
-    args.GetReturnValue().Set(scriptVector3.newInstance(objectPtr->getBounds()));
-}
-
-void ScriptDirectionalLight::SetBounds(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
-    if(args.Length() < 1 || scriptVector3.isCorrectInstance(args[0]))
-        return args.ScriptException("DirectionalLight setBounds: Invalid argument");
-    DirectionalLight* objectPtr = getDataOfInstance<DirectionalLight>(args.This());
-    objectPtr->setBounds(scriptVector3.getDataOfInstance(args[0]));
-    args.GetReturnValue().Set(args.This());
+    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+        objectPtr->setBounds(scriptVector3.getDataOfInstance(args[0]));
+        args.GetReturnValue().Set(args[0]);
+    }else
+        args.GetReturnValue().Set(handleScope.Close(scriptVector3.newInstance(objectPtr->getBounds())));
 }
 
 ScriptDirectionalLight::ScriptDirectionalLight() :ScriptLightObject("DirectionalLight") {
     v8::HandleScope handleScope;
     
     v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->SetAccessor(v8::String::New("bounds"), GetBounds);
-    objectTemplate->Set(v8::String::New("setBounds"), v8::FunctionTemplate::New(SetBounds));
+    objectTemplate->Set(v8::String::New("bounds"), v8::FunctionTemplate::New(AccessBounds));
     
     functionTemplate->Inherit(scriptLightObject.functionTemplate);
 }
