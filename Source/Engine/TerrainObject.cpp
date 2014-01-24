@@ -115,6 +115,8 @@ TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelL
     textureScale.setY(vecData.data[1]);
     textureScale.setZ(diffuse->depth);
     
+    PhysicObject::readFrictionAndRestitution(node);
+    
     VertexArrayObject::Attribute attr;
     attr.size = 3;
     std::vector<VertexArrayObject::Attribute> attributes;
@@ -224,7 +226,7 @@ void TerrainObject::updateModel() {
 }
 
 rapidxml::xml_node<xmlUsedCharType>* TerrainObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
-    rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
+    rapidxml::xml_node<xmlUsedCharType>* node = PhysicObject::writeWithoutCollisionShape(doc, levelSaver);
     node->name("TerrainObject");
     
     rapidxml::xml_node<xmlUsedCharType>* parameterNode = doc.allocate_node(rapidxml::node_element);

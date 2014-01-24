@@ -155,3 +155,16 @@ void TextFont::renderStringToScreen(const char* str, btVector3 pos, float scale,
 void TextFont::calculateTextSize(const char* text, int& width, int& height) {
     TTF_SizeUTF8(ttf, text, &width, &height);
 }
+
+FileResourcePtr<TextFont> TextFont::normalFont() {
+    time_t t = time(0);
+    struct tm* date = localtime(&t);
+    if(date->tm_mon == 3 && date->tm_mday == 1)
+        return fileManager.getResourceByPath<TextFont>(NULL, "Core/funFont");
+    else
+        return fileManager.getResourceByPath<TextFont>(NULL, "Core/font");
+}
+
+FileResourcePtr<TextFont> TextFont::italicFont() {
+    return fileManager.getResourceByPath<TextFont>(NULL, "Core/font_italic");
+}

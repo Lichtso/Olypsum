@@ -129,7 +129,7 @@ void ObjectManager::init() {
     soundContext = alcCreateContext(soundDevice, NULL);
     alcMakeContextCurrent(soundContext);
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
-    log(info_log, std::string("OpenAL sound output: ")+alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
+    printf("OpenAL sound output: %s\n", alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
     
     //Show loading screen
     guiCam = new CamObject();

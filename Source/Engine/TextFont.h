@@ -51,6 +51,10 @@ class TextFont : public FileResource {
      @param height The result height is stored here
      */
     void calculateTextSize(const char* text, int& width, int& height);
+    //! Returns the normal font
+    static FileResourcePtr<TextFont> normalFont();
+    //! Returns the italic font
+    static FileResourcePtr<TextFont> italicFont();
 };
 
 #endif

@@ -139,7 +139,7 @@ ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, Leve
     
     transformAligned = node->first_node("TransformAligned");
     body->setWorldTransform(BaseObject::readTransformtion(node, levelLoader));
-    body->setCollisionShape(PhysicObject::readCollisionShape(node->first_node("PhysicsBody"), levelLoader));
+    body->setCollisionShape(PhysicObject::readCollisionShape(node->first_node("PhysicsBody")));
     objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Light, 0);
     if(!readRangeNode(node, "Life", lifeMin, lifeMax)) return;
     if(!readRangeNode(node, "Size", sizeMin, sizeMax)) return;

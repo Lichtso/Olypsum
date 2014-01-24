@@ -38,7 +38,7 @@ void GUIButton::updateContent() {
                                 label->color = Color4(0.94);
                             break;
                         }
-                        label->font = fileManager.getResourceByPath<TextFont>(NULL, "Core/font");
+                        label->font = TextFont::normalFont();
                     break;
                     case GUIButton::State::Pressed:
                         switch(type) {
@@ -52,7 +52,7 @@ void GUIButton::updateContent() {
                                 label->color = Color4(0.94);
                             break;
                         }
-                        label->font = fileManager.getResourceByPath<TextFont>(NULL, "Core/font_italic");
+                        label->font = TextFont::italicFont();
                     break;
                 }
             else

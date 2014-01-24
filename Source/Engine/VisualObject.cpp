@@ -153,7 +153,7 @@ RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
     }
     float mass = 1.0;
     sscanf(attribute->value(), "%f", &mass);
-    btCollisionShape* collisionShape = PhysicObject::readCollisionShape(parameterNode, levelLoader);
+    btCollisionShape* collisionShape = PhysicObject::readCollisionShape(parameterNode);
     if(!collisionShape) return;
     btVector3 localInertia;
     collisionShape->calculateLocalInertia(mass, localInertia);
@@ -226,6 +226,8 @@ RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
         }
         setModel(levelLoader, fileManager.getResourceByPath<Model>(levelLoader->filePackage, attribute->value()));
     }
+    
+    PhysicObject::readFrictionAndRestitution(node);
     
     v8::HandleScope handleScope;
     v8::Handle<v8::Value> external = v8::External::New(this);

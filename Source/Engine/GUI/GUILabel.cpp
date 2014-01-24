@@ -8,8 +8,8 @@
 
 #include "Menu.h"
 
-GUILabel::GUILabel() :color(Color4(0.0, 1.0)), textAlignment(TextAlignment::Middle), sizeAlignment(GUISizeAlignment::All) {
-    font = fileManager.getResourceByPath<TextFont>(NULL, "Core/font");
+GUILabel::GUILabel() :color(Color4(0.0, 1.0)), font(TextFont::normalFont()),
+    textAlignment(TextAlignment::Middle), sizeAlignment(GUISizeAlignment::All) {
     fontHeight = menu.screenView->height*0.04;
     height = fontHeight >> 1;
 }

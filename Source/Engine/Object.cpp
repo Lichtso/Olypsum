@@ -100,7 +100,7 @@ void SimpleObject::removeClean() {
 
 
 PhysicObject::PhysicObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
-    btCollisionShape* collisionShape = readCollisionShape(node->first_node("PhysicsBody"), levelLoader);
+    btCollisionShape* collisionShape = readCollisionShape(node->first_node("PhysicsBody"));
     if(!collisionShape) return;
     body = new btCollisionObject();
     body->setCollisionShape(collisionShape);
@@ -173,7 +173,7 @@ void PhysicObject::handleCollision(btPersistentManifold* contactManifold, Physic
     scriptFile->callFunction("oncollision", true, { scriptInstance, b->scriptInstance, pointsA, pointsB, distances, impulses });
 }
 
-btCollisionShape* PhysicObject::readCollisionShape(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+btCollisionShape* PhysicObject::readCollisionShape(rapidxml::xml_node<xmlUsedCharType>* node) {
     if(!node) {
         log(error_log, "Tried to construct PhysicObject without \"PhysicsBody\"-node.");
         return NULL;
@@ -191,8 +191,60 @@ btCollisionShape* PhysicObject::readCollisionShape(rapidxml::xml_node<xmlUsedCha
     return shape;
 }
 
+void PhysicObject::readFrictionAndRestitution(rapidxml::xml_node<xmlUsedCharType>* node) {
+    float value;
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute;
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Friction");
+    if(parameterNode) {
+        attribute = parameterNode->first_attribute("linear");
+        if(!attribute) {
+            log(error_log, "Tried to construct PhysicObject-Friction without \"linear\"-attribute.");
+            return;
+        }
+        sscanf(attribute->value(), "%f", &value);
+        body->setFriction(value);
+        attribute = parameterNode->first_attribute("angular");
+        if(!attribute) {
+            log(error_log, "Tried to construct PhysicObject-Friction without \"angular\"-attribute.");
+            return;
+        }
+        sscanf(attribute->value(), "%f", &value);
+        body->setRollingFriction(value);
+    }
+    parameterNode = node->first_node("Restitution");
+    if(parameterNode) {
+        sscanf(parameterNode->value(), "%f", &value);
+        body->setRestitution(value);
+    }
+}
+
+rapidxml::xml_node<xmlUsedCharType>* PhysicObject::writeWithoutCollisionShape(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+    rapidxml::xml_node<xmlUsedCharType> *parameterNode, *node = BaseObject::write(doc, levelSaver);
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute;
+    if(body->getFriction() != 0.5 || body->getRollingFriction() != 0.0) {
+        parameterNode = doc.allocate_node(rapidxml::node_element);
+        parameterNode->name("Friction");
+        node->append_node(parameterNode);
+        attribute = doc.allocate_attribute();
+        attribute->name("linear");
+        attribute->value(doc.allocate_string(stringOf(body->getFriction()).c_str()));
+        parameterNode->append_attribute(attribute);
+        attribute = doc.allocate_attribute();
+        attribute->name("angular");
+        attribute->value(doc.allocate_string(stringOf(body->getRollingFriction()).c_str()));
+        parameterNode->append_attribute(attribute);
+    }
+    if(body->getRestitution() != 0.0) {
+        parameterNode = doc.allocate_node(rapidxml::node_element);
+        parameterNode->name("Restitution");
+        parameterNode->value(doc.allocate_string(stringOf(body->getRestitution()).c_str()));
+        node->append_node(parameterNode);
+    }
+    return node;
+}
+
 rapidxml::xml_node<xmlUsedCharType>* PhysicObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
-    rapidxml::xml_node<xmlUsedCharType>* node = BaseObject::write(doc, levelSaver);
+    rapidxml::xml_node<xmlUsedCharType>* node = PhysicObject::writeWithoutCollisionShape(doc, levelSaver);
     node->name("PhysicObject");
     rapidxml::xml_node<xmlUsedCharType>* physicsBody = doc.allocate_node(rapidxml::node_element);
     physicsBody->name("PhysicsBody");

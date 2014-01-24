@@ -45,6 +45,12 @@ class ScriptPhysicObject : public ScriptBaseObject {
     static void SetCollisionShape(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetCollisionShapeInfo(const v8::FunctionCallbackInfo<v8::Value>& args);
     protected:
+    static void GetAngularFriction(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetAngularFriction(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetLinearFriction(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetLinearFriction(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetRestitution(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetRestitution(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     ScriptPhysicObject(const char* name) :ScriptBaseObject(name) { }
     public:
     ScriptPhysicObject();

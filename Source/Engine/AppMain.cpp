@@ -53,42 +53,42 @@ void AppMain() {
         SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
         
         menu.updateWindow();
-    
-        log(info_log, std::string("Engine Version: ")+VERSION);
-        log(info_log, std::string("Multi Threading: ")+stringOf(std::thread::hardware_concurrency())+" CPUs");
+        
+        time_t t = time(0);
+        struct tm* date = gmtime(&t);
+        printf("Date / Time: %04d.%02d.%02d %02d:%02d:%02d\n", 1900+date->tm_year, 1+date->tm_mon, date->tm_mday, date->tm_hour, date->tm_min, date->tm_sec);
+        printf("Engine Version: %s\n", VERSION);
+        //printf("Multi Threading: %d\n", std::thread::hardware_concurrency());
         char* glStr = NULL;
         GLint glAuxIa, glAuxIb;
         glStr = (char*)glGetString(GL_VENDOR);
-        log(info_log, std::string("OpenGL vendor: ")+glStr);
+        printf("OpenGL Vendor: %s\n", glStr);
         glStr = (char*)glGetString(GL_RENDERER);
-        log(info_log, std::string("OpenGL renderer: ")+glStr);
+        printf("OpenGL Renderer: %s\n", glStr);
         glStr = (char*)glGetString(GL_VERSION);
-        log(info_log, std::string("OpenGL driver: ")+glStr);
+        printf("OpenGL Driver: %s\n", glStr);
         glGetIntegerv(GL_MAJOR_VERSION, &glAuxIa);
         glGetIntegerv(GL_MINOR_VERSION, &glAuxIb);
-        log(info_log, std::string("OpenGL version: ")+stringOf(glAuxIa)+"."+stringOf(glAuxIb));
+        printf("OpenGL Version: %d.%d\n", glAuxIa, glAuxIb);
         if(glAuxIa < 3 || (glAuxIa == 3 && glAuxIb < 2)) {
             log(error_log, "OpenGL version 3.2 is required, Quit.");
             exit(5);
         }
     
     #ifdef DEBUG
-        std::ostringstream stream;
-        stream << "OpenGL extensions found: ";
+        printf("OpenGL extensions found: ");
         glGetIntegerv(GL_NUM_EXTENSIONS, &glAuxIa);
         for(GLint i = 0; i < glAuxIa; i ++) {
             glStr = (char*)glGetStringi(GL_EXTENSIONS, i);
-            stream << glStr << " ";
+            printf("%s ", glStr);
         }
-        log(info_log, stream.str());
-        stream.str("");
-        stream << "OpenGL compressions found: ";
+        printf("\nOpenGL compressions found: ");
         glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &glAuxIa);
         GLint glCompressionFormats[glAuxIa];
         glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS, glCompressionFormats);
         for(GLint i = 0; i < glAuxIa; i ++)
-            stream << stringOf(glCompressionFormats[i]) << " ";
-        log(info_log, stream.str());
+            printf("%d ", glCompressionFormats[i]);
+        printf("\n");
     #endif
     }
     

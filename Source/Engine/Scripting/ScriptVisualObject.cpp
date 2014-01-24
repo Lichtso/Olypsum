@@ -278,6 +278,9 @@ ScriptRigidObject::ScriptRigidObject() :ScriptMatterObject("RigidObject") {
     objectTemplate->Set(v8::String::New("linearFactor"), v8::FunctionTemplate::New(AccessLinearFactor));
     objectTemplate->SetAccessor(v8::String::New("angularDamping"), GetAngularDamping, SetAngularDamping);
     objectTemplate->SetAccessor(v8::String::New("linearDamping"), GetLinearDamping, SetLinearDamping);
+    objectTemplate->SetAccessor(v8::String::New("angularFriction"), GetAngularFriction, SetAngularFriction);
+    objectTemplate->SetAccessor(v8::String::New("linearFriction"), GetLinearFriction, SetLinearFriction);
+    objectTemplate->SetAccessor(v8::String::New("restitution"), GetRestitution, SetRestitution);
     objectTemplate->Set(v8::String::New("transformation"), v8::FunctionTemplate::New(AccessTransformation));
     objectTemplate->Set(v8::String::New("applyImpulseAtPoint"), v8::FunctionTemplate::New(ApplyImpulseAtPoint));
     objectTemplate->Set(v8::String::New("applyAngularImpulse"), v8::FunctionTemplate::New(ApplyAngularImpulse));
@@ -332,6 +335,9 @@ ScriptTerrainObject::ScriptTerrainObject() :ScriptMatterObject("TerrainObject") 
     objectTemplate->SetAccessor(v8::String::New("width"), GetWidth);
     objectTemplate->SetAccessor(v8::String::New("length"), GetLength);
     objectTemplate->SetAccessor(v8::String::New("bitDepth"), GetBitDepth, SetBitDepth);
+    objectTemplate->SetAccessor(v8::String::New("angularFriction"), GetAngularFriction, SetAngularFriction);
+    objectTemplate->SetAccessor(v8::String::New("linearFriction"), GetLinearFriction, SetLinearFriction);
+    objectTemplate->SetAccessor(v8::String::New("restitution"), GetRestitution, SetRestitution);
     objectTemplate->Set(v8::String::New("updateModel"), v8::FunctionTemplate::New(UpdateModel));
     
     functionTemplate->Inherit(scriptMatterObject.functionTemplate);

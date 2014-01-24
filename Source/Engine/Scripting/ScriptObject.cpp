@@ -236,6 +236,45 @@ void ScriptPhysicObject::GetCollisionShapeInfo(const v8::FunctionCallbackInfo<v8
     args.GetReturnValue().Set(result);
 }
 
+void ScriptPhysicObject::GetAngularFriction(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
+    v8::HandleScope handleScope;
+    btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(args.This())->getBody();
+    args.GetReturnValue().Set(physicBody->getRollingFriction());
+}
+
+void ScriptPhysicObject::SetAngularFriction(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
+    v8::HandleScope handleScope;
+    if(!value->IsNumber() || value->NumberValue() == NAN) return;
+    btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(args.This())->getBody();
+    physicBody->setRollingFriction(value->NumberValue());
+}
+
+void ScriptPhysicObject::GetLinearFriction(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
+    v8::HandleScope handleScope;
+    btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(args.This())->getBody();
+    args.GetReturnValue().Set(physicBody->getFriction());
+}
+
+void ScriptPhysicObject::SetLinearFriction(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
+    v8::HandleScope handleScope;
+    if(!value->IsNumber() || value->NumberValue() == NAN) return;
+    btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(args.This())->getBody();
+    physicBody->setFriction(value->NumberValue());
+}
+
+void ScriptPhysicObject::GetRestitution(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
+    v8::HandleScope handleScope;
+    btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(args.This())->getBody();
+    args.GetReturnValue().Set(physicBody->getRestitution());
+}
+
+void ScriptPhysicObject::SetRestitution(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
+    v8::HandleScope handleScope;
+    if(!value->IsNumber() || value->NumberValue() == NAN) return;
+    btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(args.This())->getBody();
+    physicBody->setRestitution(value->NumberValue());
+}
+
 ScriptPhysicObject::ScriptPhysicObject() :ScriptPhysicObject("PhysicObject") {
     v8::HandleScope handleScope;
     
