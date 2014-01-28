@@ -26,7 +26,7 @@ class ShaderProgram {
 	ShaderProgram();
 	~ShaderProgram();
     //! Loads a single shader and compiles it. This method is automaticly called by loadShaderProgram()
-	bool loadShader(GLuint shaderType, const char* soucreCode, std::vector<const char*>& macros);
+	bool loadShader(GLuint shaderType, const char* sourceCode, std::vector<const char*>& macros);
     /*! Loads all shaders from a file
      @param fileName The file which contains the shaders
      @param shaderTypes A array of shader types one entry for each shader

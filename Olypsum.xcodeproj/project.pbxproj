@@ -26,6 +26,7 @@
 		1118251B14F2553A00F198A7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118251A14F2553A00F198A7 /* Cocoa.framework */; };
 		1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254114F2559600F198A7 /* OpenGL.framework */; };
 		1118254414F2559B00F198A7 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254314F2559B00F198A7 /* OpenAL.framework */; };
+		11209AF31896FA5F00F87B26 /* libLeap.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 11209AF21896FA5F00F87B26 /* libLeap.dylib */; };
 		112307F5171462E0001167DF /* ScriptParticlesObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112307F3171462E0001167DF /* ScriptParticlesObject.cpp */; };
 		112307F81718A083001167DF /* ScriptLightObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112307F61718A082001167DF /* ScriptLightObject.cpp */; };
 		112672E91699BBFD000BB805 /* Links.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112672E71699BBFD000BB805 /* Links.cpp */; };
@@ -91,8 +92,6 @@
 		11BCD0601756686A00939274 /* ScriptLinks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11BCD05E1756686900939274 /* ScriptLinks.cpp */; };
 		11BD39AD15414AA6007846B8 /* LightObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11BD39AC15414AA6007846B8 /* LightObject.cpp */; };
 		11C238D91613164C009D6F9C /* LevelManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11C238D71613164C009D6F9C /* LevelManager.cpp */; };
-		11CC497E1833D7380099BFE8 /* libLeap.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 11CC497D1833D7380099BFE8 /* libLeap.dylib */; };
-		11CC497F1833D73F0099BFE8 /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11CC497D1833D7380099BFE8 /* libLeap.dylib */; };
 		11D0C0F31727CE71004C30E9 /* ScriptGUIInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11D0C0F11727CE70004C30E9 /* ScriptGUIInput.cpp */; };
 		11D74B4716270A65000EEB50 /* Packages in Resources */ = {isa = PBXBuildFile; fileRef = 11D74B4416270A65000EEB50 /* Packages */; };
 		11D74B4816270A65000EEB50 /* Shaders in Resources */ = {isa = PBXBuildFile; fileRef = 11D74B4516270A65000EEB50 /* Shaders */; };
@@ -114,7 +113,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				11CC497F1833D73F0099BFE8 /* libLeap.dylib in CopyFiles */,
 				1197492D17DB3AB600414CAA /* libv8.dylib in CopyFiles */,
 				1114B87316A8937B00B1CD41 /* Ogg.framework in CopyFiles */,
 				1114B87416A8937B00B1CD41 /* Vorbis.framework in CopyFiles */,
@@ -149,6 +147,7 @@
 		1118251F14F2553A00F198A7 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1118254114F2559600F198A7 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		1118254314F2559B00F198A7 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
+		11209AF21896FA5F00F87B26 /* libLeap.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libLeap.dylib; path = Libraries/LeapSDK/lib/libLeap.dylib; sourceTree = "<group>"; };
 		112307F3171462E0001167DF /* ScriptParticlesObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptParticlesObject.cpp; sourceTree = "<group>"; };
 		112307F4171462E0001167DF /* ScriptParticlesObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptParticlesObject.h; sourceTree = "<group>"; };
 		112307F61718A082001167DF /* ScriptLightObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptLightObject.cpp; sourceTree = "<group>"; };
@@ -294,7 +293,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				11511422170CBE6700F77236 /* libNetLink.a in Frameworks */,
-				11CC497E1833D7380099BFE8 /* libLeap.dylib in Frameworks */,
+				11209AF31896FA5F00F87B26 /* libLeap.dylib in Frameworks */,
 				1197492C17DB39FA00414CAA /* libv8.dylib in Frameworks */,
 				1114B87016A8933200B1CD41 /* Ogg.framework in Frameworks */,
 				1114B87116A8933200B1CD41 /* Vorbis.framework in Frameworks */,
@@ -337,6 +336,7 @@
 		1118251914F2553A00F198A7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				11209AF21896FA5F00F87B26 /* libLeap.dylib */,
 				11511421170CBE6700F77236 /* libNetLink.a */,
 				11CC497D1833D7380099BFE8 /* libLeap.dylib */,
 				1197492B17DB39FA00414CAA /* libv8.dylib */,
@@ -806,7 +806,6 @@
 					"$(SRCROOT)/Libraries/v8/out/native",
 					"$(SRCROOT)/Libraries/netLink/out",
 					"$(SRCROOT)/Libraries/LeapSDK/lib",
-					"/Users/alexander/Desktop/Olypsum/Libraries/LeapSDK/lib/libc++",
 				);
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -841,7 +840,6 @@
 					"$(SRCROOT)/Libraries/v8/out/native",
 					"$(SRCROOT)/Libraries/netLink/out",
 					"$(SRCROOT)/Libraries/LeapSDK/lib",
-					"/Users/alexander/Desktop/Olypsum/Libraries/LeapSDK/lib/libc++",
 				);
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

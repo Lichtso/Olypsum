@@ -22,48 +22,48 @@ ShaderProgram::~ShaderProgram() {
 	glDeleteProgram(GLname);
 }
 
-bool ShaderProgram::loadShader(GLuint shaderType, const char* soucreCode, std::vector<const char*>& macros) {
+bool ShaderProgram::loadShader(GLuint shaderType, const char* sourceCode, std::vector<const char*>& macros) {
 	unsigned int shaderId = glCreateShader(shaderType);
     
-    std::string soucre;
+    std::string source;
     {
-        std::ostringstream soucreStream;
-        soucreStream << "#version 150\n";
+        std::ostringstream sourceStream;
+        sourceStream << "#version 150\n";
         switch(shaderType) {
             case GL_VERTEX_SHADER:
-                soucreStream << "#define GL_VERTEX_SHADER\n";
+                sourceStream << "#define GL_VERTEX_SHADER\n";
                 break;
             case GL_FRAGMENT_SHADER:
-                soucreStream << "#define GL_FRAGMENT_SHADER\n";
+                sourceStream << "#define GL_FRAGMENT_SHADER\n";
                 break;
             case GL_GEOMETRY_SHADER:
-                soucreStream << "#define GL_GEOMETRY_SHADER\n";
+                sourceStream << "#define GL_GEOMETRY_SHADER\n";
                 break;
         }
         for(unsigned int m = 0; m < macros.size(); m ++)
-            soucreStream << std::string("#define ")+macros[m]+"\n";
-        soucreStream << soucreCode;
-        soucre = soucreStream.str();
+            sourceStream << std::string("#define ")+macros[m]+"\n";
+        sourceStream << sourceCode;
+        source = sourceStream.str();
     }
     
     size_t pos = 0, prevPos;
     while(true) {
-        pos = prevPos = soucre.find(includeString, pos);
+        pos = prevPos = source.find(includeString, pos);
         if(pos == std::string::npos) break;
         pos += strlen(includeString);
-        unsigned int macroLength = soucre.find('\n', pos)-pos;
-        std::unique_ptr<char[]> data = readFile(resourcesPath+"Shaders/"+soucre.substr(pos, macroLength), true);
-        soucre.replace(prevPos, strlen(includeString)+macroLength, data.get());
+        unsigned int macroLength = source.find('\n', pos)-pos;
+        std::unique_ptr<char[]> data = readFile(resourcesPath+"Shaders/"+source.substr(pos, macroLength), true);
+        source.replace(prevPos, strlen(includeString)+macroLength, data.get());
     }
     
-    const GLchar* soucreStr = soucre.c_str();
-	glShaderSource(shaderId, 1, &soucreStr, NULL);
+    const GLchar* sourceStr = source.c_str();
+	glShaderSource(shaderId, 1, &sourceStr, NULL);
 	glCompileShader(shaderId);
 	int infoLogLength = 1024;
 	char infoLog[infoLogLength];
 	glGetShaderInfoLog(shaderId, infoLogLength, &infoLogLength, (GLchar*) &infoLog);
 	if(infoLogLength > 0) {
-        log(shader_log, std::string(infoLog)+soucreStr+"\n");
+        log(shader_log, std::string(infoLog)+sourceStr+"\n");
 		return false;
 	}
 	glAttachShader(GLname, shaderId);

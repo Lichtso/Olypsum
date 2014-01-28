@@ -335,7 +335,7 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
         if(!currentReflective) {
             for(auto matterObject : matterObjects) {
                 RigidObject* rigidObject = dynamic_cast<RigidObject*>(matterObject);
-                if(!rigidObject)
+                if(!rigidObject || !rigidObject->model)
                     continue;
                 for(Mesh* mesh : rigidObject->model->meshes)
                     if(mesh->material.reflectivity == 0.0) {

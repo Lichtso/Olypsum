@@ -78,7 +78,7 @@ bool FilePackage::init() {
         sscanf(attribute->value(), "%lx", &hashCmp);
         if(hashCmp != hash) {
             #ifdef DEBUG
-            printf("Hash of resoucre package %s should be %lx\n", name.c_str(), hash);
+            printf("Hash of resource package %s should be %lx\n", name.c_str(), hash);
             #else
             menu.setModalView("error", fileManager.localizeString("packageError_HashCorrupted"), NULL);
             return false;
