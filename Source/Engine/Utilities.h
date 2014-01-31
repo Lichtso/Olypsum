@@ -42,9 +42,9 @@
 #include <BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h>
 //#include <BulletMultiThreaded/PosixThreadSupport.h>
 #include <BulletMultiThreaded/btParallelConstraintSolver.h>
-#include <BulletMultiThreaded/btSoftBodySolver_OpenCLSIMDAware.h>
-#include <BulletMultiThreaded/btSoftBodySolverVertexBuffer_OpenGL.h>
-#include <BulletMultiThreaded/btSoftBodySolverOutputCLtoGL.h>
+#include <BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolver_OpenCLSIMDAware.h>
+#include <BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolverVertexBuffer_OpenGL.h>
+#include <BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolverOutputCLtoGL.h>
 #include <Leap.h>
 #include <netLink.h>
 #define V8_USE_UNSAFE_HANDLES 1
