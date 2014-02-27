@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Menu.h"
+#include "../Menu/Menu.h"
 
 GUIProgressBar::GUIProgressBar() :value(0.5), orientation(GUIOrientation::Horizontal) {
     width = menu.screenView->width*0.2;

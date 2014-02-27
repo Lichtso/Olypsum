@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Menu.h"
+#include "../Menu/Menu.h"
 
 GUILabel::GUILabel() :color(Color4(0.0, 1.0)), font(TextFont::normalFont()),
     textAlignment(TextAlignment::Middle), sizeAlignment(GUISizeAlignment::All) {

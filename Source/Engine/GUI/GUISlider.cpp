@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Menu.h"
+#include "../Menu/Menu.h"
 
 #define barHeight (menu.screenView->width*0.01)
 #define sliderRadius (menu.screenView->width*0.02)

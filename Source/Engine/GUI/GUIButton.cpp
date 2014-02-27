@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Menu.h"
+#include "../Menu/Menu.h"
 
 GUIButton::GUIButton() :sizeAlignment(GUISizeAlignment::All), type(GUIButton::Type::Normal), enabled(true), state(GUIButton::State::Released) {
     paddingX = menu.screenView->width*0.012;

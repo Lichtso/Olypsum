@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Menu.h"
+#include "../Menu/Menu.h"
 
 #define scrollBarWidth (menu.screenView->width*0.005)
 

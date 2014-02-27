@@ -6,9 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "GUITextField.h"
-#include "LevelManager.h"
-#include "AppMain.h"
+#include "../Menu/Menu.h"
 
 GUITextField::GUITextField() :highlighted(false), enabled(true), cursorX(0), cursorDrawTick(0.0) {
     content.innerShadow = 0;

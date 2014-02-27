@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Menu.h"
+#include "Menu/Menu.h"
 
 void NetworkManager::init() {
     socketManager.onReceive = [this](netLink::SocketManager* manager, netLink::Socket* socket) {
