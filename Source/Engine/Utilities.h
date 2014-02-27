@@ -16,7 +16,14 @@
 #include <windows.h>
 #include <gl\gl.h>
 #include <gl\glu.h>
+#include <SDL2/include/SDL.h>
+#include <SDL2/include/SDL_image.h>
+#include <SDL2/include/SDL_ttf.h>
 #else
+#include <SDL2/SDL.h>
+#include <vorbis/vorbisfile.h>
+#include <dirent.h>
+#include <sys/time.h>
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #include <OpenAL/al.h>
@@ -31,9 +38,6 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #endif
-#include <vorbis/vorbisfile.h>
-#include <dirent.h>
-#include <sys/time.h>
 #endif
 #include <sys/stat.h>
 #include <fstream>
@@ -42,7 +46,6 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <SDL2/include/SDL.h>
 #include <bulletPhysics/src/btBulletCollisionCommon.h>
 #include <bulletPhysics/src/btBulletDynamicsCommon.h>
 #include <bulletPhysics/src/BulletSoftBody/btSoftRigidDynamicsWorld.h>

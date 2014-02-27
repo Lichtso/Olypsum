@@ -40,7 +40,7 @@ void Menu::updateWindow() {
         windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
     
     if(optionsState.videoScale > 1)
-        windowFlags |= SDL_WINDOW_HIDPI;
+        windowFlags |= SDL_WINDOW_ALLOW_HIGHDPI;
     
     if(mainWindow) SDL_HideWindow(mainWindow);
     SDL_Window* newWindow = SDL_CreateWindow("Olypsum", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
@@ -56,9 +56,9 @@ void Menu::updateWindow() {
         SDL_GL_SetSwapInterval(optionsState.vSyncEnabled);
     }
     
-    float videoScale = 1.0;
-    SDL_GetWindowScale(mainWindow, &videoScale, &videoScale);
-    optionsState.videoScale = videoScale;
+    int width, height;
+    SDL_GL_GetDrawableSize(mainWindow, &width, &height);
+    optionsState.videoScale = width/optionsState.videoWidth;
     if(menu.current)
         updateSSAOShaderPrograms();
 }
