@@ -9,7 +9,7 @@
 #ifndef ScriptLinearAlgebra_h
 #define ScriptLinearAlgebra_h
 
-#include "LeapMotion.h"
+#include "../LeapMotion.h"
 
 class ScriptVector3 : public ScriptClass {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);

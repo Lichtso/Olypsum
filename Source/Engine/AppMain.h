@@ -9,7 +9,7 @@
 #ifndef AppMain_h
 #define AppMain_h
 
-#include "ScriptManager.h"
+#include "Scripting/ScriptManager.h"
 
 //! Returns the highest available video scale factor of the mainWindow
 float getMaxVideoScale();

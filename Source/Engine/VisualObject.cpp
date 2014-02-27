@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "ScriptVisualObject.h"
+#include "Scripting/ScriptVisualObject.h"
 
 MatterObject::MatterObject() :integrity(1.0) {
     objectManager.matterObjects.insert(this);

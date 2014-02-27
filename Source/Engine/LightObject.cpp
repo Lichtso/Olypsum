@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "ScriptManager.h"
+#include "Scripting/ScriptManager.h"
 
 LightBoxVolume lightBox(btVector3(1, 1, 1));
 LightSphereVolume lightSphere(1, 10, 6);

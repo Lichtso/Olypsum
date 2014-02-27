@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "ScriptLinks.h"
+#include "Scripting/ScriptLinks.h"
 
 void BaseLink::removeClean() {
     a->links.erase(this);

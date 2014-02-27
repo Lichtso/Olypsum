@@ -7,7 +7,7 @@
 //
 
 #include "ObjectManager.h"
-#include "FileManager.h"
+//#include "FileManager.h"
 
 ColorBuffer::ColorBuffer(bool shadowMapB, bool cubeMapB, unsigned int widthB, unsigned int heightB)
     :shadowMap(shadowMapB), cubeMap(cubeMapB), width(widthB), height(heightB) {

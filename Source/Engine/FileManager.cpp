@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "Menu.h"
+#include "Menu/Menu.h"
 
 FileResourcePtr<FileResource> FileResource::load(FilePackage* _filePackage, const std::string& _name) {
     filePackage = _filePackage;

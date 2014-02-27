@@ -10,8 +10,8 @@
 #define XMLUtilities_h
 #define xmlUsedCharType char
 
-#include "rapidxml.hpp"
-#include "rapidxml_print.hpp"
+#include "rapidxml/rapidxml.hpp"
+#include "rapidxml/rapidxml_print.hpp"
 #include "Profiler.h"
 
 /*! Parses the content of a file as XML

@@ -26,7 +26,6 @@
 		1118251B14F2553A00F198A7 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118251A14F2553A00F198A7 /* Cocoa.framework */; };
 		1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254114F2559600F198A7 /* OpenGL.framework */; };
 		1118254414F2559B00F198A7 /* OpenAL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1118254314F2559B00F198A7 /* OpenAL.framework */; };
-		11209AF31896FA5F00F87B26 /* libLeap.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 11209AF21896FA5F00F87B26 /* libLeap.dylib */; };
 		112307F5171462E0001167DF /* ScriptParticlesObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112307F3171462E0001167DF /* ScriptParticlesObject.cpp */; };
 		112307F81718A083001167DF /* ScriptLightObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112307F61718A082001167DF /* ScriptLightObject.cpp */; };
 		112672E91699BBFD000BB805 /* Links.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112672E71699BBFD000BB805 /* Links.cpp */; };
@@ -43,11 +42,11 @@
 		1149A7DF17E111DA0038015E /* SDL2_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1149A7DD17E111D90038015E /* SDL2_ttf.framework */; };
 		114A0E6B169064E800D2CE9C /* LevelSaver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 114A0E69169064E800D2CE9C /* LevelSaver.cpp */; };
 		11511420170C1A0E00F77236 /* ScriptIntersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */; };
-		11511422170CBE6700F77236 /* libNetLink.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 11511421170CBE6700F77236 /* libNetLink.a */; };
 		11511425170D9B7C00F77236 /* ScriptVisualObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11511423170D9B7B00F77236 /* ScriptVisualObject.cpp */; };
 		1157447217E2F78F00416B67 /* SDL2.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1149A7DA17E111D20038015E /* SDL2.framework */; };
 		1157447317E2F78F00416B67 /* SDL2_image.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1149A7DC17E111D90038015E /* SDL2_image.framework */; };
 		1157447417E2F78F00416B67 /* SDL2_ttf.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1149A7DD17E111D90038015E /* SDL2_ttf.framework */; };
+		1158E66518BE680D00C25BAB /* libNetLink.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1158E66418BE680D00C25BAB /* libNetLink.a */; };
 		11623857171DF1050027561B /* ScriptGUIRect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11623855171DF1050027561B /* ScriptGUIRect.cpp */; };
 		11648F6E153DEE63004CA74D /* FBO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11648F6D153DEE63004CA74D /* FBO.cpp */; };
 		1178F6B717209036006EAE7D /* ScriptGUIView.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1178F6B517209036006EAE7D /* ScriptGUIView.cpp */; };
@@ -103,6 +102,8 @@
 		11EC642F178F3291007990B9 /* LeapMotion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11EC642D178F3291007990B9 /* LeapMotion.cpp */; };
 		11ECD34117EC9E7F00D6F865 /* Icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 11ECD33F17EC9E7200D6F865 /* Icon.icns */; };
 		11F1EEB8156FE49400F7275D /* ParticlesObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11F1EEB7156FE49400F7275D /* ParticlesObject.cpp */; };
+		11FDB8BD18BFBFC4001A7E50 /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11FDB8BC18BFBFC4001A7E50 /* libLeap.dylib */; };
+		11FDB8BE18BFBFCD001A7E50 /* libLeap.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 11FDB8BC18BFBFC4001A7E50 /* libLeap.dylib */; };
 		11FE8AB216B5A3F400B682D0 /* ScriptManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11FE8AB016B5A3F400B682D0 /* ScriptManager.cpp */; };
 /* End PBXBuildFile section */
 
@@ -114,6 +115,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				1197492D17DB3AB600414CAA /* libv8.dylib in CopyFiles */,
+				11FDB8BD18BFBFC4001A7E50 /* libLeap.dylib in CopyFiles */,
 				1114B87316A8937B00B1CD41 /* Ogg.framework in CopyFiles */,
 				1114B87416A8937B00B1CD41 /* Vorbis.framework in CopyFiles */,
 				1114B87516A8937B00B1CD41 /* BulletCollision.framework in CopyFiles */,
@@ -147,7 +149,6 @@
 		1118251F14F2553A00F198A7 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1118254114F2559600F198A7 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		1118254314F2559B00F198A7 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
-		11209AF21896FA5F00F87B26 /* libLeap.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libLeap.dylib; path = Libraries/LeapSDK/lib/libLeap.dylib; sourceTree = "<group>"; };
 		112307F3171462E0001167DF /* ScriptParticlesObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptParticlesObject.cpp; sourceTree = "<group>"; };
 		112307F4171462E0001167DF /* ScriptParticlesObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptParticlesObject.h; sourceTree = "<group>"; };
 		112307F61718A082001167DF /* ScriptLightObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptLightObject.cpp; sourceTree = "<group>"; };
@@ -174,9 +175,9 @@
 		114A0E6A169064E800D2CE9C /* LevelSaver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LevelSaver.h; sourceTree = "<group>"; };
 		1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptIntersection.cpp; sourceTree = "<group>"; };
 		1151141F170C1A0E00F77236 /* ScriptIntersection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptIntersection.h; sourceTree = "<group>"; };
-		11511421170CBE6700F77236 /* libNetLink.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libNetLink.a; path = Libraries/netLink/out/libNetLink.a; sourceTree = "<group>"; };
 		11511423170D9B7B00F77236 /* ScriptVisualObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptVisualObject.cpp; sourceTree = "<group>"; };
 		11511424170D9B7C00F77236 /* ScriptVisualObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptVisualObject.h; sourceTree = "<group>"; };
+		1158E66418BE680D00C25BAB /* libNetLink.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libNetLink.a; path = Libraries/netLink/out/libNetLink.a; sourceTree = "<group>"; };
 		11623855171DF1050027561B /* ScriptGUIRect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptGUIRect.cpp; sourceTree = "<group>"; };
 		11623856171DF1050027561B /* ScriptGUIRect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptGUIRect.h; sourceTree = "<group>"; };
 		11648F6B153DEE0F004CA74D /* FBO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FBO.h; sourceTree = "<group>"; };
@@ -241,10 +242,6 @@
 		11A79B5A153C2FE9002B9F0A /* SDLMain.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SDLMain.mm; sourceTree = "<group>"; };
 		11A79B5B153C2FE9002B9F0A /* Model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Model.cpp; sourceTree = "<group>"; };
 		11A79B5C153C2FE9002B9F0A /* Model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Model.h; sourceTree = "<group>"; };
-		11A79B5E153C2FE9002B9F0A /* rapidxml.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rapidxml.hpp; sourceTree = "<group>"; };
-		11A79B5F153C2FE9002B9F0A /* rapidxml_iterators.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rapidxml_iterators.hpp; sourceTree = "<group>"; };
-		11A79B60153C2FE9002B9F0A /* rapidxml_print.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rapidxml_print.hpp; sourceTree = "<group>"; };
-		11A79B61153C2FE9002B9F0A /* rapidxml_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rapidxml_utils.hpp; sourceTree = "<group>"; };
 		11A79B62153C2FE9002B9F0A /* ShaderProgram.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderProgram.cpp; sourceTree = "<group>"; };
 		11A79B63153C2FE9002B9F0A /* ShaderProgram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ShaderProgram.h; sourceTree = "<group>"; };
 		11A79B64153C2FE9002B9F0A /* TextFont.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TextFont.cpp; sourceTree = "<group>"; };
@@ -264,7 +261,6 @@
 		11BD39AC15414AA6007846B8 /* LightObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LightObject.cpp; sourceTree = "<group>"; };
 		11C238D71613164C009D6F9C /* LevelManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelManager.cpp; sourceTree = "<group>"; };
 		11C238D81613164C009D6F9C /* LevelManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LevelManager.h; sourceTree = "<group>"; };
-		11CC497D1833D7380099BFE8 /* libLeap.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libLeap.dylib; path = "Libraries/LeapSDK/lib/libc++/libLeap.dylib"; sourceTree = "<group>"; };
 		11D0C0F11727CE70004C30E9 /* ScriptGUIInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptGUIInput.cpp; sourceTree = "<group>"; };
 		11D0C0F21727CE71004C30E9 /* ScriptGUIInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptGUIInput.h; sourceTree = "<group>"; };
 		11D74B4416270A65000EEB50 /* Packages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Packages; sourceTree = "<group>"; };
@@ -283,6 +279,11 @@
 		11ECD33F17EC9E7200D6F865 /* Icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Icon.icns; sourceTree = "<group>"; };
 		11F1EEB5156FE48B00F7275D /* ParticlesObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParticlesObject.h; sourceTree = "<group>"; };
 		11F1EEB7156FE49400F7275D /* ParticlesObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParticlesObject.cpp; sourceTree = "<group>"; };
+		11FDB8BC18BFBFC4001A7E50 /* libLeap.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libLeap.dylib; path = /Volumes/Users/Alexander/Desktop/Olypsum/Libraries/Leap/lib/libLeap.dylib; sourceTree = "<absolute>"; };
+		11FDB8C018BFC052001A7E50 /* rapidxml.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rapidxml.hpp; sourceTree = "<group>"; };
+		11FDB8C118BFC052001A7E50 /* rapidxml_iterators.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rapidxml_iterators.hpp; sourceTree = "<group>"; };
+		11FDB8C218BFC052001A7E50 /* rapidxml_print.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rapidxml_print.hpp; sourceTree = "<group>"; };
+		11FDB8C318BFC052001A7E50 /* rapidxml_utils.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = rapidxml_utils.hpp; sourceTree = "<group>"; };
 		11FE8AB016B5A3F400B682D0 /* ScriptManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptManager.cpp; sourceTree = "<group>"; };
 		11FE8AB116B5A3F400B682D0 /* ScriptManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptManager.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -292,9 +293,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				11511422170CBE6700F77236 /* libNetLink.a in Frameworks */,
-				11209AF31896FA5F00F87B26 /* libLeap.dylib in Frameworks */,
+				1158E66518BE680D00C25BAB /* libNetLink.a in Frameworks */,
 				1197492C17DB39FA00414CAA /* libv8.dylib in Frameworks */,
+				11FDB8BE18BFBFCD001A7E50 /* libLeap.dylib in Frameworks */,
 				1114B87016A8933200B1CD41 /* Ogg.framework in Frameworks */,
 				1114B87116A8933200B1CD41 /* Vorbis.framework in Frameworks */,
 				1149A7DB17E111D20038015E /* SDL2.framework in Frameworks */,
@@ -336,10 +337,9 @@
 		1118251914F2553A00F198A7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				11209AF21896FA5F00F87B26 /* libLeap.dylib */,
-				11511421170CBE6700F77236 /* libNetLink.a */,
-				11CC497D1833D7380099BFE8 /* libLeap.dylib */,
+				1158E66418BE680D00C25BAB /* libNetLink.a */,
 				1197492B17DB39FA00414CAA /* libv8.dylib */,
+				11FDB8BC18BFBFC4001A7E50 /* libLeap.dylib */,
 				1114B86E16A8933200B1CD41 /* Ogg.framework */,
 				1114B86F16A8933200B1CD41 /* Vorbis.framework */,
 				1114B84016A88BD100B1CD41 /* BulletCollision.framework */,
@@ -397,7 +397,7 @@
 				11A3255317089E2100B038D2 /* Network.cpp */,
 				11329D5916BD8A2A000CC025 /* Profiler.h */,
 				11329D5816BD8A29000CC025 /* Profiler.cpp */,
-				11A79B5D153C2FE9002B9F0A /* rapidxml-1.13 */,
+				11FDB8BF18BFC052001A7E50 /* rapidxml */,
 				11A907611629B27A00B16607 /* XMLUtilities.h */,
 				11A907601629B27A00B16607 /* XMLUtilities.cpp */,
 				11DA1F0E162DEA03007D7E6C /* Ray3.h */,
@@ -504,17 +504,6 @@
 			path = macCompCode;
 			sourceTree = "<group>";
 		};
-		11A79B5D153C2FE9002B9F0A /* rapidxml-1.13 */ = {
-			isa = PBXGroup;
-			children = (
-				11A79B5E153C2FE9002B9F0A /* rapidxml.hpp */,
-				11A79B5F153C2FE9002B9F0A /* rapidxml_iterators.hpp */,
-				11A79B60153C2FE9002B9F0A /* rapidxml_print.hpp */,
-				11A79B61153C2FE9002B9F0A /* rapidxml_utils.hpp */,
-			);
-			path = "rapidxml-1.13";
-			sourceTree = "<group>";
-		};
 		11D74B4216270A5A000EEB50 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -523,6 +512,17 @@
 				11D74B4516270A65000EEB50 /* Shaders */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		11FDB8BF18BFC052001A7E50 /* rapidxml */ = {
+			isa = PBXGroup;
+			children = (
+				11FDB8C018BFC052001A7E50 /* rapidxml.hpp */,
+				11FDB8C118BFC052001A7E50 /* rapidxml_iterators.hpp */,
+				11FDB8C218BFC052001A7E50 /* rapidxml_print.hpp */,
+				11FDB8C318BFC052001A7E50 /* rapidxml_utils.hpp */,
+			);
+			path = rapidxml;
 			sourceTree = "<group>";
 		};
 		11FE8AAF16B5A3D900B682D0 /* Scripting */ = {
@@ -739,7 +739,16 @@
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/Libraries",
+					"$(PROJECT_DIR)/Libraries/v8/include/**",
+					"$(PROJECT_DIR)/Libraries/bulletPhysics/src/**",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/Libraries/netLink/out",
+					"$(PROJECT_DIR)/Libraries/LeapSDK/lib",
+					"$(PROJECT_DIR)/Libraries/v8/out/native",
+				);
 				LLVM_VECTORIZE_LOOPS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
@@ -770,7 +779,16 @@
 				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/Libraries",
+					"$(PROJECT_DIR)/Libraries/v8/include/**",
+					"$(PROJECT_DIR)/Libraries/bulletPhysics/src/**",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/Libraries/netLink/out",
+					"$(PROJECT_DIR)/Libraries/LeapSDK/lib",
+					"$(PROJECT_DIR)/Libraries/v8/out/native",
+				);
 				LLVM_LTO = YES;
 				LLVM_VECTORIZE_LOOPS = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
@@ -786,26 +804,15 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(LOCAL_LIBRARY_DIR)/Frameworks",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "$(OTHER_CFLAGS)";
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Libraries/bulletPhysics/src/**",
-					"$(SRCROOT)/Libraries/v8/include/**",
-					"$(SRCROOT)/Libraries/netLink/include/**",
-					"$(SRCROOT)/Libraries/LeapSDK/include",
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Source/Engine/macCompCode/Info.plist;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/Libraries/v8/out/native",
-					"$(SRCROOT)/Libraries/netLink/out",
-					"$(SRCROOT)/Libraries/LeapSDK/lib",
+					/Volumes/Users/Alexander/Desktop/Olypsum/Libraries/Leap/lib,
 				);
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -820,26 +827,15 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(LOCAL_LIBRARY_DIR)/Frameworks",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "$(OTHER_CFLAGS)";
-				HEADER_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(SRCROOT)/Libraries/bulletPhysics/src/**",
-					"$(SRCROOT)/Libraries/v8/include/**",
-					"$(SRCROOT)/Libraries/netLink/include/**",
-					"$(SRCROOT)/Libraries/LeapSDK/include",
-				);
+				HEADER_SEARCH_PATHS = "$(inherited)";
 				INFOPLIST_FILE = Source/Engine/macCompCode/Info.plist;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SRCROOT)/Libraries/v8/out/native",
-					"$(SRCROOT)/Libraries/netLink/out",
-					"$(SRCROOT)/Libraries/LeapSDK/lib",
+					/Volumes/Users/Alexander/Desktop/Olypsum/Libraries/Leap/lib,
 				);
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

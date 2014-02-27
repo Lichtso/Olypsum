@@ -9,7 +9,7 @@
 #ifndef Menu_h
 #define Menu_h
 
-#include "LevelManager.h"
+#include "../LevelManager.h"
 
 class Menu {
     static void openExternURL(std::string str);

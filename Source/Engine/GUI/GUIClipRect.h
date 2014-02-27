@@ -9,7 +9,7 @@
 #ifndef GUIClipRect_h
 #define GUIClipRect_h
 
-#include "TextFont.h"
+#include "../TextFont.h"
 
 class GUIClipRect {
     public:

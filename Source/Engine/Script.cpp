@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "ScriptManager.h"
+#include "Scripting/ScriptManager.h"
 
 ScriptFile::~ScriptFile() {
     exports.Dispose();

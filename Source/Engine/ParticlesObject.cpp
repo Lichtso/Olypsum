@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "ScriptParticlesObject.h"
+#include "Scripting/ScriptParticlesObject.h"
 
 static bool readBoundsNode(rapidxml::xml_node<xmlUsedCharType>* node, const char* name, btVector3& min, btVector3& max) {
     XMLValueArray<float> vecData;

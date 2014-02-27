@@ -9,16 +9,14 @@
 #ifndef Utilities_h
 #define Utilities_h
 
-//#include <math.h>
-#include <dirent.h>
-#include <sys/stat.h>
-#include <sys/time.h>
-#include <fstream>
-#include <thread>
-#include <regex>
-#include <unordered_map>
-#include <unordered_set>
-
+#define V8_USE_UNSAFE_HANDLES 1
+#ifdef WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <SDKDDKVer.h>
+#include <windows.h>
+#include <gl\gl.h>
+#include <gl\glu.h>
+#else
 #ifdef __APPLE__
 #include <OpenGL/gl3.h>
 #include <OpenAL/al.h>
@@ -33,22 +31,30 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 #endif
+#include <vorbis/vorbisfile.h>
+#include <dirent.h>
+#include <sys/time.h>
+#endif
+#include <sys/stat.h>
+#include <fstream>
+#include <thread>
+#include <regex>
+#include <unordered_map>
+#include <unordered_set>
 
-#include <SDL2/SDL.h>
-#include <BulletCollision/btBulletCollisionCommon.h>
-#include <BulletDynamics/btBulletDynamicsCommon.h>
-#include <BulletSoftBody/btSoftRigidDynamicsWorld.h>
-#include <BulletSoftBody/btDefaultSoftBodySolver.h>
-#include <BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h>
-//#include <BulletMultiThreaded/PosixThreadSupport.h>
-#include <BulletMultiThreaded/btParallelConstraintSolver.h>
-#include <BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolver_OpenCLSIMDAware.h>
-#include <BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolverVertexBuffer_OpenGL.h>
-#include <BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolverOutputCLtoGL.h>
-#include <Leap.h>
-#include <netLink.h>
-#define V8_USE_UNSAFE_HANDLES 1
-#include <v8.h>
+#include <SDL2/include/SDL.h>
+#include <bulletPhysics/src/btBulletCollisionCommon.h>
+#include <bulletPhysics/src/btBulletDynamicsCommon.h>
+#include <bulletPhysics/src/BulletSoftBody/btSoftRigidDynamicsWorld.h>
+#include <bulletPhysics/src/BulletSoftBody/btDefaultSoftBodySolver.h>
+#include <bulletPhysics/src/BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h>
+#include <bulletPhysics/src/BulletMultiThreaded/btParallelConstraintSolver.h>
+#include <bulletPhysics/src/BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolver_OpenCLSIMDAware.h>
+#include <bulletPhysics/src/BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolverVertexBuffer_OpenGL.h>
+#include <bulletPhysics/src/BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolverOutputCLtoGL.h>
+#include <Leap/include/Leap.h>
+#include <netLink/include/netLink.h>
+#include <v8/include/v8.h>
 
 enum logMessageType {
     info_log = 0,

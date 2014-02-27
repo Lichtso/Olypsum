@@ -9,7 +9,7 @@
 #ifndef LevelLoader_h
 #define LevelLoader_h
 
-#include "GUIImage.h"
+#include "GUI/GUIImage.h"
 
 class LevelLoader {
     unsigned int objectLinkingScope, objectLinkingOffset;

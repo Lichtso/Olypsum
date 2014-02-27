@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "ScriptSimpleObject.h"
+#include "Scripting/ScriptSimpleObject.h"
 
 //! @cond
 struct SingleHitCallback : btDbvt::ICollide {

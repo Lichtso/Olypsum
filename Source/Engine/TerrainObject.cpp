@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "ScriptVisualObject.h"
+#include "Scripting/ScriptVisualObject.h"
 
 TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelLoader) :heights(NULL) {
     levelLoader->pushObject(this);

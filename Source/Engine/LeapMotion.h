@@ -9,7 +9,7 @@
 #ifndef LeapMotion_h
 #define LeapMotion_h
 
-#include "Menu.h"
+#include "Menu/Menu.h"
 
 class LeapManager : public Leap::Listener {
     int64_t lastFrameID = -1;

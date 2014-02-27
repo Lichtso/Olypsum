@@ -7,7 +7,7 @@
 //
 
 #include "ShaderProgram.h"
-#include "FileManager.h"
+//#include "FileManager.h"
 
 Texture::Texture() :GLname(0), frames(NULL), surface(NULL), minFilter(GL_LINEAR_MIPMAP_LINEAR), magFilter(GL_LINEAR) {
         
