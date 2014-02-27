@@ -263,11 +263,12 @@ void Menu::gameTick() {
                 mouseY = optionsState.mouseSmoothing*mouseVelocityY;
                 mouseVelocityX -= mouseX;
                 mouseVelocityY -= mouseY;
-                SDL_SetRelativeMouseMode(SDL_TRUE);
+                SDL_ShowCursor(0);
+                SDL_WarpMouseInWindow(mainWindow, optionsState.videoWidth >> 1, optionsState.videoHeight >> 1);
             }else{
                 mouseVelocityX = 0.0;
                 mouseVelocityY = 0.0;
-                SDL_SetRelativeMouseMode(SDL_FALSE);
+                SDL_ShowCursor(1);
             }
         } break;
         default:
@@ -513,7 +514,7 @@ void Menu::setGameEscMenu() {
     clear();
     current = gameEsc;
     
-    SDL_SetRelativeMouseMode(SDL_FALSE);
+    SDL_ShowCursor(1);
     SDL_WarpMouseInWindow(mainWindow, optionsState.videoWidth >> 1, optionsState.videoHeight >> 1);
     std::function<void(GUIButton*)> onClick[] = {
         [this](GUIButton* button) {

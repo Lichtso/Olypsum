@@ -137,16 +137,18 @@ void AppMain() {
                 case SDL_MOUSEWHEEL:
                     menu.handleMouseWheel(event.wheel.x, event.wheel.y);
                 break;
-                case SDL_MOUSEMOTION:
+                case SDL_MOUSEMOTION: {
+                    int mouseX = event.motion.x*optionsState.videoScale - menu.screenView->width;
+                    int mouseY = menu.screenView->height - event.motion.y*optionsState.videoScale;
                     if(menu.current == Menu::inGame && menu.mouseFixed) {
-                        menu.mouseVelocityX += optionsState.mouseSensitivity*event.motion.xrel*optionsState.videoScale;
-                        menu.mouseVelocityY -= optionsState.mouseSensitivity*event.motion.yrel*optionsState.videoScale;
+                        menu.mouseVelocityX += optionsState.mouseSensitivity*mouseX;
+                        menu.mouseVelocityY += optionsState.mouseSensitivity*mouseY;
                     }else{
-                        menu.mouseX = event.motion.x*optionsState.videoScale - menu.screenView->width;
-                        menu.mouseY = menu.screenView->height - event.motion.y*optionsState.videoScale;
+                        menu.mouseX = mouseX;
+                        menu.mouseY = mouseY;
                         menu.screenView->handleMouseMove(menu.mouseX, menu.mouseY);
                     }
-                break;
+                } break;
                 case SDL_QUIT:
                     AppTerminate();
                 break;
