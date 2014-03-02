@@ -9,7 +9,7 @@
 #include "ScriptManager.h"
 
 static v8::Handle<v8::Value> accessProperty(v8::Handle<v8::Object> object, const char* property, v8::Handle<v8::Value> setValue) {
-    v8::Handle<v8::Value> returnValue, key = v8::String::New(property);
+    v8::Handle<v8::Value> returnValue, key = ScriptString(property);
     std::smatch match;
     const std::regex regex("(.+)\\[([0-9]+)\\]");
     if(std::regex_match(std::string(property), match, regex)) {
@@ -23,7 +23,7 @@ static v8::Handle<v8::Value> accessProperty(v8::Handle<v8::Object> object, const
                 array->Set(index, setValue);
         }else if(returnValue->IsFunction()) {
             v8::Handle<v8::Function> function = v8::Handle<v8::Function>::Cast(returnValue);
-            v8::Handle<v8::Value> arguments[] = { v8::Uint32::New(index), setValue };
+            v8::Handle<v8::Value> arguments[] = { v8::Uint32::New(v8::Isolate::GetCurrent(), index), setValue };
             returnValue = function->CallAsFunction(object, (setValue.IsEmpty())?1:2, arguments);
         }
     }else{
@@ -38,68 +38,80 @@ static v8::Handle<v8::Value> accessProperty(v8::Handle<v8::Object> object, const
 }
 
 AnimationFrame::AnimationFrame(float _acceleration, float _duration, v8::Handle<v8::Value> _value)
-    :acceleration(_acceleration), duration(_duration),
-    value(v8::Persistent<v8::Value>::New(v8::Isolate::GetCurrent(), _value)) {
-    
+    :acceleration(_acceleration), duration(_duration) {
+    value.Reset(v8::Isolate::GetCurrent(), _value);
 }
 
 AnimationTrack::AnimationTrack(v8::Handle<v8::Object> _object)
-    :object(v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), _object)),
-    time(0.0), looping(false) {
-    
+    :time(0.0), looping(false) {
+    object.Reset(v8::Isolate::GetCurrent(), _object);
+}
+
+AnimationTrack::~AnimationTrack() {
+    for(auto iterator : frames)
+        delete iterator;
 }
 
 bool AnimationTrack::update(const char* property) {
-    v8::HandleScope handleScope;
-    if(frames.size() <= 1 || frames[0].value.IsEmpty() || frames[1].value.IsEmpty())
+    ScriptScope();
+    if(frames.size() <= 1 || frames[0]->value.IsEmpty() || frames[1]->value.IsEmpty())
         return false;
     
-    float t = min(time / frames[1].duration, 1.0F), t2 = t*t, t3 = t2*t;
-    t = 3.0*t2-2.0*t3+(t3-2.0*t2+t)*frames[0].acceleration+(t3-t2)*frames[1].acceleration;
+    float t = min(time / frames[1]->duration, 1.0F), t2 = t*t, t3 = t2*t;
+    t = 3.0*t2-2.0*t3+(t3-2.0*t2+t)*frames[0]->acceleration+(t3-t2)*frames[1]->acceleration;
     
     v8::Handle<v8::Value> value;
-    if(frames[0].value->IsNumber()) {
-        double a = frames[0].value->NumberValue(), b = frames[1].value->NumberValue();
-        value = v8::Number::New(a+(b-a)*t);
-    }else if(frames[0].value->IsInt32()) {
-        int a = frames[0].value->IntegerValue(), b = frames[1].value->IntegerValue();
-        value = v8::Integer::New(a+(b-a)*t);
-    }else if(frames[0].value->IsBoolean()) {
-        bool a = frames[0].value->BooleanValue(), b = frames[1].value->BooleanValue();
-        value = v8::Boolean::New((t < 0.5) ? a : b);
-    }else if(scriptVector3.isCorrectInstance(*frames[0].value)) {
-        btVector3 a = scriptVector3.getDataOfInstance(*frames[0].value),
-                  b = scriptVector3.getDataOfInstance(*frames[1].value);
-        value = scriptVector3.newInstance(a.lerp(b, t));
-    }else if(scriptQuaternion.isCorrectInstance(*frames[0].value)) {
-        btQuaternion a = scriptQuaternion.getDataOfInstance(*frames[0].value),
-                     b = scriptQuaternion.getDataOfInstance(*frames[1].value);
-        value = scriptQuaternion.newInstance(a.slerp(b, t));
-    }else if(scriptMatrix4.isCorrectInstance(*frames[0].value)) {
-        Matrix4 *a = scriptMatrix4.getDataOfInstance(*frames[0].value),
-                *b = scriptMatrix4.getDataOfInstance(*frames[1].value);
-        value = scriptMatrix4.newInstance(a->getInterpolation(*b, t));
+    if((*frames[0]->value)->IsNumber()) {
+        double a = (*frames[0]->value)->NumberValue(), b = (*frames[1]->value)->NumberValue();
+        value = v8::Number::New(v8::Isolate::GetCurrent(), a+(b-a)*t);
+    }else if((*frames[0]->value)->IsInt32()) {
+        int a = (*frames[0]->value)->IntegerValue(), b = (*frames[1]->value)->IntegerValue();
+        value = v8::Integer::New(v8::Isolate::GetCurrent(), a+(b-a)*t);
+    }else if((*frames[0]->value)->IsBoolean()) {
+        bool a = (*frames[0]->value)->BooleanValue(), b = (*frames[1]->value)->BooleanValue();
+        value = v8::Boolean::New(v8::Isolate::GetCurrent(), (t < 0.5) ? a : b);
+    }else if(scriptVector3->isCorrectInstance(*frames[0]->value)) {
+        btVector3 a = scriptVector3->getDataOfInstance(*frames[0]->value),
+                  b = scriptVector3->getDataOfInstance(*frames[1]->value);
+        value = scriptVector3->newInstance(a.lerp(b, t));
+    }else if(scriptQuaternion->isCorrectInstance(*frames[0]->value)) {
+        btQuaternion a = scriptQuaternion->getDataOfInstance(*frames[0]->value),
+                     b = scriptQuaternion->getDataOfInstance(*frames[1]->value);
+        value = scriptQuaternion->newInstance(a.slerp(b, t));
+    }else if(scriptMatrix4->isCorrectInstance(*frames[0]->value)) {
+        Matrix4 *a = scriptMatrix4->getDataOfInstance(*frames[0]->value),
+                *b = scriptMatrix4->getDataOfInstance(*frames[1]->value);
+        value = scriptMatrix4->newInstance(a->getInterpolation(*b, t));
     }else
         return false;
     
-    return !accessProperty(object, property, value).IsEmpty();
+    return !accessProperty(v8::Handle<v8::Object>(*object), property, value).IsEmpty();
 }
 
 bool AnimationTrack::gameTick(const char* property) {
     time += profiler.animationFactor;
     if(!update(property)) return false;
     
-    while(time >= frames[1].duration && frames.size() > 1) {
-        time -= frames[1].duration;
+    while(time >= frames[1]->duration && frames.size() > 1) {
+        time -= frames[1]->duration;
+        AnimationFrame* frame = frames[0];
         if(looping) {
-            AnimationFrame frame = frames[0];
             frames.erase(frames.begin());
             frames.push_back(frame);
-        }else
+        }else{
+            delete frame;
             frames.erase(frames.begin());
+        }
     }
     
     return (frames.size() <= 1);
+}
+
+
+
+AnimationProperty::~AnimationProperty() {
+    for(auto iterator : tracks)
+        delete iterator;
 }
 
 AnimationTrack* AnimationProperty::find(v8::Handle<v8::Object> object) {
@@ -129,15 +141,14 @@ bool AnimationProperty::gameTick(const char* property) {
 
 
 AnimationTimer::AnimationTimer(v8::Handle<v8::Function> _function, double _timeLength)
-    :function(v8::Persistent<v8::Function>::New(v8::Isolate::GetCurrent(), _function)),
-    timeLength(_timeLength), timeNext(_timeLength+getTime()) {
-    
+    :timeLength(_timeLength), timeNext(_timeLength+getTime()) {
+    function.Reset(v8::Isolate::GetCurrent(), _function);
 }
 
 bool AnimationTimer::gameTick(double timeNow) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     v8::TryCatch tryCatch;
-    v8::Handle<v8::Value> result = function->CallAsFunction(function, 0, NULL);
+    v8::Handle<v8::Value> result = (*function)->CallAsFunction(v8::Handle<v8::Value>(*function), 0, NULL);
     scriptManager->tryCatch(&tryCatch);
     
     if(scriptManager->timers.find(this) == scriptManager->timers.end())
@@ -157,16 +168,16 @@ bool AnimationTimer::gameTick(double timeNow) {
 
 
 void ScriptAnimation::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
-    return args.ScriptException("Animation Constructor: Class can't be instantiated");
+    ScriptScope();
+    return ScriptException("Animation Constructor: Class can't be instantiated");
 }
 
 void ScriptAnimation::AddFrames(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(args.Length() < 6)
-        return args.ScriptException("Animation addFrames(): Too few arguments");
+        return ScriptException("Animation addFrames(): Too few arguments");
     if(!args[0]->IsObject() || !args[1]->IsString()|| !args[2]->IsBoolean() || !args[3]->IsArray() || !args[4]->IsArray() || !args[5]->IsArray())
-        return args.ScriptException("Animation addFrames(): Invalid argument");
+        return ScriptException("Animation addFrames(): Invalid argument");
     
     std::string property = stdStrOfV8(args[1]);
     AnimationProperty* animationProperty;
@@ -189,62 +200,68 @@ void ScriptAnimation::AddFrames(const v8::FunctionCallbackInfo<v8::Value>& args)
                           values = v8::Handle<v8::Array>::Cast(args[5]);
     
     if(accelerations->Length() != durations->Length() || accelerations->Length() != values->Length())
-        return args.ScriptException("Animation addFrames(): Invalid frames");
+        return ScriptException("Animation addFrames(): Invalid frames");
     
     if(accelerations->Length() == 0)
         return;
     
-    v8::Handle<v8::Value> defaultValue = accessProperty(args[0]->ToObject(), cStrOfV8(args[1]), v8::Undefined());
+    v8::Handle<v8::Value> defaultValue = accessProperty(args[0]->ToObject(), cStrOfV8(args[1]), v8::Undefined(v8::Isolate::GetCurrent()));
     if(defaultValue.IsEmpty())
-        return args.ScriptException("Animation addFrames(): Invalid property");
+        return ScriptException("Animation addFrames(): Invalid property");
     
     for(unsigned int i = 0; i < accelerations->Length(); i ++) {
         if(!accelerations->Get(i)->IsNumber() || !durations->Get(i)->IsNumber())
-            return args.ScriptException("Animation addFrames(): Invalid frame");
+            return ScriptException("Animation addFrames(): Invalid frame");
         
-        track->frames.push_back(AnimationFrame(accelerations->Get(i)->NumberValue(), durations->Get(i)->NumberValue(),
-                                              (values->Get(i)->IsNull()) ? defaultValue : values->Get(i)));
+        track->frames.push_back(new AnimationFrame(accelerations->Get(i)->NumberValue(), durations->Get(i)->NumberValue(),
+                                                  (values->Get(i)->IsNull()) ? defaultValue : values->Get(i)));
     }
     track->update(property.c_str());
 }
 
 void ScriptAnimation::RemoveFrames(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(args.Length() < 4)
-        return args.ScriptException("Animation removeFrames(): Too few arguments");
+        return ScriptException("Animation removeFrames(): Too few arguments");
     if(!args[0]->IsObject() || !args[1]->IsString() ||
        !args[2]->IsUint32() || !args[3]->IsInt32() || args[3]->IntegerValue() <= 0)
-        return args.ScriptException("Animation removeFrames(): Invalid argument");
+        return ScriptException("Animation removeFrames(): Invalid argument");
     
     std::string property = stdStrOfV8(args[1]);
     auto iterator = scriptManager->animations.find(property);
     if(iterator == scriptManager->animations.end())
-        return args.ScriptException("Animation removeFrames(): Invalid track");
+        return ScriptException("Animation removeFrames(): Invalid track");
     
     AnimationProperty* animationProperty = iterator->second;
     AnimationTrack* track = animationProperty->find(args[0]->ToObject());
     if(!track)
-        return args.ScriptException("Animation removeFrames(): Invalid track");
+        return ScriptException("Animation removeFrames(): Invalid track");
     
     if(track->frames.size() <= args[2]->IntegerValue()+args[3]->IntegerValue())
-        return args.ScriptException("Animation removeFrames(): Out of bounds");
+        return ScriptException("Animation removeFrames(): Out of bounds");
     
     if(args[3]->IntegerValue() >= track->frames.size()-2) {
+        delete track;
         animationProperty->tracks.erase(animationProperty->tracks.begin()+animationProperty->find(track));
-        if(animationProperty->tracks.size() == 0)
+        if(animationProperty->tracks.size() == 0) {
+            delete animationProperty;
             scriptManager->animations.erase(scriptManager->animations.find(property));
+        }
     }else{
         if(args[2]->IntegerValue() < 2) track->time = 0.0;
-        track->frames.erase(track->frames.begin()+args[2]->IntegerValue(), track->frames.begin()+args[2]->IntegerValue()+args[3]->IntegerValue());
+        auto from = args[2]->IntegerValue(), to = args[2]->IntegerValue()+args[3]->IntegerValue();
+        for(int i = from; i < to; i ++)
+            delete track->frames[i];
+        track->frames.erase(track->frames.begin()+from, track->frames.begin()+to);
     }
 }
 
 void ScriptAnimation::GetTrackInfo(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(args.Length() < 2)
-        return args.ScriptException("Animation getTrackInfo(): Too few arguments");
+        return ScriptException("Animation getTrackInfo(): Too few arguments");
     if(!args[0]->IsObject() || !args[1]->IsString())
-        return args.ScriptException("Animation getTrackInfo(): Invalid argument");
+        return ScriptException("Animation getTrackInfo(): Invalid argument");
     
     std::string property = stdStrOfV8(args[1]);
     auto iterator = scriptManager->animations.find(property);
@@ -256,47 +273,47 @@ void ScriptAnimation::GetTrackInfo(const v8::FunctionCallbackInfo<v8::Value>& ar
     if(!track)
         return;
     
-    v8::Handle<v8::Object> result = v8::Object::New();
-    result->Set(v8::String::New("frames"), v8::Integer::New(track->frames.size()));
-    result->Set(v8::String::New("looping"), v8::Boolean::New(track->looping));
-    result->Set(v8::String::New("time"), v8::Number::New(track->time));
-    args.GetReturnValue().Set(result);
+    v8::Handle<v8::Object> result = v8::Object::New(v8::Isolate::GetCurrent());
+    result->Set(ScriptString("frames"), v8::Integer::New(v8::Isolate::GetCurrent(), track->frames.size()));
+    result->Set(ScriptString("looping"), v8::Boolean::New(v8::Isolate::GetCurrent(), track->looping));
+    result->Set(ScriptString("time"), v8::Number::New(v8::Isolate::GetCurrent(), track->time));
+    ScriptReturn(result);
 }
 
 void ScriptAnimation::StartTimer(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(args.Length() < 2)
-        return args.ScriptException("Animation startTimer(): Too few arguments");
+        return ScriptException("Animation startTimer(): Too few arguments");
     if(!args[0]->IsFunction() || !args[1]->IsNumber())
-        return args.ScriptException("Animation startTimer(): Invalid argument");
+        return ScriptException("Animation startTimer(): Invalid argument");
     
     AnimationTimer* interval = new AnimationTimer(v8::Handle<v8::Function>::Cast(args[0]), args[1]->NumberValue());
     scriptManager->timers.insert(interval);
-    args.GetReturnValue().Set(interval->function);
+    ScriptReturn(interval->function);
 }
 
 void ScriptAnimation::StopTimer(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(args.Length() == 0)
-        return args.ScriptException("Animation stopTimer(): Too few arguments");
+        return ScriptException("Animation stopTimer(): Too few arguments");
     if(!args[0]->IsFunction())
-        return args.ScriptException("Animation stopTimer(): Invalid argument");
+        return ScriptException("Animation stopTimer(): Invalid argument");
     
     for(auto interval : scriptManager->timers)
         if(interval->function == args[0]) {
-            scriptManager->timers.erase(interval);
             delete interval;
-            args.GetReturnValue().Set(true);
+            scriptManager->timers.erase(interval);
+            ScriptReturn(true);
         }
-    args.GetReturnValue().Set(false);
+    ScriptReturn(false);
 }
 
 ScriptAnimation::ScriptAnimation() :ScriptClass("Animation", Constructor) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
-    functionTemplate->Set(v8::String::New("addFrames"), v8::FunctionTemplate::New(AddFrames));
-    functionTemplate->Set(v8::String::New("removeFrames"), v8::FunctionTemplate::New(RemoveFrames));
-    functionTemplate->Set(v8::String::New("getTrackInfo"), v8::FunctionTemplate::New(GetTrackInfo));
-    functionTemplate->Set(v8::String::New("startTimer"), v8::FunctionTemplate::New(StartTimer));
-    functionTemplate->Set(v8::String::New("stopTimer"), v8::FunctionTemplate::New(StopTimer));
+    (*functionTemplate)->Set(ScriptString("addFrames"), ScriptMethod(AddFrames));
+    (*functionTemplate)->Set(ScriptString("removeFrames"), ScriptMethod(RemoveFrames));
+    (*functionTemplate)->Set(ScriptString("getTrackInfo"), ScriptMethod(GetTrackInfo));
+    (*functionTemplate)->Set(ScriptString("startTimer"), ScriptMethod(StartTimer));
+    (*functionTemplate)->Set(ScriptString("stopTimer"), ScriptMethod(StopTimer));
 }

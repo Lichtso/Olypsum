@@ -140,10 +140,8 @@ TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelL
     vao.updateIndecies(indeciesCount, indecies, GL_UNSIGNED_INT, GL_STATIC_DRAW);
     delete [] indecies;
     
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    scriptTerrainObject.functionTemplate->GetFunction()->NewInstance(1, &external);
-    scriptInstance->SetIndexedPropertiesToExternalArrayData(heights, v8::kExternalFloatArray, width*length);
+    ScriptNewInstance(scriptTerrainObject);
+    (*scriptInstance)->SetIndexedPropertiesToExternalArrayData(heights, v8::kExternalFloatArray, width*length);
     updateModel();
 }
 

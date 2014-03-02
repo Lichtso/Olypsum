@@ -70,7 +70,7 @@ class ScriptQuaternion : public ScriptClass {
 
 class ScriptMatrix4 : public ScriptClass {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void Destructor(v8::Isolate* isolate, v8::Persistent<v8::Object>* value, void* data);
+    static void Destructor(const v8::WeakCallbackData<v8::Object, void>& data);
     static void toString(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void toJSON(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void AccessRowX(const v8::FunctionCallbackInfo<v8::Value>& args);
@@ -94,8 +94,8 @@ class ScriptMatrix4 : public ScriptClass {
     ScriptMatrix4();
 };
 
-extern ScriptVector3 scriptVector3;
-extern ScriptQuaternion scriptQuaternion;
-extern ScriptMatrix4 scriptMatrix4;
+extern std::unique_ptr<ScriptVector3> scriptVector3;
+extern std::unique_ptr<ScriptQuaternion> scriptQuaternion;
+extern std::unique_ptr<ScriptMatrix4> scriptMatrix4;
 
 #endif

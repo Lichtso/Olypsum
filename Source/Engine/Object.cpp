@@ -9,8 +9,8 @@
 #include "AppMain.h"
 
 BaseClass::~BaseClass() {
-    if(!scriptInstance.IsEmpty())
-        scriptInstance.Dispose();
+    //if(!scriptInstance.IsEmpty())
+    //    scriptInstance.Reset();
 }
 
 void BaseClass::initScriptNode(FilePackage* filePackage, rapidxml::xml_node<xmlUsedCharType>* node) {
@@ -21,7 +21,7 @@ void BaseClass::initScriptNode(FilePackage* filePackage, rapidxml::xml_node<xmlU
     if(attribute) {
         scriptFile = fileManager.getResourceByPath<ScriptFile>(filePackage, attribute->value());
         if(scriptFile)
-            scriptFile->callFunction("onload", true, { scriptInstance, scriptManager->readCdataXMLNode(node) });
+            scriptFile->callFunction("onload", true, 2, *scriptInstance, *scriptManager->readCdataXMLNode(node));
     }else
         log(error_log, "Tried to construct resource without \"src\"-attribute.");
 }
@@ -65,7 +65,7 @@ rapidxml::xml_node<xmlUsedCharType>* BaseObject::write(rapidxml::xml_document<xm
     rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
     node->name("BaseObject");
     if(scriptFile) {
-        v8::Handle<v8::Value> scritData = scriptFile->callFunction("onsave", true, { scriptInstance });
+        v8::Handle<v8::Value> scritData = scriptFile->callFunction("onsave", true, 1, *scriptInstance);
         scriptManager->writeCdataXMLNode(doc, node, "Data", scritData);
         node->append_node(fileManager.writeResource(doc, "Script", scriptFile->filePackage, scriptFile->name));
     }
@@ -85,9 +85,7 @@ std::unordered_set<BaseLink*>::iterator BaseObject::findLinkTo(BaseObject* linke
 
 
 SimpleObject::SimpleObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :SimpleObject() {
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    scriptBaseObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    ScriptNewInstance(scriptBaseObject);
     objectManager.simpleObjects.insert(this);
     BaseObject::init(node, levelLoader);
 }
@@ -109,9 +107,7 @@ PhysicObject::PhysicObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoade
     body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
     objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Zone, CollisionMask_Object);
     
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    scriptPhysicObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    ScriptNewInstance(scriptPhysicObject);
 }
 
 void PhysicObject::removeClean() {
@@ -156,21 +152,21 @@ void PhysicObject::updateTouchingObjects() {
 void PhysicObject::handleCollision(btPersistentManifold* contactManifold, PhysicObject* b) {
     if(!scriptFile || !scriptFile->checkFunction("oncollision")) return;
     
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Array> pointsA = v8::Array::New(contactManifold->getNumContacts()),
-                          pointsB = v8::Array::New(contactManifold->getNumContacts()),
-                          distances = v8::Array::New(contactManifold->getNumContacts()),
-                          impulses = v8::Array::New(contactManifold->getNumContacts());
+    ScriptScope();
+    v8::Handle<v8::Array> pointsA = v8::Array::New(v8::Isolate::GetCurrent(), contactManifold->getNumContacts()),
+                          pointsB = v8::Array::New(v8::Isolate::GetCurrent(), contactManifold->getNumContacts()),
+                          distances = v8::Array::New(v8::Isolate::GetCurrent(), contactManifold->getNumContacts()),
+                          impulses = v8::Array::New(v8::Isolate::GetCurrent(), contactManifold->getNumContacts());
     
     for(unsigned int i = 0; i < contactManifold->getNumContacts(); i ++) {
         btManifoldPoint point = contactManifold->getContactPoint(i);
-        pointsA->Set(i, scriptVector3.newInstance(point.getPositionWorldOnA()));
-        pointsB->Set(i, scriptVector3.newInstance(point.getPositionWorldOnB()));
-        distances->Set(i, v8::Number::New(point.getDistance()));
-        impulses->Set(i, v8::Number::New(point.getAppliedImpulse()));
+        pointsA->Set(i, scriptVector3->newInstance(point.getPositionWorldOnA()));
+        pointsB->Set(i, scriptVector3->newInstance(point.getPositionWorldOnB()));
+        distances->Set(i, v8::Number::New(v8::Isolate::GetCurrent(), point.getDistance()));
+        impulses->Set(i, v8::Number::New(v8::Isolate::GetCurrent(), point.getAppliedImpulse()));
     }
     
-    scriptFile->callFunction("oncollision", true, { scriptInstance, b->scriptInstance, pointsA, pointsB, distances, impulses });
+    scriptFile->callFunction("oncollision", true, 6, *scriptInstance, *b->scriptInstance, *pointsA, *pointsB, *distances, *impulses);
 }
 
 btCollisionShape* PhysicObject::readCollisionShape(rapidxml::xml_node<xmlUsedCharType>* node) {

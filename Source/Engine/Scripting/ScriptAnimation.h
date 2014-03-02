@@ -21,10 +21,11 @@ class AnimationFrame {
 class AnimationTrack {
     public:
     v8::Persistent<v8::Object> object;
-    std::vector<AnimationFrame> frames;
+    std::vector<AnimationFrame*> frames;
     float time;
     bool looping;
     AnimationTrack(v8::Handle<v8::Object> object);
+    ~AnimationTrack();
     bool update(const char* property);
     bool gameTick(const char* property);
 };
@@ -33,6 +34,7 @@ class AnimationProperty {
     public:
     std::vector<AnimationTrack*> tracks;
     AnimationTrack* find(v8::Handle<v8::Object> object);
+    ~AnimationProperty();
     int find(AnimationTrack* track);
     bool gameTick(const char* property);
 };
@@ -56,6 +58,6 @@ class ScriptAnimation : public ScriptClass {
     ScriptAnimation();
 };
 
-extern ScriptAnimation scriptAnimation;
+extern std::unique_ptr<ScriptAnimation> scriptAnimation;
 
 #endif

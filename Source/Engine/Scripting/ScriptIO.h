@@ -28,7 +28,7 @@ class ScriptKeyboard : public ScriptClass {
     ScriptKeyboard();
 };
 
-extern ScriptMouse scriptMouse;
-extern ScriptKeyboard scriptKeyboard;
+extern std::unique_ptr<ScriptMouse> scriptMouse;
+extern std::unique_ptr<ScriptKeyboard> scriptKeyboard;
 
 #endif

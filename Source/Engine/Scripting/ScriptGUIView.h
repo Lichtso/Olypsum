@@ -68,9 +68,9 @@ class ScriptGUIScrollView : public ScriptGUIFramedView {
     ScriptGUIScrollView();
 };
 
-extern ScriptGUIView scriptGUIView;
-extern ScriptGUIFramedView scriptGUIFramedView;
-extern ScriptGUIScreenView scriptGUIScreenView;
-extern ScriptGUIScrollView scriptGUIScrollView;
+extern std::unique_ptr<ScriptGUIView> scriptGUIView;
+extern std::unique_ptr<ScriptGUIFramedView> scriptGUIFramedView;
+extern std::unique_ptr<ScriptGUIScreenView> scriptGUIScreenView;
+extern std::unique_ptr<ScriptGUIScrollView> scriptGUIScrollView;
 
 #endif

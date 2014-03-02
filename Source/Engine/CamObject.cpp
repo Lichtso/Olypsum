@@ -74,11 +74,9 @@ CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* lev
     
     updateViewMat();
     if(!mainCam) mainCam = this;
-        
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    scriptCamObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    
     objectManager.simpleObjects.insert(this);
+    ScriptNewInstance(scriptCamObject);
 }
 
 void CamObject::removeClean() {

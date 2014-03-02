@@ -9,9 +9,9 @@
 #include "Scripting/ScriptManager.h"
 
 ScriptFile::~ScriptFile() {
-    exports.Dispose();
-    script.Dispose();
-    context.Dispose();
+    /*exports.Reset();
+    script.Reset();
+    context.Reset();*/
 }
 
 FileResourcePtr<FileResource> ScriptFile::load(FilePackage* _filePackage, const std::string& name) {
@@ -23,19 +23,19 @@ FileResourcePtr<FileResource> ScriptFile::load(FilePackage* _filePackage, const 
     if(!data) return NULL;
     
     v8::TryCatch tryCatch;
-    v8::HandleScope handleScope;
-    context = v8::Persistent<v8::Context>::New(v8::Isolate::GetCurrent(),
-              v8::Context::New(v8::Isolate::GetCurrent(), NULL, scriptManager->globalTemplate));
-    context->Enter();
-    context->Global()->Set(v8::String::New("exports"), v8::Object::New());
+    ScriptScope();
+    context.Reset(v8::Isolate::GetCurrent(),
+                  v8::Context::New(v8::Isolate::GetCurrent(), NULL, v8::Handle<v8::ObjectTemplate>(*scriptManager->globalTemplate)));
+    (*context)->Enter();
+    (*context)->Global()->Set(ScriptString("exports"), v8::Object::New(v8::Isolate::GetCurrent()));
     
-    v8::Local<v8::String> scriptName = v8::String::New(fileManager.getPathOfResource(filePackage, name).c_str());
-    v8::Local<v8::Script> scriptLocal = v8::Script::Compile(v8::String::New(data.get()), scriptName);
+    v8::Handle<v8::String> scriptName = ScriptString(fileManager.getPathOfResource(filePackage, name).c_str());
+    v8::Handle<v8::Script> scriptLocal = v8::Script::Compile(ScriptString(data.get()), scriptName);
     if(scriptManager->tryCatch(&tryCatch)) {
-        script = v8::Persistent<v8::Script>::New(v8::Isolate::GetCurrent(), scriptLocal);
-        v8::Handle<v8::Object>::Cast(run());
-        v8::Local<v8::Value> objectLocal = context->Global()->Get(v8::String::New("exports"));
-        exports = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), v8::Local<v8::Object>::Cast(objectLocal));
+        script.Reset(v8::Isolate::GetCurrent(), scriptLocal);
+        run();
+        v8::Handle<v8::Object> objectLocal = v8::Handle<v8::Object>::Cast((*context)->Global()->Get(ScriptString("exports")));
+        exports.Reset(v8::Isolate::GetCurrent(), objectLocal);
         return pointer;
     }else
         return NULL;
@@ -43,69 +43,94 @@ FileResourcePtr<FileResource> ScriptFile::load(FilePackage* _filePackage, const 
 
 bool ScriptFile::checkFunction(const char* functionName) {
     if(exports.IsEmpty()) return false;
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast(exports->GetRealNamedProperty(v8::String::New(functionName)));
+    ScriptScope();
+    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast((*exports)->GetRealNamedProperty(ScriptString(functionName)));
     return (!function.IsEmpty() && function->IsFunction());
 }
 
 v8::Handle<v8::Value> ScriptFile::run() {
-    if(script.IsEmpty()) return v8::Undefined();
-    v8::HandleScope handleScope;
+    if(script.IsEmpty()) return v8::Undefined(v8::Isolate::GetCurrent());
+    //ScriptScope();
     v8::TryCatch tryCatch;
-    v8::Handle<v8::Value> result = script->Run();
+    v8::Handle<v8::Value> result = (*script)->Run();
     scriptManager->tryCatch(&tryCatch);
-    return handleScope.Close(result);
+    return result; //handleScope.Close(result);
 }
 
-v8::Handle<v8::Value> ScriptFile::callFunction(const char* functionName, bool recvFirstArg, std::vector<v8::Handle<v8::Value>> args) {
-    if(exports.IsEmpty()) return v8::Undefined();
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast(exports->GetRealNamedProperty(v8::String::New(functionName)));
-    if(function.IsEmpty() || !function->IsFunction()) return v8::Undefined();
+v8::Handle<v8::Value> ScriptFile::callFunction(const char* functionName, bool recvFirstArg, int argc, ...) {
+    if(exports.IsEmpty()) return v8::Undefined(v8::Isolate::GetCurrent());
+    ScriptScope();
+    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast((*exports)->GetRealNamedProperty(ScriptString(functionName)));
+    if(function.IsEmpty() || !function->IsFunction()) return v8::Undefined(v8::Isolate::GetCurrent());
     v8::TryCatch tryCatch;
+    
+    v8::Handle<v8::Value>* argList;
+    if(argc > 0) {
+        argList = new v8::Handle<v8::Value>[argc];
+        va_list argv;
+        va_start(argv, argc);
+        for(int i = 0; i < argc; i ++)
+            argList[i] = v8::Handle<v8::Value>(reinterpret_cast<v8::Value*>(va_arg(argv, void*)));
+        va_end(argv);
+        delete [] argList;
+    }
+    
     v8::Handle<v8::Value> result;
-    if(recvFirstArg && args.size() > 0 && !args[0].IsEmpty() && args[0]->IsObject())
-        result = function->CallAsFunction(v8::Handle<v8::Object>::Cast(args[0]), args.size()-1, &args[1]);
+    if(recvFirstArg && argc > 0 && !argList[0].IsEmpty() && argList[0]->IsObject())
+        result = function->CallAsFunction(v8::Handle<v8::Object>::Cast(argList[0]), argc-1, &argList[1]);
     else
-        result = function->CallAsFunction(exports, args.size(), &args[0]);
+        result = function->CallAsFunction(v8::Handle<v8::Object>(*exports), argc, argList);
+    
     if(scriptManager->tryCatch(&tryCatch))
         return result;
     else
-        return v8::Undefined();
+        return v8::Undefined(v8::Isolate::GetCurrent());
 }
 
 
 
 ScriptClass::ScriptClass(const char* nameB, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :name(nameB) {
-    v8::HandleScope handleScope;
-    functionTemplate = v8::Persistent<v8::FunctionTemplate>::New(v8::Isolate::GetCurrent(), v8::FunctionTemplate::New(constructor));
-    functionTemplate->SetClassName(v8::String::New(name));
-    functionTemplate->PrototypeTemplate()->Set(v8::String::New("className"), v8::String::New(name));
+    ScriptScope();
+    functionTemplate.Reset(v8::Isolate::GetCurrent(), ScriptMethod(constructor));
+    (*functionTemplate)->SetClassName(ScriptString(name));
+    (*functionTemplate)->PrototypeTemplate()->Set(ScriptString("className"), ScriptString(name));
 }
 
 ScriptClass::~ScriptClass() {
-    functionTemplate.Dispose();
+    //functionTemplate.Reset();
 }
 
-v8::Handle<v8::Value> ScriptClass::callFunction(v8::Handle<v8::Object> scriptInstance, const char* functionName, std::vector<v8::Handle<v8::Value>> args) {
-    if(scriptInstance.IsEmpty()) return v8::Undefined();
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast(scriptInstance->GetRealNamedProperty(v8::String::New(functionName)));
-    if(function.IsEmpty() || !function->IsFunction()) return v8::Undefined();
+v8::Handle<v8::Value> ScriptClass::callFunction(v8::Handle<v8::Object> scriptInstance, const char* functionName, int argc, ...) {
+    if(scriptInstance.IsEmpty()) return v8::Undefined(v8::Isolate::GetCurrent());
+    ScriptScope();
+    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast(scriptInstance->GetRealNamedProperty(ScriptString(functionName)));
+    if(function.IsEmpty() || !function->IsFunction()) return v8::Undefined(v8::Isolate::GetCurrent());
     v8::TryCatch tryCatch;
-    v8::Handle<v8::Value> result = function->CallAsFunction(scriptInstance, args.size(), &args[0]);
+    
+    v8::Handle<v8::Value>* argList;
+    if(argc > 0) {
+        argList = new v8::Handle<v8::Value>[argc];
+        va_list argv;
+        va_start(argv, argc);
+        for(int i = 0; i < argc; i ++)
+            argList[i] = v8::Handle<v8::Value>(reinterpret_cast<v8::Value*>(va_arg(argv, void*)));
+        va_end(argv);
+        delete [] argList;
+    }
+    
+    v8::Handle<v8::Value> result = function->CallAsFunction(scriptInstance, argc, argList);
     if(scriptManager->tryCatch(&tryCatch))
         return result;
     else
-        return v8::Undefined();
+        return v8::Undefined(v8::Isolate::GetCurrent());
 }
 
 bool ScriptClass::isCorrectInstance(const v8::Local<v8::Value>& object) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!object->IsObject()) return false;
-    return functionTemplate->HasInstance(object);
+    return (*functionTemplate)->HasInstance(object);
 }
 
 void ScriptClass::init(const v8::Persistent<v8::ObjectTemplate>& globalTemplate) {
-    globalTemplate->Set(v8::String::New(name), functionTemplate);
+    (*globalTemplate)->Set(v8::Isolate::GetCurrent(), name, v8::Handle<v8::FunctionTemplate>(*functionTemplate));
 }

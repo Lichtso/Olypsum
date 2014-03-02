@@ -56,8 +56,8 @@ class ScriptTerrainObject : public ScriptMatterObject {
     ScriptTerrainObject();
 };
 
-extern ScriptMatterObject scriptMatterObject;
-extern ScriptRigidObject scriptRigidObject;
-extern ScriptTerrainObject scriptTerrainObject;
+extern std::unique_ptr<ScriptMatterObject> scriptMatterObject;
+extern std::unique_ptr<ScriptRigidObject> scriptRigidObject;
+extern std::unique_ptr<ScriptTerrainObject> scriptTerrainObject;
 
 #endif

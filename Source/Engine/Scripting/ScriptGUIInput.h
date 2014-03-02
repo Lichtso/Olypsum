@@ -39,7 +39,7 @@ class ScriptGUITextField : public ScriptGUIFramedView {
     ScriptGUITextField();
 };
 
-extern ScriptGUISlider scriptGUISlider;
-extern ScriptGUITextField scriptGUITextField;
+extern std::unique_ptr<ScriptGUISlider> scriptGUISlider;
+extern std::unique_ptr<ScriptGUITextField> scriptGUITextField;
 
 #endif

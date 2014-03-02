@@ -32,7 +32,7 @@ void LevelSaver::pushObject(BaseObject* object) {
 }
 
 bool LevelSaver::saveLevel(v8::Handle<v8::Value> localData, v8::Handle<v8::Value> globalData, v8::Handle<v8::Value> description) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
     rapidxml::xml_document<xmlUsedCharType> doc;
     rapidxml::xml_node<xmlUsedCharType>* container = doc.allocate_node(rapidxml::node_element);

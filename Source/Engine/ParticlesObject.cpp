@@ -159,9 +159,7 @@ ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, Leve
     texture = fileManager.getResourceByPath<Texture>(levelLoader->filePackage, attribute->value());
     texture->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGBA);
     
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    scriptParticlesObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    ScriptNewInstance(scriptParticlesObject);
 }
 
 void ParticlesObject::clean() {

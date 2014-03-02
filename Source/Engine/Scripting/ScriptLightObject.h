@@ -40,9 +40,9 @@ class ScriptPositionalLight : public ScriptLightObject {
     ScriptPositionalLight();
 };
 
-extern ScriptLightObject scriptLightObject;
-extern ScriptDirectionalLight scriptDirectionalLight;
-extern ScriptSpotLight scriptSpotLight;
-extern ScriptPositionalLight scriptPositionalLight;
+extern std::unique_ptr<ScriptLightObject> scriptLightObject;
+extern std::unique_ptr<ScriptDirectionalLight> scriptDirectionalLight;
+extern std::unique_ptr<ScriptSpotLight> scriptSpotLight;
+extern std::unique_ptr<ScriptPositionalLight> scriptPositionalLight;
 
 #endif

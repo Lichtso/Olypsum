@@ -32,25 +32,25 @@ class ScriptGUIRect : public ScriptClass {
     ScriptGUIRect(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args));
     public:
     template<typename T> static void GetSizeAlignment(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-        v8::HandleScope handleScope;
+        ScriptScope();
         T* objectPtr = getDataOfInstance<T>(args.This());
         switch(objectPtr->sizeAlignment) {
             case GUISizeAlignment::None:
-                args.GetReturnValue().Set(v8::String::New("none"));
+                ScriptReturn(ScriptString("none"));
                 return;
             case GUISizeAlignment::Width:
-                args.GetReturnValue().Set(v8::String::New("width"));
+                ScriptReturn(ScriptString("width"));
                 return;
             case GUISizeAlignment::Height:
-                args.GetReturnValue().Set(v8::String::New("height"));
+                ScriptReturn(ScriptString("height"));
                 return;
             case GUISizeAlignment::All:
-                args.GetReturnValue().Set(v8::String::New("all"));
+                ScriptReturn(ScriptString("all"));
                 return;
         }
     }
     template<typename T> static void SetSizeAlignment(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-        v8::HandleScope handleScope;
+        ScriptScope();
         if(!value->IsString()) return;
         T* objectPtr = getDataOfInstance<T>(args.This());
         const char* str = cStrOfV8(value);
@@ -64,31 +64,31 @@ class ScriptGUIRect : public ScriptClass {
             objectPtr->sizeAlignment = GUISizeAlignment::All;
     }
     template<typename T> static void GetOrientation(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-        v8::HandleScope handleScope;
+        ScriptScope();
         T* objectPtr = getDataOfInstance<T>(args.This());
         switch(objectPtr->orientation) {
             case GUIOrientation::Left:
-                args.GetReturnValue().Set(v8::String::New("left"));
+                ScriptReturn(ScriptString("left"));
                 return;
             case GUIOrientation::Right:
-                args.GetReturnValue().Set(v8::String::New("right"));
+                ScriptReturn(ScriptString("right"));
                 return;
             case GUIOrientation::Bottom:
-                args.GetReturnValue().Set(v8::String::New("bottom"));
+                ScriptReturn(ScriptString("bottom"));
                 return;
             case GUIOrientation::Top:
-                args.GetReturnValue().Set(v8::String::New("top"));
+                ScriptReturn(ScriptString("top"));
                 return;
             case GUIOrientation::Vertical:
-                args.GetReturnValue().Set(v8::String::New("vertical"));
+                ScriptReturn(ScriptString("vertical"));
                 return;
             case GUIOrientation::Horizontal:
-                args.GetReturnValue().Set(v8::String::New("horizontal"));
+                ScriptReturn(ScriptString("horizontal"));
                 return;
         }
     }
     template<typename T> static void SetOrientation(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-        v8::HandleScope handleScope;
+        ScriptScope();
         if(!value->IsString()) return;
         T* objectPtr = getDataOfInstance<T>(args.This());
         const char* str = cStrOfV8(value);
@@ -106,7 +106,7 @@ class ScriptGUIRect : public ScriptClass {
             objectPtr->orientation = GUIOrientation::Horizontal;
     }
     template<typename T> static void SetOrientationDual(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-        v8::HandleScope handleScope;
+        ScriptScope();
         if(!value->IsString()) return;
         T* objectPtr = getDataOfInstance<T>(args.This());
         const char* str = cStrOfV8(value);
@@ -116,7 +116,7 @@ class ScriptGUIRect : public ScriptClass {
             objectPtr->orientation = GUIOrientation::Horizontal;
     }
     template<typename T> static T* getDataOfInstance(const v8::Local<v8::Value>& value) {
-        v8::HandleScope handleScope;
+        ScriptScope();
         v8::Local<v8::Object> object = v8::Local<v8::Object>::Cast(value);
         v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(object->GetInternalField(0));
         return static_cast<T*>(wrap->Value());
@@ -125,6 +125,6 @@ class ScriptGUIRect : public ScriptClass {
     ScriptGUIRect();
 };
 
-extern ScriptGUIRect scriptGUIRect;
+extern std::unique_ptr<ScriptGUIRect> scriptGUIRect;
 
 #endif

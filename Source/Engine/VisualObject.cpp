@@ -229,9 +229,7 @@ RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
     
     PhysicObject::readFrictionAndRestitution(node);
     
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    scriptRigidObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    ScriptNewInstance(scriptRigidObject);
 }
 
 void RigidObject::removeClean() {

@@ -36,7 +36,7 @@ const char* LevelManager::getCollisionShapeName(btCollisionShape* shape) {
 
 void LevelManager::clear() {
     if(scriptManager)
-        levelManager.mainScript->callFunction("onleave", false, { });
+        levelManager.mainScript->callFunction("onleave", false, 0);
     saveGameName = levelContainer = "";
     levelPackage = NULL;
     mainScript = NULL;

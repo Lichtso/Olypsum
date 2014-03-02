@@ -9,104 +9,104 @@
 #include "ScriptLightObject.h"
 
 void ScriptLightObject::GetRange(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     LightObject* objectPtr = getDataOfInstance<LightObject>(args.This());
-    args.GetReturnValue().Set(objectPtr->getRange());
+    ScriptReturn(objectPtr->getRange());
 }
 
 void ScriptLightObject::AccessColor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     LightObject* objectPtr = getDataOfInstance<LightObject>(args.This());
-    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
-        objectPtr->color = Color4(scriptVector3.getDataOfInstance(args[0]));
-        args.GetReturnValue().Set(args[0]);
+    if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
+        objectPtr->color = Color4(scriptVector3->getDataOfInstance(args[0]));
+        ScriptReturn(args[0]);
     }else
-        args.GetReturnValue().Set(handleScope.Close(scriptVector3.newInstance(objectPtr->color.getVector())));
+        ScriptReturn(scriptVector3->newInstance(objectPtr->color.getVector()));
 }
 
 ScriptLightObject::ScriptLightObject() :ScriptPhysicObject("LightObject") {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
-    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->SetAccessor(v8::String::New("collisionShape"),
+    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
+    objectTemplate->SetAccessor(ScriptString("collisionShape"),
                                 static_cast<v8::AccessorGetterCallback>(NULL), static_cast<v8::AccessorSetterCallback>(NULL));
-    objectTemplate->SetAccessor(v8::String::New("range"), GetRange);
-    objectTemplate->Set(v8::String::New("color"), v8::FunctionTemplate::New(AccessColor));
+    objectTemplate->SetAccessor(ScriptString("range"), GetRange);
+    objectTemplate->Set(ScriptString("color"), ScriptMethod(AccessColor));
     
-    functionTemplate->Inherit(scriptPhysicObject.functionTemplate);
+    ScriptInherit(scriptPhysicObject);
 }
 
 
 
 void ScriptDirectionalLight::AccessBounds(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     DirectionalLight* objectPtr = getDataOfInstance<DirectionalLight>(args.This());
-    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
-        objectPtr->setBounds(scriptVector3.getDataOfInstance(args[0]));
-        args.GetReturnValue().Set(args[0]);
+    if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
+        objectPtr->setBounds(scriptVector3->getDataOfInstance(args[0]));
+        ScriptReturn(args[0]);
     }else
-        args.GetReturnValue().Set(handleScope.Close(scriptVector3.newInstance(objectPtr->getBounds())));
+        ScriptReturn(scriptVector3->newInstance(objectPtr->getBounds()));
 }
 
 ScriptDirectionalLight::ScriptDirectionalLight() :ScriptLightObject("DirectionalLight") {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
-    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->Set(v8::String::New("bounds"), v8::FunctionTemplate::New(AccessBounds));
+    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
+    objectTemplate->Set(ScriptString("bounds"), ScriptMethod(AccessBounds));
     
-    functionTemplate->Inherit(scriptLightObject.functionTemplate);
+    ScriptInherit(scriptLightObject);
 }
 
 
 
 void ScriptSpotLight::GetCutoff(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     SpotLight* objectPtr = getDataOfInstance<SpotLight>(args.This());
-    args.GetReturnValue().Set(objectPtr->getCutoff());
+    ScriptReturn(objectPtr->getCutoff());
 }
 
 void ScriptSpotLight::SetBounds(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(args.Length() < 2 || !args[0]->IsNumber() || !args[1]->IsNumber())
-        return args.ScriptException("SpotLight setBounds: Invalid argument");
+        return ScriptException("SpotLight setBounds: Invalid argument");
     SpotLight* objectPtr = getDataOfInstance<SpotLight>(args.This());
     objectPtr->setBounds(args[0]->NumberValue(), args[1]->NumberValue());
-    args.GetReturnValue().Set(args.This());
+    ScriptReturn(args.This());
 }
 
 ScriptSpotLight::ScriptSpotLight() :ScriptLightObject("SpotLight") {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
-    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->SetAccessor(v8::String::New("cutoff"), GetCutoff);
-    objectTemplate->Set(v8::String::New("setBounds"), v8::FunctionTemplate::New(SetBounds));
+    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
+    objectTemplate->SetAccessor(ScriptString("cutoff"), GetCutoff);
+    objectTemplate->Set(ScriptString("setBounds"), ScriptMethod(SetBounds));
     
-    functionTemplate->Inherit(scriptLightObject.functionTemplate);
+    ScriptInherit(scriptLightObject);
 }
 
 
 
 void ScriptPositionalLight::GetOmniDirectional(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     PositionalLight* objectPtr = getDataOfInstance<PositionalLight>(args.This());
-    args.GetReturnValue().Set(objectPtr->getOmniDirectional());
+    ScriptReturn(objectPtr->getOmniDirectional());
 }
 
 void ScriptPositionalLight::SetBounds(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(args.Length() < 2 || !args[0]->IsBoolean() || !args[1]->IsNumber())
-        return args.ScriptException("PositionalLight setBounds: Invalid argument");
+        return ScriptException("PositionalLight setBounds: Invalid argument");
     PositionalLight* objectPtr = getDataOfInstance<PositionalLight>(args.This());
     objectPtr->setBounds(args[0]->BooleanValue(), args[1]->NumberValue());
-    args.GetReturnValue().Set(args.This());
+    ScriptReturn(args.This());
 }
 
 ScriptPositionalLight::ScriptPositionalLight() :ScriptLightObject("PositionalLight") {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
-    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->SetAccessor(v8::String::New("omniDirectional"), GetOmniDirectional);
-    objectTemplate->Set(v8::String::New("setBounds"), v8::FunctionTemplate::New(SetBounds));
+    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
+    objectTemplate->SetAccessor(ScriptString("omniDirectional"), GetOmniDirectional);
+    objectTemplate->Set(ScriptString("setBounds"), ScriptMethod(SetBounds));
     
-    functionTemplate->Inherit(scriptLightObject.functionTemplate);
+    ScriptInherit(scriptLightObject);
 }

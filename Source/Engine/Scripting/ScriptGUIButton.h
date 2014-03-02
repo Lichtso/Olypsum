@@ -49,8 +49,8 @@ class ScriptGUITabs : public ScriptGUIView {
     ScriptGUITabs();
 };
 
-extern ScriptGUIButton scriptGUIButton;
-extern ScriptGUICheckBox scriptGUICheckBox;
-extern ScriptGUITabs scriptGUITabs;
+extern std::unique_ptr<ScriptGUIButton> scriptGUIButton;
+extern std::unique_ptr<ScriptGUICheckBox> scriptGUICheckBox;
+extern std::unique_ptr<ScriptGUITabs> scriptGUITabs;
 
 #endif

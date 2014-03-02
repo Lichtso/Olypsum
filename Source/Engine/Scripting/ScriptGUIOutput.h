@@ -48,8 +48,8 @@ class ScriptGUIImage : public ScriptGUIRect {
     ScriptGUIImage();
 };
 
-extern ScriptGUILabel scriptGUILabel;
-extern ScriptGUIProgressBar scriptGUIProgressBar;
-extern ScriptGUIImage scriptGUIImage;
+extern std::unique_ptr<ScriptGUILabel> scriptGUILabel;
+extern std::unique_ptr<ScriptGUIProgressBar> scriptGUIProgressBar;
+extern std::unique_ptr<ScriptGUIImage> scriptGUIImage;
 
 #endif

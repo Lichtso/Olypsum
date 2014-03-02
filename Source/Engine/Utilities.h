@@ -10,15 +10,19 @@
 #define Utilities_h
 
 #define V8_USE_UNSAFE_HANDLES 1
+#define V8_ALLOW_ACCESS_TO_RAW_HANDLE_CONSTRUCTOR 1
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
+#define __BT_SKIP_UINT64_H
 #include <SDKDDKVer.h>
 #include <windows.h>
-#include <gl\gl.h>
-#include <gl\glu.h>
+#include <GL/glew.h>
+#include <OpenAL/include/al.h>
+#include <OpenAL/include/alc.h>
 #include <SDL2/include/SDL.h>
-#include <SDL2/include/SDL_image.h>
-#include <SDL2/include/SDL_ttf.h>
+#include <SDL2_image/include/SDL_image.h>
+#include <SDL2_ttf/include/SDL_ttf.h>
+#include <libvorbis/include/vorbis/vorbisfile.h>
 #else
 #include <SDL2/SDL.h>
 #include <vorbis/vorbisfile.h>

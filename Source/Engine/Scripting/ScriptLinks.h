@@ -157,15 +157,15 @@ class ScriptBoneLink : public ScriptBaseLink {
     ScriptBoneLink();
 };
 
-extern ScriptBaseLink scriptBaseLink;
-extern ScriptPhysicLink scriptPhysicLink;
-extern ScriptPointPhysicLink scriptPointPhysicLink;
-extern ScriptGearPhysicLink scriptGearPhysicLink;
-extern ScriptHingePhysicLink scriptHingePhysicLink;
-extern ScriptSliderPhysicLink scriptSliderPhysicLink;
-extern ScriptDof6PhysicLink scriptDof6PhysicLink;
-extern ScriptConeTwistPhysicLink scriptConeTwistPhysicLink;
-extern ScriptTransformLink scriptTransformLink;
-extern ScriptBoneLink scriptBoneLink;
+extern std::unique_ptr<ScriptBaseLink> scriptBaseLink;
+extern std::unique_ptr<ScriptPhysicLink> scriptPhysicLink;
+extern std::unique_ptr<ScriptPointPhysicLink> scriptPointPhysicLink;
+extern std::unique_ptr<ScriptGearPhysicLink> scriptGearPhysicLink;
+extern std::unique_ptr<ScriptHingePhysicLink> scriptHingePhysicLink;
+extern std::unique_ptr<ScriptSliderPhysicLink> scriptSliderPhysicLink;
+extern std::unique_ptr<ScriptDof6PhysicLink> scriptDof6PhysicLink;
+extern std::unique_ptr<ScriptConeTwistPhysicLink> scriptConeTwistPhysicLink;
+extern std::unique_ptr<ScriptTransformLink> scriptTransformLink;
+extern std::unique_ptr<ScriptBoneLink> scriptBoneLink;
 
 #endif

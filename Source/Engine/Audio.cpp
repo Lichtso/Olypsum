@@ -151,9 +151,7 @@ SoundObject::SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
         setTimeOffset(time);
     }
     
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    scriptSoundObject.functionTemplate->GetFunction()->NewInstance(1, &external);
+    ScriptNewInstance(scriptSoundObject);
 }
 
 SoundObject::~SoundObject() {

@@ -20,6 +20,6 @@ class ScriptIntersection : public ScriptClass {
     ScriptIntersection();
 };
 
-extern ScriptIntersection scriptIntersection;
+extern std::unique_ptr<ScriptIntersection> scriptIntersection;
 
 #endif

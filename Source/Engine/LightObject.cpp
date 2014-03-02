@@ -148,9 +148,7 @@ DirectionalLight::DirectionalLight(rapidxml::xml_node<xmlUsedCharType>* node, Le
     setBounds(vecData.getVector3());
     LightObject::init(node, levelLoader);
     
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    scriptDirectionalLight.functionTemplate->GetFunction()->NewInstance(1, &external);
+    ScriptNewInstance(scriptDirectionalLight);
 }
 
 void DirectionalLight::setTransformation(const btTransform& transformation) {
@@ -249,9 +247,7 @@ SpotLight::SpotLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* lev
     setBounds(cutoff, range);
     LightObject::init(node, levelLoader);
     
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    scriptSpotLight.functionTemplate->GetFunction()->NewInstance(1, &external);
+    ScriptNewInstance(scriptSpotLight);
 }
 
 void SpotLight::setTransformation(const btTransform& transformation) {
@@ -358,9 +354,7 @@ PositionalLight::PositionalLight(rapidxml::xml_node<xmlUsedCharType>* node, Leve
     setBounds(strcmp(attribute->value(), "true") == 0, range);
     LightObject::init(node, levelLoader);
     
-    v8::HandleScope handleScope;
-    v8::Handle<v8::Value> external = v8::External::New(this);
-    scriptPositionalLight.functionTemplate->GetFunction()->NewInstance(1, &external);
+    ScriptNewInstance(scriptPositionalLight);
 }
 
 PositionalLight::~PositionalLight() {

@@ -16,69 +16,69 @@ static void activateConstraint(btTypedConstraint* constraint) {
 
 
 void ScriptBaseLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
     if(args.Length() == 1 && args[0]->IsExternal()) {
         BaseLink* linkPtr = static_cast<BaseLink*>(v8::Local<v8::External>::Cast(args[0])->Value());
-        linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
+        linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
         args.This()->SetInternalField(0, args[0]);
-        args.GetReturnValue().Set(args.This());
+        ScriptReturn(args.This());
         return;
     }else if(args.Length() == 2 &&
-             scriptBaseObject.isCorrectInstance(args[0]) && scriptBaseObject.isCorrectInstance(args[1])) {
+             scriptBaseObject->isCorrectInstance(args[0]) && scriptBaseObject->isCorrectInstance(args[1])) {
         LinkInitializer initializer;
-        initializer.object[0] = scriptBaseObject.getDataOfInstance<BaseObject>(args[0]);
-        initializer.object[1] = scriptBaseObject.getDataOfInstance<BaseObject>(args[1]);
+        initializer.object[0] = scriptBaseObject->getDataOfInstance<BaseObject>(args[0]);
+        initializer.object[1] = scriptBaseObject->getDataOfInstance<BaseObject>(args[1]);
         BaseLink* linkPtr = new BaseLink();
         if(linkPtr->init(initializer)) {
-            linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
-            args.This()->SetInternalField(0, v8::External::New(linkPtr));
-            args.GetReturnValue().Set(args.This());
+            linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
+            args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
+            ScriptReturn(args.This());
             return;
         }else
-            return args.ScriptException("BaseLink Constructor: Invalid argument");
+            return ScriptException("BaseLink Constructor: Invalid argument");
     }
     
-    return args.ScriptException("BaseLink Constructor: Class can't be initialized");
+    return ScriptException("BaseLink Constructor: Class can't be initialized");
 }
 
 void ScriptBaseLink::GetObjectA(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     BaseLink* linkPtr = getDataOfInstance<BaseLink>(args.This());
-    args.GetReturnValue().Set(linkPtr->a->scriptInstance);
+    ScriptReturn(linkPtr->a->scriptInstance);
 }
 
 void ScriptBaseLink::GetObjectB(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     BaseLink* linkPtr = getDataOfInstance<BaseLink>(args.This());
-    args.GetReturnValue().Set(linkPtr->b->scriptInstance);
+    ScriptReturn(linkPtr->b->scriptInstance);
 }
 
 ScriptBaseLink::ScriptBaseLink() :ScriptBaseLink("BaseLink", Constructor) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
-    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->SetAccessor(v8::String::New("objectA"), GetObjectA);
-    objectTemplate->SetAccessor(v8::String::New("objectB"), GetObjectB);
+    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
+    objectTemplate->SetAccessor(ScriptString("objectA"), GetObjectA);
+    objectTemplate->SetAccessor(ScriptString("objectB"), GetObjectB);
     
-    functionTemplate->Inherit(scriptBaseClass.functionTemplate);
+    ScriptInherit(scriptBaseClass);
 }
 
 
 
 void ScriptPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
-    return args.ScriptException("PhysicLink Constructor: Class can't be instantiated");
+    ScriptScope();
+    return ScriptException("PhysicLink Constructor: Class can't be instantiated");
 }
 
 void ScriptPhysicLink::GetBurstImpulse(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btTypedConstraint* constraint = getDataOfInstance<PhysicLink>(args.This())->constraint;
-    args.GetReturnValue().Set(constraint->getBreakingImpulseThreshold());
+    ScriptReturn(constraint->getBreakingImpulseThreshold());
 }
 
 void ScriptPhysicLink::SetBurstImpulse(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsNumber()) return;
     
     btTypedConstraint* constraint = getDataOfInstance<PhysicLink>(args.This())->constraint;
@@ -86,181 +86,181 @@ void ScriptPhysicLink::SetBurstImpulse(v8::Local<v8::String> property, v8::Local
 }
 
 void ScriptPhysicLink::GetCollisionDisabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
-    args.GetReturnValue().Set(getDataOfInstance<PhysicLink>(args.This())->isCollisionDisabled());
+    ScriptScope();
+    ScriptReturn(getDataOfInstance<PhysicLink>(args.This())->isCollisionDisabled());
 }
 
 void ScriptPhysicLink::SetCollisionDisabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsBoolean()) return;
     
     getDataOfInstance<PhysicLink>(args.This())->setCollisionDisabled(value->BooleanValue());
 }
 
 void ScriptPhysicLink::AppliedForceObjectA(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
-    args.GetReturnValue().Set(scriptVector3.newInstance(getDataOfInstance<PhysicLink>(args.This())->constraint->m_appliedForceBodyA));
+    ScriptScope();
+    ScriptReturn(scriptVector3->newInstance(getDataOfInstance<PhysicLink>(args.This())->constraint->m_appliedForceBodyA));
 }
 
 void ScriptPhysicLink::AppliedTorqueObjectA(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
-    args.GetReturnValue().Set(scriptVector3.newInstance(getDataOfInstance<PhysicLink>(args.This())->constraint->m_appliedTorqueBodyA));
+    ScriptScope();
+    ScriptReturn(scriptVector3->newInstance(getDataOfInstance<PhysicLink>(args.This())->constraint->m_appliedTorqueBodyA));
 }
 
 void ScriptPhysicLink::AppliedForceObjectB(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
-    args.GetReturnValue().Set(scriptVector3.newInstance(getDataOfInstance<PhysicLink>(args.This())->constraint->m_appliedForceBodyB));
+    ScriptScope();
+    ScriptReturn(scriptVector3->newInstance(getDataOfInstance<PhysicLink>(args.This())->constraint->m_appliedForceBodyB));
 }
 
 void ScriptPhysicLink::AppliedTorqueObjectB(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
-    args.GetReturnValue().Set(scriptVector3.newInstance(getDataOfInstance<PhysicLink>(args.This())->constraint->m_appliedTorqueBodyB));
+    ScriptScope();
+    ScriptReturn(scriptVector3->newInstance(getDataOfInstance<PhysicLink>(args.This())->constraint->m_appliedTorqueBodyB));
 }
 
 ScriptPhysicLink::ScriptPhysicLink() :ScriptBaseLink("PhysicLink", Constructor) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
-    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->SetAccessor(v8::String::New("burstImpulse"), GetBurstImpulse, SetBurstImpulse);
-    objectTemplate->SetAccessor(v8::String::New("collisionDisabled"), GetCollisionDisabled, SetCollisionDisabled);
-    objectTemplate->Set(v8::String::New("appliedForceObjectA"), v8::FunctionTemplate::New(AppliedForceObjectA));
-    objectTemplate->Set(v8::String::New("appliedTorqueObjectA"), v8::FunctionTemplate::New(AppliedTorqueObjectA));
-    objectTemplate->Set(v8::String::New("appliedForceObjectB"), v8::FunctionTemplate::New(AppliedForceObjectB));
-    objectTemplate->Set(v8::String::New("appliedTorqueObjectB"), v8::FunctionTemplate::New(AppliedTorqueObjectB));
+    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
+    objectTemplate->SetAccessor(ScriptString("burstImpulse"), GetBurstImpulse, SetBurstImpulse);
+    objectTemplate->SetAccessor(ScriptString("collisionDisabled"), GetCollisionDisabled, SetCollisionDisabled);
+    objectTemplate->Set(ScriptString("appliedForceObjectA"), ScriptMethod(AppliedForceObjectA));
+    objectTemplate->Set(ScriptString("appliedTorqueObjectA"), ScriptMethod(AppliedTorqueObjectA));
+    objectTemplate->Set(ScriptString("appliedForceObjectB"), ScriptMethod(AppliedForceObjectB));
+    objectTemplate->Set(ScriptString("appliedTorqueObjectB"), ScriptMethod(AppliedTorqueObjectB));
     
-    functionTemplate->Inherit(scriptBaseLink.functionTemplate);
+    ScriptInherit(scriptBaseLink);
 }
 
 
 
 void ScriptPointPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
     if(args.Length() == 1 && args[0]->IsExternal()) {
         args.This()->SetInternalField(0, args[0]);
-        args.GetReturnValue().Set(args.This());
+        ScriptReturn(args.This());
         return;
     }else if(args.Length() == 4 &&
-             scriptRigidObject.isCorrectInstance(args[0]) && scriptRigidObject.isCorrectInstance(args[1]) &&
-             scriptVector3.isCorrectInstance(args[2]) && scriptVector3.isCorrectInstance(args[3])) {
+             scriptRigidObject->isCorrectInstance(args[0]) && scriptRigidObject->isCorrectInstance(args[1]) &&
+             scriptVector3->isCorrectInstance(args[2]) && scriptVector3->isCorrectInstance(args[3])) {
         LinkInitializer initializer;
         RigidObject *a, *b;
-        initializer.object[0] = a = scriptBaseObject.getDataOfInstance<RigidObject>(args[0]);
-        initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
+        initializer.object[0] = a = scriptBaseObject->getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = scriptBaseObject->getDataOfInstance<RigidObject>(args[1]);
         PhysicLink* linkPtr = new PhysicLink();
         if(linkPtr->init(initializer, new btPoint2PointConstraint(*a->getBody(), *b->getBody(),
-                                                                  scriptVector3.getDataOfInstance(args[2]),
-                                                                  scriptVector3.getDataOfInstance(args[3])))) {
-            linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
-            args.This()->SetInternalField(0, v8::External::New(linkPtr));
-            args.GetReturnValue().Set(args.This());
+                                                                  scriptVector3->getDataOfInstance(args[2]),
+                                                                  scriptVector3->getDataOfInstance(args[3])))) {
+            linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
+            args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
+            ScriptReturn(args.This());
             return;
         }else
-            return args.ScriptException("PointPhysicLink Constructor: Invalid argument");
+            return ScriptException("PointPhysicLink Constructor: Invalid argument");
     }
     
-    return args.ScriptException("PointPhysicLink Constructor: Class can't be initialized");
+    return ScriptException("PointPhysicLink Constructor: Class can't be initialized");
 }
 
 void ScriptPointPhysicLink::AccessPointA(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     auto constraint = static_cast<btPoint2PointConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+    if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
         activateConstraint(constraint);
-        btVector3 point = scriptVector3.getDataOfInstance(args[0]);
+        btVector3 point = scriptVector3->getDataOfInstance(args[0]);
         constraint->setPivotA(point);
-        args.GetReturnValue().Set(args[0]);
+        ScriptReturn(args[0]);
     }else
-        args.GetReturnValue().Set(scriptVector3.newInstance(constraint->getPivotInA()));
+        ScriptReturn(scriptVector3->newInstance(constraint->getPivotInA()));
 }
 
 void ScriptPointPhysicLink::AccessPointB(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     auto constraint = static_cast<btPoint2PointConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+    if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
         activateConstraint(constraint);
-        btVector3 point = scriptVector3.getDataOfInstance(args[0]);
+        btVector3 point = scriptVector3->getDataOfInstance(args[0]);
         constraint->setPivotB(point);
-        args.GetReturnValue().Set(args[0]);
+        ScriptReturn(args[0]);
     }else
-        args.GetReturnValue().Set(scriptVector3.newInstance(constraint->getPivotInB()));
+        ScriptReturn(scriptVector3->newInstance(constraint->getPivotInB()));
 }
 
 ScriptPointPhysicLink::ScriptPointPhysicLink() :ScriptPhysicLink("PointPhysicLink", Constructor) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
-    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->Set(v8::String::New("pointA"), v8::FunctionTemplate::New(AccessPointA));
-    objectTemplate->Set(v8::String::New("pointB"), v8::FunctionTemplate::New(AccessPointB));
+    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
+    objectTemplate->Set(ScriptString("pointA"), ScriptMethod(AccessPointA));
+    objectTemplate->Set(ScriptString("pointB"), ScriptMethod(AccessPointB));
     
-    functionTemplate->Inherit(scriptPhysicLink.functionTemplate);
+    ScriptInherit(scriptPhysicLink);
 }
 
 
 
 void ScriptGearPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
     if(args.Length() == 1 && args[0]->IsExternal()) {
         args.This()->SetInternalField(0, args[0]);
-        args.GetReturnValue().Set(args.This());
+        ScriptReturn(args.This());
         return;
     }else if(args.Length() == 5 &&
-             scriptRigidObject.isCorrectInstance(args[0]) && scriptRigidObject.isCorrectInstance(args[1]) &&
-             scriptVector3.isCorrectInstance(args[2]) && scriptVector3.isCorrectInstance(args[3]) &&
+             scriptRigidObject->isCorrectInstance(args[0]) && scriptRigidObject->isCorrectInstance(args[1]) &&
+             scriptVector3->isCorrectInstance(args[2]) && scriptVector3->isCorrectInstance(args[3]) &&
              args[4]->IsNumber()) {
         LinkInitializer initializer;
         RigidObject *a, *b;
-        initializer.object[0] = a = scriptBaseObject.getDataOfInstance<RigidObject>(args[0]);
-        initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
+        initializer.object[0] = a = scriptBaseObject->getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = scriptBaseObject->getDataOfInstance<RigidObject>(args[1]);
         PhysicLink* linkPtr = new PhysicLink();
         if(linkPtr->init(initializer, new btGearConstraint(*a->getBody(), *b->getBody(),
-                                                           scriptVector3.getDataOfInstance(args[2]),
-                                                           scriptVector3.getDataOfInstance(args[3]),
+                                                           scriptVector3->getDataOfInstance(args[2]),
+                                                           scriptVector3->getDataOfInstance(args[3]),
                                                            args[4]->NumberValue()))) {
-            linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
-            args.This()->SetInternalField(0, v8::External::New(linkPtr));
-            args.GetReturnValue().Set(args.This());
+            linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
+            args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
+            ScriptReturn(args.This());
             return;
         }else
-            return args.ScriptException("GearPhysicLink Constructor: Invalid argument");
+            return ScriptException("GearPhysicLink Constructor: Invalid argument");
     }
     
-    return args.ScriptException("GearPhysicLink Constructor: Class can't be initialized");
+    return ScriptException("GearPhysicLink Constructor: Class can't be initialized");
 }
 
 void ScriptGearPhysicLink::AccessAxisA(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     auto constraint = static_cast<btGearConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+    if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
         activateConstraint(constraint);
-        btVector3 axis = scriptVector3.getDataOfInstance(args[0]);
+        btVector3 axis = scriptVector3->getDataOfInstance(args[0]);
         constraint->setAxisA(axis);
-        args.GetReturnValue().Set(args[0]);
+        ScriptReturn(args[0]);
     }else
-        args.GetReturnValue().Set(scriptVector3.newInstance(constraint->getAxisA()));
+        ScriptReturn(scriptVector3->newInstance(constraint->getAxisA()));
 }
 
 void ScriptGearPhysicLink::AccessAxisB(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     auto constraint = static_cast<btGearConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+    if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
         activateConstraint(constraint);
-        btVector3 axis = scriptVector3.getDataOfInstance(args[0]);
+        btVector3 axis = scriptVector3->getDataOfInstance(args[0]);
         constraint->setAxisB(axis);
-        args.GetReturnValue().Set(args[0]);
+        ScriptReturn(args[0]);
     }else
-        args.GetReturnValue().Set(scriptVector3.newInstance(constraint->getAxisB()));
+        ScriptReturn(scriptVector3->newInstance(constraint->getAxisB()));
 }
 
 void ScriptGearPhysicLink::GetRatio(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btGearConstraint* constraint = static_cast<btGearConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getRatio());
+    ScriptReturn(constraint->getRatio());
 }
 
 void ScriptGearPhysicLink::SetRatio(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsNumber()) return;
     
     btGearConstraint* constraint = static_cast<btGearConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
@@ -268,84 +268,84 @@ void ScriptGearPhysicLink::SetRatio(v8::Local<v8::String> property, v8::Local<v8
 }
 
 ScriptGearPhysicLink::ScriptGearPhysicLink() :ScriptPhysicLink("GearPhysicLink", Constructor) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
-    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->Set(v8::String::New("axisA"), v8::FunctionTemplate::New(AccessAxisA));
-    objectTemplate->Set(v8::String::New("axisB"), v8::FunctionTemplate::New(AccessAxisB));
-    objectTemplate->SetAccessor(v8::String::New("ratio"), GetRatio, SetRatio);
+    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
+    objectTemplate->Set(ScriptString("axisA"), ScriptMethod(AccessAxisA));
+    objectTemplate->Set(ScriptString("axisB"), ScriptMethod(AccessAxisB));
+    objectTemplate->SetAccessor(ScriptString("ratio"), GetRatio, SetRatio);
     
-    functionTemplate->Inherit(scriptPhysicLink.functionTemplate);
+    ScriptInherit(scriptPhysicLink);
 }
 
 
 
 void ScriptHingePhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
     if(args.Length() == 1 && args[0]->IsExternal()) {
         args.This()->SetInternalField(0, args[0]);
-        args.GetReturnValue().Set(args.This());
+        ScriptReturn(args.This());
         return;
     }else if(args.Length() == 4 &&
-             scriptRigidObject.isCorrectInstance(args[0]) && scriptRigidObject.isCorrectInstance(args[1]) &&
-             scriptMatrix4.isCorrectInstance(args[2]) && scriptMatrix4.isCorrectInstance(args[3])) {
+             scriptRigidObject->isCorrectInstance(args[0]) && scriptRigidObject->isCorrectInstance(args[1]) &&
+             scriptMatrix4->isCorrectInstance(args[2]) && scriptMatrix4->isCorrectInstance(args[3])) {
         LinkInitializer initializer;
         RigidObject *a, *b;
-        initializer.object[0] = a = scriptBaseObject.getDataOfInstance<RigidObject>(args[0]);
-        initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
+        initializer.object[0] = a = scriptBaseObject->getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = scriptBaseObject->getDataOfInstance<RigidObject>(args[1]);
         PhysicLink* linkPtr = new PhysicLink();
         if(linkPtr->init(initializer, new btHingeConstraint(*a->getBody(), *b->getBody(),
-                                                            scriptMatrix4.getDataOfInstance(args[2])->getBTTransform(),
-                                                            scriptMatrix4.getDataOfInstance(args[3])->getBTTransform(),
+                                                            scriptMatrix4->getDataOfInstance(args[2])->getBTTransform(),
+                                                            scriptMatrix4->getDataOfInstance(args[3])->getBTTransform(),
                                                             true))) {
-            linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
-            args.This()->SetInternalField(0, v8::External::New(linkPtr));
-            args.GetReturnValue().Set(args.This());
+            linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
+            args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
+            ScriptReturn(args.This());
             return;
         }else
-            return args.ScriptException("HingePhysicLink Constructor: Invalid argument");
+            return ScriptException("HingePhysicLink Constructor: Invalid argument");
     }
     
-    return args.ScriptException("HingePhysicLink Constructor: Class can't be initialized");
+    return ScriptException("HingePhysicLink Constructor: Class can't be initialized");
 }
 
 void ScriptHingePhysicLink::AccessFrameA(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     auto constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && scriptMatrix4.isCorrectInstance(args[0])) {
+    if(args.Length() == 1 && scriptMatrix4->isCorrectInstance(args[0])) {
         activateConstraint(constraint);
-        constraint->setFrames(scriptMatrix4.getDataOfInstance(args[0])->getBTTransform(), constraint->getFrameOffsetB());
-        args.GetReturnValue().Set(args[0]);
+        constraint->setFrames(scriptMatrix4->getDataOfInstance(args[0])->getBTTransform(), constraint->getFrameOffsetB());
+        ScriptReturn(args[0]);
     }else
-        args.GetReturnValue().Set(scriptMatrix4.newInstance(constraint->getFrameOffsetA()));
+        ScriptReturn(scriptMatrix4->newInstance(constraint->getFrameOffsetA()));
 }
 
 void ScriptHingePhysicLink::AccessFrameB(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     auto constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && scriptMatrix4.isCorrectInstance(args[0])) {
+    if(args.Length() == 1 && scriptMatrix4->isCorrectInstance(args[0])) {
         activateConstraint(constraint);
-        constraint->setFrames(constraint->getFrameOffsetA(), scriptMatrix4.getDataOfInstance(args[0])->getBTTransform());
-        args.GetReturnValue().Set(args[0]);
+        constraint->setFrames(constraint->getFrameOffsetA(), scriptMatrix4->getDataOfInstance(args[0])->getBTTransform());
+        ScriptReturn(args[0]);
     }else
-        args.GetReturnValue().Set(scriptMatrix4.newInstance(constraint->getFrameOffsetB()));
+        ScriptReturn(scriptMatrix4->newInstance(constraint->getFrameOffsetB()));
 }
 
 void ScriptHingePhysicLink::GetHingeAngle(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getHingeAngle());
+    ScriptReturn(constraint->getHingeAngle());
 }
 
 void ScriptHingePhysicLink::GetAngularLimitMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getLowerLimit());
+    ScriptReturn(constraint->getLowerLimit());
 }
 
 void ScriptHingePhysicLink::SetAngularLimitMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsNumber()) return;
     btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     constraint->setLimit(value->NumberValue(), constraint->getUpperLimit());
@@ -353,13 +353,13 @@ void ScriptHingePhysicLink::SetAngularLimitMin(v8::Local<v8::String> property, v
 }
 
 void ScriptHingePhysicLink::GetAngularLimitMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getUpperLimit());
+    ScriptReturn(constraint->getUpperLimit());
 }
 
 void ScriptHingePhysicLink::SetAngularLimitMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsNumber()) return;
     btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     constraint->setLimit(constraint->getLowerLimit(), value->NumberValue());
@@ -367,13 +367,13 @@ void ScriptHingePhysicLink::SetAngularLimitMax(v8::Local<v8::String> property, v
 }
 
 void ScriptHingePhysicLink::GetAngularMotorEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getEnableAngularMotor());
+    ScriptReturn(constraint->getEnableAngularMotor());
 }
 
 void ScriptHingePhysicLink::SetAngularMotorEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsBoolean()) return;
     btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     constraint->enableAngularMotor(value->BooleanValue(),
@@ -383,13 +383,13 @@ void ScriptHingePhysicLink::SetAngularMotorEnabled(v8::Local<v8::String> propert
 }
 
 void ScriptHingePhysicLink::GetAngularMotorVelocity(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getMotorTargetVelosity());
+    ScriptReturn(constraint->getMotorTargetVelosity());
 }
 
 void ScriptHingePhysicLink::SetAngularMotorVelocity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsNumber()) return;
     btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     constraint->enableAngularMotor(constraint->getEnableAngularMotor(),
@@ -399,13 +399,13 @@ void ScriptHingePhysicLink::SetAngularMotorVelocity(v8::Local<v8::String> proper
 }
 
 void ScriptHingePhysicLink::GetAngularMotorForce(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getMaxMotorImpulse());
+    ScriptReturn(constraint->getMaxMotorImpulse());
 }
 
 void ScriptHingePhysicLink::SetAngularMotorForce(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsNumber()) return;
     btHingeConstraint* constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     constraint->enableAngularMotor(constraint->getEnableAngularMotor(),
@@ -415,95 +415,95 @@ void ScriptHingePhysicLink::SetAngularMotorForce(v8::Local<v8::String> property,
 }
 
 ScriptHingePhysicLink::ScriptHingePhysicLink() :ScriptPhysicLink("HingePhysicLink", Constructor) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
-    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->Set(v8::String::New("frameA"), v8::FunctionTemplate::New(AccessFrameA));
-    objectTemplate->Set(v8::String::New("frameB"), v8::FunctionTemplate::New(AccessFrameB));
-    objectTemplate->SetAccessor(v8::String::New("hingeAngle"), GetHingeAngle);
-    objectTemplate->SetAccessor(v8::String::New("angularLimitMin"), GetAngularLimitMin, SetAngularLimitMin);
-    objectTemplate->SetAccessor(v8::String::New("angularLimitMax"), GetAngularLimitMax, SetAngularLimitMax);
-    objectTemplate->SetAccessor(v8::String::New("angularMotorEnabled"), GetAngularMotorEnabled, SetAngularMotorEnabled);
-    objectTemplate->SetAccessor(v8::String::New("angularMotorVelocity"), GetAngularMotorVelocity, SetAngularMotorVelocity);
-    objectTemplate->SetAccessor(v8::String::New("angularMotorForce"), GetAngularMotorForce, SetAngularMotorForce);
+    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
+    objectTemplate->Set(ScriptString("frameA"), ScriptMethod(AccessFrameA));
+    objectTemplate->Set(ScriptString("frameB"), ScriptMethod(AccessFrameB));
+    objectTemplate->SetAccessor(ScriptString("hingeAngle"), GetHingeAngle);
+    objectTemplate->SetAccessor(ScriptString("angularLimitMin"), GetAngularLimitMin, SetAngularLimitMin);
+    objectTemplate->SetAccessor(ScriptString("angularLimitMax"), GetAngularLimitMax, SetAngularLimitMax);
+    objectTemplate->SetAccessor(ScriptString("angularMotorEnabled"), GetAngularMotorEnabled, SetAngularMotorEnabled);
+    objectTemplate->SetAccessor(ScriptString("angularMotorVelocity"), GetAngularMotorVelocity, SetAngularMotorVelocity);
+    objectTemplate->SetAccessor(ScriptString("angularMotorForce"), GetAngularMotorForce, SetAngularMotorForce);
     
-    functionTemplate->Inherit(scriptPhysicLink.functionTemplate);
+    ScriptInherit(scriptPhysicLink);
 }
 
 
 
 void ScriptSliderPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
     if(args.Length() == 1 && args[0]->IsExternal()) {
         args.This()->SetInternalField(0, args[0]);
-        args.GetReturnValue().Set(args.This());
+        ScriptReturn(args.This());
         return;
     }else if(args.Length() == 4 &&
-             scriptRigidObject.isCorrectInstance(args[0]) && scriptRigidObject.isCorrectInstance(args[1]) &&
-             scriptMatrix4.isCorrectInstance(args[2]) && scriptMatrix4.isCorrectInstance(args[3])) {
+             scriptRigidObject->isCorrectInstance(args[0]) && scriptRigidObject->isCorrectInstance(args[1]) &&
+             scriptMatrix4->isCorrectInstance(args[2]) && scriptMatrix4->isCorrectInstance(args[3])) {
         LinkInitializer initializer;
         RigidObject *a, *b;
-        initializer.object[0] = a = scriptBaseObject.getDataOfInstance<RigidObject>(args[0]);
-        initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
+        initializer.object[0] = a = scriptBaseObject->getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = scriptBaseObject->getDataOfInstance<RigidObject>(args[1]);
         PhysicLink* linkPtr = new PhysicLink();
         if(linkPtr->init(initializer, new btSliderConstraint(*a->getBody(), *b->getBody(),
-                                                             scriptMatrix4.getDataOfInstance(args[2])->getBTTransform(),
-                                                             scriptMatrix4.getDataOfInstance(args[3])->getBTTransform(),
+                                                             scriptMatrix4->getDataOfInstance(args[2])->getBTTransform(),
+                                                             scriptMatrix4->getDataOfInstance(args[3])->getBTTransform(),
                                                              true))) {
-            linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
-            args.This()->SetInternalField(0, v8::External::New(linkPtr));
-            args.GetReturnValue().Set(args.This());
+            linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
+            args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
+            ScriptReturn(args.This());
             return;
         }else
-            return args.ScriptException("SliderPhysicLink Constructor: Invalid argument");
+            return ScriptException("SliderPhysicLink Constructor: Invalid argument");
     }
     
-    return args.ScriptException("SliderPhysicLink Constructor: Class can't be initialized");
+    return ScriptException("SliderPhysicLink Constructor: Class can't be initialized");
 }
 
 void ScriptSliderPhysicLink::AccessFrameA(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     auto constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && scriptMatrix4.isCorrectInstance(args[0])) {
+    if(args.Length() == 1 && scriptMatrix4->isCorrectInstance(args[0])) {
         activateConstraint(constraint);
-        constraint->setFrames(scriptMatrix4.getDataOfInstance(args[0])->getBTTransform(), constraint->getFrameOffsetB());
-        args.GetReturnValue().Set(args[0]);
+        constraint->setFrames(scriptMatrix4->getDataOfInstance(args[0])->getBTTransform(), constraint->getFrameOffsetB());
+        ScriptReturn(args[0]);
     }else
-        args.GetReturnValue().Set(scriptMatrix4.newInstance(constraint->getFrameOffsetA()));
+        ScriptReturn(scriptMatrix4->newInstance(constraint->getFrameOffsetA()));
 }
 
 void ScriptSliderPhysicLink::AccessFrameB(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     auto constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && scriptMatrix4.isCorrectInstance(args[0])) {
+    if(args.Length() == 1 && scriptMatrix4->isCorrectInstance(args[0])) {
         activateConstraint(constraint);
-        constraint->setFrames(constraint->getFrameOffsetA(), scriptMatrix4.getDataOfInstance(args[0])->getBTTransform());
-        args.GetReturnValue().Set(args[0]);
+        constraint->setFrames(constraint->getFrameOffsetA(), scriptMatrix4->getDataOfInstance(args[0])->getBTTransform());
+        ScriptReturn(args[0]);
     }else
-        args.GetReturnValue().Set(scriptMatrix4.newInstance(constraint->getFrameOffsetB()));
+        ScriptReturn(scriptMatrix4->newInstance(constraint->getFrameOffsetB()));
 }
 
 void ScriptSliderPhysicLink::GetHingeAngle(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getAngularPos());
+    ScriptReturn(constraint->getAngularPos());
 }
 
 void ScriptSliderPhysicLink::GetSliderPos(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getLinearPos());
+    ScriptReturn(constraint->getLinearPos());
 }
 
 void ScriptSliderPhysicLink::GetAngularLimitMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getLowerAngLimit());
+    ScriptReturn(constraint->getLowerAngLimit());
 }
 
 void ScriptSliderPhysicLink::SetAngularLimitMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsNumber()) return;
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     constraint->setLowerAngLimit(value->NumberValue());
@@ -511,13 +511,13 @@ void ScriptSliderPhysicLink::SetAngularLimitMin(v8::Local<v8::String> property, 
 }
 
 void ScriptSliderPhysicLink::GetAngularLimitMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getUpperAngLimit());
+    ScriptReturn(constraint->getUpperAngLimit());
 }
 
 void ScriptSliderPhysicLink::SetAngularLimitMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsNumber()) return;
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     constraint->setUpperAngLimit(value->NumberValue());
@@ -525,13 +525,13 @@ void ScriptSliderPhysicLink::SetAngularLimitMax(v8::Local<v8::String> property, 
 }
 
 void ScriptSliderPhysicLink::GetAngularMotorEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getPoweredAngMotor());
+    ScriptReturn(constraint->getPoweredAngMotor());
 }
 
 void ScriptSliderPhysicLink::SetAngularMotorEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsBoolean()) return;
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     constraint->setPoweredAngMotor(value->BooleanValue());
@@ -539,13 +539,13 @@ void ScriptSliderPhysicLink::SetAngularMotorEnabled(v8::Local<v8::String> proper
 }
 
 void ScriptSliderPhysicLink::GetAngularMotorVelocity(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getTargetAngMotorVelocity());
+    ScriptReturn(constraint->getTargetAngMotorVelocity());
 }
 
 void ScriptSliderPhysicLink::SetAngularMotorVelocity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsNumber()) return;
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     constraint->setTargetAngMotorVelocity(value->NumberValue());
@@ -553,13 +553,13 @@ void ScriptSliderPhysicLink::SetAngularMotorVelocity(v8::Local<v8::String> prope
 }
 
 void ScriptSliderPhysicLink::GetAngularMotorForce(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getMaxAngMotorForce());
+    ScriptReturn(constraint->getMaxAngMotorForce());
 }
 
 void ScriptSliderPhysicLink::SetAngularMotorForce(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsNumber()) return;
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     constraint->setMaxAngMotorForce(value->NumberValue());
@@ -567,13 +567,13 @@ void ScriptSliderPhysicLink::SetAngularMotorForce(v8::Local<v8::String> property
 }
 
 void ScriptSliderPhysicLink::GetLinearLimitMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getLowerLinLimit());
+    ScriptReturn(constraint->getLowerLinLimit());
 }
 
 void ScriptSliderPhysicLink::SetLinearLimitMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsNumber()) return;
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     constraint->setLowerLinLimit(value->NumberValue());
@@ -581,13 +581,13 @@ void ScriptSliderPhysicLink::SetLinearLimitMin(v8::Local<v8::String> property, v
 }
 
 void ScriptSliderPhysicLink::GetLinearLimitMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getUpperLinLimit());
+    ScriptReturn(constraint->getUpperLinLimit());
 }
 
 void ScriptSliderPhysicLink::SetLinearLimitMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsNumber()) return;
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     constraint->setUpperLinLimit(value->NumberValue());
@@ -595,13 +595,13 @@ void ScriptSliderPhysicLink::SetLinearLimitMax(v8::Local<v8::String> property, v
 }
 
 void ScriptSliderPhysicLink::GetLinearMotorEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getPoweredLinMotor());
+    ScriptReturn(constraint->getPoweredLinMotor());
 }
 
 void ScriptSliderPhysicLink::SetLinearMotorEnabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsBoolean()) return;
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     constraint->setPoweredLinMotor(value->BooleanValue());
@@ -609,13 +609,13 @@ void ScriptSliderPhysicLink::SetLinearMotorEnabled(v8::Local<v8::String> propert
 }
 
 void ScriptSliderPhysicLink::GetLinearMotorVelocity(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getTargetLinMotorVelocity());
+    ScriptReturn(constraint->getTargetLinMotorVelocity());
 }
 
 void ScriptSliderPhysicLink::SetLinearMotorVelocity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsNumber()) return;
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     constraint->setTargetLinMotorVelocity(value->NumberValue());
@@ -623,13 +623,13 @@ void ScriptSliderPhysicLink::SetLinearMotorVelocity(v8::Local<v8::String> proper
 }
 
 void ScriptSliderPhysicLink::GetLinearMotorForce(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getMaxLinMotorForce());
+    ScriptReturn(constraint->getMaxLinMotorForce());
 }
 
 void ScriptSliderPhysicLink::SetLinearMotorForce(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsNumber()) return;
     btSliderConstraint* constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     constraint->setMaxLinMotorForce(value->NumberValue());
@@ -637,25 +637,25 @@ void ScriptSliderPhysicLink::SetLinearMotorForce(v8::Local<v8::String> property,
 }
 
 ScriptSliderPhysicLink::ScriptSliderPhysicLink() :ScriptPhysicLink("SliderPhysicLink", Constructor) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
-    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->Set(v8::String::New("frameA"), v8::FunctionTemplate::New(AccessFrameA));
-    objectTemplate->Set(v8::String::New("frameB"), v8::FunctionTemplate::New(AccessFrameB));
-    objectTemplate->SetAccessor(v8::String::New("hingeAngle"), GetHingeAngle);
-    objectTemplate->SetAccessor(v8::String::New("sliderPos"), GetSliderPos);
-    objectTemplate->SetAccessor(v8::String::New("angularLimitMin"), GetAngularLimitMin, SetAngularLimitMin);
-    objectTemplate->SetAccessor(v8::String::New("angularLimitMax"), GetAngularLimitMax, SetAngularLimitMax);
-    objectTemplate->SetAccessor(v8::String::New("angularMotorEnabled"), GetAngularMotorEnabled, SetAngularMotorEnabled);
-    objectTemplate->SetAccessor(v8::String::New("angularMotorVelocity"), GetAngularMotorVelocity, SetAngularMotorVelocity);
-    objectTemplate->SetAccessor(v8::String::New("angularMotorForce"), GetAngularMotorForce, SetAngularMotorForce);
-    objectTemplate->SetAccessor(v8::String::New("linearLimitMin"), GetLinearLimitMin, SetLinearLimitMin);
-    objectTemplate->SetAccessor(v8::String::New("linearLimitMax"), GetLinearLimitMax, SetLinearLimitMax);
-    objectTemplate->SetAccessor(v8::String::New("linearMotorEnabled"), GetLinearMotorEnabled, SetLinearMotorEnabled);
-    objectTemplate->SetAccessor(v8::String::New("linearMotorVelocity"), GetLinearMotorVelocity, SetLinearMotorVelocity);
-    objectTemplate->SetAccessor(v8::String::New("linearMotorForce"), GetLinearMotorForce, SetLinearMotorForce);
+    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
+    objectTemplate->Set(ScriptString("frameA"), ScriptMethod(AccessFrameA));
+    objectTemplate->Set(ScriptString("frameB"), ScriptMethod(AccessFrameB));
+    objectTemplate->SetAccessor(ScriptString("hingeAngle"), GetHingeAngle);
+    objectTemplate->SetAccessor(ScriptString("sliderPos"), GetSliderPos);
+    objectTemplate->SetAccessor(ScriptString("angularLimitMin"), GetAngularLimitMin, SetAngularLimitMin);
+    objectTemplate->SetAccessor(ScriptString("angularLimitMax"), GetAngularLimitMax, SetAngularLimitMax);
+    objectTemplate->SetAccessor(ScriptString("angularMotorEnabled"), GetAngularMotorEnabled, SetAngularMotorEnabled);
+    objectTemplate->SetAccessor(ScriptString("angularMotorVelocity"), GetAngularMotorVelocity, SetAngularMotorVelocity);
+    objectTemplate->SetAccessor(ScriptString("angularMotorForce"), GetAngularMotorForce, SetAngularMotorForce);
+    objectTemplate->SetAccessor(ScriptString("linearLimitMin"), GetLinearLimitMin, SetLinearLimitMin);
+    objectTemplate->SetAccessor(ScriptString("linearLimitMax"), GetLinearLimitMax, SetLinearLimitMax);
+    objectTemplate->SetAccessor(ScriptString("linearMotorEnabled"), GetLinearMotorEnabled, SetLinearMotorEnabled);
+    objectTemplate->SetAccessor(ScriptString("linearMotorVelocity"), GetLinearMotorVelocity, SetLinearMotorVelocity);
+    objectTemplate->SetAccessor(ScriptString("linearMotorForce"), GetLinearMotorForce, SetLinearMotorForce);
     
-    functionTemplate->Inherit(scriptPhysicLink.functionTemplate);
+    ScriptInherit(scriptPhysicLink);
 }
 
 
@@ -686,59 +686,59 @@ btGeneric6DofSpringConstraint* ScriptDof6PhysicLink::DisableSpring(PhysicLink* l
 }
 
 void ScriptDof6PhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
     if(args.Length() == 1 && args[0]->IsExternal()) {
         args.This()->SetInternalField(0, args[0]);
-        args.GetReturnValue().Set(args.This());
+        ScriptReturn(args.This());
         return;
     }else if(args.Length() == 4 &&
-             scriptRigidObject.isCorrectInstance(args[0]) && scriptRigidObject.isCorrectInstance(args[1]) &&
-             scriptMatrix4.isCorrectInstance(args[2]) && scriptMatrix4.isCorrectInstance(args[3])) {
+             scriptRigidObject->isCorrectInstance(args[0]) && scriptRigidObject->isCorrectInstance(args[1]) &&
+             scriptMatrix4->isCorrectInstance(args[2]) && scriptMatrix4->isCorrectInstance(args[3])) {
         LinkInitializer initializer;
         RigidObject *a, *b;
-        initializer.object[0] = a = scriptBaseObject.getDataOfInstance<RigidObject>(args[0]);
-        initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
-        btTransform transA = scriptMatrix4.getDataOfInstance(args[2])->getBTTransform(),
-                    transB = scriptMatrix4.getDataOfInstance(args[3])->getBTTransform();
+        initializer.object[0] = a = scriptBaseObject->getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = scriptBaseObject->getDataOfInstance<RigidObject>(args[1]);
+        btTransform transA = scriptMatrix4->getDataOfInstance(args[2])->getBTTransform(),
+                    transB = scriptMatrix4->getDataOfInstance(args[3])->getBTTransform();
         PhysicLink* linkPtr = new PhysicLink();
         btGeneric6DofConstraint* constraint = new btGeneric6DofConstraint(*a->getBody(), *b->getBody(), transA, transB, true);
         if(linkPtr->init(initializer, constraint)) {
-            linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
-            args.This()->SetInternalField(0, v8::External::New(linkPtr));
-            args.GetReturnValue().Set(args.This());
+            linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
+            args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
+            ScriptReturn(args.This());
             return;
         }else
-            return args.ScriptException("Dof6PhysicLink Constructor: Invalid argument");
+            return ScriptException("Dof6PhysicLink Constructor: Invalid argument");
     }
     
-    return args.ScriptException("Dof6PhysicLink Constructor: Class can't be initialized");
+    return ScriptException("Dof6PhysicLink Constructor: Class can't be initialized");
 }
 
 void ScriptDof6PhysicLink::AccessFrameA(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     auto constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && scriptMatrix4.isCorrectInstance(args[0])) {
+    if(args.Length() == 1 && scriptMatrix4->isCorrectInstance(args[0])) {
         activateConstraint(constraint);
-        constraint->setFrames(scriptMatrix4.getDataOfInstance(args[0])->getBTTransform(), constraint->getFrameOffsetB());
-        args.GetReturnValue().Set(args[0]);
+        constraint->setFrames(scriptMatrix4->getDataOfInstance(args[0])->getBTTransform(), constraint->getFrameOffsetB());
+        ScriptReturn(args[0]);
     }else
-        args.GetReturnValue().Set(scriptMatrix4.newInstance(constraint->getFrameOffsetA()));
+        ScriptReturn(scriptMatrix4->newInstance(constraint->getFrameOffsetA()));
 }
 
 void ScriptDof6PhysicLink::AccessFrameB(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     auto constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && scriptMatrix4.isCorrectInstance(args[0])) {
+    if(args.Length() == 1 && scriptMatrix4->isCorrectInstance(args[0])) {
         activateConstraint(constraint);
-        constraint->setFrames(constraint->getFrameOffsetA(), scriptMatrix4.getDataOfInstance(args[0])->getBTTransform());
-        args.GetReturnValue().Set(args[0]);
+        constraint->setFrames(constraint->getFrameOffsetA(), scriptMatrix4->getDataOfInstance(args[0])->getBTTransform());
+        ScriptReturn(args[0]);
     }else
-        args.GetReturnValue().Set(scriptMatrix4.newInstance(constraint->getFrameOffsetB()));
+        ScriptReturn(scriptMatrix4->newInstance(constraint->getFrameOffsetB()));
 }
 
 void ScriptDof6PhysicLink::AccessSpringStiffness(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     auto link = getDataOfInstance<PhysicLink>(args.This());
     auto constraint = static_cast<btGeneric6DofSpringConstraint*>(link->constraint);
     if(args.Length() == 0 || !args[0]->IsUint32() || args[0]->IntegerValue() > 5)
@@ -762,45 +762,45 @@ void ScriptDof6PhysicLink::AccessSpringStiffness(const v8::FunctionCallbackInfo<
                 constraint = DisableSpring(link);
             activateConstraint(constraint);
         }
-        args.GetReturnValue().Set(args[1]);
+        ScriptReturn(args[1]);
     }else if(constraint->getConstraintType() == D6_SPRING_CONSTRAINT_TYPE)
-        args.GetReturnValue().Set(constraint->getStiffness(args[0]->IntegerValue()));
+        ScriptReturn(constraint->getStiffness(args[0]->IntegerValue()));
 }
 
 void ScriptDof6PhysicLink::AccessSpringDamping(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     auto link = getDataOfInstance<PhysicLink>(args.This());
     if(args.Length() == 0 || !args[0]->IsUint32() || args[0]->IntegerValue() > 5)
         return;
     if(args.Length() > 1 && !args[1]->IsNumber()) {
         auto constraint = EnableSpring(link);
         constraint->setDamping(args[0]->IntegerValue(), args[1]->NumberValue());
-        args.GetReturnValue().Set(args[1]);
+        ScriptReturn(args[1]);
     }else{
         auto constraint = static_cast<btGeneric6DofSpringConstraint*>(link->constraint);
         if(constraint->getConstraintType() != D6_SPRING_CONSTRAINT_TYPE) return;
-        args.GetReturnValue().Set(constraint->getDamping(args[0]->IntegerValue()));
+        ScriptReturn(constraint->getDamping(args[0]->IntegerValue()));
     }
 }
 
 void ScriptDof6PhysicLink::AccessSpringEquilibrium(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     auto link = getDataOfInstance<PhysicLink>(args.This());
     if(args.Length() == 0 || !args[0]->IsUint32() || args[0]->IntegerValue() > 5)
         return;
     if(args.Length() > 1 && !args[1]->IsNumber()) {
         auto constraint = EnableSpring(link);
         constraint->setEquilibriumPoint(args[0]->IntegerValue(), args[1]->NumberValue());
-        args.GetReturnValue().Set(args[1]);
+        ScriptReturn(args[1]);
     }else{
         auto constraint = static_cast<btGeneric6DofSpringConstraint*>(link->constraint);
         if(constraint->getConstraintType() != D6_SPRING_CONSTRAINT_TYPE) return;
-        args.GetReturnValue().Set(constraint->getEquilibriumPoint(args[0]->IntegerValue()));
+        ScriptReturn(constraint->getEquilibriumPoint(args[0]->IntegerValue()));
     }
 }
 
 void ScriptDof6PhysicLink::AccessMotorEnabled(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btGeneric6DofConstraint* constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     if(args.Length() == 0 || !args[0]->IsUint32() || args[0]->IntegerValue() > 5)
         return;
@@ -817,13 +817,13 @@ void ScriptDof6PhysicLink::AccessMotorEnabled(const v8::FunctionCallbackInfo<v8:
     if(args.Length() > 1 && args[1]->IsBoolean()) {
         activateConstraint(constraint);
         *value = args[1]->BooleanValue();
-        args.GetReturnValue().Set(args[1]);
+        ScriptReturn(args[1]);
     }else
-        args.GetReturnValue().Set(*value);
+        ScriptReturn(*value);
 }
 
 void ScriptDof6PhysicLink::AccessMotorVelocity(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btGeneric6DofConstraint* constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     if(args.Length() == 0 || !args[0]->IsUint32() || args[0]->IntegerValue() > 5)
         return;
@@ -840,13 +840,13 @@ void ScriptDof6PhysicLink::AccessMotorVelocity(const v8::FunctionCallbackInfo<v8
     if(args.Length() > 1 && args[1]->IsNumber()) {
         activateConstraint(constraint);
         *value = args[1]->NumberValue();
-        args.GetReturnValue().Set(args[1]);
+        ScriptReturn(args[1]);
     }else
-        args.GetReturnValue().Set(*value);
+        ScriptReturn(*value);
 }
 
 void ScriptDof6PhysicLink::AccessMotorForce(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btGeneric6DofConstraint* constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
     if(args.Length() == 0 || !args[0]->IsUint32() || args[0]->IntegerValue() > 5)
         return;
@@ -863,148 +863,148 @@ void ScriptDof6PhysicLink::AccessMotorForce(const v8::FunctionCallbackInfo<v8::V
     if(args.Length() > 1 && args[1]->IsNumber()) {
         activateConstraint(constraint);
         *value = args[1]->NumberValue();
-        args.GetReturnValue().Set(args[1]);
+        ScriptReturn(args[1]);
     }else
-        args.GetReturnValue().Set(*value);
+        ScriptReturn(*value);
 }
 
 void ScriptDof6PhysicLink::AccessAngularLimitMin(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btGeneric6DofConstraint* constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+    if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
         activateConstraint(constraint);
-        constraint->setAngularLowerLimit(scriptVector3.getDataOfInstance(args[0]));
-        args.GetReturnValue().Set(args[0]);
+        constraint->setAngularLowerLimit(scriptVector3->getDataOfInstance(args[0]));
+        ScriptReturn(args[0]);
     }else{
         btVector3 value;
         constraint->getAngularLowerLimit(value);
-        args.GetReturnValue().Set(scriptVector3.newInstance(value));
+        ScriptReturn(scriptVector3->newInstance(value));
     }
 }
 
 void ScriptDof6PhysicLink::AccessAngularLimitMax(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btGeneric6DofConstraint* constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+    if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
         activateConstraint(constraint);
-        constraint->setAngularUpperLimit(scriptVector3.getDataOfInstance(args[0]));
-        args.GetReturnValue().Set(args[0]);
+        constraint->setAngularUpperLimit(scriptVector3->getDataOfInstance(args[0]));
+        ScriptReturn(args[0]);
     }else{
         btVector3 value;
         constraint->getAngularUpperLimit(value);
-        args.GetReturnValue().Set(scriptVector3.newInstance(value));
+        ScriptReturn(scriptVector3->newInstance(value));
     }
 }
 
 void ScriptDof6PhysicLink::AccessLinearLimitMin(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btGeneric6DofConstraint* constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+    if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
         activateConstraint(constraint);
-        constraint->setLinearLowerLimit(scriptVector3.getDataOfInstance(args[0]));
-        args.GetReturnValue().Set(args[0]);
+        constraint->setLinearLowerLimit(scriptVector3->getDataOfInstance(args[0]));
+        ScriptReturn(args[0]);
     }else{
         btVector3 value;
         constraint->getLinearLowerLimit(value);
-        args.GetReturnValue().Set(scriptVector3.newInstance(value));
+        ScriptReturn(scriptVector3->newInstance(value));
     }
 }
 
 void ScriptDof6PhysicLink::AccessLinearLimitMax(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btGeneric6DofConstraint* constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && scriptVector3.isCorrectInstance(args[0])) {
+    if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
         activateConstraint(constraint);
-        constraint->setLinearUpperLimit(scriptVector3.getDataOfInstance(args[0]));
-        args.GetReturnValue().Set(args[0]);
+        constraint->setLinearUpperLimit(scriptVector3->getDataOfInstance(args[0]));
+        ScriptReturn(args[0]);
     }else{
         btVector3 value;
         constraint->getLinearUpperLimit(value);
-        args.GetReturnValue().Set(scriptVector3.newInstance(value));
+        ScriptReturn(scriptVector3->newInstance(value));
     }
 }
 
 ScriptDof6PhysicLink::ScriptDof6PhysicLink() :ScriptPhysicLink("Dof6PhysicLink", Constructor) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
-    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->Set(v8::String::New("frameA"), v8::FunctionTemplate::New(AccessFrameA));
-    objectTemplate->Set(v8::String::New("frameB"), v8::FunctionTemplate::New(AccessFrameB));
-    objectTemplate->Set(v8::String::New("springStiffness"), v8::FunctionTemplate::New(AccessSpringStiffness));
-    objectTemplate->Set(v8::String::New("springDamping"), v8::FunctionTemplate::New(AccessSpringDamping));
-    objectTemplate->Set(v8::String::New("springEquilibrium"), v8::FunctionTemplate::New(AccessSpringEquilibrium));
-    objectTemplate->Set(v8::String::New("motorEnabled"), v8::FunctionTemplate::New(AccessMotorEnabled));
-    objectTemplate->Set(v8::String::New("motorVelocity"), v8::FunctionTemplate::New(AccessMotorVelocity));
-    objectTemplate->Set(v8::String::New("motorForce"), v8::FunctionTemplate::New(AccessMotorForce));
-    objectTemplate->Set(v8::String::New("angularLimitMin"), v8::FunctionTemplate::New(AccessAngularLimitMin));
-    objectTemplate->Set(v8::String::New("angularLimitMax"), v8::FunctionTemplate::New(AccessAngularLimitMax));
-    objectTemplate->Set(v8::String::New("linearLimitMin"), v8::FunctionTemplate::New(AccessLinearLimitMin));
-    objectTemplate->Set(v8::String::New("linearLimitMax"), v8::FunctionTemplate::New(AccessLinearLimitMax));
+    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
+    objectTemplate->Set(ScriptString("frameA"), ScriptMethod(AccessFrameA));
+    objectTemplate->Set(ScriptString("frameB"), ScriptMethod(AccessFrameB));
+    objectTemplate->Set(ScriptString("springStiffness"), ScriptMethod(AccessSpringStiffness));
+    objectTemplate->Set(ScriptString("springDamping"), ScriptMethod(AccessSpringDamping));
+    objectTemplate->Set(ScriptString("springEquilibrium"), ScriptMethod(AccessSpringEquilibrium));
+    objectTemplate->Set(ScriptString("motorEnabled"), ScriptMethod(AccessMotorEnabled));
+    objectTemplate->Set(ScriptString("motorVelocity"), ScriptMethod(AccessMotorVelocity));
+    objectTemplate->Set(ScriptString("motorForce"), ScriptMethod(AccessMotorForce));
+    objectTemplate->Set(ScriptString("angularLimitMin"), ScriptMethod(AccessAngularLimitMin));
+    objectTemplate->Set(ScriptString("angularLimitMax"), ScriptMethod(AccessAngularLimitMax));
+    objectTemplate->Set(ScriptString("linearLimitMin"), ScriptMethod(AccessLinearLimitMin));
+    objectTemplate->Set(ScriptString("linearLimitMax"), ScriptMethod(AccessLinearLimitMax));
     
-    functionTemplate->Inherit(scriptPhysicLink.functionTemplate);
+    ScriptInherit(scriptPhysicLink);
 }
 
 
 
 void ScriptConeTwistPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
     if(args.Length() == 1 && args[0]->IsExternal()) {
         args.This()->SetInternalField(0, args[0]);
-        args.GetReturnValue().Set(args.This());
+        ScriptReturn(args.This());
         return;
     }else if(args.Length() == 4 &&
-             scriptRigidObject.isCorrectInstance(args[0]) && scriptRigidObject.isCorrectInstance(args[1]) &&
-             scriptMatrix4.isCorrectInstance(args[2]) && scriptMatrix4.isCorrectInstance(args[3])) {
+             scriptRigidObject->isCorrectInstance(args[0]) && scriptRigidObject->isCorrectInstance(args[1]) &&
+             scriptMatrix4->isCorrectInstance(args[2]) && scriptMatrix4->isCorrectInstance(args[3])) {
         LinkInitializer initializer;
         RigidObject *a, *b;
-        initializer.object[0] = a = scriptBaseObject.getDataOfInstance<RigidObject>(args[0]);
-        initializer.object[1] = b = scriptBaseObject.getDataOfInstance<RigidObject>(args[1]);
+        initializer.object[0] = a = scriptBaseObject->getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = scriptBaseObject->getDataOfInstance<RigidObject>(args[1]);
         PhysicLink* linkPtr = new PhysicLink();
         if(linkPtr->init(initializer, new btConeTwistConstraint(*a->getBody(), *b->getBody(),
-                                                             scriptMatrix4.getDataOfInstance(args[2])->getBTTransform(),
-                                                             scriptMatrix4.getDataOfInstance(args[3])->getBTTransform()))) {
-            linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
-            args.This()->SetInternalField(0, v8::External::New(linkPtr));
-            args.GetReturnValue().Set(args.This());
+                                                             scriptMatrix4->getDataOfInstance(args[2])->getBTTransform(),
+                                                             scriptMatrix4->getDataOfInstance(args[3])->getBTTransform()))) {
+            linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
+            args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
+            ScriptReturn(args.This());
             return;
         }else
-            return args.ScriptException("ConeTwistPhysicLink Constructor: Invalid argument");
+            return ScriptException("ConeTwistPhysicLink Constructor: Invalid argument");
     }
     
-    return args.ScriptException("ConeTwistPhysicLink Constructor: Class can't be initialized");
+    return ScriptException("ConeTwistPhysicLink Constructor: Class can't be initialized");
 }
 
 void ScriptConeTwistPhysicLink::AccessFrameA(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     auto constraint = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && scriptMatrix4.isCorrectInstance(args[0])) {
+    if(args.Length() == 1 && scriptMatrix4->isCorrectInstance(args[0])) {
         activateConstraint(constraint);
-        constraint->setFrames(scriptMatrix4.getDataOfInstance(args[0])->getBTTransform(), constraint->getFrameOffsetB());
-        args.GetReturnValue().Set(args[0]);
+        constraint->setFrames(scriptMatrix4->getDataOfInstance(args[0])->getBTTransform(), constraint->getFrameOffsetB());
+        ScriptReturn(args[0]);
     }else
-        args.GetReturnValue().Set(scriptMatrix4.newInstance(constraint->getFrameOffsetA()));
+        ScriptReturn(scriptMatrix4->newInstance(constraint->getFrameOffsetA()));
 }
 
 void ScriptConeTwistPhysicLink::AccessFrameB(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     auto constraint = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(args.Length() == 1 && scriptMatrix4.isCorrectInstance(args[0])) {
+    if(args.Length() == 1 && scriptMatrix4->isCorrectInstance(args[0])) {
         activateConstraint(constraint);
-        constraint->setFrames(constraint->getFrameOffsetA(), scriptMatrix4.getDataOfInstance(args[0])->getBTTransform());
-        args.GetReturnValue().Set(args[0]);
+        constraint->setFrames(constraint->getFrameOffsetA(), scriptMatrix4->getDataOfInstance(args[0])->getBTTransform());
+        ScriptReturn(args[0]);
     }else
-        args.GetReturnValue().Set(scriptMatrix4.newInstance(constraint->getFrameOffsetB()));
+        ScriptReturn(scriptMatrix4->newInstance(constraint->getFrameOffsetB()));
 }
 
 void ScriptConeTwistPhysicLink::GetSwingSpan(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btConeTwistConstraint* constraint = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set((stdStrOfV8(property) == "spanA") ? constraint->getSwingSpan1() : constraint->getSwingSpan2());
+    ScriptReturn((stdStrOfV8(property) == "spanA") ? constraint->getSwingSpan1() : constraint->getSwingSpan2());
 }
 
 void ScriptConeTwistPhysicLink::SetSwingSpan(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsNumber()) return;
     
     btConeTwistConstraint* constraint = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
@@ -1016,13 +1016,13 @@ void ScriptConeTwistPhysicLink::SetSwingSpan(v8::Local<v8::String> property, v8:
 }
 
 void ScriptConeTwistPhysicLink::GetTwistSpan(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btConeTwistConstraint* constraint = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getTwistSpan());
+    ScriptReturn(constraint->getTwistSpan());
 }
 
 void ScriptConeTwistPhysicLink::SetTwistSpan(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsNumber()) return;
     
     btConeTwistConstraint* constraint = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
@@ -1031,122 +1031,122 @@ void ScriptConeTwistPhysicLink::SetTwistSpan(v8::Local<v8::String> property, v8:
 }
 
 void ScriptConeTwistPhysicLink::GetTwistAngle(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     btConeTwistConstraint* constraint = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    args.GetReturnValue().Set(constraint->getTwistAngle());
+    ScriptReturn(constraint->getTwistAngle());
 }
 
 ScriptConeTwistPhysicLink::ScriptConeTwistPhysicLink() :ScriptPhysicLink("ConeTwistPhysicLink", Constructor) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
-    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->Set(v8::String::New("frameA"), v8::FunctionTemplate::New(AccessFrameA));
-    objectTemplate->Set(v8::String::New("frameB"), v8::FunctionTemplate::New(AccessFrameB));
-    objectTemplate->SetAccessor(v8::String::New("swingSpanA"), GetSwingSpan, SetSwingSpan);
-    objectTemplate->SetAccessor(v8::String::New("swingSpanB"), GetSwingSpan, SetSwingSpan);
-    objectTemplate->SetAccessor(v8::String::New("twistSpan"), GetTwistSpan, SetTwistSpan);
-    objectTemplate->SetAccessor(v8::String::New("twistAngle"), GetTwistAngle);
+    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
+    objectTemplate->Set(ScriptString("frameA"), ScriptMethod(AccessFrameA));
+    objectTemplate->Set(ScriptString("frameB"), ScriptMethod(AccessFrameB));
+    objectTemplate->SetAccessor(ScriptString("swingSpanA"), GetSwingSpan, SetSwingSpan);
+    objectTemplate->SetAccessor(ScriptString("swingSpanB"), GetSwingSpan, SetSwingSpan);
+    objectTemplate->SetAccessor(ScriptString("twistSpan"), GetTwistSpan, SetTwistSpan);
+    objectTemplate->SetAccessor(ScriptString("twistAngle"), GetTwistAngle);
     
-    functionTemplate->Inherit(scriptPhysicLink.functionTemplate);
+    ScriptInherit(scriptPhysicLink);
 }
 
 
 
 void ScriptTransformLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
     if(args.Length() == 1 && args[0]->IsExternal()) {
         TransformLink* linkPtr = static_cast<TransformLink*>(v8::Local<v8::External>::Cast(args[0])->Value());
-        linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
+        linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
         args.This()->SetInternalField(0, args[0]);
-        args.GetReturnValue().Set(args.This());
+        ScriptReturn(args.This());
         return;
     }else if(args.Length() > 2 &&
-             scriptBaseObject.isCorrectInstance(args[0]) && scriptBaseObject.isCorrectInstance(args[1])) {
+             scriptBaseObject->isCorrectInstance(args[0]) && scriptBaseObject->isCorrectInstance(args[1])) {
         LinkInitializer initializer;
-        initializer.object[0] = scriptBaseObject.getDataOfInstance<BaseObject>(args[0]);
-        initializer.object[1] = scriptBaseObject.getDataOfInstance<BaseObject>(args[1]);
+        initializer.object[0] = scriptBaseObject->getDataOfInstance<BaseObject>(args[0]);
+        initializer.object[1] = scriptBaseObject->getDataOfInstance<BaseObject>(args[1]);
         TransformLink* linkPtr = new TransformLink();
         std::vector<btTransform> transformations;
         for(unsigned int i = 2; i < args.Length(); i ++) {
-            if(!scriptMatrix4.isCorrectInstance(args[i]))
-                return args.ScriptException("TransformLink Constructor: Invalid argument");
-            transformations.push_back(scriptMatrix4.getDataOfInstance(args[i])->getBTTransform());
+            if(!scriptMatrix4->isCorrectInstance(args[i]))
+                return ScriptException("TransformLink Constructor: Invalid argument");
+            transformations.push_back(scriptMatrix4->getDataOfInstance(args[i])->getBTTransform());
         }
         if(linkPtr->init(initializer, transformations)) {
-            args.This()->SetInternalField(0, v8::External::New(linkPtr));
-            args.GetReturnValue().Set(args.This());
+            args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
+            ScriptReturn(args.This());
             return;
         }else
-            return args.ScriptException("TransformLink Constructor: Invalid argument");
+            return ScriptException("TransformLink Constructor: Invalid argument");
     }
     
-    return args.ScriptException("TransformLink Constructor: Class can't be initialized");
+    return ScriptException("TransformLink Constructor: Class can't be initialized");
 }
 
 void ScriptTransformLink::AccessTransformation(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     TransformLink* linkPtr = getDataOfInstance<TransformLink>(args.This());
     if(args.Length() == 0)
-        return args.ScriptException("TransformLink transformation(): Too few arguments");
+        return ScriptException("TransformLink transformation(): Too few arguments");
     if(!args[0]->IsNumber() || args[0]->Uint32Value() >= linkPtr->transformations.size())
-        return args.ScriptException("TransformLink transformation(): Invalid argument");
+        return ScriptException("TransformLink transformation(): Invalid argument");
     btTransform& transform = linkPtr->transformations[args[0]->Uint32Value()];
-    if(args.Length() == 2 && scriptMatrix4.isCorrectInstance(args[1])) {
-        Matrix4* mat = scriptMatrix4.getDataOfInstance(args[1]);
+    if(args.Length() == 2 && scriptMatrix4->isCorrectInstance(args[1])) {
+        Matrix4* mat = scriptMatrix4->getDataOfInstance(args[1]);
         if(mat->isValid())
             transform = mat->getBTTransform();
-        args.GetReturnValue().Set(args[1]);
+        ScriptReturn(args[1]);
     }else
-        args.GetReturnValue().Set(scriptMatrix4.newInstance(Matrix4(transform)));
+        ScriptReturn(scriptMatrix4->newInstance(Matrix4(transform)));
 }
 
 ScriptTransformLink::ScriptTransformLink() :ScriptBaseLink("TransformLink", Constructor) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
-    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->Set(v8::String::New("transformation"), v8::FunctionTemplate::New(AccessTransformation));
+    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
+    objectTemplate->Set(ScriptString("transformation"), ScriptMethod(AccessTransformation));
     
-    functionTemplate->Inherit(scriptBaseLink.functionTemplate);
+    ScriptInherit(scriptBaseLink);
 }
 
 
 
 void ScriptBoneLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
     if(args.Length() == 1 && args[0]->IsExternal()) {
         BoneLink* linkPtr = static_cast<BoneLink*>(v8::Local<v8::External>::Cast(args[0])->Value());
-        linkPtr->scriptInstance = v8::Persistent<v8::Object>::New(v8::Isolate::GetCurrent(), args.This());
+        linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
         args.This()->SetInternalField(0, args[0]);
-        args.GetReturnValue().Set(args.This());
+        ScriptReturn(args.This());
         return;
     }else if(args.Length() == 3 &&
-             scriptBaseObject.isCorrectInstance(args[0]) && scriptBaseObject.isCorrectInstance(args[1]) &&
+             scriptBaseObject->isCorrectInstance(args[0]) && scriptBaseObject->isCorrectInstance(args[1]) &&
              args[2]->IsString()) {
         LinkInitializer initializer;
-        initializer.object[0] = scriptBaseObject.getDataOfInstance<BaseObject>(args[0]);
-        initializer.object[1] = scriptBaseObject.getDataOfInstance<BaseObject>(args[1]);
+        initializer.object[0] = scriptBaseObject->getDataOfInstance<BaseObject>(args[0]);
+        initializer.object[1] = scriptBaseObject->getDataOfInstance<BaseObject>(args[1]);
         BoneLink* linkPtr = new BoneLink();
         if(linkPtr->init(initializer, linkPtr->getBoneByName(cStrOfV8(args[2])))) {
-            args.This()->SetInternalField(0, v8::External::New(linkPtr));
-            args.GetReturnValue().Set(args.This());
+            args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
+            ScriptReturn(args.This());
             return;
         }else
-            return args.ScriptException("BoneLink Constructor: Invalid argument");
+            return ScriptException("BoneLink Constructor: Invalid argument");
     }
     
-    return args.ScriptException("BoneLink Constructor: Class can't be initialized");
+    return ScriptException("BoneLink Constructor: Class can't be initialized");
 }
 
 void ScriptBoneLink::GetBone(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     BoneLink* linkPtr = getDataOfInstance<BoneLink>(args.This());
-    args.GetReturnValue().Set(v8::String::New(linkPtr->bone->name.c_str()));
+    ScriptReturn(ScriptString(linkPtr->bone->name.c_str()));
 }
 
 void ScriptBoneLink::SetBone(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(!value->IsString()) return;
     BoneLink* linkPtr = getDataOfInstance<BoneLink>(args.This());
     Bone* bone = linkPtr->getBoneByName(cStrOfV8(value));
@@ -1154,35 +1154,35 @@ void ScriptBoneLink::SetBone(v8::Local<v8::String> property, v8::Local<v8::Value
 }
 
 void ScriptBoneLink::GetBoneChildren(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     BoneLink* linkPtr = getDataOfInstance<BoneLink>(args.This());
     unsigned int i = 0;
-    v8::Handle<v8::Array> objects = v8::Array::New(linkPtr->bone->children.size());
+    v8::Handle<v8::Array> objects = v8::Array::New(v8::Isolate::GetCurrent(), linkPtr->bone->children.size());
     for(auto child : linkPtr->bone->children)
-        objects->Set(i ++, v8::String::New(child->name.c_str()));
-    args.GetReturnValue().Set(objects);
+        objects->Set(i ++, ScriptString(child->name.c_str()));
+    ScriptReturn(objects);
 }
 
 void ScriptBoneLink::GetRelativeMat(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     BoneLink* linkPtr = getDataOfInstance<BoneLink>(args.This());
-    args.GetReturnValue().Set(scriptMatrix4.newInstance(Matrix4(linkPtr->bone->relativeMat)));
+    ScriptReturn(scriptMatrix4->newInstance(Matrix4(linkPtr->bone->relativeMat)));
 }
 
 void ScriptBoneLink::GetAbsoluteMat(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     BoneLink* linkPtr = getDataOfInstance<BoneLink>(args.This());
-    args.GetReturnValue().Set(scriptMatrix4.newInstance(Matrix4(linkPtr->bone->absoluteInv)));
+    ScriptReturn(scriptMatrix4->newInstance(Matrix4(linkPtr->bone->absoluteInv)));
 }
 
 ScriptBoneLink::ScriptBoneLink() :ScriptBaseLink("BoneLink", Constructor) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
-    v8::Local<v8::ObjectTemplate> objectTemplate = functionTemplate->PrototypeTemplate();
-    objectTemplate->SetAccessor(v8::String::New("bone"), GetBone, SetBone);
-    objectTemplate->Set(v8::String::New("getBoneChildren"), v8::FunctionTemplate::New(GetBoneChildren));
-    objectTemplate->Set(v8::String::New("getRelativeMat"), v8::FunctionTemplate::New(GetRelativeMat));
-    objectTemplate->Set(v8::String::New("getAbsoluteMat"), v8::FunctionTemplate::New(GetAbsoluteMat));
+    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
+    objectTemplate->SetAccessor(ScriptString("bone"), GetBone, SetBone);
+    objectTemplate->Set(ScriptString("getBoneChildren"), ScriptMethod(GetBoneChildren));
+    objectTemplate->Set(ScriptString("getRelativeMat"), ScriptMethod(GetRelativeMat));
+    objectTemplate->Set(ScriptString("getAbsoluteMat"), ScriptMethod(GetAbsoluteMat));
     
-    functionTemplate->Inherit(scriptBaseLink.functionTemplate);
+    ScriptInherit(scriptBaseLink);
 }

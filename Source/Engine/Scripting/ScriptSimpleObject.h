@@ -47,8 +47,8 @@ class ScriptSoundObject : public ScriptSimpleObject {
     ScriptSoundObject();
 };
 
-extern ScriptSimpleObject scriptSimpleObject;
-extern ScriptCamObject scriptCamObject;
-extern ScriptSoundObject scriptSoundObject;
+extern std::unique_ptr<ScriptSimpleObject> scriptSimpleObject;
+extern std::unique_ptr<ScriptCamObject> scriptCamObject;
+extern std::unique_ptr<ScriptSoundObject> scriptSoundObject;
 
 #endif

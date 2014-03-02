@@ -13,12 +13,12 @@ LevelLoader::LevelLoader() :transformation(btTransform::getIdentity()), filePack
 }
 
 v8::Handle<v8::Array> LevelLoader::getResultsArray() {
-    v8::HandleScope handleScope;
+    //ScriptScope();
     unsigned int i = 0;
-    v8::Handle<v8::Array> objects = v8::Array::New();
+    v8::Handle<v8::Array> objects = v8::Array::New(v8::Isolate::GetCurrent());
     for(auto hit : objectLinkingIndex)
-        objects->Set(i ++, hit->scriptInstance);
-    return handleScope.Close(objects);
+        objects->Set(i ++, v8::Handle<v8::Object>(*hit->scriptInstance));
+    return objects; //handleScope.Close(objects);
 }
 
 BaseObject* LevelLoader::getObjectLinking(unsigned int index) {
@@ -35,7 +35,7 @@ void LevelLoader::pushObject(BaseObject* object) {
 }
 
 bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     std::unique_ptr<char[]> rawData;
     rapidxml::xml_document<xmlUsedCharType> doc;
     
@@ -202,7 +202,7 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
         v8::Handle<v8::Value> globalData = scriptManager->readCdataXMLNode(node);
         if(!writeXmlFile(doc, statusFilePath, true))
             return false;
-        levelManager.mainScript->callFunction("onload", false, { localData, globalData });
+        levelManager.mainScript->callFunction("onload", false, 2, *localData, *globalData);
         if(!mainCam) {
             log(error_log, "No CamObject was set as mainCam.");
             return false;

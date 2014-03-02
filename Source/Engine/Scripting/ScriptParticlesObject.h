@@ -36,6 +36,6 @@ class ScriptParticlesObject : public ScriptPhysicObject {
     ScriptParticlesObject();
 };
 
-extern ScriptParticlesObject scriptParticlesObject;
+extern std::unique_ptr<ScriptParticlesObject> scriptParticlesObject;
 
 #endif

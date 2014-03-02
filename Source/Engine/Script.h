@@ -8,7 +8,18 @@
 
 #ifndef Script_h
 #define Script_h
-#define ScriptException(str) GetReturnValue().Set(v8::ThrowException(v8::String::New(str)))
+
+#define ScriptScope() v8::HandleScope handleScope(v8::Isolate::GetCurrent())
+#define ScriptString(str) v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), str)
+#define ScriptException(str) args.GetReturnValue().Set(v8::Isolate::GetCurrent()->ThrowException(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), str)))
+#define ScriptNewInstance(class) v8::HandleScope handleScope(v8::Isolate::GetCurrent()); \
+v8::Handle<v8::Value> external = v8::External::New(v8::Isolate::GetCurrent(), this); \
+(*class->functionTemplate)->GetFunction()->NewInstance(1, &external);
+#define ScriptMethod(method) v8::FunctionTemplate::New(v8::Isolate::GetCurrent(), method)
+#define ScriptInherit(class) (*functionTemplate)->Inherit(v8::Handle<v8::FunctionTemplate>(*class->functionTemplate))
+#define ScriptReturn(value) args.GetReturnValue().Set(value)
+#define ScriptClassInit(class) class.reset(new decltype(class)::element_type); \
+class->init(globalTemplate)
 
 #include "FBO.h"
 
@@ -21,7 +32,7 @@ class ScriptFile : public FileResource {
     FileResourcePtr<FileResource> load(FilePackage* filePackage, const std::string& name);
     bool checkFunction(const char* functionName);
     v8::Handle<v8::Value> run();
-    v8::Handle<v8::Value> callFunction(const char* functionName, bool recvFirstArg, std::vector<v8::Handle<v8::Value>> args);
+    v8::Handle<v8::Value> callFunction(const char* functionName, bool recvFirstArg, int argc, ...);
 };
 
 class ScriptClass {
@@ -31,7 +42,7 @@ class ScriptClass {
     const char* name;
     v8::Persistent<v8::FunctionTemplate> functionTemplate;
     virtual ~ScriptClass();
-    static v8::Handle<v8::Value> callFunction(v8::Handle<v8::Object> scriptInstance, const char* functionName, std::vector<v8::Handle<v8::Value>> args);
+    static v8::Handle<v8::Value> callFunction(v8::Handle<v8::Object> scriptInstance, const char* functionName, int argc, ...);
     bool isCorrectInstance(const v8::Local<v8::Value>& object);
     void init(const v8::Persistent<v8::ObjectTemplate>& globalTemplate);
 };

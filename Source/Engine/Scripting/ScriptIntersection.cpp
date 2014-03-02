@@ -9,52 +9,52 @@
 #include "ScriptIntersection.h"
 
 void ScriptIntersection::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
-    return args.ScriptException("Intersection Constructor: Class can't be instantiated");
+    ScriptScope();
+    return ScriptException("Intersection Constructor: Class can't be instantiated");
 }
 
 void ScriptIntersection::RayCast(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(args.Length() < 4)
-        return args.ScriptException("Intersection rayCast(): Too few arguments");
-    if(!scriptVector3.isCorrectInstance(args[0]) || !scriptVector3.isCorrectInstance(args[1]) ||
+        return ScriptException("Intersection rayCast(): Too few arguments");
+    if(!scriptVector3->isCorrectInstance(args[0]) || !scriptVector3->isCorrectInstance(args[1]) ||
        !args[2]->IsInt32() || !args[3]->IsBoolean())
-        return args.ScriptException("Intersection rayCast(): Invalid argument");
+        return ScriptException("Intersection rayCast(): Invalid argument");
     
-    Ray3 ray(scriptVector3.getDataOfInstance(args[0]), scriptVector3.getDataOfInstance(args[1]));
+    Ray3 ray(scriptVector3->getDataOfInstance(args[0]), scriptVector3->getDataOfInstance(args[1]));
     v8::Handle<v8::Array> objects, points, normals;
     
     if(args[3]->BooleanValue()) {
         BaseObject* object;
         btVector3 point, normal;
         unsigned int count = ray.hitTestNearest(args[2]->Uint32Value(), object, point, normal);
-        objects = v8::Array::New(count);
-        points = v8::Array::New(count);
-        normals = v8::Array::New(count);
+        objects = v8::Array::New(v8::Isolate::GetCurrent(), count);
+        points = v8::Array::New(v8::Isolate::GetCurrent(), count);
+        normals = v8::Array::New(v8::Isolate::GetCurrent(), count);
         if(count) {
-            objects->Set(0, object->scriptInstance);
-            points->Set(0, scriptVector3.newInstance(point));
-            normals->Set(0, scriptVector3.newInstance(normal));
+            objects->Set(0, v8::Handle<v8::Object>(*object->scriptInstance));
+            points->Set(0, scriptVector3->newInstance(point));
+            normals->Set(0, scriptVector3->newInstance(normal));
         }
     }else{
         std::vector<BaseObject*> object;
         std::vector<btVector3> point, normal;
         unsigned int count = ray.hitTestAll(args[2]->Uint32Value(), object, point, normal);
-        objects = v8::Array::New(count);
-        points = v8::Array::New(count);
-        normals = v8::Array::New(count);
+        objects = v8::Array::New(v8::Isolate::GetCurrent(), count);
+        points = v8::Array::New(v8::Isolate::GetCurrent(), count);
+        normals = v8::Array::New(v8::Isolate::GetCurrent(), count);
         for(unsigned int i = 0; i < count; i ++) {
-            objects->Set(i, object[i]->scriptInstance);
-            points->Set(i, scriptVector3.newInstance(point[i]));
-            normals->Set(i, scriptVector3.newInstance(normal[i]));
+            objects->Set(i, v8::Handle<v8::Object>(*object[i]->scriptInstance));
+            points->Set(i, scriptVector3->newInstance(point[i]));
+            normals->Set(i, scriptVector3->newInstance(normal[i]));
         }
     }
     
-    v8::Handle<v8::Object> result = v8::Object::New();
-    result->Set(v8::String::New("objects"), objects);
-    result->Set(v8::String::New("points"), points);
-    result->Set(v8::String::New("normals"), normals);
-    args.GetReturnValue().Set(result);
+    v8::Handle<v8::Object> result = v8::Object::New(v8::Isolate::GetCurrent());
+    result->Set(ScriptString("objects"), objects);
+    result->Set(ScriptString("points"), points);
+    result->Set(ScriptString("normals"), normals);
+    ScriptReturn(result);
 }
 
 //! @cond
@@ -97,32 +97,32 @@ struct	ContactResultCallback : btCollisionWorld::ContactResultCallback {
 //! @endcond
 
 void ScriptIntersection::AABBIntersection(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(args.Length() < 3)
-        return args.ScriptException("Intersection aabbIntersection(): Too few arguments");
-    if(!scriptVector3.isCorrectInstance(args[0]) || !scriptVector3.isCorrectInstance(args[1]) || !args[2]->IsInt32())
-        return args.ScriptException("Intersection aabbIntersection(): Invalid argument");
+        return ScriptException("Intersection aabbIntersection(): Too few arguments");
+    if(!scriptVector3->isCorrectInstance(args[0]) || !scriptVector3->isCorrectInstance(args[1]) || !args[2]->IsInt32())
+        return ScriptException("Intersection aabbIntersection(): Invalid argument");
     
     IntersectionCallback resultCallback(args[2]->Uint32Value());
     btDbvtBroadphase* broadphase = static_cast<btDbvtBroadphase*>(objectManager.broadphase);
-    broadphase->aabbTest(scriptVector3.getDataOfInstance(args[0]), scriptVector3.getDataOfInstance(args[1]), resultCallback);
+    broadphase->aabbTest(scriptVector3->getDataOfInstance(args[0]), scriptVector3->getDataOfInstance(args[1]), resultCallback);
     
     unsigned int i = 0;
-    v8::Handle<v8::Array> objects = v8::Array::New(resultCallback.hits.size());
+    v8::Handle<v8::Array> objects = v8::Array::New(v8::Isolate::GetCurrent(), resultCallback.hits.size());
     for(auto hit : resultCallback.hits)
-        objects->Set(i ++, hit->scriptInstance);
-    args.GetReturnValue().Set(objects);
+        objects->Set(i ++, v8::Handle<v8::Object>(*hit->scriptInstance));
+    ScriptReturn(objects);
 }
 
 void ScriptIntersection::SphereIntersection(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     if(args.Length() < 3)
-        return args.ScriptException("Intersection sphereIntersection(): Too few arguments");
-    if(!scriptVector3.isCorrectInstance(args[0]) || !args[1]->IsNumber() || !args[2]->IsInt32())
-        return args.ScriptException("Intersection sphereIntersection(): Invalid argument");
+        return ScriptException("Intersection sphereIntersection(): Too few arguments");
+    if(!scriptVector3->isCorrectInstance(args[0]) || !args[1]->IsNumber() || !args[2]->IsInt32())
+        return ScriptException("Intersection sphereIntersection(): Invalid argument");
     
     btTransform tmpTransform;
-    tmpTransform.setOrigin(scriptVector3.getDataOfInstance(args[0]));
+    tmpTransform.setOrigin(scriptVector3->getDataOfInstance(args[0]));
     btSphereShape tmpShape(args[1]->NumberValue());
     btCollisionObject tmpObject;
     tmpObject.setCollisionShape(&tmpShape);
@@ -132,16 +132,16 @@ void ScriptIntersection::SphereIntersection(const v8::FunctionCallbackInfo<v8::V
     objectManager.physicsWorld->contactTest(&tmpObject, resultCallback);
     
     unsigned int i = 0;
-    v8::Handle<v8::Array> objects = v8::Array::New(resultCallback.hits.size());
+    v8::Handle<v8::Array> objects = v8::Array::New(v8::Isolate::GetCurrent(), resultCallback.hits.size());
     for(auto hit : resultCallback.hits)
-        objects->Set(i ++, hit->scriptInstance);
-    args.GetReturnValue().Set(objects);
+        objects->Set(i ++, v8::Handle<v8::Object>(*hit->scriptInstance));
+    ScriptReturn(objects);
 }
 
 ScriptIntersection::ScriptIntersection() :ScriptClass("Intersection", Constructor) {
-    v8::HandleScope handleScope;
+    ScriptScope();
     
-    functionTemplate->Set(v8::String::New("rayCast"), v8::FunctionTemplate::New(RayCast));
-    functionTemplate->Set(v8::String::New("aabbIntersection"), v8::FunctionTemplate::New(AABBIntersection));
-    functionTemplate->Set(v8::String::New("sphereIntersection"), v8::FunctionTemplate::New(SphereIntersection));
+    (*functionTemplate)->Set(ScriptString("rayCast"), ScriptMethod(RayCast));
+    (*functionTemplate)->Set(ScriptString("aabbIntersection"), ScriptMethod(AABBIntersection));
+    (*functionTemplate)->Set(ScriptString("sphereIntersection"), ScriptMethod(SphereIntersection));
 }

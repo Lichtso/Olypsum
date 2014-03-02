@@ -133,8 +133,8 @@ GUIScreenView::GUIScreenView() :modalView(NULL), focused(NULL) {
 }
 
 GUIScreenView::~GUIScreenView() {
-    if(!scriptInstance.IsEmpty())
-        scriptInstance.Dispose();
+    //if(!scriptInstance.IsEmpty())
+    //    scriptInstance.Reset();
 }
 
 void GUIScreenView::updateContent() {

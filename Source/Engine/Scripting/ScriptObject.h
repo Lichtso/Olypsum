@@ -20,7 +20,7 @@ class ScriptBaseClass : public ScriptClass {
     ScriptBaseClass(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args) = Constructor);
     public:
     template<typename T> static T* getDataOfInstance(const v8::Local<v8::Value>& value) {
-        v8::HandleScope handleScope;
+        ScriptScope();
         v8::Local<v8::Object> object = v8::Local<v8::Object>::Cast(value);
         v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(object->GetInternalField(0));
         return static_cast<T*>(wrap->Value());
@@ -56,8 +56,8 @@ class ScriptPhysicObject : public ScriptBaseObject {
     ScriptPhysicObject();
 };
 
-extern ScriptBaseClass scriptBaseClass;
-extern ScriptBaseObject scriptBaseObject;
-extern ScriptPhysicObject scriptPhysicObject;
+extern std::unique_ptr<ScriptBaseClass> scriptBaseClass;
+extern std::unique_ptr<ScriptBaseObject> scriptBaseObject;
+extern std::unique_ptr<ScriptPhysicObject> scriptPhysicObject;
 
 #endif

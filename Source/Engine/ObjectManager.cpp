@@ -279,7 +279,7 @@ void ObjectManager::gameTick() {
     //Script Animations
     scriptManager->gameTick();
     
-    levelManager.mainScript->callFunction("ongametick", false, { });
+    levelManager.mainScript->callFunction("ongametick", false, 0);
     profiler.leaveSection("Execute script: ongametick()");
 }
 
@@ -303,7 +303,7 @@ void ObjectManager::physicsTick() {
         userObjectB->handleCollision(contactManifold, userObjectA);
 	}
     
-    levelManager.mainScript->callFunction("onphysicstick", false, { });
+    levelManager.mainScript->callFunction("onphysicstick", false, 0);
 }
 
 void ObjectManager::drawShadowCasters() {

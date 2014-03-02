@@ -124,29 +124,29 @@ void Menu::handleMouseDown(Uint8 button) {
     if((button == SDL_BUTTON_LEFT && screenView->handleMouseDown(mouseX, mouseY))
        || menu.current != inGame) return;
     
-    v8::HandleScope handleScope;
-    levelManager.mainScript->callFunction("onmousedown", false, { v8::Number::New(button) });
+    ScriptScope();
+    levelManager.mainScript->callFunction("onmousedown", false, 1, *v8::Number::New(v8::Isolate::GetCurrent(), button));
 }
 
 void Menu::handleMouseUp(Uint8 button) {
     if(screenView->handleMouseUp(mouseX, mouseY) || menu.current != inGame) return;
     
-    v8::HandleScope handleScope;
-    levelManager.mainScript->callFunction("onmouseup", false, { v8::Number::New(button) });
+    ScriptScope();
+    levelManager.mainScript->callFunction("onmouseup", false, 1, *v8::Number::New(v8::Isolate::GetCurrent(), button));
 }
 
 void Menu::handleMouseWheel(float deltaX, float deltaY) {
     if(screenView->handleMouseWheel(mouseX, mouseY, deltaX, deltaY) || menu.current != inGame) return;
     
-    v8::HandleScope handleScope;
-    levelManager.mainScript->callFunction("onmousewheel", false, { v8::Number::New(deltaX), v8::Number::New(deltaY) });
+    ScriptScope();
+    levelManager.mainScript->callFunction("onmousewheel", false, 2, *v8::Number::New(v8::Isolate::GetCurrent(), deltaX), *v8::Number::New(v8::Isolate::GetCurrent(), deltaY));
 }
 
 void Menu::handleKeyDown(SDL_Keycode key, const char* text) {
     if(screenView->handleKeyDown(key, text) || menu.current != inGame) return;
     
-    v8::HandleScope handleScope;
-    levelManager.mainScript->callFunction("onkeydown", false, { v8::Integer::New(key) });
+    ScriptScope();
+    levelManager.mainScript->callFunction("onkeydown", false, 1, *v8::Integer::New(v8::Isolate::GetCurrent(), key));
 }
 
 void Menu::handleKeyUp(SDL_Keycode key) {
@@ -186,8 +186,8 @@ void Menu::handleKeyUp(SDL_Keycode key) {
     }
     
     if(menu.current == inGame) {
-        v8::HandleScope handleScope;
-        levelManager.mainScript->callFunction("onkeyup", false, { v8::Integer::New(key) });
+        ScriptScope();
+        levelManager.mainScript->callFunction("onkeyup", false, 1, *v8::Integer::New(v8::Isolate::GetCurrent(), key));
     }
 }
 
@@ -277,7 +277,7 @@ void Menu::gameTick() {
 }
 
 void Menu::sendPauseEvent() {
-    levelManager.mainScript->callFunction("onpause", false, { });
+    levelManager.mainScript->callFunction("onpause", false, 0);
 }
 
 void Menu::setModalView(const std::string& title, const std::string& text, std::function<void(GUIButton* button)> onContinue) {

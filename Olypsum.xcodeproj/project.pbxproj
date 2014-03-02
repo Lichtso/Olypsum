@@ -46,6 +46,11 @@
 		1148738A18BFDA7500C4B8B2 /* SDL2_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1148737E18BFDA4D00C4B8B2 /* SDL2_ttf.framework */; };
 		1148738B18BFDA7500C4B8B2 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1148737F18BFDA4D00C4B8B2 /* SDL2.framework */; };
 		114A0E6B169064E800D2CE9C /* LevelSaver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 114A0E69169064E800D2CE9C /* LevelSaver.cpp */; };
+		114CB6CE18C396060060B48C /* libv8_base.x64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 114CB6CC18C396060060B48C /* libv8_base.x64.a */; };
+		114CB6D518C3D10B0060B48C /* libicui18n.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 114CB6D418C3D10B0060B48C /* libicui18n.a */; };
+		114CB6D718C3D1150060B48C /* libicuuc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 114CB6D618C3D1150060B48C /* libicuuc.a */; };
+		114CB6DF18C3D3FC0060B48C /* libicudata.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 114CB6DE18C3D3FC0060B48C /* libicudata.a */; };
+		114CB6E318C3D5320060B48C /* libv8_snapshot.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 114CB6E218C3D5320060B48C /* libv8_snapshot.a */; };
 		11511420170C1A0E00F77236 /* ScriptIntersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */; };
 		11511425170D9B7C00F77236 /* ScriptVisualObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11511423170D9B7B00F77236 /* ScriptVisualObject.cpp */; };
 		1158E66518BE680D00C25BAB /* libNetLink.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1158E66418BE680D00C25BAB /* libNetLink.a */; };
@@ -57,8 +62,6 @@
 		118620481650165400A32518 /* ObjectManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118620461650165400A32518 /* ObjectManager.cpp */; };
 		1188A5431745403900D535B2 /* ScriptAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1188A5411745403900D535B2 /* ScriptAnimation.cpp */; };
 		118B60621573E2E8004C132E /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118B60611573E2E8004C132E /* Audio.cpp */; };
-		1197492C17DB39FA00414CAA /* libv8.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1197492B17DB39FA00414CAA /* libv8.dylib */; };
-		1197492D17DB3AB600414CAA /* libv8.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1197492B17DB39FA00414CAA /* libv8.dylib */; };
 		1199EC331722D205006BD235 /* ScriptIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1199EC311722D204006BD235 /* ScriptIO.cpp */; };
 		1199EC361723D795006BD235 /* ScriptGUIOutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1199EC341723D793006BD235 /* ScriptGUIOutput.cpp */; };
 		11A3255517089E2100B038D2 /* Network.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11A3255317089E2100B038D2 /* Network.cpp */; };
@@ -115,7 +118,6 @@
 			dstSubfolderSpec = 10;
 			files = (
 				1148736F18BFD97100C4B8B2 /* libLeap.dylib in CopyFiles */,
-				1197492D17DB3AB600414CAA /* libv8.dylib in CopyFiles */,
 				1114B87316A8937B00B1CD41 /* Ogg.framework in CopyFiles */,
 				1114B87416A8937B00B1CD41 /* Vorbis.framework in CopyFiles */,
 				1114B87516A8937B00B1CD41 /* BulletCollision.framework in CopyFiles */,
@@ -174,6 +176,11 @@
 		1148737F18BFDA4D00C4B8B2 /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = Libraries/SDL2.framework; sourceTree = "<group>"; };
 		114A0E69169064E800D2CE9C /* LevelSaver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelSaver.cpp; sourceTree = "<group>"; };
 		114A0E6A169064E800D2CE9C /* LevelSaver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LevelSaver.h; sourceTree = "<group>"; };
+		114CB6CC18C396060060B48C /* libv8_base.x64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libv8_base.x64.a; path = Libraries/v8/out/native/libv8_base.x64.a; sourceTree = "<group>"; };
+		114CB6D418C3D10B0060B48C /* libicui18n.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicui18n.a; path = Libraries/v8/out/native/libicui18n.a; sourceTree = "<group>"; };
+		114CB6D618C3D1150060B48C /* libicuuc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuuc.a; path = Libraries/v8/out/native/libicuuc.a; sourceTree = "<group>"; };
+		114CB6DE18C3D3FC0060B48C /* libicudata.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicudata.a; path = Libraries/v8/out/native/libicudata.a; sourceTree = "<group>"; };
+		114CB6E218C3D5320060B48C /* libv8_snapshot.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libv8_snapshot.a; path = Libraries/v8/out/native/libv8_snapshot.a; sourceTree = "<group>"; };
 		1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptIntersection.cpp; sourceTree = "<group>"; };
 		1151141F170C1A0E00F77236 /* ScriptIntersection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptIntersection.h; sourceTree = "<group>"; };
 		11511423170D9B7B00F77236 /* ScriptVisualObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptVisualObject.cpp; sourceTree = "<group>"; };
@@ -195,7 +202,6 @@
 		1188A5421745403900D535B2 /* ScriptAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptAnimation.h; sourceTree = "<group>"; };
 		118B60601573E2DF004C132E /* Audio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Audio.h; sourceTree = "<group>"; };
 		118B60611573E2E8004C132E /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Audio.cpp; sourceTree = "<group>"; };
-		1197492B17DB39FA00414CAA /* libv8.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libv8.dylib; path = Libraries/v8/out/native/libv8.dylib; sourceTree = "<group>"; };
 		1199EC311722D204006BD235 /* ScriptIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptIO.cpp; sourceTree = "<group>"; };
 		1199EC321722D204006BD235 /* ScriptIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptIO.h; sourceTree = "<group>"; };
 		1199EC341723D793006BD235 /* ScriptGUIOutput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptGUIOutput.cpp; sourceTree = "<group>"; };
@@ -294,8 +300,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				1158E66518BE680D00C25BAB /* libNetLink.a in Frameworks */,
+				114CB6DF18C3D3FC0060B48C /* libicudata.a in Frameworks */,
+				114CB6D718C3D1150060B48C /* libicuuc.a in Frameworks */,
+				114CB6D518C3D10B0060B48C /* libicui18n.a in Frameworks */,
+				114CB6CE18C396060060B48C /* libv8_base.x64.a in Frameworks */,
+				114CB6E318C3D5320060B48C /* libv8_snapshot.a in Frameworks */,
 				1148737018BFD98400C4B8B2 /* libLeap.dylib in Frameworks */,
-				1197492C17DB39FA00414CAA /* libv8.dylib in Frameworks */,
 				1114B87016A8933200B1CD41 /* Ogg.framework in Frameworks */,
 				1114B87116A8933200B1CD41 /* Vorbis.framework in Frameworks */,
 				1114B84616A88BD100B1CD41 /* BulletCollision.framework in Frameworks */,
@@ -338,8 +348,12 @@
 			isa = PBXGroup;
 			children = (
 				1158E66418BE680D00C25BAB /* libNetLink.a */,
+				114CB6DE18C3D3FC0060B48C /* libicudata.a */,
+				114CB6D618C3D1150060B48C /* libicuuc.a */,
+				114CB6D418C3D10B0060B48C /* libicui18n.a */,
+				114CB6CC18C396060060B48C /* libv8_base.x64.a */,
+				114CB6E218C3D5320060B48C /* libv8_snapshot.a */,
 				1148736E18BFD97100C4B8B2 /* libLeap.dylib */,
-				1197492B17DB39FA00414CAA /* libv8.dylib */,
 				1114B86E16A8933200B1CD41 /* Ogg.framework */,
 				1114B86F16A8933200B1CD41 /* Vorbis.framework */,
 				1114B84016A88BD100B1CD41 /* BulletCollision.framework */,
@@ -817,6 +831,7 @@
 					"$(inherited)",
 					/Volumes/Users/Alexander/Desktop/Olypsum/Libraries/Leap/lib,
 					"$(PROJECT_DIR)/Libraries/Leap/lib",
+					"$(PROJECT_DIR)/Libraries/v8/out/native",
 				);
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -844,6 +859,7 @@
 					"$(inherited)",
 					/Volumes/Users/Alexander/Desktop/Olypsum/Libraries/Leap/lib,
 					"$(PROJECT_DIR)/Libraries/Leap/lib",
+					"$(PROJECT_DIR)/Libraries/v8/out/native",
 				);
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
