@@ -189,11 +189,11 @@ void ShaderProgram::setUniformVec2(const char* name, btScalar x, btScalar y) {
     glUniform2f(getUniformLocation(name), x, y);
 }
 
-void ShaderProgram::setUniformVec3(const char* name, btVector3 value) {
+void ShaderProgram::setUniformVec3(const char* name, const btVector3& value) {
     glUniform3f(getUniformLocation(name), value.x(), value.y(), value.z());
 }
 
-void ShaderProgram::setUniformVec4(const char* name, btVector3 value) {
+void ShaderProgram::setUniformVec4(const char* name, const btVector3& value) {
     glUniform4f(getUniformLocation(name), value.x(), value.y(), value.z(), value.w());
 }
 

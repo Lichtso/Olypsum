@@ -192,19 +192,19 @@ std::string stringOf(float value) {
     return buffer;
 }
 
-std::string stringOf(btVector3& vec) {
+std::string stringOf(const btVector3& vec) {
     char buffer[128];
     sprintf(buffer, "%g %g %g", vec.x(), vec.y(), vec.z());
     return buffer;
 }
 
-std::string stringOf(btQuaternion& rot) {
+std::string stringOf(const btQuaternion& rot) {
     char buffer[128];
     sprintf(buffer, "%g %g %g %g", rot.x(), rot.y(), rot.z(), rot.w());
     return buffer;
 }
 
-std::string stringOf(btTransform& mat) {
+std::string stringOf(const btTransform& mat) {
     btScalar values[16];
     mat.getOpenGLMatrix(values);
     

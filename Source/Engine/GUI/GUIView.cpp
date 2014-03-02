@@ -50,13 +50,13 @@ void GUIView::updateContent() {
         children[i]->updateContent();
 }
 
-void GUIView::draw(btVector3 transform, GUIClipRect& parentClipRect) {
+void GUIView::draw(const btVector3& parentTransform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     
     GUIClipRect clipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
     
-    transform += btVector3(posX, posY, 0.0);
+    btVector3 transform = parentTransform + btVector3(posX, posY, 0.0);
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->draw(transform, clipRect);
 }
@@ -108,13 +108,13 @@ void GUIFramedView::updateContent() {
         children[i]->updateContent();
 }
 
-void GUIFramedView::draw(btVector3 transform, GUIClipRect& parentClipRect) {
+void GUIFramedView::draw(const btVector3& parentTransform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     
     GUIClipRect clipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
     
-    transform += btVector3(posX, posY, 0.0);
+    btVector3 transform = parentTransform + btVector3(posX, posY, 0.0);
     content.drawOnScreen(transform, 0, 0, clipRect);
     float inset = abs(content.innerShadow);
     clipRect.minPosX += inset;

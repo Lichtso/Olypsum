@@ -67,13 +67,13 @@ void GUIScrollView::updateContent() {
     }
 }
 
-void GUIScrollView::draw(btVector3 transform, GUIClipRect& parentClipRect) {
+void GUIScrollView::draw(const btVector3& parentTransform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     
     GUIClipRect clipRect, fixedClipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
     
-    transform += btVector3(posX, posY, 0.0);
+    btVector3 transform = parentTransform + btVector3(posX, posY, 0.0);
     float inset = abs(content.innerShadow);
     if(content.innerShadow != 0)
         content.drawOnScreen(transform, 0, 0, clipRect);

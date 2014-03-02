@@ -32,7 +32,7 @@ class LightVolume {
 class LightBoxVolume : public LightVolume {
     public:
     btVector3 halfSize; //!< The half extends of the box
-    LightBoxVolume(btVector3 halfSize);
+    LightBoxVolume(const btVector3& halfSize);
     std::unique_ptr<float[]> getVertices(unsigned int& verticesCount);
     std::unique_ptr<unsigned int[]> getIndecies(unsigned int& elementsCount);
 };

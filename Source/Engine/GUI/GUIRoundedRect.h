@@ -21,7 +21,7 @@ enum GUICorner {
 class GUIDrawableRect {
     public:
     int width, height;
-    void drawOnScreen(btVector3 parentTransform, int posX, int posY, GUIClipRect &parentClipRect);
+    void drawOnScreen(const btVector3& parentTransform, int posX, int posY, GUIClipRect &parentClipRect);
 };
 
 class GUIRoundedRect : public GUIDrawableRect {
@@ -39,7 +39,7 @@ class GUIRoundedRect : public GUIDrawableRect {
     GUIRoundedRect();
     ~GUIRoundedRect();
     void updateContent();
-    void drawOnScreen(btVector3 parentTransform, int posX, int posY, GUIClipRect &parentClipRect);
+    void drawOnScreen(const btVector3& parentTransform, int posX, int posY, GUIClipRect &parentClipRect);
 };
 
 #endif

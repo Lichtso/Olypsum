@@ -90,13 +90,13 @@ void GUILabel::updateContent() {
     }
 }
 
-void GUILabel::draw(btVector3 transform, GUIClipRect& parentClipRect) {
+void GUILabel::draw(const btVector3& parentTransform, GUIClipRect& parentClipRect) {
     if(!visible || text.size() == 0 || fontHeight == 0) return;
     if(lines.size() == 0) updateContent();
     
     GUIClipRect clipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
-    transform += btVector3(posX, posY, 0.0);
+    btVector3 transform = parentTransform + btVector3(posX, posY, 0.0);
     
     GUILabelLine* line;
     shaderPrograms[spriteSP]->setUniformF("alpha", color.a);

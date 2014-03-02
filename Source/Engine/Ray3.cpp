@@ -8,17 +8,17 @@
 
 #include "ObjectManager.h"
 
-Ray3::Ray3(btVector3 originB, btVector3 directionB) :origin(originB), direction(directionB) {
+Ray3::Ray3(const btVector3& originB, const btVector3& directionB) :origin(originB), direction(directionB) {
     
 }
 
-float Ray3::getDistToPlane(btVector3 normal, float dist) {
+float Ray3::getDistToPlane(const btVector3& normal, float dist) {
     float determinant = normal.dot(direction);
     if(determinant == 0.0) return NAN;
     return -(normal.dot(origin)-dist)/determinant;
 }
 
-btVector3 Ray3::getHitPointPlane(btVector3 normal, float dist) {
+btVector3 Ray3::getHitPointPlane(const btVector3& normal, float dist) {
     float determinant = normal.dot(direction);
     if(determinant == 0.0) return origin;
     return origin-(normal.dot(origin)-dist)/determinant*direction;

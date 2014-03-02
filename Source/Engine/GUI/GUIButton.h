@@ -31,7 +31,7 @@ class GUIButton : public GUIFramedView {
     std::function<void(GUIButton*)> onClick;
     GUIButton();
     void updateContent();
-    void draw(btVector3 transform, GUIClipRect& parentClipRect);
+    void draw(const btVector3& parentTransform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);
     bool handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);

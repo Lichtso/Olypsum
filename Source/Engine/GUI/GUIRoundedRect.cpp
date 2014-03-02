@@ -8,7 +8,7 @@
 
 #include "../Menu/Menu.h"
 
-void GUIDrawableRect::drawOnScreen(btVector3 parentTransform, int posX, int posY, GUIClipRect &parentClipRect) {
+void GUIDrawableRect::drawOnScreen(const btVector3& parentTransform, int posX, int posY, GUIClipRect &parentClipRect) {
     GUIClipRect clipRect;
     clipRect.minPosX = max(parentClipRect.minPosX, posX-width);
     clipRect.minPosY = max(parentClipRect.minPosY, posY-height);
@@ -220,7 +220,7 @@ void GUIRoundedRect::updateContent() {
     delete [] pixels;
 }
 
-void GUIRoundedRect::drawOnScreen(btVector3 parentTransform, int posX, int posY, GUIClipRect &parentClipRect) {
+void GUIRoundedRect::drawOnScreen(const btVector3& parentTransform, int posX, int posY, GUIClipRect &parentClipRect) {
     if(!texture) updateContent();
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);

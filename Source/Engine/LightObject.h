@@ -35,7 +35,7 @@ class LightObject : public VisualObject {
     //! Deletes the shadowmap(s) if present
     virtual void deleteShadowMap();
     //! Returns the priority of this light source in the shadow casting ranking
-    virtual float getPriority(btVector3 position) = 0;
+    virtual float getPriority(const btVector3& position) = 0;
     void init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
@@ -47,12 +47,12 @@ class DirectionalLight : public LightObject {
     DirectionalLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     void setTransformation(const btTransform& transformation);
     //! Updates the box shape to the given half extends
-    void setBounds(btVector3 bounds);
+    void setBounds(const btVector3& bounds);
     //! Returns the half extends of the box shape
     btVector3 getBounds();
     bool updateShadowMap(bool shadowActive);
     void draw();
-    float getPriority(btVector3 position);
+    float getPriority(const btVector3& position);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
@@ -68,7 +68,7 @@ class SpotLight : public LightObject {
     float getCutoff();
     bool updateShadowMap(bool shadowActive);
     void draw();
-    float getPriority(btVector3 position);
+    float getPriority(const btVector3& position);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
@@ -86,7 +86,7 @@ class PositionalLight : public LightObject {
     bool updateShadowMap(bool shadowActive);
     void draw();
     void deleteShadowMap();
-    float getPriority(btVector3 position);
+    float getPriority(const btVector3& position);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 

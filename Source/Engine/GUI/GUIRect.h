@@ -42,7 +42,7 @@ class GUIRect {
     virtual void setFocus(bool active);
     virtual bool getLimSize(GUIClipRect& clipRect, GUIClipRect& parentClipRect);
     virtual void updateContent();
-    virtual void draw(btVector3 transform, GUIClipRect& parentClipRect) = 0;
+    virtual void draw(const btVector3& parentTransform, GUIClipRect& parentClipRect) = 0;
     virtual bool handleMouseDown(int mouseX, int mouseY);
     virtual bool handleMouseUp(int mouseX, int mouseY);
     virtual void handleMouseMove(int mouseX, int mouseY) { };

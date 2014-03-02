@@ -152,13 +152,13 @@ void GUIButton::updateContent() {
     content.updateContent();
 }
 
-void GUIButton::draw(btVector3 transform, GUIClipRect& parentClipRect) {
+void GUIButton::draw(const btVector3& parentTransform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     
     GUIClipRect clipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
     
-    transform += btVector3(posX, posY, 0.0);
+    btVector3 transform = parentTransform + btVector3(posX, posY, 0.0);
     content.drawOnScreen(transform, 0, 0, clipRect);
     
     for(unsigned int i = 0; i < children.size(); i ++)

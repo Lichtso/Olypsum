@@ -66,7 +66,7 @@ void GUISlider::updateContent() {
     slider.updateContent();
 }
 
-void GUISlider::drawBar(btVector3 transform, GUIClipRect clipRect, GUIRoundedRect& roundedRect) {
+void GUISlider::drawBar(const btVector3& parentTransform, GUIClipRect clipRect, GUIRoundedRect& roundedRect) {
     if(orientation & GUIOrientation::Horizontal) {
         int splitPos = width*(value*2.0-1.0);
         if(&roundedRect == &barL)
@@ -80,15 +80,15 @@ void GUISlider::drawBar(btVector3 transform, GUIClipRect clipRect, GUIRoundedRec
         else
             clipRect.minPosY = max(clipRect.minPosY, splitPos);
     }
-    roundedRect.drawOnScreen(transform, 0, 0, clipRect);
+    roundedRect.drawOnScreen(parentTransform, 0, 0, clipRect);
 }
 
-void GUISlider::draw(btVector3 transform, GUIClipRect& parentClipRect) {
+void GUISlider::draw(const btVector3& parentTransform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     
     GUIClipRect clipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
-    transform += btVector3(posX, posY, 0.0);
+    btVector3 transform = parentTransform + btVector3(posX, posY, 0.0);
     
     drawBar(transform, clipRect, barL);
     drawBar(transform, clipRect, barR);

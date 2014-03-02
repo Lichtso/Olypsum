@@ -159,14 +159,13 @@ void DirectionalLight::setTransformation(const btTransform& transformation) {
     body->setWorldTransform(transformation * shiftMat);
 }
 
-void DirectionalLight::setBounds(btVector3 bounds) {
+void DirectionalLight::setBounds(const btVector3& bounds) {
     shadowCam.fov = -bounds.y();
     shadowCam.aspect = bounds.x()/bounds.y();
     shadowCam.far = bounds.z();
     shadowCam.near = bounds.z()*0.01;
     
-    bounds.setZ(bounds.z()*0.5);
-    setPhysicsShape(new btBoxShape(bounds));
+    setPhysicsShape(new btBoxShape(btVector3(bounds.x(), bounds.y(), bounds.z()*0.5)));
 }
 
 btVector3 DirectionalLight::getBounds() {
@@ -203,7 +202,7 @@ void DirectionalLight::draw() {
     lightBox.draw();
 }
 
-float DirectionalLight::getPriority(btVector3 position) {
+float DirectionalLight::getPriority(const btVector3& position) {
     return 2.0;
 }
 
@@ -306,7 +305,7 @@ void SpotLight::draw() {
     lightCone.draw();
 }
 
-float SpotLight::getPriority(btVector3 position) {
+float SpotLight::getPriority(const btVector3& position) {
     return 1.0;
 }
 
@@ -490,7 +489,7 @@ void PositionalLight::deleteShadowMap() {
     shadowMapB = NULL;
 }
 
-float PositionalLight::getPriority(btVector3 position) {
+float PositionalLight::getPriority(const btVector3& position) {
     return 1.0-(position-shadowCam.getTransformation().getOrigin()).length()/shadowCam.far;
 }
 

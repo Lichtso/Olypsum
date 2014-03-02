@@ -44,7 +44,7 @@ class TextFont : public FileResource {
      @param color The color of the string used for filling
      @param antialiasing Enable edge smoothing
      */
-    void renderStringToScreen(const char* str, btVector3 pos, float scale, Color4 color, bool antialiasing);
+    void renderStringToScreen(const char* str, const btVector3& pos, float scale, Color4 color, bool antialiasing);
     /*! Calculates the width and height of a text
      @param text The text used to calculate the size
      @param width The result width is stored here

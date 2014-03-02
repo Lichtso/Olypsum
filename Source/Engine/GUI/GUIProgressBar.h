@@ -13,13 +13,13 @@
 
 class GUIProgressBar : public GUIRect {
     GUIRoundedRect barL, barR;
-    void drawBar(btVector3 transform, GUIClipRect clipRect, GUIRoundedRect& roundedRect);
+    void drawBar(const btVector3& parentTransform, GUIClipRect clipRect, GUIRoundedRect& roundedRect);
     public:
     float value;
     GUIOrientation orientation;
     GUIProgressBar();
     void updateContent();
-    void draw(btVector3 transform, GUIClipRect& parentClipRect);
+    void draw(const btVector3& parentTransform, GUIClipRect& parentClipRect);
 };
 
 #endif

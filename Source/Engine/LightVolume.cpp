@@ -53,7 +53,7 @@ unsigned int staticBoxWireFrame[] = {
     0, 4, 1, 5, 2, 6, 3, 7
 };
 
-LightBoxVolume::LightBoxVolume(btVector3 halfSizeB) :halfSize(halfSizeB) {
+LightBoxVolume::LightBoxVolume(const btVector3& _halfSize) :halfSize(_halfSize) {
     
 }
 

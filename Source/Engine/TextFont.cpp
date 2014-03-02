@@ -130,7 +130,7 @@ void TextFont::renderStringToSurface(const char* str, SDL_Surface* surfaceB, int
     SDL_FreeSurface(surfaceA);
 }
 
-void TextFont::renderStringToScreen(const char* str, btVector3 pos, float scale, Color4 color, bool antialiasing) {
+void TextFont::renderStringToScreen(const char* str, const btVector3& pos, float scale, Color4 color, bool antialiasing) {
     int width, height;
     GLuint texture = renderStringToTexture(str, color, antialiasing, width, height);
     

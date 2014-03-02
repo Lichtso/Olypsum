@@ -87,12 +87,12 @@ void GUITextField::updateContent() {
 
 #define GUITextField_Padding 8
 
-void GUITextField::draw(btVector3 transform, GUIClipRect& parentClipRect) {
+void GUITextField::draw(const btVector3& parentTransform, GUIClipRect& parentClipRect) {
     if(!visible) return;
     GUIClipRect clipRect;
     if(!getLimSize(clipRect, parentClipRect)) return;
     
-    transform += btVector3(posX, posY, 0.0);
+    btVector3 transform = parentTransform + btVector3(posX, posY, 0.0);
     modelMat.setIdentity();
     modelMat.setOrigin(transform);
     

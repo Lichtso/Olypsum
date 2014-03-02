@@ -27,7 +27,7 @@ class GUITextField : public GUIFramedView {
     void setFocus(bool active);
     bool addChild(GUIRect* child);
     void updateContent();
-    void draw(btVector3 transform, GUIClipRect& parentClipRect);
+    void draw(const btVector3& parentTransform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
     bool handleKeyDown(SDL_Keycode key, const char* text);

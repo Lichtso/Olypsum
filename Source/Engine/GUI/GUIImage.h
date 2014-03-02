@@ -18,7 +18,7 @@ class GUIImage : public GUIRect {
     FileResourcePtr<Texture> texture;
     GUIImage();
     void updateContent();
-    void draw(btVector3 transform, GUIClipRect& parentClipRect);
+    void draw(const btVector3& parentTransform, GUIClipRect& parentClipRect);
 };
 
 #endif

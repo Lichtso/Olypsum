@@ -141,13 +141,13 @@ std::string stringOf(unsigned int value);
 std::string stringOf(float value);
 
 //! Converts a btVector3 into a std::string
-std::string stringOf(btVector3& vec);
+std::string stringOf(const btVector3& vec);
 
 //! Converts a btQuaternion into a std::string
-std::string stringOf(btQuaternion& rot);
+std::string stringOf(const btQuaternion& rot);
 
 //! Converts a btTransform into a std::string
-std::string stringOf(btTransform& mat);
+std::string stringOf(const btTransform& mat);
 
 /*! Converts a any value into a std::string
  @param format A string to be used for conversion like in printf()
@@ -178,7 +178,7 @@ template <class T> inline const T frand(T min, T max) {
 }
 
 //! Generates a random btVector3 between min and max
-inline btVector3 vec3rand(btVector3 min, btVector3 max) {
+inline btVector3 vec3rand(const btVector3& min, const btVector3& max) {
     return btVector3(frand(min.x(), max.x()), frand(min.y(), max.y()), frand(min.z(), max.z()));
 }
 

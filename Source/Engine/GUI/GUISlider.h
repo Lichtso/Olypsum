@@ -15,7 +15,7 @@ class GUISlider : public GUIRect {
     GUIRoundedRect barL, barR, slider;
     int mouseDragPos;
     bool highlighted;
-    void drawBar(btVector3 transform, GUIClipRect clipRect, GUIRoundedRect& roundedRect);
+    void drawBar(const btVector3& parentTransform, GUIClipRect clipRect, GUIRoundedRect& roundedRect);
     public:
     float value;
     unsigned int steps;
@@ -24,7 +24,7 @@ class GUISlider : public GUIRect {
     std::function<void(GUISlider*, bool)> onChange;
     GUISlider();
     void updateContent();
-    void draw(btVector3 transform, GUIClipRect& parentClipRect);
+    void draw(const btVector3& parentTransform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);
     bool handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);

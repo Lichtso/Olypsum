@@ -57,9 +57,9 @@ class ShaderProgram {
     //! Sets a vec2 uniform
     void setUniformVec2(const char* name, btScalar x, btScalar y);
     //! Sets a vec3 uniform
-    void setUniformVec3(const char* name, btVector3 value);
+    void setUniformVec3(const char* name, const btVector3& value);
     //! Sets a vec4 uniform
-    void setUniformVec4(const char* name, btVector3 value);
+    void setUniformVec4(const char* name, const btVector3& value);
     //! Sets a mat3 uniform
     void setUniformMatrix3(const char* name, const btMatrix3x3* mat);
     //! Sets a mat3uniform

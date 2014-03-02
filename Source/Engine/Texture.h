@@ -29,9 +29,9 @@ class Color4 {
     //! A rgb color
     Color4(float rB, float gB, float bB) : r(rB), g(gB), b(bB), a(1) {};
     //! A rgb color
-    Color4(btVector3 vec) : r(vec.x()), g(vec.y()), b(vec.z()), a(1) {};
+    Color4(const btVector3& vec) : r(vec.x()), g(vec.y()), b(vec.z()), a(1) {};
     //! A rgb color
-    Color4(btQuaternion vec) : r(vec.x()), g(vec.y()), b(vec.z()), a(vec.w()) {};
+    Color4(const btQuaternion& vec) : r(vec.x()), g(vec.y()), b(vec.z()), a(vec.w()) {};
     //! A transparent rgb color
     Color4(float rB, float gB, float bB, float aB) : r(rB), g(gB), b(bB), a(aB) {};
     Color4& operator=(const Color4& B) {

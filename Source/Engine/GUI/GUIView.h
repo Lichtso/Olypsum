@@ -23,7 +23,7 @@ class GUIView : public GUIRect {
     //! Deletes the child at given index
     void deleteChild(unsigned int index);
     void updateContent();
-    void draw(btVector3 parentTransform, GUIClipRect& parentClipRect);
+    void draw(const btVector3& parentTransform, GUIClipRect& parentClipRect);
     bool handleMouseDown(int mouseX, int mouseY);
     bool handleMouseUp(int mouseX, int mouseY);
     void handleMouseMove(int mouseX, int mouseY);
@@ -35,7 +35,7 @@ class GUIFramedView : public GUIView {
     GUIRoundedRect content;
     GUIFramedView();
     void updateContent();
-    void draw(btVector3 parentTransform, GUIClipRect& parentClipRect);
+    void draw(const btVector3& parentTransform, GUIClipRect& parentClipRect);
 };
 
 class GUIScreenView : public GUIView {
