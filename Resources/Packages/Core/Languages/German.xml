@@ -11,7 +11,6 @@
 	<Entry key="mainMenu">Hauptmenü</Entry>
 	<Entry key="graphics">Grafik</Entry>
 	<Entry key="language">Sprache</Entry>
-	<Entry key="leapMotionController">Leap Motion Controller</Entry>
 	<Entry key="sound">Ton</Entry>
 	<Entry key="soundGlobal">Lautstärke</Entry>
 	<Entry key="soundMusic">Musik</Entry>

@@ -9,8 +9,7 @@
 #ifndef Utilities_h
 #define Utilities_h
 
-#define V8_USE_UNSAFE_HANDLES 1
-#define V8_ALLOW_ACCESS_TO_RAW_HANDLE_CONSTRUCTOR 1
+#define V8_ALLOW_ACCESS_TO_RAW_HANDLE_CONSTRUCTOR
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
 #define __BT_SKIP_UINT64_H
@@ -44,6 +43,7 @@
 #endif
 #endif
 #include <sys/stat.h>
+#include <iostream>
 #include <fstream>
 #include <thread>
 #include <regex>
@@ -59,7 +59,6 @@
 #include <bulletPhysics/src/BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolver_OpenCLSIMDAware.h>
 #include <bulletPhysics/src/BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolverVertexBuffer_OpenGL.h>
 #include <bulletPhysics/src/BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolverOutputCLtoGL.h>
-#include <Leap/include/Leap.h>
 #include <netLink/include/netLink.h>
 #include <v8/include/v8.h>
 
@@ -180,11 +179,6 @@ template <class T> inline const T frand(T min, T max) {
 //! Generates a random btVector3 between min and max
 inline btVector3 vec3rand(const btVector3& min, const btVector3& max) {
     return btVector3(frand(min.x(), max.x()), frand(min.y(), max.y()), frand(min.z(), max.z()));
-}
-
-//! Convertes a Leap::Vector to a btVector3
-inline btVector3 leapToBullet(Leap::Vector vec) {
-    return btVector3(vec.x, vec.y, vec.z);
 }
 
 //! System time in seconds

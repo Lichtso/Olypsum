@@ -202,7 +202,8 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
         v8::Handle<v8::Value> globalData = scriptManager->readCdataXMLNode(node);
         if(!writeXmlFile(doc, statusFilePath, true))
             return false;
-        levelManager.mainScript->callFunction("onload", false, 2, *localData, *globalData);
+        v8::Handle<v8::Value> argv[] = { v8::Handle<v8::Value>(*localData), v8::Handle<v8::Value>(*globalData) };
+        levelManager.mainScript->callFunction("onload", false, 2, argv);
         if(!mainCam) {
             log(error_log, "No CamObject was set as mainCam.");
             return false;

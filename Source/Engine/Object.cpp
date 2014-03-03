@@ -20,8 +20,10 @@ void BaseClass::initScriptNode(FilePackage* filePackage, rapidxml::xml_node<xmlU
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = scriptNode->first_attribute("src");
     if(attribute) {
         scriptFile = fileManager.getResourceByPath<ScriptFile>(filePackage, attribute->value());
-        if(scriptFile)
-            scriptFile->callFunction("onload", true, 2, *scriptInstance, *scriptManager->readCdataXMLNode(node));
+        if(scriptFile) {
+            v8::Handle<v8::Value> argv[] = { v8::Handle<v8::Value>(*scriptInstance), scriptManager->readCdataXMLNode(node) };
+            scriptFile->callFunction("onload", true, 2, argv);
+        }
     }else
         log(error_log, "Tried to construct resource without \"src\"-attribute.");
 }
@@ -65,7 +67,8 @@ rapidxml::xml_node<xmlUsedCharType>* BaseObject::write(rapidxml::xml_document<xm
     rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
     node->name("BaseObject");
     if(scriptFile) {
-        v8::Handle<v8::Value> scritData = scriptFile->callFunction("onsave", true, 1, *scriptInstance);
+        v8::Handle<v8::Value> argv[] = { v8::Handle<v8::Value>(*scriptInstance) };
+        v8::Handle<v8::Value> scritData = scriptFile->callFunction("onsave", true, 1, argv);
         scriptManager->writeCdataXMLNode(doc, node, "Data", scritData);
         node->append_node(fileManager.writeResource(doc, "Script", scriptFile->filePackage, scriptFile->name));
     }
@@ -166,7 +169,11 @@ void PhysicObject::handleCollision(btPersistentManifold* contactManifold, Physic
         impulses->Set(i, v8::Number::New(v8::Isolate::GetCurrent(), point.getAppliedImpulse()));
     }
     
-    scriptFile->callFunction("oncollision", true, 6, *scriptInstance, *b->scriptInstance, *pointsA, *pointsB, *distances, *impulses);
+    v8::Handle<v8::Value> argv[] = {
+        v8::Handle<v8::Value>(*scriptInstance), v8::Handle<v8::Value>(*b->scriptInstance),
+        pointsA, pointsB, distances, impulses
+    };
+    scriptFile->callFunction("oncollision", true, 6, argv);
 }
 
 btCollisionShape* PhysicObject::readCollisionShape(rapidxml::xml_node<xmlUsedCharType>* node) {

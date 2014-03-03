@@ -165,7 +165,6 @@ void AppMain() {
         }
         
         networkManager.gameTick();
-        leapManager.gameTick();
         menu.gameTick();
         if(levelManager.gameStatus == noGame) {
             glClearColor(1, 1, 1, 1);

@@ -37,8 +37,6 @@
 		114325ED186724B000A6ADC3 /* MultiplayerMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 114325EA186724B000A6ADC3 /* MultiplayerMenu.cpp */; };
 		114325EE186724B000A6ADC3 /* OptionsMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 114325EB186724B000A6ADC3 /* OptionsMenu.cpp */; };
 		1145E3C5170ECEBB00480189 /* ScriptSimpleObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1145E3C3170ECEBB00480189 /* ScriptSimpleObject.cpp */; };
-		1148736F18BFD97100C4B8B2 /* libLeap.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1148736E18BFD97100C4B8B2 /* libLeap.dylib */; };
-		1148737018BFD98400C4B8B2 /* libLeap.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 1148736E18BFD97100C4B8B2 /* libLeap.dylib */; };
 		1148738018BFDA4D00C4B8B2 /* SDL2_image.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1148737D18BFDA4D00C4B8B2 /* SDL2_image.framework */; };
 		1148738118BFDA4D00C4B8B2 /* SDL2_ttf.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1148737E18BFDA4D00C4B8B2 /* SDL2_ttf.framework */; };
 		1148738218BFDA4D00C4B8B2 /* SDL2.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1148737F18BFDA4D00C4B8B2 /* SDL2.framework */; };
@@ -46,11 +44,8 @@
 		1148738A18BFDA7500C4B8B2 /* SDL2_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1148737E18BFDA4D00C4B8B2 /* SDL2_ttf.framework */; };
 		1148738B18BFDA7500C4B8B2 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1148737F18BFDA4D00C4B8B2 /* SDL2.framework */; };
 		114A0E6B169064E800D2CE9C /* LevelSaver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 114A0E69169064E800D2CE9C /* LevelSaver.cpp */; };
-		114CB6CE18C396060060B48C /* libv8_base.x64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 114CB6CC18C396060060B48C /* libv8_base.x64.a */; };
-		114CB6D518C3D10B0060B48C /* libicui18n.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 114CB6D418C3D10B0060B48C /* libicui18n.a */; };
-		114CB6D718C3D1150060B48C /* libicuuc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 114CB6D618C3D1150060B48C /* libicuuc.a */; };
-		114CB6DF18C3D3FC0060B48C /* libicudata.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 114CB6DE18C3D3FC0060B48C /* libicudata.a */; };
-		114CB6E318C3D5320060B48C /* libv8_snapshot.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 114CB6E218C3D5320060B48C /* libv8_snapshot.a */; };
+		114CB6E918C49D300060B48C /* libv8_base.x64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 114CB6E718C49D300060B48C /* libv8_base.x64.a */; };
+		114CB6EA18C49D300060B48C /* libv8_snapshot.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 114CB6E818C49D300060B48C /* libv8_snapshot.a */; };
 		11511420170C1A0E00F77236 /* ScriptIntersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */; };
 		11511425170D9B7C00F77236 /* ScriptVisualObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11511423170D9B7B00F77236 /* ScriptVisualObject.cpp */; };
 		1158E66518BE680D00C25BAB /* libNetLink.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1158E66418BE680D00C25BAB /* libNetLink.a */; };
@@ -104,7 +99,6 @@
 		11DA1F12162DEA03007D7E6C /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11DA1F0F162DEA03007D7E6C /* Matrix4.cpp */; };
 		11DA1F16162DEA18007D7E6C /* LightVolume.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11DA1F14162DEA18007D7E6C /* LightVolume.cpp */; };
 		11DD0B0A17AA509900A43E39 /* OpenCL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11DD0B0917AA509900A43E39 /* OpenCL.framework */; };
-		11EC642F178F3291007990B9 /* LeapMotion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11EC642D178F3291007990B9 /* LeapMotion.cpp */; };
 		11ECD34117EC9E7F00D6F865 /* Icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 11ECD33F17EC9E7200D6F865 /* Icon.icns */; };
 		11F1EEB8156FE49400F7275D /* ParticlesObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11F1EEB7156FE49400F7275D /* ParticlesObject.cpp */; };
 		11FE8AB216B5A3F400B682D0 /* ScriptManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11FE8AB016B5A3F400B682D0 /* ScriptManager.cpp */; };
@@ -117,7 +111,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				1148736F18BFD97100C4B8B2 /* libLeap.dylib in CopyFiles */,
 				1114B87316A8937B00B1CD41 /* Ogg.framework in CopyFiles */,
 				1114B87416A8937B00B1CD41 /* Vorbis.framework in CopyFiles */,
 				1114B87516A8937B00B1CD41 /* BulletCollision.framework in CopyFiles */,
@@ -170,17 +163,13 @@
 		114325EB186724B000A6ADC3 /* OptionsMenu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsMenu.cpp; path = Menu/OptionsMenu.cpp; sourceTree = "<group>"; };
 		1145E3C3170ECEBB00480189 /* ScriptSimpleObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptSimpleObject.cpp; sourceTree = "<group>"; };
 		1145E3C4170ECEBB00480189 /* ScriptSimpleObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptSimpleObject.h; sourceTree = "<group>"; };
-		1148736E18BFD97100C4B8B2 /* libLeap.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libLeap.dylib; path = Libraries/Leap/lib/libLeap.dylib; sourceTree = "<group>"; };
 		1148737D18BFDA4D00C4B8B2 /* SDL2_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_image.framework; path = Libraries/SDL2_image.framework; sourceTree = "<group>"; };
 		1148737E18BFDA4D00C4B8B2 /* SDL2_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_ttf.framework; path = Libraries/SDL2_ttf.framework; sourceTree = "<group>"; };
 		1148737F18BFDA4D00C4B8B2 /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = Libraries/SDL2.framework; sourceTree = "<group>"; };
 		114A0E69169064E800D2CE9C /* LevelSaver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelSaver.cpp; sourceTree = "<group>"; };
 		114A0E6A169064E800D2CE9C /* LevelSaver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LevelSaver.h; sourceTree = "<group>"; };
-		114CB6CC18C396060060B48C /* libv8_base.x64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libv8_base.x64.a; path = Libraries/v8/out/native/libv8_base.x64.a; sourceTree = "<group>"; };
-		114CB6D418C3D10B0060B48C /* libicui18n.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicui18n.a; path = Libraries/v8/out/native/libicui18n.a; sourceTree = "<group>"; };
-		114CB6D618C3D1150060B48C /* libicuuc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicuuc.a; path = Libraries/v8/out/native/libicuuc.a; sourceTree = "<group>"; };
-		114CB6DE18C3D3FC0060B48C /* libicudata.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libicudata.a; path = Libraries/v8/out/native/libicudata.a; sourceTree = "<group>"; };
-		114CB6E218C3D5320060B48C /* libv8_snapshot.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libv8_snapshot.a; path = Libraries/v8/out/native/libv8_snapshot.a; sourceTree = "<group>"; };
+		114CB6E718C49D300060B48C /* libv8_base.x64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libv8_base.x64.a; path = Libraries/v8/out/native/libv8_base.x64.a; sourceTree = "<group>"; };
+		114CB6E818C49D300060B48C /* libv8_snapshot.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libv8_snapshot.a; path = Libraries/v8/out/native/libv8_snapshot.a; sourceTree = "<group>"; };
 		1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptIntersection.cpp; sourceTree = "<group>"; };
 		1151141F170C1A0E00F77236 /* ScriptIntersection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptIntersection.h; sourceTree = "<group>"; };
 		11511423170D9B7B00F77236 /* ScriptVisualObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptVisualObject.cpp; sourceTree = "<group>"; };
@@ -281,8 +270,6 @@
 		11DA1F14162DEA18007D7E6C /* LightVolume.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LightVolume.cpp; sourceTree = "<group>"; };
 		11DA1F15162DEA18007D7E6C /* LightVolume.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LightVolume.h; sourceTree = "<group>"; };
 		11DD0B0917AA509900A43E39 /* OpenCL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenCL.framework; path = System/Library/Frameworks/OpenCL.framework; sourceTree = SDKROOT; };
-		11EC642D178F3291007990B9 /* LeapMotion.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LeapMotion.cpp; sourceTree = "<group>"; };
-		11EC642E178F3291007990B9 /* LeapMotion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeapMotion.h; sourceTree = "<group>"; };
 		11ECD33F17EC9E7200D6F865 /* Icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Icon.icns; sourceTree = "<group>"; };
 		11F1EEB5156FE48B00F7275D /* ParticlesObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ParticlesObject.h; sourceTree = "<group>"; };
 		11F1EEB7156FE49400F7275D /* ParticlesObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParticlesObject.cpp; sourceTree = "<group>"; };
@@ -299,13 +286,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				114CB6E918C49D300060B48C /* libv8_base.x64.a in Frameworks */,
+				114CB6EA18C49D300060B48C /* libv8_snapshot.a in Frameworks */,
 				1158E66518BE680D00C25BAB /* libNetLink.a in Frameworks */,
-				114CB6DF18C3D3FC0060B48C /* libicudata.a in Frameworks */,
-				114CB6D718C3D1150060B48C /* libicuuc.a in Frameworks */,
-				114CB6D518C3D10B0060B48C /* libicui18n.a in Frameworks */,
-				114CB6CE18C396060060B48C /* libv8_base.x64.a in Frameworks */,
-				114CB6E318C3D5320060B48C /* libv8_snapshot.a in Frameworks */,
-				1148737018BFD98400C4B8B2 /* libLeap.dylib in Frameworks */,
 				1114B87016A8933200B1CD41 /* Ogg.framework in Frameworks */,
 				1114B87116A8933200B1CD41 /* Vorbis.framework in Frameworks */,
 				1114B84616A88BD100B1CD41 /* BulletCollision.framework in Frameworks */,
@@ -347,13 +330,9 @@
 		1118251914F2553A00F198A7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				114CB6E718C49D300060B48C /* libv8_base.x64.a */,
+				114CB6E818C49D300060B48C /* libv8_snapshot.a */,
 				1158E66418BE680D00C25BAB /* libNetLink.a */,
-				114CB6DE18C3D3FC0060B48C /* libicudata.a */,
-				114CB6D618C3D1150060B48C /* libicuuc.a */,
-				114CB6D418C3D10B0060B48C /* libicui18n.a */,
-				114CB6CC18C396060060B48C /* libv8_base.x64.a */,
-				114CB6E218C3D5320060B48C /* libv8_snapshot.a */,
-				1148736E18BFD97100C4B8B2 /* libLeap.dylib */,
 				1114B86E16A8933200B1CD41 /* Ogg.framework */,
 				1114B86F16A8933200B1CD41 /* Vorbis.framework */,
 				1114B84016A88BD100B1CD41 /* BulletCollision.framework */,
@@ -462,8 +441,6 @@
 				11C238D81613164C009D6F9C /* LevelManager.h */,
 				11C238D71613164C009D6F9C /* LevelManager.cpp */,
 				114325DF18671C7600A6ADC3 /* Menu */,
-				11EC642E178F3291007990B9 /* LeapMotion.h */,
-				11EC642D178F3291007990B9 /* LeapMotion.cpp */,
 				11FE8AAF16B5A3D900B682D0 /* Scripting */,
 				11A79B21153C2FE9002B9F0A /* AppMain.h */,
 				11A79B20153C2FE9002B9F0A /* AppMain.cpp */,
@@ -657,7 +634,6 @@
 				11A79B74153C2FE9002B9F0A /* GUIRect.cpp in Sources */,
 				11A79B75153C2FE9002B9F0A /* GUIRoundedRect.cpp in Sources */,
 				11A79B76153C2FE9002B9F0A /* GUIScrollView.cpp in Sources */,
-				11EC642F178F3291007990B9 /* LeapMotion.cpp in Sources */,
 				11A79B77153C2FE9002B9F0A /* GUISlider.cpp in Sources */,
 				11A79B78153C2FE9002B9F0A /* GUITabs.cpp in Sources */,
 				11A79B79153C2FE9002B9F0A /* GUITextField.cpp in Sources */,
@@ -735,7 +711,10 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
+				FRAMEWORK_SEARCH_PATHS = (
+					/Library/Frameworks,
+					"$(PROJECT_DIR)/Libraries",
+				);
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -760,7 +739,6 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/Libraries/netLink/out",
-					"$(PROJECT_DIR)/Libraries/LeapSDK/lib",
 					"$(PROJECT_DIR)/Libraries/v8/out/native",
 				);
 				LLVM_VECTORIZE_LOOPS = YES;
@@ -783,7 +761,10 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
+				FRAMEWORK_SEARCH_PATHS = (
+					/Library/Frameworks,
+					"$(PROJECT_DIR)/Libraries",
+				);
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "$(OTHER_CFLAGS)";
@@ -800,7 +781,6 @@
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(PROJECT_DIR)/Libraries/netLink/out",
-					"$(PROJECT_DIR)/Libraries/LeapSDK/lib",
 					"$(PROJECT_DIR)/Libraries/v8/out/native",
 				);
 				LLVM_LTO = YES;
@@ -818,10 +798,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Libraries",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "$(OTHER_CFLAGS)";
@@ -829,8 +806,6 @@
 				INFOPLIST_FILE = Source/Engine/macCompCode/Info.plist;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/Volumes/Users/Alexander/Desktop/Olypsum/Libraries/Leap/lib,
-					"$(PROJECT_DIR)/Libraries/Leap/lib",
 					"$(PROJECT_DIR)/Libraries/v8/out/native",
 				);
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;
@@ -846,10 +821,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(inherited)",
-					"$(PROJECT_DIR)/Libraries",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "$(OTHER_CFLAGS)";
@@ -857,8 +829,6 @@
 				INFOPLIST_FILE = Source/Engine/macCompCode/Info.plist;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					/Volumes/Users/Alexander/Desktop/Olypsum/Libraries/Leap/lib,
-					"$(PROJECT_DIR)/Libraries/Leap/lib",
 					"$(PROJECT_DIR)/Libraries/v8/out/native",
 				);
 				PRECOMPS_INCLUDE_HEADERS_FROM_BUILT_PRODUCTS_DIR = YES;

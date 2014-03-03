@@ -16,7 +16,7 @@ void ScriptGUIButton::Constructor(const v8::FunctionCallbackInfo<v8::Value>& arg
     
     GUIButton* objectPtr = new GUIButton();
     objectPtr->onClick = [](GUIButton* objectPtr) {
-        callFunction(v8::Handle<v8::Object>(*objectPtr->scriptInstance), "onclick", 0);
+        callFunction(v8::Handle<v8::Object>(*objectPtr->scriptInstance), "onclick", 0, NULL);
     };
     ScriptReturn(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
 }
@@ -152,7 +152,7 @@ void ScriptGUICheckBox::Constructor(const v8::FunctionCallbackInfo<v8::Value>& a
     
     GUICheckBox* objectPtr = new GUICheckBox();
     objectPtr->onClick = [](GUICheckBox* objectPtr) {
-        callFunction(v8::Handle<v8::Object>(*objectPtr->scriptInstance), "onclick", 0);
+        callFunction(v8::Handle<v8::Object>(*objectPtr->scriptInstance), "onclick", 0, NULL);
     };
     ScriptReturn(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
 }
@@ -173,7 +173,7 @@ void ScriptGUITabs::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args)
     
     GUITabs* objectPtr = new GUITabs();
     objectPtr->onChange = [](GUITabs* objectPtr) {
-        callFunction(v8::Handle<v8::Object>(*objectPtr->scriptInstance), "onchange", 0);
+        callFunction(v8::Handle<v8::Object>(*objectPtr->scriptInstance), "onchange", 0, NULL);
     };
     ScriptReturn(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
 }

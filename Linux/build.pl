@@ -2,7 +2,7 @@
 use strict;
 
 my($version) = "0.4.2";
-my(@libs) = qw(/usr/lib/libc++.so.1 /usr/lib/x86_64-linux-gnu/libopenal.so.1 /usr/lib/libv8.so /usr/lib/Leap/libLeap.so /usr/local/lib/libSDL2-2.0.so.0 /usr/local/lib/libSDL2_ttf-2.0.so.0 /usr/local/lib/libSDL2_image-2.0.so.0 /usr/local/lib/libBulletCollision.so.2.82 /usr/local/lib/libBulletDynamics.so.2.82 /usr/local/lib/libBulletSoftBody.so.2.82 /usr/local/lib/libBulletMultiThreaded.so.2.82 /usr/local/lib/libLinearMath.so.2.82);
+my(@libs) = qw(/usr/lib/libc++.so.1 /usr/lib/x86_64-linux-gnu/libopenal.so.1 ../Libraries/v8/out/native/obj.target/tools/gyp/libv8.so /usr/local/lib/libSDL2-2.0.so.0 /usr/local/lib/libSDL2_ttf-2.0.so.0 /usr/local/lib/libSDL2_image-2.0.so.0 /usr/local/lib/libBulletCollision.so.2.82 /usr/local/lib/libBulletDynamics.so.2.82 /usr/local/lib/libBulletSoftBody.so.2.82 /usr/local/lib/libBulletMultiThreaded.so.2.82 /usr/local/lib/libLinearMath.so.2.82);
 my(@files)=`(cd ../Source/Engine/; find . -iname "*.cpp" -type f)`;
 my(@sourceDirs)= qw(../Source/Engine/ ../Source/Engine/rapidxml/ ../Source/Engine/GUI/ ../Source/Engine/Menu/ ../Source/Engine/Scripting/);
 my($SOURCES) = join(' ', map { chomp $_; $_ =~ s/^\.\///; $_; } @files);
@@ -20,7 +20,7 @@ print Makefile <<EOF;
 BIN := olypsum/opt/olypsum/bin/olypsum
 COMPILER := clang++ -stdlib=libc++ -std=c++11 -DDEBUG=1 -DVERSION='"$version"'
 HEADERS := -I../Source/Engine/ -I../Libraries/ -I../Libraries/bulletPhysics/src/
-LINKER := -o \$(BIN) -Lolypsum/opt/olypsum/lib/ -Wl,-rpath,'\$\$ORIGIN/../lib' -lLeap -lv8 -lopenal -lvorbis -lvorbisfile -lGL -lSDL2 -lSDL2_image -lSDL2_ttf -lLinearMath -lBulletCollision -lBulletDynamics -lBulletSoftBody -lBulletMultiThreaded ../Libraries/netLink/out/libNetLink.bc
+LINKER := -o \$(BIN) -Lolypsum/opt/olypsum/lib/ -Wl,-rpath,'\$\$ORIGIN/../lib' -lv8 -lopenal -lvorbis -lvorbisfile -lGL -lSDL2 -lSDL2_image -lSDL2_ttf -lLinearMath -lBulletCollision -lBulletDynamics -lBulletSoftBody -lBulletMultiThreaded ../Libraries/netLink/out/libNetLink.bc
 SOURCES := $SOURCES
 OBJS := $OBJS
 

@@ -16,7 +16,8 @@ void ScriptGUISlider::Constructor(const v8::FunctionCallbackInfo<v8::Value>& arg
     
     GUISlider* objectPtr = new GUISlider();
     objectPtr->onChange = [](GUISlider* objectPtr, bool changing) {
-        callFunction(v8::Handle<v8::Object>(*objectPtr->scriptInstance), "onchange", 1, *v8::Boolean::New(v8::Isolate::GetCurrent(), changing));
+        v8::Handle<v8::Value> argv[] = { v8::Boolean::New(v8::Isolate::GetCurrent(), changing) };
+        callFunction(v8::Handle<v8::Object>(*objectPtr->scriptInstance), "onchange", 1, argv);
     };
     ScriptReturn(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
 }
@@ -82,13 +83,13 @@ void ScriptGUITextField::Constructor(const v8::FunctionCallbackInfo<v8::Value>& 
     
     GUITextField* objectPtr = new GUITextField();
     objectPtr->onChange = [](GUITextField* objectPtr) {
-        callFunction(v8::Handle<v8::Object>(*objectPtr->scriptInstance), "onchange", 0);
+        callFunction(v8::Handle<v8::Object>(*objectPtr->scriptInstance), "onchange", 0, NULL);
     };
     objectPtr->onFocus = [](GUITextField* objectPtr) {
-        callFunction(v8::Handle<v8::Object>(*objectPtr->scriptInstance), "onfocus", 0);
+        callFunction(v8::Handle<v8::Object>(*objectPtr->scriptInstance), "onfocus", 0, NULL);
     };
     objectPtr->onBlur = [](GUITextField* objectPtr) {
-        callFunction(v8::Handle<v8::Object>(*objectPtr->scriptInstance), "onblur", 0);
+        callFunction(v8::Handle<v8::Object>(*objectPtr->scriptInstance), "onblur", 0, NULL);
     };
     ScriptReturn(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
 }

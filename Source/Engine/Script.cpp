@@ -57,29 +57,18 @@ v8::Handle<v8::Value> ScriptFile::run() {
     return result; //handleScope.Close(result);
 }
 
-v8::Handle<v8::Value> ScriptFile::callFunction(const char* functionName, bool recvFirstArg, int argc, ...) {
+v8::Handle<v8::Value> ScriptFile::callFunction(const char* functionName, bool recvFirstArg, int argc, v8::Handle<v8::Value>* argv) {
     if(exports.IsEmpty()) return v8::Undefined(v8::Isolate::GetCurrent());
     ScriptScope();
     v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast((*exports)->GetRealNamedProperty(ScriptString(functionName)));
     if(function.IsEmpty() || !function->IsFunction()) return v8::Undefined(v8::Isolate::GetCurrent());
     v8::TryCatch tryCatch;
     
-    v8::Handle<v8::Value>* argList;
-    if(argc > 0) {
-        argList = new v8::Handle<v8::Value>[argc];
-        va_list argv;
-        va_start(argv, argc);
-        for(int i = 0; i < argc; i ++)
-            argList[i] = v8::Handle<v8::Value>(reinterpret_cast<v8::Value*>(va_arg(argv, void*)));
-        va_end(argv);
-        delete [] argList;
-    }
-    
     v8::Handle<v8::Value> result;
-    if(recvFirstArg && argc > 0 && !argList[0].IsEmpty() && argList[0]->IsObject())
-        result = function->CallAsFunction(v8::Handle<v8::Object>::Cast(argList[0]), argc-1, &argList[1]);
+    if(recvFirstArg && argc > 0 && !argv[0].IsEmpty() && argv[0]->IsObject())
+        result = function->CallAsFunction(v8::Handle<v8::Object>::Cast(argv[0]), argc-1, &argv[1]);
     else
-        result = function->CallAsFunction(v8::Handle<v8::Object>(*exports), argc, argList);
+        result = function->CallAsFunction(v8::Handle<v8::Object>(*exports), argc, argv);
     
     if(scriptManager->tryCatch(&tryCatch))
         return result;
@@ -100,25 +89,14 @@ ScriptClass::~ScriptClass() {
     //functionTemplate.Reset();
 }
 
-v8::Handle<v8::Value> ScriptClass::callFunction(v8::Handle<v8::Object> scriptInstance, const char* functionName, int argc, ...) {
+v8::Handle<v8::Value> ScriptClass::callFunction(v8::Handle<v8::Object> scriptInstance, const char* functionName, int argc, v8::Handle<v8::Value>* argv) {
     if(scriptInstance.IsEmpty()) return v8::Undefined(v8::Isolate::GetCurrent());
     ScriptScope();
     v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast(scriptInstance->GetRealNamedProperty(ScriptString(functionName)));
     if(function.IsEmpty() || !function->IsFunction()) return v8::Undefined(v8::Isolate::GetCurrent());
     v8::TryCatch tryCatch;
     
-    v8::Handle<v8::Value>* argList;
-    if(argc > 0) {
-        argList = new v8::Handle<v8::Value>[argc];
-        va_list argv;
-        va_start(argv, argc);
-        for(int i = 0; i < argc; i ++)
-            argList[i] = v8::Handle<v8::Value>(reinterpret_cast<v8::Value*>(va_arg(argv, void*)));
-        va_end(argv);
-        delete [] argList;
-    }
-    
-    v8::Handle<v8::Value> result = function->CallAsFunction(scriptInstance, argc, argList);
+    v8::Handle<v8::Value> result = function->CallAsFunction(scriptInstance, argc, argv);
     if(scriptManager->tryCatch(&tryCatch))
         return result;
     else

@@ -32,7 +32,7 @@ class ScriptFile : public FileResource {
     FileResourcePtr<FileResource> load(FilePackage* filePackage, const std::string& name);
     bool checkFunction(const char* functionName);
     v8::Handle<v8::Value> run();
-    v8::Handle<v8::Value> callFunction(const char* functionName, bool recvFirstArg, int argc, ...);
+    v8::Handle<v8::Value> callFunction(const char* functionName, bool recvFirstArg, int argc, v8::Handle<v8::Value>* argv);
 };
 
 class ScriptClass {
@@ -42,7 +42,7 @@ class ScriptClass {
     const char* name;
     v8::Persistent<v8::FunctionTemplate> functionTemplate;
     virtual ~ScriptClass();
-    static v8::Handle<v8::Value> callFunction(v8::Handle<v8::Object> scriptInstance, const char* functionName, int argc, ...);
+    static v8::Handle<v8::Value> callFunction(v8::Handle<v8::Object> scriptInstance, const char* functionName, int argc, v8::Handle<v8::Value>* argv);
     bool isCorrectInstance(const v8::Local<v8::Value>& object);
     void init(const v8::Persistent<v8::ObjectTemplate>& globalTemplate);
 };

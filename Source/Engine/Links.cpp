@@ -124,8 +124,10 @@ bool PhysicLink::isCollisionDisabled() {
 void PhysicLink::gameTick() {
     if(constraint->m_userConstraintPtr) return;
     
-    if(scriptFile)
-        scriptFile->callFunction("onburst", true, 1, *scriptInstance);
+    if(scriptFile) {
+        v8::Handle<v8::Value> argv[] = { v8::Handle<v8::Value>(*scriptInstance) };
+        scriptFile->callFunction("onburst", true, 1, argv);
+    }
     
     removeClean();
 }
