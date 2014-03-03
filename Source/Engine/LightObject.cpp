@@ -58,7 +58,7 @@ btTransform LightObject::getTransformation() {
 }
 
 float LightObject::getRange() {
-    return shadowCam.far;
+    return shadowCam.farPlane;
 }
 
 bool LightObject::updateShadowMap(bool shadowActive) {
@@ -76,7 +76,7 @@ bool LightObject::updateShadowMap(bool shadowActive) {
 }
 
 void LightObject::draw() {
-    currentShaderProgram->setUniformF("lInvRange", 1.0/shadowCam.far);
+    currentShaderProgram->setUniformF("lInvRange", 1.0/shadowCam.farPlane);
     currentShaderProgram->setUniformVec3("lColor", color.getVector());
     
     bool reflection = dynamic_cast<PlaneReflective*>(objectManager.currentReflective);
@@ -134,7 +134,7 @@ void LightObject::deleteShadowMap() {
 
 
 DirectionalLight::DirectionalLight() {
-    shadowCam.near = 1.0;
+    shadowCam.nearPlane = 1.0;
 }
 
 DirectionalLight::DirectionalLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :DirectionalLight() {
@@ -155,21 +155,21 @@ void DirectionalLight::setTransformation(const btTransform& transformation) {
     shadowCam.setTransformation(transformation);
     btTransform shiftMat;
     shiftMat.setIdentity();
-    shiftMat.setOrigin(btVector3(0, 0, -shadowCam.far*0.5));
+    shiftMat.setOrigin(btVector3(0, 0, -shadowCam.farPlane*0.5));
     body->setWorldTransform(transformation * shiftMat);
 }
 
 void DirectionalLight::setBounds(const btVector3& bounds) {
     shadowCam.fov = -bounds.y();
     shadowCam.aspect = bounds.x()/bounds.y();
-    shadowCam.far = bounds.z();
-    shadowCam.near = bounds.z()*0.01;
+    shadowCam.farPlane = bounds.z();
+    shadowCam.nearPlane = bounds.z()*0.01;
     
     setPhysicsShape(new btBoxShape(btVector3(bounds.x(), bounds.y(), bounds.z()*0.5)));
 }
 
 btVector3 DirectionalLight::getBounds() {
-    return btVector3(-shadowCam.fov*shadowCam.aspect, -shadowCam.fov, shadowCam.far);
+    return btVector3(-shadowCam.fov*shadowCam.aspect, -shadowCam.fov, shadowCam.farPlane);
 }
 
 bool DirectionalLight::updateShadowMap(bool shadowActive) {
@@ -184,8 +184,8 @@ bool DirectionalLight::updateShadowMap(bool shadowActive) {
 
 void DirectionalLight::draw() {
     modelMat.setIdentity();
-    modelMat.setBasis(modelMat.getBasis().scaled(btVector3(-shadowCam.fov*shadowCam.aspect, -shadowCam.fov, shadowCam.far*0.5)));
-    modelMat.setOrigin(btVector3(0.0, 0.0, -shadowCam.far*0.5));
+    modelMat.setBasis(modelMat.getBasis().scaled(btVector3(-shadowCam.fov*shadowCam.aspect, -shadowCam.fov, shadowCam.farPlane*0.5)));
+    modelMat.setOrigin(btVector3(0.0, 0.0, -shadowCam.farPlane*0.5));
     modelMat = shadowCam.getTransformation()*modelMat;
     
     if(shadowMap) {
@@ -212,7 +212,7 @@ rapidxml::xml_node<xmlUsedCharType>* DirectionalLight::write(rapidxml::xml_docum
     rapidxml::xml_node<xmlUsedCharType>* boundsNode = doc.allocate_node(rapidxml::node_element);
     boundsNode->name("Bounds");
     char buffer[64];
-    sprintf(buffer, "%f %f %f", -shadowCam.fov*shadowCam.aspect, -shadowCam.fov, shadowCam.far);
+    sprintf(buffer, "%f %f %f", -shadowCam.fov*shadowCam.aspect, -shadowCam.fov, shadowCam.farPlane);
     boundsNode->value(doc.allocate_string(buffer));
     node->append_node(boundsNode);
     return node;
@@ -221,7 +221,7 @@ rapidxml::xml_node<xmlUsedCharType>* DirectionalLight::write(rapidxml::xml_docum
 
 
 SpotLight::SpotLight() {
-    shadowCam.near = 0.1;
+    shadowCam.nearPlane = 0.1;
 }
 
 SpotLight::SpotLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :SpotLight() {
@@ -253,15 +253,15 @@ void SpotLight::setTransformation(const btTransform& transformation) {
     shadowCam.setTransformation(transformation);
     btTransform shiftMat;
     shiftMat.setIdentity();
-    shiftMat.setOrigin(btVector3(0, 0, -shadowCam.far*0.5));
+    shiftMat.setOrigin(btVector3(0, 0, -shadowCam.farPlane*0.5));
     body->setWorldTransform(transformation * shiftMat);
 }
 
 void SpotLight::setBounds(float cutoff, float range) {
     shadowCam.fov = cutoff;
-    shadowCam.far = range;
+    shadowCam.farPlane = range;
     
-    setPhysicsShape(new btConeShapeZ(tan(shadowCam.fov*0.5)*shadowCam.far, shadowCam.far));
+    setPhysicsShape(new btConeShapeZ(tan(shadowCam.fov*0.5)*shadowCam.farPlane, shadowCam.farPlane));
 }
 
 float SpotLight::getCutoff() {
@@ -283,10 +283,10 @@ bool SpotLight::updateShadowMap(bool shadowActive) {
 }
 
 void SpotLight::draw() {
-    float radius = tan(shadowCam.fov*0.5)*shadowCam.far;
+    float radius = tan(shadowCam.fov*0.5)*shadowCam.farPlane;
     modelMat.setIdentity();
-    modelMat.setBasis(modelMat.getBasis().scaled(btVector3(radius*1.05, radius*1.05, shadowCam.far)));
-    modelMat.setOrigin(btVector3(0.0, 0.0, -shadowCam.far));
+    modelMat.setBasis(modelMat.getBasis().scaled(btVector3(radius*1.05, radius*1.05, shadowCam.farPlane)));
+    modelMat.setOrigin(btVector3(0.0, 0.0, -shadowCam.farPlane));
     modelMat = shadowCam.getTransformation()*modelMat;
     
     if(shadowMap) {
@@ -321,7 +321,7 @@ rapidxml::xml_node<xmlUsedCharType>* SpotLight::write(rapidxml::xml_document<xml
     boundsNode->append_attribute(attribute);
     attribute = doc.allocate_attribute();
     attribute->name("range");
-    attribute->value(doc.allocate_string(stringOf(shadowCam.far).c_str()));
+    attribute->value(doc.allocate_string(stringOf(shadowCam.farPlane).c_str()));
     boundsNode->append_attribute(attribute);
     return node;
 }
@@ -329,7 +329,7 @@ rapidxml::xml_node<xmlUsedCharType>* SpotLight::write(rapidxml::xml_document<xml
 
 
 PositionalLight::PositionalLight() :shadowMapB(NULL) {
-    shadowCam.near = 0.1;
+    shadowCam.nearPlane = 0.1;
 }
 
 PositionalLight::PositionalLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :PositionalLight() {
@@ -367,14 +367,14 @@ void PositionalLight::setTransformation(const btTransform& transformation) {
     else{
         btTransform shiftMat;
         shiftMat.setIdentity();
-        shiftMat.setOrigin(btVector3(0, 0, -shadowCam.far*0.5));
+        shiftMat.setOrigin(btVector3(0, 0, -shadowCam.farPlane*0.5));
         body->setWorldTransform(transformation * shiftMat);
     }
 }
 
 void PositionalLight::setBounds(bool omniDirectional, float range) {
     shadowCam.fov = (omniDirectional) ? M_PI*2.0 : M_PI;
-    shadowCam.far = range;
+    shadowCam.farPlane = range;
     
     if(omniDirectional)
         setPhysicsShape(new btSphereShape(range));
@@ -435,9 +435,9 @@ bool PositionalLight::updateShadowMap(bool shadowActive) {
         glEnable(GL_CLIP_DISTANCE0);
         objectManager.currentShadowIsParabolid = true;
         shaderPrograms[solidParabolidShadowSP]->use();
-        shaderPrograms[solidParabolidShadowSP]->setUniformF("lRange", shadowCam.far);
+        shaderPrograms[solidParabolidShadowSP]->setUniformF("lRange", shadowCam.farPlane);
         shaderPrograms[skeletalParabolidShadowSP]->use();
-        shaderPrograms[skeletalParabolidShadowSP]->setUniformF("lRange", shadowCam.far);
+        shaderPrograms[skeletalParabolidShadowSP]->setUniformF("lRange", shadowCam.farPlane);
         mainFBO.renderInTexture(shadowMap, GL_TEXTURE_2D);
         objectManager.drawShadowCasters();
         if(shadowMapB) {
@@ -454,7 +454,7 @@ bool PositionalLight::updateShadowMap(bool shadowActive) {
 void PositionalLight::draw() {
     modelMat.setIdentity();
     btMatrix3x3 basis(btQuaternion(btVector3(0.0, 1.0, 0.0), M_PI));
-    modelMat.setBasis(basis.scaled(btVector3(shadowCam.far*1.05, shadowCam.far*1.05, shadowCam.far*1.05)));
+    modelMat.setBasis(basis.scaled(btVector3(shadowCam.farPlane*1.05, shadowCam.farPlane*1.05, shadowCam.farPlane*1.05)));
     modelMat = shadowCam.getTransformation()*modelMat;
     
     if(shadowMap) {
@@ -472,8 +472,8 @@ void PositionalLight::draw() {
     currentShaderProgram->setUniformVec3("lPosition", shadowCam.getTransformation().getOrigin());
     currentShaderProgram->setUniformVec3("lDirection", shadowCam.getTransformation().getBasis().getColumn(2)*-1.0);
     if(optionsState.cubemapsEnabled)
-        currentShaderProgram->setUniformVec2("shadowDepthTransform", (shadowCam.far+shadowCam.near)/(shadowCam.far-shadowCam.near)*0.5+0.5,
-                                                                    -(shadowCam.far*shadowCam.near)/(shadowCam.far-shadowCam.near)*1.005);
+        currentShaderProgram->setUniformVec2("shadowDepthTransform", (shadowCam.farPlane+shadowCam.nearPlane)/(shadowCam.farPlane-shadowCam.nearPlane)*0.5+0.5,
+                                                                    -(shadowCam.farPlane*shadowCam.nearPlane)/(shadowCam.farPlane-shadowCam.nearPlane)*1.005);
     
     LightObject::draw();
     if(abs(shadowCam.fov-M_PI) < 0.001)
@@ -490,7 +490,7 @@ void PositionalLight::deleteShadowMap() {
 }
 
 float PositionalLight::getPriority(const btVector3& position) {
-    return 1.0-(position-shadowCam.getTransformation().getOrigin()).length()/shadowCam.far;
+    return 1.0-(position-shadowCam.getTransformation().getOrigin()).length()/shadowCam.farPlane;
 }
 
 rapidxml::xml_node<xmlUsedCharType>* PositionalLight::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
@@ -508,7 +508,7 @@ rapidxml::xml_node<xmlUsedCharType>* PositionalLight::write(rapidxml::xml_docume
     boundsNode->append_attribute(attribute);
     attribute = doc.allocate_attribute();
     attribute->name("range");
-    attribute->value(doc.allocate_string(stringOf(shadowCam.far).c_str()));
+    attribute->value(doc.allocate_string(stringOf(shadowCam.farPlane).c_str()));
     boundsNode->append_attribute(attribute);
     return node;
 }

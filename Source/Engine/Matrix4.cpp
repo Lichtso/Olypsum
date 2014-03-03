@@ -266,7 +266,7 @@ Matrix4 Matrix4::operator*(const Matrix4& b) {
         r_line = _mm_mul_ps(b_line, a_line);
         for(char j = 1; j < 4; j ++) {
             a_line = _mm_set1_ps(values[i+j]);
-            b_line = b.rows[j].mVec128;
+            b_line = b.rows[j];
             r_line = _mm_add_ps(_mm_mul_ps(b_line, a_line), r_line);
         }
         _mm_store_ps(&a.values[i], r_line);

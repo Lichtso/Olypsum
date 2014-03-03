@@ -352,7 +352,7 @@ void Menu::clearAndAddBackground() {
     clear();
     
     GUIImage* image = new GUIImage();
-    image->texture = fileManager.getResourceByPath<Texture>(NULL, "Core/background.jpg");
+    image->texture = fileManager.getResourceByPath<Texture>(NULL, "Core/background.png");
     image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
     if((float)image->texture->width/image->texture->height <= (float)screenView->width/screenView->height) {
         image->sizeAlignment = GUISizeAlignment::Height;

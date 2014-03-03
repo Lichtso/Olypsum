@@ -32,27 +32,27 @@ void ScriptCamObject::SetFov(v8::Local<v8::String> property, v8::Local<v8::Value
 void ScriptCamObject::GetNear(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     ScriptScope();
     CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
-    ScriptReturn(objectPtr->near);
+    ScriptReturn(objectPtr->nearPlane);
 }
 
 void ScriptCamObject::SetNear(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     ScriptScope();
     if(!value->IsNumber()) return;
     CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
-    objectPtr->near = value->NumberValue();
+    objectPtr->nearPlane = value->NumberValue();
 }
 
 void ScriptCamObject::GetFar(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     ScriptScope();
     CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
-    ScriptReturn(objectPtr->far);
+    ScriptReturn(objectPtr->farPlane);
 }
 
 void ScriptCamObject::SetFar(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     ScriptScope();
     if(!value->IsNumber()) return;
     CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
-    objectPtr->far = value->NumberValue();
+    objectPtr->farPlane = value->NumberValue();
 }
 
 void ScriptCamObject::GetViewRay(const v8::FunctionCallbackInfo<v8::Value>& args) {

@@ -30,6 +30,7 @@ $RULES
 	\$(COMPILER) \$(LINKER) \$(OBJS)
 
 package:
+	strip olypsum/opt/olypsum/bin/olypsum
 	dpkg-deb -z8 -Zgzip --build olypsum
 
 clean:
@@ -64,6 +65,7 @@ Depends: libc6 (>= 2.15)
 Version: $version-1
 Homepage: http://gamefortec.net/
 Description: Gamefortecs 3D-Game-Engine
+Installed-Size: 50000
 EOF
 close(control);
 

@@ -21,7 +21,7 @@ class Matrix4 {
         struct {
             btVector3 x, y, z, w;
         }; //!< The transformation split up in 4 btVector3
-        btVector3 rows[4]; //!< The transformation split up in btVector3[4]
+        __m128 rows[4]; //!< The transformation split up in btVector3[4]
         btScalar values[16]; //!< The transformation split up in 16 btScalar
     };
     Matrix4();

@@ -144,8 +144,8 @@ void ShaderProgram::use () {
     }
     if(currentCam) {
         Matrix4 transform = currentCam->getCamMatrix();
-        setUniformF("depthNear", 1.0-currentCam->near);
-        setUniformF("depthFar", 2.0/log2(currentCam->far/currentCam->near));
+        setUniformF("depthNear", 1.0-currentCam->nearPlane);
+        setUniformF("depthFar", 2.0/log2(currentCam->farPlane/currentCam->nearPlane));
         setUniformMatrix4("viewMat", &currentCam->viewMat);
         setUniformMatrix4("camMat", &transform);
         if(checkUniformExistence("modelViewMat")) {

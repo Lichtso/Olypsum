@@ -39,7 +39,7 @@ struct FrustumCullingCallback : btDbvt::ICollide {
 
 
 
-CamObject::CamObject() :fov(-1.0), aspect(1.0), near(-1.0), far(1.0) {
+CamObject::CamObject() :fov(-1.0), aspect(1.0), nearPlane(-1.0), farPlane(1.0) {
     setTransformation(btTransform::getIdentity());
 }
 
@@ -64,13 +64,13 @@ CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* lev
         log(error_log, "Tried to construct Cam without \"near\"-attribute.");
         return;
     }
-    sscanf(attribute->value(), "%f", &near);
+    sscanf(attribute->value(), "%f", &nearPlane);
     attribute = boundsNode->first_attribute("far");
     if(!attribute) {
         log(error_log, "Tried to construct Cam without \"far\"-attribute.");
         return;
     }
-    sscanf(attribute->value(), "%f", &far);
+    sscanf(attribute->value(), "%f", &farPlane);
     
     updateViewMat();
     if(!mainCam) mainCam = this;
@@ -105,10 +105,10 @@ Ray3 CamObject::getRelativeRayAt(float x, float y) {
         ray.direction.setX(x*aux*aspect);
         ray.direction.setY(-y*aux);
         ray.direction.setZ(-1.0);
-        ray.origin = ray.direction*near;
+        ray.origin = ray.direction*nearPlane;
     }else{ //Ortho
         ray.direction = btVector3(0, 0, -1);
-        ray.origin = btVector3(-x*fov*aspect, y*fov, -near);
+        ray.origin = btVector3(-x*fov*aspect, y*fov, -nearPlane);
     }
     return ray;
 }
@@ -125,11 +125,11 @@ bool CamObject::doFrustumCulling() {
     btVector3 planes_n[6];
     btScalar planes_o[6];
     planes_n[1] = virtualMat.z;
-    planes_o[1] = -planes_n[1].dot(virtualMat.w-planes_n[1]*far);
+    planes_o[1] = -planes_n[1].dot(virtualMat.w-planes_n[1]*farPlane);
     planes_n[0] = -planes_n[1];
     
     if(fov < M_PI) {
-        planes_o[0] = -planes_n[0].dot(virtualMat.w+planes_n[0]*near);
+        planes_o[0] = -planes_n[0].dot(virtualMat.w+planes_n[0]*nearPlane);
         
         PlaneReflective* planeReflective = dynamic_cast<PlaneReflective*>(objectManager.currentReflective);
         if(planeReflective) {
@@ -210,15 +210,15 @@ bool CamObject::doFrustumCulling() {
         if(abs(fov-M_PI) < 0.001)
             planes_o[0] = -planes_n[0].dot(virtualMat.w);
         else
-            planes_o[0] = -planes_n[0].dot(virtualMat.w-planes_n[0]*far);
+            planes_o[0] = -planes_n[0].dot(virtualMat.w-planes_n[0]*farPlane);
         planes_n[2] = virtualMat.x;
-        planes_o[2] = -planes_n[2].dot(virtualMat.w-planes_n[2]*far);
+        planes_o[2] = -planes_n[2].dot(virtualMat.w-planes_n[2]*farPlane);
         planes_n[3] = -planes_n[2];
-        planes_o[3] = -planes_n[3].dot(virtualMat.w-planes_n[3]*far);
+        planes_o[3] = -planes_n[3].dot(virtualMat.w-planes_n[3]*farPlane);
         planes_n[4] = virtualMat.y;
-        planes_o[4] = -planes_n[4].dot(virtualMat.w-planes_n[4]*far);
+        planes_o[4] = -planes_n[4].dot(virtualMat.w-planes_n[4]*farPlane);
         planes_n[5] = -planes_n[4];
-        planes_o[5] = -planes_n[5].dot(virtualMat.w-planes_n[5]*far);
+        planes_o[5] = -planes_n[5].dot(virtualMat.w-planes_n[5]*farPlane);
     }
     
     short int filterMask = CollisionMask_Static | CollisionMask_Object;
@@ -250,7 +250,7 @@ bool CamObject::testInverseNearPlaneHit(btDbvtProxy* node) {
     
     planes_n[0] = (dynamic_cast<PlaneReflective*>(objectManager.currentReflective)) ? -virtualMat.z : virtualMat.z;
     if(fov < M_PI)
-        planes_o[0] = -planes_n[0].dot(virtualMat.w-planes_n[0]*near);
+        planes_o[0] = -planes_n[0].dot(virtualMat.w-planes_n[0]*nearPlane);
     else
         planes_o[0] = -planes_n[0].dot(virtualMat.w);
     
@@ -267,18 +267,18 @@ void CamObject::drawDebugFrustum(Color4 color) {
         };
         
         modelMat.setIdentity();
-        FrustumVolume volume(bounds, far-near);
+        FrustumVolume volume(bounds, farPlane-nearPlane);
         volume.init();
         volume.drawDebug(color);
     }else if(abs(fov-M_PI) < 0.001) {
         modelMat = transformation;
-        modelMat.setOrigin(modelMat.getOrigin()-transformation.getBasis().getColumn(2)*far*0.5);
-        LightBoxVolume volume(btVector3(far, far, far*0.5));
+        modelMat.setOrigin(modelMat.getOrigin()-transformation.getBasis().getColumn(2)*farPlane*0.5);
+        LightBoxVolume volume(btVector3(farPlane, farPlane, farPlane*0.5));
         volume.init();
         volume.drawDebug(color);
     }else{
         modelMat = transformation;
-        LightBoxVolume volume(btVector3(far, far, far));
+        LightBoxVolume volume(btVector3(farPlane, farPlane, farPlane));
         volume.init();
         volume.drawDebug(color);
     }
@@ -305,9 +305,9 @@ void CamObject::updateViewMat() {
     viewMat = getCamMatrix().getInverse();
     
     if(fov < 0.0) //Ortho
-        viewMat.ortho(-fov*aspect, -fov, near, far);
+        viewMat.ortho(-fov*aspect, -fov, nearPlane, farPlane);
     else if(fov < M_PI) //Perspective
-        viewMat.perspective(fov, aspect, near, far);
+        viewMat.perspective(fov, aspect, nearPlane, farPlane);
 }
 
 rapidxml::xml_node<xmlUsedCharType>* CamObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
@@ -323,11 +323,11 @@ rapidxml::xml_node<xmlUsedCharType>* CamObject::write(rapidxml::xml_document<xml
     boundsNode->append_attribute(attribute);
     attribute = doc.allocate_attribute();
     attribute->name("near");
-    attribute->value(doc.allocate_string(stringOf(near).c_str()));
+    attribute->value(doc.allocate_string(stringOf(nearPlane).c_str()));
     boundsNode->append_attribute(attribute);
     attribute = doc.allocate_attribute();
     attribute->name("far");
-    attribute->value(doc.allocate_string(stringOf(far).c_str()));
+    attribute->value(doc.allocate_string(stringOf(farPlane).c_str()));
     boundsNode->append_attribute(attribute);
     return node;
 }
