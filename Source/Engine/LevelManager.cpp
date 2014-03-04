@@ -67,7 +67,7 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
             const char* name = node->first_attribute("id")->value();
             if(sharedCollisionShapes.find(name) != sharedCollisionShapes.end()) {
                 log(error_log, std::string("Tried to overwrite collision shape by id: ")+name+".");
-                menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), NULL);
+                menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), nullptr);
                 return false;
             }
             
@@ -84,7 +84,7 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
                         sharedCollisionShapes[name] = new btCylinderShapeZ(vecData.getVector3());
                     else{
                         log(error_log, std::string("Found collision shape (")+name+") with an unknown direction: "+direction+'.');
-                        menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), NULL);
+                        menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), nullptr);
                         return false;
                     }
                 }else
@@ -116,7 +116,7 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
                         sharedCollisionShapes[name] = new btConeShapeZ(radius, length);
                 }else{
                     log(error_log, std::string("Found collision shape (")+name+") with an unknown direction: "+direction+'.');
-                    menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), NULL);
+                    menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), nullptr);
                     return false;
                 }
             }else if(strcmp(node->name(), "SphereCompound") == 0) {
@@ -164,7 +164,7 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
                 sharedCollisionShapes[name] = new btStaticPlaneShape(btVector3(vec.data[0], vec.data[1], vec.data[2]), distance);
             }else{
                 log(error_log, std::string("Found collision shape (")+name+") shape with an unknown type: "+node->name()+'.');
-                menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), NULL);
+                menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), nullptr);
                 return false;
             }
             node = node->next_sibling();
@@ -177,7 +177,7 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
             btCollisionShape* childShape = getCollisionShape((*compoundElement)->first);
             if(!childShape) {
                 log(error_log, std::string("Found compound collision shape (")+(*compoundElement)->first+") with an invalid child.");
-                menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), NULL);
+                menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), nullptr);
                 return false;
             }
             compoundShape->addChildShape((*compoundElement)->second, childShape);

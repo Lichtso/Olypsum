@@ -19,7 +19,7 @@ void AppMain() {
     resourcesPath = trimPath(resourcesPath, 2)+SYSTEM_SLASH+"Resources"+SYSTEM_SLASH;
     
 #ifdef WIN32
-    
+    supportPath = std::string(getenv("HOME"))+"\\My Documents\\Gamefortec";
 #else
 #ifdef __APPLE__
     supportPath = std::string(getenv("HOME"))+"/Library/Application Support/Gamefortec";

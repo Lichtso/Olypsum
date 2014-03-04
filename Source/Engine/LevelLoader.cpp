@@ -47,7 +47,7 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
         rawData = readXmlFile(doc, filePackage->path+"/Containers/"+name+".xml", false);
     
     if(!rawData) {
-        menu.setModalView("error", fileManager.localizeString("packageError_ContainerMissing")+'\n'+name, NULL);
+        menu.setModalView("error", fileManager.localizeString("packageError_ContainerMissing")+'\n'+name, nullptr);
         return false;
     }
     
@@ -220,7 +220,7 @@ bool LevelLoader::loadLevel() {
         levelManager.clear();
         menu.setSaveGamesMenu();
         if(!menu.screenView->modalView)
-            menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), NULL);
+            menu.setModalView("error", fileManager.localizeString("packageError_Corrupted"), nullptr);
         return false;
     }
     

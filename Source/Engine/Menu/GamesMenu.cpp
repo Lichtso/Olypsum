@@ -40,7 +40,7 @@ void Menu::setSaveGamesMenu() {
     screenView->addChild(scrollView);
     
     size_t validSaveGames = 0;
-    forEachInDir(supportPath+"Saves/", NULL, [this, &validSaveGames, &scrollView](const std::string& directoryPath, std::string name) {
+    forEachInDir(supportPath+"Saves/", nullptr, [this, &validSaveGames, &scrollView](const std::string& directoryPath, std::string name) {
         std::string path = supportPath+"Saves/"+name;
         rapidxml::xml_document<xmlUsedCharType> doc;
         std::unique_ptr<char[]> fileData = readXmlFile(doc, supportPath+"Saves/"+name+"Status.xml", false);
@@ -114,7 +114,7 @@ void Menu::setSaveGamesMenu() {
         
         validSaveGames ++;
         return false;
-    }, NULL);
+    }, nullptr);
     scrollView->contentHeight = validSaveGames*0.4*scrollView->height;
     
     std::function<void(GUIButton*)> onClick[] = {

@@ -50,25 +50,25 @@ bool FilePackage::init() {
     };
     
     hash = hashFile(path+"CollisionShapes.xml");
-    hash ^= forEachInDir(path+"Containers/", hashFileContent, hashDirectoryName, NULL);
-    hash ^= forEachInDir(path+"Scripts/", hashFileContent, hashDirectoryName, NULL);
-    hash ^= forEachInDir(path+"Languages/", hashFileContent, NULL, NULL);
-    hash ^= forEachInDir(path+"Fonts/", hashName, hashDirectoryName, NULL);
-    hash ^= forEachInDir(path+"Models/", hashName, hashDirectoryName, NULL);
-    hash ^= forEachInDir(path+"Textures/", hashName, hashDirectoryName, NULL);
-    hash ^= forEachInDir(path+"Sounds/", hashName, hashDirectoryName, NULL);
+    hash ^= forEachInDir(path+"Containers/", hashFileContent, hashDirectoryName, nullptr);
+    hash ^= forEachInDir(path+"Scripts/", hashFileContent, hashDirectoryName, nullptr);
+    hash ^= forEachInDir(path+"Languages/", hashFileContent, nullptr, nullptr);
+    hash ^= forEachInDir(path+"Fonts/", hashName, hashDirectoryName, nullptr);
+    hash ^= forEachInDir(path+"Models/", hashName, hashDirectoryName, nullptr);
+    hash ^= forEachInDir(path+"Textures/", hashName, hashDirectoryName, nullptr);
+    hash ^= forEachInDir(path+"Sounds/", hashName, hashDirectoryName, nullptr);
     
     rapidxml::xml_document<xmlUsedCharType> doc;
     std::unique_ptr<char[]> fileData = readXmlFile(doc, path+"/Package.xml", false);
     if(!fileData) {
-        menu.setModalView("error", fileManager.localizeString("packageError_FilesMissing"), NULL);
+        menu.setModalView("error", fileManager.localizeString("packageError_FilesMissing"), nullptr);
         return false;
     }
     rapidxml::xml_node<xmlUsedCharType> *node,
                                         *packageNode = doc.first_node("Package"),
                                         *version = packageNode->first_node("EngineVersion");
     if(version && compareVersions(version->first_attribute()->value(), VERSION) == -1) {
-        menu.setModalView("error", fileManager.localizeString("packageError_Version"), NULL);
+        menu.setModalView("error", fileManager.localizeString("packageError_Version"), nullptr);
         return false;
     }
     
@@ -80,7 +80,7 @@ bool FilePackage::init() {
             #ifdef DEBUG
             printf("Hash of resource package %s should be %lx\n", name.c_str(), hash);
             #else
-            menu.setModalView("error", fileManager.localizeString("packageError_HashCorrupted"), NULL);
+            menu.setModalView("error", fileManager.localizeString("packageError_HashCorrupted"), nullptr);
             return false;
             #endif
         }
@@ -112,7 +112,7 @@ bool FilePackage::init() {
                 log(warning_log, std::string("Package ")+name+" dependens on its self.");
             
             if(!(package = fileManager.loadPackage(dependencyName)) || hashCmp != package->hash) {
-                menu.setModalView("error", fileManager.localizeString("packageError_CouldNotLoad")+'\n'+name, NULL);
+                menu.setModalView("error", fileManager.localizeString("packageError_CouldNotLoad")+'\n'+name, nullptr);
                 return false;
             }
             
@@ -136,7 +136,7 @@ bool FilePackage::findFileByNameInSubdir(const char* directoryPath, std::string&
             fileName = name;
             found = true;
         }
-    }, NULL, NULL);
+    }, nullptr, nullptr);
     
     return found;
 }
@@ -145,7 +145,7 @@ bool FilePackage::getLocalizableLanguages(std::vector<std::string>& languages) {
     return forEachInDir(path+"Languages/", [&languages](const std::string& directoryPath, std::string name) {
         if(name.length() > 4 && name.compare(name.length()-4, 4, ".xml") == 0)
             languages.push_back(name.substr(0, name.length()-4));
-    }, NULL, NULL);
+    }, nullptr, nullptr);
 }
 
 bool FilePackage::loadLocalization() {
@@ -225,8 +225,8 @@ void FileManager::loadAllPackages() {
         fileManager.loadPackage(name);
         return false;
     };
-    forEachInDir(resourcesPath+"Packages"+SYSTEM_SLASH, NULL, enterDirectory, NULL);
-    forEachInDir(supportPath+"Packages"+SYSTEM_SLASH, NULL, enterDirectory, NULL);
+    forEachInDir(resourcesPath+"Packages"+SYSTEM_SLASH, nullptr, enterDirectory, nullptr);
+    forEachInDir(supportPath+"Packages"+SYSTEM_SLASH, nullptr, enterDirectory, nullptr);
 }
 
 bool FileManager::readResourcePath(FilePackage*& filePackage, std::string& name) {
