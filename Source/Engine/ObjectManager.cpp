@@ -14,9 +14,9 @@ ALCcontext* soundContext;
 //! @cond
 class LightPrioritySorter {
     public:
-    btVector3 position;
+    const btVector3* position;
     bool operator()(LightObject* a, LightObject* b) {
-        return a->getPriority(position) > b->getPriority(position);
+        return a->getPriority(*position) > b->getPriority(*position);
     }
 };
 
@@ -179,8 +179,9 @@ void ObjectManager::gameTick() {
     glEnable(GL_DEPTH_TEST);
     
     //Calculate LightObjects
+	btVector3 position = mainCam->getTransformation().getOrigin();
     LightPrioritySorter lightPrioritySorter;
-    lightPrioritySorter.position = mainCam->getTransformation().getOrigin();
+	lightPrioritySorter.position = &position;
     std::sort(lightObjects.begin(), lightObjects.end(), lightPrioritySorter);
     
     unsigned int maxShadows = (optionsState.shadowQuality > 0) ? 3 : 0;

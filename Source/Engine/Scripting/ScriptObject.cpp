@@ -23,9 +23,7 @@ void ScriptBaseClass::Constructor(const v8::FunctionCallbackInfo<v8::Value>& arg
 void ScriptBaseClass::GetScriptClass(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     ScriptScope();
     BaseClass* objectPtr = getDataOfInstance<BaseClass>(args.This());
-    std::string path = objectPtr->scriptFile->name;
-    if(objectPtr->scriptFile->filePackage != levelManager.levelPackage)
-        path = std::string("../")+objectPtr->scriptFile->filePackage->name+'/'+path;
+    std::string path = fileManager.getPathOfResource(objectPtr->scriptFile->filePackage, objectPtr->scriptFile->name);
     ScriptReturn(ScriptString(path.c_str()));
 }
 

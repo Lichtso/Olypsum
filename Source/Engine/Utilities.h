@@ -13,8 +13,17 @@
 #ifdef WIN32
 #define WIN32_LEAN_AND_MEAN
 #define __BT_SKIP_UINT64_H
+#define _USE_MATH_DEFINES
+#define mkdir _mkdir
+#define rmdir _rmdir
+#define getcwd _getcwd
+#define popen _popen
+#define pclose _pclose
+#define SYSTEM_SLASH '\\'
+#include <math.h>
 #include <SDKDDKVer.h>
 #include <windows.h>
+#include <direct.h>
 #include <GL/glew.h>
 #include <OpenAL/include/al.h>
 #include <OpenAL/include/alc.h>
@@ -23,11 +32,13 @@
 #include <SDL2_ttf/include/SDL_ttf.h>
 #include <libvorbis/include/vorbis/vorbisfile.h>
 #else
+#define SYSTEM_SLASH '/'
 #include <SDL2/SDL.h>
 #include <vorbis/vorbisfile.h>
 #include <dirent.h>
 #include <sys/time.h>
 #ifdef __APPLE__
+#define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED
 #include <OpenGL/gl3.h>
 #include <OpenAL/al.h>
 #include <OpenAL/alc.h>

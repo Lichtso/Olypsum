@@ -29,9 +29,9 @@ FilePackage::~FilePackage() {
 }
 
 bool FilePackage::init() {
-    path = resourcesPath+"Packages/"+name+'/';
+    path = resourcesPath+"Packages"+SYSTEM_SLASH+name+SYSTEM_SLASH;
     if(!checkDir(path)) {
-        path = supportPath+"Packages/"+name+'/';
+        path = supportPath+"Packages"+SYSTEM_SLASH+name+SYSTEM_SLASH;
         if(!checkDir(path))
             return false;
     }
@@ -225,8 +225,8 @@ void FileManager::loadAllPackages() {
         fileManager.loadPackage(name);
         return false;
     };
-    forEachInDir(resourcesPath+"Packages/", NULL, enterDirectory, NULL);
-    forEachInDir(supportPath+"Packages/", NULL, enterDirectory, NULL);
+    forEachInDir(resourcesPath+"Packages"+SYSTEM_SLASH, NULL, enterDirectory, NULL);
+    forEachInDir(supportPath+"Packages"+SYSTEM_SLASH, NULL, enterDirectory, NULL);
 }
 
 bool FileManager::readResourcePath(FilePackage*& filePackage, std::string& name) {
@@ -285,8 +285,8 @@ static T readOptionValue(rapidxml::xml_node<xmlUsedCharType>* option, const char
 }
 
 void OptionsState::loadOptions() {
-    createDir(supportPath+"Saves/");
-    createDir(supportPath+"Packages/");
+    createDir(supportPath+"Saves"+SYSTEM_SLASH);
+    createDir(supportPath+"Packages"+SYSTEM_SLASH);
     language = "English";
     
     rapidxml::xml_document<xmlUsedCharType> doc;

@@ -43,7 +43,7 @@ class Color4 {
     }
     //! Converts this Color4 to gray scale float
     float getGrayScale() {
-        return (r+g+b)/3.0;
+        return (r+g+b)/3.0F;
     }
     //! Converts this Color4 to a btVector3
     btVector3 getVector() {
@@ -56,10 +56,10 @@ class Color4 {
     //! Converts this Color4 to a SDL_Color
     SDL_Color getSDL() {
         SDL_Color B;
-        B.r = r*255;
-        B.g = g*255;
-        B.b = b*255;
-        B.a = a*255;
+		B.r = (Uint8)(r*255);
+		B.g = (Uint8)(g*255);
+		B.b = (Uint8)(b*255);
+		B.a = (Uint8)(a*255);
         return B;
     }
 };

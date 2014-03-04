@@ -188,12 +188,13 @@ void FBO::renderInGBuffers(GLuint colorBuffer, bool specular) {
 void FBO::renderInBuffers(bool fillScreen, GLuint* inBuffers, unsigned char inBuffersCount, GLuint* outBuffers, unsigned char outBuffersCount) {
     if(outBuffersCount) {
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-        GLenum drawBuffers[outBuffersCount];
+        GLenum* drawBuffers = new GLenum[outBuffersCount];
         for(unsigned char o = 0; o < outBuffersCount; o ++) {
             drawBuffers[o] = GL_COLOR_ATTACHMENT0+o;
             glFramebufferTexture2D(GL_FRAMEBUFFER, drawBuffers[o], GL_TEXTURE_RECTANGLE, outBuffers[o], 0);
         }
         glDrawBuffers(outBuffersCount, drawBuffers);
+		delete[] drawBuffers;
     }else
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     

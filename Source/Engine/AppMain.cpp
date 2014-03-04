@@ -10,22 +10,26 @@
 
 void AppMain() {
     //Init paths
-    if(*resourcesPath.begin() != '/') {
+    if(*resourcesPath.begin() != SYSTEM_SLASH) {
         char cwdPath[512];
         getcwd(cwdPath, sizeof(cwdPath)/sizeof(char)-1);
-        resourcesPath = std::string(cwdPath)+'/'+resourcesPath;
+        resourcesPath = std::string(cwdPath)+SYSTEM_SLASH+resourcesPath;
     }
     executablePath = trimPath(resourcesPath, 0);
-    resourcesPath = trimPath(resourcesPath, 2)+"/Resources/";
+    resourcesPath = trimPath(resourcesPath, 2)+SYSTEM_SLASH+"Resources"+SYSTEM_SLASH;
     
+#ifdef WIN32
+    
+#else
 #ifdef __APPLE__
     supportPath = std::string(getenv("HOME"))+"/Library/Application Support/Gamefortec";
 #else
     supportPath = std::string(getenv("HOME"))+"/.Gamefortec";
 #endif
-    supportPath = trimPath(supportPath, 0)+'/';
+#endif
+    supportPath = trimPath(supportPath, 0)+SYSTEM_SLASH;
     createDir(supportPath);
-    supportPath += "Olypsum/";
+    supportPath = supportPath+"Olypsum"+SYSTEM_SLASH;
     createDir(supportPath);
     optionsState.loadOptions();
     

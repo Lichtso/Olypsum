@@ -596,11 +596,12 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
                     floatArray->data[i*3+2] = vec.z();
                 }
             }
-            char floatArrayData[16*floatArray->count], *floatArrayPos = floatArrayData;
+            /*char *floatArrayData = new char[16*floatArray->count], *floatArrayPos = floatArrayData;
             for(unsigned int i = 0; i < floatArray->count; i ++) {
                 if(i > 0) *(floatArrayPos ++) = ' ';
                 floatArrayPos += sprintf(floatArrayPos, "%4.8f", floatArray->data[i]);
             }
+			delete[] floatArrayData;*/
             
             floatArray->count /= floatArray->stride;
             if(floatArray->stride == 2)
@@ -664,7 +665,7 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
                 sscanf(dataAttribute->value(), "%d", &offset);
                 dataAttribute = dataNode->first_attribute("source");
                 if(!dataAttribute) goto endParsingXML;
-                decltype(vertexReferenceArrays)::iterator iterator = vertexReferenceArrays.find(dataAttribute->value()+1);
+				std::unordered_map<std::string, std::vector<VertexReference>*>::iterator iterator = vertexReferenceArrays.find(dataAttribute->value() + 1);
                 if(iterator == vertexReferenceArrays.end()) {
                     VertexReference vertexReference;
                     vertexReference.source = floatArrays[dataAttribute->value()+1];
@@ -751,9 +752,10 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
                 indexBuffer.count = indexCount*mesh->vao.indeciesCount;
                 mesh->vao.indeciesCount = 0;
                 for(int i = indexCountBuffer.count-1; i >= 0; i --) {
-                    unsigned int copyCount = indexCountBuffer.data[i]*indexCount,
-                    expandCount = (indexCountBuffer.data[i]-2)*3*indexCount,
-                    indexAuxBuffer[copyCount], index;
+					unsigned int copyCount = indexCountBuffer.data[i] * indexCount,
+								 expandCount = (indexCountBuffer.data[i] - 2) * 3 * indexCount,
+								 index;
+					unsigned int* indexAuxBuffer = new unsigned int[copyCount];
                     
                     index = indexBufferSize-finishedElements-copyCount;
                     for(unsigned int j = 0; j < copyCount; j ++)
@@ -766,6 +768,7 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
                             indexBuffer.data[index+indexCount] = indexAuxBuffer[k+indexCount*(j+1)];
                             indexBuffer.data[index+indexCount*2] = indexAuxBuffer[k+indexCount*(j+2)];
                         }
+					delete[] indexAuxBuffer;
                     
                     finishedElements += indexCountBuffer.data[i]*indexCount;
                     mesh->vao.indeciesCount += (indexCountBuffer.data[i]-2)*3;
@@ -774,10 +777,10 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
             }
             
             //Indecizer
-            float dataBuffer[strideIndex*mesh->vao.indeciesCount];
+            float* dataBuffer = new float[strideIndex*mesh->vao.indeciesCount];
             if(indexCount > 1) { //Use IndexBuffer
                 int combinationIndex, combinationCount = 0;
-                unsigned int indecies[mesh->vao.indeciesCount];
+				unsigned int* indecies = new unsigned int[mesh->vao.indeciesCount];
                 for(unsigned int i = 0; i < mesh->vao.indeciesCount; i ++) {
                     combinationIndex = -1;
                     for(unsigned int j = 0; j < combinationCount && combinationIndex == -1; j ++) {
@@ -812,6 +815,7 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
                             mesh->vao.indeciesCount*strideIndex*sizeof(float));
                     log(warning_log, buffer);
                 }
+				delete[] indecies;
             }else{ //Don't use IndexBuffer
                 dataIndex = 0;
                 for(unsigned int i = 0; i < mesh->vao.indeciesCount; i ++)
@@ -823,6 +827,7 @@ FileResourcePtr<FileResource> Model::load(FilePackage* _filePackage, const std::
                 mesh->vao.init(attributes, false);
                 mesh->vao.updateVertices(mesh->vao.indeciesCount*strideIndex, dataBuffer, GL_STATIC_DRAW);
             }
+			delete[] dataBuffer;
             
             rapidxml::xml_node<xmlUsedCharType>* sourceB = source->next_sibling("triangles");
             if(!sourceB) sourceB = source->next_sibling("polylist");

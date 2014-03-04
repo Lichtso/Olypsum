@@ -55,7 +55,7 @@ static bool readRangeNode(rapidxml::xml_node<xmlUsedCharType>* node, const char*
 }
 
 template<class T>
-rapidxml::xml_node<xmlUsedCharType>* writeBoundsNode(rapidxml::xml_document<xmlUsedCharType>& doc, const char* name, T min, T max) {
+static rapidxml::xml_node<xmlUsedCharType>* writeBoundsNode(rapidxml::xml_document<xmlUsedCharType>& doc, const char* name, const T& min, const T& max) {
     rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
     node->name(name);
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();

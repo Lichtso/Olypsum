@@ -85,19 +85,33 @@ std::size_t hashFile(const std::string& filePath) {
 }
 
 bool checkDir(std::string path) {
+#ifdef WIN32
+	WIN32_FIND_DATAA FindFileData;
+	HANDLE hFind = FindFirstFileA(path.c_str(), &FindFileData);
+	if(hFind != INVALID_HANDLE_VALUE) {
+		FindClose(hFind);
+		return true;
+	}
+#else
     DIR* dir = opendir(path.c_str());
     if(dir) {
         closedir(dir);
         return true;
-    }else
-        return false;
+    }
+#endif
+	else
+		return false;
 }
 
 bool createDir(std::string path) {
     if(checkDir(path))
         return false;
     else{
-        mkdir(path.c_str(), S_IRWXU | S_IRWXG);
+#ifdef WIN32
+        mkdir(path.c_str());
+#else
+		mkdir(path.c_str(), S_IRWXU | S_IRWXG);
+#endif
         return true;
     }
 }
@@ -106,28 +120,45 @@ bool forEachInDir(std::string path,
                   std::function<void(const std::string& directoryPath, std::string name)> perFile,
                   std::function<bool(const std::string& directoryPath, std::string name)> enterDirectory,
                   std::function<void(const std::string& directoryPath)> leaveDirectory) {
+	std::unordered_set<std::string> items;
+
+#ifdef WIN32
+	path += '*';
+	WIN32_FIND_DATAA FindFileData;
+	HANDLE hFind = FindFirstFileA(path.c_str(), &FindFileData);
+	if(hFind == INVALID_HANDLE_VALUE) return false;
+
+	while(FindNextFileA(hFind, &FindFileData)) {
+		std::string name(FindFileData.cFileName);
+		if(*name.begin() == '.') continue;
+		if(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			name += SYSTEM_SLASH;
+		items.insert(name);
+	}
+	FindClose(hFind);
+#else
     DIR* dir = opendir(path.c_str());
     if(!dir) return false;
     
     dirent* item;
-    std::unordered_set<std::string> items;
     while((item = readdir(dir))) {
         std::string name(item->d_name);
         if(*name.begin() == '.') continue;
         if(item->d_type == DT_DIR)
-            name += '/';
+			name += SYSTEM_SLASH;
         items.insert(name);
     }
-    
-    for(std::string name : items) {
-        if(*(name.end()-1) == '/') {
-            if(enterDirectory && enterDirectory(path, name))
-                forEachInDir(path+name, perFile, enterDirectory, leaveDirectory);
-        }else if(perFile)
-            perFile(path, name);
-    }
-    
     closedir(dir);
+#endif
+
+	for(std::string name : items) {
+		if(*(name.end() - 1) == SYSTEM_SLASH) {
+			if(enterDirectory && enterDirectory(path, name))
+				forEachInDir(path+name, perFile, enterDirectory, leaveDirectory);
+		}else if(perFile)
+			perFile(path, name);
+	}
+
     if(leaveDirectory)
         leaveDirectory(path);
     return true;
@@ -148,7 +179,7 @@ std::string trimPath(std::string path, size_t n) {
     std::vector<std::string> tokens;
     std::string token;
     
-    while(std::getline(ss, token, '/')) {
+	while(std::getline(ss, token, SYSTEM_SLASH)) {
         if(token == ".") continue;
         
         if(tokens.size() > 0) {
@@ -167,7 +198,7 @@ std::string trimPath(std::string path, size_t n) {
     ss.str("");
     for(size_t i = 0; i < tokens.size()-n; i ++) {
         if(i > 0)
-            ss << '/';
+			ss << SYSTEM_SLASH;
         ss << tokens[i];
     }
     
@@ -220,7 +251,7 @@ std::string stringOf(const btTransform& mat) {
 }
 
 double getTime() {
-#ifdef OS_WIN32
+#ifdef WIN32
     SYSTEMTIME now;
     GetSystemTime(&now);
     return now.wHour*3600.0 + now.wMinute*60.0 + now.wSecond + now.wMilliseconds/1000.0;

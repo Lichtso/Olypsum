@@ -59,13 +59,17 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* sourceCode, std::v
     const GLchar* sourceStr = source.c_str();
 	glShaderSource(shaderId, 1, &sourceStr, NULL);
 	glCompileShader(shaderId);
-	int infoLogLength = 1024;
-	char infoLog[infoLogLength];
-	glGetShaderInfoLog(shaderId, infoLogLength, &infoLogLength, (GLchar*) &infoLog);
+
+	int infoLogLength;
+	glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &infoLogLength);
 	if(infoLogLength > 0) {
+		char* infoLog = new char[infoLogLength];
+		glGetShaderInfoLog(shaderId, infoLogLength, &infoLogLength, (GLchar*)&infoLog);
         log(shader_log, std::string(infoLog)+sourceStr+"\n");
+		delete[] infoLog;
 		return false;
 	}
+
 	glAttachShader(GLname, shaderId);
     glDeleteShader(shaderId);
     return true;
@@ -74,10 +78,11 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* sourceCode, std::v
 bool ShaderProgram::loadShaderProgram(const char* fileName, std::vector<GLenum> shaderTypes, std::vector<const char*> macros) {
     GLsizei shaderCount;
     glGetProgramiv(GLname, GL_ATTACHED_SHADERS, &shaderCount);
-    GLuint shaders[shaderCount];
+    GLuint* shaders = new GLuint[shaderCount];
     glGetAttachedShaders(GLname, shaderCount, &shaderCount, shaders);
     for(size_t i = 0; i < shaderCount; i ++)
         glDetachShader(GLname, shaders[i]);
+	delete[] shaders;
     
     std::unique_ptr<char[]> data = readFile(resourcesPath+"Shaders/"+fileName+".glsl", true);
     char* dataPos = data.get();
@@ -113,11 +118,13 @@ bool ShaderProgram::link() {
     cachedUniforms.clear();
 	glLinkProgram(GLname);
     
-    int infoLogLength = 1024;
-	char infoLog[infoLogLength];
-    glGetProgramInfoLog(GLname, infoLogLength, &infoLogLength, (GLchar*) &infoLog);
-	if(infoLogLength > 0) {
-        log(shader_log, infoLog);
+	int infoLogLength;
+	glGetProgramiv(GLname, GL_INFO_LOG_LENGTH, &infoLogLength);
+	if (infoLogLength > 0) {
+		char* infoLog = new char[infoLogLength];
+		glGetProgramInfoLog(GLname, infoLogLength, &infoLogLength, (GLchar*)&infoLog);
+		log(shader_log, infoLog);
+		delete[] infoLog;
 		return false;
 	}
     
@@ -244,10 +251,11 @@ void ShaderProgram::setUniformMatrix4(const char* name, const btTransform* mat) 
 void ShaderProgram::setUniformMatrix4(const char* name, const btTransform* mat, unsigned int count) {
     GLint location = getUniformLocation(name);
     if(location < 0) return;
-    btScalar matData[count*16];
+    btScalar* matData = new btScalar[count*16];
     for(unsigned int i = 0; i < count; i ++)
         mat[i].getOpenGLMatrix(matData+i*16);
     glUniformMatrix4fv(location, count, false, matData);
+	delete[] matData;
 }
 
 btTransform modelMat;
@@ -491,7 +499,7 @@ void updateSSAOShaderPrograms() {
     shaderPrograms[ssaoSP]->use();
     
     unsigned char samples = 32;
-    float pSphere[samples*3];
+    float* pSphere = new float[samples*3];
     for(unsigned char i = 0; i < samples; i ++) {
         btVector3 vec(frand(-1.0, 1.0), frand(-1.0, 1.0), frand(0.0, 1.0));
         vec.normalize();
@@ -501,6 +509,7 @@ void updateSSAOShaderPrograms() {
         pSphere[i*3+2] = vec.y();
     }
     glUniform3fv(glGetUniformLocation(shaderPrograms[ssaoSP]->GLname, "pSphere"), samples, pSphere);
+	delete[] pSphere;
     
     shaderPrograms[ssaoCombineSP]->loadShaderProgram("postSSAO2", shaderTypeVertexFragment, { ssaoQualityMacro, scaleMacro });
     shaderPrograms[ssaoCombineSP]->addAttribute(POSITION_ATTRIBUTE, "position");
