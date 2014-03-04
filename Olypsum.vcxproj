@@ -1,0 +1,214 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source\Engine\AppMain.cpp" />
+    <ClCompile Include="Source\Engine\Audio.cpp" />
+    <ClCompile Include="Source\Engine\CamObject.cpp" />
+    <ClCompile Include="Source\Engine\FBO.cpp" />
+    <ClCompile Include="Source\Engine\FileManager.cpp" />
+    <ClCompile Include="Source\Engine\GUI\GUIButton.cpp" />
+    <ClCompile Include="Source\Engine\GUI\GUICheckBox.cpp" />
+    <ClCompile Include="Source\Engine\GUI\GUIClipRect.cpp" />
+    <ClCompile Include="Source\Engine\GUI\GUIImage.cpp" />
+    <ClCompile Include="Source\Engine\GUI\GUILabel.cpp" />
+    <ClCompile Include="Source\Engine\GUI\GUIProgressBar.cpp" />
+    <ClCompile Include="Source\Engine\GUI\GUIRect.cpp" />
+    <ClCompile Include="Source\Engine\GUI\GUIRoundedRect.cpp" />
+    <ClCompile Include="Source\Engine\GUI\GUIScrollView.cpp" />
+    <ClCompile Include="Source\Engine\GUI\GUISlider.cpp" />
+    <ClCompile Include="Source\Engine\GUI\GUITabs.cpp" />
+    <ClCompile Include="Source\Engine\GUI\GUITextField.cpp" />
+    <ClCompile Include="Source\Engine\GUI\GUIView.cpp" />
+    <ClCompile Include="Source\Engine\LevelLoader.cpp" />
+    <ClCompile Include="Source\Engine\LevelManager.cpp" />
+    <ClCompile Include="Source\Engine\LevelSaver.cpp" />
+    <ClCompile Include="Source\Engine\LightObject.cpp" />
+    <ClCompile Include="Source\Engine\LightVolume.cpp" />
+    <ClCompile Include="Source\Engine\Links.cpp" />
+    <ClCompile Include="Source\Engine\main.cpp" />
+    <ClCompile Include="Source\Engine\Matrix4.cpp" />
+    <ClCompile Include="Source\Engine\Menu\GamesMenu.cpp" />
+    <ClCompile Include="Source\Engine\Menu\Menu.cpp" />
+    <ClCompile Include="Source\Engine\Menu\MultiplayerMenu.cpp" />
+    <ClCompile Include="Source\Engine\Menu\OptionsMenu.cpp" />
+    <ClCompile Include="Source\Engine\Model.cpp" />
+    <ClCompile Include="Source\Engine\Network.cpp" />
+    <ClCompile Include="Source\Engine\Object.cpp" />
+    <ClCompile Include="Source\Engine\ObjectManager.cpp" />
+    <ClCompile Include="Source\Engine\ParticlesObject.cpp" />
+    <ClCompile Include="Source\Engine\Profiler.cpp" />
+    <ClCompile Include="Source\Engine\Ray3.cpp" />
+    <ClCompile Include="Source\Engine\Script.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptAnimation.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptGUIButton.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptGUIInput.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptGUIOutput.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptGUIRect.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptGUIView.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptIntersection.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptIO.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptLightObject.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptLinearAlgebra.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptLinks.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptManager.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptObject.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptParticlesObject.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptSimpleObject.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptVisualObject.cpp" />
+    <ClCompile Include="Source\Engine\ShaderProgram.cpp" />
+    <ClCompile Include="Source\Engine\TerrainObject.cpp" />
+    <ClCompile Include="Source\Engine\TextFont.cpp" />
+    <ClCompile Include="Source\Engine\Texture.cpp" />
+    <ClCompile Include="Source\Engine\Utilities.cpp" />
+    <ClCompile Include="Source\Engine\VertexArrayObject.cpp" />
+    <ClCompile Include="Source\Engine\VisualObject.cpp" />
+    <ClCompile Include="Source\Engine\XMLUtilities.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Source\Engine\AppMain.h" />
+    <ClInclude Include="Source\Engine\Audio.h" />
+    <ClInclude Include="Source\Engine\CamObject.h" />
+    <ClInclude Include="Source\Engine\FBO.h" />
+    <ClInclude Include="Source\Engine\FileManager.h" />
+    <ClInclude Include="Source\Engine\GUI\GUIButton.h" />
+    <ClInclude Include="Source\Engine\GUI\GUICheckBox.h" />
+    <ClInclude Include="Source\Engine\GUI\GUIClipRect.h" />
+    <ClInclude Include="Source\Engine\GUI\GUIImage.h" />
+    <ClInclude Include="Source\Engine\GUI\GUILabel.h" />
+    <ClInclude Include="Source\Engine\GUI\GUIProgressBar.h" />
+    <ClInclude Include="Source\Engine\GUI\GUIRect.h" />
+    <ClInclude Include="Source\Engine\GUI\GUIRoundedRect.h" />
+    <ClInclude Include="Source\Engine\GUI\GUIScrollView.h" />
+    <ClInclude Include="Source\Engine\GUI\GUISlider.h" />
+    <ClInclude Include="Source\Engine\GUI\GUITabs.h" />
+    <ClInclude Include="Source\Engine\GUI\GUITextField.h" />
+    <ClInclude Include="Source\Engine\GUI\GUIView.h" />
+    <ClInclude Include="Source\Engine\Header.h" />
+    <ClInclude Include="Source\Engine\LevelLoader.h" />
+    <ClInclude Include="Source\Engine\LevelManager.h" />
+    <ClInclude Include="Source\Engine\LevelSaver.h" />
+    <ClInclude Include="Source\Engine\LightObject.h" />
+    <ClInclude Include="Source\Engine\LightVolume.h" />
+    <ClInclude Include="Source\Engine\Links.h" />
+    <ClInclude Include="Source\Engine\Matrix4.h" />
+    <ClInclude Include="Source\Engine\Menu\Menu.h" />
+    <ClInclude Include="Source\Engine\Model.h" />
+    <ClInclude Include="Source\Engine\Network.h" />
+    <ClInclude Include="Source\Engine\Object.h" />
+    <ClInclude Include="Source\Engine\ObjectManager.h" />
+    <ClInclude Include="Source\Engine\ParticlesObject.h" />
+    <ClInclude Include="Source\Engine\Profiler.h" />
+    <ClInclude Include="Source\Engine\rapidxml-1.13\rapidxml.hpp" />
+    <ClInclude Include="Source\Engine\rapidxml-1.13\rapidxml_iterators.hpp" />
+    <ClInclude Include="Source\Engine\rapidxml-1.13\rapidxml_print.hpp" />
+    <ClInclude Include="Source\Engine\rapidxml-1.13\rapidxml_utils.hpp" />
+    <ClInclude Include="Source\Engine\Ray3.h" />
+    <ClInclude Include="Source\Engine\Script.h" />
+    <ClInclude Include="Source\Engine\Scripting\ScriptAnimation.h" />
+    <ClInclude Include="Source\Engine\Scripting\ScriptGUIButton.h" />
+    <ClInclude Include="Source\Engine\Scripting\ScriptGUIInput.h" />
+    <ClInclude Include="Source\Engine\Scripting\ScriptGUIOutput.h" />
+    <ClInclude Include="Source\Engine\Scripting\ScriptGUIRect.h" />
+    <ClInclude Include="Source\Engine\Scripting\ScriptGUIView.h" />
+    <ClInclude Include="Source\Engine\Scripting\ScriptIntersection.h" />
+    <ClInclude Include="Source\Engine\Scripting\ScriptIO.h" />
+    <ClInclude Include="Source\Engine\Scripting\ScriptLightObject.h" />
+    <ClInclude Include="Source\Engine\Scripting\ScriptLinearAlgebra.h" />
+    <ClInclude Include="Source\Engine\Scripting\ScriptLinks.h" />
+    <ClInclude Include="Source\Engine\Scripting\ScriptManager.h" />
+    <ClInclude Include="Source\Engine\Scripting\ScriptObject.h" />
+    <ClInclude Include="Source\Engine\Scripting\ScriptParticlesObject.h" />
+    <ClInclude Include="Source\Engine\Scripting\ScriptSimpleObject.h" />
+    <ClInclude Include="Source\Engine\Scripting\ScriptVisualObject.h" />
+    <ClInclude Include="Source\Engine\ShaderProgram.h" />
+    <ClInclude Include="Source\Engine\TerrainObject.h" />
+    <ClInclude Include="Source\Engine\TextFont.h" />
+    <ClInclude Include="Source\Engine\Texture.h" />
+    <ClInclude Include="Source\Engine\Utilities.h" />
+    <ClInclude Include="Source\Engine\VertexArrayObject.h" />
+    <ClInclude Include="Source\Engine\VisualObject.h" />
+    <ClInclude Include="Source\Engine\XMLUtilities.h" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8537995D-D935-421A-8068-B7BC9315B9A6}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Olypsum</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);Libraries/DLLs;</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);Libraries/DLLs;</LibraryPath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;VERSION="0.4.2";_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:/Program Files (x86)/Intel/OpenCL SDK/3.0/include;Libraries;Libraries/libogg/include;Libraries/glew/include;Libraries/SDL2/include;Libraries/bulletPhysics/src;Source/Engine</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;VERSION="0.4.2";_CRT_SECURE_NO_WARNINGS;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:/Program Files (x86)/Intel/OpenCL SDK/3.0/include;Libraries;Libraries/libogg/include;Libraries/glew/include;Libraries/SDL2/include;Libraries/bulletPhysics/src;Source/Engine</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
