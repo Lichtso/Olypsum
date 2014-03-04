@@ -9,6 +9,10 @@
 #include "Menu/Menu.h"
 
 void NetworkManager::init() {
+#ifdef WIN32
+    netLink::init();
+#endif
+    
     socketManager.onReceive = [this](netLink::SocketManager* manager, netLink::Socket* socket) {
         try {
             socket->advanceInputBuffer();

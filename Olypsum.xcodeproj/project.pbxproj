@@ -189,6 +189,7 @@
 		118620471650165400A32518 /* ObjectManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ObjectManager.h; sourceTree = "<group>"; };
 		1188A5411745403900D535B2 /* ScriptAnimation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptAnimation.cpp; sourceTree = "<group>"; };
 		1188A5421745403900D535B2 /* ScriptAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptAnimation.h; sourceTree = "<group>"; };
+		11894C3218C631AD000467C1 /* Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Header.h; sourceTree = "<group>"; };
 		118B60601573E2DF004C132E /* Audio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Audio.h; sourceTree = "<group>"; };
 		118B60611573E2E8004C132E /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Audio.cpp; sourceTree = "<group>"; };
 		1199EC311722D204006BD235 /* ScriptIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptIO.cpp; sourceTree = "<group>"; };
@@ -384,6 +385,7 @@
 		11A79B1F153C2FE9002B9F0A /* Engine */ = {
 			isa = PBXGroup;
 			children = (
+				11894C3218C631AD000467C1 /* Header.h */,
 				11A79B69153C2FE9002B9F0A /* Utilities.h */,
 				11A79B68153C2FE9002B9F0A /* Utilities.cpp */,
 				11A3255417089E2100B038D2 /* Network.h */,

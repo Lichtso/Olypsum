@@ -9,69 +9,7 @@
 #ifndef Utilities_h
 #define Utilities_h
 
-#define V8_ALLOW_ACCESS_TO_RAW_HANDLE_CONSTRUCTOR
-#ifdef WIN32
-#define WIN32_LEAN_AND_MEAN
-#define __BT_SKIP_UINT64_H
-#define _USE_MATH_DEFINES
-#define mkdir _mkdir
-#define rmdir _rmdir
-#define getcwd _getcwd
-#define popen _popen
-#define pclose _pclose
-#define SYSTEM_SLASH '\\'
-#include <math.h>
-#include <SDKDDKVer.h>
-#include <windows.h>
-#include <direct.h>
-#include <GL/glew.h>
-#include <OpenAL/include/al.h>
-#include <OpenAL/include/alc.h>
-#include <SDL2/include/SDL.h>
-#include <SDL2_image/include/SDL_image.h>
-#include <SDL2_ttf/include/SDL_ttf.h>
-#include <libvorbis/include/vorbis/vorbisfile.h>
-#else
-#define SYSTEM_SLASH '/'
-#include <SDL2/SDL.h>
-#include <vorbis/vorbisfile.h>
-#include <dirent.h>
-#include <sys/time.h>
-#ifdef __APPLE__
-#define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED
-#include <OpenGL/gl3.h>
-#include <OpenAL/al.h>
-#include <OpenAL/alc.h>
-#include <SDL2_image/SDL_image.h>
-#include <SDL2_ttf/SDL_ttf.h>
-#else
-#define GL_GLEXT_PROTOTYPES
-#include <GL/gl.h>
-#include <AL/al.h>
-#include <AL/alc.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
-#endif
-#endif
-#include <sys/stat.h>
-#include <iostream>
-#include <fstream>
-#include <thread>
-#include <regex>
-#include <unordered_map>
-#include <unordered_set>
-
-#include <bulletPhysics/src/btBulletCollisionCommon.h>
-#include <bulletPhysics/src/btBulletDynamicsCommon.h>
-#include <bulletPhysics/src/BulletSoftBody/btSoftRigidDynamicsWorld.h>
-#include <bulletPhysics/src/BulletSoftBody/btDefaultSoftBodySolver.h>
-#include <bulletPhysics/src/BulletSoftBody/btSoftBodyRigidBodyCollisionConfiguration.h>
-#include <bulletPhysics/src/BulletMultiThreaded/btParallelConstraintSolver.h>
-#include <bulletPhysics/src/BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolver_OpenCLSIMDAware.h>
-#include <bulletPhysics/src/BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolverVertexBuffer_OpenGL.h>
-#include <bulletPhysics/src/BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolverOutputCLtoGL.h>
-#include <netLink/include/netLink.h>
-#include <v8/include/v8.h>
+#include "Header.h"
 
 enum logMessageType {
     info_log = 0,

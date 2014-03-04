@@ -13,10 +13,21 @@ float getMaxVideoScale() {
     return 1.0;
 }
 
+#ifdef WIN32
+int WINAPI WinMain(HINSTANCE hInstance,
+                   HINSTANCE hPrevInstance,
+                   LPSTR lpCmdLine,
+                   int nCmdShow) {
+	printf("%s\n", lpCmdLine);
+	//AppMain();
+	return 0;
+}
+#else
 int main(int argc, const char** argv) {
     resourcesPath = argv[0];
     AppMain();
     return 0;
 }
+#endif
 
 #endif
