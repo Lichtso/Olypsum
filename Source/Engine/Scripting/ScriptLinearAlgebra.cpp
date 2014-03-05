@@ -618,7 +618,7 @@ void ScriptMatrix4::Destructor(const v8::WeakCallbackData<v8::Object, void>& dat
     v8::Isolate::GetCurrent()->AdjustAmountOfExternalAllocatedMemory(-sizeof(Matrix4));
     //value->ClearWeak();
     //value->Reset();
-    //printf("~ ScriptMatrix4\n");
+    //log(info_log, "~ ScriptMatrix4");
     delete mat;
 }
 

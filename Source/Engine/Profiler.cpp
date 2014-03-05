@@ -37,7 +37,7 @@ void Profiler::markFrame() {
         FPS = newFPS;
         newFPS = 0;
         
-        std::ostringstream ss;
+        /*std::ostringstream ss;
         ss << "Profile (" << FPS << " FPS)\n";
         foreach_e(sections, iterator) {
             if(iterator->second.secAverage == 0) {
@@ -48,7 +48,7 @@ void Profiler::markFrame() {
             iterator->second.secAverage = 0;
         }
         ss << "\n";
-        //printf("%s", ss.str().c_str());
+        log(info_log, ss);*/
     }
     
     //usleep(1000);

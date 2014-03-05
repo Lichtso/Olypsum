@@ -14,13 +14,18 @@ float getMaxVideoScale() {
 }
 
 #ifdef WIN32
-int WINAPI WinMain(HINSTANCE hInstance,
+/*int WINAPI WinMain(HINSTANCE hInstance,
                    HINSTANCE hPrevInstance,
                    LPSTR lpCmdLine,
                    int nCmdShow) {
-	printf("%s\n", lpCmdLine);
+    log(info_log, "Windows start");
 	//AppMain();
 	return 0;
+}*/
+int main(int argc, const char** argv) {
+    resourcesPath = argv[0];
+    log(info_log, std::string("Windows start: ")+resourcesPath);
+    return 0;
 }
 #else
 int main(int argc, const char** argv) {

@@ -11,6 +11,9 @@
 void log(logMessageType type, std::string message) {
     std::string typeStr;
     switch(type) {
+        case typeless_log:
+            typeStr = "";
+            break;
         case info_log:
             typeStr = "INFO: ";
             break;
@@ -29,9 +32,13 @@ void log(logMessageType type, std::string message) {
     }
     
     message = typeStr+message;
-    printf("%s\n", message.c_str());
     if(levelManager.gameStatus != noGame)
         menu.consoleAdd(message);
+#ifdef WIN32
+    OutputDebugStringA(message.c_str());
+#else
+    printf("%s\n", message.c_str());
+#endif
 }
 
 int getFileSize(const std::string& filePath) {
@@ -292,4 +299,4 @@ const Uint8* keyState = NULL;
 int keyStateSize = 0;
 SDL_Window* mainWindow = NULL;
 SDL_GLContext glContext = NULL;
-std::string executablePath, resourcesPath, supportPath;
+std::string resourcesPath, supportPath;

@@ -12,7 +12,8 @@
 #include "Header.h"
 
 enum logMessageType {
-    info_log = 0,
+    typeless_log,
+    info_log,
     warning_log,
     error_log,
     shader_log,
@@ -144,6 +145,6 @@ extern const Uint8* keyState;
 extern int keyStateSize;
 extern SDL_Window* mainWindow;
 extern SDL_GLContext glContext;
-extern std::string executablePath, resourcesPath, supportPath;
+extern std::string resourcesPath, supportPath;
 
 #endif

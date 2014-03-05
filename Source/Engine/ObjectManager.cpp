@@ -129,7 +129,7 @@ void ObjectManager::init() {
     soundContext = alcCreateContext(soundDevice, NULL);
     alcMakeContextCurrent(soundContext);
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
-    printf("OpenAL sound output: %s\n", alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
+    log(typeless_log, std::string("OpenAL sound output: ")+alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
     
     //Show loading screen
     guiCam = new CamObject();
@@ -287,8 +287,6 @@ void ObjectManager::gameTick() {
 void ObjectManager::physicsTick() {
     unsigned int numManifolds = collisionDispatcher->getNumManifolds();
     
-    //printf(str, "Collisions: %d", numManifolds);
-    
 	for(unsigned int i = 0; i < numManifolds; i ++) {
 		btPersistentManifold* contactManifold = collisionDispatcher->getManifoldByIndexInternal(i);
         if(contactManifold->getNumContacts() == 0) continue;
@@ -297,8 +295,6 @@ void ObjectManager::physicsTick() {
                                 *objectB = contactManifold->getBody1();
         PhysicObject *userObjectA = static_cast<PhysicObject*>(objectA->getUserPointer()),
                      *userObjectB = static_cast<PhysicObject*>(objectB->getUserPointer());
-        
-        //printf("%p %p (%p %p) %d\n", objectA, objectB, userObjectA, userObjectB, contactManifold->getNumContacts());
         
         userObjectA->handleCollision(contactManifold, userObjectB);
         userObjectB->handleCollision(contactManifold, userObjectA);

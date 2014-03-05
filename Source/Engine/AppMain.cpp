@@ -10,24 +10,22 @@
 
 void AppMain() {
     //Init paths
-    if(*resourcesPath.begin() != SYSTEM_SLASH) {
+    /*if(resourcesPath.size() == 0) {
         char cwdPath[512];
         getcwd(cwdPath, sizeof(cwdPath)/sizeof(char)-1);
-        resourcesPath = std::string(cwdPath)+SYSTEM_SLASH+resourcesPath;
-    }
-    executablePath = trimPath(resourcesPath, 0);
+        resourcesPath = std::string(cwdPath)+SYSTEM_SLASH+executablePath;
+    }*/
     resourcesPath = trimPath(resourcesPath, 2)+SYSTEM_SLASH+"Resources"+SYSTEM_SLASH;
     
 #ifdef WIN32
-    supportPath = std::string(getenv("HOME"))+"\\My Documents\\Gamefortec";
+    supportPath = std::string(getenv("HOME"))+"\\My Documents\\";
+#elif defined __APPLE__
+    supportPath = std::string(getenv("HOME"))+"/Library/Application Support/";
 #else
-#ifdef __APPLE__
-    supportPath = std::string(getenv("HOME"))+"/Library/Application Support/Gamefortec";
-#else
-    supportPath = std::string(getenv("HOME"))+"/.Gamefortec";
+    supportPath = std::string(getenv("HOME"))+"/.";
 #endif
-#endif
-    supportPath = trimPath(supportPath, 0)+SYSTEM_SLASH;
+    
+    supportPath = trimPath(supportPath+"Gamefortec", 0)+SYSTEM_SLASH;
     createDir(supportPath);
     supportPath = supportPath+"Olypsum"+SYSTEM_SLASH;
     createDir(supportPath);
@@ -60,40 +58,43 @@ void AppMain() {
         
         time_t t = time(0);
         struct tm* date = gmtime(&t);
-        printf("Date / Time: %04d.%02d.%02d %02d:%02d:%02d\n", 1900+date->tm_year, 1+date->tm_mon, date->tm_mday, date->tm_hour, date->tm_min, date->tm_sec);
-        printf("Engine Version: %s\n", VERSION);
-        //printf("Multi Threading: %d\n", std::thread::hardware_concurrency());
+        char* buffer = new char[2048];
+        sprintf(buffer, "Date / Time: %04d.%02d.%02d %02d:%02d:%02d", 1900+date->tm_year, 1+date->tm_mon, date->tm_mday, date->tm_hour, date->tm_min, date->tm_sec);
+        log(typeless_log, buffer);
+        log(typeless_log, std::string("Engine Version: ")+VERSION);
+        //log(typeless_log, std::string("Multi Threading: ")+stringOf(std::thread::hardware_concurrency()));
         char* glStr = NULL;
         GLint glAuxIa, glAuxIb;
         glStr = (char*)glGetString(GL_VENDOR);
-        printf("OpenGL Vendor: %s\n", glStr);
+        log(typeless_log, std::string("OpenGL Vendor: ")+glStr);
         glStr = (char*)glGetString(GL_RENDERER);
-        printf("OpenGL Renderer: %s\n", glStr);
+        log(typeless_log, std::string("OpenGL Renderer: ")+glStr);
         glStr = (char*)glGetString(GL_VERSION);
-        printf("OpenGL Driver: %s\n", glStr);
+        log(typeless_log, std::string("OpenGL Driver: ")+glStr);
         glGetIntegerv(GL_MAJOR_VERSION, &glAuxIa);
         glGetIntegerv(GL_MINOR_VERSION, &glAuxIb);
-        printf("OpenGL Version: %d.%d\n", glAuxIa, glAuxIb);
+        log(typeless_log, std::string("OpenGL Version: ")+stringOf(glAuxIa)+'.'+stringOf(glAuxIb));
         if(glAuxIa < 3 || (glAuxIa == 3 && glAuxIb < 2)) {
             log(error_log, "OpenGL version 3.2 is required, Quit.");
             exit(5);
         }
-    
     #ifdef DEBUG
-        printf("OpenGL extensions found: ");
+        sprintf(buffer, "OpenGL extensions found: ");
         glGetIntegerv(GL_NUM_EXTENSIONS, &glAuxIa);
         for(GLint i = 0; i < glAuxIa; i ++) {
             glStr = (char*)glGetStringi(GL_EXTENSIONS, i);
-            printf("%s ", glStr);
+            sprintf(buffer, "%s%s, ", buffer, glStr);
         }
-        printf("\nOpenGL compressions found: ");
+        log(typeless_log, buffer);
+        sprintf(buffer, "OpenGL compressions found: ");
         glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, &glAuxIa);
         GLint glCompressionFormats[glAuxIa];
         glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS, glCompressionFormats);
         for(GLint i = 0; i < glAuxIa; i ++)
-            printf("%d ", glCompressionFormats[i]);
-        printf("\n");
+            sprintf(buffer, "%s%d ", buffer, glCompressionFormats[i]);
+        log(typeless_log, buffer);
     #endif
+        delete[] buffer;
     }
     
     glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &optionsState.anisotropy);

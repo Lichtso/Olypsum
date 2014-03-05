@@ -22,7 +22,7 @@ void NetworkManager::init() {
                 return false;
             });
         }catch(netLink::Exception exc) {
-            printf("Exception %d\n", exc.code);
+            log(error_log, "Exception "+stringOf(exc.code));
         }
     };
 }
@@ -59,7 +59,7 @@ void NetworkManager::enable() {
         serializer.serialize();
         udpSocket->pubsync();
     }catch(netLink::Exception exc) {
-        printf("Exception %d\n", exc.code);
+        log(error_log, "Exception "+stringOf(exc.code));
     }
 }
 
