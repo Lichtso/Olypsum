@@ -158,7 +158,7 @@ class FileManager {
     //! Gets a resource from a given path
     template <class T> FileResourcePtr<T> getResourceByPath(FilePackage* filePackage, std::string name) {
         if(!readResourcePath(filePackage, name)) {
-            log(error_log, "Couldn't initialize resource.");
+            log(error_log, "Couldn't initialize resource: "+name);
             return NULL;
         }
         return filePackage->getResource<T>(name);

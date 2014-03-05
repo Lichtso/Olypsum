@@ -203,13 +203,15 @@ void FileManager::clear() {
 FilePackage* FileManager::loadPackage(const std::string& name) {
     auto iterator = filePackages.find(name);
     if(iterator == filePackages.end()) {
-        FilePackage* package = fileManager.filePackages[name] = new FilePackage(name);
+        FilePackage* package = new FilePackage(name);
         if(!package->init()) {
+            log(error_log, "Couldn't load file package: "+name);
             delete package;
-            filePackages.erase(name);
             return NULL;
-        }else
+        }else{
+            fileManager.filePackages[name] = package;
             return package;
+        }
     }
     return iterator->second;
 }

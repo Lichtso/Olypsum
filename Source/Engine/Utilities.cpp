@@ -45,7 +45,7 @@ void log(logMessageType type, std::string message) {
 
 int getFileSize(const std::string& filePath) {
     std::ifstream file;
-    file.open(filePath.c_str());
+    file.open(filePath.c_str(), std::ios::ate | std::ios::binary);
     if(!file.is_open())
         return -1;
     unsigned int fileSize = file.tellg();
@@ -55,7 +55,7 @@ int getFileSize(const std::string& filePath) {
 
 std::unique_ptr<char[]> readFile(const std::string& filePath, bool logs) {
     std::ifstream file;
-    file.open(filePath.c_str(), std::ios::ate);
+    file.open(filePath.c_str(), std::ios::ate | std::ios::binary);
     if(!file.is_open()) {
         if(!logs) return NULL;
         log(error_log, std::string("The file ")+filePath.c_str()+" couldn't be found.");
@@ -72,7 +72,7 @@ std::unique_ptr<char[]> readFile(const std::string& filePath, bool logs) {
 
 bool writeFile(const std::string& filePath, const std::string& content, bool logs) {
     std::ofstream file;
-    file.open(filePath.c_str(), std::ios_base::trunc);
+    file.open(filePath.c_str(), std::ios_base::trunc | std::ios::binary);
     if(!file.is_open()) {
         if(!logs) return false;
         log(error_log, std::string("The file ")+filePath.c_str()+" couldn't be opened.");
@@ -95,6 +95,7 @@ std::size_t hashFile(const std::string& filePath) {
 
 bool checkDir(std::string path) {
 #ifdef WIN32
+    path += '*';
 	WIN32_FIND_DATAA FindFileData;
 	HANDLE hFind = FindFirstFileA(path.c_str(), &FindFileData);
 	if(hFind != INVALID_HANDLE_VALUE) {
