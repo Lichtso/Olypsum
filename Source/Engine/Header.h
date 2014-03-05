@@ -34,6 +34,7 @@
 #pragma comment(lib, "BulletMultiThreaded")
 #pragma comment(lib, "BulletSoftBody")
 #pragma comment(lib, "SDL2")
+#pragma comment(lib, "SDLmain.lib")
 #pragma comment(lib, "SDL2_image")
 #pragma comment(lib, "SDL2_ttf")
 #pragma comment(lib, "v8")

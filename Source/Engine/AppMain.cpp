@@ -18,7 +18,7 @@ void AppMain() {
     resourcesPath = trimPath(resourcesPath, 2)+SYSTEM_SLASH+"Resources"+SYSTEM_SLASH;
     
 #ifdef WIN32
-    supportPath = std::string(getenv("HOME"))+"\\My Documents\\";
+    supportPath = std::string(getenv("USERPROFILE"))+"\\Documents\\";
 #elif defined __APPLE__
     supportPath = std::string(getenv("HOME"))+"/Library/Application Support/";
 #else

@@ -7,7 +7,6 @@
 //
 
 #include "SDLMain.h"
-#undef main
 
 int main(int argc, const char** argv) {
     resourcesPath = argv[0];

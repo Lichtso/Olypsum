@@ -34,10 +34,12 @@ void log(logMessageType type, std::string message) {
     message = typeStr+message;
     if(levelManager.gameStatus != noGame)
         menu.consoleAdd(message);
+    
+    message += '\n';
 #ifdef WIN32
     OutputDebugStringA(message.c_str());
 #else
-    printf("%s\n", message.c_str());
+    puts(message.c_str());
 #endif
 }
 
