@@ -13,9 +13,9 @@ void AppMain() {
     /*if(resourcesPath.size() == 0) {
         char cwdPath[512];
         getcwd(cwdPath, sizeof(cwdPath)/sizeof(char)-1);
-        resourcesPath = std::string(cwdPath)+SYSTEM_SLASH+executablePath;
+        resourcesPath = std::string(cwdPath)+'/'+executablePath;
     }*/
-    resourcesPath = trimPath(resourcesPath, 2)+SYSTEM_SLASH+"Resources"+SYSTEM_SLASH;
+    resourcesPath = trimPath(resourcesPath, 2)+"/Resources/";
     
 #ifdef WIN32
     supportPath = std::string(getenv("USERPROFILE"))+"\\Documents\\";
@@ -25,9 +25,9 @@ void AppMain() {
     supportPath = std::string(getenv("HOME"))+"/.";
 #endif
     
-    supportPath = trimPath(supportPath+"Gamefortec", 0)+SYSTEM_SLASH;
+    supportPath = trimPath(supportPath+"Gamefortec", 0)+'/';
     createDir(supportPath);
-    supportPath = supportPath+"Olypsum"+SYSTEM_SLASH;
+    supportPath = supportPath+"Olypsum/";
     createDir(supportPath);
     optionsState.loadOptions();
     
@@ -53,8 +53,15 @@ void AppMain() {
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
         SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
-        
         menu.updateWindow();
+        
+#ifdef WIN32
+        GLenum err = glewInit();
+        if(GLEW_OK != err) {
+            log(error_log, "GLEW failed to initialize, Quit.");
+            exit(3);
+        }
+#endif
         
         time_t t = time(0);
         struct tm* date = gmtime(&t);
@@ -76,7 +83,7 @@ void AppMain() {
         log(typeless_log, std::string("OpenGL Version: ")+stringOf(glAuxIa)+'.'+stringOf(glAuxIb));
         if(glAuxIa < 3 || (glAuxIa == 3 && glAuxIb < 2)) {
             log(error_log, "OpenGL version 3.2 is required, Quit.");
-            exit(5);
+            exit(4);
         }
     #ifdef DEBUG
         sprintf(buffer, "OpenGL extensions found: ");

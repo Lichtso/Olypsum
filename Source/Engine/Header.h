@@ -51,9 +51,7 @@
 #define getcwd _getcwd
 #define popen _popen
 #define pclose _pclose
-#define SYSTEM_SLASH '\\'
 #else
-#define SYSTEM_SLASH '/'
 #include <SDL2/SDL.h>
 #include <vorbis/vorbisfile.h>
 #include <dirent.h>

@@ -195,7 +195,7 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
 }
 
 bool LevelManager::newGame(FilePackage* package, const std::string& name) {
-    if(!createDir(supportPath+"Saves"+SYSTEM_SLASH+name+SYSTEM_SLASH))
+    if(!createDir(supportPath+"Saves/"+name+'/'))
         return false;
     
     rapidxml::xml_document<xmlUsedCharType> doc;

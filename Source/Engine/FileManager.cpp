@@ -29,9 +29,9 @@ FilePackage::~FilePackage() {
 }
 
 bool FilePackage::init() {
-    path = resourcesPath+"Packages"+SYSTEM_SLASH+name+SYSTEM_SLASH;
+    path = resourcesPath+"Packages/"+name+'/';
     if(!checkDir(path)) {
-        path = supportPath+"Packages"+SYSTEM_SLASH+name+SYSTEM_SLASH;
+        path = supportPath+"Packages/"+name+'/';
         if(!checkDir(path))
             return false;
     }
@@ -50,13 +50,13 @@ bool FilePackage::init() {
     };
     
     hash = hashFile(path+"CollisionShapes.xml");
-    hash ^= forEachInDir(path+"Containers/", hashFileContent, hashDirectoryName, nullptr);
-    hash ^= forEachInDir(path+"Scripts/", hashFileContent, hashDirectoryName, nullptr);
-    hash ^= forEachInDir(path+"Languages/", hashFileContent, nullptr, nullptr);
-    hash ^= forEachInDir(path+"Fonts/", hashName, hashDirectoryName, nullptr);
-    hash ^= forEachInDir(path+"Models/", hashName, hashDirectoryName, nullptr);
-    hash ^= forEachInDir(path+"Textures/", hashName, hashDirectoryName, nullptr);
-    hash ^= forEachInDir(path+"Sounds/", hashName, hashDirectoryName, nullptr);
+    forEachInDir(path+"Containers/", hashFileContent, hashDirectoryName, nullptr);
+    forEachInDir(path+"Scripts/", hashFileContent, hashDirectoryName, nullptr);
+    forEachInDir(path+"Languages/", hashFileContent, nullptr, nullptr);
+    forEachInDir(path+"Fonts/", hashName, hashDirectoryName, nullptr);
+    forEachInDir(path+"Models/", hashName, hashDirectoryName, nullptr);
+    forEachInDir(path+"Textures/", hashName, hashDirectoryName, nullptr);
+    forEachInDir(path+"Sounds/", hashName, hashDirectoryName, nullptr);
     
     rapidxml::xml_document<xmlUsedCharType> doc;
     std::unique_ptr<char[]> fileData = readXmlFile(doc, path+"/Package.xml", false);
@@ -229,8 +229,8 @@ void FileManager::loadAllPackages() {
         fileManager.loadPackage(name);
         return false;
     };
-    forEachInDir(resourcesPath+"Packages"+SYSTEM_SLASH, nullptr, enterDirectory, nullptr);
-    forEachInDir(supportPath+"Packages"+SYSTEM_SLASH, nullptr, enterDirectory, nullptr);
+    forEachInDir(resourcesPath+"Packages/", nullptr, enterDirectory, nullptr);
+    forEachInDir(supportPath+"Packages/", nullptr, enterDirectory, nullptr);
 }
 
 bool FileManager::readResourcePath(FilePackage*& filePackage, std::string& name) {
@@ -289,8 +289,8 @@ static T readOptionValue(rapidxml::xml_node<xmlUsedCharType>* option, const char
 }
 
 void OptionsState::loadOptions() {
-    createDir(supportPath+"Saves"+SYSTEM_SLASH);
-    createDir(supportPath+"Packages"+SYSTEM_SLASH);
+    createDir(supportPath+"Saves/");
+    createDir(supportPath+"Packages/");
     language = "English";
     
     rapidxml::xml_document<xmlUsedCharType> doc;

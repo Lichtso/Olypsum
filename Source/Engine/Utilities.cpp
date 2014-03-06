@@ -35,8 +35,8 @@ void log(logMessageType type, std::string message) {
     if(levelManager.gameStatus != noGame)
         menu.consoleAdd(message);
     
-    message += '\n';
 #ifdef WIN32
+    message += '\n';
     OutputDebugStringA(message.c_str());
 #else
     puts(message.c_str());
@@ -95,9 +95,8 @@ std::size_t hashFile(const std::string& filePath) {
 
 bool checkDir(std::string path) {
 #ifdef WIN32
-    path += '*';
 	WIN32_FIND_DATAA FindFileData;
-	HANDLE hFind = FindFirstFileA(path.c_str(), &FindFileData);
+	HANDLE hFind = FindFirstFileA((path+'*').c_str(), &FindFileData);
 	if(hFind != INVALID_HANDLE_VALUE) {
 		FindClose(hFind);
 		return true;
@@ -133,16 +132,15 @@ bool forEachInDir(std::string path,
 	std::unordered_set<std::string> items;
 
 #ifdef WIN32
-	path += '*';
 	WIN32_FIND_DATAA FindFileData;
-	HANDLE hFind = FindFirstFileA(path.c_str(), &FindFileData);
+	HANDLE hFind = FindFirstFileA((path+'*').c_str(), &FindFileData);
 	if(hFind == INVALID_HANDLE_VALUE) return false;
 
 	while(FindNextFileA(hFind, &FindFileData)) {
 		std::string name(FindFileData.cFileName);
 		if(*name.begin() == '.') continue;
 		if(FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-			name += SYSTEM_SLASH;
+			name += '/';
 		items.insert(name);
 	}
 	FindClose(hFind);
@@ -155,14 +153,14 @@ bool forEachInDir(std::string path,
         std::string name(item->d_name);
         if(*name.begin() == '.') continue;
         if(item->d_type == DT_DIR)
-			name += SYSTEM_SLASH;
+			name += '/';
         items.insert(name);
     }
     closedir(dir);
 #endif
 
 	for(std::string name : items) {
-		if(*(name.end() - 1) == SYSTEM_SLASH) {
+		if(*(name.end() - 1) == '/') {
 			if(enterDirectory && enterDirectory(path, name))
 				forEachInDir(path+name, perFile, enterDirectory, leaveDirectory);
 		}else if(perFile)
@@ -189,7 +187,7 @@ std::string trimPath(std::string path, size_t n) {
     std::vector<std::string> tokens;
     std::string token;
     
-	while(std::getline(ss, token, SYSTEM_SLASH)) {
+	while(std::getline(ss, token, '/')) {
         if(token == ".") continue;
         
         if(tokens.size() > 0) {
@@ -208,7 +206,7 @@ std::string trimPath(std::string path, size_t n) {
     ss.str("");
     for(size_t i = 0; i < tokens.size()-n; i ++) {
         if(i > 0)
-			ss << SYSTEM_SLASH;
+			ss << '/';
         ss << tokens[i];
     }
     

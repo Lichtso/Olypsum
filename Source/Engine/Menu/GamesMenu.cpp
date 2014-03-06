@@ -107,7 +107,7 @@ void Menu::setSaveGamesMenu() {
         button->onClick = [this, name](GUIButton* button) {
             setModalView("remove", fileManager.localizeString("name")+": "+name,
                          [this, name](GUIButton* button) {
-                             removeDir(supportPath+"Saves"+SYSTEM_SLASH+name+SYSTEM_SLASH);
+                             removeDir(supportPath+"Saves/"+name+'/');
                              setSaveGamesMenu();
                          });
         };
@@ -170,7 +170,7 @@ void Menu::setNewGameMenu() {
     textField->height = screenView->height*0.07;
     textField->onChange = [scrollView](GUITextField* textField) {
         GUILabel* label = static_cast<GUILabel*>(textField->children[0]);
-        std::string path = supportPath+"Saves"+SYSTEM_SLASH+label->text+SYSTEM_SLASH;
+        std::string path = supportPath+"Saves/"+label->text+'/';
         scrollView->visible = !checkDir(path) && label->getLength() >= 3;
     };
     screenView->addChild(textField);
