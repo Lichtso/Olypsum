@@ -138,4 +138,10 @@ btTransform readTransformationXML(rapidxml::xml_node<xmlUsedCharType>* node);
 //! Writes a btTransform and returns it as rapidxml::xml_node
 rapidxml::xml_node<xmlUsedCharType>* writeTransformationXML(rapidxml::xml_document<xmlUsedCharType> &doc, btTransform& transform);
 
+/*! Calculates the hash value of a xml node, all its attributes and children
+ @param filePath Input xml node
+ @return Output hash value
+ */
+std::size_t hashXMLNode(rapidxml::xml_node<xmlUsedCharType>* node);
+
 #endif

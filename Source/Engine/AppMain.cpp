@@ -56,6 +56,7 @@ void AppMain() {
         menu.updateWindow();
         
 #ifdef WIN32
+        glewExperimental = GL_TRUE;
         GLenum err = glewInit();
         if(GLEW_OK != err) {
             log(error_log, "GLEW failed to initialize, Quit.");
@@ -85,6 +86,7 @@ void AppMain() {
             log(error_log, "OpenGL version 3.2 is required, Quit.");
             exit(4);
         }
+        
     #ifdef DEBUG
         sprintf(buffer, "OpenGL extensions found: ");
         glGetIntegerv(GL_NUM_EXTENSIONS, &glAuxIa);
@@ -102,13 +104,13 @@ void AppMain() {
         log(typeless_log, buffer);
     #endif
         delete[] buffer;
+        
+        glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &optionsState.anisotropy);
+        optionsState.anisotropy = fmin(optionsState.anisotropy, pow(2.0, optionsState.surfaceQuality));
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glFrontFace(GL_CCW);
     }
-    
-    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &optionsState.anisotropy);
-    optionsState.anisotropy = fmin(optionsState.anisotropy, pow(2.0, optionsState.surfaceQuality));
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glFrontFace(GL_CCW);
     
     networkManager.init();
     objectManager.init();

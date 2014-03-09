@@ -45,8 +45,8 @@
     <Entry key="packages">Levelpacks</Entry>
 	<Entry key="packageError_ContainerMissing">Dieser Kontainer konnte nicht gefunden werden:</Entry>
 	<Entry key="packageError_CouldNotLoad">Dieses Levelpack konnte nicht geladen werden:</Entry>
-	<Entry key="packageError_HashCorrupted">Das Levelpack konnte nicht geladen werden,
-da seine Prüfsumme falsch ist.</Entry>
+    <Entry key="packageError_Dependency">Das Levelpack konnte nicht geladen werden,
+        da seine Abhängigkeiten beschädigt sind.</Entry>
 	<Entry key="packageError_FilesMissing">Das Levelpack konnte nicht geladen
 werden, weil einige Dateien fehlen.</Entry>
 	<Entry key="packageError_Corrupted">Der Spielstand konnte nicht geladen

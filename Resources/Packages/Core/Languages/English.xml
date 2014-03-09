@@ -45,8 +45,8 @@
     <Entry key="packages">Packages</Entry>
 	<Entry key="packageError_ContainerMissing">Could not find container by name:</Entry>
 	<Entry key="packageError_CouldNotLoad">Could not load level package by name:</Entry>
-	<Entry key="packageError_HashCorrupted">Could not load level package,
-because its check sum is invalid.</Entry>
+	<Entry key="packageError_Dependency">Could not load level package,
+because its dependencies are corrupted.</Entry>
 	<Entry key="packageError_FilesMissing">Could not load level package,
 because some files are missing.</Entry>
 	<Entry key="packageError_Corrupted">Could not load saved game,

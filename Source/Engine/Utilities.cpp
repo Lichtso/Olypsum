@@ -83,14 +83,10 @@ bool writeFile(const std::string& filePath, const std::string& content, bool log
     return true;
 }
 
-std::size_t hashFile(const std::string& filePath) {
-    std::ifstream file;
-    file.open(filePath.c_str(), std::ios_base::binary);
-    if(!file.is_open()) return 0;
-    std::stringstream stream;
-    file >> stream.rdbuf();
-    file.close();
-    return std::hash<std::string>()(stream.str());
+std::size_t hashXMLFile(const std::string& filePath) {
+    rapidxml::xml_document<xmlUsedCharType> doc;
+    std::unique_ptr<char[]> buffer = readXmlFile(doc, filePath, false);
+    return (doc.first_node()) ? hashXMLNode(doc.first_node()) : 0;
 }
 
 bool checkDir(std::string path) {
@@ -129,7 +125,7 @@ bool forEachInDir(std::string path,
                   std::function<void(const std::string& directoryPath, std::string name)> perFile,
                   std::function<bool(const std::string& directoryPath, std::string name)> enterDirectory,
                   std::function<void(const std::string& directoryPath)> leaveDirectory) {
-	std::unordered_set<std::string> items;
+	std::set<std::string> items;
 
 #ifdef WIN32
 	WIN32_FIND_DATAA FindFileData;
@@ -183,16 +179,17 @@ bool removeDir(std::string path) {
 }
 
 std::string trimPath(std::string path, size_t n) {
-    std::stringstream ss(path);
     std::vector<std::string> tokens;
-    std::string token;
     
-	while(std::getline(ss, token, '/')) {
-        if(token == ".") continue;
+    std::size_t b = 0;
+	for(std::size_t i = 0; true; i ++) {
+        if(i < path.length() && path[i] != '/' && path[i] != '\\') continue;
+        std::string token = path.substr(b, i-b);
+        b = i+1;
         
+        if(token == ".") continue;
         if(tokens.size() > 0) {
             if(token.size() == 0) continue;
-            
             if(token == ".." && tokens[tokens.size()-1] != "..") {
                 tokens.pop_back();
                 continue;
@@ -200,10 +197,10 @@ std::string trimPath(std::string path, size_t n) {
         }
         
         tokens.push_back(token);
+        if(i >= path.length()) break;
     }
     
-    ss.clear();
-    ss.str("");
+    std::stringstream ss;
     for(size_t i = 0; i < tokens.size()-n; i ++) {
         if(i > 0)
 			ss << '/';

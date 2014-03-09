@@ -286,6 +286,9 @@ void Menu::sendPauseEvent() {
 }
 
 void Menu::setModalView(const std::string& title, const std::string& text, std::function<void(GUIButton* button)> onContinue) {
+    if(!onContinue)
+        log(warning_log, text);
+    
     if(!menu.screenView || menu.screenView->modalView) return;
     
     GUIFramedView* modalView = new GUIFramedView();

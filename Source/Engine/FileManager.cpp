@@ -37,10 +37,10 @@ bool FilePackage::init() {
     }
     
     auto hashFileContent = [this](const std::string& path, std::string name) {
-        hash ^= hashFile(path+name);
+        hash ^= hashXMLFile(path+name);
     };
     
-    auto hashName = [this](const std::string& path, std::string name) {
+    auto hashFileName = [this](const std::string& path, std::string name) {
         hash ^= std::hash<std::string>()(name);
     };
     
@@ -49,14 +49,14 @@ bool FilePackage::init() {
         return true;
     };
     
-    hash = hashFile(path+"CollisionShapes.xml");
+    hash = hashXMLFile(path+"CollisionShapes.xml");
     forEachInDir(path+"Containers/", hashFileContent, hashDirectoryName, nullptr);
-    forEachInDir(path+"Scripts/", hashFileContent, hashDirectoryName, nullptr);
-    forEachInDir(path+"Languages/", hashFileContent, nullptr, nullptr);
-    forEachInDir(path+"Fonts/", hashName, hashDirectoryName, nullptr);
-    forEachInDir(path+"Models/", hashName, hashDirectoryName, nullptr);
-    forEachInDir(path+"Textures/", hashName, hashDirectoryName, nullptr);
-    forEachInDir(path+"Sounds/", hashName, hashDirectoryName, nullptr);
+    forEachInDir(path+"Languages/", hashFileContent, hashDirectoryName, nullptr);
+    forEachInDir(path+"Scripts/", hashFileName, hashDirectoryName, nullptr);
+    forEachInDir(path+"Fonts/", hashFileName, hashDirectoryName, nullptr);
+    forEachInDir(path+"Models/", hashFileName, hashDirectoryName, nullptr);
+    forEachInDir(path+"Textures/", hashFileName, hashDirectoryName, nullptr);
+    forEachInDir(path+"Sounds/", hashFileName, hashDirectoryName, nullptr);
     
     rapidxml::xml_document<xmlUsedCharType> doc;
     std::unique_ptr<char[]> fileData = readXmlFile(doc, path+"/Package.xml", false);
@@ -71,22 +71,7 @@ bool FilePackage::init() {
         menu.setModalView("error", fileManager.localizeString("packageError_Version"), nullptr);
         return false;
     }
-    
-    std::size_t hashCmp;
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = packageNode->first_attribute("hash");
-    if(attribute) {
-        sscanf(attribute->value(), "%lx", &hashCmp);
-        if(hashCmp != hash) {
-            #ifdef DEBUG
-            char buffer[32];
-            sprintf(buffer, "%lx", hash);
-            log(warning_log, "Hash of resource package "+name+" should be "+buffer);
-            #else
-            menu.setModalView("error", fileManager.localizeString("packageError_HashCorrupted"), nullptr);
-            return false;
-            #endif
-        }
-    }
+    hash ^= hashXMLNode(packageNode);
     
     node = packageNode->first_node("Description");
     if(node) {
@@ -103,7 +88,8 @@ bool FilePackage::init() {
     if(node) {
         packageNode = node->first_node("Package");
         while(packageNode) {
-            attribute = packageNode->first_attribute("hash");
+            std::size_t hashCmp;
+            rapidxml::xml_attribute<xmlUsedCharType>* attribute = packageNode->first_attribute("hash");
             if(!attribute) continue;
             sscanf(attribute->value(), "%lx", &hashCmp);
             
@@ -113,8 +99,20 @@ bool FilePackage::init() {
             if(dependencyName == name)
                 log(warning_log, std::string("Package ")+name+" dependens on its self.");
             
-            if(!(package = fileManager.loadPackage(dependencyName)) || hashCmp != package->hash) {
-                menu.setModalView("error", fileManager.localizeString("packageError_CouldNotLoad")+'\n'+name, nullptr);
+            if(!(package = fileManager.loadPackage(dependencyName))) {
+                menu.setModalView("error", fileManager.localizeString("packageError_Dependency")+'\n'+name+" / "+dependencyName, nullptr);
+                return false;
+            }
+            
+            if(hashCmp != package->hash) {
+                char buffer[32];
+#ifdef WIN32
+                sprintf(buffer, "%llx", package->hash);
+#else
+                sprintf(buffer, "%lx", package->hash);
+#endif
+                log(warning_log, std::string("Expected checksum ")+buffer+" for package "+dependencyName);
+                menu.setModalView("error", fileManager.localizeString("packageError_Dependency")+'\n'+name+" / "+dependencyName, nullptr);
                 return false;
             }
             

@@ -15,18 +15,12 @@ VertexArrayObject::VertexArrayObject() :vao(0), vbo(0), ibo(0), drawType(GL_TRIA
 VertexArrayObject::~VertexArrayObject() {
     if(vao == 0) return;
     glDeleteVertexArrays(1, &vao);
-    if(ibo)
-        glDeleteBuffers(2, &vbo);
-    else
-        glDeleteBuffers(1, &vbo);
+    glDeleteBuffers((ibo) ? 2 : 1, &vbo);
 }
 
 void VertexArrayObject::init(std::vector<Attribute> attributes, bool indexMode) {
     glGenVertexArrays(1, &vao);
-    if(indexMode)
-        glGenBuffers(2, &vbo);
-    else
-        glGenBuffers(1, &vbo);
+    glGenBuffers((indexMode) ? 2 : 1, &vbo);
     
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);

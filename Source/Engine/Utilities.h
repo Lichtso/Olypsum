@@ -47,11 +47,11 @@ std::unique_ptr<char[]> readFile(const std::string& filePath, bool logs);
  */
 bool writeFile(const std::string& filePath, const std::string& content, bool logs);
 
-/*! Calculates the hash value of a file
+/*! Calculates the hash value of a .xml file
  @param filePath Input file path
  @return Output hash value
  */
-std::size_t hashFile(const std::string& filePath);
+std::size_t hashXMLFile(const std::string& filePath);
 
 //! Checks for a directory at a given path
 bool checkDir(std::string path);
