@@ -28,7 +28,11 @@ void NetworkManager::init() {
 }
 
 void NetworkManager::gameTick() {
-    socketManager.listen();
+	try {
+		socketManager.listen();
+	}catch(netLink::Exception exc) {
+		log(error_log, "Exception "+stringOf(exc.code));
+	}
     profiler.leaveSection("Networking");
 }
 

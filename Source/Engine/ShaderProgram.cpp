@@ -7,7 +7,6 @@
 //
 
 #include "ObjectManager.h"
-//#include "FileManager.h"
 
 const char *seperatorString = "#separator", *includeString = "#include ";
 
@@ -51,7 +50,11 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* sourceCode, std::v
         pos = prevPos = source.find(includeString, pos);
         if(pos == std::string::npos) break;
         pos += strlen(includeString);
+#ifdef WIN32
+        unsigned int macroLength = source.find("\r\n", pos)-pos;
+#else
         unsigned int macroLength = source.find('\n', pos)-pos;
+#endif
         std::unique_ptr<char[]> data = readFile(resourcesPath+"Shaders/"+source.substr(pos, macroLength), true);
         source.replace(prevPos, strlen(includeString)+macroLength, data.get());
     }
@@ -59,17 +62,18 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* sourceCode, std::v
     const GLchar* sourceStr = source.c_str();
 	glShaderSource(shaderId, 1, &sourceStr, NULL);
 	glCompileShader(shaderId);
-
-	int infoLogLength;
-	glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &infoLogLength);
-	if(infoLogLength > 0) {
-		char* infoLog = new char[infoLogLength];
-		glGetShaderInfoLog(shaderId, infoLogLength, &infoLogLength, (GLchar*)infoLog);
-        log(shader_log, std::string(infoLog)+sourceStr+"\n");
+    
+	int aux;
+	glGetShaderiv(shaderId, GL_COMPILE_STATUS, &aux);
+	if (aux != GL_TRUE) {
+		glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &aux);
+		char* infoLog = new char[aux];
+		glGetShaderInfoLog(shaderId, aux, &aux, (GLchar*)infoLog);
+        log(shader_log, std::string(infoLog));
 		delete[] infoLog;
 		return false;
 	}
-
+    
 	glAttachShader(GLname, shaderId);
     glDeleteShader(shaderId);
     return true;
@@ -118,11 +122,12 @@ bool ShaderProgram::link() {
     cachedUniforms.clear();
 	glLinkProgram(GLname);
     
-	int infoLogLength;
-	glGetProgramiv(GLname, GL_INFO_LOG_LENGTH, &infoLogLength);
-	if (infoLogLength > 0) {
-		char* infoLog = new char[infoLogLength];
-		glGetProgramInfoLog(GLname, infoLogLength, &infoLogLength, (GLchar*)infoLog);
+	int aux;
+	glGetProgramiv(GLname, GL_LINK_STATUS, &aux);
+	if(aux != GL_TRUE) {
+		glGetProgramiv(GLname, GL_INFO_LOG_LENGTH, &aux);
+		char* infoLog = new char[aux];
+		glGetProgramInfoLog(GLname, aux, &aux, (GLchar*)infoLog);
 		log(shader_log, infoLog);
 		delete[] infoLog;
 		return false;
@@ -417,14 +422,14 @@ void updateGBufferShaderPrograms() {
         
         switch(p / 16) {
             case 0:
-            macros.push_back("REFLECTION_TYPE 0");
-            break;
+                macros.push_back("REFLECTION_TYPE 0");
+                break;
             case 1:
-            macros.push_back("REFLECTION_TYPE 1");
-            break;
+                macros.push_back("REFLECTION_TYPE 1");
+                break;
             case 2:
-            macros.push_back("REFLECTION_TYPE 2");
-            break;
+                macros.push_back("REFLECTION_TYPE 2");
+                break;
         }
         
         shaderPrograms[solidGSP+p]->loadShaderProgram("gBuffer",

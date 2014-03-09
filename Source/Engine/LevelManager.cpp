@@ -43,8 +43,8 @@ void LevelManager::clear() {
     gameStatus = noGame;
     for(auto iterator: sharedCollisionShapes)
         delete iterator.second;
-    sharedCollisionShapes.clear();
     objectManager.clear();
+    sharedCollisionShapes.clear();
     fileManager.clear();
 }
 
