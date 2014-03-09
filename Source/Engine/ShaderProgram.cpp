@@ -9,7 +9,7 @@
 #include "ObjectManager.h"
 //#include "FileManager.h"
 
-const char *seperatorString = "#separator\n", *includeString = "#include ";
+const char *seperatorString = "#separator", *includeString = "#include ";
 
 ShaderProgram::ShaderProgram() {
     GLname = glCreateProgram();
@@ -31,13 +31,13 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* sourceCode, std::v
         sourceStream << "#version 150\n";
         switch(shaderType) {
             case GL_VERTEX_SHADER:
-                sourceStream << "#define GL_VERTEX_SHADER\n";
+                sourceStream << "#define VERTEX_SHADER\n";
                 break;
             case GL_FRAGMENT_SHADER:
-                sourceStream << "#define GL_FRAGMENT_SHADER\n";
+                sourceStream << "#define FRAGMENT_SHADER\n";
                 break;
             case GL_GEOMETRY_SHADER:
-                sourceStream << "#define GL_GEOMETRY_SHADER\n";
+                sourceStream << "#define GEOMETRY_SHADER\n";
                 break;
         }
         for(unsigned int m = 0; m < macros.size(); m ++)
@@ -64,7 +64,7 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* sourceCode, std::v
 	glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &infoLogLength);
 	if(infoLogLength > 0) {
 		char* infoLog = new char[infoLogLength];
-		glGetShaderInfoLog(shaderId, infoLogLength, &infoLogLength, (GLchar*)&infoLog);
+		glGetShaderInfoLog(shaderId, infoLogLength, &infoLogLength, (GLchar*)infoLog);
         log(shader_log, std::string(infoLog)+sourceStr+"\n");
 		delete[] infoLog;
 		return false;
@@ -122,7 +122,7 @@ bool ShaderProgram::link() {
 	glGetProgramiv(GLname, GL_INFO_LOG_LENGTH, &infoLogLength);
 	if (infoLogLength > 0) {
 		char* infoLog = new char[infoLogLength];
-		glGetProgramInfoLog(GLname, infoLogLength, &infoLogLength, (GLchar*)&infoLog);
+		glGetProgramInfoLog(GLname, infoLogLength, &infoLogLength, (GLchar*)infoLog);
 		log(shader_log, infoLog);
 		delete[] infoLog;
 		return false;

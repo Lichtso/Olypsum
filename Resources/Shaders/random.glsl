@@ -7,7 +7,7 @@ int int2Rand(in int a, in int b) {
     return i+(i<<5)^(i>>12);
 }
 
-#ifdef GL_VERTEX_SHADER
+#ifdef VERTEX_SHADER
 int genSeed() {
     return gl_VertexID*int(1000.0*animationFactor);
 }
