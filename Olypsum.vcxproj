@@ -190,6 +190,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;VERSION="0.4.2";_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:/Program Files (x86)/Intel/OpenCL SDK/3.0/include;Libraries;Libraries/libogg/include;Libraries/glew/include;Libraries/SDL2/include;Libraries/bulletPhysics/src;Source/Engine</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -209,6 +210,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;VERSION="0.4.2";_CRT_SECURE_NO_WARNINGS;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:/Program Files (x86)/Intel/OpenCL SDK/3.0/include;Libraries;Libraries/libogg/include;Libraries/glew/include;Libraries/SDL2/include;Libraries/bulletPhysics/src;Source/Engine</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
