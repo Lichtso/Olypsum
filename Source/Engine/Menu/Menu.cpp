@@ -50,6 +50,19 @@ void Menu::updateWindow() {
     
     if(mainWindow) SDL_DestroyWindow(mainWindow);
     mainWindow = newWindow;
+    
+#ifdef WIN32
+	{
+		std::string filePath = resourcesPath+"Icon64.png";
+		SDL_Surface* surface = IMG_Load(filePath.c_str());
+		if(surface) {
+			SDL_SetWindowIcon(mainWindow, surface);
+			SDL_FreeSurface(surface);
+		}else
+			log(error_log, std::string("Unable to load icon.\n")+IMG_GetError());
+	}
+#endif
+    
     SDL_RaiseWindow(mainWindow);
     if(glContext)
         SDL_GL_MakeCurrent(mainWindow, glContext);
