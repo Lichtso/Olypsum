@@ -138,7 +138,9 @@ void ObjectManager::init() {
 }
 
 void ObjectManager::clear() {
+    physicsWorld.reset();
     currentShadowLight = NULL;
+    mainCam = NULL;
     
     for(unsigned int i = 0; i < lightObjects.size(); i ++)
         lightObjects[i]->removeFast();
@@ -159,9 +161,6 @@ void ObjectManager::clear() {
     for(auto simpleObject : simpleObjects)
         simpleObject->removeFast();
     simpleObjects.clear();
-    
-    physicsWorld.reset();
-    mainCam = NULL;
 }
 
 void ObjectManager::initGame() {
