@@ -18,7 +18,7 @@ foreach my $f (@libs) {
 open(Makefile, ">Makefile") || die("Can\'t open Makefile $!");
 print Makefile <<EOF;
 BIN := olypsum/opt/olypsum/bin/olypsum
-COMPILER := clang++ -stdlib=libc++ -std=c++11 -DDEBUG=1 -DVERSION='"$version"'
+COMPILER := clang++ -stdlib=libc++ -std=c++11 -DVERSION='"$version"'
 HEADERS := -I../Source/Engine/ -I../Libraries/ -I../Libraries/bulletPhysics/src/
 LINKER := -o \$(BIN) -Lolypsum/opt/olypsum/lib/ -Wl,-rpath,'\$\$ORIGIN/../lib' -lv8 -lopenal -lvorbis -lvorbisfile -lGL -lSDL2 -lSDL2_image -lSDL2_ttf -lLinearMath -lBulletCollision -lBulletDynamics -lBulletSoftBody -lBulletMultiThreaded ../Libraries/netLink/out/libNetLink.bc
 SOURCES := $SOURCES

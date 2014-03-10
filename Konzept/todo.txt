@@ -22,6 +22,7 @@ Skeletal animation
 Performance issue of explosions
 
 Bugs:
+Light animation in test scene
 GUIRoundedRect border: odd size screen resolution
 Parallax Occlusion / Position
 Ortho projection / Logarithmic depth buffer

@@ -18,7 +18,9 @@ void NetworkManager::init() {
             socket->advanceInputBuffer();
             MsgPack::Deserializer deserializer(socket);
             deserializer.deserialize([this](std::unique_ptr<MsgPack::Element> parsed) {
-                std::cout << "Received: " << *parsed << "\n";
+				std::ostringstream stream;
+				stream << "NETWORK Received: " << *parsed;
+				log(typeless_log, stream.str());
                 return false;
             });
         }catch(netLink::Exception exc) {

@@ -16,12 +16,14 @@ Menu::Menu() :current(none), screenView(NULL) {
 }
 
 void Menu::openExternURL(std::string str) {
-#ifdef __APPLE__
+#ifdef WIN32
+	str = std::string("start ") + str;
+#elif defined __APPLE__
     str = std::string("open \"")+str+"\"";
 #else
     str = std::string("xdg-open \"")+str+"\"";
 #endif
-    std::system(str.c_str());
+	std::system(str.c_str());
 }
 
 void Menu::leaveOptionsMenu(GUIButton* button) {
@@ -76,37 +78,37 @@ void Menu::updateVideoResulution() {
     switch(current) {
         case none:
             clear();
-        break;
+            break;
         case loading:
             setLoadingMenu();
-        break;
+            break;
         case main:
             setMainMenu();
-        break;
+            break;
         case options:
             setOptionsMenu();
-        break;
+            break;
         case languages:
             setLanguagesMenu();
-        break;
+            break;
         case credits:
             setCreditsMenu();
-        break;
+            break;
         case inGame:
             setInGameMenu();
-        break;
+            break;
         case gameEsc:
             setGameEscMenu();
-        break;
+            break;
         case saveGames:
             setSaveGamesMenu();
-        break;
+            break;
         case newGame:
             setNewGameMenu();
-        break;
+            break;
         case multiplayer:
             setMultiplayerMenu();
-        break;
+            break;
     }
 }
 
@@ -341,7 +343,7 @@ void Menu::setModalView(const std::string& title, const std::string& text, std::
     button->addChild(label);
     
     screenView->setModalView(modalView);
-
+    
 }
 
 void Menu::clear() {
@@ -404,14 +406,14 @@ void Menu::setMainMenu() {
     screenView->addChild(view);
     
     std::function<void(GUIButton*)> onClick[] = {
-        [this](GUIButton* button) {
-            setSaveGamesMenu();
-        }, [this](GUIButton* button) {
-            setMultiplayerMenu();
-        }, [this](GUIButton* button) {
-            setOptionsMenu();
-        }, [this](GUIButton* button) {
-            setCreditsMenu();
+        [](GUIButton* button) {
+			menu.setSaveGamesMenu();
+        }, [](GUIButton* button) {
+			menu.setMultiplayerMenu();
+        }, [](GUIButton* button) {
+			menu.setOptionsMenu();
+        }, [](GUIButton* button) {
+			menu.setCreditsMenu();
         }, [](GUIButton* button) {
             AppTerminate();
         }
@@ -490,8 +492,8 @@ void Menu::setCreditsMenu() {
     
     button = new GUIButton();
     button->posY = screenView->height*-0.8;
-    button->onClick = [this](GUIButton* button) {
-        setMainMenu();
+    button->onClick = [](GUIButton* button) {
+		menu.setMainMenu();
     };
     screenView->addChild(button);
     label = new GUILabel();
@@ -525,14 +527,14 @@ void Menu::setGameEscMenu() {
     SDL_ShowCursor(1);
     SDL_WarpMouseInWindow(mainWindow, optionsState.videoWidth >> 1, optionsState.videoHeight >> 1);
     std::function<void(GUIButton*)> onClick[] = {
-        [this](GUIButton* button) {
-            setInGameMenu();
-            sendPauseEvent();
-        }, [this](GUIButton* button) {
-            setOptionsMenu();
-        }, [this](GUIButton* button) {
+        [](GUIButton* button) {
+			menu.setInGameMenu();
+			menu.sendPauseEvent();
+        }, [](GUIButton* button) {
+			menu.setOptionsMenu();
+        }, [](GUIButton* button) {
             levelManager.clear();
-            setMainMenu();
+            menu.setMainMenu();
         }, [](GUIButton* button) {
             levelManager.clear();
             AppTerminate();

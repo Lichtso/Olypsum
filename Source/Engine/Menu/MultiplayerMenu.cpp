@@ -13,20 +13,25 @@ void Menu::setMultiplayerMenu() {
     current = multiplayer;
     
     if(optionsState.nickname.size() == 0) {
-        char username[128], hostname[128], nickname[256];
-        FILE* f = popen("whoami", "r");
-        fgets(username, 128, f);
-        pclose(f);
-        size_t len = strlen(username)-1;
-        username[len] = 0;
-        
+		char whoami[256], nickname[512];
+		FILE* f = popen("whoami", "r");
+		fgets(whoami, 128, f);
+		pclose(f);
+		size_t len = strlen(whoami)-1;
+		whoami[len] = 0;
+#ifdef WIN32
+		char* username = strchr(whoami, '\\');
+		*(username ++) = 0;
+		sprintf(nickname, "%s@%s", username, whoami);
+#else
+		char hostname[128];
         f = popen("hostname -s", "r");
         fgets(hostname, 128, f);
         pclose(f);
         len = strlen(hostname)-1;
         hostname[len] = 0;
-        
-        sprintf(nickname, "%s@%s", username, hostname);
+		sprintf(nickname, "%s@%s", whoami, hostname);
+#endif
         optionsState.nickname = nickname;
     }
     
