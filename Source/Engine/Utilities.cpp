@@ -29,6 +29,9 @@ void log(logMessageType type, std::string message) {
         case script_log:
             typeStr = "SCRIPT: ";
             break;
+        case network_log:
+            typeStr = "NETWORK: ";
+            break;
     }
     
     message = typeStr+message;

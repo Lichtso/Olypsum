@@ -20,7 +20,7 @@ void ScriptParticlesObject::GetTexture(v8::Local<v8::String> property, const v8:
     std::string name;
     FilePackage* filePackage = fileManager.findResource<Texture>(objectPtr->texture, name);
     if(!filePackage) return;
-    ScriptReturn(ScriptString(fileManager.getPathOfResource(filePackage, name).c_str()));
+    ScriptReturn(fileManager.getPathOfResource(filePackage, name).c_str());
 }
 
 void ScriptParticlesObject::SetTexture(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
@@ -163,19 +163,19 @@ ScriptParticlesObject::ScriptParticlesObject() :ScriptPhysicObject("ParticlesObj
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("maxParticles"), GetMaxParticles);
-    objectTemplate->SetAccessor(ScriptString("texture"), GetTexture, SetTexture);
-    objectTemplate->SetAccessor(ScriptString("transformAligned"), GetTransformAligned, SetTransformAligned);
-    objectTemplate->SetAccessor(ScriptString("systemLife"), GetSystemLife, SetSystemLife);
-    objectTemplate->SetAccessor(ScriptString("lifeMin"), GetLifeMin, SetLifeMin);
-    objectTemplate->SetAccessor(ScriptString("lifeMax"), GetLifeMax, SetLifeMax);
-    objectTemplate->SetAccessor(ScriptString("sizeMin"), GetSizeMin, SetSizeMin);
-    objectTemplate->SetAccessor(ScriptString("sizeMax"), GetSizeMax, SetSizeMax);
-    objectTemplate->Set(ScriptString("force"), ScriptMethod(AccessForce));
-    objectTemplate->Set(ScriptString("posMin"), ScriptMethod(AccessPosMin));
-    objectTemplate->Set(ScriptString("posMax"), ScriptMethod(AccessPosMax));
-    objectTemplate->Set(ScriptString("dirMin"), ScriptMethod(AccessDirMin));
-    objectTemplate->Set(ScriptString("dirMax"), ScriptMethod(AccessDirMax));
+    ScriptAccessor(objectTemplate, "maxParticles", GetMaxParticles, 0);
+    ScriptAccessor(objectTemplate, "texture", GetTexture, SetTexture);
+    ScriptAccessor(objectTemplate, "transformAligned", GetTransformAligned, SetTransformAligned);
+    ScriptAccessor(objectTemplate, "systemLife", GetSystemLife, SetSystemLife);
+    ScriptAccessor(objectTemplate, "lifeMin", GetLifeMin, SetLifeMin);
+    ScriptAccessor(objectTemplate, "lifeMax", GetLifeMax, SetLifeMax);
+    ScriptAccessor(objectTemplate, "sizeMin", GetSizeMin, SetSizeMin);
+    ScriptAccessor(objectTemplate, "sizeMax", GetSizeMax, SetSizeMax);
+    ScriptMethod(objectTemplate, "force", AccessForce);
+    ScriptMethod(objectTemplate, "posMin", AccessPosMin);
+    ScriptMethod(objectTemplate, "posMax", AccessPosMax);
+    ScriptMethod(objectTemplate, "dirMin", AccessDirMin);
+    ScriptMethod(objectTemplate, "dirMax", AccessDirMax);
     
     ScriptInherit(scriptPhysicObject);
 }

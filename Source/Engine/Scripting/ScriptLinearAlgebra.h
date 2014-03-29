@@ -42,8 +42,8 @@ class ScriptVector3 : public ScriptClass {
 
 class ScriptQuaternion : public ScriptClass {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void toString(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void toJSON(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void ToString(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void ToJSON(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void IndexedPropertyGetter(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void GetAngle(const v8::FunctionCallbackInfo<v8::Value>& args);
@@ -71,8 +71,8 @@ class ScriptQuaternion : public ScriptClass {
 class ScriptMatrix4 : public ScriptClass {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void Destructor(const v8::WeakCallbackData<v8::Object, void>& data);
-    static void toString(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void toJSON(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void ToString(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void ToJSON(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void AccessRowX(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void AccessRowY(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void AccessRowZ(const v8::FunctionCallbackInfo<v8::Value>& args);

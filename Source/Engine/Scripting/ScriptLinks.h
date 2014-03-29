@@ -130,8 +130,10 @@ class ScriptConeTwistPhysicLink : public ScriptPhysicLink {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void AccessFrameA(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void AccessFrameB(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetSwingSpan(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
-    static void SetSwingSpan(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetSwingSpanA(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetSwingSpanA(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetSwingSpanB(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetSwingSpanB(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetTwistSpan(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetTwistSpan(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetTwistAngle(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);

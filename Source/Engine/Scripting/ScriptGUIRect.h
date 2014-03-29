@@ -23,8 +23,8 @@ class ScriptGUIRect : public ScriptClass {
     static void SetHeight(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetVisible(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetVisible(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
-    static void GetFocus(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
-    static void SetFocus(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    static void GetFocused(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void SetFocused(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetParent(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void Remove(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void UpdateContent(const v8::FunctionCallbackInfo<v8::Value>& args);
@@ -36,16 +36,16 @@ class ScriptGUIRect : public ScriptClass {
         T* objectPtr = getDataOfInstance<T>(args.This());
         switch(objectPtr->sizeAlignment) {
             case GUISizeAlignment::None:
-                ScriptReturn(ScriptString("none"));
+                ScriptReturn("none");
                 return;
             case GUISizeAlignment::Width:
-                ScriptReturn(ScriptString("width"));
+                ScriptReturn("width");
                 return;
             case GUISizeAlignment::Height:
-                ScriptReturn(ScriptString("height"));
+                ScriptReturn("height");
                 return;
             case GUISizeAlignment::All:
-                ScriptReturn(ScriptString("all"));
+                ScriptReturn("all");
                 return;
         }
     }
@@ -68,22 +68,22 @@ class ScriptGUIRect : public ScriptClass {
         T* objectPtr = getDataOfInstance<T>(args.This());
         switch(objectPtr->orientation) {
             case GUIOrientation::Left:
-                ScriptReturn(ScriptString("left"));
+                ScriptReturn("left");
                 return;
             case GUIOrientation::Right:
-                ScriptReturn(ScriptString("right"));
+                ScriptReturn("right");
                 return;
             case GUIOrientation::Bottom:
-                ScriptReturn(ScriptString("bottom"));
+                ScriptReturn("bottom");
                 return;
             case GUIOrientation::Top:
-                ScriptReturn(ScriptString("top"));
+                ScriptReturn("top");
                 return;
             case GUIOrientation::Vertical:
-                ScriptReturn(ScriptString("vertical"));
+                ScriptReturn("vertical");
                 return;
             case GUIOrientation::Horizontal:
-                ScriptReturn(ScriptString("horizontal"));
+                ScriptReturn("horizontal");
                 return;
         }
     }

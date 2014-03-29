@@ -53,7 +53,7 @@ void ScriptVector3::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args)
 void ScriptVector3::ToString(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ScriptScope();
     btVector3 vec = getDataOfInstance(args.This());
-    ScriptReturn(ScriptString(stringOf(vec).c_str()));
+    ScriptReturn(stringOf(vec).c_str());
 }
 
 void ScriptVector3::ToJSON(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -274,24 +274,24 @@ ScriptVector3::ScriptVector3() :ScriptClass("Vector3", Constructor) {
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
     objectTemplate->SetIndexedPropertyHandler(IndexedPropertyGetter, IndexedPropertySetter);
-    objectTemplate->Set(ScriptString("toString"), ScriptMethod(ToString));
-    objectTemplate->Set(ScriptString("toJSON"), ScriptMethod(ToJSON));
-    objectTemplate->Set(ScriptString("getAngle"), ScriptMethod(GetAngle));
-    objectTemplate->Set(ScriptString("getSum"), ScriptMethod(GetSum));
-    objectTemplate->Set(ScriptString("getDiff"), ScriptMethod(GetDifference));
-    objectTemplate->Set(ScriptString("getProduct"), ScriptMethod(GetProduct));
-    objectTemplate->Set(ScriptString("getQuotient"), ScriptMethod(GetQuotient));
-    objectTemplate->Set(ScriptString("getDot"), ScriptMethod(GetDotProduct));
-    objectTemplate->Set(ScriptString("getCross"), ScriptMethod(GetCrossProduct));
-    objectTemplate->Set(ScriptString("getLength"), ScriptMethod(GetLength));
-    objectTemplate->Set(ScriptString("getNormalized"), ScriptMethod(GetNormalized));
-    objectTemplate->Set(ScriptString("getInterpolation"), ScriptMethod(GetInterpolation));
-    objectTemplate->Set(ScriptString("add"), ScriptMethod(Sum));
-    objectTemplate->Set(ScriptString("sub"), ScriptMethod(Subtract));
-    objectTemplate->Set(ScriptString("mult"), ScriptMethod(Multiply));
-    objectTemplate->Set(ScriptString("divide"), ScriptMethod(Divide));
-    objectTemplate->Set(ScriptString("cross"), ScriptMethod(CrossProduct));
-    objectTemplate->Set(ScriptString("normalize"), ScriptMethod(Normalize));
+    ScriptMethod(objectTemplate, "toString", ToString);
+    ScriptMethod(objectTemplate, "toJSON", ToJSON);
+    ScriptMethod(objectTemplate, "getAngle", GetAngle);
+    ScriptMethod(objectTemplate, "getSum", GetSum);
+    ScriptMethod(objectTemplate, "getDiff", GetDifference);
+    ScriptMethod(objectTemplate, "getProduct", GetProduct);
+    ScriptMethod(objectTemplate, "getQuotient", GetQuotient);
+    ScriptMethod(objectTemplate, "getDot", GetDotProduct);
+    ScriptMethod(objectTemplate, "getCross", GetCrossProduct);
+    ScriptMethod(objectTemplate, "getLength", GetLength);
+    ScriptMethod(objectTemplate, "getNormalized", GetNormalized);
+    ScriptMethod(objectTemplate, "getInterpolation", GetInterpolation);
+    ScriptMethod(objectTemplate, "add", Sum);
+    ScriptMethod(objectTemplate, "sub", Subtract);
+    ScriptMethod(objectTemplate, "mult", Multiply);
+    ScriptMethod(objectTemplate, "divide", Divide);
+    ScriptMethod(objectTemplate, "cross", CrossProduct);
+    ScriptMethod(objectTemplate, "normalize", Normalize);
 }
 
 
@@ -355,13 +355,13 @@ void ScriptQuaternion::Constructor(const v8::FunctionCallbackInfo<v8::Value>& ar
     return ScriptException("Quaternion Constructor: Invalid argument");
 }
 
-void ScriptQuaternion::toString(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void ScriptQuaternion::ToString(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ScriptScope();
     btQuaternion quaternion = getDataOfInstance(args.This());
-    ScriptReturn(ScriptString(stringOf(quaternion).c_str()));
+    ScriptReturn(stringOf(quaternion).c_str());
 }
 
-void ScriptQuaternion::toJSON(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void ScriptQuaternion::ToJSON(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ScriptScope();
     btQuaternion quaternion = getDataOfInstance(args.This());
     v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), 4);
@@ -565,23 +565,23 @@ ScriptQuaternion::ScriptQuaternion() :ScriptClass("Quaternion", Constructor) {
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
     objectTemplate->SetIndexedPropertyHandler(IndexedPropertyGetter, IndexedPropertySetter);
-    objectTemplate->Set(ScriptString("toString"), ScriptMethod(toString));
-    objectTemplate->Set(ScriptString("toJSON"), ScriptMethod(toJSON));
-    objectTemplate->Set(ScriptString("getAngle"), ScriptMethod(GetAngle));
-    objectTemplate->Set(ScriptString("getAxis"), ScriptMethod(GetAxis));
-    objectTemplate->Set(ScriptString("getInverse"), ScriptMethod(GetInverse));
-    objectTemplate->Set(ScriptString("getSum"), ScriptMethod(GetSum));
-    objectTemplate->Set(ScriptString("getDiff"), ScriptMethod(GetDifference));
-    objectTemplate->Set(ScriptString("getProduct"), ScriptMethod(GetProduct));
-    objectTemplate->Set(ScriptString("getDot"), ScriptMethod(GetDotProduct));
-    objectTemplate->Set(ScriptString("getLength"), ScriptMethod(GetLength));
-    objectTemplate->Set(ScriptString("getNormalized"), ScriptMethod(GetNormalized));
-    objectTemplate->Set(ScriptString("getInterpolation"), ScriptMethod(GetInterpolation));
-    objectTemplate->Set(ScriptString("setRotation"), ScriptMethod(SetRotation));
-    objectTemplate->Set(ScriptString("add"), ScriptMethod(Sum));
-    objectTemplate->Set(ScriptString("sub"), ScriptMethod(Subtract));
-    objectTemplate->Set(ScriptString("mult"), ScriptMethod(Multiply));
-    objectTemplate->Set(ScriptString("normalize"), ScriptMethod(Normalize));
+    ScriptMethod(objectTemplate, "toString", ToString);
+    ScriptMethod(objectTemplate, "toJSON", ToJSON);
+    ScriptMethod(objectTemplate, "getAngle", GetAngle);
+    ScriptMethod(objectTemplate, "getAxis", GetAxis);
+    ScriptMethod(objectTemplate, "getInverse", GetInverse);
+    ScriptMethod(objectTemplate, "getSum", GetSum);
+    ScriptMethod(objectTemplate, "getDiff", GetDifference);
+    ScriptMethod(objectTemplate, "getProduct", GetProduct);
+    ScriptMethod(objectTemplate, "getDot", GetDotProduct);
+    ScriptMethod(objectTemplate, "getLength", GetLength);
+    ScriptMethod(objectTemplate, "getNormalized", GetNormalized);
+    ScriptMethod(objectTemplate, "getInterpolation", GetInterpolation);
+    ScriptMethod(objectTemplate, "setRotation", SetRotation);
+    ScriptMethod(objectTemplate, "add", Sum);
+    ScriptMethod(objectTemplate, "sub", Subtract);
+    ScriptMethod(objectTemplate, "mult", Multiply);
+    ScriptMethod(objectTemplate, "normalize", Normalize);
 }
 
 
@@ -622,13 +622,13 @@ void ScriptMatrix4::Destructor(const v8::WeakCallbackData<v8::Object, void>& dat
     delete mat;
 }
 
-void ScriptMatrix4::toString(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void ScriptMatrix4::ToString(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ScriptScope();
     Matrix4* mat = getDataOfInstance(args.This());
-    ScriptReturn(ScriptString(stringOf(*mat).c_str()));
+    ScriptReturn(stringOf(*mat).c_str());
 }
 
-void ScriptMatrix4::toJSON(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void ScriptMatrix4::ToJSON(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ScriptScope();
     Matrix4* mat = getDataOfInstance(args.This());
     v8::Local<v8::Array> array = v8::Array::New(v8::Isolate::GetCurrent(), 16);
@@ -814,20 +814,20 @@ ScriptMatrix4::ScriptMatrix4() :ScriptClass("Matrix4", Constructor) {
     instanceTemplate->SetInternalFieldCount(1);
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->Set(ScriptString("toString"), ScriptMethod(toString));
-    objectTemplate->Set(ScriptString("toJSON"), ScriptMethod(toJSON));
-    objectTemplate->Set(ScriptString("x"), ScriptMethod(AccessRowX));
-    objectTemplate->Set(ScriptString("y"), ScriptMethod(AccessRowY));
-    objectTemplate->Set(ScriptString("z"), ScriptMethod(AccessRowZ));
-    objectTemplate->Set(ScriptString("w"), ScriptMethod(AccessRowW));
-    objectTemplate->Set(ScriptString("rotation"), ScriptMethod(AccessRotation));
-    objectTemplate->Set(ScriptString("setIdentity"), ScriptMethod(SetIdentity));
-    objectTemplate->Set(ScriptString("getInverse"), ScriptMethod(GetInverse));
-    objectTemplate->Set(ScriptString("getProduct"), ScriptMethod(GetProduct));
-    objectTemplate->Set(ScriptString("getRotated"), ScriptMethod(GetRotatedVector));
-    objectTemplate->Set(ScriptString("getTransformed"), ScriptMethod(GetTransformedVector));
-    objectTemplate->Set(ScriptString("mult"), ScriptMethod(Multiply));
-    objectTemplate->Set(ScriptString("scale"), ScriptMethod(Scale));
-    objectTemplate->Set(ScriptString("rotate"), ScriptMethod(Rotate));
-    objectTemplate->Set(ScriptString("translate"), ScriptMethod(Translate));
+    ScriptMethod(objectTemplate, "toString", ToString);
+    ScriptMethod(objectTemplate, "toJSON", ToJSON);
+    ScriptMethod(objectTemplate, "x", AccessRowX);
+    ScriptMethod(objectTemplate, "y", AccessRowY);
+    ScriptMethod(objectTemplate, "z", AccessRowZ);
+    ScriptMethod(objectTemplate, "w", AccessRowW);
+    ScriptMethod(objectTemplate, "rotation", AccessRotation);
+    ScriptMethod(objectTemplate, "setIdentity", SetIdentity);
+    ScriptMethod(objectTemplate, "getInverse", GetInverse);
+    ScriptMethod(objectTemplate, "getProduct", GetProduct);
+    ScriptMethod(objectTemplate, "getRotated", GetRotatedVector);
+    ScriptMethod(objectTemplate, "getTransformed", GetTransformedVector);
+    ScriptMethod(objectTemplate, "mult", Multiply);
+    ScriptMethod(objectTemplate, "scale", Scale);
+    ScriptMethod(objectTemplate, "rotate", Rotate);
+    ScriptMethod(objectTemplate, "translate", Translate);
 }

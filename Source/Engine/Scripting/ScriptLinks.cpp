@@ -58,8 +58,8 @@ ScriptBaseLink::ScriptBaseLink() :ScriptBaseLink("BaseLink", Constructor) {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("objectA"), GetObjectA);
-    objectTemplate->SetAccessor(ScriptString("objectB"), GetObjectB);
+    ScriptAccessor(objectTemplate, "objectA", GetObjectA, 0);
+    ScriptAccessor(objectTemplate, "objectB", GetObjectB, 0);
     
     ScriptInherit(scriptBaseClass);
 }
@@ -121,12 +121,12 @@ ScriptPhysicLink::ScriptPhysicLink() :ScriptBaseLink("PhysicLink", Constructor) 
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("burstImpulse"), GetBurstImpulse, SetBurstImpulse);
-    objectTemplate->SetAccessor(ScriptString("collisionDisabled"), GetCollisionDisabled, SetCollisionDisabled);
-    objectTemplate->Set(ScriptString("appliedForceObjectA"), ScriptMethod(AppliedForceObjectA));
-    objectTemplate->Set(ScriptString("appliedTorqueObjectA"), ScriptMethod(AppliedTorqueObjectA));
-    objectTemplate->Set(ScriptString("appliedForceObjectB"), ScriptMethod(AppliedForceObjectB));
-    objectTemplate->Set(ScriptString("appliedTorqueObjectB"), ScriptMethod(AppliedTorqueObjectB));
+    ScriptAccessor(objectTemplate, "burstImpulse", GetBurstImpulse, SetBurstImpulse);
+    ScriptAccessor(objectTemplate, "collisionDisabled", GetCollisionDisabled, SetCollisionDisabled);
+    ScriptMethod(objectTemplate, "appliedForceObjectA", AppliedForceObjectA);
+    ScriptMethod(objectTemplate, "appliedTorqueObjectA", AppliedTorqueObjectA);
+    ScriptMethod(objectTemplate, "appliedForceObjectB", AppliedForceObjectB);
+    ScriptMethod(objectTemplate, "appliedTorqueObjectB", AppliedTorqueObjectB);
     
     ScriptInherit(scriptBaseLink);
 }
@@ -190,8 +190,8 @@ ScriptPointPhysicLink::ScriptPointPhysicLink() :ScriptPhysicLink("PointPhysicLin
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->Set(ScriptString("pointA"), ScriptMethod(AccessPointA));
-    objectTemplate->Set(ScriptString("pointB"), ScriptMethod(AccessPointB));
+    ScriptMethod(objectTemplate, "pointA", AccessPointA);
+    ScriptMethod(objectTemplate, "pointB", AccessPointB);
     
     ScriptInherit(scriptPhysicLink);
 }
@@ -271,9 +271,9 @@ ScriptGearPhysicLink::ScriptGearPhysicLink() :ScriptPhysicLink("GearPhysicLink",
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->Set(ScriptString("axisA"), ScriptMethod(AccessAxisA));
-    objectTemplate->Set(ScriptString("axisB"), ScriptMethod(AccessAxisB));
-    objectTemplate->SetAccessor(ScriptString("ratio"), GetRatio, SetRatio);
+    ScriptAccessor(objectTemplate, "ratio", GetRatio, SetRatio);
+    ScriptMethod(objectTemplate, "axisA", AccessAxisA);
+    ScriptMethod(objectTemplate, "axisB", AccessAxisB);
     
     ScriptInherit(scriptPhysicLink);
 }
@@ -418,14 +418,14 @@ ScriptHingePhysicLink::ScriptHingePhysicLink() :ScriptPhysicLink("HingePhysicLin
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->Set(ScriptString("frameA"), ScriptMethod(AccessFrameA));
-    objectTemplate->Set(ScriptString("frameB"), ScriptMethod(AccessFrameB));
-    objectTemplate->SetAccessor(ScriptString("hingeAngle"), GetHingeAngle);
-    objectTemplate->SetAccessor(ScriptString("angularLimitMin"), GetAngularLimitMin, SetAngularLimitMin);
-    objectTemplate->SetAccessor(ScriptString("angularLimitMax"), GetAngularLimitMax, SetAngularLimitMax);
-    objectTemplate->SetAccessor(ScriptString("angularMotorEnabled"), GetAngularMotorEnabled, SetAngularMotorEnabled);
-    objectTemplate->SetAccessor(ScriptString("angularMotorVelocity"), GetAngularMotorVelocity, SetAngularMotorVelocity);
-    objectTemplate->SetAccessor(ScriptString("angularMotorForce"), GetAngularMotorForce, SetAngularMotorForce);
+    ScriptAccessor(objectTemplate, "hingeAngle", GetHingeAngle, 0);
+    ScriptAccessor(objectTemplate, "angularLimitMin", GetAngularLimitMin, SetAngularLimitMin);
+    ScriptAccessor(objectTemplate, "angularLimitMax", GetAngularLimitMax, SetAngularLimitMax);
+    ScriptAccessor(objectTemplate, "angularMotorEnabled", GetAngularMotorEnabled, SetAngularMotorEnabled);
+    ScriptAccessor(objectTemplate, "angularMotorVelocity", GetAngularMotorVelocity, SetAngularMotorVelocity);
+    ScriptAccessor(objectTemplate, "angularMotorForce", GetAngularMotorForce, SetAngularMotorForce);
+    ScriptMethod(objectTemplate, "frameA", AccessFrameA);
+    ScriptMethod(objectTemplate, "frameB", AccessFrameB);
     
     ScriptInherit(scriptPhysicLink);
 }
@@ -640,20 +640,20 @@ ScriptSliderPhysicLink::ScriptSliderPhysicLink() :ScriptPhysicLink("SliderPhysic
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->Set(ScriptString("frameA"), ScriptMethod(AccessFrameA));
-    objectTemplate->Set(ScriptString("frameB"), ScriptMethod(AccessFrameB));
-    objectTemplate->SetAccessor(ScriptString("hingeAngle"), GetHingeAngle);
-    objectTemplate->SetAccessor(ScriptString("sliderPos"), GetSliderPos);
-    objectTemplate->SetAccessor(ScriptString("angularLimitMin"), GetAngularLimitMin, SetAngularLimitMin);
-    objectTemplate->SetAccessor(ScriptString("angularLimitMax"), GetAngularLimitMax, SetAngularLimitMax);
-    objectTemplate->SetAccessor(ScriptString("angularMotorEnabled"), GetAngularMotorEnabled, SetAngularMotorEnabled);
-    objectTemplate->SetAccessor(ScriptString("angularMotorVelocity"), GetAngularMotorVelocity, SetAngularMotorVelocity);
-    objectTemplate->SetAccessor(ScriptString("angularMotorForce"), GetAngularMotorForce, SetAngularMotorForce);
-    objectTemplate->SetAccessor(ScriptString("linearLimitMin"), GetLinearLimitMin, SetLinearLimitMin);
-    objectTemplate->SetAccessor(ScriptString("linearLimitMax"), GetLinearLimitMax, SetLinearLimitMax);
-    objectTemplate->SetAccessor(ScriptString("linearMotorEnabled"), GetLinearMotorEnabled, SetLinearMotorEnabled);
-    objectTemplate->SetAccessor(ScriptString("linearMotorVelocity"), GetLinearMotorVelocity, SetLinearMotorVelocity);
-    objectTemplate->SetAccessor(ScriptString("linearMotorForce"), GetLinearMotorForce, SetLinearMotorForce);
+    ScriptAccessor(objectTemplate, "hingeAngle", GetHingeAngle, 0);
+    ScriptAccessor(objectTemplate, "sliderPos", GetSliderPos, 0);
+    ScriptAccessor(objectTemplate, "angularLimitMin", GetAngularLimitMin, SetAngularLimitMin);
+    ScriptAccessor(objectTemplate, "angularLimitMax", GetAngularLimitMax, SetAngularLimitMax);
+    ScriptAccessor(objectTemplate, "angularMotorEnabled", GetAngularMotorEnabled, SetAngularMotorEnabled);
+    ScriptAccessor(objectTemplate, "angularMotorVelocity", GetAngularMotorVelocity, SetAngularMotorVelocity);
+    ScriptAccessor(objectTemplate, "angularMotorForce", GetAngularMotorForce, SetAngularMotorForce);
+    ScriptAccessor(objectTemplate, "linearLimitMin", GetLinearLimitMin, SetLinearLimitMin);
+    ScriptAccessor(objectTemplate, "linearLimitMax", GetLinearLimitMax, SetLinearLimitMax);
+    ScriptAccessor(objectTemplate, "linearMotorEnabled", GetLinearMotorEnabled, SetLinearMotorEnabled);
+    ScriptAccessor(objectTemplate, "linearMotorVelocity", GetLinearMotorVelocity, SetLinearMotorVelocity);
+    ScriptAccessor(objectTemplate, "linearMotorForce", GetLinearMotorForce, SetLinearMotorForce);
+    ScriptMethod(objectTemplate, "frameA", AccessFrameA);
+    ScriptMethod(objectTemplate, "frameB", AccessFrameB);
     
     ScriptInherit(scriptPhysicLink);
 }
@@ -928,18 +928,18 @@ ScriptDof6PhysicLink::ScriptDof6PhysicLink() :ScriptPhysicLink("Dof6PhysicLink",
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->Set(ScriptString("frameA"), ScriptMethod(AccessFrameA));
-    objectTemplate->Set(ScriptString("frameB"), ScriptMethod(AccessFrameB));
-    objectTemplate->Set(ScriptString("springStiffness"), ScriptMethod(AccessSpringStiffness));
-    objectTemplate->Set(ScriptString("springDamping"), ScriptMethod(AccessSpringDamping));
-    objectTemplate->Set(ScriptString("springEquilibrium"), ScriptMethod(AccessSpringEquilibrium));
-    objectTemplate->Set(ScriptString("motorEnabled"), ScriptMethod(AccessMotorEnabled));
-    objectTemplate->Set(ScriptString("motorVelocity"), ScriptMethod(AccessMotorVelocity));
-    objectTemplate->Set(ScriptString("motorForce"), ScriptMethod(AccessMotorForce));
-    objectTemplate->Set(ScriptString("angularLimitMin"), ScriptMethod(AccessAngularLimitMin));
-    objectTemplate->Set(ScriptString("angularLimitMax"), ScriptMethod(AccessAngularLimitMax));
-    objectTemplate->Set(ScriptString("linearLimitMin"), ScriptMethod(AccessLinearLimitMin));
-    objectTemplate->Set(ScriptString("linearLimitMax"), ScriptMethod(AccessLinearLimitMax));
+    ScriptMethod(objectTemplate, "frameA", AccessFrameA);
+    ScriptMethod(objectTemplate, "frameB", AccessFrameB);
+    ScriptMethod(objectTemplate, "springStiffness", AccessSpringStiffness);
+    ScriptMethod(objectTemplate, "springDamping", AccessSpringDamping);
+    ScriptMethod(objectTemplate, "springEquilibrium", AccessSpringEquilibrium);
+    ScriptMethod(objectTemplate, "motorEnabled", AccessMotorEnabled);
+    ScriptMethod(objectTemplate, "motorVelocity", AccessMotorVelocity);
+    ScriptMethod(objectTemplate, "motorForce", AccessMotorForce);
+    ScriptMethod(objectTemplate, "angularLimitMin", AccessAngularLimitMin);
+    ScriptMethod(objectTemplate, "angularLimitMax", AccessAngularLimitMax);
+    ScriptMethod(objectTemplate, "linearLimitMin", AccessLinearLimitMin);
+    ScriptMethod(objectTemplate, "linearLimitMax", AccessLinearLimitMax);
     
     ScriptInherit(scriptPhysicLink);
 }
@@ -997,21 +997,33 @@ void ScriptConeTwistPhysicLink::AccessFrameB(const v8::FunctionCallbackInfo<v8::
         ScriptReturn(scriptMatrix4->newInstance(constraint->getFrameOffsetB()));
 }
 
-void ScriptConeTwistPhysicLink::GetSwingSpan(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
+void ScriptConeTwistPhysicLink::GetSwingSpanA(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     ScriptScope();
     btConeTwistConstraint* constraint = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    ScriptReturn((stdStrOfV8(property) == "spanA") ? constraint->getSwingSpan1() : constraint->getSwingSpan2());
+    ScriptReturn(constraint->getSwingSpan1());
 }
 
-void ScriptConeTwistPhysicLink::SetSwingSpan(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
+void ScriptConeTwistPhysicLink::SetSwingSpanA(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     ScriptScope();
     if(!value->IsNumber()) return;
     
     btConeTwistConstraint* constraint = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
-    if(stdStrOfV8(property) == "swingSpanA")
-        constraint->setLimit(5, value->NumberValue());
-    else
-        constraint->setLimit(4, value->NumberValue());
+    constraint->setLimit(5, value->NumberValue());
+    activateConstraint(constraint);
+}
+
+void ScriptConeTwistPhysicLink::GetSwingSpanB(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
+    ScriptScope();
+    btConeTwistConstraint* constraint = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
+    ScriptReturn(constraint->getSwingSpan2());
+}
+
+void ScriptConeTwistPhysicLink::SetSwingSpanB(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
+    ScriptScope();
+    if(!value->IsNumber()) return;
+    
+    btConeTwistConstraint* constraint = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(args.This())->constraint);
+    constraint->setLimit(4, value->NumberValue());
     activateConstraint(constraint);
 }
 
@@ -1040,12 +1052,12 @@ ScriptConeTwistPhysicLink::ScriptConeTwistPhysicLink() :ScriptPhysicLink("ConeTw
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->Set(ScriptString("frameA"), ScriptMethod(AccessFrameA));
-    objectTemplate->Set(ScriptString("frameB"), ScriptMethod(AccessFrameB));
-    objectTemplate->SetAccessor(ScriptString("swingSpanA"), GetSwingSpan, SetSwingSpan);
-    objectTemplate->SetAccessor(ScriptString("swingSpanB"), GetSwingSpan, SetSwingSpan);
-    objectTemplate->SetAccessor(ScriptString("twistSpan"), GetTwistSpan, SetTwistSpan);
-    objectTemplate->SetAccessor(ScriptString("twistAngle"), GetTwistAngle);
+    ScriptAccessor(objectTemplate, "swingSpanA", GetSwingSpanA, SetSwingSpanA);
+    ScriptAccessor(objectTemplate, "swingSpanB", GetSwingSpanB, SetSwingSpanB);
+    ScriptAccessor(objectTemplate, "twistSpan", GetTwistSpan, SetTwistSpan);
+    ScriptAccessor(objectTemplate, "twistAngle", GetTwistAngle, 0);
+    ScriptMethod(objectTemplate, "frameA", AccessFrameA);
+    ScriptMethod(objectTemplate, "frameB", AccessFrameB);
     
     ScriptInherit(scriptPhysicLink);
 }
@@ -1105,7 +1117,7 @@ ScriptTransformLink::ScriptTransformLink() :ScriptBaseLink("TransformLink", Cons
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->Set(ScriptString("transformation"), ScriptMethod(AccessTransformation));
+    ScriptMethod(objectTemplate, "transformation", AccessTransformation);
     
     ScriptInherit(scriptBaseLink);
 }
@@ -1142,7 +1154,7 @@ void ScriptBoneLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args
 void ScriptBoneLink::GetBone(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     ScriptScope();
     BoneLink* linkPtr = getDataOfInstance<BoneLink>(args.This());
-    ScriptReturn(ScriptString(linkPtr->bone->name.c_str()));
+    ScriptReturn(linkPtr->bone->name.c_str());
 }
 
 void ScriptBoneLink::SetBone(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
@@ -1179,10 +1191,10 @@ ScriptBoneLink::ScriptBoneLink() :ScriptBaseLink("BoneLink", Constructor) {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("bone"), GetBone, SetBone);
-    objectTemplate->Set(ScriptString("getBoneChildren"), ScriptMethod(GetBoneChildren));
-    objectTemplate->Set(ScriptString("getRelativeMat"), ScriptMethod(GetRelativeMat));
-    objectTemplate->Set(ScriptString("getAbsoluteMat"), ScriptMethod(GetAbsoluteMat));
+    ScriptAccessor(objectTemplate, "bone", GetBone, SetBone);
+    ScriptMethod(objectTemplate, "getBoneChildren", GetBoneChildren);
+    ScriptMethod(objectTemplate, "getRelativeMat", GetRelativeMat);
+    ScriptMethod(objectTemplate, "getAbsoluteMat", GetAbsoluteMat);
     
     ScriptInherit(scriptBaseLink);
 }

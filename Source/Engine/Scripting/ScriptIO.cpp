@@ -34,9 +34,9 @@ void ScriptMouse::AccessFixed(const v8::FunctionCallbackInfo<v8::Value>& args) {
 ScriptMouse::ScriptMouse() :ScriptClass("Mouse", Constructor) {
     ScriptScope();
     
-    (*functionTemplate)->Set(ScriptString("x"), ScriptMethod(AccessX));
-    (*functionTemplate)->Set(ScriptString("y"), ScriptMethod(AccessY));
-    (*functionTemplate)->Set(ScriptString("fixed"), ScriptMethod(AccessFixed));
+    ScriptMethod(*functionTemplate, "x", AccessX);
+    ScriptMethod(*functionTemplate, "y", AccessY);
+    ScriptMethod(*functionTemplate, "fixed", AccessFixed);
 }
 
 
@@ -59,6 +59,6 @@ void ScriptKeyboard::IsKeyPressed(const v8::FunctionCallbackInfo<v8::Value>& arg
 ScriptKeyboard::ScriptKeyboard() :ScriptClass("Keyboard", Constructor) {
     ScriptScope();
     
-    (*functionTemplate)->Set(ScriptString("getKeyCount"), ScriptMethod(GetKeyCount));
-    (*functionTemplate)->Set(ScriptString("isKeyPressed"), ScriptMethod(IsKeyPressed));
+    ScriptMethod(*functionTemplate, "getKeyCount", GetKeyCount);
+    ScriptMethod(*functionTemplate, "isKeyPressed", IsKeyPressed);
 }

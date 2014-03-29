@@ -54,8 +54,8 @@ void GUITextField::moveCursorRight() {
     cursorDrawTick = 0.0;
 }
 
-void GUITextField::setFocus(bool active) {
-    GUIRect::setFocus(active);
+void GUITextField::setFocused(bool active) {
+    GUIRect::setFocused(active);
     if(active) {
         cursorDrawTick = 0.0;
         cursorX = 0;
@@ -101,7 +101,7 @@ void GUITextField::draw(const btVector3& parentTransform, GUIClipRect& parentCli
     
     GUILabel* label = static_cast<GUILabel*>(children[0]);
     int cursorPosX, cursorPosY;
-    bool cursorActive = getFocus();
+    bool cursorActive = isFocused();
     if(cursorActive) {
         if(fmod(cursorDrawTick, 0.25) >= 0.2) {
             if(keyState[SDL_SCANCODE_BACKSPACE])
@@ -130,10 +130,10 @@ void GUITextField::draw(const btVector3& parentTransform, GUIClipRect& parentCli
 
 bool GUITextField::handleMouseDown(int mouseX, int mouseY) {
     if(!visible || !enabled || mouseX < -width || mouseX > width || mouseY < -height || mouseY > height) {
-        setFocus(false);
+        setFocused(false);
         return false;
     }else
-        setFocus(true);
+        setFocused(true);
     
     int cursorPosXa, cursorPosXb, cursorPosY;
     GUILabel* label = static_cast<GUILabel*>(children[0]);
@@ -183,7 +183,7 @@ bool GUITextField::handleKeyDown(SDL_Keycode key, const char* text) {
         case SDLK_TAB:
         case SDLK_RETURN:
         case SDLK_ESCAPE:
-            setFocus(false);
+            setFocused(false);
             break;
         case SDLK_UP:
             cursorX = 0;

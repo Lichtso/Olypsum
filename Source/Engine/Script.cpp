@@ -80,7 +80,7 @@ v8::Handle<v8::Value> ScriptFile::callFunction(const char* functionName, bool re
 
 ScriptClass::ScriptClass(const char* nameB, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :name(nameB) {
     ScriptScope();
-    functionTemplate.Reset(v8::Isolate::GetCurrent(), ScriptMethod(constructor));
+    functionTemplate.Reset(v8::Isolate::GetCurrent(), v8::FunctionTemplate::New(v8::Isolate::GetCurrent(), constructor));
     (*functionTemplate)->SetClassName(ScriptString(name));
     (*functionTemplate)->PrototypeTemplate()->Set(ScriptString("className"), ScriptString(name));
 }

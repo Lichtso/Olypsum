@@ -7,7 +7,7 @@
 	<Entry key="options">Optionen</Entry>
 	<Entry key="credits">Danksagung</Entry>
 	<Entry key="quitGame">Beenden</Entry>
-	<Entry key="back">Zurück</Entry>
+	<Entry key="return">Zurück</Entry>
 	<Entry key="mainMenu">Hauptmenü</Entry>
 	<Entry key="graphics">Grafik</Entry>
 	<Entry key="language">Sprache</Entry>
@@ -23,12 +23,12 @@
 	<Entry key="vSyncEnabled">V-Sync</Entry>
 	<Entry key="videoResolution">Auflösung</Entry>
 	<Entry key="depthOfFieldQuality">Tiefenunschärfe</Entry>
-	<Entry key="surfaceQuality">Oberflächenqualität</Entry>
-	<Entry key="shadowQuality">Schattenqualität</Entry>
+	<Entry key="surfaceQuality">Oberflächen</Entry>
+	<Entry key="shadowQuality">Schatten</Entry>
 	<Entry key="ssaoQuality">SSAO-Qualität</Entry>
-	<Entry key="blendingQuality">Mischungsqualität</Entry>
+	<Entry key="blendingQuality">Farbmischung</Entry>
 	<Entry key="fullScreen">Vollbild</Entry>
-	<Entry key="retina">Retina</Entry>
+	<Entry key="highDefinition">HD-Video</Entry>
 	<Entry key="on">An</Entry>
 	<Entry key="off">Aus</Entry>
 	<Entry key="ipV4">IP v4</Entry>
@@ -41,7 +41,7 @@
 	<Entry key="ok">Ok</Entry>
 	<Entry key="name">Name</Entry>
 	<Entry key="newGame">Neues Spiel</Entry>
-	<Entry key="remove">Löschen</Entry>
+	<Entry key="delete">Löschen</Entry>
     <Entry key="packages">Levelpacks</Entry>
 	<Entry key="packageError_ContainerMissing">Dieser Kontainer konnte nicht gefunden werden:</Entry>
 	<Entry key="packageError_CouldNotLoad">Dieses Levelpack konnte nicht geladen werden:</Entry>

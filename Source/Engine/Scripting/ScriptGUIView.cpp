@@ -44,9 +44,9 @@ ScriptGUIView::ScriptGUIView() :ScriptGUIRect("GUIView", Constructor) {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("length"), GetChildCount);
     objectTemplate->SetIndexedPropertyHandler(GetChild);
-    objectTemplate->Set(ScriptString("adopt"), ScriptMethod(Adopt));
+    ScriptAccessor(objectTemplate, "length", GetChildCount, 0);
+    ScriptMethod(objectTemplate, "adopt", Adopt);
     
     ScriptInherit(scriptGUIRect);
 }
@@ -123,11 +123,11 @@ ScriptGUIFramedView::ScriptGUIFramedView() :ScriptGUIView("GUIFramedView", Const
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->Set(ScriptString("topColor"), ScriptMethod(AccessTopColor));
-    objectTemplate->Set(ScriptString("bottomColor"), ScriptMethod(AccessBottomColor));
-    objectTemplate->Set(ScriptString("borderColor"), ScriptMethod(AccessBorderColor));
-    objectTemplate->SetAccessor(ScriptString("innerShadow"), GetInnerShadow, SetInnerShadow);
-    objectTemplate->SetAccessor(ScriptString("cornerRadius"), GetCornerRadius, SetCornerRadius);
+    ScriptAccessor(objectTemplate, "innerShadow", GetInnerShadow, SetInnerShadow);
+    ScriptAccessor(objectTemplate, "cornerRadius", GetCornerRadius, SetCornerRadius);
+    ScriptMethod(objectTemplate, "topColor", AccessTopColor);
+    ScriptMethod(objectTemplate, "bottomColor", AccessBottomColor);
+    ScriptMethod(objectTemplate, "borderColor", AccessBorderColor);
     
     ScriptInherit(scriptGUIView);
 }
@@ -169,19 +169,19 @@ void ScriptGUIScreenView::SetModalView(v8::Local<v8::String> property, v8::Local
         objectPtr->setModalView(scriptGUIView->getDataOfInstance<GUIView>(property));
 }
 
-void ScriptGUIScreenView::GetFocused(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
+void ScriptGUIScreenView::isFocused(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     ScriptScope();
     GUIScreenView* objectPtr = getDataOfInstance<GUIScreenView>(args.This());
-    if(objectPtr->focused)
-        ScriptReturn(objectPtr->focused->scriptInstance);
+    if(objectPtr->focus)
+        ScriptReturn(objectPtr->focus->scriptInstance);
 }
 
 ScriptGUIScreenView::ScriptGUIScreenView() :ScriptGUIView("GUIScreenView", Constructor) {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("modalView"), GetModalView, SetModalView);
-    objectTemplate->SetAccessor(ScriptString("focused"), GetFocused);
+    ScriptAccessor(objectTemplate, "modalView", GetModalView, SetModalView);
+    ScriptAccessor(objectTemplate, "focus", isFocused, 0);
     
     ScriptInherit(scriptGUIView);
 }
@@ -284,12 +284,12 @@ ScriptGUIScrollView::ScriptGUIScrollView() :ScriptGUIFramedView("GUIScrollView",
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("sliderX"), GetSliderX, SetSliderX);
-    objectTemplate->SetAccessor(ScriptString("sliderY"), GetSliderY, SetSliderY);
-    objectTemplate->SetAccessor(ScriptString("scrollX"), GetScrollX, SetScrollX);
-    objectTemplate->SetAccessor(ScriptString("scrollY"), GetScrollY, SetScrollY);
-    objectTemplate->SetAccessor(ScriptString("contentWidth"), GetContentWidth, SetContentWidth);
-    objectTemplate->SetAccessor(ScriptString("contentHeight"), GetContentHeight, SetContentHeight);
+    ScriptAccessor(objectTemplate, "sliderX", GetSliderX, SetSliderX);
+    ScriptAccessor(objectTemplate, "sliderY", GetSliderY, SetSliderY);
+    ScriptAccessor(objectTemplate, "scrollX", GetScrollX, SetScrollX);
+    ScriptAccessor(objectTemplate, "scrollY", GetScrollY, SetScrollY);
+    ScriptAccessor(objectTemplate, "contentWidth", GetContentWidth, SetContentWidth);
+    ScriptAccessor(objectTemplate, "contentHeight", GetContentHeight, SetContentHeight);
     
     ScriptInherit(scriptGUIFramedView);
 }

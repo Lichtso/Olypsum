@@ -56,7 +56,7 @@ void Menu::setMultiplayerMenu() {
     };
     screenView->addChild(button);
     label = new GUILabel();
-    label->text = fileManager.localizeString("back");
+    label->text = fileManager.localizeString("return");
     label->fontHeight = screenView->height*0.1;
     label->width = screenView->width*0.14;
     label->sizeAlignment = GUISizeAlignment::Height;

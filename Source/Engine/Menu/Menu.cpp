@@ -8,6 +8,7 @@
 
 #include "AppMain.h"
 
+const char* homepage = "http://gamefortec.net/";
 const float loadingScreenTime = 3.0;
 float loadingScreen = loadingScreenTime;
 
@@ -80,6 +81,10 @@ void Menu::updateWindow() {
 
 void Menu::updateVideoResulution() {
     SDL_GetWindowSize(mainWindow, &optionsState.videoWidth, &optionsState.videoHeight);
+    optionsState.videoWidth -= optionsState.videoWidth % 2;
+    optionsState.videoHeight -= optionsState.videoHeight % 2;
+    SDL_SetWindowSize(mainWindow, optionsState.videoWidth, optionsState.videoHeight);
+    
     if(levelManager.gameStatus != noGame) {
         mainFBO.init();
         mainCam->aspect = (float)optionsState.videoWidth/optionsState.videoHeight;
@@ -442,7 +447,7 @@ void Menu::setMainMenu() {
         label->textAlignment = GUILabel::TextAlignment::Left;
         label->fontHeight = screenView->height*0.1;
         label->sizeAlignment = GUISizeAlignment::Height;
-        label->width = view->width+view->content.innerShadow*2.2-button->paddingX*1.0;
+        label->width = view->width+view->content.innerShadow*2.2-button->paddingX;
         button->addChild(label);
     }
     
@@ -476,7 +481,7 @@ void Menu::setCreditsMenu() {
     screenView->addChild(view);
     
     label = new GUILabel();
-    label->text = std::string("Engine: Alexander Meißner\nDeveloper Kit: Noah Hummel\n© 2013, Gamefortec");
+    label->text = std::string("Engine: Alexander Meißner\nDeveloper Kit: Noah Hummel\n© 2014, Gamefortec");
     label->posY = view->height*0.6;
     label->width = screenView->width*0.8;
     label->fontHeight = screenView->height*0.1;
@@ -486,17 +491,17 @@ void Menu::setCreditsMenu() {
     GUIButton* button = new GUIButton();
     button->posY = screenView->height*0.14;
     button->onClick = [](GUIButton* button) {
-        openExternURL("http://gamefortec.net/");
+        openExternURL(homepage);
     };
     view->addChild(button);
     label = new GUILabel();
-    label->text = "http://gamefortec.net/";
+    label->text = homepage;
     label->fontHeight = screenView->height*0.1;
     label->sizeAlignment = GUISizeAlignment::All;
     button->addChild(label);
     
     label = new GUILabel();
-    label->text = std::string("Using libraries:\nZlib License: SDL2, Bullet Physics\nBSD (3-Clause) License:\nOgg / Vorbis: © 2013, Xiph.Org Foundation\nV8: © 2013, Google, Inc.");
+    label->text = std::string("Using libraries:\nZlib License: SDL2, Bullet Physics\nBSD (3-Clause) License:\nOgg / Vorbis: © 2014, Xiph.Org Foundation\nV8: © 2014, Google, Inc.");
     label->posY = -view->height*0.5;
     label->width = screenView->width*0.8;
     label->fontHeight = screenView->height*0.1;
@@ -510,7 +515,7 @@ void Menu::setCreditsMenu() {
     };
     screenView->addChild(button);
     label = new GUILabel();
-    label->text = fileManager.localizeString("back");
+    label->text = fileManager.localizeString("return");
     label->fontHeight = screenView->height*0.1;
     label->width = screenView->width*0.14;
     label->sizeAlignment = GUISizeAlignment::Height;
@@ -553,7 +558,7 @@ void Menu::setGameEscMenu() {
             AppTerminate();
         }
     };
-    const char* buttonLabels[] = { "back", "options", "mainMenu", "quitGame" };
+    const char* buttonLabels[] = { "return", "options", "mainMenu", "quitGame" };
     for(unsigned char i = 0; i < 4; i ++) {
         GUIButton* button = new GUIButton();
         button->posY = screenView->height*(0.32-0.16*i);

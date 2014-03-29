@@ -24,7 +24,7 @@ void ScriptBaseClass::GetScriptClass(v8::Local<v8::String> property, const v8::P
     ScriptScope();
     BaseClass* objectPtr = getDataOfInstance<BaseClass>(args.This());
     std::string path = fileManager.getPathOfResource(objectPtr->scriptFile->filePackage, objectPtr->scriptFile->name);
-    ScriptReturn(ScriptString(path.c_str()));
+    ScriptReturn(path.c_str());
 }
 
 void ScriptBaseClass::SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
@@ -53,8 +53,8 @@ ScriptBaseClass::ScriptBaseClass() :ScriptBaseClass("BaseClass") {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("scriptClass"), GetScriptClass, SetScriptClass);
-    objectTemplate->Set(v8::Isolate::GetCurrent(), "delete", ScriptMethod(Delete));
+    ScriptAccessor(objectTemplate, "scriptClass", GetScriptClass, SetScriptClass);
+    ScriptMethod(objectTemplate, "delete", Delete);
 }
 
 
@@ -114,11 +114,11 @@ ScriptBaseObject::ScriptBaseObject() :ScriptBaseClass("BaseObject") {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->Set(v8::Isolate::GetCurrent(), "transformation", ScriptMethod(AccessTransformation));
-    objectTemplate->Set(v8::Isolate::GetCurrent(), "getLink", ScriptMethod(GetLink));
-    objectTemplate->Set(v8::Isolate::GetCurrent(), "getLinkCount", ScriptMethod(GetLinkCount));
-    objectTemplate->Set(v8::Isolate::GetCurrent(), "getTransformUpLink", ScriptMethod(GetTransformUpLink));
-    objectTemplate->Set(v8::Isolate::GetCurrent(), "getBoneUpLink", ScriptMethod(GetBoneUpLink));
+    ScriptMethod(objectTemplate, "transformation", AccessTransformation);
+    ScriptMethod(objectTemplate, "getLink", GetLink);
+    ScriptMethod(objectTemplate, "getLinkCount", GetLinkCount);
+    ScriptMethod(objectTemplate, "getTransformUpLink", GetTransformUpLink);
+    ScriptMethod(objectTemplate, "getBoneUpLink", GetBoneUpLink);
     
     ScriptInherit(scriptBaseClass);
 }
@@ -130,7 +130,7 @@ void ScriptPhysicObject::GetCollisionShape(v8::Local<v8::String> property, const
     btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(args.This())->getBody();
     std::string buffer = levelManager.getCollisionShapeName(physicBody->getCollisionShape());
     if(buffer.size() > 0)
-        ScriptReturn(ScriptString(buffer.c_str()));
+        ScriptReturn(buffer.c_str());
 }
 
 void ScriptPhysicObject::SetCollisionShape(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
@@ -277,8 +277,8 @@ ScriptPhysicObject::ScriptPhysicObject() :ScriptPhysicObject("PhysicObject") {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("collisionShape"), GetCollisionShape, SetCollisionShape);
-    objectTemplate->Set(ScriptString("collisionShapeInfo"), ScriptMethod(GetCollisionShapeInfo));
+    ScriptAccessor(objectTemplate, "collisionShape", GetCollisionShape, SetCollisionShape);
+    ScriptMethod(objectTemplate, "collisionShapeInfo", GetCollisionShapeInfo);
     
     ScriptInherit(scriptBaseObject);
 }

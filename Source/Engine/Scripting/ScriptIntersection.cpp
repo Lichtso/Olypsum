@@ -141,7 +141,7 @@ void ScriptIntersection::SphereIntersection(const v8::FunctionCallbackInfo<v8::V
 ScriptIntersection::ScriptIntersection() :ScriptClass("Intersection", Constructor) {
     ScriptScope();
     
-    (*functionTemplate)->Set(ScriptString("rayCast"), ScriptMethod(RayCast));
-    (*functionTemplate)->Set(ScriptString("aabbIntersection"), ScriptMethod(AABBIntersection));
-    (*functionTemplate)->Set(ScriptString("sphereIntersection"), ScriptMethod(SphereIntersection));
+    ScriptMethod(*functionTemplate, "rayCast", RayCast);
+    ScriptMethod(*functionTemplate, "aabbIntersection", AABBIntersection);
+    ScriptMethod(*functionTemplate, "sphereIntersection", SphereIntersection);
 }

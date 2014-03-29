@@ -57,8 +57,7 @@ void AppMain() {
         
 #ifdef WIN32
         glewExperimental = GL_TRUE;
-        GLenum err = glewInit();
-        if(GLEW_OK != err) {
+        if(glewInit() != GLEW_OK) {
             log(error_log, "GLEW failed to initialize, Quit.");
             exit(3);
         }

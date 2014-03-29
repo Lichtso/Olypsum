@@ -23,13 +23,13 @@ void ScriptGUILabel::GetTextAlignment(v8::Local<v8::String> property, const v8::
     GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
     switch(objectPtr->textAlignment) {
         case GUILabel::TextAlignment::Left:
-            ScriptReturn(ScriptString("left"));
+            ScriptReturn("left");
             return;
         case GUILabel::TextAlignment::Middle:
-            ScriptReturn(ScriptString("middle"));
+            ScriptReturn("middle");
             return;
         case GUILabel::TextAlignment::Right:
-            ScriptReturn(ScriptString("right"));
+            ScriptReturn("right");
             return;
     }
 }
@@ -50,7 +50,7 @@ void ScriptGUILabel::SetTextAlignment(v8::Local<v8::String> property, v8::Local<
 void ScriptGUILabel::GetText(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     ScriptScope();
     GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
-    ScriptReturn(ScriptString(objectPtr->text.c_str()));
+    ScriptReturn(objectPtr->text.c_str());
 }
 
 void ScriptGUILabel::SetText(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
@@ -66,7 +66,7 @@ void ScriptGUILabel::GetFont(v8::Local<v8::String> property, const v8::PropertyC
     std::string name;
     FilePackage* filePackage = fileManager.findResource<TextFont>(objectPtr->font, name);
     if(filePackage)
-        ScriptReturn(ScriptString(fileManager.getPathOfResource(filePackage, name).c_str()));
+        ScriptReturn(fileManager.getPathOfResource(filePackage, name).c_str());
 }
 
 void ScriptGUILabel::SetFont(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
@@ -105,12 +105,12 @@ ScriptGUILabel::ScriptGUILabel() :ScriptGUIRect("GUILabel", Constructor) {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("sizeAlignment"), GetSizeAlignment<GUILabel>, SetSizeAlignment<GUILabel>);
-    objectTemplate->SetAccessor(ScriptString("textAlignment"), GetTextAlignment, SetTextAlignment);
-    objectTemplate->SetAccessor(ScriptString("text"), GetText, SetText);
-    objectTemplate->SetAccessor(ScriptString("font"), GetFont, SetFont);
-    objectTemplate->SetAccessor(ScriptString("fontHeight"), GetFontHeight, SetFontHeight);
-    objectTemplate->Set(ScriptString("color"), ScriptMethod(AccessColor));
+    ScriptAccessor(objectTemplate, "sizeAlignment", GetSizeAlignment<GUILabel>, SetSizeAlignment<GUILabel>);
+    ScriptAccessor(objectTemplate, "textAlignment", GetTextAlignment, SetTextAlignment);
+    ScriptAccessor(objectTemplate, "text", GetText, SetText);
+    ScriptAccessor(objectTemplate, "font", GetFont, SetFont);
+    ScriptAccessor(objectTemplate, "fontHeight", GetFontHeight, SetFontHeight);
+    ScriptMethod(objectTemplate, "color", AccessColor);
     
     ScriptInherit(scriptGUIRect);
 }
@@ -173,7 +173,7 @@ void ScriptGUIImage::GetImage(v8::Local<v8::String> property, const v8::Property
     std::string name;
     FilePackage* filePackage = fileManager.findResource<Texture>(objectPtr->texture, name);
     if(filePackage)
-        ScriptReturn(ScriptString(fileManager.getPathOfResource(filePackage, name).c_str()));
+        ScriptReturn(fileManager.getPathOfResource(filePackage, name).c_str());
 }
 
 void ScriptGUIImage::SetImage(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
@@ -188,8 +188,8 @@ ScriptGUIImage::ScriptGUIImage() :ScriptGUIRect("GUIImage", Constructor) {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("sizeAlignment"), GetSizeAlignment<GUIImage>, SetSizeAlignment<GUIImage>);
-    objectTemplate->SetAccessor(ScriptString("image"), GetImage, SetImage);
+    ScriptAccessor(objectTemplate, "sizeAlignment", GetSizeAlignment<GUIImage>, SetSizeAlignment<GUIImage>);
+    ScriptAccessor(objectTemplate, "image", GetImage, SetImage);
     
     ScriptInherit(scriptGUIRect);
 }

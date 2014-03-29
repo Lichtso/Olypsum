@@ -43,8 +43,8 @@ ScriptMatterObject::ScriptMatterObject() :ScriptPhysicObject("MatterObject") {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("integrity"), GetIntegrity, SetIntegrity);
-    objectTemplate->Set(ScriptString("attachDecal"), ScriptMethod(AttachDecal));
+    ScriptAccessor(objectTemplate, "integrity", GetIntegrity, SetIntegrity);
+    ScriptMethod(objectTemplate, "attachDecal", AttachDecal);
     
     ScriptInherit(scriptPhysicObject);
 }
@@ -57,7 +57,7 @@ void ScriptRigidObject::GetModel(v8::Local<v8::String> property, const v8::Prope
     std::string name;
     FilePackage* filePackage = fileManager.findResource<Model>(objectPtr->model, name);
     if(filePackage)
-        ScriptReturn(ScriptString(fileManager.getPathOfResource(filePackage, name).c_str()));
+        ScriptReturn(fileManager.getPathOfResource(filePackage, name).c_str());
 }
 
 void ScriptRigidObject::SetModel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
@@ -269,24 +269,24 @@ ScriptRigidObject::ScriptRigidObject() :ScriptMatterObject("RigidObject") {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("model"), GetModel, SetModel);
-    objectTemplate->SetAccessor(ScriptString("mass"), GetMass, SetMass);
-    objectTemplate->SetAccessor(ScriptString("kinematic"), GetKinematic, SetKinematic);
-    objectTemplate->Set(ScriptString("angularVelocity"), ScriptMethod(AccessAngularVelocity));
-    objectTemplate->Set(ScriptString("linearVelocity"), ScriptMethod(AccessLinearVelocity));
-    objectTemplate->Set(ScriptString("angularFactor"), ScriptMethod(AccessAngularFactor));
-    objectTemplate->Set(ScriptString("linearFactor"), ScriptMethod(AccessLinearFactor));
-    objectTemplate->SetAccessor(ScriptString("angularDamping"), GetAngularDamping, SetAngularDamping);
-    objectTemplate->SetAccessor(ScriptString("linearDamping"), GetLinearDamping, SetLinearDamping);
-    objectTemplate->SetAccessor(ScriptString("angularFriction"), GetAngularFriction, SetAngularFriction);
-    objectTemplate->SetAccessor(ScriptString("linearFriction"), GetLinearFriction, SetLinearFriction);
-    objectTemplate->SetAccessor(ScriptString("restitution"), GetRestitution, SetRestitution);
-    objectTemplate->Set(ScriptString("transformation"), ScriptMethod(AccessTransformation));
-    objectTemplate->Set(ScriptString("applyImpulseAtPoint"), ScriptMethod(ApplyImpulseAtPoint));
-    objectTemplate->Set(ScriptString("applyAngularImpulse"), ScriptMethod(ApplyAngularImpulse));
-    objectTemplate->Set(ScriptString("applyLinearImpulse"), ScriptMethod(ApplyLinearImpulse));
-    objectTemplate->Set(ScriptString("getBoneByName"), ScriptMethod(GetBoneByName));
-    objectTemplate->Set(ScriptString("textureAnimationTime"), ScriptMethod(AccessTextureAnimationTime));
+    ScriptAccessor(objectTemplate, "model", GetModel, SetModel);
+    ScriptAccessor(objectTemplate, "mass", GetMass, SetMass);
+    ScriptAccessor(objectTemplate, "kinematic", GetKinematic, SetKinematic);
+    ScriptAccessor(objectTemplate, "angularDamping", GetAngularDamping, SetAngularDamping);
+    ScriptAccessor(objectTemplate, "linearDamping", GetLinearDamping, SetLinearDamping);
+    ScriptAccessor(objectTemplate, "angularFriction", GetAngularFriction, SetAngularFriction);
+    ScriptAccessor(objectTemplate, "linearFriction", GetLinearFriction, SetLinearFriction);
+    ScriptAccessor(objectTemplate, "restitution", GetRestitution, SetRestitution);
+    ScriptMethod(objectTemplate, "angularVelocity", AccessAngularVelocity);
+    ScriptMethod(objectTemplate, "linearVelocity", AccessLinearVelocity);
+    ScriptMethod(objectTemplate, "angularFactor", AccessAngularFactor);
+    ScriptMethod(objectTemplate, "linearFactor", AccessLinearFactor);
+    ScriptMethod(objectTemplate, "transformation", AccessTransformation);
+    ScriptMethod(objectTemplate, "applyImpulseAtPoint", ApplyImpulseAtPoint);
+    ScriptMethod(objectTemplate, "applyAngularImpulse", ApplyAngularImpulse);
+    ScriptMethod(objectTemplate, "applyLinearImpulse", ApplyLinearImpulse);
+    ScriptMethod(objectTemplate, "getBoneByName", GetBoneByName);
+    ScriptMethod(objectTemplate, "textureAnimationTime", AccessTextureAnimationTime);
     
     ScriptInherit(scriptMatterObject);
 }
@@ -329,16 +329,14 @@ ScriptTerrainObject::ScriptTerrainObject() :ScriptMatterObject("TerrainObject") 
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("collisionShape"),
-                                static_cast<v8::AccessorGetterCallback>(NULL),
-                                static_cast<v8::AccessorSetterCallback>(NULL));
-    objectTemplate->SetAccessor(ScriptString("width"), GetWidth);
-    objectTemplate->SetAccessor(ScriptString("length"), GetLength);
-    objectTemplate->SetAccessor(ScriptString("bitDepth"), GetBitDepth, SetBitDepth);
-    objectTemplate->SetAccessor(ScriptString("angularFriction"), GetAngularFriction, SetAngularFriction);
-    objectTemplate->SetAccessor(ScriptString("linearFriction"), GetLinearFriction, SetLinearFriction);
-    objectTemplate->SetAccessor(ScriptString("restitution"), GetRestitution, SetRestitution);
-    objectTemplate->Set(ScriptString("updateModel"), ScriptMethod(UpdateModel));
+    ScriptAccessor(objectTemplate, "collisionShape", 0, 0);
+    ScriptAccessor(objectTemplate, "width", GetWidth, 0);
+    ScriptAccessor(objectTemplate, "length", GetLength, 0);
+    ScriptAccessor(objectTemplate, "bitDepth", GetBitDepth, SetBitDepth);
+    ScriptAccessor(objectTemplate, "angularFriction", GetAngularFriction, SetAngularFriction);
+    ScriptAccessor(objectTemplate, "linearFriction", GetLinearFriction, SetLinearFriction);
+    ScriptAccessor(objectTemplate, "restitution", GetRestitution, SetRestitution);
+    ScriptMethod(objectTemplate, "updateModel", UpdateModel);
     
     ScriptInherit(scriptMatterObject);
 }

@@ -101,11 +101,11 @@ void Menu::setSaveGamesMenu() {
         button->sizeAlignment = GUISizeAlignment::Height;
         scrollView->addChild(button);
         label = new GUILabel();
-        label->text = fileManager.localizeString("remove");
+        label->text = fileManager.localizeString("delete");
         label->fontHeight = screenView->height*0.1;
         button->addChild(label);
         button->onClick = [this, name](GUIButton* button) {
-            setModalView("remove", fileManager.localizeString("name")+": "+name,
+            setModalView("delete", fileManager.localizeString("name")+": "+name,
                          [this, name](GUIButton* button) {
                              removeDir(supportPath+"Saves/"+name+'/');
                              setSaveGamesMenu();
@@ -124,7 +124,7 @@ void Menu::setSaveGamesMenu() {
             setNewGameMenu();
         }
     };
-    const char* buttonLabels[] = { "back", "newGame" };
+    const char* buttonLabels[] = { "return", "newGame" };
     for(unsigned char i = 0; i < 2; i ++) {
         GUIButton* button = new GUIButton();
         button->posX = screenView->width*(-0.8+i*1.6);

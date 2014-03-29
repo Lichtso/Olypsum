@@ -311,9 +311,9 @@ void ScriptAnimation::StopTimer(const v8::FunctionCallbackInfo<v8::Value>& args)
 ScriptAnimation::ScriptAnimation() :ScriptClass("Animation", Constructor) {
     ScriptScope();
     
-    (*functionTemplate)->Set(ScriptString("addFrames"), ScriptMethod(AddFrames));
-    (*functionTemplate)->Set(ScriptString("removeFrames"), ScriptMethod(RemoveFrames));
-    (*functionTemplate)->Set(ScriptString("getTrackInfo"), ScriptMethod(GetTrackInfo));
-    (*functionTemplate)->Set(ScriptString("startTimer"), ScriptMethod(StartTimer));
-    (*functionTemplate)->Set(ScriptString("stopTimer"), ScriptMethod(StopTimer));
+    ScriptMethod(*functionTemplate, "addFrames", AddFrames);
+    ScriptMethod(*functionTemplate, "removeFrames", RemoveFrames);
+    ScriptMethod(*functionTemplate, "getTrackInfo", GetTrackInfo);
+    ScriptMethod(*functionTemplate, "startTimer", StartTimer);
+    ScriptMethod(*functionTemplate, "stopTimer", StopTimer);
 }

@@ -15,7 +15,9 @@
 #define ScriptNewInstance(class) v8::HandleScope handleScope(v8::Isolate::GetCurrent()); \
 v8::Handle<v8::Value> external = v8::External::New(v8::Isolate::GetCurrent(), this); \
 (*class->functionTemplate)->GetFunction()->NewInstance(1, &external);
-#define ScriptMethod(method) v8::FunctionTemplate::New(v8::Isolate::GetCurrent(), method)
+#define ScriptMethod(template, name, method) (template)->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), name), \
+v8::FunctionTemplate::New(v8::Isolate::GetCurrent(), method));
+#define ScriptAccessor(template, name, getter, setter) (template)->SetAccessor(ScriptString(name), getter, setter);
 #define ScriptInherit(class) (*functionTemplate)->Inherit(v8::Handle<v8::FunctionTemplate>(*class->functionTemplate))
 #define ScriptReturn(value) args.GetReturnValue().Set(value)
 #define ScriptClassInit(class) class.reset(new decltype(class)::element_type); \

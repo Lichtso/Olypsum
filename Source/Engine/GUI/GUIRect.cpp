@@ -23,21 +23,21 @@ GUIRect* GUIRect::getRootParent() {
     return node;
 }
 
-bool GUIRect::getFocus() {
+bool GUIRect::isFocused() {
     GUIScreenView* screenView = dynamic_cast<GUIScreenView*>(getRootParent());
     if(!screenView) return false;
-    return (screenView->focused == this);
+    return (screenView->focus == this);
 }
 
-void GUIRect::setFocus(bool active) {
+void GUIRect::setFocused(bool active) {
     GUIScreenView* screenView = dynamic_cast<GUIScreenView*>(getRootParent());
     if(!screenView) return;
     if(active) {
-        if(screenView->focused)
-            screenView->focused->setFocus(false);
-        screenView->focused = this;
+        if(screenView->focus)
+            screenView->focus->setFocused(false);
+        screenView->focus = this;
     }else
-        screenView->focused = NULL;
+        screenView->focus = NULL;
 }
 
 bool GUIRect::getLimSize(GUIClipRect& clipRect, GUIClipRect& parentClipRect) {

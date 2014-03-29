@@ -22,7 +22,8 @@ Skeletal animation
 Performance issue of explosions
 
 Bugs:
+V8: Garbage Collection Crash
+Windows: Checksums
 Light animation in test scene
-GUIRoundedRect border: odd size screen resolution
 Parallax Occlusion / Position
 Ortho projection / Logarithmic depth buffer

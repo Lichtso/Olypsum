@@ -128,7 +128,7 @@ void GUIFramedView::draw(const btVector3& parentTransform, GUIClipRect& parentCl
 
 
 
-GUIScreenView::GUIScreenView() :modalView(NULL), focused(NULL) {
+GUIScreenView::GUIScreenView() :modalView(NULL), focus(NULL) {
     updateContent();
 }
 
@@ -235,18 +235,18 @@ bool GUIScreenView::handleMouseWheel(int mouseX, int mouseY, float deltaX, float
 }
 
 bool GUIScreenView::handleKeyDown(SDL_Keycode key, const char* text) {
-    if(!focused) return false;
-    return focused->handleKeyDown(key, text);
+    if(!focus) return false;
+    return focus->handleKeyDown(key, text);
 }
 
 bool GUIScreenView::handleKeyUp(SDL_Keycode key) {
-    if(!focused) return false;
-    return focused->handleKeyUp(key);
+    if(!focus) return false;
+    return focus->handleKeyUp(key);
 }
 
 void GUIScreenView::setModalView(GUIRect* modalViewB) {
-    if(focused)
-        focused->setFocus(false);
+    if(focus)
+        focus->setFocused(false);
     if(modalView)
         deleteChild(getIndexOfChild(modalView));
     modalView = modalViewB;

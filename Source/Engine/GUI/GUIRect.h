@@ -38,8 +38,8 @@ class GUIRect {
     GUIRect();
     virtual ~GUIRect();
     GUIRect* getRootParent();
-    bool getFocus();
-    virtual void setFocus(bool active);
+    bool isFocused();
+    virtual void setFocused(bool active);
     virtual bool getLimSize(GUIClipRect& clipRect, GUIClipRect& parentClipRect);
     virtual void updateContent();
     virtual void draw(const btVector3& parentTransform, GUIClipRect& parentClipRect) = 0;

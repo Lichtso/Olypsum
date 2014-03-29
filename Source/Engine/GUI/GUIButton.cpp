@@ -9,7 +9,7 @@
 #include "../Menu/Menu.h"
 
 GUIButton::GUIButton() :sizeAlignment(GUISizeAlignment::All), type(GUIButton::Type::Normal), enabled(true), state(GUIButton::State::Released) {
-    paddingX = menu.screenView->width*0.012;
+    paddingX = menu.screenView->width*0.01;
     paddingY = menu.screenView->height*0.01;
 }
 
@@ -38,7 +38,6 @@ void GUIButton::updateContent() {
                                 label->color = Color4(0.94);
                             break;
                         }
-                        label->font = TextFont::normalFont();
                     break;
                     case GUIButton::State::Pressed:
                         switch(type) {
@@ -52,7 +51,6 @@ void GUIButton::updateContent() {
                                 label->color = Color4(0.94);
                             break;
                         }
-                        label->font = TextFont::italicFont();
                     break;
                 }
             else

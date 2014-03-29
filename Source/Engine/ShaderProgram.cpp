@@ -50,11 +50,10 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* sourceCode, std::v
         pos = prevPos = source.find(includeString, pos);
         if(pos == std::string::npos) break;
         pos += strlen(includeString);
-#ifdef WIN32
-        unsigned int macroLength = source.find("\r\n", pos)-pos;
-#else
-        unsigned int macroLength = source.find('\n', pos)-pos;
-#endif
+        auto macroLength = source.find('\n', pos);
+        if(macroLength == -1) break;
+        if(source[macroLength-1] == '\r') macroLength --;
+        macroLength -= pos;
         std::unique_ptr<char[]> data = readFile(resourcesPath+"Shaders/"+source.substr(pos, macroLength), true);
         source.replace(prevPos, strlen(includeString)+macroLength, data.get());
     }
@@ -65,7 +64,7 @@ bool ShaderProgram::loadShader(GLuint shaderType, const char* sourceCode, std::v
     
 	int aux;
 	glGetShaderiv(shaderId, GL_COMPILE_STATUS, &aux);
-	if (aux != GL_TRUE) {
+	if(aux != GL_TRUE) {
 		glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &aux);
 		char* infoLog = new char[aux];
 		glGetShaderInfoLog(shaderId, aux, &aux, (GLchar*)infoLog);

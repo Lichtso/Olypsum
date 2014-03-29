@@ -24,7 +24,7 @@ class GUITextField : public GUIFramedView {
     bool enabled;
     std::function<void(GUITextField*)> onFocus, onChange, onBlur;
     GUITextField();
-    void setFocus(bool active);
+    void setFocused(bool active);
     bool addChild(GUIRect* child);
     void updateContent();
     void draw(const btVector3& parentTransform, GUIClipRect& parentClipRect);

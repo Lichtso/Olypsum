@@ -78,17 +78,17 @@ void ScriptGUIRect::SetVisible(v8::Local<v8::String> property, v8::Local<v8::Val
     objectPtr->visible = value->BooleanValue();
 }
 
-void ScriptGUIRect::GetFocus(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
+void ScriptGUIRect::GetFocused(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     ScriptScope();
     GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    ScriptReturn(objectPtr->getFocus());
+    ScriptReturn(objectPtr->isFocused());
 }
 
-void ScriptGUIRect::SetFocus(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
+void ScriptGUIRect::SetFocused(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
     ScriptScope();
     if(!value->IsBoolean()) return;
     GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    objectPtr->setFocus(value->BooleanValue());
+    objectPtr->setFocused(value->BooleanValue());
 }
 
 void ScriptGUIRect::GetParent(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
@@ -131,13 +131,13 @@ ScriptGUIRect::ScriptGUIRect() :ScriptGUIRect("GUIRect", Constructor) {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("x"), GetPosX, SetPosX);
-    objectTemplate->SetAccessor(ScriptString("y"), GetPosY, SetPosY);
-    objectTemplate->SetAccessor(ScriptString("width"), GetWidth, SetWidth);
-    objectTemplate->SetAccessor(ScriptString("height"), GetHeight, SetHeight);
-    objectTemplate->SetAccessor(ScriptString("visible"), GetVisible, SetVisible);
-    objectTemplate->SetAccessor(ScriptString("focus"), GetFocus, SetFocus);
-    objectTemplate->SetAccessor(ScriptString("parent"), GetParent);
-    objectTemplate->Set(ScriptString("remove"), ScriptMethod(Remove));
-    objectTemplate->Set(ScriptString("updateContent"), ScriptMethod(UpdateContent));
+    ScriptAccessor(objectTemplate, "x", GetPosX, SetPosX);
+    ScriptAccessor(objectTemplate, "y", GetPosY, SetPosY);
+    ScriptAccessor(objectTemplate, "width", GetWidth, SetWidth);
+    ScriptAccessor(objectTemplate, "height", GetHeight, SetHeight);
+    ScriptAccessor(objectTemplate, "visible", GetVisible, SetVisible);
+    ScriptAccessor(objectTemplate, "focused", GetFocused, SetFocused);
+    ScriptAccessor(objectTemplate, "parent", GetParent, 0);
+    ScriptMethod(objectTemplate, "remove", Remove);
+    ScriptMethod(objectTemplate, "updateContent", UpdateContent);
 }

@@ -63,7 +63,7 @@ void Menu::setOptionsMenu() {
     const char* checkBoxLabels[] = {
         "vSyncEnabled",
         "fullScreen",
-        "retina",
+        "highDefinition",
         "cubemapsEnabled",
         "edgeSmoothEnabled",
         "screenBlurEnabled"
@@ -215,7 +215,7 @@ void Menu::setOptionsMenu() {
     button->onClick = leaveOptionsMenu;
     screenView->addChild(button);
     label = new GUILabel();
-    label->text = fileManager.localizeString("back");
+    label->text = fileManager.localizeString("return");
     label->fontHeight = screenView->height*0.1;
     label->width = screenView->width*0.14;
     label->sizeAlignment = GUISizeAlignment::Height;
@@ -253,7 +253,7 @@ void Menu::setLanguagesMenu() {
     };
     screenView->addChild(button);
     label = new GUILabel();
-    label->text = fileManager.localizeString("back");
+    label->text = fileManager.localizeString("return");
     label->fontHeight = screenView->height*0.1;
     label->width = screenView->width*0.14;
     label->sizeAlignment = GUISizeAlignment::Height;

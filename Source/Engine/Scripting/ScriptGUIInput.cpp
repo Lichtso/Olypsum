@@ -65,10 +65,10 @@ ScriptGUISlider::ScriptGUISlider() :ScriptGUIRect("GUISlider", Constructor) {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("orientation"), GetOrientation<GUISlider>, SetOrientationDual<GUISlider>);
-    objectTemplate->SetAccessor(ScriptString("value"), GetValue, SetValue);
-    objectTemplate->SetAccessor(ScriptString("steps"), GetSteps, SetSteps);
-    objectTemplate->SetAccessor(ScriptString("enabled"), GetEnabled, SetEnabled);
+    ScriptAccessor(objectTemplate, "orientation", GetOrientation<GUISlider>, SetOrientationDual<GUISlider>);
+    ScriptAccessor(objectTemplate, "value", GetValue, SetValue);
+    ScriptAccessor(objectTemplate, "steps", GetSteps, SetSteps);
+    ScriptAccessor(objectTemplate, "enabled", GetEnabled, SetEnabled);
     
     ScriptInherit(scriptGUIRect);
 }
@@ -124,7 +124,7 @@ void ScriptGUITextField::GetText(v8::Local<v8::String> property, const v8::Prope
     ScriptScope();
     GUITextField* objectPtr = getDataOfInstance<GUITextField>(args.This());
     GUILabel* label = static_cast<GUILabel*>(objectPtr->children[0]);
-    ScriptReturn(ScriptString(label->text.c_str()));
+    ScriptReturn(label->text.c_str());
 }
 
 void ScriptGUITextField::SetText(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
@@ -139,9 +139,9 @@ ScriptGUITextField::ScriptGUITextField() :ScriptGUIFramedView("GUITextField", Co
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("cursorX"), GetCursorX, SetCursorX);
-    objectTemplate->SetAccessor(ScriptString("enabled"), GetEnabled, SetEnabled);
-    objectTemplate->SetAccessor(ScriptString("text"), GetText, SetText);
+    ScriptAccessor(objectTemplate, "cursorX", GetCursorX, SetCursorX);
+    ScriptAccessor(objectTemplate, "enabled", GetEnabled, SetEnabled);
+    ScriptAccessor(objectTemplate, "text", GetText, SetText);
     
     ScriptInherit(scriptGUIFramedView);
 }

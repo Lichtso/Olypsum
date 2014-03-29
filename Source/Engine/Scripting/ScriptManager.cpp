@@ -49,7 +49,7 @@ void ScriptManager::ScriptLocalizeString(const v8::FunctionCallbackInfo<v8::Valu
     if(!args[0]->IsString())
         return ScriptException("localizeString(): Invalid argument");
     else
-        ScriptReturn(ScriptString(fileManager.localizeString(cStrOfV8(args[0])).c_str()));
+        ScriptReturn(fileManager.localizeString(cStrOfV8(args[0])).c_str());
 }
 
 void ScriptManager::ScriptSaveLevel(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -102,7 +102,7 @@ void ScriptManager::ScriptGetGamePaused(v8::Local<v8::String> property, const v8
 
 void ScriptManager::ScriptGetLevel(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     ScriptScope();
-    ScriptReturn(ScriptString(levelManager.levelContainer.c_str()));
+    ScriptReturn(levelManager.levelContainer.c_str());
 }
 
 void ScriptManager::ScriptSetLevel(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
@@ -148,15 +148,15 @@ void ScriptManager::writeCdataXMLNode(rapidxml::xml_document<xmlUsedCharType>& d
 ScriptManager::ScriptManager() {
     ScriptScope();
     globalTemplate.Reset(v8::Isolate::GetCurrent(), v8::ObjectTemplate::New());
-    (*globalTemplate)->Set(ScriptString("log"), ScriptMethod(ScriptLog));
-    (*globalTemplate)->Set(ScriptString("require"), ScriptMethod(ScriptRequire));
-    (*globalTemplate)->Set(ScriptString("loadContainer"), ScriptMethod(ScriptLoadContainer));
-    (*globalTemplate)->Set(ScriptString("localizeString"), ScriptMethod(ScriptLocalizeString));
-    (*globalTemplate)->Set(ScriptString("saveLevel"), ScriptMethod(ScriptSaveLevel));
-    (*globalTemplate)->Set(ScriptString("accessSceneProperty"), ScriptMethod(ScriptAccessSceneProperty));
-    (*globalTemplate)->SetAccessor(ScriptString("gamePaused"), ScriptGetGamePaused);
-    (*globalTemplate)->SetAccessor(ScriptString("levelID"), ScriptGetLevel, ScriptSetLevel);
-    (*globalTemplate)->SetAccessor(ScriptString("animationFactor"), ScriptGetAnimationFactor);
+    ScriptMethod(*globalTemplate, "log", ScriptLog);
+    ScriptMethod(*globalTemplate, "require", ScriptRequire);
+    ScriptMethod(*globalTemplate, "loadContainer", ScriptLoadContainer);
+    ScriptMethod(*globalTemplate, "localizeString", ScriptLocalizeString);
+    ScriptMethod(*globalTemplate, "saveLevel", ScriptSaveLevel);
+    ScriptMethod(*globalTemplate, "accessSceneProperty", ScriptAccessSceneProperty);
+    ScriptAccessor(*globalTemplate, "gamePaused", ScriptGetGamePaused, 0);
+    ScriptAccessor(*globalTemplate, "levelID", ScriptGetLevel, ScriptSetLevel);
+    ScriptAccessor(*globalTemplate, "animationFactor", ScriptGetAnimationFactor, 0);
     ScriptClassInit(scriptBaseClass);
     ScriptClassInit(scriptBaseObject);
     ScriptClassInit(scriptVector3);

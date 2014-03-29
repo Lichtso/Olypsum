@@ -41,7 +41,7 @@ class ScriptGUIScreenView : public ScriptGUIView {
     static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetModalView(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetModalView(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
-    static void GetFocused(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
+    static void isFocused(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     protected:
     ScriptGUIScreenView(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :ScriptGUIView(name, constructor) { }
     public:

@@ -28,10 +28,9 @@ ScriptLightObject::ScriptLightObject() :ScriptPhysicObject("LightObject") {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("collisionShape"),
-                                static_cast<v8::AccessorGetterCallback>(NULL), static_cast<v8::AccessorSetterCallback>(NULL));
-    objectTemplate->SetAccessor(ScriptString("range"), GetRange);
-    objectTemplate->Set(ScriptString("color"), ScriptMethod(AccessColor));
+    ScriptAccessor(objectTemplate, "collisionShape", 0, 0);
+    ScriptAccessor(objectTemplate, "range", GetRange, 0);
+    ScriptMethod(objectTemplate, "color", AccessColor);
     
     ScriptInherit(scriptPhysicObject);
 }
@@ -52,7 +51,7 @@ ScriptDirectionalLight::ScriptDirectionalLight() :ScriptLightObject("Directional
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->Set(ScriptString("bounds"), ScriptMethod(AccessBounds));
+    ScriptMethod(objectTemplate, "bounds", AccessBounds);
     
     ScriptInherit(scriptLightObject);
 }
@@ -78,8 +77,8 @@ ScriptSpotLight::ScriptSpotLight() :ScriptLightObject("SpotLight") {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("cutoff"), GetCutoff);
-    objectTemplate->Set(ScriptString("setBounds"), ScriptMethod(SetBounds));
+    ScriptAccessor(objectTemplate, "cutoff", GetCutoff, 0);
+    ScriptMethod(objectTemplate, "setBounds", SetBounds);
     
     ScriptInherit(scriptLightObject);
 }
@@ -105,8 +104,8 @@ ScriptPositionalLight::ScriptPositionalLight() :ScriptLightObject("PositionalLig
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("omniDirectional"), GetOmniDirectional);
-    objectTemplate->Set(ScriptString("setBounds"), ScriptMethod(SetBounds));
+    ScriptAccessor(objectTemplate, "omniDirectional", GetOmniDirectional, 0);
+    ScriptMethod(objectTemplate, "setBounds", SetBounds);
     
     ScriptInherit(scriptLightObject);
 }

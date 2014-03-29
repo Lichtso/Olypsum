@@ -17,7 +17,8 @@ enum logMessageType {
     warning_log,
     error_log,
     shader_log,
-    script_log
+    script_log,
+    network_log
 };
 
 /*! Logs a message to console and stdout

@@ -19,12 +19,12 @@ void NetworkManager::init() {
             MsgPack::Deserializer deserializer(socket);
             deserializer.deserialize([this](std::unique_ptr<MsgPack::Element> parsed) {
 				std::ostringstream stream;
-				stream << "NETWORK Received: " << *parsed;
-				log(typeless_log, stream.str());
+				stream << *parsed;
+				log(network_log, stream.str());
                 return false;
             });
         }catch(netLink::Exception exc) {
-            log(error_log, "Exception "+stringOf(exc.code));
+            log(network_log, "Exception "+stringOf(exc.code));
         }
     };
 }
@@ -33,7 +33,7 @@ void NetworkManager::gameTick() {
 	try {
 		socketManager.listen();
 	}catch(netLink::Exception exc) {
-		log(error_log, "Exception "+stringOf(exc.code));
+		log(network_log, "Exception "+stringOf(exc.code));
 	}
     profiler.leaveSection("Networking");
 }
@@ -65,7 +65,7 @@ void NetworkManager::enable() {
         serializer.serialize();
         udpSocket->pubsync();
     }catch(netLink::Exception exc) {
-        log(error_log, "Exception "+stringOf(exc.code));
+        log(network_log, "Exception "+stringOf(exc.code));
     }
 }
 

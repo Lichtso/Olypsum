@@ -65,13 +65,13 @@ void ScriptGUIButton::GetState(v8::Local<v8::String> property, const v8::Propert
     GUIButton* objectPtr = getDataOfInstance<GUIButton>(args.This());
     switch(objectPtr->state) {
         case GUIButton::State::Released:
-            ScriptReturn(ScriptString("released"));
+            ScriptReturn("released");
             return;
         case GUIButton::State::Highlighted:
-            ScriptReturn(ScriptString("highlighted"));
+            ScriptReturn("highlighted");
             return;
         case GUIButton::State::Pressed:
-            ScriptReturn(ScriptString("pressed"));
+            ScriptReturn("pressed");
             return;
     }
 }
@@ -94,19 +94,19 @@ void ScriptGUIButton::GetType(v8::Local<v8::String> property, const v8::Property
     GUIButton* objectPtr = getDataOfInstance<GUIButton>(args.This());
     switch(objectPtr->type) {
         case GUIButton::Type::Normal:
-            ScriptReturn(ScriptString("normal"));
+            ScriptReturn("normal");
             return;
         case GUIButton::Type::Delete:
-            ScriptReturn(ScriptString("delete"));
+            ScriptReturn("delete");
             return;
         case GUIButton::Type::Add:
-            ScriptReturn(ScriptString("add"));
+            ScriptReturn("add");
             return;
         case GUIButton::Type::Edit:
-            ScriptReturn(ScriptString("edit"));
+            ScriptReturn("edit");
             return;
         case GUIButton::Type::Lockable:
-            ScriptReturn(ScriptString("lockable"));
+            ScriptReturn("lockable");
             return;
     }
 }
@@ -132,13 +132,13 @@ ScriptGUIButton::ScriptGUIButton() :ScriptGUIFramedView("GUIButton", Constructor
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("sizeAlignment"), GetSizeAlignment<GUIButton>, SetSizeAlignment<GUIButton>);
-    objectTemplate->SetAccessor(ScriptString("paddingX"), GetPaddingX, SetPaddingX);
-    objectTemplate->SetAccessor(ScriptString("paddingY"), GetPaddingY, SetPaddingY);
-    objectTemplate->SetAccessor(ScriptString("enabled"), GetEnabled, SetEnabled);
-    objectTemplate->SetAccessor(ScriptString("state"), GetState, SetState);
-    objectTemplate->SetAccessor(ScriptString("type"), GetType, SetType);
-    
+    ScriptAccessor(objectTemplate, "sizeAlignment", GetSizeAlignment<GUIButton>, SetSizeAlignment<GUIButton>);
+    ScriptAccessor(objectTemplate, "paddingX", GetPaddingX, SetPaddingX);
+    ScriptAccessor(objectTemplate, "paddingY", GetPaddingY, SetPaddingY);
+    ScriptAccessor(objectTemplate, "enabled", GetEnabled, SetEnabled);
+    ScriptAccessor(objectTemplate, "state", GetState, SetState);
+    ScriptAccessor(objectTemplate, "type", GetType, SetType);
+
     ScriptInherit(scriptGUIFramedView);
 }
 
@@ -208,10 +208,10 @@ ScriptGUITabs::ScriptGUITabs() :ScriptGUIView("GUITabs", Constructor) {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("sizeAlignment"), GetSizeAlignment<GUITabs>, SetSizeAlignment<GUITabs>);
-    objectTemplate->SetAccessor(ScriptString("orientation"), GetOrientation<GUITabs>, SetOrientation<GUITabs>);
-    objectTemplate->SetAccessor(ScriptString("selected"), GetSelected, SetSelected);
-    objectTemplate->SetAccessor(ScriptString("deactivatable"), GetDeactivatable, SetDeactivatable);
+    ScriptAccessor(objectTemplate, "sizeAlignment", GetSizeAlignment<GUITabs>, SetSizeAlignment<GUITabs>);
+    ScriptAccessor(objectTemplate, "orientation", GetOrientation<GUITabs>, SetOrientation<GUITabs>);
+    ScriptAccessor(objectTemplate, "selected", GetSelected, SetSelected);
+    ScriptAccessor(objectTemplate, "deactivatable", GetDeactivatable, SetDeactivatable);
     
     ScriptInherit(scriptGUIView);
 }

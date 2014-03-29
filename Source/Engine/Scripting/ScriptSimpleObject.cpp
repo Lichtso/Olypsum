@@ -85,13 +85,13 @@ ScriptCamObject::ScriptCamObject() :ScriptSimpleObject("CamObject") {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("fov"), GetFov, SetFov);
-    objectTemplate->SetAccessor(ScriptString("near"), GetNear, SetNear);
-    objectTemplate->SetAccessor(ScriptString("far"), GetFar, SetFar);
-    objectTemplate->Set(ScriptString("getViewRay"), ScriptMethod(GetViewRay));
-    objectTemplate->Set(ScriptString("setMainCam"), ScriptMethod(SetMainCam));
+    ScriptAccessor(objectTemplate, "fov", GetFov, SetFov);
+    ScriptAccessor(objectTemplate, "near", GetNear, SetNear);
+    ScriptAccessor(objectTemplate, "far", GetFar, SetFar);
+    ScriptMethod(objectTemplate, "getViewRay", GetViewRay);
+    ScriptMethod(objectTemplate, "setMainCam", SetMainCam);
+    ScriptMethod(*functionTemplate, "getMainCam", GetMainCam);
     
-    (*functionTemplate)->Set(ScriptString("getMainCam"), ScriptMethod(GetMainCam));
     ScriptInherit(scriptBaseObject);
 }
 
@@ -102,7 +102,7 @@ void ScriptSoundObject::GetSoundTrack(v8::Local<v8::String> property, const v8::
     std::string name;
     FilePackage* filePackage = fileManager.findResource<SoundTrack>(objectPtr->soundTrack, name);
     if(filePackage)
-        ScriptReturn(ScriptString(fileManager.getPathOfResource(filePackage, name).c_str()));
+        ScriptReturn(fileManager.getPathOfResource(filePackage, name).c_str());
 }
 
 void ScriptSoundObject::SetSoundTrack(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
@@ -157,11 +157,11 @@ void ScriptSoundObject::GetMode(v8::Local<v8::String> property, const v8::Proper
     SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
     switch(objectPtr->mode) {
         case SoundObject::Mode::Looping:
-            ScriptReturn(ScriptString("looping"));
+            ScriptReturn("looping");
         case SoundObject::Mode::Hold:
-            ScriptReturn(ScriptString("hold"));
+            ScriptReturn("hold");
         case SoundObject::Mode::Dispose:
-            ScriptReturn(ScriptString("dispose"));
+            ScriptReturn("dispose");
     }
 }
 
@@ -182,11 +182,11 @@ ScriptSoundObject::ScriptSoundObject() :ScriptSimpleObject("SoundObject") {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("soundTrack"), GetSoundTrack, SetSoundTrack);
-    objectTemplate->SetAccessor(ScriptString("timeOffset"), GetTimeOffset, SetTimeOffset);
-    objectTemplate->SetAccessor(ScriptString("volume"), GetVolume, SetVolume);
-    objectTemplate->SetAccessor(ScriptString("playing"), GetPlaying, SetPlaying);
-    objectTemplate->SetAccessor(ScriptString("mode"), GetMode, SetMode);
+    ScriptAccessor(objectTemplate, "soundTrack", GetSoundTrack, SetSoundTrack);
+    ScriptAccessor(objectTemplate, "timeOffset", GetTimeOffset, SetTimeOffset);
+    ScriptAccessor(objectTemplate, "volume", GetVolume, SetVolume);
+    ScriptAccessor(objectTemplate, "playing", GetPlaying, SetPlaying);
+    ScriptAccessor(objectTemplate, "mode", GetMode, SetMode);
     
     ScriptInherit(scriptBaseObject);
 }

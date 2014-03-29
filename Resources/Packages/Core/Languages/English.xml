@@ -7,7 +7,7 @@
 	<Entry key="options">Options</Entry>
 	<Entry key="credits">Credits</Entry>
 	<Entry key="quitGame">Quit Game</Entry>
-	<Entry key="back">Back</Entry>
+	<Entry key="return">Return</Entry>
 	<Entry key="mainMenu">Main Menu</Entry>
 	<Entry key="graphics">Graphics</Entry>
 	<Entry key="language">Language</Entry>
@@ -28,7 +28,7 @@
 	<Entry key="ssaoQuality">SSAO Quality</Entry>
 	<Entry key="blendingQuality">Blending Quality</Entry>
 	<Entry key="fullScreen">Full Screen</Entry>
-	<Entry key="retina">Retina</Entry>
+	<Entry key="highDefinition">HD Display</Entry>
 	<Entry key="on">On</Entry>
 	<Entry key="off">Off</Entry>
 	<Entry key="ipV4">IP v4</Entry>
@@ -41,7 +41,7 @@
 	<Entry key="ok">Ok</Entry>
 	<Entry key="name">Name</Entry>
 	<Entry key="newGame">New Game</Entry>
-	<Entry key="remove">Remove</Entry>
+	<Entry key="delete">Delete</Entry>
     <Entry key="packages">Packages</Entry>
 	<Entry key="packageError_ContainerMissing">Could not find container by name:</Entry>
 	<Entry key="packageError_CouldNotLoad">Could not load level package by name:</Entry>

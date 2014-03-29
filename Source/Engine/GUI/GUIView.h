@@ -40,7 +40,7 @@ class GUIFramedView : public GUIView {
 
 class GUIScreenView : public GUIView {
     public:
-    GUIRect *modalView, *focused;
+    GUIRect *modalView, *focus;
     GUIScreenView();
     ~GUIScreenView();
     void updateContent();
