@@ -68,7 +68,7 @@ void AppMain() {
         char* buffer = new char[2048];
         sprintf(buffer, "Date / Time: %04d.%02d.%02d %02d:%02d:%02d", 1900+date->tm_year, 1+date->tm_mon, date->tm_mday, date->tm_hour, date->tm_min, date->tm_sec);
         log(typeless_log, buffer);
-        log(typeless_log, std::string("Engine Version: ")+VERSION);
+        log(typeless_log, std::string("Engine Version: ")+engineVersion);
         //log(typeless_log, std::string("Multi Threading: ")+stringOf(std::thread::hardware_concurrency()));
         char* glStr = NULL;
         GLint glAuxIa, glAuxIb;

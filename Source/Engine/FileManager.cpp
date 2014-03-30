@@ -66,8 +66,8 @@ bool FilePackage::init() {
     }
     rapidxml::xml_node<xmlUsedCharType> *node,
                                         *packageNode = doc.first_node("Package"),
-                                        *version = packageNode->first_node("EngineVersion");
-    if(version && compareVersions(version->first_attribute()->value(), VERSION) == -1) {
+                                        *versionNode = packageNode->first_node("EngineVersion");
+    if(versionNode && compareVersions(versionNode->first_attribute()->value(), engineVersion) == -1) {
         menu.setModalView("error", fileManager.localizeString("packageError_Version"), nullptr);
         return false;
     }
@@ -91,7 +91,7 @@ bool FilePackage::init() {
             std::size_t hashCmp;
             rapidxml::xml_attribute<xmlUsedCharType>* attribute = packageNode->first_attribute("hash");
             if(!attribute) continue;
-            sscanf(attribute->value(), "%lx", &hashCmp);
+            sscanf(attribute->value(), HEX64, &hashCmp);
             
             attribute = packageNode->first_attribute("name");
             if(!attribute) continue;
@@ -106,11 +106,7 @@ bool FilePackage::init() {
             
             if(hashCmp != package->hash) {
                 char buffer[32];
-#ifdef WIN32
-                sprintf(buffer, "%llx", package->hash);
-#else
-                sprintf(buffer, "%lx", package->hash);
-#endif
+                sprintf(buffer, HEX64, package->hash);
                 log(warning_log, std::string("Expected checksum ")+buffer+" for package "+dependencyName);
                 menu.setModalView("error", fileManager.localizeString("packageError_Dependency")+'\n'+name+" / "+dependencyName, nullptr);
                 return false;
@@ -295,7 +291,7 @@ void OptionsState::loadOptions() {
     std::unique_ptr<char[]> fileData = readXmlFile(doc, supportPath+"Options.xml", false);
     if(fileData) {
         rapidxml::xml_node<xmlUsedCharType>* options = doc.first_node("Options");
-        if(compareVersions(options->first_node("EngineVersion")->first_attribute()->value(), VERSION) >= 0) {
+        if(compareVersions(options->first_node("EngineVersion")->first_attribute()->value(), engineVersion) >= 0) {
             language = options->first_node("Language")->first_attribute()->value();
             rapidxml::xml_node<xmlUsedCharType>* optionGroup = options->first_node("Multiplayer");
             nickname = optionGroup->first_node("Nickname")->first_attribute()->value();
@@ -336,7 +332,7 @@ void OptionsState::saveOptions() {
     rapidxml::xml_node<xmlUsedCharType>* options = doc.allocate_node(rapidxml::node_element);
     options->name("Options");
     doc.append_node(options);
-    addXMLNode(doc, options, "EngineVersion", VERSION);
+    addXMLNode(doc, options, "EngineVersion", engineVersion);
     addXMLNode(doc, options, "Language", language.c_str());
     
     rapidxml::xml_node<xmlUsedCharType>* optionGroup = doc.allocate_node(rapidxml::node_element);

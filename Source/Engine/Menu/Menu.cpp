@@ -452,7 +452,7 @@ void Menu::setMainMenu() {
     }
     
     GUILabel* label = new GUILabel();
-    label->text = fileManager.localizeString("version")+": "+VERSION+" (Alpha)\nDO NOT DISTRIBUTE!";
+    label->text = fileManager.localizeString("version")+": "+engineVersion+" (Alpha)\nDO NOT DISTRIBUTE!";
     label->textAlignment = GUILabel::TextAlignment::Left;
     label->sizeAlignment = GUISizeAlignment::Height;
     label->width = screenView->width*0.4;

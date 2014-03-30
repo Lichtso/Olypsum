@@ -51,7 +51,9 @@
 #define getcwd _getcwd
 #define popen _popen
 #define pclose _pclose
+#define HEX64 "%llx"
 #else
+#define HEX64 "%lx"
 #include <SDL2/SDL.h>
 #include <vorbis/vorbisfile.h>
 #include <dirent.h>

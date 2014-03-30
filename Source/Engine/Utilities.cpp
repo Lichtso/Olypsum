@@ -305,6 +305,11 @@ char compareVersions(std::string strA, std::string strB) {
     return (a.size() > i) ? 1 : 0;
 }
 
+#ifdef __APPLE__
+const char* engineVersion = NULL;
+#else
+const char* engineVersion = VERSION;
+#endif
 const Uint8* keyState = NULL;
 int keyStateSize = 0;
 SDL_Window* mainWindow = NULL;

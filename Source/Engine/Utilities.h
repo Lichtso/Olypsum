@@ -154,6 +154,7 @@ double getTime();
  */
 char compareVersions(std::string a, std::string b);
 
+extern const char* engineVersion;
 extern const Uint8* keyState;
 extern int keyStateSize;
 extern SDL_Window* mainWindow;

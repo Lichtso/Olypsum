@@ -202,7 +202,7 @@ bool LevelManager::newGame(FilePackage* package, const std::string& name) {
     rapidxml::xml_node<xmlUsedCharType>* rootNode = doc.allocate_node(rapidxml::node_element);
     rootNode->name("Status");
     doc.append_node(rootNode);
-    addXMLNode(doc, rootNode, "EngineVersion", VERSION);
+    addXMLNode(doc, rootNode, "EngineVersion", engineVersion);
     addXMLNode(doc, rootNode, "Package", package->name.c_str());
     addXMLNode(doc, rootNode, "Level", package->initialContainer.c_str());
     writeXmlFile(doc, supportPath+"Saves/"+name+"/Status.xml", true);
