@@ -21,6 +21,18 @@ enum logMessageType {
     network_log
 };
 
+/*! Performs CityHash64 on a c-string
+ @param str The string to be hashed
+ @return 64bit hash value
+ */
+uint64_t CityHash64(const char* str);
+
+/*! Performs CityHash64 on a std::string
+ @param str The string to be hashed
+ @return 64bit hash value
+ */
+uint64_t CityHash64(std::string str);
+
 /*! Logs a message to console and stdout
  @param type Type of the message
  @param message Message to be loged

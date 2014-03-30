@@ -30,6 +30,7 @@
 		112307F81718A083001167DF /* ScriptLightObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112307F61718A082001167DF /* ScriptLightObject.cpp */; };
 		112672E91699BBFD000BB805 /* Links.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112672E71699BBFD000BB805 /* Links.cpp */; };
 		112672EC1699BCF1000BB805 /* TerrainObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112672EA1699BCF0000BB805 /* TerrainObject.cpp */; };
+		1129224418E80F2800BD9F21 /* city.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1129224218E80F2800BD9F21 /* city.cc */; };
 		112BF180162AFE8100CF0C0D /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112BF17E162AFE8100CF0C0D /* Object.cpp */; };
 		11329D5A16BD8A2A000CC025 /* Profiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11329D5816BD8A29000CC025 /* Profiler.cpp */; };
 		114325E218671C8800A6ADC3 /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 114325E018671C8800A6ADC3 /* Menu.cpp */; };
@@ -152,6 +153,8 @@
 		112672E81699BBFD000BB805 /* Links.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Links.h; sourceTree = "<group>"; };
 		112672EA1699BCF0000BB805 /* TerrainObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TerrainObject.cpp; sourceTree = "<group>"; };
 		112672EB1699BCF0000BB805 /* TerrainObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TerrainObject.h; sourceTree = "<group>"; };
+		1129224218E80F2800BD9F21 /* city.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = city.cc; sourceTree = "<group>"; };
+		1129224318E80F2800BD9F21 /* city.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = city.h; sourceTree = "<group>"; };
 		112BF17E162AFE8100CF0C0D /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Object.cpp; sourceTree = "<group>"; };
 		112BF17F162AFE8100CF0C0D /* Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Object.h; sourceTree = "<group>"; };
 		11329D5816BD8A29000CC025 /* Profiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Profiler.cpp; sourceTree = "<group>"; };
@@ -362,6 +365,15 @@
 			name = "Other Frameworks";
 			sourceTree = "<group>";
 		};
+		1129224118E80F2800BD9F21 /* cityhash */ = {
+			isa = PBXGroup;
+			children = (
+				1129224318E80F2800BD9F21 /* city.h */,
+				1129224218E80F2800BD9F21 /* city.cc */,
+			);
+			path = cityhash;
+			sourceTree = "<group>";
+		};
 		114325DF18671C7600A6ADC3 /* Menu */ = {
 			isa = PBXGroup;
 			children = (
@@ -386,6 +398,7 @@
 			isa = PBXGroup;
 			children = (
 				11894C3218C631AD000467C1 /* Header.h */,
+				1129224118E80F2800BD9F21 /* cityhash */,
 				11A79B69153C2FE9002B9F0A /* Utilities.h */,
 				11A79B68153C2FE9002B9F0A /* Utilities.cpp */,
 				11A3255417089E2100B038D2 /* Network.h */,
@@ -671,6 +684,7 @@
 				11329D5A16BD8A2A000CC025 /* Profiler.cpp in Sources */,
 				117CBA9C16EBDC6800307B94 /* ScriptObject.cpp in Sources */,
 				11AD22DB16FCE77200B9FB12 /* main.cpp in Sources */,
+				1129224418E80F2800BD9F21 /* city.cc in Sources */,
 				114325EE186724B000A6ADC3 /* OptionsMenu.cpp in Sources */,
 				11A3255517089E2100B038D2 /* Network.cpp in Sources */,
 				11511420170C1A0E00F77236 /* ScriptIntersection.cpp in Sources */,

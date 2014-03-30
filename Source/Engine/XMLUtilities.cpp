@@ -102,15 +102,15 @@ rapidxml::xml_node<xmlUsedCharType>* writeTransformationXML(rapidxml::xml_docume
 }
 
 std::size_t hashXMLNode(rapidxml::xml_node<xmlUsedCharType>* node) {
-    std::size_t hash = std::hash<std::string>()(node->name());
+    std::size_t hash = CityHash64(node->name());
     if(node->value())
-        hash ^= std::hash<std::string>()(node->value());
+        hash ^= CityHash64(node->value());
     
     rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute();
     while(attribute) {
-        hash ^= std::hash<std::string>()(attribute->name());
+        hash ^= CityHash64(attribute->name());
         if(attribute->value())
-            hash ^= std::hash<std::string>()(attribute->value());
+            hash ^= CityHash64(attribute->value());
         attribute = attribute->next_attribute();
     }
     

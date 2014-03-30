@@ -1,4 +1,4 @@
-V8 API: Create Objects
+V8 -> JSC, Object-Constructors
 Implement btSoftBody
 Logarithmic Shadow Mapping
 Water physics
@@ -23,7 +23,6 @@ Performance issue of explosions
 
 Bugs:
 V8: Garbage Collection Crash
-Windows: Checksums
 Light animation in test scene
 Parallax Occlusion / Position
 Ortho projection / Logarithmic depth buffer

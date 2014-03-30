@@ -205,7 +205,7 @@ void ScriptAnimation::AddFrames(const v8::FunctionCallbackInfo<v8::Value>& args)
     if(accelerations->Length() == 0)
         return;
     
-    v8::Handle<v8::Value> defaultValue = accessProperty(args[0]->ToObject(), cStrOfV8(args[1]), v8::Undefined(v8::Isolate::GetCurrent()));
+    v8::Handle<v8::Value> defaultValue = accessProperty(args[0]->ToObject(), cStrOfV8(args[1]), v8::Handle<v8::Value>());
     if(defaultValue.IsEmpty())
         return ScriptException("Animation addFrames(): Invalid property");
     

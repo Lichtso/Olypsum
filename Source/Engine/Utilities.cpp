@@ -6,7 +6,16 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
+#include "cityhash/city.h"
 #include "Menu/Menu.h"
+
+uint64_t CityHash64(const char* str) {
+    return CityHash64(str, strlen(str));
+}
+
+uint64_t CityHash64(std::string str) {
+    return CityHash64(str.c_str(), str.length());
+}
 
 void log(logMessageType type, std::string message) {
     std::string typeStr;

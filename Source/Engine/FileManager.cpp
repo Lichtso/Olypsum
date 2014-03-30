@@ -41,11 +41,11 @@ bool FilePackage::init() {
     };
     
     auto hashFileName = [this](const std::string& path, std::string name) {
-        hash ^= std::hash<std::string>()(name);
+        hash ^= CityHash64(name);
     };
     
     auto hashDirectoryName = [this](const std::string& path, std::string name) {
-        hash ^= std::hash<std::string>()(name);
+        hash ^= CityHash64(name);
         return true;
     };
     
