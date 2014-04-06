@@ -13,7 +13,7 @@
 
 class ScriptLightObject : public ScriptPhysicObject {
     static void GetRange(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
-    static void AccessColor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(AccessColor);
     protected:
     ScriptLightObject(const char* name) :ScriptPhysicObject(name) { }
     public:
@@ -21,21 +21,21 @@ class ScriptLightObject : public ScriptPhysicObject {
 };
 
 class ScriptDirectionalLight : public ScriptLightObject {
-    static void AccessBounds(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(AccessBounds);
     public:
     ScriptDirectionalLight();
 };
 
 class ScriptSpotLight : public ScriptLightObject {
     static void GetCutoff(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
-    static void SetBounds(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(SetBounds);
     public:
     ScriptSpotLight();
 };
 
 class ScriptPositionalLight : public ScriptLightObject {
     static void GetOmniDirectional(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
-    static void SetBounds(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(SetBounds);
     public:
     ScriptPositionalLight();
 };

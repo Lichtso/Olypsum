@@ -141,7 +141,6 @@ TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelL
     delete [] indecies;
     
     ScriptNewInstance(scriptTerrainObject);
-    (*scriptInstance)->SetIndexedPropertiesToExternalArrayData(heights, v8::kExternalFloatArray, width*length);
     updateModel();
 }
 

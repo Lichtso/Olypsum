@@ -14,7 +14,7 @@
 class ScriptMatterObject : public ScriptPhysicObject {
     static void GetIntegrity(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetIntegrity(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
-    static void AttachDecal(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(AttachDecal);
     protected:
     ScriptMatterObject(const char* name) :ScriptPhysicObject(name) { }
     public:
@@ -28,20 +28,20 @@ class ScriptRigidObject : public ScriptMatterObject {
     static void SetMass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetKinematic(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetKinematic(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
-    static void AccessAngularVelocity(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessLinearVelocity(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessAngularFactor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessLinearFactor(const v8::FunctionCallbackInfo<v8::Value>& args);
     static void GetAngularDamping(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetAngularDamping(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetLinearDamping(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetLinearDamping(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
-    static void AccessTransformation(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void ApplyImpulseAtPoint(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void ApplyAngularImpulse(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void ApplyLinearImpulse(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetBoneByName(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessTextureAnimationTime(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(AccessAngularVelocity);
+    ScriptDeclareMethod(AccessLinearVelocity);
+    ScriptDeclareMethod(AccessAngularFactor);
+    ScriptDeclareMethod(AccessLinearFactor);
+    ScriptDeclareMethod(AccessTransformation);
+    ScriptDeclareMethod(ApplyImpulseAtPoint);
+    ScriptDeclareMethod(ApplyAngularImpulse);
+    ScriptDeclareMethod(ApplyLinearImpulse);
+    ScriptDeclareMethod(GetBoneByName);
+    ScriptDeclareMethod(AccessTextureAnimationTime);
     public:
     ScriptRigidObject();
 };
@@ -51,7 +51,8 @@ class ScriptTerrainObject : public ScriptMatterObject {
     static void GetLength(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void GetBitDepth(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetBitDepth(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
-    static void UpdateModel(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(AccessCell);
+    ScriptDeclareMethod(UpdateModel);
     public:
     ScriptTerrainObject();
 };

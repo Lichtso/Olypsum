@@ -107,7 +107,6 @@ void ScriptRigidObject::AccessAngularVelocity(const v8::FunctionCallbackInfo<v8:
             body->activate();
         }
         ScriptReturn(args[0]);
-        return;
     }
     ScriptReturn(scriptVector3->newInstance(body->getAngularVelocity()));
 }
@@ -122,7 +121,6 @@ void ScriptRigidObject::AccessLinearVelocity(const v8::FunctionCallbackInfo<v8::
             body->activate();
         }
         ScriptReturn(args[0]);
-        return;
     }
     ScriptReturn(scriptVector3->newInstance(body->getLinearVelocity()));
 }
@@ -135,7 +133,6 @@ void ScriptRigidObject::AccessAngularFactor(const v8::FunctionCallbackInfo<v8::V
         if(isValidVector(vec))
             body->setAngularFactor(vec);
         ScriptReturn(args[0]);
-        return;
     }
     ScriptReturn(scriptVector3->newInstance(body->getAngularFactor()));
 }
@@ -148,7 +145,6 @@ void ScriptRigidObject::AccessLinearFactor(const v8::FunctionCallbackInfo<v8::Va
         if(isValidVector(vec))
             body->setLinearFactor(vec);
         ScriptReturn(args[0]);
-        return;
     }
     ScriptReturn(scriptVector3->newInstance(body->getLinearFactor()));
 }
@@ -189,7 +185,6 @@ void ScriptRigidObject::AccessTransformation(const v8::FunctionCallbackInfo<v8::
             objectPtr->setKinematic(true);
         }
         ScriptReturn(args[0]);
-        return;
     }else
         ScriptReturn(scriptMatrix4->newInstance(Matrix4(objectPtr->getTransformation())));
 }
@@ -260,7 +255,6 @@ void ScriptRigidObject::AccessTextureAnimationTime(const v8::FunctionCallbackInf
     if(args.Length() == 2 && args[1]->IsNumber()) {
         objectPtr->textureAnimationTime[args[0]->Uint32Value()] = args[1]->NumberValue();
         ScriptReturn(args[1]);
-        return;
     }else
         ScriptReturn(objectPtr->textureAnimationTime[args[0]->Uint32Value()]);
 }
@@ -318,6 +312,28 @@ void ScriptTerrainObject::SetBitDepth(v8::Local<v8::String> property, v8::Local<
     objectPtr->bitDepth = value->Uint32Value() >> 2;
 }
 
+void ScriptTerrainObject::AccessCell(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    ScriptScope();
+    TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(args.This());
+    if(args.Length() < 2)
+        return ScriptException("TerrainObject accessCell(): Too few arguments");
+    if(!args[0]->IsUint32() || !args[1]->IsUint32())
+        return ScriptException("TerrainObject accessCell(): Invalid argument");
+    auto x = args[0]->Uint32Value(), y = args[1]->Uint32Value();
+    if(x > objectPtr->width || y > objectPtr->length)
+        return ScriptException("TerrainObject accessCell(): Out of bounds");
+    
+    auto value = &objectPtr->heights[objectPtr->width*y+x];
+    if(args.Length() == 3) {
+        if(!args[2]->IsNumber())
+            return ScriptException("TerrainObject accessCell(): Invalid argument");
+        *value = args[2]->NumberValue();
+        ScriptReturn(args[2]);
+    }else{
+        ScriptReturn(*value);
+    }
+}
+
 void ScriptTerrainObject::UpdateModel(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ScriptScope();
     TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(args.This());
@@ -336,6 +352,7 @@ ScriptTerrainObject::ScriptTerrainObject() :ScriptMatterObject("TerrainObject") 
     ScriptAccessor(objectTemplate, "angularFriction", GetAngularFriction, SetAngularFriction);
     ScriptAccessor(objectTemplate, "linearFriction", GetLinearFriction, SetLinearFriction);
     ScriptAccessor(objectTemplate, "restitution", GetRestitution, SetRestitution);
+    ScriptMethod(objectTemplate, "accessCell", AccessCell);
     ScriptMethod(objectTemplate, "updateModel", UpdateModel);
     
     ScriptInherit(scriptMatterObject);

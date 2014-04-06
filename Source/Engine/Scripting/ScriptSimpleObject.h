@@ -25,9 +25,9 @@ class ScriptCamObject : public ScriptSimpleObject {
     static void SetNear(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetFar(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetFar(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
-    static void GetViewRay(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void SetMainCam(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetMainCam(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(GetViewRay);
+    ScriptDeclareMethod(SetMainCam);
+    ScriptDeclareMethod(GetMainCam);
     public:
     ScriptCamObject();
 };

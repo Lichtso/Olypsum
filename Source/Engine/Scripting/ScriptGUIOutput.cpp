@@ -24,13 +24,10 @@ void ScriptGUILabel::GetTextAlignment(v8::Local<v8::String> property, const v8::
     switch(objectPtr->textAlignment) {
         case GUILabel::TextAlignment::Left:
             ScriptReturn("left");
-            return;
         case GUILabel::TextAlignment::Middle:
             ScriptReturn("middle");
-            return;
         case GUILabel::TextAlignment::Right:
             ScriptReturn("right");
-            return;
     }
 }
 
@@ -96,7 +93,6 @@ void ScriptGUILabel::AccessColor(const v8::FunctionCallbackInfo<v8::Value>& args
     if(args.Length() == 1 && scriptQuaternion->isCorrectInstance(args[0])) {
         objectPtr->color = Color4(scriptQuaternion->getDataOfInstance(args[0]));
         ScriptReturn(args[0]);
-        return;
     }else
         ScriptReturn(scriptQuaternion->newInstance(objectPtr->color.getQuaternion()));
 }

@@ -23,18 +23,16 @@ void ScriptBaseLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args
         linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
         args.This()->SetInternalField(0, args[0]);
         ScriptReturn(args.This());
-        return;
     }else if(args.Length() == 2 &&
              scriptBaseObject->isCorrectInstance(args[0]) && scriptBaseObject->isCorrectInstance(args[1])) {
         LinkInitializer initializer;
-        initializer.object[0] = scriptBaseObject->getDataOfInstance<BaseObject>(args[0]);
-        initializer.object[1] = scriptBaseObject->getDataOfInstance<BaseObject>(args[1]);
+        initializer.object[0] = getDataOfInstance<BaseObject>(args[0]);
+        initializer.object[1] = getDataOfInstance<BaseObject>(args[1]);
         BaseLink* linkPtr = new BaseLink();
         if(linkPtr->init(initializer)) {
             linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
             args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
             ScriptReturn(args.This());
-            return;
         }else
             return ScriptException("BaseLink Constructor: Invalid argument");
     }
@@ -139,14 +137,13 @@ void ScriptPointPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value
     if(args.Length() == 1 && args[0]->IsExternal()) {
         args.This()->SetInternalField(0, args[0]);
         ScriptReturn(args.This());
-        return;
     }else if(args.Length() == 4 &&
              scriptRigidObject->isCorrectInstance(args[0]) && scriptRigidObject->isCorrectInstance(args[1]) &&
              scriptVector3->isCorrectInstance(args[2]) && scriptVector3->isCorrectInstance(args[3])) {
         LinkInitializer initializer;
         RigidObject *a, *b;
-        initializer.object[0] = a = scriptBaseObject->getDataOfInstance<RigidObject>(args[0]);
-        initializer.object[1] = b = scriptBaseObject->getDataOfInstance<RigidObject>(args[1]);
+        initializer.object[0] = a = getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = getDataOfInstance<RigidObject>(args[1]);
         PhysicLink* linkPtr = new PhysicLink();
         if(linkPtr->init(initializer, new btPoint2PointConstraint(*a->getBody(), *b->getBody(),
                                                                   scriptVector3->getDataOfInstance(args[2]),
@@ -154,7 +151,6 @@ void ScriptPointPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value
             linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
             args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
             ScriptReturn(args.This());
-            return;
         }else
             return ScriptException("PointPhysicLink Constructor: Invalid argument");
     }
@@ -204,15 +200,14 @@ void ScriptGearPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>
     if(args.Length() == 1 && args[0]->IsExternal()) {
         args.This()->SetInternalField(0, args[0]);
         ScriptReturn(args.This());
-        return;
     }else if(args.Length() == 5 &&
              scriptRigidObject->isCorrectInstance(args[0]) && scriptRigidObject->isCorrectInstance(args[1]) &&
              scriptVector3->isCorrectInstance(args[2]) && scriptVector3->isCorrectInstance(args[3]) &&
              args[4]->IsNumber()) {
         LinkInitializer initializer;
         RigidObject *a, *b;
-        initializer.object[0] = a = scriptBaseObject->getDataOfInstance<RigidObject>(args[0]);
-        initializer.object[1] = b = scriptBaseObject->getDataOfInstance<RigidObject>(args[1]);
+        initializer.object[0] = a = getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = getDataOfInstance<RigidObject>(args[1]);
         PhysicLink* linkPtr = new PhysicLink();
         if(linkPtr->init(initializer, new btGearConstraint(*a->getBody(), *b->getBody(),
                                                            scriptVector3->getDataOfInstance(args[2]),
@@ -221,7 +216,6 @@ void ScriptGearPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>
             linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
             args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
             ScriptReturn(args.This());
-            return;
         }else
             return ScriptException("GearPhysicLink Constructor: Invalid argument");
     }
@@ -286,14 +280,13 @@ void ScriptHingePhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value
     if(args.Length() == 1 && args[0]->IsExternal()) {
         args.This()->SetInternalField(0, args[0]);
         ScriptReturn(args.This());
-        return;
     }else if(args.Length() == 4 &&
              scriptRigidObject->isCorrectInstance(args[0]) && scriptRigidObject->isCorrectInstance(args[1]) &&
              scriptMatrix4->isCorrectInstance(args[2]) && scriptMatrix4->isCorrectInstance(args[3])) {
         LinkInitializer initializer;
         RigidObject *a, *b;
-        initializer.object[0] = a = scriptBaseObject->getDataOfInstance<RigidObject>(args[0]);
-        initializer.object[1] = b = scriptBaseObject->getDataOfInstance<RigidObject>(args[1]);
+        initializer.object[0] = a = getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = getDataOfInstance<RigidObject>(args[1]);
         PhysicLink* linkPtr = new PhysicLink();
         if(linkPtr->init(initializer, new btHingeConstraint(*a->getBody(), *b->getBody(),
                                                             scriptMatrix4->getDataOfInstance(args[2])->getBTTransform(),
@@ -302,7 +295,6 @@ void ScriptHingePhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value
             linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
             args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
             ScriptReturn(args.This());
-            return;
         }else
             return ScriptException("HingePhysicLink Constructor: Invalid argument");
     }
@@ -438,14 +430,13 @@ void ScriptSliderPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Valu
     if(args.Length() == 1 && args[0]->IsExternal()) {
         args.This()->SetInternalField(0, args[0]);
         ScriptReturn(args.This());
-        return;
     }else if(args.Length() == 4 &&
              scriptRigidObject->isCorrectInstance(args[0]) && scriptRigidObject->isCorrectInstance(args[1]) &&
              scriptMatrix4->isCorrectInstance(args[2]) && scriptMatrix4->isCorrectInstance(args[3])) {
         LinkInitializer initializer;
         RigidObject *a, *b;
-        initializer.object[0] = a = scriptBaseObject->getDataOfInstance<RigidObject>(args[0]);
-        initializer.object[1] = b = scriptBaseObject->getDataOfInstance<RigidObject>(args[1]);
+        initializer.object[0] = a = getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = getDataOfInstance<RigidObject>(args[1]);
         PhysicLink* linkPtr = new PhysicLink();
         if(linkPtr->init(initializer, new btSliderConstraint(*a->getBody(), *b->getBody(),
                                                              scriptMatrix4->getDataOfInstance(args[2])->getBTTransform(),
@@ -454,7 +445,6 @@ void ScriptSliderPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Valu
             linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
             args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
             ScriptReturn(args.This());
-            return;
         }else
             return ScriptException("SliderPhysicLink Constructor: Invalid argument");
     }
@@ -691,14 +681,13 @@ void ScriptDof6PhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>
     if(args.Length() == 1 && args[0]->IsExternal()) {
         args.This()->SetInternalField(0, args[0]);
         ScriptReturn(args.This());
-        return;
     }else if(args.Length() == 4 &&
              scriptRigidObject->isCorrectInstance(args[0]) && scriptRigidObject->isCorrectInstance(args[1]) &&
              scriptMatrix4->isCorrectInstance(args[2]) && scriptMatrix4->isCorrectInstance(args[3])) {
         LinkInitializer initializer;
         RigidObject *a, *b;
-        initializer.object[0] = a = scriptBaseObject->getDataOfInstance<RigidObject>(args[0]);
-        initializer.object[1] = b = scriptBaseObject->getDataOfInstance<RigidObject>(args[1]);
+        initializer.object[0] = a = getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = getDataOfInstance<RigidObject>(args[1]);
         btTransform transA = scriptMatrix4->getDataOfInstance(args[2])->getBTTransform(),
                     transB = scriptMatrix4->getDataOfInstance(args[3])->getBTTransform();
         PhysicLink* linkPtr = new PhysicLink();
@@ -707,7 +696,6 @@ void ScriptDof6PhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>
             linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
             args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
             ScriptReturn(args.This());
-            return;
         }else
             return ScriptException("Dof6PhysicLink Constructor: Invalid argument");
     }
@@ -952,14 +940,13 @@ void ScriptConeTwistPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::V
     if(args.Length() == 1 && args[0]->IsExternal()) {
         args.This()->SetInternalField(0, args[0]);
         ScriptReturn(args.This());
-        return;
     }else if(args.Length() == 4 &&
              scriptRigidObject->isCorrectInstance(args[0]) && scriptRigidObject->isCorrectInstance(args[1]) &&
              scriptMatrix4->isCorrectInstance(args[2]) && scriptMatrix4->isCorrectInstance(args[3])) {
         LinkInitializer initializer;
         RigidObject *a, *b;
-        initializer.object[0] = a = scriptBaseObject->getDataOfInstance<RigidObject>(args[0]);
-        initializer.object[1] = b = scriptBaseObject->getDataOfInstance<RigidObject>(args[1]);
+        initializer.object[0] = a = getDataOfInstance<RigidObject>(args[0]);
+        initializer.object[1] = b = getDataOfInstance<RigidObject>(args[1]);
         PhysicLink* linkPtr = new PhysicLink();
         if(linkPtr->init(initializer, new btConeTwistConstraint(*a->getBody(), *b->getBody(),
                                                              scriptMatrix4->getDataOfInstance(args[2])->getBTTransform(),
@@ -967,7 +954,6 @@ void ScriptConeTwistPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::V
             linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
             args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
             ScriptReturn(args.This());
-            return;
         }else
             return ScriptException("ConeTwistPhysicLink Constructor: Invalid argument");
     }
@@ -1072,12 +1058,11 @@ void ScriptTransformLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>&
         linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
         args.This()->SetInternalField(0, args[0]);
         ScriptReturn(args.This());
-        return;
     }else if(args.Length() > 2 &&
              scriptBaseObject->isCorrectInstance(args[0]) && scriptBaseObject->isCorrectInstance(args[1])) {
         LinkInitializer initializer;
-        initializer.object[0] = scriptBaseObject->getDataOfInstance<BaseObject>(args[0]);
-        initializer.object[1] = scriptBaseObject->getDataOfInstance<BaseObject>(args[1]);
+        initializer.object[0] = getDataOfInstance<BaseObject>(args[0]);
+        initializer.object[1] = getDataOfInstance<BaseObject>(args[1]);
         TransformLink* linkPtr = new TransformLink();
         std::vector<btTransform> transformations;
         for(unsigned int i = 2; i < args.Length(); i ++) {
@@ -1088,7 +1073,6 @@ void ScriptTransformLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>&
         if(linkPtr->init(initializer, transformations)) {
             args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
             ScriptReturn(args.This());
-            return;
         }else
             return ScriptException("TransformLink Constructor: Invalid argument");
     }
@@ -1132,18 +1116,16 @@ void ScriptBoneLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args
         linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
         args.This()->SetInternalField(0, args[0]);
         ScriptReturn(args.This());
-        return;
     }else if(args.Length() == 3 &&
              scriptBaseObject->isCorrectInstance(args[0]) && scriptBaseObject->isCorrectInstance(args[1]) &&
              args[2]->IsString()) {
         LinkInitializer initializer;
-        initializer.object[0] = scriptBaseObject->getDataOfInstance<BaseObject>(args[0]);
-        initializer.object[1] = scriptBaseObject->getDataOfInstance<BaseObject>(args[1]);
+        initializer.object[0] = getDataOfInstance<BaseObject>(args[0]);
+        initializer.object[1] = getDataOfInstance<BaseObject>(args[1]);
         BoneLink* linkPtr = new BoneLink();
         if(linkPtr->init(initializer, linkPtr->getBoneByName(cStrOfV8(args[2])))) {
             args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
             ScriptReturn(args.This());
-            return;
         }else
             return ScriptException("BoneLink Constructor: Invalid argument");
     }

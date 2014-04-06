@@ -23,7 +23,7 @@ exports.explosion = function(object) {
 					var diffX = x-centerX, diffY = y-centerY,
 						dist = Math.sqrt(diffX*diffX+diffY*diffY)/radius;
 					if(dist < 1.0)
-						result[i][y*result[i].width+x] = Math.min(result[i][y*result[i].width+x], Math.max(0.0, pos.y-Math.cos(Math.asin(dist))/size.y));
+						result[i].accessCell(x, y, Math.min(result[i].accessCell(x, y), Math.max(0.0, pos.y-Math.cos(Math.asin(dist))/size.y)));
 				}
 			result[i].updateModel();
 		}

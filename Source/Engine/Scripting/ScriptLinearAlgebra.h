@@ -12,27 +12,25 @@
 #include "../Menu/Menu.h"
 
 class ScriptVector3 : public ScriptClass {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void ToString(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void ToJSON(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void IndexedPropertyGetter(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& args);
-    static void IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<v8::Value>& args);
-    static void GetAngle(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetSum(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetDifference(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetProduct(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetQuotient(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetDotProduct(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetCrossProduct(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetLength(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetNormalized(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetInterpolation(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void Sum(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void Subtract(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void Multiply(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void Divide(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void CrossProduct(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void Normalize(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
+    ScriptDeclareMethod(ToString);
+    ScriptDeclareMethod(ToJSON);
+    ScriptDeclareMethod(GetAngle);
+    ScriptDeclareMethod(GetSum);
+    ScriptDeclareMethod(GetDifference);
+    ScriptDeclareMethod(GetProduct);
+    ScriptDeclareMethod(GetQuotient);
+    ScriptDeclareMethod(GetDotProduct);
+    ScriptDeclareMethod(GetCrossProduct);
+    ScriptDeclareMethod(GetLength);
+    ScriptDeclareMethod(GetNormalized);
+    ScriptDeclareMethod(GetInterpolation);
+    ScriptDeclareMethod(Sum);
+    ScriptDeclareMethod(Subtract);
+    ScriptDeclareMethod(Multiply);
+    ScriptDeclareMethod(Divide);
+    ScriptDeclareMethod(CrossProduct);
+    ScriptDeclareMethod(Normalize);
     public:
     static btVector3 getDataOfInstance(const v8::Local<v8::Value>& object);
     static void setDataToInstance(const v8::Local<v8::Value>& object, const btVector3& vec);
@@ -41,26 +39,24 @@ class ScriptVector3 : public ScriptClass {
 };
 
 class ScriptQuaternion : public ScriptClass {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void ToString(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void ToJSON(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void IndexedPropertyGetter(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& args);
-    static void IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<v8::Value>& args);
-    static void GetAngle(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetAxis(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetInverse(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetSum(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetDifference(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetProduct(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetDotProduct(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetLength(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetNormalized(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetInterpolation(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void SetRotation(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void Sum(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void Subtract(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void Multiply(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void Normalize(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
+    ScriptDeclareMethod(ToString);
+    ScriptDeclareMethod(ToJSON);
+    ScriptDeclareMethod(GetAngle);
+    ScriptDeclareMethod(GetAxis);
+    ScriptDeclareMethod(GetInverse);
+    ScriptDeclareMethod(GetSum);
+    ScriptDeclareMethod(GetDifference);
+    ScriptDeclareMethod(GetProduct);
+    ScriptDeclareMethod(GetDotProduct);
+    ScriptDeclareMethod(GetLength);
+    ScriptDeclareMethod(GetNormalized);
+    ScriptDeclareMethod(GetInterpolation);
+    ScriptDeclareMethod(SetRotation);
+    ScriptDeclareMethod(Sum);
+    ScriptDeclareMethod(Subtract);
+    ScriptDeclareMethod(Multiply);
+    ScriptDeclareMethod(Normalize);
     public:
     static btQuaternion getDataOfInstance(const v8::Local<v8::Value>& object);
     static void setDataToInstance(const v8::Local<v8::Value>& object, const btQuaternion& quaternion);
@@ -69,24 +65,24 @@ class ScriptQuaternion : public ScriptClass {
 };
 
 class ScriptMatrix4 : public ScriptClass {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
     static void Destructor(const v8::WeakCallbackData<v8::Object, void>& data);
-    static void ToString(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void ToJSON(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessRowX(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessRowY(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessRowZ(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessRowW(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessRotation(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void SetIdentity(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetInverse(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetProduct(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetRotatedVector(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetTransformedVector(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void Multiply(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void Scale(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void Rotate(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void Translate(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(ToString);
+    ScriptDeclareMethod(ToJSON);
+    ScriptDeclareMethod(AccessRowX);
+    ScriptDeclareMethod(AccessRowY);
+    ScriptDeclareMethod(AccessRowZ);
+    ScriptDeclareMethod(AccessRowW);
+    ScriptDeclareMethod(AccessRotation);
+    ScriptDeclareMethod(SetIdentity);
+    ScriptDeclareMethod(GetInverse);
+    ScriptDeclareMethod(GetProduct);
+    ScriptDeclareMethod(GetRotatedVector);
+    ScriptDeclareMethod(GetTransformedVector);
+    ScriptDeclareMethod(Multiply);
+    ScriptDeclareMethod(Scale);
+    ScriptDeclareMethod(Rotate);
+    ScriptDeclareMethod(Translate);
     public:
     static Matrix4* getDataOfInstance(const v8::Local<v8::Value>& object);
     static void setDataToInstance(const v8::Local<v8::Value>& object, const Matrix4& mat);

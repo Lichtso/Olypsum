@@ -27,7 +27,6 @@ void ScriptVector3::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args)
                 args.This()->Set(propertyNames[i], param);
             }
             ScriptReturn(args.This());
-            return;
         }
         
         if(!args[0]->IsObject())
@@ -47,7 +46,6 @@ void ScriptVector3::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args)
         }
     
     ScriptReturn(args.This());
-    return;
 }
 
 void ScriptVector3::ToString(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -64,23 +62,6 @@ void ScriptVector3::ToJSON(const v8::FunctionCallbackInfo<v8::Value>& args) {
     array->Set(1, v8::Number::New(v8::Isolate::GetCurrent(), vec.y()));
     array->Set(2, v8::Number::New(v8::Isolate::GetCurrent(), vec.z()));
     ScriptReturn(array);
-}
-
-void ScriptVector3::IndexedPropertyGetter(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    if(index > 2)
-        return ScriptException("Vector3 []: Invalid index");
-    const char* names[] = { "x", "y", "z" };
-    ScriptReturn(args.This()->GetRealNamedProperty(ScriptString(names[index])));
-}
-
-void ScriptVector3::IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    if(index > 2)
-        return ScriptException("Vector3 []: Invalid index");
-    const char* names[] = { "x", "y", "z" };
-    args.This()->Set(ScriptString(names[index]), value);
-    ScriptReturn(value);
 }
 
 void ScriptVector3::GetAngle(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -273,7 +254,6 @@ ScriptVector3::ScriptVector3() :ScriptClass("Vector3", Constructor) {
     instanceTemplate->Set(ScriptString("z"), v8::Number::New(v8::Isolate::GetCurrent(), 0.0), (v8::PropertyAttribute)(v8::DontDelete));
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetIndexedPropertyHandler(IndexedPropertyGetter, IndexedPropertySetter);
     ScriptMethod(objectTemplate, "toString", ToString);
     ScriptMethod(objectTemplate, "toJSON", ToJSON);
     ScriptMethod(objectTemplate, "getAngle", GetAngle);
@@ -305,7 +285,6 @@ void ScriptQuaternion::Constructor(const v8::FunctionCallbackInfo<v8::Value>& ar
     switch(args.Length()) {
         case 0:
             ScriptReturn(args.This());
-            return;
         case 1: {
             v8::Handle<v8::Value> param;
             if(args[0]->IsArray()) {
@@ -331,10 +310,9 @@ void ScriptQuaternion::Constructor(const v8::FunctionCallbackInfo<v8::Value>& ar
                 return ScriptException("Quaternion Constructor: Invalid argument");
             scriptQuaternion->setDataToInstance(args.This(), btQuaternion(scriptVector3->getDataOfInstance(args[0]), args[1]->NumberValue()));
             ScriptReturn(args.This());
-            return;
         } break;
         default:
-            for(unsigned int i = 0; i < 4; i ++) {
+            for(unsigned int i = 0; i < args.Length(); i ++) {
                 if(!args[i]->IsNumber()) break;
                 data.push_back(args[i]->NumberValue());
             }
@@ -345,14 +323,12 @@ void ScriptQuaternion::Constructor(const v8::FunctionCallbackInfo<v8::Value>& ar
         case 3:
             scriptQuaternion->setDataToInstance(args.This(), btQuaternion(data[0], data[1], data[2]));
             ScriptReturn(args.This());
-            return;
         case 4:
             scriptQuaternion->setDataToInstance(args.This(), btQuaternion(data[0], data[1], data[2], data[3]));
             ScriptReturn(args.This());
-            return;
+        default:
+            return ScriptException("Quaternion Constructor: Invalid argument");
     }
-    
-    return ScriptException("Quaternion Constructor: Invalid argument");
 }
 
 void ScriptQuaternion::ToString(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -372,30 +348,11 @@ void ScriptQuaternion::ToJSON(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ScriptReturn(array);
 }
 
-void ScriptQuaternion::IndexedPropertyGetter(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    if(index > 3)
-        return ScriptException("Quaternion []: Invalid index");
-    const char* names[] = { "x", "y", "z", "w" };
-    ScriptReturn(args.This()->GetRealNamedProperty(ScriptString(names[index])));
-}
-
-void ScriptQuaternion::IndexedPropertySetter(uint32_t index, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    if(index > 3)
-        return ScriptException("Quaternion []: Invalid index");
-    const char* names[] = { "x", "y", "z", "w" };
-    args.This()->Set(ScriptString(names[index]), value);
-    ScriptReturn(value);
-}
-
 void ScriptQuaternion::GetAngle(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ScriptScope();
     btQuaternion quaternion = getDataOfInstance(args.This());
-    if(args.Length() == 0) {
+    if(args.Length() == 0)
         ScriptReturn(quaternion.getAngle());
-        return;
-    }
     if(args.Length() != 1 || !scriptQuaternion->isCorrectInstance(args[0]))
         return ScriptException("Quaternion getAngle: Invalid argument");
     btQuaternion quaternionB = getDataOfInstance(args[0]);
@@ -564,7 +521,6 @@ ScriptQuaternion::ScriptQuaternion() :ScriptClass("Quaternion", Constructor) {
     instanceTemplate->Set(ScriptString("w"), v8::Number::New(v8::Isolate::GetCurrent(), 1.0), (v8::PropertyAttribute)(v8::DontDelete));
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetIndexedPropertyHandler(IndexedPropertyGetter, IndexedPropertySetter);
     ScriptMethod(objectTemplate, "toString", ToString);
     ScriptMethod(objectTemplate, "toJSON", ToJSON);
     ScriptMethod(objectTemplate, "getAngle", GetAngle);
@@ -606,7 +562,6 @@ void ScriptMatrix4::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args)
     
     v8::Persistent<v8::Object> object(v8::Isolate::GetCurrent(), args.This());
     object.SetWeak<void>(NULL, &Destructor);
-    (*object)->SetIndexedPropertiesToExternalArrayData(&matrix.get()->values, v8::kExternalFloatArray, 16);
     (*object)->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), matrix.release()));
     v8::Isolate::GetCurrent()->AdjustAmountOfExternalAllocatedMemory(sizeof(Matrix4));
     ScriptReturn(args.This());
@@ -616,8 +571,6 @@ void ScriptMatrix4::Destructor(const v8::WeakCallbackData<v8::Object, void>& dat
     ScriptScope();
     Matrix4* mat = getDataOfInstance(data.GetValue());
     v8::Isolate::GetCurrent()->AdjustAmountOfExternalAllocatedMemory(-sizeof(Matrix4));
-    //value->ClearWeak();
-    //value->Reset();
     //log(info_log, "~ ScriptMatrix4");
     delete mat;
 }
@@ -643,7 +596,6 @@ void ScriptMatrix4::AccessRowX(const v8::FunctionCallbackInfo<v8::Value>& args) 
     if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
         objectPtr->x = scriptVector3->getDataOfInstance(args[0]);
         ScriptReturn(args[0]);
-        return;
     }else
         ScriptReturn(scriptVector3->newInstance(objectPtr->x));
 }
@@ -654,7 +606,6 @@ void ScriptMatrix4::AccessRowY(const v8::FunctionCallbackInfo<v8::Value>& args) 
     if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
         objectPtr->y = scriptVector3->getDataOfInstance(args[0]);
         ScriptReturn(args[0]);
-        return;
     }else
         ScriptReturn(scriptVector3->newInstance(objectPtr->y));
 }
@@ -665,7 +616,6 @@ void ScriptMatrix4::AccessRowZ(const v8::FunctionCallbackInfo<v8::Value>& args) 
     if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
         objectPtr->z = scriptVector3->getDataOfInstance(args[0]);
         ScriptReturn(args[0]);
-        return;
     }else
         ScriptReturn(scriptVector3->newInstance(objectPtr->z));
 }
@@ -676,7 +626,6 @@ void ScriptMatrix4::AccessRowW(const v8::FunctionCallbackInfo<v8::Value>& args) 
     if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
         objectPtr->w = scriptVector3->getDataOfInstance(args[0]);
         ScriptReturn(args[0]);
-        return;
     }else
         ScriptReturn(scriptVector3->newInstance(objectPtr->w));
 }
@@ -690,7 +639,6 @@ void ScriptMatrix4::AccessRotation(const v8::FunctionCallbackInfo<v8::Value>& ar
         basis.setRotation(scriptQuaternion->getDataOfInstance(args[0]));
         *mat = Matrix4(basis, mat->w);
         ScriptReturn(args[0]);
-        return;
     }else{
         btQuaternion quaternion;
         mat->getBTMatrix3x3().getRotation(quaternion);
@@ -765,17 +713,15 @@ void ScriptMatrix4::Rotate(const v8::FunctionCallbackInfo<v8::Value>& args) {
             Matrix4* mat = getDataOfInstance(args.This());
             mat->rotate(ScriptQuaternion::getDataOfInstance(args[0]));
             ScriptReturn(args.This());
-            return;
         } case 2: {
             if(!scriptVector3->isCorrectInstance(args[0]) || !args[1]->IsNumber())
                 break;
             Matrix4* mat = getDataOfInstance(args.This());
             mat->rotate(ScriptVector3::getDataOfInstance(args[0]), args[1]->NumberValue());
             ScriptReturn(args.This());
-            return;
-        }
+        } default:
+            return ScriptException("Matrix4 rotate: Invalid argument");
     }
-    return ScriptException("Matrix4 rotate: Invalid argument");
 }
 
 void ScriptMatrix4::Translate(const v8::FunctionCallbackInfo<v8::Value>& args) {

@@ -12,18 +12,18 @@
 #include "ScriptAnimation.h"
 
 class ScriptMouse : public ScriptClass {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessX(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessY(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessFixed(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
+    ScriptDeclareMethod(AccessX);
+    ScriptDeclareMethod(AccessY);
+    ScriptDeclareMethod(AccessFixed);
     public:
     ScriptMouse();
 };
 
 class ScriptKeyboard : public ScriptClass {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetKeyCount(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void IsKeyPressed(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
+    ScriptDeclareMethod(GetKeyCount);
+    ScriptDeclareMethod(IsKeyPressed);
     public:
     ScriptKeyboard();
 };

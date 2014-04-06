@@ -66,13 +66,10 @@ void ScriptGUIButton::GetState(v8::Local<v8::String> property, const v8::Propert
     switch(objectPtr->state) {
         case GUIButton::State::Released:
             ScriptReturn("released");
-            return;
         case GUIButton::State::Highlighted:
             ScriptReturn("highlighted");
-            return;
         case GUIButton::State::Pressed:
             ScriptReturn("pressed");
-            return;
     }
 }
 
@@ -95,19 +92,14 @@ void ScriptGUIButton::GetType(v8::Local<v8::String> property, const v8::Property
     switch(objectPtr->type) {
         case GUIButton::Type::Normal:
             ScriptReturn("normal");
-            return;
         case GUIButton::Type::Delete:
             ScriptReturn("delete");
-            return;
         case GUIButton::Type::Add:
             ScriptReturn("add");
-            return;
         case GUIButton::Type::Edit:
             ScriptReturn("edit");
-            return;
         case GUIButton::Type::Lockable:
             ScriptReturn("lockable");
-            return;
     }
 }
 

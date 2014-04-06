@@ -97,7 +97,14 @@ void ScriptGUIRect::GetParent(v8::Local<v8::String> property, const v8::Property
     ScriptReturn(objectPtr->parent->scriptInstance);
 }
 
-void ScriptGUIRect::Remove(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void ScriptGUIRect::SetParent(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
+    ScriptScope();
+    if(!scriptGUIView->isCorrectInstance(value)) return;
+    GUIView* objectPtr = getDataOfInstance<GUIView>(value);
+    objectPtr->addChild(getDataOfInstance<GUIRect>(args.This()));
+}
+
+void ScriptGUIRect::Delete(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ScriptScope();
     GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
     objectPtr->parent->deleteChild(objectPtr->parent->getIndexOfChild(objectPtr));
@@ -120,7 +127,7 @@ ScriptGUIRect::ScriptGUIRect(const char* name, void(constructor)(const v8::Funct
 v8::Handle<v8::Value> ScriptGUIRect::initInstance(v8::Local<v8::Object> instance, GUIView* parent, GUIRect* child) {
     if(!parent->addChild(child)) {
         delete child;
-        return v8::Isolate::GetCurrent()->ThrowException(ScriptString("GUIView adopt(): Failed"));
+        return v8::Isolate::GetCurrent()->ThrowException(ScriptString("GUIRect Constructor: Invalid parent"));
     }
     child->scriptInstance.Reset(v8::Isolate::GetCurrent(), instance);
     instance->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), child));
@@ -137,7 +144,7 @@ ScriptGUIRect::ScriptGUIRect() :ScriptGUIRect("GUIRect", Constructor) {
     ScriptAccessor(objectTemplate, "height", GetHeight, SetHeight);
     ScriptAccessor(objectTemplate, "visible", GetVisible, SetVisible);
     ScriptAccessor(objectTemplate, "focused", GetFocused, SetFocused);
-    ScriptAccessor(objectTemplate, "parent", GetParent, 0);
-    ScriptMethod(objectTemplate, "remove", Remove);
+    ScriptAccessor(objectTemplate, "parent", GetParent, SetParent);
+    ScriptMethod(objectTemplate, "delete", Delete);
     ScriptMethod(objectTemplate, "updateContent", UpdateContent);
 }

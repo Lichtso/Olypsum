@@ -48,12 +48,12 @@ class AnimationTimer {
 };
 
 class ScriptAnimation : public ScriptClass {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AddFrames(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void RemoveFrames(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetTrackInfo(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void StartTimer(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void StopTimer(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
+    ScriptDeclareMethod(AddFrames);
+    ScriptDeclareMethod(RemoveFrames);
+    ScriptDeclareMethod(GetTrackInfo);
+    ScriptDeclareMethod(StartTimer);
+    ScriptDeclareMethod(StopTimer);
     public:
     ScriptAnimation();
 };

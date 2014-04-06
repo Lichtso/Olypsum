@@ -12,10 +12,10 @@
 #include "ScriptLinks.h"
 
 class ScriptIntersection : public ScriptClass {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void RayCast(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AABBIntersection(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void SphereIntersection(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
+    ScriptDeclareMethod(RayCast);
+    ScriptDeclareMethod(AABBIntersection);
+    ScriptDeclareMethod(SphereIntersection);
     public:
     ScriptIntersection();
 };

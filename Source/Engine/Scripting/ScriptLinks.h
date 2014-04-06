@@ -12,26 +12,25 @@
 #include "ScriptLightObject.h"
 
 class ScriptBaseLink : public ScriptBaseClass {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
     static void GetObjectA(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void GetObjectB(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     protected:
-    ScriptBaseLink(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args))
-                    :ScriptBaseClass(name, constructor) { }
+    ScriptBaseLink(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :ScriptBaseClass(name, constructor) { }
     public:
     ScriptBaseLink();
 };
 
 class ScriptPhysicLink : public ScriptBaseLink {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
     static void GetBurstImpulse(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetBurstImpulse(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetCollisionDisabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetCollisionDisabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
-    static void AppliedForceObjectA(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AppliedTorqueObjectA(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AppliedForceObjectB(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AppliedTorqueObjectB(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(AppliedForceObjectA);
+    ScriptDeclareMethod(AppliedTorqueObjectA);
+    ScriptDeclareMethod(AppliedForceObjectB);
+    ScriptDeclareMethod(AppliedTorqueObjectB);
     protected:
     ScriptPhysicLink(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args))
                     :ScriptBaseLink(name, constructor) { }
@@ -40,17 +39,17 @@ class ScriptPhysicLink : public ScriptBaseLink {
 };
 
 class ScriptPointPhysicLink : public ScriptPhysicLink {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessPointA(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessPointB(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
+    ScriptDeclareMethod(AccessPointA);
+    ScriptDeclareMethod(AccessPointB);
     public:
     ScriptPointPhysicLink();
 };
 
 class ScriptGearPhysicLink : public ScriptPhysicLink {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessAxisA(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessAxisB(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
+    ScriptDeclareMethod(AccessAxisA);
+    ScriptDeclareMethod(AccessAxisB);
     static void GetRatio(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetRatio(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     public:
@@ -58,9 +57,9 @@ class ScriptGearPhysicLink : public ScriptPhysicLink {
 };
 
 class ScriptHingePhysicLink : public ScriptPhysicLink {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessFrameA(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessFrameB(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
+    ScriptDeclareMethod(AccessFrameA);
+    ScriptDeclareMethod(AccessFrameB);
     static void GetHingeAngle(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void GetAngularLimitMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetAngularLimitMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
@@ -77,9 +76,9 @@ class ScriptHingePhysicLink : public ScriptPhysicLink {
 };
 
 class ScriptSliderPhysicLink : public ScriptPhysicLink {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessFrameA(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessFrameB(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
+    ScriptDeclareMethod(AccessFrameA);
+    ScriptDeclareMethod(AccessFrameB);
     static void GetHingeAngle(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void GetSliderPos(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void GetAngularLimitMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
@@ -109,27 +108,27 @@ class ScriptSliderPhysicLink : public ScriptPhysicLink {
 class ScriptDof6PhysicLink : public ScriptPhysicLink {
     static btGeneric6DofSpringConstraint* EnableSpring(PhysicLink* link);
     static btGeneric6DofSpringConstraint* DisableSpring(PhysicLink* link);
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessFrameA(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessFrameB(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessSpringStiffness(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessSpringDamping(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessSpringEquilibrium(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessMotorEnabled(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessMotorVelocity(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessMotorForce(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessAngularLimitMin(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessAngularLimitMax(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessLinearLimitMin(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessLinearLimitMax(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
+    ScriptDeclareMethod(AccessFrameA);
+    ScriptDeclareMethod(AccessFrameB);
+    ScriptDeclareMethod(AccessSpringStiffness);
+    ScriptDeclareMethod(AccessSpringDamping);
+    ScriptDeclareMethod(AccessSpringEquilibrium);
+    ScriptDeclareMethod(AccessMotorEnabled);
+    ScriptDeclareMethod(AccessMotorVelocity);
+    ScriptDeclareMethod(AccessMotorForce);
+    ScriptDeclareMethod(AccessAngularLimitMin);
+    ScriptDeclareMethod(AccessAngularLimitMax);
+    ScriptDeclareMethod(AccessLinearLimitMin);
+    ScriptDeclareMethod(AccessLinearLimitMax);
     public:
     ScriptDof6PhysicLink();
 };
 
 class ScriptConeTwistPhysicLink : public ScriptPhysicLink {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessFrameA(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessFrameB(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
+    ScriptDeclareMethod(AccessFrameA);
+    ScriptDeclareMethod(AccessFrameB);
     static void GetSwingSpanA(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetSwingSpanA(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetSwingSpanB(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
@@ -142,19 +141,19 @@ class ScriptConeTwistPhysicLink : public ScriptPhysicLink {
 };
 
 class ScriptTransformLink : public ScriptBaseLink {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessTransformation(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
+    ScriptDeclareMethod(AccessTransformation);
     public:
     ScriptTransformLink();
 };
 
 class ScriptBoneLink : public ScriptBaseLink {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
     static void GetBone(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetBone(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
-    static void GetBoneChildren(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetRelativeMat(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void GetAbsoluteMat(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(GetBoneChildren);
+    ScriptDeclareMethod(GetRelativeMat);
+    ScriptDeclareMethod(GetAbsoluteMat);
     public:
     ScriptBoneLink();
 };

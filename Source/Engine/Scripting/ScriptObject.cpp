@@ -67,47 +67,47 @@ void ScriptBaseObject::AccessTransformation(const v8::FunctionCallbackInfo<v8::V
         if(mat->isValid())
             objectPtr->setTransformation(mat->getBTTransform());
         ScriptReturn(args[0]);
-        return;
     }else
         ScriptReturn(scriptMatrix4->newInstance(Matrix4(objectPtr->getTransformation())));
-}
-
-void ScriptBaseObject::GetLink(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    if(args.Length() < 1)
-        return ScriptException("BaseObject getLink(): Too few arguments");
-    if(!args[0]->IsUint32())
-        return ScriptException("BaseObject getLink(): Invalid argument");
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
-    if(args[0]->IntegerValue() >= objectPtr->links.size())
-        return ScriptException("BaseObject getLink(): Out of bounds");
-    ScriptReturn((*std::next(objectPtr->links.begin(), args[0]->IntegerValue()))->scriptInstance);
-}
-
-void ScriptBaseObject::GetLinkCount(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
-    ScriptReturn(v8::Integer::New(v8::Isolate::GetCurrent(), objectPtr->links.size()));
 }
 
 void ScriptBaseObject::GetTransformUpLink(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ScriptScope();
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
     foreach_e(objectPtr->links, i)
-        if(dynamic_cast<TransformLink*>(*i) && (*i)->b == objectPtr) {
+        if(dynamic_cast<TransformLink*>(*i) && (*i)->b == objectPtr)
             ScriptReturn((*i)->scriptInstance);
-            return;
-        }
 }
 
 void ScriptBaseObject::GetBoneUpLink(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ScriptScope();
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
     foreach_e(objectPtr->links, i)
-        if(dynamic_cast<BoneLink*>(*i) && (*i)->b == objectPtr) {
+        if(dynamic_cast<BoneLink*>(*i) && (*i)->b == objectPtr)
             ScriptReturn((*i)->scriptInstance);
-            return;
-        }
+}
+
+void ScriptBaseObject::IterateLinks(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    ScriptScope();
+    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
+    
+    if(args.Length() != 1 || !args[0]->IsFunction())
+        return ScriptException("BaseObject iterateLinks: Invalid argument");
+    
+    v8::TryCatch tryCatch;
+    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast(args[0]);
+    for(auto link : objectPtr->links) {
+        v8::Handle<v8::Value> linkInstance(*(link->scriptInstance));
+        function->CallAsFunction(args.This(), 1, &linkInstance);
+        if(!scriptManager->tryCatch(&tryCatch))
+            break;
+    }
+}
+
+void ScriptBaseObject::GetLinkCount(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
+    ScriptScope();
+    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
+    ScriptReturn(v8::Integer::New(v8::Isolate::GetCurrent(), objectPtr->links.size()));
 }
 
 ScriptBaseObject::ScriptBaseObject() :ScriptBaseClass("BaseObject") {
@@ -115,10 +115,10 @@ ScriptBaseObject::ScriptBaseObject() :ScriptBaseClass("BaseObject") {
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
     ScriptMethod(objectTemplate, "transformation", AccessTransformation);
-    ScriptMethod(objectTemplate, "getLink", GetLink);
-    ScriptMethod(objectTemplate, "getLinkCount", GetLinkCount);
     ScriptMethod(objectTemplate, "getTransformUpLink", GetTransformUpLink);
     ScriptMethod(objectTemplate, "getBoneUpLink", GetBoneUpLink);
+    ScriptMethod(objectTemplate, "iterateLinks", IterateLinks);
+    ScriptAccessor(objectTemplate, "linkCount", GetLinkCount, 0);
     
     ScriptInherit(scriptBaseClass);
 }

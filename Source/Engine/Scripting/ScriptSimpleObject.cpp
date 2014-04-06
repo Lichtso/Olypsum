@@ -96,6 +96,7 @@ ScriptCamObject::ScriptCamObject() :ScriptSimpleObject("CamObject") {
 }
 
 
+
 void ScriptSoundObject::GetSoundTrack(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     ScriptScope();
     SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());

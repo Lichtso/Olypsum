@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 Gamefortec. All rights reserved.
 //
 
-#include "ScriptGUIView.h"
+#include "ScriptManager.h"
 
 void ScriptGUIView::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ScriptScope();
@@ -18,35 +18,35 @@ void ScriptGUIView::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args)
     ScriptReturn(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
 }
 
+void ScriptGUIView::IterateChildren(const v8::FunctionCallbackInfo<v8::Value>& args) {
+    ScriptScope();
+    GUIView* objectPtr = getDataOfInstance<GUIView>(args.This());
+    
+    if(args.Length() != 1 || !args[0]->IsFunction())
+        return ScriptException("GUIView iterateChildren: Invalid argument");
+    
+    v8::TryCatch tryCatch;
+    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast(args[0]);
+    for(auto child : objectPtr->children) {
+        v8::Handle<v8::Value> childInstance(*(child->scriptInstance));
+        function->CallAsFunction(args.This(), 1, &childInstance);
+        if(!scriptManager->tryCatch(&tryCatch))
+            break;
+    }
+}
+
 void ScriptGUIView::GetChildCount(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
     ScriptScope();
     GUIView* objectPtr = getDataOfInstance<GUIView>(args.This());
     ScriptReturn(v8::Integer::New(v8::Isolate::GetCurrent(), objectPtr->children.size()));
 }
 
-void ScriptGUIView::GetChild(uint32_t index, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    GUIView* objectPtr = getDataOfInstance<GUIView>(args.This());
-    if(index >= objectPtr->children.size())
-        return ScriptException("GUIView []: Invalid argument");
-    ScriptReturn(objectPtr->children[index]->scriptInstance);
-}
-
-void ScriptGUIView::Adopt(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    if(args.Length() < 1 || !scriptGUIRect->isCorrectInstance(args[0]))
-        return ScriptException("GUIView adopt(): Child is not a GUIRect");
-    GUIView* objectPtr = getDataOfInstance<GUIView>(args.This());
-    objectPtr->addChild(getDataOfInstance<GUIRect>(args.This()));
-}
-
 ScriptGUIView::ScriptGUIView() :ScriptGUIRect("GUIView", Constructor) {
     ScriptScope();
     
     v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetIndexedPropertyHandler(GetChild);
-    ScriptAccessor(objectTemplate, "length", GetChildCount, 0);
-    ScriptMethod(objectTemplate, "adopt", Adopt);
+    ScriptMethod(objectTemplate, "iterateChildren", IterateChildren);
+    ScriptAccessor(objectTemplate, "childCount", GetChildCount, 0);
     
     ScriptInherit(scriptGUIRect);
 }
@@ -143,7 +143,6 @@ void ScriptGUIScreenView::Constructor(const v8::FunctionCallbackInfo<v8::Value>&
             menu.screenView->scriptInstance.Reset(v8::Isolate::GetCurrent(), (*scriptGUIScreenView->functionTemplate)->GetFunction()->NewInstance(1, &external));
         }
         ScriptReturn(menu.screenView->scriptInstance);
-        return;
     }
     
     if(args.Length() != 1 || !args[0]->IsExternal())

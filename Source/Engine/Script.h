@@ -15,11 +15,12 @@
 #define ScriptNewInstance(class) v8::HandleScope handleScope(v8::Isolate::GetCurrent()); \
 v8::Handle<v8::Value> external = v8::External::New(v8::Isolate::GetCurrent(), this); \
 (*class->functionTemplate)->GetFunction()->NewInstance(1, &external);
+#define ScriptDeclareMethod(Name) static void Name(const v8::FunctionCallbackInfo<v8::Value>& args)
 #define ScriptMethod(template, name, method) (template)->Set(v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), name), \
 v8::FunctionTemplate::New(v8::Isolate::GetCurrent(), method));
 #define ScriptAccessor(template, name, getter, setter) (template)->SetAccessor(ScriptString(name), getter, setter);
 #define ScriptInherit(class) (*functionTemplate)->Inherit(v8::Handle<v8::FunctionTemplate>(*class->functionTemplate))
-#define ScriptReturn(value) args.GetReturnValue().Set(value)
+#define ScriptReturn(value) return args.GetReturnValue().Set(value)
 #define ScriptClassInit(class) class.reset(new decltype(class)::element_type); \
 class->init(globalTemplate)
 

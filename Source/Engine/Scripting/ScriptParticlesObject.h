@@ -27,11 +27,11 @@ class ScriptParticlesObject : public ScriptPhysicObject {
     static void SetSizeMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetSizeMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetSizeMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
-    static void AccessForce(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessPosMin(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessPosMax(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessDirMin(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void AccessDirMax(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(AccessForce);
+    ScriptDeclareMethod(AccessPosMin);
+    ScriptDeclareMethod(AccessPosMax);
+    ScriptDeclareMethod(AccessDirMin);
+    ScriptDeclareMethod(AccessDirMax);
     public:
     ScriptParticlesObject();
 };

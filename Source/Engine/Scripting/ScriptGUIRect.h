@@ -12,7 +12,7 @@
 #include "ScriptIO.h"
 
 class ScriptGUIRect : public ScriptClass {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
     static void GetPosX(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetPosX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetPosY(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
@@ -26,8 +26,9 @@ class ScriptGUIRect : public ScriptClass {
     static void GetFocused(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetFocused(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetParent(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
-    static void Remove(const v8::FunctionCallbackInfo<v8::Value>& args);
-    static void UpdateContent(const v8::FunctionCallbackInfo<v8::Value>& args);
+    static void SetParent(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
+    ScriptDeclareMethod(Delete);
+    ScriptDeclareMethod(UpdateContent);
     protected:
     ScriptGUIRect(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args));
     public:
@@ -37,16 +38,12 @@ class ScriptGUIRect : public ScriptClass {
         switch(objectPtr->sizeAlignment) {
             case GUISizeAlignment::None:
                 ScriptReturn("none");
-                return;
             case GUISizeAlignment::Width:
                 ScriptReturn("width");
-                return;
             case GUISizeAlignment::Height:
                 ScriptReturn("height");
-                return;
             case GUISizeAlignment::All:
                 ScriptReturn("all");
-                return;
         }
     }
     template<typename T> static void SetSizeAlignment(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
@@ -69,22 +66,16 @@ class ScriptGUIRect : public ScriptClass {
         switch(objectPtr->orientation) {
             case GUIOrientation::Left:
                 ScriptReturn("left");
-                return;
             case GUIOrientation::Right:
                 ScriptReturn("right");
-                return;
             case GUIOrientation::Bottom:
                 ScriptReturn("bottom");
-                return;
             case GUIOrientation::Top:
                 ScriptReturn("top");
-                return;
             case GUIOrientation::Vertical:
                 ScriptReturn("vertical");
-                return;
             case GUIOrientation::Horizontal:
                 ScriptReturn("horizontal");
-                return;
         }
     }
     template<typename T> static void SetOrientation(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {

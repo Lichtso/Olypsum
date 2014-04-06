@@ -12,7 +12,7 @@
 #include "ScriptGUIOutput.h"
 
 class ScriptGUISlider : public ScriptGUIRect {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
     static void GetValue(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetValue(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetSteps(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
@@ -26,7 +26,7 @@ class ScriptGUISlider : public ScriptGUIRect {
 };
 
 class ScriptGUITextField : public ScriptGUIFramedView {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
     static void GetCursorX(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetCursorX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetEnabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);

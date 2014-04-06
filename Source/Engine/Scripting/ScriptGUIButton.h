@@ -12,7 +12,7 @@
 #include "ScriptGUIInput.h"
 
 class ScriptGUIButton : public ScriptGUIFramedView {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
     static void GetPaddingX(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetPaddingX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetPaddingY(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
@@ -30,7 +30,7 @@ class ScriptGUIButton : public ScriptGUIFramedView {
 };
 
 class ScriptGUICheckBox : public ScriptGUIButton {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
     protected:
     ScriptGUICheckBox(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :ScriptGUIButton(name, constructor) { }
     public:
@@ -38,7 +38,7 @@ class ScriptGUICheckBox : public ScriptGUIButton {
 };
 
 class ScriptGUITabs : public ScriptGUIView {
-    static void Constructor(const v8::FunctionCallbackInfo<v8::Value>& args);
+    ScriptDeclareMethod(Constructor);
     static void GetSelected(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
     static void SetSelected(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args);
     static void GetDeactivatable(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args);
