@@ -1,4 +1,4 @@
-V8 -> JSC, JS-Object-Constructors, JS-Dev-Console
+V8 -> JSC, JS-Object-Constructors
 Implement btSoftBody
 Logarithmic Shadow Mapping
 Water physics
@@ -14,7 +14,6 @@ Procedural models / Plants
 3D GUI transformations
 GUILabel texture mask
 KI and path finding
-Windows port
 
 Test:
 Ubuntu .deb package

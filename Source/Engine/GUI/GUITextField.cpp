@@ -167,16 +167,14 @@ bool GUITextField::handleKeyDown(SDL_Keycode key, const char* text) {
         switch(key) {
             case SDLK_c:
                 SDL_SetClipboardText(static_cast<GUILabel*>(children[0])->text.c_str());
-                break;
+                return true;
             case SDLK_v:
                 if(SDL_HasClipboardText())
                     insertStr(SDL_GetClipboardText());
-                break;
+                return true;
             default:
-                
-                break;
+                return true;
         }
-        return true;
     }
     
     switch(key) {
@@ -184,29 +182,28 @@ bool GUITextField::handleKeyDown(SDL_Keycode key, const char* text) {
         case SDLK_RETURN:
         case SDLK_ESCAPE:
             setFocused(false);
-            break;
+            return true;
         case SDLK_UP:
             cursorX = 0;
             cursorDrawTick = 0.0;
-            break;
+            return true;
         case SDLK_DOWN:
             cursorX = static_cast<GUILabel*>(children[0])->text.size();
             cursorDrawTick = 0.0;
-            break;
+            return true;
         case SDLK_BACKSPACE:
             removeChar();
-            break;
+            return true;
         case SDLK_LEFT:
             moveCursorLeft();
-            break;
+            return true;
         case SDLK_RIGHT:
             moveCursorRight();
-            break;
+            return true;
         default:
             insertStr(text);
-        break;
+            return true;
     }
-    return true;
 }
 
 void GUITextField::setCursorX(unsigned int newCursorX) {

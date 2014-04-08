@@ -163,7 +163,7 @@ bool FilePackage::loadLocalization() {
         entryKeyAttribute = entryNode->first_attribute("key");
         if(!entryKeyAttribute) return false;
         
-        localization[std::string(entryKeyAttribute->value())] = std::string(entryNode->value());
+        localization[std::string(entryKeyAttribute->value())] = std::regex_replace(entryNode->value(), std::regex("\r\n"), "\n");
         entryNode = entryNode->next_sibling("Entry");
     }
     

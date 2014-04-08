@@ -47,10 +47,10 @@
 	<Entry key="packageError_CouldNotLoad">Dieses Levelpack konnte nicht geladen werden:</Entry>
     <Entry key="packageError_Dependency">Das Levelpack konnte nicht geladen werden,
         da seine Abhängigkeiten beschädigt sind.</Entry>
+    <Entry key="packageError_Version">Das Levelpack konnte nicht geladen werden,
+        weil dessen Version zu alt ist.</Entry>
 	<Entry key="packageError_FilesMissing">Das Levelpack konnte nicht geladen
 werden, weil einige Dateien fehlen.</Entry>
 	<Entry key="packageError_Corrupted">Der Spielstand konnte nicht geladen
 werden, da er beschädigt ist.</Entry>
-	<Entry key="packageError_Version">Der Spielstand konnte nicht geladen werden,
-weil dessen Version zu alt ist.</Entry>
 </Localization>
