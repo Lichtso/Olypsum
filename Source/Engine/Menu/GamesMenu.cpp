@@ -164,7 +164,6 @@ void Menu::setNewGameMenu() {
     GUITextField* textField = new GUITextField();
     label = static_cast<GUILabel*>(textField->children[0]);
     label->text = fileManager.localizeString("newGame");
-    textField->posX = 0.0;
     textField->posY = screenView->height*-0.8;
     textField->width = screenView->width*0.4;
     textField->height = screenView->height*0.07;

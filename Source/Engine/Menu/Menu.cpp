@@ -8,7 +8,8 @@
 
 #include "AppMain.h"
 
-const char* homepage = "http://gamefortec.net/";
+const std::string consoleJSCommand = "#! ";
+const std::string homepage = "http://gamefortec.net/";
 const float loadingScreenTime = 3.0;
 float loadingScreen = loadingScreenTime;
 
@@ -140,6 +141,24 @@ void Menu::consoleAdd(const std::string& message, float duration) {
     consoleMessages.push_back(entry);
 }
 
+void Menu::consoleHandle(const std::string& message) {
+    if(message.length() == 0) return;
+    
+    if(message.find(consoleJSCommand) == 0) {
+        ScriptScope();
+        v8::TryCatch tryCatch;
+        (*levelManager.mainScript->context)->Enter();
+        v8::Handle<v8::String> code = ScriptString(message.substr(consoleJSCommand.length()).c_str());
+        v8::Handle<v8::Script> scriptLocal = v8::Script::Compile(code, ScriptString("Console Input"));
+        v8::Handle<v8::Value> result = scriptLocal->Run();
+        if(scriptManager->tryCatch(&tryCatch) && !result.IsEmpty())
+            log(script_log, stdStrOfV8(result));
+        (*levelManager.mainScript->context)->Exit();
+    }else{
+        log(user_log, message);
+    }
+}
+
 void Menu::handleMouseDown(Uint8 button) {
     if((button == SDL_BUTTON_LEFT && screenView->handleMouseDown(mouseX, mouseY))
        || menu.current != inGame) return;
@@ -176,37 +195,61 @@ void Menu::handleKeyDown(SDL_Keycode key, const char* text) {
 void Menu::handleKeyUp(SDL_Keycode key) {
     if(screenView->handleKeyUp(key)) return;
     
-    if(key == SDLK_ESCAPE) {
-        switch(current) {
-            case none:
-            case loading:
-            case main:
-                AppTerminate();
-                return;
-            case options:
-                leaveOptionsMenu(NULL);
-                return;
-            case languages:
-                setOptionsMenu();
-                return;
-            case multiplayer:
-                networkManager.disable();
-            case credits:
-            case saveGames:
-                setMainMenu();
-                return;
-            case inGame:
-                setGameEscMenu();
-                sendPauseEvent();
-                return;
-            case gameEsc:
-                setInGameMenu();
-                sendPauseEvent();
-                return;
-            case newGame:
-                setSaveGamesMenu();
-                return;
-        }
+    switch(key) {
+        case SDLK_ESCAPE:
+            switch(current) {
+                case none:
+                case loading:
+                case main:
+                    AppTerminate();
+                    return;
+                case options:
+                    leaveOptionsMenu(NULL);
+                    return;
+                case languages:
+                    setOptionsMenu();
+                    return;
+                case multiplayer:
+                    networkManager.disable();
+                case credits:
+                case saveGames:
+                    setMainMenu();
+                    return;
+                case inGame: {
+                    GUITextField* textField = static_cast<GUITextField*>(screenView->children[1]);
+                    if(textField->visible) {
+                        textField->visible = false;
+                        textField->setFocused(false);
+                        GUILabel* label = static_cast<GUILabel*>(textField->children[0]);
+                        label->text = "";
+                    }else{
+                        setGameEscMenu();
+                        sendPauseEvent();
+                    }
+                } return;
+                case gameEsc:
+                    setInGameMenu();
+                    sendPauseEvent();
+                    return;
+                case newGame:
+                    setSaveGamesMenu();
+                    return;
+            }
+        case SDLK_RETURN:
+            if(current == inGame) {
+                GUITextField* textField = static_cast<GUITextField*>(screenView->children[1]);
+                if(textField->visible) {
+                    GUILabel* label = static_cast<GUILabel*>(textField->children[0]);
+                    consoleHandle(label->text);
+                    label->text = "";
+                    textField->visible = false;
+                    textField->setFocused(false);
+                }else{
+                    textField->visible = true;
+                    textField->setFocused(true);
+                }
+            }
+            return;
     }
     
     if(menu.current == inGame) {
@@ -534,6 +577,13 @@ void Menu::setInGameMenu() {
     view->width = screenView->width*0.48;
     view->height = screenView->height*0.68;
     screenView->addChild(view);
+    
+    GUITextField* textField = new GUITextField();
+    textField->posY = screenView->height*-0.8;
+    textField->width = screenView->width*0.9;
+    textField->height = screenView->height*0.07;
+    textField->visible = false;
+    screenView->addChild(textField);
     
     screenView->updateContent();
 }

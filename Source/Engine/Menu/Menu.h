@@ -42,6 +42,7 @@ class Menu {
     void updateWindow();
     void updateVideoResulution();
     void consoleAdd(const std::string& message, float duration = 10.0);
+    void consoleHandle(const std::string& message);
     void handleMouseDown(Uint8 button);
     void handleMouseUp(Uint8 button);
     void handleMouseWheel(float deltaX, float deltaY);

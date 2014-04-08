@@ -41,6 +41,9 @@ void log(logMessageType type, std::string message) {
         case network_log:
             typeStr = "NETWORK: ";
             break;
+        case user_log:
+            typeStr = "USER: ";
+            break;
     }
     
     message = typeStr+message;

@@ -18,7 +18,8 @@ enum logMessageType {
     error_log,
     shader_log,
     script_log,
-    network_log
+    network_log,
+    user_log
 };
 
 /*! Performs CityHash64 on a c-string
