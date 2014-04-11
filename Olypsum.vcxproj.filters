@@ -15,6 +15,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Engine\cityhash\city.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Source\Engine\GUI\GUIButton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -203,6 +206,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Engine\cityhash\city.h">
+      <Filter>Header Files</Filter>
+    </ClCompile>
     <ClInclude Include="Source\Engine\GUI\GUIButton.h">
       <Filter>Header Files</Filter>
     </ClInclude>

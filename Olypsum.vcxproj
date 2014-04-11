@@ -14,6 +14,7 @@
     <ClCompile Include="Source\Engine\AppMain.cpp" />
     <ClCompile Include="Source\Engine\Audio.cpp" />
     <ClCompile Include="Source\Engine\CamObject.cpp" />
+    <ClCompile Include="Source\Engine\cityhash\city.cpp" />
     <ClCompile Include="Source\Engine\FBO.cpp" />
     <ClCompile Include="Source\Engine\FileManager.cpp" />
     <ClCompile Include="Source\Engine\GUI\GUIButton.cpp" />
@@ -78,6 +79,7 @@
     <ClInclude Include="Source\Engine\AppMain.h" />
     <ClInclude Include="Source\Engine\Audio.h" />
     <ClInclude Include="Source\Engine\CamObject.h" />
+    <ClCompile Include="Source\Engine\cityhash\city.h" />
     <ClInclude Include="Source\Engine\FBO.h" />
     <ClInclude Include="Source\Engine\FileManager.h" />
     <ClInclude Include="Source\Engine\GUI\GUIButton.h" />
@@ -203,7 +205,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level1</WarningLevel>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>

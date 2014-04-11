@@ -4,7 +4,7 @@ use strict;
 my($version) = "0.4.3";
 my(@libs) = qw(/usr/lib/libc++.so.1 /usr/lib/x86_64-linux-gnu/libopenal.so.1 ../Libraries/v8/out/native/obj.target/tools/gyp/libv8.so /usr/local/lib/libSDL2-2.0.so.0 /usr/local/lib/libSDL2_ttf-2.0.so.0 /usr/local/lib/libSDL2_image-2.0.so.0 /usr/local/lib/libBulletCollision.so.2.82 /usr/local/lib/libBulletDynamics.so.2.82 /usr/local/lib/libBulletSoftBody.so.2.82 /usr/local/lib/libBulletMultiThreaded.so.2.82 /usr/local/lib/libLinearMath.so.2.82);
 my(@files)=`(cd ../Source/Engine/; find . -iname "*.cpp" -type f)`;
-my(@sourceDirs)= qw(../Source/Engine/ ../Source/Engine/rapidxml/ ../Source/Engine/GUI/ ../Source/Engine/Menu/ ../Source/Engine/Scripting/);
+my(@sourceDirs)= qw(../Source/Engine/ ../Source/Engine/cityhash/ ../Source/Engine/rapidxml/ ../Source/Engine/GUI/ ../Source/Engine/Menu/ ../Source/Engine/Scripting/);
 my($SOURCES) = join(' ', map { chomp $_; $_ =~ s/^\.\///; $_; } @files);
 my($OBJS) = join(' ', map { $_ =~ s/cpp$/bc/; $_ =~ s/^[^\/]+\///; "build/".$_; } @files);
 my($RULES) = join("\n", map { "build/%.bc: $_%.cpp\n\t\$(COMPILER) -o \$@ -c -emit-llvm \$(HEADERS) \$<\n" } @sourceDirs);

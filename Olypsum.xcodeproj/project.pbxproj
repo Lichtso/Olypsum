@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1102B34C172AEF3500D6913E /* ScriptGUIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1102B34A172AEF3500D6913E /* ScriptGUIButton.cpp */; };
+		110E600618F7C609008AEC76 /* city.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 110E600518F7C609008AEC76 /* city.cpp */; };
 		1114B84616A88BD100B1CD41 /* BulletCollision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B84016A88BD100B1CD41 /* BulletCollision.framework */; };
 		1114B84716A88BD100B1CD41 /* BulletDynamics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B84116A88BD100B1CD41 /* BulletDynamics.framework */; };
 		1114B84816A88BD100B1CD41 /* BulletMultiThreaded.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B84216A88BD100B1CD41 /* BulletMultiThreaded.framework */; };
@@ -30,7 +31,6 @@
 		112307F81718A083001167DF /* ScriptLightObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112307F61718A082001167DF /* ScriptLightObject.cpp */; };
 		112672E91699BBFD000BB805 /* Links.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112672E71699BBFD000BB805 /* Links.cpp */; };
 		112672EC1699BCF1000BB805 /* TerrainObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112672EA1699BCF0000BB805 /* TerrainObject.cpp */; };
-		1129224418E80F2800BD9F21 /* city.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1129224218E80F2800BD9F21 /* city.cc */; };
 		112BF180162AFE8100CF0C0D /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112BF17E162AFE8100CF0C0D /* Object.cpp */; };
 		11329D5A16BD8A2A000CC025 /* Profiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11329D5816BD8A29000CC025 /* Profiler.cpp */; };
 		114325E218671C8800A6ADC3 /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 114325E018671C8800A6ADC3 /* Menu.cpp */; };
@@ -130,6 +130,7 @@
 /* Begin PBXFileReference section */
 		1102B34A172AEF3500D6913E /* ScriptGUIButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptGUIButton.cpp; sourceTree = "<group>"; };
 		1102B34B172AEF3500D6913E /* ScriptGUIButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptGUIButton.h; sourceTree = "<group>"; };
+		110E600518F7C609008AEC76 /* city.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = city.cpp; sourceTree = "<group>"; };
 		1114B84016A88BD100B1CD41 /* BulletCollision.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletCollision.framework; path = /Library/Frameworks/BulletCollision.framework; sourceTree = "<absolute>"; };
 		1114B84116A88BD100B1CD41 /* BulletDynamics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletDynamics.framework; path = /Library/Frameworks/BulletDynamics.framework; sourceTree = "<absolute>"; };
 		1114B84216A88BD100B1CD41 /* BulletMultiThreaded.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletMultiThreaded.framework; path = /Library/Frameworks/BulletMultiThreaded.framework; sourceTree = "<absolute>"; };
@@ -153,7 +154,6 @@
 		112672E81699BBFD000BB805 /* Links.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Links.h; sourceTree = "<group>"; };
 		112672EA1699BCF0000BB805 /* TerrainObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TerrainObject.cpp; sourceTree = "<group>"; };
 		112672EB1699BCF0000BB805 /* TerrainObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TerrainObject.h; sourceTree = "<group>"; };
-		1129224218E80F2800BD9F21 /* city.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = city.cc; sourceTree = "<group>"; };
 		1129224318E80F2800BD9F21 /* city.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = city.h; sourceTree = "<group>"; };
 		112BF17E162AFE8100CF0C0D /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Object.cpp; sourceTree = "<group>"; };
 		112BF17F162AFE8100CF0C0D /* Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Object.h; sourceTree = "<group>"; };
@@ -369,7 +369,7 @@
 			isa = PBXGroup;
 			children = (
 				1129224318E80F2800BD9F21 /* city.h */,
-				1129224218E80F2800BD9F21 /* city.cc */,
+				110E600518F7C609008AEC76 /* city.cpp */,
 			);
 			path = cityhash;
 			sourceTree = "<group>";
@@ -684,7 +684,6 @@
 				11329D5A16BD8A2A000CC025 /* Profiler.cpp in Sources */,
 				117CBA9C16EBDC6800307B94 /* ScriptObject.cpp in Sources */,
 				11AD22DB16FCE77200B9FB12 /* main.cpp in Sources */,
-				1129224418E80F2800BD9F21 /* city.cc in Sources */,
 				114325EE186724B000A6ADC3 /* OptionsMenu.cpp in Sources */,
 				11A3255517089E2100B038D2 /* Network.cpp in Sources */,
 				11511420170C1A0E00F77236 /* ScriptIntersection.cpp in Sources */,
@@ -699,6 +698,7 @@
 				11D0C0F31727CE71004C30E9 /* ScriptGUIInput.cpp in Sources */,
 				1102B34C172AEF3500D6913E /* ScriptGUIButton.cpp in Sources */,
 				1188A5431745403900D535B2 /* ScriptAnimation.cpp in Sources */,
+				110E600618F7C609008AEC76 /* city.cpp in Sources */,
 				11BCD0601756686A00939274 /* ScriptLinks.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
