@@ -13,38 +13,22 @@ void NetworkManager::init() {
     netLink::init();
 #endif
     
-    socketManager.onReceive = [this](netLink::SocketManager* manager, netLink::Socket* socket) {
-        try {
-            socket->advanceInputBuffer();
-            MsgPack::Deserializer deserializer(socket);
-            deserializer.deserialize([this](std::unique_ptr<MsgPack::Element> parsed) {
-				std::ostringstream stream;
-				stream << *parsed;
-				log(network_log, stream.str());
-                return false;
-            });
-        }catch(netLink::Exception exc) {
-            log(network_log, "Exception "+stringOf(exc.code));
-        }
+    socketManager.onReceiveMsgPack = [this](netLink::SocketManager* manager, std::shared_ptr<netLink::Socket> socket, std::unique_ptr<MsgPack::Element> element) {
+        std::ostringstream stream;
+        stream << *element;
+        log(network_log, stream.str());
     };
 }
 
 void NetworkManager::gameTick() {
-	try {
-		socketManager.listen();
-	}catch(netLink::Exception exc) {
-		log(network_log, "Exception "+stringOf(exc.code));
-	}
+	socketManager.listen();
     profiler.leaveSection("Networking");
 }
 
 void NetworkManager::enable() {
     if(udpSocket) disable();
     
-    udpSocket.reset(new netLink::Socket());
-    udpSocket->setInputBufferSize(10000);
-    udpSocket->setOutputBufferSize(10000);
-    socketManager.sockets.insert(udpSocket);
+    udpSocket = socketManager.newMsgPackSocket();
     
     if(optionsState.ipVersion == "ipV4")
         udpSocket->initAsUdpPeer("0.0.0.0", udpPort);
@@ -57,16 +41,10 @@ void NetworkManager::enable() {
     udpSocket->portRemote = udpPort;
     udpSocket->setMulticastGroup(udpSocket->hostRemote, true);
     
-    try {
-        MsgPack::Serializer serializer(udpSocket.get());
-        serializer << new MsgPack::MapHeader(1);
-        serializer << "nickname";
-        serializer << optionsState.nickname;
-        serializer.serialize();
-        udpSocket->pubsync();
-    }catch(netLink::Exception exc) {
-        log(network_log, "Exception "+stringOf(exc.code));
-    }
+    netLink::MsgPackSocket& msgPackSocket = *static_cast<netLink::MsgPackSocket*>(udpSocket.get());
+    msgPackSocket << new MsgPack::MapHeader(1);
+    msgPackSocket << new MsgPack::String("nickname");
+    msgPackSocket << new MsgPack::String(optionsState.nickname);
 }
 
 void NetworkManager::disable() {
