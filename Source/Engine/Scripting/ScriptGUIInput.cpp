@@ -3,11 +3,11 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 24.04.13.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
-#include "ScriptGUIInput.h"
-
+#include "ScriptManager.h"
+/*
 void ScriptGUISlider::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ScriptScope();
     
@@ -144,4 +144,4 @@ ScriptGUITextField::ScriptGUITextField() :ScriptGUIFramedView("GUITextField", Co
     ScriptAccessor(objectTemplate, "text", GetText, SetText);
     
     ScriptInherit(scriptGUIFramedView);
-}
+}*/

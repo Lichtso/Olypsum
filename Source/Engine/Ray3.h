@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 24.02.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #ifndef Ray3_h

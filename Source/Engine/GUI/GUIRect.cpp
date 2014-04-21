@@ -3,17 +3,18 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 28.02.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
-#include "GUIView.h"
+#include "../Scripting/ScriptManager.h"
 
-GUIRect::GUIRect() :parent(NULL), visible(true), posX(0), posY(0), width(100), height(100) {
+GUIRect::GUIRect() :scriptInstance(NULL), parent(NULL), visible(true), posX(0), posY(0), width(100), height(100) {
     
 }
 
 GUIRect::~GUIRect() {
-    
+    if(scriptInstance)
+        JSValueUnprotect(scriptManager->mainScript->context, scriptInstance);
 }
 
 GUIRect* GUIRect::getRootParent() {

@@ -1,4 +1,4 @@
-V8 -> JSC, JS-Object-Constructors
+JS-Object-Constructors, JS API for links and GUI
 Implement btSoftBody
 Logarithmic Shadow Mapping
 Water physics
@@ -21,7 +21,5 @@ Skeletal animation
 Performance issue of explosions
 
 Bugs:
-V8: Garbage Collection Crash
-Light animation in test scene
 Parallax Occlusion / Position
 Ortho projection / Logarithmic depth buffer

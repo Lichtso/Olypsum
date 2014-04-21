@@ -3,112 +3,157 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 28.01.13.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #include "Scripting/ScriptManager.h"
 
+JSObjectRef ScriptException(JSContextRef context, JSValueRef* exception, const std::string& message) {
+    ScriptString strMessage(message);
+    JSValueRef str = strMessage.getJSStr(context);
+    *exception = JSObjectMakeError(context, 1, &str, NULL);
+    return NULL;
+}
+
+void ScriptLogException(JSContextRef context, JSValueRef exception) {
+    if(!exception) return;
+    JSObjectRef errorObject = JSValueToObject(context, exception, NULL);
+    if(!errorObject) return;
+    JSValueRef name = JSObjectGetProperty(context, errorObject, ScriptStringName.str, NULL),
+               message = JSObjectGetProperty(context, errorObject, ScriptStringMessage.str, NULL),
+               stack = JSObjectGetProperty(context, errorObject, ScriptStringStack.str, NULL);
+    ScriptString strName(context, name);
+    ScriptString strMessage(context, message);
+    ScriptString strStack(context, stack);
+    log(script_log, strName.getStdStr()+"\n"+strMessage.getStdStr()+"\n"+strStack.getStdStr());
+}
+
+
+
+ScriptString::ScriptString(const char* _str) {
+    str = JSStringCreateWithUTF8CString(_str);
+}
+
+ScriptString::ScriptString(const std::string& _str) {
+    str = JSStringCreateWithUTF8CString(_str.c_str());
+}
+
+ScriptString::ScriptString(JSContextRef context, JSValueRef value) {
+    str = JSValueToStringCopy(context, value, NULL);
+}
+
+ScriptString::~ScriptString() {
+    if(str) JSStringRelease(str);
+}
+
+std::string ScriptString::getStdStr() {
+    auto size = JSStringGetMaximumUTF8CStringSize(str);
+    char* buffer = new char[size];
+    JSStringGetUTF8CString(str, buffer, size);
+    std::string string(buffer);
+    delete [] buffer;
+    return string;
+}
+
+JSValueRef ScriptString::getJSStr(JSContextRef context) {
+    return JSValueMakeString(context, str);
+}
+
+
+
+ScriptFile::ScriptFile() :context(NULL), exports(NULL) {
+    
+}
+
 ScriptFile::~ScriptFile() {
-    /*exports.Reset();
-    script.Reset();
-    context.Reset();*/
+    if(context)
+        JSGlobalContextRelease(context);
 }
 
 FileResourcePtr<FileResource> ScriptFile::load(FilePackage* _filePackage, const std::string& name) {
     auto pointer = FileResource::load(_filePackage, name);
-    if(!script.IsEmpty()) return NULL;
+    if(context) return NULL;
     
     std::string filePath = filePackage->getPathOfFile("Scripts/", name)+".js";
     std::unique_ptr<char[]> data = readFile(filePath, true);
     if(!data) return NULL;
     
-    v8::TryCatch tryCatch;
-    ScriptScope();
-    context.Reset(v8::Isolate::GetCurrent(),
-                  v8::Context::New(v8::Isolate::GetCurrent(), NULL, v8::Handle<v8::ObjectTemplate>(*scriptManager->globalTemplate)));
-    (*context)->Enter();
-    (*context)->Global()->Set(ScriptString("exports"), v8::Object::New(v8::Isolate::GetCurrent()));
+    JSValueRef exception = NULL;
+    ScriptString strSourceCode(data.get());
+    ScriptString strScriptName(fileManager.getPathOfResource(filePackage, name));
     
-    v8::Handle<v8::String> scriptName = ScriptString(fileManager.getPathOfResource(filePackage, name).c_str());
-    v8::Handle<v8::Script> scriptLocal = v8::Script::Compile(ScriptString(data.get()), scriptName);
-    if(scriptManager->tryCatch(&tryCatch)) {
-        script.Reset(v8::Isolate::GetCurrent(), scriptLocal);
-        run();
-        v8::Handle<v8::Object> objectLocal = v8::Handle<v8::Object>::Cast((*context)->Global()->Get(ScriptString("exports")));
-        exports.Reset(v8::Isolate::GetCurrent(), objectLocal);
-        return pointer;
-    }else
+    context = JSGlobalContextCreateInGroup(scriptManager->contextGroup, NULL);
+    JSObjectRef globalObject = JSContextGetGlobalObject(context);
+    for(unsigned i = 0; i < ScriptStaticsCount; i ++)
+        if(scriptManager->staticObjects[i]) //TODO: Remove
+            JSObjectSetProperty(context, globalObject, ScriptStringClassNames[i].str, scriptManager->staticObjects[i], kJSPropertyAttributeDontDelete, 0);
+    JSObjectSetProperty(context, globalObject, ScriptStringExports.str, JSObjectMake(context, NULL, NULL), kJSPropertyAttributeDontDelete, 0);
+    JSEvaluateScript(context, strSourceCode.str, NULL, strScriptName.str, 0, &exception);
+    
+    if(exception) {
+        ScriptLogException(context, exception);
         return NULL;
+    }else{
+        exports = JSValueToObject(context, JSObjectGetProperty(context, globalObject, ScriptStringExports.str, NULL), NULL);
+        return pointer;
+    }
 }
 
 bool ScriptFile::checkFunction(const char* functionName) {
-    if(exports.IsEmpty()) return false;
-    ScriptScope();
-    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast((*exports)->GetRealNamedProperty(ScriptString(functionName)));
-    return (!function.IsEmpty() && function->IsFunction());
+    if(!exports) return false;
+    ScriptString strFunctionName(functionName);
+    JSValueRef function = JSObjectGetProperty(context, exports, strFunctionName.str, NULL);
+    JSObjectRef functionObject = JSValueToObject(context, function, NULL);
+    return (functionObject && JSObjectIsFunction(context, functionObject));
 }
 
-v8::Handle<v8::Value> ScriptFile::run() {
-    if(script.IsEmpty()) return v8::Undefined(v8::Isolate::GetCurrent());
-    //ScriptScope();
-    v8::TryCatch tryCatch;
-    v8::Handle<v8::Value> result = (*script)->Run();
-    scriptManager->tryCatch(&tryCatch);
-    return result; //handleScope.Close(result);
-}
-
-v8::Handle<v8::Value> ScriptFile::callFunction(const char* functionName, bool recvFirstArg, int argc, v8::Handle<v8::Value>* argv) {
-    if(exports.IsEmpty()) return v8::Undefined(v8::Isolate::GetCurrent());
-    ScriptScope();
-    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast((*exports)->GetRealNamedProperty(ScriptString(functionName)));
-    if(function.IsEmpty() || !function->IsFunction()) return v8::Undefined(v8::Isolate::GetCurrent());
-    v8::TryCatch tryCatch;
+JSValueRef ScriptFile::callFunction(const char* functionName, bool recvFirstArg, int argc, JSValueRef* argv) {
+    if(!exports) return NULL;
+    ScriptString strFunctionName(functionName);
+    JSValueRef exception = NULL, result, function = JSObjectGetProperty(context, exports, strFunctionName.str, NULL);
+    JSObjectRef functionObject = JSValueToObject(context, function, NULL);
+    if(!functionObject || !JSObjectIsFunction(context, functionObject)) return NULL;
     
-    v8::Handle<v8::Value> result;
-    if(recvFirstArg && argc > 0 && !argv[0].IsEmpty() && argv[0]->IsObject())
-        result = function->CallAsFunction(v8::Handle<v8::Object>::Cast(argv[0]), argc-1, &argv[1]);
+    if(recvFirstArg && argc > 0 && argv[0] && JSValueIsObject(context, argv[0]))
+        result = JSObjectCallAsFunction(context, functionObject, JSValueToObject(context, argv[0], NULL), argc-1, &argv[1], &exception);
     else
-        result = function->CallAsFunction(v8::Handle<v8::Object>(*exports), argc, argv);
+        result = JSObjectCallAsFunction(context, functionObject, exports, argc, argv, &exception);
     
-    if(scriptManager->tryCatch(&tryCatch))
+    if(exception) {
+        ScriptLogException(context, exception);
+        return NULL;
+    }else
         return result;
-    else
-        return v8::Undefined(v8::Isolate::GetCurrent());
 }
 
 
 
-ScriptClass::ScriptClass(const char* nameB, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :name(nameB) {
-    ScriptScope();
-    functionTemplate.Reset(v8::Isolate::GetCurrent(), v8::FunctionTemplate::New(v8::Isolate::GetCurrent(), constructor));
-    (*functionTemplate)->SetClassName(ScriptString(name));
-    (*functionTemplate)->PrototypeTemplate()->Set(ScriptString("className"), ScriptString(name));
-}
-
-ScriptClass::~ScriptClass() {
-    //functionTemplate.Reset();
-}
-
-v8::Handle<v8::Value> ScriptClass::callFunction(v8::Handle<v8::Object> scriptInstance, const char* functionName, int argc, v8::Handle<v8::Value>* argv) {
-    if(scriptInstance.IsEmpty()) return v8::Undefined(v8::Isolate::GetCurrent());
-    ScriptScope();
-    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast(scriptInstance->GetRealNamedProperty(ScriptString(functionName)));
-    if(function.IsEmpty() || !function->IsFunction()) return v8::Undefined(v8::Isolate::GetCurrent());
-    v8::TryCatch tryCatch;
-    
-    v8::Handle<v8::Value> result = function->CallAsFunction(scriptInstance, argc, argv);
-    if(scriptManager->tryCatch(&tryCatch))
-        return result;
-    else
-        return v8::Undefined(v8::Isolate::GetCurrent());
-}
-
-bool ScriptClass::isCorrectInstance(const v8::Local<v8::Value>& object) {
-    ScriptScope();
-    if(!object->IsObject()) return false;
-    return (*functionTemplate)->HasInstance(object);
-}
-
-void ScriptClass::init(const v8::Persistent<v8::ObjectTemplate>& globalTemplate) {
-    (*globalTemplate)->Set(v8::Isolate::GetCurrent(), name, v8::Handle<v8::FunctionTemplate>(*functionTemplate));
-}
+ScriptString
+ScriptStringClassNames[ScriptStaticsCount],
+ScriptStringChildren("children"),
+ScriptStringDirection("direction"),
+ScriptStringDispose("dispose"),
+ScriptStringDistance("distance"),
+ScriptStringExports("exports"),
+ScriptStringFrames("frames"),
+ScriptStringHold("hold"),
+ScriptStringLength("length"),
+ScriptStringLooping("looping"),
+ScriptStringMessage("message"),
+ScriptStringName("name"),
+ScriptStringNormal("normal"),
+ScriptStringNormals("normals"),
+ScriptStringObjects("objects"),
+ScriptStringOrigin("origin"),
+ScriptStringPositions("positions"),
+ScriptStringRadii("radii"),
+ScriptStringRadius("radius"),
+ScriptStringSize("size"),
+ScriptStringStack("stack"),
+ScriptStringTime("time"),
+ScriptStringTransformations("transformations"),
+ScriptStringType("type"),
+ScriptStringW("w"),
+ScriptStringX("x"),
+ScriptStringY("y"),
+ScriptStringZ("z");

@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 11.01.13.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #ifndef VertexArrayObject_h

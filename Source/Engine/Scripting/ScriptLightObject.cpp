@@ -3,109 +3,126 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 12.04.13.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
-#include "ScriptLightObject.h"
+#include "ScriptManager.h"
 
-void ScriptLightObject::GetRange(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    LightObject* objectPtr = getDataOfInstance<LightObject>(args.This());
-    ScriptReturn(objectPtr->getRange());
+static JSObjectRef ScriptLightObjectConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    return ScriptException(context, exception, "LightObject Constructor: Class can't be instantiated");
 }
 
-void ScriptLightObject::AccessColor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    LightObject* objectPtr = getDataOfInstance<LightObject>(args.This());
-    if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
-        objectPtr->color = Color4(scriptVector3->getDataOfInstance(args[0]));
-        ScriptReturn(args[0]);
+ScriptClassStaticDefinition(LightObject);
+
+static JSValueRef ScriptLightObjectGetRange(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<LightObject>(instance)->getRange());
+}
+
+static JSValueRef ScriptLightObjectAccessColor(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    LightObject* objectPtr = getDataOfInstance<LightObject>(instance);
+    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
+        objectPtr->color = getScriptVector3(context, argv[0]);
+        return argv[0];
     }else
-        ScriptReturn(scriptVector3->newInstance(objectPtr->color.getVector()));
+        return newScriptVector3(context, objectPtr->color.getVector());
 }
 
-ScriptLightObject::ScriptLightObject() :ScriptPhysicObject("LightObject") {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    ScriptAccessor(objectTemplate, "collisionShape", 0, 0);
-    ScriptAccessor(objectTemplate, "range", GetRange, 0);
-    ScriptMethod(objectTemplate, "color", AccessColor);
-    
-    ScriptInherit(scriptPhysicObject);
+JSStaticValue ScriptLightObjectProperties[] = {
+    {"range", ScriptLightObjectGetRange, 0, ScriptMethodAttributes},
+    {0, 0, 0, 0}
+};
+
+JSStaticFunction ScriptLightObjectMethods[] = {
+    {"color", ScriptLightObjectAccessColor, ScriptMethodAttributes},
+    {0, 0, 0}
+};
+
+ScriptClassDefinition(LightObject, ScriptLightObjectProperties, ScriptLightObjectMethods);
+
+
+
+static JSObjectRef ScriptDirectionalLightConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    return ScriptException(context, exception, "DirectionalLight Constructor: Class can't be instantiated");
 }
 
+ScriptClassStaticDefinition(DirectionalLight);
 
-
-void ScriptDirectionalLight::AccessBounds(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    DirectionalLight* objectPtr = getDataOfInstance<DirectionalLight>(args.This());
-    if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
-        objectPtr->setBounds(scriptVector3->getDataOfInstance(args[0]));
-        ScriptReturn(args[0]);
+static JSValueRef ScriptDirectionalLightAccessBounds(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    DirectionalLight* objectPtr = getDataOfInstance<DirectionalLight>(instance);
+    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
+        objectPtr->setBounds(getScriptVector3(context, argv[0]));
+        return argv[0];
     }else
-        ScriptReturn(scriptVector3->newInstance(objectPtr->getBounds()));
+        return newScriptVector3(context, objectPtr->getBounds());
 }
 
-ScriptDirectionalLight::ScriptDirectionalLight() :ScriptLightObject("DirectionalLight") {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    ScriptMethod(objectTemplate, "bounds", AccessBounds);
-    
-    ScriptInherit(scriptLightObject);
+JSStaticFunction ScriptDirectionalLightMethods[] = {
+    {"color", ScriptDirectionalLightAccessBounds, ScriptMethodAttributes},
+    {0, 0, 0}
+};
+
+ScriptClassDefinition(DirectionalLight, NULL, ScriptDirectionalLightMethods);
+
+
+
+static JSObjectRef ScriptPositionalLightConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    return ScriptException(context, exception, "PositionalLight Constructor: Class can't be instantiated");
 }
 
+ScriptClassStaticDefinition(PositionalLight);
 
-
-void ScriptSpotLight::GetCutoff(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    SpotLight* objectPtr = getDataOfInstance<SpotLight>(args.This());
-    ScriptReturn(objectPtr->getCutoff());
+static JSValueRef ScriptPositionalLightGetOmniDirectional(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeBoolean(context, getDataOfInstance<PositionalLight>(instance)->getOmniDirectional());
 }
 
-void ScriptSpotLight::SetBounds(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    if(args.Length() < 2 || !args[0]->IsNumber() || !args[1]->IsNumber())
-        return ScriptException("SpotLight setBounds: Invalid argument");
-    SpotLight* objectPtr = getDataOfInstance<SpotLight>(args.This());
-    objectPtr->setBounds(args[0]->NumberValue(), args[1]->NumberValue());
-    ScriptReturn(args.This());
+static JSValueRef ScriptPositionalLightSetBounds(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    if(argc != 2 || !JSValueIsBoolean(context, argv[0]) || !JSValueIsNumber(context, argv[1]))
+        return ScriptException(context, exception, "SpotLight setBounds(): Expected Number, Number");
+    PositionalLight* objectPtr = getDataOfInstance<PositionalLight>(instance);
+    objectPtr->setBounds(JSValueToBoolean(context, argv[0]), JSValueToNumber(context, argv[1], NULL));
+    return JSValueMakeUndefined(context);
 }
 
-ScriptSpotLight::ScriptSpotLight() :ScriptLightObject("SpotLight") {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    ScriptAccessor(objectTemplate, "cutoff", GetCutoff, 0);
-    ScriptMethod(objectTemplate, "setBounds", SetBounds);
-    
-    ScriptInherit(scriptLightObject);
+JSStaticValue ScriptPositionalLightProperties[] = {
+    {"omniDirectional", ScriptPositionalLightGetOmniDirectional, 0, ScriptMethodAttributes},
+    {0, 0, 0, 0}
+};
+
+JSStaticFunction ScriptPositionalLightMethods[] = {
+    {"setBounds", ScriptPositionalLightSetBounds, ScriptMethodAttributes},
+    {0, 0, 0}
+};
+
+ScriptClassDefinition(PositionalLight, ScriptPositionalLightProperties, ScriptPositionalLightMethods);
+
+
+
+static JSObjectRef ScriptSpotLightConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    return ScriptException(context, exception, "SpotLight Constructor: Class can't be instantiated");
 }
 
+ScriptClassStaticDefinition(SpotLight);
 
-
-void ScriptPositionalLight::GetOmniDirectional(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    PositionalLight* objectPtr = getDataOfInstance<PositionalLight>(args.This());
-    ScriptReturn(objectPtr->getOmniDirectional());
+static JSValueRef ScriptSpotLightGetCutoff(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<SpotLight>(instance)->getCutoff());
 }
 
-void ScriptPositionalLight::SetBounds(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    if(args.Length() < 2 || !args[0]->IsBoolean() || !args[1]->IsNumber())
-        return ScriptException("PositionalLight setBounds: Invalid argument");
-    PositionalLight* objectPtr = getDataOfInstance<PositionalLight>(args.This());
-    objectPtr->setBounds(args[0]->BooleanValue(), args[1]->NumberValue());
-    ScriptReturn(args.This());
+static JSValueRef ScriptSpotLightSetBounds(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    if(argc != 2 || !JSValueIsNumber(context, argv[0]) || !JSValueIsNumber(context, argv[1]))
+        return ScriptException(context, exception, "SpotLight setBounds(): Expected Number, Number");
+    SpotLight* objectPtr = getDataOfInstance<SpotLight>(instance);
+    objectPtr->setBounds(JSValueToNumber(context, argv[0], NULL), JSValueToNumber(context, argv[1], NULL));
+    return JSValueMakeUndefined(context);
 }
 
-ScriptPositionalLight::ScriptPositionalLight() :ScriptLightObject("PositionalLight") {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    ScriptAccessor(objectTemplate, "omniDirectional", GetOmniDirectional, 0);
-    ScriptMethod(objectTemplate, "setBounds", SetBounds);
-    
-    ScriptInherit(scriptLightObject);
-}
+JSStaticValue ScriptSpotLightProperties[] = {
+    {"cutoff", ScriptSpotLightGetCutoff, 0, ScriptMethodAttributes},
+    {0, 0, 0, 0}
+};
+
+JSStaticFunction ScriptSpotLightMethods[] = {
+    {"setBounds", ScriptSpotLightSetBounds, ScriptMethodAttributes},
+    {0, 0, 0}
+};
+
+ScriptClassDefinition(SpotLight, ScriptSpotLightProperties, ScriptSpotLightMethods);

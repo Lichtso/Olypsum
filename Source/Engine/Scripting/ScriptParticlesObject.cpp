@@ -3,179 +3,209 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 09.04.13.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
-#include "ScriptParticlesObject.h"
+#include "ScriptManager.h"
 
-void ScriptParticlesObject::GetMaxParticles(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    ScriptReturn(objectPtr->maxParticles);
+static JSObjectRef ScriptParticlesObjectConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    return ScriptException(context, exception, "ParticlesObject Constructor: Class can't be instantiated");
 }
 
-void ScriptParticlesObject::GetTexture(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
+ScriptClassStaticDefinition(ParticlesObject);
+
+static JSValueRef ScriptParticlesObjectGetMaxParticles(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<ParticlesObject>(instance)->maxParticles);
+}
+
+static JSValueRef ScriptParticlesObjectGetTextures(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(instance);
     std::string name;
     FilePackage* filePackage = fileManager.findResource<Texture>(objectPtr->texture, name);
-    if(!filePackage) return;
-    ScriptReturn(fileManager.getPathOfResource(filePackage, name).c_str());
-}
-
-void ScriptParticlesObject::SetTexture(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsString()) return;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    auto texture = fileManager.getResourceByPath<Texture>(levelManager.levelPackage, stdStrOfV8(value));
-    if(texture) objectPtr->texture = texture;
-}
-
-void ScriptParticlesObject::GetTransformAligned(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    ScriptReturn(objectPtr->transformAligned);
-}
-
-void ScriptParticlesObject::SetTransformAligned(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsBoolean()) return;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    objectPtr->transformAligned = value->BooleanValue();
-}
-
-void ScriptParticlesObject::GetSystemLife(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    ScriptReturn(objectPtr->systemLife);
-}
-
-void ScriptParticlesObject::SetSystemLife(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsNumber()) return;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    objectPtr->systemLife = value->NumberValue();
-}
-
-void ScriptParticlesObject::GetLifeMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    ScriptReturn(objectPtr->lifeMin);
-}
-
-void ScriptParticlesObject::SetLifeMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsNumber()) return;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    objectPtr->lifeMin = value->NumberValue();
-}
-
-void ScriptParticlesObject::GetLifeMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    ScriptReturn(objectPtr->lifeMax);
-}
-
-void ScriptParticlesObject::SetLifeMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsNumber()) return;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    objectPtr->lifeMax = value->NumberValue();
-}
-
-void ScriptParticlesObject::GetSizeMin(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    ScriptReturn(objectPtr->sizeMin);
-}
-
-void ScriptParticlesObject::SetSizeMin(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsNumber()) return;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    objectPtr->sizeMin = value->NumberValue();
-}
-
-void ScriptParticlesObject::GetSizeMax(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    ScriptReturn(objectPtr->sizeMax);
-}
-
-void ScriptParticlesObject::SetSizeMax(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsNumber()) return;
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    objectPtr->sizeMax = value->NumberValue();
-}
-
-void ScriptParticlesObject::AccessForce(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
-        objectPtr->force = scriptVector3->getDataOfInstance(args[0]);
-        ScriptReturn(args[0]);
+    if(filePackage) {
+        ScriptString strName(fileManager.getPathOfResource(filePackage, name));
+        return strName.getJSStr(context);
     }else
-        ScriptReturn(scriptVector3->newInstance(objectPtr->force));
+        return ScriptException(context, exception, "ParticlesObject getTextures(): Internal error");
 }
 
-void ScriptParticlesObject::AccessPosMin(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
-        objectPtr->posMin = scriptVector3->getDataOfInstance(args[0]);
-        ScriptReturn(args[0]);
+static bool ScriptParticlesObjectSetTextures(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsString(context, value)) {
+        ScriptException(context, exception, "ParticlesObject setTextures(): Expected String");
+        return false;
+    }
+    ScriptString strName(context, value);
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(instance);
+    auto texture = fileManager.getResourceByPath<Texture>(levelManager.levelPackage, strName.getStdStr());
+    if(texture) {
+        objectPtr->texture = texture;
+        return true;
     }else
-        ScriptReturn(scriptVector3->newInstance(objectPtr->posMin));
+        return false;
 }
 
-void ScriptParticlesObject::AccessPosMax(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
-        objectPtr->posMax = scriptVector3->getDataOfInstance(args[0]);
-        ScriptReturn(args[0]);
+static JSValueRef ScriptParticlesObjectGetTransformAligned(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeBoolean(context, getDataOfInstance<ParticlesObject>(instance)->transformAligned);
+}
+
+static bool ScriptParticlesObjectSetTransformAligned(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsBoolean(context, value)) {
+        ScriptException(context, exception, "ParticlesObject setTransformAligned(): Expected Boolean");
+        return false;
+    }
+    getDataOfInstance<ParticlesObject>(instance)->transformAligned = JSValueToBoolean(context, value);
+    return true;
+}
+
+static JSValueRef ScriptParticlesObjectGetSystemLife(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<ParticlesObject>(instance)->systemLife);
+}
+
+static bool ScriptParticlesObjectSetSystemLife(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "ParticlesObject setSystemLife(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    if(isfinite(numberValue)) {
+        getDataOfInstance<ParticlesObject>(instance)->systemLife = numberValue;
+        return true;
     }else
-        ScriptReturn(scriptVector3->newInstance(objectPtr->posMax));
+        return false;
 }
 
-void ScriptParticlesObject::AccessDirMin(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
-        objectPtr->dirMin = scriptVector3->getDataOfInstance(args[0]);
-        ScriptReturn(args[0]);
+static JSValueRef ScriptParticlesObjectGetLifeMin(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<ParticlesObject>(instance)->lifeMin);
+}
+
+static bool ScriptParticlesObjectSetLifeMin(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "ParticlesObject setLifeMin(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    if(isfinite(numberValue)) {
+        getDataOfInstance<ParticlesObject>(instance)->lifeMin = numberValue;
+        return true;
     }else
-        ScriptReturn(scriptVector3->newInstance(objectPtr->dirMin));
+        return false;
 }
 
-void ScriptParticlesObject::AccessDirMax(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(args.This());
-    if(args.Length() == 1 && scriptVector3->isCorrectInstance(args[0])) {
-        objectPtr->dirMax = scriptVector3->getDataOfInstance(args[0]);
-        ScriptReturn(args[0]);
+static JSValueRef ScriptParticlesObjectGetLifeMax(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<ParticlesObject>(instance)->lifeMax);
+}
+
+static bool ScriptParticlesObjectSetLifeMax(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "ParticlesObject setLifeMax(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    if(isfinite(numberValue)) {
+        getDataOfInstance<ParticlesObject>(instance)->lifeMax = numberValue;
+        return true;
     }else
-        ScriptReturn(scriptVector3->newInstance(objectPtr->dirMax));
+        return false;
 }
 
-ScriptParticlesObject::ScriptParticlesObject() :ScriptPhysicObject("ParticlesObject") {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    ScriptAccessor(objectTemplate, "maxParticles", GetMaxParticles, 0);
-    ScriptAccessor(objectTemplate, "texture", GetTexture, SetTexture);
-    ScriptAccessor(objectTemplate, "transformAligned", GetTransformAligned, SetTransformAligned);
-    ScriptAccessor(objectTemplate, "systemLife", GetSystemLife, SetSystemLife);
-    ScriptAccessor(objectTemplate, "lifeMin", GetLifeMin, SetLifeMin);
-    ScriptAccessor(objectTemplate, "lifeMax", GetLifeMax, SetLifeMax);
-    ScriptAccessor(objectTemplate, "sizeMin", GetSizeMin, SetSizeMin);
-    ScriptAccessor(objectTemplate, "sizeMax", GetSizeMax, SetSizeMax);
-    ScriptMethod(objectTemplate, "force", AccessForce);
-    ScriptMethod(objectTemplate, "posMin", AccessPosMin);
-    ScriptMethod(objectTemplate, "posMax", AccessPosMax);
-    ScriptMethod(objectTemplate, "dirMin", AccessDirMin);
-    ScriptMethod(objectTemplate, "dirMax", AccessDirMax);
-    
-    ScriptInherit(scriptPhysicObject);
+static JSValueRef ScriptParticlesObjectGetSizeMin(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<ParticlesObject>(instance)->sizeMin);
 }
+
+static bool ScriptParticlesObjectSetSizeMin(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "ParticlesObject setLifeMin(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    if(isfinite(numberValue)) {
+        getDataOfInstance<ParticlesObject>(instance)->sizeMin = numberValue;
+        return true;
+    }else
+        return false;
+}
+
+static JSValueRef ScriptParticlesObjectGetSizeMax(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<ParticlesObject>(instance)->sizeMax);
+}
+
+static bool ScriptParticlesObjectSetSizeMax(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "ParticlesObject setSizeMax(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    if(isfinite(numberValue)) {
+        getDataOfInstance<ParticlesObject>(instance)->sizeMax = numberValue;
+        return true;
+    }else
+        return false;
+}
+
+static JSValueRef ScriptParticlesObjectAccessForce(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(instance);
+    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
+        objectPtr->force = getScriptVector3(context, argv[0]);
+        return argv[0];
+    }else
+        return newScriptVector3(context, objectPtr->force);
+}
+
+static JSValueRef ScriptParticlesObjectAccessPosMin(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(instance);
+    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
+        objectPtr->posMin = getScriptVector3(context, argv[0]);
+        return argv[0];
+    }else
+        return newScriptVector3(context, objectPtr->posMin);
+}
+
+static JSValueRef ScriptParticlesObjectAccessPosMax(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(instance);
+    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
+        objectPtr->posMin = getScriptVector3(context, argv[0]);
+        return argv[0];
+    }else
+        return newScriptVector3(context, objectPtr->posMax);
+}
+
+static JSValueRef ScriptParticlesObjectAccessDirMin(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(instance);
+    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
+        objectPtr->dirMin = getScriptVector3(context, argv[0]);
+        return argv[0];
+    }else
+        return newScriptVector3(context, objectPtr->dirMin);
+}
+
+static JSValueRef ScriptParticlesObjectAccessDirMax(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(instance);
+    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
+        objectPtr->dirMin = getScriptVector3(context, argv[0]);
+        return argv[0];
+    }else
+        return newScriptVector3(context, objectPtr->dirMin);
+}
+
+JSStaticValue ScriptParticlesObjectProperties[] = {
+    {"maxParticles", ScriptParticlesObjectGetMaxParticles, 0, ScriptMethodAttributes},
+    {"texture", ScriptParticlesObjectGetTextures, ScriptParticlesObjectSetTextures, kJSPropertyAttributeDontDelete},
+    {"transformAligned", ScriptParticlesObjectGetTransformAligned, ScriptParticlesObjectSetTransformAligned, kJSPropertyAttributeDontDelete},
+    {"systemLife", ScriptParticlesObjectGetSystemLife, ScriptParticlesObjectSetSystemLife, kJSPropertyAttributeDontDelete},
+    {"lifeMin", ScriptParticlesObjectGetLifeMin, ScriptParticlesObjectSetLifeMin, kJSPropertyAttributeDontDelete},
+    {"lifeMax", ScriptParticlesObjectGetLifeMax, ScriptParticlesObjectSetLifeMax, kJSPropertyAttributeDontDelete},
+    {"sizeMin", ScriptParticlesObjectGetSizeMin, ScriptParticlesObjectSetSizeMin, kJSPropertyAttributeDontDelete},
+    {"sizeMax", ScriptParticlesObjectGetSizeMax, ScriptParticlesObjectSetSizeMax, kJSPropertyAttributeDontDelete},
+    {0, 0, 0, 0}
+};
+
+JSStaticFunction ScriptParticlesObjectMethods[] = {
+    {"force", ScriptParticlesObjectAccessForce, ScriptMethodAttributes},
+    {"posMin", ScriptParticlesObjectAccessPosMin, ScriptMethodAttributes},
+    {"posMax", ScriptParticlesObjectAccessPosMax, ScriptMethodAttributes},
+    {"dirMin", ScriptParticlesObjectAccessDirMin, ScriptMethodAttributes},
+    {"dirMax", ScriptParticlesObjectAccessDirMax, ScriptMethodAttributes},
+    {0, 0, 0}
+};
+
+ScriptClassDefinition(ParticlesObject, ScriptParticlesObjectProperties, ScriptParticlesObjectMethods);

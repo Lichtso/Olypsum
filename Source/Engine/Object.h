@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 14.10.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #ifndef Object_h
@@ -25,11 +25,11 @@ class LevelSaver;
  */
 class BaseClass {
     protected:
-    BaseClass() :scriptFile(NULL) { }
+    BaseClass() :scriptInstance(NULL) { };
     virtual ~BaseClass();
     public:
     FileResourcePtr<ScriptFile> scriptFile; //!< The script file to be called on events
-    v8::Persistent<v8::Object> scriptInstance; //!< The script representation
+    JSObjectRef scriptInstance; //!< The script representation
     //! Used to remove a BaseClass correctly
     virtual void removeClean() { };
     //! Used to delete a LinkObject quickly

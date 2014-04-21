@@ -3,10 +3,10 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 06.01.13.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
-#include "Scripting/ScriptVisualObject.h"
+#include "Scripting/ScriptManager.h"
 
 TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelLoader) :heights(NULL) {
     levelLoader->pushObject(this);
@@ -139,9 +139,9 @@ TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelL
         }
     vao.updateIndecies(indeciesCount, indecies, GL_UNSIGNED_INT, GL_STATIC_DRAW);
     delete [] indecies;
-    
-    ScriptNewInstance(scriptTerrainObject);
     updateModel();
+    
+    ScriptInstance(ScriptTerrainObject);
 }
 
 TerrainObject::~TerrainObject() {

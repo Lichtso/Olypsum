@@ -3,10 +3,10 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 20.08.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
-#include "Scripting/ScriptVisualObject.h"
+#include "Scripting/ScriptManager.h"
 
 MatterObject::MatterObject() :integrity(1.0) {
     objectManager.matterObjects.insert(this);
@@ -228,8 +228,7 @@ RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
     }
     
     PhysicObject::readFrictionAndRestitution(node);
-    
-    ScriptNewInstance(scriptRigidObject);
+    ScriptInstance(ScriptRigidObject);
 }
 
 void RigidObject::removeClean() {
@@ -428,7 +427,7 @@ void RigidObject::prepareShaderProgram(Mesh* mesh) {
         currentShaderProgram->setUniformMatrix4("jointMats", skeletonPose.get(), model->skeleton->bones.size());
 }
 
-BoneLink* RigidObject::findBoneLinkOfName(const char* name) {
+BoneLink* RigidObject::findBoneLinkOfName(const std::string& name) {
     if(!skeletonPose) return NULL;
     auto bones = model->skeleton->bones;
     auto iterator = bones.find(name);

@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 31.03.13.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #ifndef Network_h
@@ -21,7 +21,7 @@ class NetworkManager {
     public:
     void init();
     void gameTick();
-    void enable();
+    bool enable();
     void disable();
 };
 

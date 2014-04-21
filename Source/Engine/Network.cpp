@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 31.03.13.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #include "Menu/Menu.h"
@@ -21,30 +21,42 @@ void NetworkManager::init() {
 }
 
 void NetworkManager::gameTick() {
-	socketManager.listen();
+    try {
+        socketManager.listen();
+    }catch(netLink::Exception exep) {
+        log(network_log, std::string("Listen Exception ")+stringOf(exep.code));
+    }
     profiler.leaveSection("Networking");
 }
 
-void NetworkManager::enable() {
+bool NetworkManager::enable() {
     if(udpSocket) disable();
     
-    udpSocket = socketManager.newMsgPackSocket();
-    
-    if(optionsState.ipVersion == "ipV4")
-        udpSocket->initAsUdpPeer("0.0.0.0", udpPort);
-    else if(optionsState.ipVersion == "ipV6")
-        udpSocket->initAsUdpPeer("::0", udpPort);
-    else
-        udpSocket->initAsUdpPeer("*", udpPort);
-    
-    udpSocket->hostRemote = (udpSocket->getIPVersion() == netLink::IPv4) ? scanIPv4 : scanIPv6;
-    udpSocket->portRemote = udpPort;
-    udpSocket->setMulticastGroup(udpSocket->hostRemote, true);
-    
-    netLink::MsgPackSocket& msgPackSocket = *static_cast<netLink::MsgPackSocket*>(udpSocket.get());
-    msgPackSocket << new MsgPack::MapHeader(1);
-    msgPackSocket << new MsgPack::String("nickname");
-    msgPackSocket << new MsgPack::String(optionsState.nickname);
+    try {
+        udpSocket = socketManager.newMsgPackSocket();
+        
+        if(optionsState.ipVersion == "ipV4")
+            udpSocket->initAsUdpPeer("0.0.0.0", udpPort);
+        else if(optionsState.ipVersion == "ipV6")
+            udpSocket->initAsUdpPeer("::0", udpPort);
+        else
+            udpSocket->initAsUdpPeer("*", udpPort);
+        
+        udpSocket->hostRemote = (udpSocket->getIPVersion() == netLink::IPv4) ? scanIPv4 : scanIPv6;
+        udpSocket->portRemote = udpPort;
+        udpSocket->setMulticastGroup(udpSocket->hostRemote, true);
+        
+        netLink::MsgPackSocket& msgPackSocket = *static_cast<netLink::MsgPackSocket*>(udpSocket.get());
+        msgPackSocket << new MsgPack::MapHeader(1);
+        msgPackSocket << new MsgPack::String("nickname");
+        msgPackSocket << new MsgPack::String(optionsState.nickname);
+        
+        return true;
+    }catch(netLink::Exception exep) {
+        log(network_log, std::string("Enable Exception ")+stringOf(exep.code));
+        disable();
+        return false;
+    }
 }
 
 void NetworkManager::disable() {

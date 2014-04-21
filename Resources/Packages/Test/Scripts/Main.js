@@ -11,8 +11,7 @@ exports.explosion = function(object) {
 			result[i].applyLinearImpulse(vec.mult(force));
 			result[i].integrity -= force*0.01;
 		}
-
-		if(result[i].className == "TerrainObject") { //Hole in ground
+		if(result[i] instanceof TerrainObject) { //Hole in ground
 			var mat = result[i].transformation().getInverse().mult(transform),
 				size = result[i].collisionShapeInfo().size,
 				pos = mat.w().divide(size).mult(0.5).add(new Vector3(0.5, 0.5, 0.5)),
@@ -22,18 +21,27 @@ exports.explosion = function(object) {
 				for(var x = Math.max(centerX-radius, 0); x < Math.min(centerX+radius+1, result[i].width); x ++) {
 					var diffX = x-centerX, diffY = y-centerY,
 						dist = Math.sqrt(diffX*diffX+diffY*diffY)/radius;
-					if(dist < 1.0)
-						result[i].accessCell(x, y, Math.min(result[i].accessCell(x, y), Math.max(0.0, pos.y-Math.cos(Math.asin(dist))/size.y)));
+					if(dist < 1.0) {
+                        var height = result[i].accessCell(x, y), diffZ = height-pos.y+Math.cos(Math.asin(dist))/size.y;
+                        if(diffZ > 0.0)
+                            result[i].accessCell(x, y, height-diffZ*0.5);
+                    }
 				}
 			result[i].updateModel();
 		}
 	}
-
+    
 	//Spawn effects
 	var mat = new Matrix4();
 	mat.w(transform.w());
-	var imported = loadContainer(mat, "explosion");
-	Animation.addFrames(imported[1], "color", false, [1.0, 1.0], [0.0, 1.5], [null, new Vector3(0.0, 0.0, 0.0)]);
+	var imported = Engine.loadContainer(mat, "explosion");
+    var t = 0.0, color = imported[1].color();
+    
+    Animation.startTimer(function() {
+        imported[1].color(color.getInterpolation(new Vector3(0.0, 0.0, 0.0), t));
+        t += 1.0/60.0;
+        return t <= 1.0;
+    }, 1.0/60.0);
 }
 
 exports.onload = function(localData, globalData) {
@@ -55,13 +63,13 @@ exports.onpause = function(paused) {
 };*/
 
 exports.ongametick = function() {
-	if(gamePaused) return;
-	var Cam = require('Cam');
-
+	if(Engine.gamePaused) return;
+	var Cam = Engine.getScript('Cam');
+    
 	var transform = Cam.camObject.transformation(),
-		speed = animationFactor*5.0;
-
-	if(Keyboard.isKeyPressed(4)) //A
+		speed = Animation.factor*5.0;
+    
+    if(Keyboard.isKeyPressed(4)) //A
 		transform.w(transform.w().add(transform.x().mult(-speed)));
 	else if(Keyboard.isKeyPressed(7)) //D
 		transform.w(transform.w().add(transform.x().mult(speed)));
@@ -75,21 +83,21 @@ exports.ongametick = function() {
 		transform.w(transform.w().add(transform.z().mult(-speed)));
 	else if(Keyboard.isKeyPressed(22)) //S
 		transform.w(transform.w().add(transform.z().mult(speed)));
-
+    
 	if(!Keyboard.isKeyPressed(225)) { //Shift left
 		var rotation = transform.rotation(), up = new Vector3(0.0, 1.0, 0.0);
-		transform.rotation(rotation.getProduct(new Quaternion(-Mouse.x()*0.01, Mouse.y()*0.01, 0.0)));
+		transform.rotation(rotation.getProduct(new Quaternion(-Mouse.x*0.01, Mouse.y*0.01, 0.0)));
 		transform.y(up);
 		transform.x(transform.y().cross(transform.z()).normalize());
 		transform.y(transform.z().cross(transform.x()).normalize());
 		if(transform.y().getDot(up) < 0.12)
-			transform.rotation(rotation.mult(new Quaternion(-Mouse.x()*0.01, 0.0, 0.0)));
+			transform.rotation(rotation.mult(new Quaternion(-Mouse.x*0.01, Mouse.y*0.01, 0.0)));
 	}
 	
 	Cam.camObject.transformation(transform);
 
 	if(exports.grabbedObject != null) {
-		var camTransform = require('Cam').camObject.transformation(),
+		var camTransform = Cam.camObject.transformation(),
 			objTransform = exports.grabbedObject.transformation();
 		var velocity = camTransform.getTransformed(exports.grabbedVector).sub(objTransform.w()),
 			speed = velocity.getLength();
@@ -97,7 +105,7 @@ exports.ongametick = function() {
         speed = Math.min(speed*5.0, 10.0);
         
         if(Keyboard.isKeyPressed(225)) //Shift left
-            exports.grabbedObject.angularVelocity(camTransform.getRotated(new Vector3(-Mouse.y()*0.1, Mouse.x()*0.1, 0.0)));
+            exports.grabbedObject.angularVelocity(camTransform.getRotated(new Vector3(-Mouse.y*0.1, Mouse.x*0.1, 0.0)));
         else
             exports.grabbedObject.angularVelocity(new Vector3(0.0, 0.0, 0.0));
         exports.grabbedObject.linearVelocity(velocity.mult(speed));
@@ -114,7 +122,7 @@ exports.onmousewheel = function(deltaX, deltaY) {
 };
 
 exports.onmousedown = function() {
-	var transform = require('Cam').camObject.transformation();
+	var transform = Engine.getScript('Cam').camObject.transformation();
 	var hits = Intersection.rayCast(transform.w(), transform.z().mult(-100.0), 0xFFFF, true);
 	if(hits.objects.length == 0 || !hits.objects[0].mass)
 		exports.grabbedObject = null;

@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 30.12.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #ifndef LevelSaver_h
@@ -17,7 +17,7 @@ class LevelSaver {
     public:
     LevelSaver();
     void pushObject(BaseObject* object);
-    bool saveLevel(v8::Handle<v8::Value> localData, v8::Handle<v8::Value> globalData, v8::Handle<v8::Value> description);
+    bool saveLevel(JSContextRef context, JSValueRef localData, JSValueRef globalData, JSValueRef description);
 };
 
 #endif

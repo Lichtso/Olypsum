@@ -3,282 +3,256 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 09.03.13.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #include "ScriptManager.h"
 
-void ScriptBaseClass::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    
-    if(args.Length() != 1 || !args[0]->IsExternal())
-        return ScriptException("BaseClass Constructor: Class can't be instantiated");
-    
-    BaseClass* objectPrt = static_cast<BaseClass*>(v8::Local<v8::External>::Cast(args[0])->Value());
-    objectPrt->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
-    args.This()->SetInternalField(0, args[0]);
-    ScriptReturn(args.This());
+static JSObjectRef ScriptBaseClassConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    return ScriptException(context, exception, "BaseClass Constructor: Class can't be instantiated");
 }
 
-void ScriptBaseClass::GetScriptClass(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    BaseClass* objectPtr = getDataOfInstance<BaseClass>(args.This());
-    std::string path = fileManager.getPathOfResource(objectPtr->scriptFile->filePackage, objectPtr->scriptFile->name);
-    ScriptReturn(path.c_str());
+ScriptClassStaticDefinition(BaseClass);
+
+static JSValueRef ScriptBaseClassGetScriptClass(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    BaseClass* objectPtr = getDataOfInstance<BaseClass>(instance);
+    ScriptString strClassName(fileManager.getPathOfResource(objectPtr->scriptFile->filePackage, objectPtr->scriptFile->name));
+    return strClassName.getJSStr(context);
 }
 
-void ScriptBaseClass::SetScriptClass(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsString()) return;
-    BaseClass* objectPtr = getDataOfInstance<BaseClass>(args.This());
-    FilePackage* filePackage = levelManager.levelPackage;
-    FileResourcePtr<ScriptFile> scriptFile = fileManager.getResourceByPath<ScriptFile>(filePackage, stdStrOfV8(value));
-    if(scriptFile)
+static bool ScriptBaseClassSetScriptClass(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsString(context, value)) return false;
+    BaseClass* objectPtr = getDataOfInstance<BaseClass>(instance);
+    ScriptString strClassName(context, value);
+    FileResourcePtr<ScriptFile> scriptFile = fileManager.getResourceByPath<ScriptFile>(levelManager.levelPackage, strClassName.getStdStr());
+    if(scriptFile) {
         objectPtr->scriptFile = scriptFile;
-}
-
-void ScriptBaseClass::Delete(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    getDataOfInstance<BaseClass>(args.This())->removeClean();
-}
-
-ScriptBaseClass::ScriptBaseClass(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :ScriptClass(name, constructor) {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> instanceTemplate = (*functionTemplate)->InstanceTemplate();
-    instanceTemplate->SetInternalFieldCount(1);
-}
-
-ScriptBaseClass::ScriptBaseClass() :ScriptBaseClass("BaseClass") {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    ScriptAccessor(objectTemplate, "scriptClass", GetScriptClass, SetScriptClass);
-    ScriptMethod(objectTemplate, "delete", Delete);
-}
-
-
-
-void ScriptBaseObject::AccessTransformation(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
-    if(args.Length() == 1 && scriptMatrix4->isCorrectInstance(args[0])) {
-        Matrix4* mat = scriptMatrix4->getDataOfInstance(args[0]);
-        if(mat->isValid())
-            objectPtr->setTransformation(mat->getBTTransform());
-        ScriptReturn(args[0]);
+        return true;
     }else
-        ScriptReturn(scriptMatrix4->newInstance(Matrix4(objectPtr->getTransformation())));
+        return false;
 }
 
-void ScriptBaseObject::GetTransformUpLink(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
+static JSValueRef ScriptBaseClassDelete(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    getDataOfInstance<BaseClass>(instance)->removeClean();
+    return JSValueMakeUndefined(context);
+}
+
+JSStaticValue ScriptBaseClassProperties[] = {
+    {"scriptClass", ScriptBaseClassGetScriptClass, ScriptBaseClassSetScriptClass, kJSPropertyAttributeDontDelete},
+    {0, 0, 0, 0}
+};
+
+JSStaticFunction ScriptBaseClassMethods[] = {
+    {"delete", ScriptBaseClassDelete, ScriptMethodAttributes},
+    {0, 0, 0}
+};
+
+ScriptClassDefinition(BaseClass, ScriptBaseClassProperties, ScriptBaseClassMethods);
+
+
+
+static JSObjectRef ScriptBaseObjectConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    return ScriptException(context, exception, "BaseObject Constructor: Class can't be instantiated");
+}
+
+ScriptClassStaticDefinition(BaseObject);
+
+static JSValueRef ScriptBaseObjectAccessTransformation(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    BaseObject* objectPtr = getDataOfInstance<BaseObject>(instance);
+    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4])) {
+        Matrix4* matrix = getDataOfInstance<Matrix4>(context, argv[0]);
+        if(matrix->isValid())
+            objectPtr->setTransformation(matrix->getBTTransform());
+        return argv[0];
+    }else
+        return newScriptMatrix4(context, objectPtr->getTransformation());
+}
+
+static JSValueRef ScriptBaseObjectGetTransformUpLink(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    BaseObject* objectPtr = getDataOfInstance<BaseObject>(instance);
     foreach_e(objectPtr->links, i)
         if(dynamic_cast<TransformLink*>(*i) && (*i)->b == objectPtr)
-            ScriptReturn((*i)->scriptInstance);
+            return (*i)->scriptInstance;
+    return JSValueMakeNull(context);
 }
 
-void ScriptBaseObject::GetBoneUpLink(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
+static JSValueRef ScriptBaseObjectGetBoneUpLink(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    BaseObject* objectPtr = getDataOfInstance<BaseObject>(instance);
     foreach_e(objectPtr->links, i)
         if(dynamic_cast<BoneLink*>(*i) && (*i)->b == objectPtr)
-            ScriptReturn((*i)->scriptInstance);
+            return (*i)->scriptInstance;
+    return JSValueMakeNull(context);
 }
 
-void ScriptBaseObject::IterateLinks(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
-    
-    if(args.Length() != 1 || !args[0]->IsFunction())
-        return ScriptException("BaseObject iterateLinks: Invalid argument");
-    
-    v8::TryCatch tryCatch;
-    v8::Handle<v8::Function> function = v8::Local<v8::Function>::Cast(args[0]);
+static JSValueRef ScriptBaseObjectIterateLinks(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    if(argc != 1)
+        return ScriptException(context, exception, "BaseObject iterateLinks: Expected Function");
+    JSObjectRef callback = JSValueToObject(context, argv[0], NULL);
+    if(!callback || !JSObjectIsFunction(context, callback))
+        return ScriptException(context, exception, "BaseObject iterateLinks: Expected Function");
+    BaseObject* objectPtr = getDataOfInstance<BaseObject>(instance);
     for(auto link : objectPtr->links) {
-        v8::Handle<v8::Value> linkInstance(*(link->scriptInstance));
-        function->CallAsFunction(args.This(), 1, &linkInstance);
-        if(!scriptManager->tryCatch(&tryCatch))
-            break;
+        JSValueRef args[] = { link->scriptInstance };
+        JSObjectCallAsFunction(context, callback, callback, 1, args, exception);
+        return NULL;
     }
+    return JSValueMakeUndefined(context);
 }
 
-void ScriptBaseObject::GetLinkCount(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(args.This());
-    ScriptReturn(v8::Integer::New(v8::Isolate::GetCurrent(), objectPtr->links.size()));
+static JSValueRef ScriptBaseObjectGetLinkCount(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    BaseObject* objectPtr = getDataOfInstance<BaseObject>(instance);
+    return JSValueMakeNumber(context, objectPtr->links.size());
 }
 
-ScriptBaseObject::ScriptBaseObject() :ScriptBaseClass("BaseObject") {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    ScriptMethod(objectTemplate, "transformation", AccessTransformation);
-    ScriptMethod(objectTemplate, "getTransformUpLink", GetTransformUpLink);
-    ScriptMethod(objectTemplate, "getBoneUpLink", GetBoneUpLink);
-    ScriptMethod(objectTemplate, "iterateLinks", IterateLinks);
-    ScriptAccessor(objectTemplate, "linkCount", GetLinkCount, 0);
-    
-    ScriptInherit(scriptBaseClass);
+JSStaticValue ScriptBaseObjectProperties[] = {
+    {"linkCount", ScriptBaseObjectGetLinkCount, 0, ScriptMethodAttributes},
+    {0, 0, 0, 0}
+};
+
+JSStaticFunction ScriptBaseObjectMethods[] = {
+    {"transformation", ScriptBaseObjectAccessTransformation, ScriptMethodAttributes},
+    {"getTransformUpLink", ScriptBaseObjectGetTransformUpLink, ScriptMethodAttributes},
+    {"getBoneUpLink", ScriptBaseObjectGetBoneUpLink, ScriptMethodAttributes},
+    {"iterateLinks", ScriptBaseObjectIterateLinks, ScriptMethodAttributes},
+    {0, 0, 0}
+};
+
+ScriptClassDefinition(BaseObject, ScriptBaseObjectProperties, ScriptBaseObjectMethods);
+
+
+
+static JSObjectRef ScriptPhysicObjectConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    return ScriptException(context, exception, "PhysicObject Constructor: Class can't be instantiated");
 }
 
+ScriptClassStaticDefinition(PhysicObject);
 
-
-void ScriptPhysicObject::GetCollisionShape(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(args.This())->getBody();
-    std::string buffer = levelManager.getCollisionShapeName(physicBody->getCollisionShape());
-    if(buffer.size() > 0)
-        ScriptReturn(buffer.c_str());
+static JSValueRef ScriptPhysicObjectGetCollisionShape(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    btCollisionShape* shape = getDataOfInstance<PhysicObject>(instance)->getBody()->getCollisionShape();
+    std::string buffer = levelManager.getCollisionShapeName(shape);
+    if(buffer.size() == 0)
+        return ScriptException(context, exception, "PhysicObject getCollisionShape(): Internal error");
+    ScriptString strName(buffer);
+    return strName.getJSStr(context);
 }
 
-void ScriptPhysicObject::SetCollisionShape(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsString()) return;
-    btCollisionShape* shape = levelManager.getCollisionShape(stdStrOfV8(value));
+static bool ScriptPhysicObjectSetCollisionShape(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsString(context, value)) {
+        ScriptException(context, exception, "PhysicObject setCollisionShape(): Expected String");
+        return false;
+    }
+    ScriptString strName(context, value);
+    btCollisionShape* shape = levelManager.getCollisionShape(strName.getStdStr());
     if(shape) {
-        PhysicObject* objectPtr = getDataOfInstance<PhysicObject>(args.This());
+        PhysicObject* objectPtr = getDataOfInstance<PhysicObject>(instance);
         objectPtr->getBody()->setCollisionShape(shape);
         objectPtr->updateTouchingObjects();
-    }
+        return true;
+    }else
+        return false;
 }
 
-void ScriptPhysicObject::GetCollisionShapeInfo(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    btCollisionShape* shape = getDataOfInstance<PhysicObject>(args.This())->getBody()->getCollisionShape();
-    v8::Handle<v8::Object> result = v8::Object::New(v8::Isolate::GetCurrent());
-    result->Set(ScriptString("type"), ScriptString(shape->getName()));
+static JSValueRef ScriptPhysicObjectGetCollisionShapeInfo(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    btCollisionShape* shape = getDataOfInstance<PhysicObject>(instance)->getBody()->getCollisionShape();
+    JSObjectRef result = JSObjectMake(context, NULL, NULL);
+    ScriptString strType(shape->getName());
+    JSObjectSetProperty(context, result, ScriptStringType.str, strType.getJSStr(context), 0, NULL);
     switch(shape->getShapeType()) {
         case CYLINDER_SHAPE_PROXYTYPE: {
-            result->Set(ScriptString("size"), scriptVector3->newInstance(static_cast<btCylinderShape*>(shape)->getHalfExtentsWithMargin()));
+            btVector3 size = static_cast<btCylinderShape*>(shape)->getHalfExtentsWithMargin();
+            JSObjectSetProperty(context, result, ScriptStringSize.str, newScriptVector3(context, size), 0, NULL);
             if(dynamic_cast<btCylinderShapeX*>(shape))
-                result->Set(ScriptString("direction"), ScriptString("x"));
+                JSObjectSetProperty(context, result, ScriptStringDirection.str, ScriptStringX.getJSStr(context), 0, NULL);
             else if(dynamic_cast<btCylinderShapeZ*>(shape))
-            result->Set(ScriptString("direction"), ScriptString("z"));
+                JSObjectSetProperty(context, result, ScriptStringDirection.str, ScriptStringZ.getJSStr(context), 0, NULL);
             else
-                result->Set(ScriptString("direction"), ScriptString("y"));
+                JSObjectSetProperty(context, result, ScriptStringDirection.str, ScriptStringY.getJSStr(context), 0, NULL);
         } break;
         case BOX_SHAPE_PROXYTYPE: {
-            result->Set(ScriptString("size"), scriptVector3->newInstance(static_cast<btBoxShape*>(shape)->getHalfExtentsWithMargin()));
+            btVector3 size = static_cast<btBoxShape*>(shape)->getHalfExtentsWithMargin();
+            JSObjectSetProperty(context, result, ScriptStringSize.str, newScriptVector3(context, size), 0, NULL);
         } break;
         case SPHERE_SHAPE_PROXYTYPE: {
-            result->Set(ScriptString("radius"), v8::Number::New(v8::Isolate::GetCurrent(), static_cast<btSphereShape*>(shape)->getRadius()));
+            double radius = static_cast<btSphereShape*>(shape)->getRadius();
+            JSObjectSetProperty(context, result, ScriptStringSize.str, JSValueMakeNumber(context, radius), 0, NULL);
         } break;
         case CAPSULE_SHAPE_PROXYTYPE: {
             btCapsuleShape* capsuleShape = static_cast<btCapsuleShape*>(shape);
-            result->Set(ScriptString("radius"), v8::Number::New(v8::Isolate::GetCurrent(), capsuleShape->getRadius()));
-            result->Set(ScriptString("length"), v8::Number::New(v8::Isolate::GetCurrent(), capsuleShape->getHalfHeight()));
+            double radius = capsuleShape->getRadius(), length = capsuleShape->getHalfHeight();
+            JSObjectSetProperty(context, result, ScriptStringRadius.str, JSValueMakeNumber(context, radius), 0, NULL);
+            JSObjectSetProperty(context, result, ScriptStringLength.str, JSValueMakeNumber(context, length), 0, NULL);
             if(dynamic_cast<btCapsuleShapeX*>(shape))
-                result->Set(ScriptString("direction"), ScriptString("x"));
+                JSObjectSetProperty(context, result, ScriptStringDirection.str, ScriptStringX.getJSStr(context), 0, NULL);
             else if(dynamic_cast<btCapsuleShapeZ*>(shape))
-                result->Set(ScriptString("direction"), ScriptString("z"));
+                JSObjectSetProperty(context, result, ScriptStringDirection.str, ScriptStringZ.getJSStr(context), 0, NULL);
             else
-                result->Set(ScriptString("direction"), ScriptString("y"));
+                JSObjectSetProperty(context, result, ScriptStringDirection.str, ScriptStringY.getJSStr(context), 0, NULL);
         } break;
         case CONE_SHAPE_PROXYTYPE: {
             btConeShape* coneShape = static_cast<btConeShape*>(shape);
-            result->Set(ScriptString("radius"), v8::Number::New(v8::Isolate::GetCurrent(), coneShape->getRadius()));
-            result->Set(ScriptString("length"), v8::Number::New(v8::Isolate::GetCurrent(), coneShape->getHeight()));
+            double radius = coneShape->getRadius(), length = coneShape->getHeight();
+            JSObjectSetProperty(context, result, ScriptStringRadius.str, JSValueMakeNumber(context, radius), 0, NULL);
+            JSObjectSetProperty(context, result, ScriptStringLength.str, JSValueMakeNumber(context, length), 0, NULL);
             if(dynamic_cast<btConeShapeX*>(shape))
-                result->Set(ScriptString("direction"), ScriptString("x"));
+                JSObjectSetProperty(context, result, ScriptStringDirection.str, ScriptStringX.getJSStr(context), 0, NULL);
             else if(dynamic_cast<btConeShapeZ*>(shape))
-                result->Set(ScriptString("direction"), ScriptString("z"));
+                JSObjectSetProperty(context, result, ScriptStringDirection.str, ScriptStringZ.getJSStr(context), 0, NULL);
             else
-                result->Set(ScriptString("direction"), ScriptString("y"));
+                JSObjectSetProperty(context, result, ScriptStringDirection.str, ScriptStringY.getJSStr(context), 0, NULL);
         } break;
         case MULTI_SPHERE_SHAPE_PROXYTYPE: {
             btMultiSphereShape* multiSphereShape = static_cast<btMultiSphereShape*>(shape);
-            v8::Handle<v8::Array> positions = v8::Array::New(v8::Isolate::GetCurrent(), multiSphereShape->getSphereCount());
-            v8::Handle<v8::Array> radii = v8::Array::New(v8::Isolate::GetCurrent(), multiSphereShape->getSphereCount());
+            JSObjectRef positions = JSObjectMakeArray(context, 0, NULL, NULL),
+                        radii = JSObjectMakeArray(context, 0, NULL, NULL);
             for(unsigned int i = 0; i < multiSphereShape->getSphereCount(); i ++) {
-                positions->Set(i, scriptVector3->newInstance(multiSphereShape->getSpherePosition(i)));
-                radii->Set(i, v8::Number::New(v8::Isolate::GetCurrent(), multiSphereShape->getSphereRadius(i)));
+                JSObjectSetPropertyAtIndex(context, positions, i, newScriptVector3(context, multiSphereShape->getSpherePosition(i)), NULL);
+                JSObjectSetPropertyAtIndex(context, radii, i, JSValueMakeNumber(context, multiSphereShape->getSphereRadius(i)), NULL);
             }
-            result->Set(ScriptString("positions"), positions);
-            result->Set(ScriptString("radii"), radii);
+            JSObjectSetProperty(context, result, ScriptStringPositions.str, positions, 0, NULL);
+            JSObjectSetProperty(context, result, ScriptStringRadii.str, radii, 0, NULL);
         } break;
         case COMPOUND_SHAPE_PROXYTYPE: {
             btCompoundShape* compoundShape = static_cast<btCompoundShape*>(shape);
-            
-            v8::Handle<v8::Array> transformations = v8::Array::New(v8::Isolate::GetCurrent(), compoundShape->getNumChildShapes());
-            v8::Handle<v8::Array> children = v8::Array::New(v8::Isolate::GetCurrent(), compoundShape->getNumChildShapes());
+            JSObjectRef transformations = JSObjectMakeArray(context, 0, NULL, NULL),
+                        children = JSObjectMakeArray(context, 0, NULL, NULL);
             for(unsigned int i = 0; i < compoundShape->getNumChildShapes(); i ++) {
-                transformations->Set(i, scriptMatrix4->newInstance(compoundShape->getChildTransform(i)));
-                std::string buffer = levelManager.getCollisionShapeName(compoundShape->getChildShape(i));
-                if(buffer.size())
-                    children->Set(i, ScriptString(buffer.c_str()));
+                ScriptString strName(levelManager.getCollisionShapeName(compoundShape->getChildShape(i)));
+                JSObjectSetPropertyAtIndex(context, transformations, i, newScriptMatrix4(context, compoundShape->getChildTransform(i)), NULL);
+                JSObjectSetPropertyAtIndex(context, children, i, strName.getJSStr(context), NULL);
             }
-            result->Set(ScriptString("transformations"), transformations);
-            result->Set(ScriptString("children"), children);
+            JSObjectSetProperty(context, result, ScriptStringTransformations.str, transformations, 0, NULL);
+            JSObjectSetProperty(context, result, ScriptStringChildren.str, children, 0, NULL);
         } break;
         case CONVEX_HULL_SHAPE_PROXYTYPE: {
             btConvexHullShape* convexHullShape = static_cast<btConvexHullShape*>(shape);
-            v8::Handle<v8::Array> points = v8::Array::New(v8::Isolate::GetCurrent(), convexHullShape->getNumPoints());
+           JSObjectRef positions = JSObjectMakeArray(context, 0, NULL, NULL);
             for(unsigned int i = 0; i < convexHullShape->getNumPoints(); i ++)
-                points->Set(i, scriptVector3->newInstance(convexHullShape->getUnscaledPoints()[i]));
-            result->Set(ScriptString("points"), points);
+                JSObjectSetPropertyAtIndex(context, positions, i, newScriptVector3(context, convexHullShape->getUnscaledPoints()[i]), NULL);
+            JSObjectSetProperty(context, result, ScriptStringPositions.str, positions, 0, NULL);
         } break;
         case STATIC_PLANE_PROXYTYPE: {
             btStaticPlaneShape* staticPlaneShape = static_cast<btStaticPlaneShape*>(shape);
-            result->Set(ScriptString("normal"), scriptVector3->newInstance(staticPlaneShape->getPlaneNormal()));
-            result->Set(ScriptString("distance"), v8::Number::New(v8::Isolate::GetCurrent(), staticPlaneShape->getPlaneConstant()));
+            JSObjectSetProperty(context, result, ScriptStringNormal.str, newScriptVector3(context, staticPlaneShape->getPlaneNormal()), 0, NULL);
+            JSObjectSetProperty(context, result, ScriptStringDistance.str, JSValueMakeNumber(context, staticPlaneShape->getPlaneConstant()), 0, NULL);
         } break;
         case TERRAIN_SHAPE_PROXYTYPE: {
-            TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(args.This());
-            btVector3 size = static_cast<btHeightfieldTerrainShape*>(shape)->getLocalScaling() *
-                             btVector3(objectPtr->width*0.5, 0.5, objectPtr->length*0.5);
-            result->Set(ScriptString("size"), scriptVector3->newInstance(size));
+            TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(instance);
+            btVector3 size = static_cast<btHeightfieldTerrainShape*>(shape)->getLocalScaling();
+            size *= btVector3(objectPtr->width*0.5, 0.5, objectPtr->length*0.5);
+            JSObjectSetProperty(context, result, ScriptStringSize.str, newScriptVector3(context, size), 0, NULL);
         } break;
     }
-    ScriptReturn(result);
+    return result;
 }
 
-void ScriptPhysicObject::GetAngularFriction(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(args.This())->getBody();
-    ScriptReturn(physicBody->getRollingFriction());
-}
+JSStaticValue ScriptPhysicObjectProperties[] = {
+    {"collisionShape", ScriptPhysicObjectGetCollisionShape, ScriptPhysicObjectSetCollisionShape, kJSPropertyAttributeDontDelete},
+    {0, 0, 0, 0}
+};
 
-void ScriptPhysicObject::SetAngularFriction(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsNumber() || value->NumberValue() == NAN) return;
-    btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(args.This())->getBody();
-    physicBody->setRollingFriction(value->NumberValue());
-}
+JSStaticFunction ScriptPhysicObjectMethods[] = {
+    {"collisionShapeInfo", ScriptPhysicObjectGetCollisionShapeInfo, ScriptMethodAttributes},
+    {0, 0, 0}
+};
 
-void ScriptPhysicObject::GetLinearFriction(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(args.This())->getBody();
-    ScriptReturn(physicBody->getFriction());
-}
-
-void ScriptPhysicObject::SetLinearFriction(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsNumber() || value->NumberValue() == NAN) return;
-    btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(args.This())->getBody();
-    physicBody->setFriction(value->NumberValue());
-}
-
-void ScriptPhysicObject::GetRestitution(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(args.This())->getBody();
-    ScriptReturn(physicBody->getRestitution());
-}
-
-void ScriptPhysicObject::SetRestitution(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsNumber() || value->NumberValue() == NAN) return;
-    btCollisionObject* physicBody = getDataOfInstance<PhysicObject>(args.This())->getBody();
-    physicBody->setRestitution(value->NumberValue());
-}
-
-ScriptPhysicObject::ScriptPhysicObject() :ScriptPhysicObject("PhysicObject") {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    ScriptAccessor(objectTemplate, "collisionShape", GetCollisionShape, SetCollisionShape);
-    ScriptMethod(objectTemplate, "collisionShapeInfo", GetCollisionShapeInfo);
-    
-    ScriptInherit(scriptBaseObject);
-}
+ScriptClassDefinition(PhysicObject, ScriptPhysicObjectProperties, ScriptPhysicObjectMethods);

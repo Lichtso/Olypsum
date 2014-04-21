@@ -3,10 +3,10 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 29.05.13.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
-#include "ScriptLinks.h"
+#include "ScriptManager.h"
 
 static void activateConstraint(btTypedConstraint* constraint) {
     constraint->getRigidBodyA().activate();
@@ -15,122 +15,110 @@ static void activateConstraint(btTypedConstraint* constraint) {
 
 
 
-void ScriptBaseLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
+static JSObjectRef ScriptBaseLinkConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    if(argc != 2 ||
+       JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptBaseObject]) ||
+       JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptBaseObject]))
+        return ScriptException(context, exception, "BaseLink Constructor: Expected BaseObject, BaseObject");
     
-    if(args.Length() == 1 && args[0]->IsExternal()) {
-        BaseLink* linkPtr = static_cast<BaseLink*>(v8::Local<v8::External>::Cast(args[0])->Value());
-        linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
-        args.This()->SetInternalField(0, args[0]);
-        ScriptReturn(args.This());
-    }else if(args.Length() == 2 &&
-             scriptBaseObject->isCorrectInstance(args[0]) && scriptBaseObject->isCorrectInstance(args[1])) {
-        LinkInitializer initializer;
-        initializer.object[0] = getDataOfInstance<BaseObject>(args[0]);
-        initializer.object[1] = getDataOfInstance<BaseObject>(args[1]);
-        BaseLink* linkPtr = new BaseLink();
-        if(linkPtr->init(initializer)) {
-            linkPtr->scriptInstance.Reset(v8::Isolate::GetCurrent(), args.This());
-            args.This()->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), linkPtr));
-            ScriptReturn(args.This());
-        }else
-            return ScriptException("BaseLink Constructor: Invalid argument");
+    LinkInitializer initializer;
+    initializer.object[0] = getDataOfInstance<BaseObject>(context, argv[0]);
+    initializer.object[1] = getDataOfInstance<BaseObject>(context, argv[1]);
+    BaseLink* linkPtr = new BaseLink();
+    if(linkPtr->init(initializer)) {
+        linkPtr->scriptInstance = JSObjectMake(context, ScriptClasses[ScriptBaseLink], linkPtr);
+        return linkPtr->scriptInstance;
+    }else
+        return ScriptException(context, exception, "BaseLink Constructor: Invalid argument");
+}
+
+ScriptClassStaticDefinition(BaseLink);
+
+static JSValueRef ScriptBaseLinkGetObjectA(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return getDataOfInstance<BaseLink>(instance)->a->scriptInstance;
+}
+
+static JSValueRef ScriptBaseLinkGetObjectB(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return getDataOfInstance<BaseLink>(instance)->b->scriptInstance;
+}
+
+JSStaticValue ScriptBaseLinkProperties[] = {
+    {"objectA", ScriptBaseLinkGetObjectA, 0, ScriptMethodAttributes},
+    {"objectB", ScriptBaseLinkGetObjectB, 0, ScriptMethodAttributes},
+    {0, 0, 0, 0}
+};
+
+ScriptClassDefinition(BaseLink, ScriptBaseLinkProperties, NULL);
+
+
+
+static JSObjectRef ScriptPhysicLinkConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    return ScriptException(context, exception, "PhysicLink Constructor: Class can't be instantiated");
+}
+
+ScriptClassStaticDefinition(PhysicLink);
+
+static JSValueRef ScriptPhysicLinkGetBurstImpulse(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<PhysicLink>(instance)->constraint->getBreakingImpulseThreshold());
+}
+
+static bool ScriptPhysicLinkSetBurstImpulse(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "PhysicLink setBurstImpulse(): Expected Number");
+        return false;
     }
-    
-    return ScriptException("BaseLink Constructor: Class can't be initialized");
+    getDataOfInstance<PhysicLink>(instance)->constraint->setBreakingImpulseThreshold(JSValueToNumber(context, value, NULL));
+    return true;
 }
 
-void ScriptBaseLink::GetObjectA(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    BaseLink* linkPtr = getDataOfInstance<BaseLink>(args.This());
-    ScriptReturn(linkPtr->a->scriptInstance);
+static JSValueRef ScriptPhysicLinkGetCollisionDisabled(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeBoolean(context, getDataOfInstance<PhysicLink>(instance)->isCollisionDisabled());
 }
 
-void ScriptBaseLink::GetObjectB(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    BaseLink* linkPtr = getDataOfInstance<BaseLink>(args.This());
-    ScriptReturn(linkPtr->b->scriptInstance);
+static bool ScriptPhysicLinkSetCollisionDisabled(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsBoolean(context, value)) {
+        ScriptException(context, exception, "PhysicLink setCollisionDisabled(): Expected Boolean");
+        return false;
+    }
+    getDataOfInstance<PhysicLink>(instance)->setCollisionDisabled(JSValueToBoolean(context, value));
+    return true;
 }
 
-ScriptBaseLink::ScriptBaseLink() :ScriptBaseLink("BaseLink", Constructor) {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    ScriptAccessor(objectTemplate, "objectA", GetObjectA, 0);
-    ScriptAccessor(objectTemplate, "objectB", GetObjectB, 0);
-    
-    ScriptInherit(scriptBaseClass);
+static JSValueRef ScriptPhysicObjectAppliedForceObjectA(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    return newScriptVector3(context, getDataOfInstance<PhysicLink>(instance)->constraint->m_appliedForceBodyA);
 }
 
-
-
-void ScriptPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    return ScriptException("PhysicLink Constructor: Class can't be instantiated");
+static JSValueRef ScriptPhysicObjectAppliedForceObjectB(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    return newScriptVector3(context, getDataOfInstance<PhysicLink>(instance)->constraint->m_appliedForceBodyB);
 }
 
-void ScriptPhysicLink::GetBurstImpulse(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    btTypedConstraint* constraint = getDataOfInstance<PhysicLink>(args.This())->constraint;
-    ScriptReturn(constraint->getBreakingImpulseThreshold());
+static JSValueRef ScriptPhysicObjectAppliedTorqueObjectA(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    return newScriptVector3(context, getDataOfInstance<PhysicLink>(instance)->constraint->m_appliedTorqueBodyA);
 }
 
-void ScriptPhysicLink::SetBurstImpulse(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsNumber()) return;
-    
-    btTypedConstraint* constraint = getDataOfInstance<PhysicLink>(args.This())->constraint;
-    constraint->setBreakingImpulseThreshold(value->NumberValue());
+static JSValueRef ScriptPhysicObjectAppliedTorqueObjectB(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    return newScriptVector3(context, getDataOfInstance<PhysicLink>(instance)->constraint->m_appliedTorqueBodyB);
 }
 
-void ScriptPhysicLink::GetCollisionDisabled(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ScriptReturn(getDataOfInstance<PhysicLink>(args.This())->isCollisionDisabled());
-}
+JSStaticValue ScriptPhysicLinkProperties[] = {
+    {"burstImpulse", ScriptPhysicLinkGetBurstImpulse, ScriptPhysicLinkSetBurstImpulse, kJSPropertyAttributeDontDelete},
+    {"collisionDisabled", ScriptPhysicLinkGetCollisionDisabled, ScriptPhysicLinkSetCollisionDisabled, kJSPropertyAttributeDontDelete},
+    {0, 0, 0, 0}
+};
 
-void ScriptPhysicLink::SetCollisionDisabled(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsBoolean()) return;
-    
-    getDataOfInstance<PhysicLink>(args.This())->setCollisionDisabled(value->BooleanValue());
-}
+JSStaticFunction ScriptPhysicLinkMethods[] = {
+    {"appliedForceObjectA", ScriptPhysicObjectAppliedForceObjectA, ScriptMethodAttributes},
+    {"appliedForceObjectB", ScriptPhysicObjectAppliedForceObjectB, ScriptMethodAttributes},
+    {"appliedTorqueObjectA", ScriptPhysicObjectAppliedTorqueObjectA, ScriptMethodAttributes},
+    {"appliedTorqueObjectB", ScriptPhysicObjectAppliedTorqueObjectB, ScriptMethodAttributes},
+    {0, 0, 0}
+};
 
-void ScriptPhysicLink::AppliedForceObjectA(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ScriptReturn(scriptVector3->newInstance(getDataOfInstance<PhysicLink>(args.This())->constraint->m_appliedForceBodyA));
-}
-
-void ScriptPhysicLink::AppliedTorqueObjectA(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ScriptReturn(scriptVector3->newInstance(getDataOfInstance<PhysicLink>(args.This())->constraint->m_appliedTorqueBodyA));
-}
-
-void ScriptPhysicLink::AppliedForceObjectB(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ScriptReturn(scriptVector3->newInstance(getDataOfInstance<PhysicLink>(args.This())->constraint->m_appliedForceBodyB));
-}
-
-void ScriptPhysicLink::AppliedTorqueObjectB(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    ScriptReturn(scriptVector3->newInstance(getDataOfInstance<PhysicLink>(args.This())->constraint->m_appliedTorqueBodyB));
-}
-
-ScriptPhysicLink::ScriptPhysicLink() :ScriptBaseLink("PhysicLink", Constructor) {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    ScriptAccessor(objectTemplate, "burstImpulse", GetBurstImpulse, SetBurstImpulse);
-    ScriptAccessor(objectTemplate, "collisionDisabled", GetCollisionDisabled, SetCollisionDisabled);
-    ScriptMethod(objectTemplate, "appliedForceObjectA", AppliedForceObjectA);
-    ScriptMethod(objectTemplate, "appliedTorqueObjectA", AppliedTorqueObjectA);
-    ScriptMethod(objectTemplate, "appliedForceObjectB", AppliedForceObjectB);
-    ScriptMethod(objectTemplate, "appliedTorqueObjectB", AppliedTorqueObjectB);
-    
-    ScriptInherit(scriptBaseLink);
-}
+ScriptClassDefinition(PhysicLink, ScriptPhysicLinkProperties, ScriptPhysicLinkMethods);
 
 
 
+/*
 void ScriptPointPhysicLink::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ScriptScope();
     
@@ -1180,3 +1168,4 @@ ScriptBoneLink::ScriptBoneLink() :ScriptBaseLink("BoneLink", Constructor) {
     
     ScriptInherit(scriptBaseLink);
 }
+*/

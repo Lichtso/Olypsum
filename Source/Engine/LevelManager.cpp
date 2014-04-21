@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 26.09.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #include "AppMain.h"
@@ -36,12 +36,15 @@ const char* LevelManager::getCollisionShapeName(btCollisionShape* shape) {
 
 void LevelManager::clear() {
     if(scriptManager)
-        levelManager.mainScript->callFunction("onleave", false, 0, NULL);
+        scriptManager->mainScript->callFunction("onleave", false, 0, NULL);
     saveGameName = levelContainer = "";
     levelPackage = NULL;
-    mainScript = NULL;
     gameStatus = noGame;
     objectManager.clear();
+    if(scriptManager) {
+        scriptManager->clean();
+        scriptManager.reset();
+    }
     for(auto iterator: sharedCollisionShapes)
         delete iterator.second;
     sharedCollisionShapes.clear();
@@ -188,8 +191,11 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
     }
     
     mainFBO.init();
+    if(scriptManager)
+        scriptManager->clean();
     scriptManager.reset(new ScriptManager());
-    mainScript = fileManager.getResourceByPath<ScriptFile>(package, "Main");
+    scriptManager->mainScript = fileManager.getResourceByPath<ScriptFile>(package, "Main");
+    
     LevelLoader levelLoader;
     return levelLoader.loadLevel();
 }

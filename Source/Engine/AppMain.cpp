@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 20.02.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #include "AppMain.h"
@@ -111,6 +111,20 @@ void AppMain() {
         glFrontFace(GL_CCW);
     }
     
+    /* JSC Heisen Bug
+    ScriptClasses[ScriptVector3] = NULL;
+    JSGlobalContextRef context = JSGlobalContextCreate(NULL);
+    for(unsigned int j = 0; j < 1024; j ++) {
+        printf("TEST %d\n", j);
+        JSValueRef *pointsA = new JSValueRef[1];
+        pointsA[0] = newScriptVector3(context, btVector3(1.0, 1.0, 1.0));
+        for(unsigned int i = 0; i < 1024; i ++)
+            newScriptVector3(context, btVector3(1.0, 1.0, 1.0));
+        JSObjectMakeArray(context, 1, pointsA, NULL);
+        delete [] pointsA;
+    }*/
+    
+    initScriptClasses();
     networkManager.init();
     objectManager.init();
     

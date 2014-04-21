@@ -3,61 +3,49 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 16.05.13.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #ifndef ScriptAnimation_h
 #define ScriptAnimation_h
 
-#include "ScriptIntersection.h"
+#include "ScriptLinearAlgebra.h"
 
-class AnimationFrame {
+/*class AnimationFrame {
     public:
-    AnimationFrame(float acceleration, float duration, v8::Handle<v8::Value> value);
+    AnimationFrame(float acceleration, float duration, JSValueRef value);
     float acceleration, duration;
-    v8::Persistent<v8::Value> value;
+    JSValueRef value;
 };
 
 class AnimationTrack {
     public:
-    v8::Persistent<v8::Object> object;
+    JSObjectRef object;
     std::vector<AnimationFrame*> frames;
     float time;
     bool looping;
-    AnimationTrack(v8::Handle<v8::Object> object);
+    AnimationTrack(JSObjectRef object);
     ~AnimationTrack();
-    bool update(const char* property);
-    bool gameTick(const char* property);
+    bool update(const std::string& property);
+    bool gameTick(const std::string& property);
 };
 
 class AnimationProperty {
     public:
     std::vector<AnimationTrack*> tracks;
-    AnimationTrack* find(v8::Handle<v8::Object> object);
+    AnimationTrack* find(JSObjectRef object);
     ~AnimationProperty();
     int find(AnimationTrack* track);
-    bool gameTick(const char* property);
-};
+    bool gameTick(const std::string& property);
+};*/
 
 class AnimationTimer {
     public:
     double timeNext, timeLength;
-    v8::Persistent<v8::Function> function;
-    AnimationTimer(v8::Handle<v8::Function> function, double timeLength);
+    JSObjectRef function;
+    AnimationTimer(JSObjectRef function, double timeLength);
+    ~AnimationTimer();
     bool gameTick(double timeNow);
 };
-
-class ScriptAnimation : public ScriptClass {
-    ScriptDeclareMethod(Constructor);
-    ScriptDeclareMethod(AddFrames);
-    ScriptDeclareMethod(RemoveFrames);
-    ScriptDeclareMethod(GetTrackInfo);
-    ScriptDeclareMethod(StartTimer);
-    ScriptDeclareMethod(StopTimer);
-    public:
-    ScriptAnimation();
-};
-
-extern std::unique_ptr<ScriptAnimation> scriptAnimation;
 
 #endif

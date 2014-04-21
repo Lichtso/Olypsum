@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 20.08.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #ifndef VisualObject_h
@@ -134,7 +134,7 @@ class RigidObject : public MatterObject {
      @param name The name of the bone in the COLLADA model
      @return BoneLink if present or NULL if not
      */
-    BoneLink* findBoneLinkOfName(const char* name);
+    BoneLink* findBoneLinkOfName(const std::string& name);
 };
 
 //! A reflective RigidObject

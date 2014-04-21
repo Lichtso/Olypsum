@@ -3,10 +3,10 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 21.02.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
-#include "Scripting/ScriptSimpleObject.h"
+#include "Scripting/ScriptManager.h"
 
 //! @cond
 struct SingleHitCallback : btDbvt::ICollide {
@@ -76,7 +76,7 @@ CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* lev
     if(!mainCam) mainCam = this;
     
     objectManager.simpleObjects.insert(this);
-    ScriptNewInstance(scriptCamObject);
+    ScriptInstance(ScriptCamObject);
 }
 
 void CamObject::removeClean() {

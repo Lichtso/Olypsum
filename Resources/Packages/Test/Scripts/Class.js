@@ -12,7 +12,7 @@ exports.oncollision = function(otherObject, posA, posB, dists, impulses) {
 		if(impulses[i] > impulse)
 			impulse = impulses[i];
 	if(impulse < 20.0 || this.integrity <= 0.0) return;
-	require('Main').explosion(this);
+	Engine.getScript('Main').explosion(this);
 
 	/*var now = new Date();
 	if(!this.spawnTimer || now.getTime() - this.spawnTimer.getTime() > 2000.0) {

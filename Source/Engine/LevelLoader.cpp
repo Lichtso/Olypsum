@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 13.10.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #include "AppMain.h"
@@ -12,13 +12,11 @@ LevelLoader::LevelLoader() :transformation(btTransform::getIdentity()), filePack
     
 }
 
-v8::Handle<v8::Array> LevelLoader::getResultsArray() {
-    //ScriptScope();
-    unsigned int i = 0;
-    v8::Handle<v8::Array> objects = v8::Array::New(v8::Isolate::GetCurrent());
-    for(auto hit : objectLinkingIndex)
-        objects->Set(i ++, v8::Handle<v8::Object>(*hit->scriptInstance));
-    return objects; //handleScope.Close(objects);
+JSObjectRef LevelLoader::getResultsArray(JSContextRef context) {
+    JSObjectRef array = JSObjectMakeArray(context, 0, NULL, NULL);
+    for(unsigned int i = 0; i < objectLinkingIndex.size(); i ++)
+        JSObjectSetPropertyAtIndex(context, array, i, objectLinkingIndex[i]->scriptInstance, NULL);
+    return array;
 }
 
 BaseObject* LevelLoader::getObjectLinking(unsigned int index) {
@@ -35,7 +33,6 @@ void LevelLoader::pushObject(BaseObject* object) {
 }
 
 bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
-    ScriptScope();
     std::unique_ptr<char[]> rawData;
     rapidxml::xml_document<xmlUsedCharType> doc;
     
@@ -193,17 +190,17 @@ bool LevelLoader::loadContainer(std::string name, bool isLevelRoot) {
     
     //Update status file
     if(levelNode) {
-        v8::Handle<v8::Value> localData = scriptManager->readCdataXMLNode(levelNode);
+        JSValueRef localData = scriptManager->readCdataXMLNode(levelNode, scriptManager->mainScript->context);
         doc.clear();
         std::string statusFilePath = supportPath+"Saves/"+levelManager.saveGameName+"/Status.xml";
         std::unique_ptr<char[]> fileData = readXmlFile(doc, statusFilePath, true);
         node = doc.first_node("Status");
         node->first_node("Level")->first_attribute()->value(name.c_str());
-        v8::Handle<v8::Value> globalData = scriptManager->readCdataXMLNode(node);
+        JSValueRef globalData = scriptManager->readCdataXMLNode(node, scriptManager->mainScript->context);
         if(!writeXmlFile(doc, statusFilePath, true))
             return false;
-        v8::Handle<v8::Value> argv[] = { v8::Handle<v8::Value>(*localData), v8::Handle<v8::Value>(*globalData) };
-        levelManager.mainScript->callFunction("onload", false, 2, argv);
+        JSValueRef argv[] = { localData, globalData };
+        scriptManager->mainScript->callFunction("onload", false, 2, argv);
         if(!mainCam) {
             log(error_log, "No CamObject was set as mainCam.");
             return false;

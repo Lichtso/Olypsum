@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 28.05.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #ifndef Audio_h
@@ -58,11 +58,11 @@ class SoundObject : public SimpleObject {
      */
     void setSoundTrack(FileResourcePtr<SoundTrack> soundTrack);
     //! Starts/stops playing the SoundTrack or resumes it
-    void setPlaying(bool playing);
+    void setIsPlaying(bool playing);
     /*!
      @return Is this SoundObject currently playing
      */
-    bool getPlaying();
+    bool getIsPlaying();
     /*! Sets the playback position
      @param timeOffset The new playback position in seconds
      */

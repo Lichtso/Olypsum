@@ -3,11 +3,11 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 21.04.13.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
-#include "ScriptGUIOutput.h"
-
+#include "ScriptManager.h"
+/*
 void ScriptGUILabel::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ScriptScope();
     
@@ -189,3 +189,4 @@ ScriptGUIImage::ScriptGUIImage() :ScriptGUIRect("GUIImage", Constructor) {
     
     ScriptInherit(scriptGUIRect);
 }
+*/

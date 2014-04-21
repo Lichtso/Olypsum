@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 26.09.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #ifndef LevelManager_h
@@ -22,7 +22,6 @@ class LevelManager {
     public:
     std::unordered_map<std::string, btCollisionShape*> sharedCollisionShapes; //!< All available collision shapes
     FilePackage* levelPackage;
-    FileResourcePtr<ScriptFile> mainScript;
     std::string saveGameName, levelContainer;
     GameStatusName gameStatus = noGame;
     

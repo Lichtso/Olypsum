@@ -3,14 +3,13 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 14.10.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
-#include "AppMain.h"
+#include "Scripting/ScriptManager.h"
 
 BaseClass::~BaseClass() {
-    //if(!scriptInstance.IsEmpty())
-    //    scriptInstance.Reset();
+    JSValueUnprotect(scriptManager->mainScript->context, scriptInstance);
 }
 
 void BaseClass::initScriptNode(FilePackage* filePackage, rapidxml::xml_node<xmlUsedCharType>* node) {
@@ -21,7 +20,7 @@ void BaseClass::initScriptNode(FilePackage* filePackage, rapidxml::xml_node<xmlU
     if(attribute) {
         scriptFile = fileManager.getResourceByPath<ScriptFile>(filePackage, attribute->value());
         if(scriptFile) {
-            v8::Handle<v8::Value> argv[] = { v8::Handle<v8::Value>(*scriptInstance), scriptManager->readCdataXMLNode(node) };
+            JSValueRef argv[] = { scriptInstance, scriptManager->readCdataXMLNode(node, scriptFile->context) };
             scriptFile->callFunction("onload", true, 2, argv);
         }
     }else
@@ -67,9 +66,8 @@ rapidxml::xml_node<xmlUsedCharType>* BaseObject::write(rapidxml::xml_document<xm
     rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
     node->name("BaseObject");
     if(scriptFile) {
-        v8::Handle<v8::Value> argv[] = { v8::Handle<v8::Value>(*scriptInstance) };
-        v8::Handle<v8::Value> scritData = scriptFile->callFunction("onsave", true, 1, argv);
-        scriptManager->writeCdataXMLNode(doc, node, "Data", scritData);
+        JSValueRef argv[] = { scriptInstance }, scritData = scriptFile->callFunction("onsave", true, 1, argv);
+        scriptManager->writeCdataXMLNode(doc, node, "Data", scriptFile->context, scritData);
         node->append_node(fileManager.writeResource(doc, "Script", scriptFile->filePackage, scriptFile->name));
     }
     btTransform transform = getTransformation();
@@ -88,7 +86,7 @@ std::unordered_set<BaseLink*>::iterator BaseObject::findLinkTo(BaseObject* linke
 
 
 SimpleObject::SimpleObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :SimpleObject() {
-    ScriptNewInstance(scriptBaseObject);
+    ScriptInstance(ScriptBaseObject);
     objectManager.simpleObjects.insert(this);
     BaseObject::init(node, levelLoader);
 }
@@ -109,8 +107,7 @@ PhysicObject::PhysicObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoade
     body->setUserPointer(this);
     body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
     objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Zone, CollisionMask_Object);
-    
-    ScriptNewInstance(scriptPhysicObject);
+    ScriptInstance(ScriptPhysicObject);
 }
 
 void PhysicObject::removeClean() {
@@ -154,24 +151,24 @@ void PhysicObject::updateTouchingObjects() {
 
 void PhysicObject::handleCollision(btPersistentManifold* contactManifold, PhysicObject* b) {
     if(!scriptFile || !scriptFile->checkFunction("oncollision")) return;
-    
-    ScriptScope();
-    v8::Handle<v8::Array> pointsA = v8::Array::New(v8::Isolate::GetCurrent(), contactManifold->getNumContacts()),
-                          pointsB = v8::Array::New(v8::Isolate::GetCurrent(), contactManifold->getNumContacts()),
-                          distances = v8::Array::New(v8::Isolate::GetCurrent(), contactManifold->getNumContacts()),
-                          impulses = v8::Array::New(v8::Isolate::GetCurrent(), contactManifold->getNumContacts());
-    
+    JSContextRef context = scriptFile->context;
+    JSObjectRef pointsA = JSObjectMakeArray(context, 0, NULL, NULL),
+                pointsB = JSObjectMakeArray(context, 0, NULL, NULL),
+                distances = JSObjectMakeArray(context, 0, NULL, NULL),
+                impulses = JSObjectMakeArray(context, 0, NULL, NULL);
     for(unsigned int i = 0; i < contactManifold->getNumContacts(); i ++) {
         btManifoldPoint point = contactManifold->getContactPoint(i);
-        pointsA->Set(i, scriptVector3->newInstance(point.getPositionWorldOnA()));
-        pointsB->Set(i, scriptVector3->newInstance(point.getPositionWorldOnB()));
-        distances->Set(i, v8::Number::New(v8::Isolate::GetCurrent(), point.getDistance()));
-        impulses->Set(i, v8::Number::New(v8::Isolate::GetCurrent(), point.getAppliedImpulse()));
+        JSObjectSetPropertyAtIndex(context, pointsA, i, newScriptVector3(context, point.getPositionWorldOnA()), NULL);
+        JSObjectSetPropertyAtIndex(context, pointsB, i, newScriptVector3(context, point.getPositionWorldOnB()), NULL);
+        JSObjectSetPropertyAtIndex(context, distances, i, JSValueMakeNumber(context, point.getDistance()), NULL);
+        JSObjectSetPropertyAtIndex(context, impulses, i, JSValueMakeNumber(context, point.getAppliedImpulse()), NULL);
     }
-    
-    v8::Handle<v8::Value> argv[] = {
-        v8::Handle<v8::Value>(*scriptInstance), v8::Handle<v8::Value>(*b->scriptInstance),
-        pointsA, pointsB, distances, impulses
+    JSValueRef argv[] = {
+        scriptInstance, b->scriptInstance,
+        pointsA,
+        pointsB,
+        distances,
+        impulses
     };
     scriptFile->callFunction("oncollision", true, 6, argv);
 }

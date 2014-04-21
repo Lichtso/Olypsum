@@ -3,10 +3,10 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 28.05.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
-#include "Scripting/ScriptSimpleObject.h"
+#include "Scripting/ScriptManager.h"
 
 #ifdef LITTLE_ENDIAN
 #define ENDIAN 0
@@ -85,7 +85,7 @@ SoundObject::SoundObject(SoundTrack* _soundTrack, Mode _mode) :SoundObject() {
     soundTrack = _soundTrack;
     mode = _mode;
     alSourcei(ALname, AL_BUFFER, soundTrack->ALname);
-    setPlaying(true);
+    setIsPlaying(true);
 }
 
 SoundObject::SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :SoundObject() {
@@ -137,7 +137,7 @@ SoundObject::SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
     }
     
     if(node->first_node("IsPlaying"))
-        setPlaying(true);
+        setIsPlaying(true);
     
     parameterNode = node->first_node("TimeOffset");
     if(parameterNode) {
@@ -151,7 +151,7 @@ SoundObject::SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
         setTimeOffset(time);
     }
     
-    ScriptNewInstance(scriptSoundObject);
+    ScriptInstance(ScriptSoundObject);
 }
 
 SoundObject::~SoundObject() {
@@ -159,7 +159,7 @@ SoundObject::~SoundObject() {
 }
 
 bool SoundObject::gameTick() {
-    if(mode == Dispose && !getPlaying()) {
+    if(mode == Dispose && !getIsPlaying()) {
         removeClean();
         return false;
     }
@@ -212,7 +212,7 @@ rapidxml::xml_node<xmlUsedCharType>* SoundObject::write(rapidxml::xml_document<x
         }
     }
     
-    if(getPlaying()) {
+    if(getIsPlaying()) {
         parameterNode = doc.allocate_node(rapidxml::node_element);
         parameterNode->name("IsPlaying");
         node->append_node(parameterNode);
@@ -234,17 +234,16 @@ void SoundObject::setSoundTrack(FileResourcePtr<SoundTrack> soundTrackB) {
     alSourcei(ALname, AL_BUFFER, soundTrack->ALname);
 }
 
-void SoundObject::setPlaying(bool playing) {
+void SoundObject::setIsPlaying(bool playing) {
     if(!soundTrack || !soundTrack->ALname) return;
     alSourcei(ALname, AL_LOOPING, mode == Looping);
     if(playing)
         alSourcePlay(ALname);
     else
         alSourcePause(ALname);
-    //alSourceStop(ALname);
 }
 
-bool SoundObject::getPlaying() {
+bool SoundObject::getIsPlaying() {
     if(!soundTrack) return false;
     ALint state;
     alGetSourcei(ALname, AL_SOURCE_STATE, &state);
@@ -256,6 +255,7 @@ void SoundObject::setTimeOffset(float timeOffset) {
 }
 
 float SoundObject::getTimeOffset() {
+    if(!soundTrack) return -1.0;
     ALfloat timeOffset;
     alGetSourcef(ALname, AL_SEC_OFFSET, &timeOffset);
     return timeOffset;

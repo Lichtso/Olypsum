@@ -3,10 +3,10 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 25.05.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
-#include "Scripting/ScriptParticlesObject.h"
+#include "Scripting/ScriptManager.h"
 
 static bool readBoundsNode(rapidxml::xml_node<xmlUsedCharType>* node, const char* name, btVector3& min, btVector3& max) {
     XMLValueArray<float> vecData;
@@ -159,15 +159,11 @@ ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, Leve
     texture = fileManager.getResourceByPath<Texture>(levelLoader->filePackage, attribute->value());
     texture->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGBA);
     
-    ScriptNewInstance(scriptParticlesObject);
+    ScriptInstance(ScriptParticlesObject);
 }
 
 void ParticlesObject::clean() {
-    if(body) {
-        objectManager.physicsWorld->removeCollisionObject(body);
-        delete body;
-        body = NULL;
-    }
+    body->setCollisionShape(NULL);
     
     if(optionsState.particleCalcTarget == 1) {
         delete [] (Particle*)particles;

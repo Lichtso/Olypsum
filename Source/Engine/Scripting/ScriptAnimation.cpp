@@ -3,92 +3,127 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 16.05.13.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #include "ScriptManager.h"
 
-static v8::Handle<v8::Value> accessProperty(v8::Handle<v8::Object> object, const char* property, v8::Handle<v8::Value> setValue) {
-    v8::Handle<v8::Value> returnValue, key = ScriptString(property);
+/*static JSValueRef ScriptCopyValue(JSContextRef context, JSValueRef value) {
+    if(JSValueIsNumber(context, value)) {
+        value = JSValueMakeNumber(context, JSValueToNumber(context, value, NULL));
+    }else if(JSValueIsBoolean(context, value)) {
+        value = JSValueMakeBoolean(context, JSValueToBoolean(context, value));
+    }else if(JSValueIsObjectOfClass(context, value, ScriptClasses[ScriptVector3])) {
+        value = newScriptVector3(context, getScriptVector3(context, value));
+    }else if(JSValueIsObjectOfClass(context, value, ScriptClasses[ScriptQuaternion])) {
+        value = newScriptQuaternion(context, getScriptQuaternion(context, value));
+    }else if(JSValueIsObjectOfClass(context, value, ScriptClasses[ScriptMatrix4])) {
+        value = newScriptMatrix4(context, *getDataOfInstance<Matrix4>(context, value));
+    }else
+        return NULL;
+    
+    return value;
+}
+
+static JSValueRef accessProperty(JSObjectRef object, const std::string& property, JSValueRef setValue) {
+    ScriptString strKey(property);
+    JSContextRef context = scriptManager->mainScript->context;
+    JSValueRef returnValue, exception = NULL;
+    JSObjectRef valueObject;
     std::smatch match;
     const std::regex regex("(.+)\\[([0-9]+)\\]");
-    if(std::regex_match(std::string(property), match, regex)) {
-        returnValue = object->Get(*match[0].str().c_str());
+    if(std::regex_match(property, match, regex)) {
+        ScriptString strKey(match[0].str());
+        returnValue = JSObjectGetProperty(context, object, strKey.str, NULL);
+        valueObject = JSValueToObject(context, returnValue, NULL);
         unsigned int index = 0;
         sscanf(match[1].str().c_str(), "%d", &index);
-        if(returnValue->IsArray()) {
-            v8::Handle<v8::Array> array = v8::Handle<v8::Array>::Cast(returnValue);
-            returnValue = array->Get(index);
-            if(!setValue.IsEmpty())
-                array->Set(index, setValue);
-        }else if(returnValue->IsFunction()) {
-            v8::Handle<v8::Function> function = v8::Handle<v8::Function>::Cast(returnValue);
-            v8::Handle<v8::Value> arguments[] = { v8::Uint32::New(v8::Isolate::GetCurrent(), index), setValue };
-            returnValue = function->CallAsFunction(object, (setValue.IsEmpty())?1:2, arguments);
+        if(valueObject) {
+            if(JSObjectIsFunction(context, valueObject)) {
+                JSValueRef argv[] = { JSValueMakeNumber(context, index), setValue };
+                returnValue = JSObjectCallAsFunction(context, valueObject, object, (setValue)?1:2, argv, &exception);
+                if(exception) {
+                    ScriptLogException(context, exception);
+                    return NULL;
+                }
+            }else{
+                returnValue = JSObjectGetPropertyAtIndex(context, valueObject, index, NULL);
+                if(returnValue && setValue) {
+                    JSObjectSetPropertyAtIndex(context, valueObject, index, setValue, NULL);
+                    returnValue = setValue;
+                }
+            }
         }
     }else{
-        returnValue = object->Get(key);
-        if(returnValue->IsFunction()) {
-            v8::Handle<v8::Function> function = v8::Handle<v8::Function>::Cast(returnValue);
-            returnValue = function->CallAsFunction(object, (setValue.IsEmpty())?0:1, &setValue);
-        }else if(!setValue.IsEmpty())
-            object->Set(key, setValue);
+        returnValue = JSObjectGetProperty(context, object, strKey.str, NULL);
+        valueObject = JSValueToObject(context, returnValue, NULL);
+        if(valueObject && JSObjectIsFunction(context, valueObject)) {
+            returnValue = JSObjectCallAsFunction(context, valueObject, object, (setValue)?0:1, &setValue, &exception);
+            if(exception) {
+                ScriptLogException(context, exception);
+                return NULL;
+            }
+        }else if(setValue) {
+            JSObjectSetProperty(context, object, strKey.str, setValue, 0, NULL);
+            returnValue = setValue;
+        }
     }
     return returnValue;
 }
 
-AnimationFrame::AnimationFrame(float _acceleration, float _duration, v8::Handle<v8::Value> _value)
-    :acceleration(_acceleration), duration(_duration) {
-    value.Reset(v8::Isolate::GetCurrent(), _value);
+AnimationFrame::AnimationFrame(float _acceleration, float _duration, JSValueRef _value)
+    :acceleration(_acceleration), duration(_duration), value(_value) {
+    
 }
 
-AnimationTrack::AnimationTrack(v8::Handle<v8::Object> _object)
-    :time(0.0), looping(false) {
-    object.Reset(v8::Isolate::GetCurrent(), _object);
+AnimationTrack::AnimationTrack(JSObjectRef _object)
+    :time(0.0), looping(false), object(_object) {
+    JSValueProtect(scriptManager->mainScript->context, object);
 }
 
 AnimationTrack::~AnimationTrack() {
-    for(auto iterator : frames)
+    JSContextRef context = scriptManager->mainScript->context;
+    for(auto iterator : frames) {
+        JSValueUnprotect(context, iterator->value);
         delete iterator;
+    }
+    JSValueUnprotect(context, object);
 }
 
-bool AnimationTrack::update(const char* property) {
-    ScriptScope();
-    if(frames.size() <= 1 || frames[0]->value.IsEmpty() || frames[1]->value.IsEmpty())
+bool AnimationTrack::update(const std::string& property) {
+    if(frames.size() < 2 || !frames[0]->value || !frames[1]->value)
         return false;
     
     float t = min(time / frames[1]->duration, 1.0F), t2 = t*t, t3 = t2*t;
     t = 3.0*t2-2.0*t3+(t3-2.0*t2+t)*frames[0]->acceleration+(t3-t2)*frames[1]->acceleration;
     
-    v8::Handle<v8::Value> value;
-    if((*frames[0]->value)->IsNumber()) {
-        double a = (*frames[0]->value)->NumberValue(), b = (*frames[1]->value)->NumberValue();
-        value = v8::Number::New(v8::Isolate::GetCurrent(), a+(b-a)*t);
-    }else if((*frames[0]->value)->IsInt32()) {
-        int a = (*frames[0]->value)->IntegerValue(), b = (*frames[1]->value)->IntegerValue();
-        value = v8::Integer::New(v8::Isolate::GetCurrent(), a+(b-a)*t);
-    }else if((*frames[0]->value)->IsBoolean()) {
-        bool a = (*frames[0]->value)->BooleanValue(), b = (*frames[1]->value)->BooleanValue();
-        value = v8::Boolean::New(v8::Isolate::GetCurrent(), (t < 0.5) ? a : b);
-    }else if(scriptVector3->isCorrectInstance(*frames[0]->value)) {
-        btVector3 a = scriptVector3->getDataOfInstance(*frames[0]->value),
-                  b = scriptVector3->getDataOfInstance(*frames[1]->value);
-        value = scriptVector3->newInstance(a.lerp(b, t));
-    }else if(scriptQuaternion->isCorrectInstance(*frames[0]->value)) {
-        btQuaternion a = scriptQuaternion->getDataOfInstance(*frames[0]->value),
-                     b = scriptQuaternion->getDataOfInstance(*frames[1]->value);
-        value = scriptQuaternion->newInstance(a.slerp(b, t));
-    }else if(scriptMatrix4->isCorrectInstance(*frames[0]->value)) {
-        Matrix4 *a = scriptMatrix4->getDataOfInstance(*frames[0]->value),
-                *b = scriptMatrix4->getDataOfInstance(*frames[1]->value);
-        value = scriptMatrix4->newInstance(a->getInterpolation(*b, t));
+    JSValueRef value;
+    JSContextRef context = scriptManager->mainScript->context;
+    if(JSValueIsNumber(context, frames[0]->value)) {
+        double a = JSValueToNumber(context, frames[0]->value, NULL), b = JSValueToNumber(context, frames[1]->value, NULL);
+        value = JSValueMakeNumber(context, a+(b-a)*t);
+    }else if(JSValueIsBoolean(context, frames[0]->value)) {
+        bool a = JSValueToBoolean(context, frames[0]->value), b = JSValueToBoolean(context, frames[1]->value);
+        value = JSValueMakeBoolean(context, (t < 0.5) ? a : b);
+    }else if(JSValueIsObjectOfClass(context, frames[0]->value, ScriptClasses[ScriptVector3])) {
+        btVector3 a = getScriptVector3(context, frames[0]->value),
+                  b = getScriptVector3(context, frames[1]->value);
+        value = newScriptVector3(context, a.lerp(b, t));
+    }else if(JSValueIsObjectOfClass(context, frames[0]->value, ScriptClasses[ScriptQuaternion])) {
+        btQuaternion a = getScriptQuaternion(context, frames[0]->value),
+                     b = getScriptQuaternion(context, frames[1]->value);
+        value = newScriptQuaternion(context, a.slerp(b, t));
+    }else if(JSValueIsObjectOfClass(context, frames[0]->value, ScriptClasses[ScriptMatrix4])) {
+        Matrix4 *a = getDataOfInstance<Matrix4>(context, frames[0]->value),
+                *b = getDataOfInstance<Matrix4>(context, frames[1]->value);
+        value = newScriptMatrix4(context, a->getInterpolation(*b, t));
     }else
         return false;
     
-    return !accessProperty(v8::Handle<v8::Object>(*object), property, value).IsEmpty();
+    return accessProperty(object, property, value);
 }
 
-bool AnimationTrack::gameTick(const char* property) {
+bool AnimationTrack::gameTick(const std::string& property) {
     time += profiler.animationFactor;
     if(!update(property)) return false;
     
@@ -99,6 +134,7 @@ bool AnimationTrack::gameTick(const char* property) {
             frames.erase(frames.begin());
             frames.push_back(frame);
         }else{
+            JSValueUnprotect(scriptManager->mainScript->context, frame->value);
             delete frame;
             frames.erase(frames.begin());
         }
@@ -114,7 +150,7 @@ AnimationProperty::~AnimationProperty() {
         delete iterator;
 }
 
-AnimationTrack* AnimationProperty::find(v8::Handle<v8::Object> object) {
+AnimationTrack* AnimationProperty::find(JSObjectRef object) {
     for(unsigned int i = 0; i < tracks.size(); i ++)
         if(tracks[i]->object == object)
             return tracks[i];
@@ -128,7 +164,7 @@ int AnimationProperty::find(AnimationTrack* track) {
     return -1;
 }
 
-bool AnimationProperty::gameTick(const char* property) {
+bool AnimationProperty::gameTick(const std::string& property) {
     for(unsigned int i = 0; i < tracks.size(); i ++)
         if(tracks[i]->gameTick(property)) {
             delete tracks[i];
@@ -136,25 +172,31 @@ bool AnimationProperty::gameTick(const char* property) {
             i --;
         }
     return (tracks.size() == 0);
+}*/
+
+
+
+AnimationTimer::AnimationTimer(JSObjectRef _function, double _timeLength)
+    :timeLength(_timeLength), timeNext(_timeLength+getTime()), function(_function) {
+    JSValueProtect(scriptManager->mainScript->context, function);
 }
 
-
-
-AnimationTimer::AnimationTimer(v8::Handle<v8::Function> _function, double _timeLength)
-    :timeLength(_timeLength), timeNext(_timeLength+getTime()) {
-    function.Reset(v8::Isolate::GetCurrent(), _function);
+AnimationTimer::~AnimationTimer() {
+    JSValueUnprotect(scriptManager->mainScript->context, function);
 }
 
 bool AnimationTimer::gameTick(double timeNow) {
-    ScriptScope();
-    v8::TryCatch tryCatch;
-    v8::Handle<v8::Value> result = (*function)->CallAsFunction(v8::Handle<v8::Value>(*function), 0, NULL);
-    scriptManager->tryCatch(&tryCatch);
+    JSContextRef context = scriptManager->mainScript->context;
+    JSValueRef exception = NULL, result = JSObjectCallAsFunction(context, function, function, 0, NULL, &exception);
+    if(exception) {
+        ScriptLogException(context, exception);
+        return true;
+    }
     
     if(scriptManager->timers.find(this) == scriptManager->timers.end())
         return false;
     
-    if(timeLength > 0.0 && result->IsBoolean() && result->BooleanValue()) {
+    if(timeLength > 0.0 && JSValueToBoolean(context, result)) {
         if(timeNow-timeNext > timeLength)
             timeNext = timeNow+timeLength;
         else
@@ -167,153 +209,176 @@ bool AnimationTimer::gameTick(double timeNow) {
 
 
 
-void ScriptAnimation::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    return ScriptException("Animation Constructor: Class can't be instantiated");
+static JSValueRef ScriptAnimationGetFactor(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, profiler.animationFactor);
 }
 
-void ScriptAnimation::AddFrames(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    if(args.Length() < 6)
-        return ScriptException("Animation addFrames(): Too few arguments");
-    if(!args[0]->IsObject() || !args[1]->IsString()|| !args[2]->IsBoolean() || !args[3]->IsArray() || !args[4]->IsArray() || !args[5]->IsArray())
-        return ScriptException("Animation addFrames(): Invalid argument");
-    
-    std::string property = stdStrOfV8(args[1]);
-    AnimationProperty* animationProperty;
-    auto iterator = scriptManager->animations.find(property);
-    if(iterator == scriptManager->animations.end()) {
-        animationProperty = new AnimationProperty();
-        scriptManager->animations[property] = animationProperty;
-    }else
-        animationProperty = iterator->second;
-    
-    AnimationTrack* track = animationProperty->find(args[0]->ToObject());
-    if(!track) {
-        track = new AnimationTrack(args[0]->ToObject());
-        animationProperty->tracks.push_back(track);
-    }
-    track->looping = args[2]->BooleanValue();
-    
-    v8::Handle<v8::Array> accelerations = v8::Handle<v8::Array>::Cast(args[3]),
-                          durations = v8::Handle<v8::Array>::Cast(args[4]),
-                          values = v8::Handle<v8::Array>::Cast(args[5]);
-    
-    if(accelerations->Length() != durations->Length() || accelerations->Length() != values->Length())
-        return ScriptException("Animation addFrames(): Invalid frames");
-    
-    if(accelerations->Length() == 0)
-        return;
-    
-    v8::Handle<v8::Value> defaultValue = accessProperty(args[0]->ToObject(), cStrOfV8(args[1]), v8::Handle<v8::Value>());
-    if(defaultValue.IsEmpty())
-        return ScriptException("Animation addFrames(): Invalid property");
-    
-    for(unsigned int i = 0; i < accelerations->Length(); i ++) {
-        if(!accelerations->Get(i)->IsNumber() || !durations->Get(i)->IsNumber())
-            return ScriptException("Animation addFrames(): Invalid frame");
+/*static JSValueRef ScriptAnimationAddFrames(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    if(argc == 6 && JSValueIsString(context, argv[1]) && JSValueIsBoolean(context, argv[2])) {
+        JSObjectRef object = JSValueToObject(context, argv[0], NULL),
+                    accelerations = JSValueToObject(context, argv[3], NULL),
+                    durations = JSValueToObject(context, argv[4], NULL),
+                    values = JSValueToObject(context, argv[5], NULL);
         
-        track->frames.push_back(new AnimationFrame(accelerations->Get(i)->NumberValue(), durations->Get(i)->NumberValue(),
-                                                  (values->Get(i)->IsNull()) ? defaultValue : values->Get(i)));
-    }
-    track->update(property.c_str());
-}
-
-void ScriptAnimation::RemoveFrames(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    if(args.Length() < 4)
-        return ScriptException("Animation removeFrames(): Too few arguments");
-    if(!args[0]->IsObject() || !args[1]->IsString() ||
-       !args[2]->IsUint32() || !args[3]->IsInt32() || args[3]->IntegerValue() <= 0)
-        return ScriptException("Animation removeFrames(): Invalid argument");
-    
-    std::string property = stdStrOfV8(args[1]);
-    auto iterator = scriptManager->animations.find(property);
-    if(iterator == scriptManager->animations.end())
-        return ScriptException("Animation removeFrames(): Invalid track");
-    
-    AnimationProperty* animationProperty = iterator->second;
-    AnimationTrack* track = animationProperty->find(args[0]->ToObject());
-    if(!track)
-        return ScriptException("Animation removeFrames(): Invalid track");
-    
-    if(track->frames.size() <= args[2]->IntegerValue()+args[3]->IntegerValue())
-        return ScriptException("Animation removeFrames(): Out of bounds");
-    
-    if(args[3]->IntegerValue() >= track->frames.size()-2) {
-        delete track;
-        animationProperty->tracks.erase(animationProperty->tracks.begin()+animationProperty->find(track));
-        if(animationProperty->tracks.size() == 0) {
-            delete animationProperty;
-            scriptManager->animations.erase(scriptManager->animations.find(property));
+        if(object && accelerations && durations && values) {
+            unsigned int lengthA = JSValueToNumber(context, JSObjectGetProperty(context, accelerations, ScriptStringLength.str, NULL), NULL),
+                         lengthB = JSValueToNumber(context, JSObjectGetProperty(context, durations, ScriptStringLength.str, NULL), NULL),
+                         lengthC = JSValueToNumber(context, JSObjectGetProperty(context, values, ScriptStringLength.str, NULL), NULL);
+            
+            if(lengthA == 0 || lengthA != lengthB || lengthB != lengthC)
+                return ScriptException(context, exception, "Animation addFrames(): Invalid frame arrays");
+            
+            ScriptString strProperty(context, argv[1]);
+            std::string property = strProperty.getStdStr();
+            
+            AnimationProperty* animationProperty;
+            auto iterator = scriptManager->animations.find(property);
+            if(iterator == scriptManager->animations.end()) {
+                animationProperty = new AnimationProperty();
+                scriptManager->animations[property] = animationProperty;
+            }else
+                animationProperty = iterator->second;
+            
+            AnimationTrack* track = animationProperty->find(object);
+            if(!track) {
+                track = new AnimationTrack(object);
+                animationProperty->tracks.push_back(track);
+            }
+            track->looping = JSValueToBoolean(context, argv[2]);
+            
+            JSValueRef defaultValue = accessProperty(object, property, NULL);
+            if(!defaultValue)
+                return ScriptException(context, exception, "Animation addFrames(): Invalid property");
+            
+            for(unsigned int i = 0; i < lengthA; i ++) {
+                JSValueRef acceleration = JSObjectGetPropertyAtIndex(context, accelerations, i, NULL),
+                           duration = JSObjectGetPropertyAtIndex(context, durations, i, NULL),
+                           value = JSObjectGetPropertyAtIndex(context, values, i, NULL);
+                
+                if(!JSValueIsNumber(context, acceleration) || !JSValueIsNumber(context, duration))
+                    return ScriptException(context, exception, "Animation addFrames(): Invalid frame");
+                
+                track->frames.push_back(new AnimationFrame(JSValueToNumber(context, acceleration, NULL),
+                                                           JSValueToNumber(context, duration, NULL),
+                                                           (!value || JSValueIsNull(context, value)) ? defaultValue : value));
+            }
+            
+            track->update(property.c_str());
+            return JSValueMakeUndefined(context);
         }
-    }else{
-        if(args[2]->IntegerValue() < 2) track->time = 0.0;
-        auto from = args[2]->IntegerValue(), to = args[2]->IntegerValue()+args[3]->IntegerValue();
-        for(int i = from; i < to; i ++)
-            delete track->frames[i];
-        track->frames.erase(track->frames.begin()+from, track->frames.begin()+to);
     }
+    return ScriptException(context, exception, "Animation addFrames(): Expected Object, String, Boolean, Array, Array, Array");
 }
 
-void ScriptAnimation::GetTrackInfo(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    if(args.Length() < 2)
-        return ScriptException("Animation getTrackInfo(): Too few arguments");
-    if(!args[0]->IsObject() || !args[1]->IsString())
-        return ScriptException("Animation getTrackInfo(): Invalid argument");
-    
-    std::string property = stdStrOfV8(args[1]);
-    auto iterator = scriptManager->animations.find(property);
-    if(iterator == scriptManager->animations.end())
-        return;
-    
-    AnimationProperty* animationProperty = iterator->second;
-    AnimationTrack* track = animationProperty->find(args[0]->ToObject());
-    if(!track)
-        return;
-    
-    v8::Handle<v8::Object> result = v8::Object::New(v8::Isolate::GetCurrent());
-    result->Set(ScriptString("frames"), v8::Integer::New(v8::Isolate::GetCurrent(), track->frames.size()));
-    result->Set(ScriptString("looping"), v8::Boolean::New(v8::Isolate::GetCurrent(), track->looping));
-    result->Set(ScriptString("time"), v8::Number::New(v8::Isolate::GetCurrent(), track->time));
-    ScriptReturn(result);
-}
-
-void ScriptAnimation::StartTimer(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    if(args.Length() < 2)
-        return ScriptException("Animation startTimer(): Too few arguments");
-    if(!args[0]->IsFunction() || !args[1]->IsNumber())
-        return ScriptException("Animation startTimer(): Invalid argument");
-    
-    AnimationTimer* interval = new AnimationTimer(v8::Handle<v8::Function>::Cast(args[0]), args[1]->NumberValue());
-    scriptManager->timers.insert(interval);
-    ScriptReturn(interval->function);
-}
-
-void ScriptAnimation::StopTimer(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    if(args.Length() == 0)
-        return ScriptException("Animation stopTimer(): Too few arguments");
-    if(!args[0]->IsFunction())
-        return ScriptException("Animation stopTimer(): Invalid argument");
-    
-    for(auto interval : scriptManager->timers)
-        if(interval->function == args[0]) {
-            delete interval;
-            scriptManager->timers.erase(interval);
-            ScriptReturn(true);
+static JSValueRef ScriptAnimationDeleteFrames(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    if(argc == 4 && JSValueIsString(context, argv[1]) && JSValueIsNumber(context, argv[2]) && JSValueIsNumber(context, argv[3])) {
+        JSObjectRef object = JSValueToObject(context, argv[0], NULL);
+        if(object) {
+            ScriptString strProperty(context, argv[1]);
+            std::string property = strProperty.getStdStr();
+            
+            auto iterator = scriptManager->animations.find(property);
+            if(iterator == scriptManager->animations.end())
+                return ScriptException(context, exception, "Animation deleteFrames(): Invalid track");
+            
+            AnimationProperty* animationProperty = iterator->second;
+            AnimationTrack* track = animationProperty->find(object);
+            if(!track)
+                return ScriptException(context, exception, "Animation deleteFrames(): Invalid track");
+            
+            unsigned int offset = JSValueToNumber(context, argv[2], NULL),
+                         length = JSValueToNumber(context, argv[3], NULL),
+                         endOffset = offset+length;
+            
+            if(offset+length > track->frames.size())
+                return ScriptException(context, exception, "Animation deleteFrames(): Out of bounds");
+            
+            if(length >= track->frames.size()-2) {
+                delete track;
+                animationProperty->tracks.erase(animationProperty->tracks.begin()+animationProperty->find(track));
+                if(animationProperty->tracks.size() == 0) {
+                    delete animationProperty;
+                    scriptManager->animations.erase(scriptManager->animations.find(property));
+                }
+            }else{
+                if(offset < 2) track->time = 0.0;
+                for(int i = offset; i < endOffset; i ++) {
+                    JSValueUnprotect(context, track->frames[i]->value);
+                    delete track->frames[i];
+                }
+                track->frames.erase(track->frames.begin()+offset, track->frames.begin()+endOffset);
+            }
         }
-    ScriptReturn(false);
+    }
+    return ScriptException(context, exception, "Animation deleteFrames(): Expected Object, String, Number, Number, Number");
 }
 
-ScriptAnimation::ScriptAnimation() :ScriptClass("Animation", Constructor) {
-    ScriptScope();
-    
-    ScriptMethod(*functionTemplate, "addFrames", AddFrames);
-    ScriptMethod(*functionTemplate, "removeFrames", RemoveFrames);
-    ScriptMethod(*functionTemplate, "getTrackInfo", GetTrackInfo);
-    ScriptMethod(*functionTemplate, "startTimer", StartTimer);
-    ScriptMethod(*functionTemplate, "stopTimer", StopTimer);
+static JSValueRef ScriptAnimationGetTrackInfo(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    if(argc == 2 && JSValueIsString(context, argv[1])) {
+        JSObjectRef object = JSValueToObject(context, argv[0], NULL);
+        if(object) {
+            ScriptString strProperty(context, argv[1]);
+            std::string property = strProperty.getStdStr();
+            
+            auto iterator = scriptManager->animations.find(property);
+            if(iterator == scriptManager->animations.end())
+                return JSValueMakeNull(context);
+            
+            AnimationProperty* animationProperty = iterator->second;
+            AnimationTrack* track = animationProperty->find(object);
+            if(!track)
+                return JSValueMakeNull(context);
+            
+            JSObjectRef result = JSObjectMake(context, NULL, NULL);
+            JSObjectSetProperty(context, result, ScriptStringFrames.str, JSValueMakeNumber(context, track->frames.size()), 0, NULL);
+            JSObjectSetProperty(context, result, ScriptStringLooping.str, JSValueMakeBoolean(context, track->looping), 0, NULL);
+            JSObjectSetProperty(context, result, ScriptStringTime.str, JSValueMakeNumber(context, track->time), 0, NULL);
+            return result;
+        }
+    }
+    return ScriptException(context, exception, "Animation getTrackInfo(): Expected Object, String");
+}*/
+
+static JSValueRef ScriptAnimationStartTimer(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    if(argc == 2 && JSValueIsNumber(context, argv[1])) {
+        JSObjectRef function = JSValueToObject(context, argv[0], NULL);
+        if(JSObjectIsFunction(context, function)) {
+            AnimationTimer* interval = new AnimationTimer(function, JSValueToNumber(context, argv[1], NULL));
+            scriptManager->timers.insert(interval);
+            return function;
+        }
+    }
+    return ScriptException(context, exception, "Animation startTimer(): Expected Function, Number");
 }
+
+static JSValueRef ScriptAnimationStopTimer(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    if(argc == 1) {
+        JSObjectRef function = JSValueToObject(context, argv[0], NULL);
+        if(JSObjectIsFunction(context, function)) {
+            for(auto interval : scriptManager->timers)
+                if(interval->function == function) {
+                    delete interval;
+                    scriptManager->timers.erase(interval);
+                    return JSValueMakeBoolean(context, true);
+                }
+            return JSValueMakeBoolean(context, false);
+        }
+    }
+    return ScriptException(context, exception, "Animation stopTimer(): Expected Function");
+}
+
+JSStaticValue ScriptAnimationProperties[] = {
+    {"factor", ScriptAnimationGetFactor, 0, ScriptMethodAttributes},
+    {0, 0, 0, 0}
+};
+
+JSStaticFunction ScriptAnimationMethods[] = {
+    //{"addFrames", ScriptAnimationAddFrames, ScriptMethodAttributes},
+    //{"deleteFrames", ScriptAnimationDeleteFrames, ScriptMethodAttributes},
+    //{"getTrackInfo", ScriptAnimationGetTrackInfo, ScriptMethodAttributes},
+    {"startTimer", ScriptAnimationStartTimer, ScriptMethodAttributes},
+    {"stopTimer", ScriptAnimationStopTimer, ScriptMethodAttributes},
+    {0, 0, 0}
+};
+
+ScriptClassDefinition(Animation, ScriptAnimationProperties, ScriptAnimationMethods);

@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 22.07.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #include "AppMain.h"
@@ -145,15 +145,14 @@ void Menu::consoleHandle(const std::string& message) {
     if(message.length() == 0) return;
     
     if(message.find(consoleJSCommand) == 0) {
-        ScriptScope();
-        v8::TryCatch tryCatch;
-        (*levelManager.mainScript->context)->Enter();
-        v8::Handle<v8::String> code = ScriptString(message.substr(consoleJSCommand.length()).c_str());
-        v8::Handle<v8::Script> scriptLocal = v8::Script::Compile(code, ScriptString("Console Input"));
-        v8::Handle<v8::Value> result = scriptLocal->Run();
-        if(scriptManager->tryCatch(&tryCatch) && !result.IsEmpty())
-            log(script_log, stdStrOfV8(result));
-        (*levelManager.mainScript->context)->Exit();
+        ScriptString strSourceCode(message.substr(consoleJSCommand.length()));
+        JSValueRef exception = NULL, result = JSEvaluateScript(scriptManager->mainScript->context, strSourceCode.str, NULL, NULL, 0, &exception);
+        if(exception)
+            ScriptLogException(scriptManager->mainScript->context, exception);
+        else if(result && !JSValueIsUndefined(scriptManager->mainScript->context, result)) {
+            ScriptString strResult(scriptManager->mainScript->context, result);
+            log(script_log, strResult.getStdStr());
+        }
     }else{
         log(user_log, message);
     }
@@ -163,33 +162,29 @@ void Menu::handleMouseDown(Uint8 button) {
     if((button == SDL_BUTTON_LEFT && screenView->handleMouseDown(mouseX, mouseY))
        || menu.current != inGame) return;
     
-    ScriptScope();
-    v8::Handle<v8::Value> argv[] = { v8::Number::New(v8::Isolate::GetCurrent(), button) };
-    levelManager.mainScript->callFunction("onmousedown", false, 1, argv);
+    JSValueRef argv[] = { JSValueMakeNumber(scriptManager->mainScript->context, button) };
+    scriptManager->mainScript->callFunction("onmousedown", false, 1, argv);
 }
 
 void Menu::handleMouseUp(Uint8 button) {
     if(screenView->handleMouseUp(mouseX, mouseY) || menu.current != inGame) return;
     
-    ScriptScope();
-    v8::Handle<v8::Value> argv[] = { v8::Number::New(v8::Isolate::GetCurrent(), button) };
-    levelManager.mainScript->callFunction("onmouseup", false, 1, argv);
+    JSValueRef argv[] = { JSValueMakeNumber(scriptManager->mainScript->context, button) };
+    scriptManager->mainScript->callFunction("onmouseup", false, 1, argv);
 }
 
 void Menu::handleMouseWheel(float deltaX, float deltaY) {
     if(screenView->handleMouseWheel(mouseX, mouseY, deltaX, deltaY) || menu.current != inGame) return;
     
-    ScriptScope();
-    v8::Handle<v8::Value> argv[] = { v8::Number::New(v8::Isolate::GetCurrent(), deltaX), v8::Number::New(v8::Isolate::GetCurrent(), deltaY) };
-    levelManager.mainScript->callFunction("onmousewheel", false, 2, argv);
+    JSValueRef argv[] = { JSValueMakeNumber(scriptManager->mainScript->context, deltaX), JSValueMakeNumber(scriptManager->mainScript->context, deltaY) };
+    scriptManager->mainScript->callFunction("onmousewheel", false, 2, argv);
 }
 
 void Menu::handleKeyDown(SDL_Keycode key, const char* text) {
     if(screenView->handleKeyDown(key, text) || menu.current != inGame) return;
     
-    ScriptScope();
-    v8::Handle<v8::Value> argv[] = { v8::Number::New(v8::Isolate::GetCurrent(), key) };
-    levelManager.mainScript->callFunction("onkeydown", false, 1, argv);
+    JSValueRef argv[] = { JSValueMakeNumber(scriptManager->mainScript->context, key) };
+    scriptManager->mainScript->callFunction("onkeydown", false, 1, argv);
 }
 
 void Menu::handleKeyUp(SDL_Keycode key) {
@@ -253,9 +248,8 @@ void Menu::handleKeyUp(SDL_Keycode key) {
     }
     
     if(menu.current == inGame) {
-        ScriptScope();
-        v8::Handle<v8::Value> argv[] = { v8::Number::New(v8::Isolate::GetCurrent(), key) };
-        levelManager.mainScript->callFunction("onkeyup", false, 1, argv);
+        JSValueRef argv[] = { JSValueMakeNumber(scriptManager->mainScript->context, key) };
+        scriptManager->mainScript->callFunction("onkeyup", false, 1, argv);
     }
 }
 
@@ -345,7 +339,7 @@ void Menu::gameTick() {
 }
 
 void Menu::sendPauseEvent() {
-    levelManager.mainScript->callFunction("onpause", false, 0, NULL);
+    scriptManager->mainScript->callFunction("onpause", false, 0, NULL);
 }
 
 void Menu::setModalView(const std::string& title, const std::string& text, std::function<void(GUIButton* button)> onContinue) {
@@ -524,7 +518,7 @@ void Menu::setCreditsMenu() {
     screenView->addChild(view);
     
     label = new GUILabel();
-    label->text = std::string("Engine: Alexander Meißner\nDeveloper Kit: Noah Hummel\n© 2014, Gamefortec");
+    label->text = std::string("Programmer: Alexander Meißner\n© 2014, Gamefortec");
     label->posY = view->height*0.6;
     label->width = screenView->width*0.8;
     label->fontHeight = screenView->height*0.1;
@@ -544,7 +538,7 @@ void Menu::setCreditsMenu() {
     button->addChild(label);
     
     label = new GUILabel();
-    label->text = std::string("Using libraries:\nZlib License: SDL2, Bullet Physics\nBSD (3-Clause) License:\nOgg / Vorbis: © 2014, Xiph.Org Foundation\nV8: © 2014, Google, Inc.");
+    label->text = std::string("Using libraries:\nZlib License: SDL2, Bullet Physics\nBSD (3-Clause) License:\nOgg / Vorbis: © 2014, Xiph.Org Foundation\nWebKit JSC: © 2014, Apple, Inc.");
     label->posY = -view->height*0.5;
     label->width = screenView->width*0.8;
     label->fontHeight = screenView->height*0.1;

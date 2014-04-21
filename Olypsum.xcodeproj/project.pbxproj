@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		1102B34C172AEF3500D6913E /* ScriptGUIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1102B34A172AEF3500D6913E /* ScriptGUIButton.cpp */; };
+		11056944190288AE002F2AFA /* ScriptIntersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11056943190288AE002F2AFA /* ScriptIntersection.cpp */; };
+		11056946190288D6002F2AFA /* ScriptEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11056945190288D6002F2AFA /* ScriptEngine.cpp */; };
 		110E600618F7C609008AEC76 /* city.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 110E600518F7C609008AEC76 /* city.cpp */; };
 		1114B84616A88BD100B1CD41 /* BulletCollision.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B84016A88BD100B1CD41 /* BulletCollision.framework */; };
 		1114B84716A88BD100B1CD41 /* BulletDynamics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1114B84116A88BD100B1CD41 /* BulletDynamics.framework */; };
@@ -45,9 +47,6 @@
 		1148738A18BFDA7500C4B8B2 /* SDL2_ttf.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1148737E18BFDA4D00C4B8B2 /* SDL2_ttf.framework */; };
 		1148738B18BFDA7500C4B8B2 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1148737F18BFDA4D00C4B8B2 /* SDL2.framework */; };
 		114A0E6B169064E800D2CE9C /* LevelSaver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 114A0E69169064E800D2CE9C /* LevelSaver.cpp */; };
-		114CB6E918C49D300060B48C /* libv8_base.x64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 114CB6E718C49D300060B48C /* libv8_base.x64.a */; };
-		114CB6EA18C49D300060B48C /* libv8_snapshot.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 114CB6E818C49D300060B48C /* libv8_snapshot.a */; };
-		11511420170C1A0E00F77236 /* ScriptIntersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */; };
 		11511425170D9B7C00F77236 /* ScriptVisualObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11511423170D9B7B00F77236 /* ScriptVisualObject.cpp */; };
 		1158E66518BE680D00C25BAB /* libNetLink.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1158E66418BE680D00C25BAB /* libNetLink.a */; };
 		11623857171DF1050027561B /* ScriptGUIRect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11623855171DF1050027561B /* ScriptGUIRect.cpp */; };
@@ -57,6 +56,8 @@
 		1185668D189013030017A68D /* Script.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1185668B189013030017A68D /* Script.cpp */; };
 		118620481650165400A32518 /* ObjectManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118620461650165400A32518 /* ObjectManager.cpp */; };
 		1188A5431745403900D535B2 /* ScriptAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1188A5411745403900D535B2 /* ScriptAnimation.cpp */; };
+		11896A6E18FC277600F8EFC4 /* JavaScriptCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 11896A6D18FC277600F8EFC4 /* JavaScriptCore.framework */; };
+		11896A6F18FC278300F8EFC4 /* JavaScriptCore.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 11896A6D18FC277600F8EFC4 /* JavaScriptCore.framework */; };
 		118B60621573E2E8004C132E /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 118B60611573E2E8004C132E /* Audio.cpp */; };
 		1199EC331722D205006BD235 /* ScriptIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1199EC311722D204006BD235 /* ScriptIO.cpp */; };
 		1199EC361723D795006BD235 /* ScriptGUIOutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1199EC341723D793006BD235 /* ScriptGUIOutput.cpp */; };
@@ -122,6 +123,7 @@
 				1148738018BFDA4D00C4B8B2 /* SDL2_image.framework in CopyFiles */,
 				1148738118BFDA4D00C4B8B2 /* SDL2_ttf.framework in CopyFiles */,
 				1148738218BFDA4D00C4B8B2 /* SDL2.framework in CopyFiles */,
+				11896A6F18FC278300F8EFC4 /* JavaScriptCore.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -129,7 +131,8 @@
 
 /* Begin PBXFileReference section */
 		1102B34A172AEF3500D6913E /* ScriptGUIButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptGUIButton.cpp; sourceTree = "<group>"; };
-		1102B34B172AEF3500D6913E /* ScriptGUIButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptGUIButton.h; sourceTree = "<group>"; };
+		11056943190288AE002F2AFA /* ScriptIntersection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptIntersection.cpp; sourceTree = "<group>"; };
+		11056945190288D6002F2AFA /* ScriptEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptEngine.cpp; sourceTree = "<group>"; };
 		110E600518F7C609008AEC76 /* city.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = city.cpp; sourceTree = "<group>"; };
 		1114B84016A88BD100B1CD41 /* BulletCollision.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletCollision.framework; path = /Library/Frameworks/BulletCollision.framework; sourceTree = "<absolute>"; };
 		1114B84116A88BD100B1CD41 /* BulletDynamics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = BulletDynamics.framework; path = /Library/Frameworks/BulletDynamics.framework; sourceTree = "<absolute>"; };
@@ -147,9 +150,7 @@
 		1118254114F2559600F198A7 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		1118254314F2559B00F198A7 /* OpenAL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenAL.framework; path = System/Library/Frameworks/OpenAL.framework; sourceTree = SDKROOT; };
 		112307F3171462E0001167DF /* ScriptParticlesObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptParticlesObject.cpp; sourceTree = "<group>"; };
-		112307F4171462E0001167DF /* ScriptParticlesObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptParticlesObject.h; sourceTree = "<group>"; };
 		112307F61718A082001167DF /* ScriptLightObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptLightObject.cpp; sourceTree = "<group>"; };
-		112307F71718A083001167DF /* ScriptLightObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptLightObject.h; sourceTree = "<group>"; };
 		112672E71699BBFD000BB805 /* Links.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Links.cpp; sourceTree = "<group>"; };
 		112672E81699BBFD000BB805 /* Links.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Links.h; sourceTree = "<group>"; };
 		112672EA1699BCF0000BB805 /* TerrainObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TerrainObject.cpp; sourceTree = "<group>"; };
@@ -165,27 +166,19 @@
 		114325EA186724B000A6ADC3 /* MultiplayerMenu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MultiplayerMenu.cpp; path = Menu/MultiplayerMenu.cpp; sourceTree = "<group>"; };
 		114325EB186724B000A6ADC3 /* OptionsMenu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptionsMenu.cpp; path = Menu/OptionsMenu.cpp; sourceTree = "<group>"; };
 		1145E3C3170ECEBB00480189 /* ScriptSimpleObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptSimpleObject.cpp; sourceTree = "<group>"; };
-		1145E3C4170ECEBB00480189 /* ScriptSimpleObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptSimpleObject.h; sourceTree = "<group>"; };
 		1148737D18BFDA4D00C4B8B2 /* SDL2_image.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_image.framework; path = Libraries/SDL2_image.framework; sourceTree = "<group>"; };
 		1148737E18BFDA4D00C4B8B2 /* SDL2_ttf.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_ttf.framework; path = Libraries/SDL2_ttf.framework; sourceTree = "<group>"; };
 		1148737F18BFDA4D00C4B8B2 /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = Libraries/SDL2.framework; sourceTree = "<group>"; };
 		114A0E69169064E800D2CE9C /* LevelSaver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelSaver.cpp; sourceTree = "<group>"; };
 		114A0E6A169064E800D2CE9C /* LevelSaver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LevelSaver.h; sourceTree = "<group>"; };
-		114CB6E718C49D300060B48C /* libv8_base.x64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libv8_base.x64.a; path = Libraries/v8/out/native/libv8_base.x64.a; sourceTree = "<group>"; };
-		114CB6E818C49D300060B48C /* libv8_snapshot.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libv8_snapshot.a; path = Libraries/v8/out/native/libv8_snapshot.a; sourceTree = "<group>"; };
-		1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptIntersection.cpp; sourceTree = "<group>"; };
-		1151141F170C1A0E00F77236 /* ScriptIntersection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptIntersection.h; sourceTree = "<group>"; };
 		11511423170D9B7B00F77236 /* ScriptVisualObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptVisualObject.cpp; sourceTree = "<group>"; };
-		11511424170D9B7C00F77236 /* ScriptVisualObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptVisualObject.h; sourceTree = "<group>"; };
 		1158E66418BE680D00C25BAB /* libNetLink.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libNetLink.a; path = Libraries/netLink/out/libNetLink.a; sourceTree = "<group>"; };
 		11623855171DF1050027561B /* ScriptGUIRect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptGUIRect.cpp; sourceTree = "<group>"; };
-		11623856171DF1050027561B /* ScriptGUIRect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptGUIRect.h; sourceTree = "<group>"; };
+		11623856171DF1050027561B /* ScriptGUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptGUI.h; sourceTree = "<group>"; };
 		11648F6B153DEE0F004CA74D /* FBO.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = FBO.h; sourceTree = "<group>"; };
 		11648F6D153DEE63004CA74D /* FBO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FBO.cpp; sourceTree = "<group>"; };
 		1178F6B517209036006EAE7D /* ScriptGUIView.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptGUIView.cpp; sourceTree = "<group>"; };
-		1178F6B617209036006EAE7D /* ScriptGUIView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptGUIView.h; sourceTree = "<group>"; };
 		117CBA9A16EBDC6800307B94 /* ScriptObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptObject.cpp; sourceTree = "<group>"; };
-		117CBA9B16EBDC6800307B94 /* ScriptObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptObject.h; sourceTree = "<group>"; };
 		1185668B189013030017A68D /* Script.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Script.cpp; sourceTree = "<group>"; };
 		1185668C189013030017A68D /* Script.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Script.h; sourceTree = "<group>"; };
 		118620461650165400A32518 /* ObjectManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ObjectManager.cpp; sourceTree = "<group>"; };
@@ -193,12 +186,11 @@
 		1188A5411745403900D535B2 /* ScriptAnimation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptAnimation.cpp; sourceTree = "<group>"; };
 		1188A5421745403900D535B2 /* ScriptAnimation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptAnimation.h; sourceTree = "<group>"; };
 		11894C3218C631AD000467C1 /* Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Header.h; sourceTree = "<group>"; };
+		11896A6D18FC277600F8EFC4 /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = "Libraries/webkit-master/WebKitBuild/JavaScriptCore.framework"; sourceTree = "<group>"; };
 		118B60601573E2DF004C132E /* Audio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Audio.h; sourceTree = "<group>"; };
 		118B60611573E2E8004C132E /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Audio.cpp; sourceTree = "<group>"; };
 		1199EC311722D204006BD235 /* ScriptIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptIO.cpp; sourceTree = "<group>"; };
-		1199EC321722D204006BD235 /* ScriptIO.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptIO.h; sourceTree = "<group>"; };
 		1199EC341723D793006BD235 /* ScriptGUIOutput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptGUIOutput.cpp; sourceTree = "<group>"; };
-		1199EC351723D794006BD235 /* ScriptGUIOutput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptGUIOutput.h; sourceTree = "<group>"; };
 		11A3255317089E2100B038D2 /* Network.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Network.cpp; sourceTree = "<group>"; };
 		11A3255417089E2100B038D2 /* Network.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Network.h; sourceTree = "<group>"; };
 		11A6811D16B96CFC000E4029 /* ScriptLinearAlgebra.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptLinearAlgebra.cpp; sourceTree = "<group>"; };
@@ -256,13 +248,11 @@
 		11B2626D15E28DF6002C638D /* VisualObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = VisualObject.cpp; sourceTree = "<group>"; };
 		11B2626E15E28DF6002C638D /* VisualObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VisualObject.h; sourceTree = "<group>"; };
 		11BCD05E1756686900939274 /* ScriptLinks.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptLinks.cpp; sourceTree = "<group>"; };
-		11BCD05F1756686900939274 /* ScriptLinks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptLinks.h; sourceTree = "<group>"; };
 		11BD39AA15414A81007846B8 /* LightObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LightObject.h; sourceTree = "<group>"; };
 		11BD39AC15414AA6007846B8 /* LightObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LightObject.cpp; sourceTree = "<group>"; };
 		11C238D71613164C009D6F9C /* LevelManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelManager.cpp; sourceTree = "<group>"; };
 		11C238D81613164C009D6F9C /* LevelManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LevelManager.h; sourceTree = "<group>"; };
 		11D0C0F11727CE70004C30E9 /* ScriptGUIInput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptGUIInput.cpp; sourceTree = "<group>"; };
-		11D0C0F21727CE71004C30E9 /* ScriptGUIInput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScriptGUIInput.h; sourceTree = "<group>"; };
 		11D74B4416270A65000EEB50 /* Packages */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Packages; sourceTree = "<group>"; };
 		11D74B4516270A65000EEB50 /* Shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Shaders; sourceTree = "<group>"; };
 		11D74B4D16296735000EEB50 /* LevelLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = LevelLoader.cpp; sourceTree = "<group>"; };
@@ -290,8 +280,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				114CB6E918C49D300060B48C /* libv8_base.x64.a in Frameworks */,
-				114CB6EA18C49D300060B48C /* libv8_snapshot.a in Frameworks */,
 				1158E66518BE680D00C25BAB /* libNetLink.a in Frameworks */,
 				1114B87016A8933200B1CD41 /* Ogg.framework in Frameworks */,
 				1114B87116A8933200B1CD41 /* Vorbis.framework in Frameworks */,
@@ -303,6 +291,7 @@
 				1148738918BFDA7500C4B8B2 /* SDL2_image.framework in Frameworks */,
 				1148738A18BFDA7500C4B8B2 /* SDL2_ttf.framework in Frameworks */,
 				1148738B18BFDA7500C4B8B2 /* SDL2.framework in Frameworks */,
+				11896A6E18FC277600F8EFC4 /* JavaScriptCore.framework in Frameworks */,
 				1118254414F2559B00F198A7 /* OpenAL.framework in Frameworks */,
 				11DD0B0A17AA509900A43E39 /* OpenCL.framework in Frameworks */,
 				1118254214F2559600F198A7 /* OpenGL.framework in Frameworks */,
@@ -334,8 +323,6 @@
 		1118251914F2553A00F198A7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				114CB6E718C49D300060B48C /* libv8_base.x64.a */,
-				114CB6E818C49D300060B48C /* libv8_snapshot.a */,
 				1158E66418BE680D00C25BAB /* libNetLink.a */,
 				1114B86E16A8933200B1CD41 /* Ogg.framework */,
 				1114B86F16A8933200B1CD41 /* Vorbis.framework */,
@@ -347,6 +334,7 @@
 				1148737D18BFDA4D00C4B8B2 /* SDL2_image.framework */,
 				1148737E18BFDA4D00C4B8B2 /* SDL2_ttf.framework */,
 				1148737F18BFDA4D00C4B8B2 /* SDL2.framework */,
+				11896A6D18FC277600F8EFC4 /* JavaScriptCore.framework */,
 				1118251C14F2553A00F198A7 /* Other Frameworks */,
 			);
 			name = Frameworks;
@@ -536,33 +524,22 @@
 			children = (
 				11A6811E16B96CFC000E4029 /* ScriptLinearAlgebra.h */,
 				11A6811D16B96CFC000E4029 /* ScriptLinearAlgebra.cpp */,
-				117CBA9B16EBDC6800307B94 /* ScriptObject.h */,
-				117CBA9A16EBDC6800307B94 /* ScriptObject.cpp */,
-				11511424170D9B7C00F77236 /* ScriptVisualObject.h */,
-				11511423170D9B7B00F77236 /* ScriptVisualObject.cpp */,
-				1145E3C4170ECEBB00480189 /* ScriptSimpleObject.h */,
-				1145E3C3170ECEBB00480189 /* ScriptSimpleObject.cpp */,
-				112307F4171462E0001167DF /* ScriptParticlesObject.h */,
-				112307F3171462E0001167DF /* ScriptParticlesObject.cpp */,
-				112307F71718A083001167DF /* ScriptLightObject.h */,
-				112307F61718A082001167DF /* ScriptLightObject.cpp */,
-				11BCD05F1756686900939274 /* ScriptLinks.h */,
-				11BCD05E1756686900939274 /* ScriptLinks.cpp */,
-				1151141F170C1A0E00F77236 /* ScriptIntersection.h */,
-				1151141E170C1A0E00F77236 /* ScriptIntersection.cpp */,
 				1188A5421745403900D535B2 /* ScriptAnimation.h */,
 				1188A5411745403900D535B2 /* ScriptAnimation.cpp */,
-				1199EC321722D204006BD235 /* ScriptIO.h */,
+				11056943190288AE002F2AFA /* ScriptIntersection.cpp */,
 				1199EC311722D204006BD235 /* ScriptIO.cpp */,
-				11623856171DF1050027561B /* ScriptGUIRect.h */,
+				11056945190288D6002F2AFA /* ScriptEngine.cpp */,
+				117CBA9A16EBDC6800307B94 /* ScriptObject.cpp */,
+				1145E3C3170ECEBB00480189 /* ScriptSimpleObject.cpp */,
+				11511423170D9B7B00F77236 /* ScriptVisualObject.cpp */,
+				112307F3171462E0001167DF /* ScriptParticlesObject.cpp */,
+				112307F61718A082001167DF /* ScriptLightObject.cpp */,
+				11BCD05E1756686900939274 /* ScriptLinks.cpp */,
+				11623856171DF1050027561B /* ScriptGUI.h */,
 				11623855171DF1050027561B /* ScriptGUIRect.cpp */,
-				1178F6B617209036006EAE7D /* ScriptGUIView.h */,
 				1178F6B517209036006EAE7D /* ScriptGUIView.cpp */,
-				1199EC351723D794006BD235 /* ScriptGUIOutput.h */,
 				1199EC341723D793006BD235 /* ScriptGUIOutput.cpp */,
-				11D0C0F21727CE71004C30E9 /* ScriptGUIInput.h */,
 				11D0C0F11727CE70004C30E9 /* ScriptGUIInput.cpp */,
-				1102B34B172AEF3500D6913E /* ScriptGUIButton.h */,
 				1102B34A172AEF3500D6913E /* ScriptGUIButton.cpp */,
 				11FE8AB116B5A3F400B682D0 /* ScriptManager.h */,
 				11FE8AB016B5A3F400B682D0 /* ScriptManager.cpp */,
@@ -650,6 +627,7 @@
 				11A79B75153C2FE9002B9F0A /* GUIRoundedRect.cpp in Sources */,
 				11A79B76153C2FE9002B9F0A /* GUIScrollView.cpp in Sources */,
 				11A79B77153C2FE9002B9F0A /* GUISlider.cpp in Sources */,
+				11056944190288AE002F2AFA /* ScriptIntersection.cpp in Sources */,
 				11A79B78153C2FE9002B9F0A /* GUITabs.cpp in Sources */,
 				11A79B79153C2FE9002B9F0A /* GUITextField.cpp in Sources */,
 				11A79B7A153C2FE9002B9F0A /* GUIView.cpp in Sources */,
@@ -667,6 +645,7 @@
 				118B60621573E2E8004C132E /* Audio.cpp in Sources */,
 				11B2626F15E28DF7002C638D /* VisualObject.cpp in Sources */,
 				11C238D91613164C009D6F9C /* LevelManager.cpp in Sources */,
+				11056946190288D6002F2AFA /* ScriptEngine.cpp in Sources */,
 				11D74B4F16296735000EEB50 /* LevelLoader.cpp in Sources */,
 				11A907621629B27A00B16607 /* XMLUtilities.cpp in Sources */,
 				112BF180162AFE8100CF0C0D /* Object.cpp in Sources */,
@@ -686,7 +665,6 @@
 				11AD22DB16FCE77200B9FB12 /* main.cpp in Sources */,
 				114325EE186724B000A6ADC3 /* OptionsMenu.cpp in Sources */,
 				11A3255517089E2100B038D2 /* Network.cpp in Sources */,
-				11511420170C1A0E00F77236 /* ScriptIntersection.cpp in Sources */,
 				11511425170D9B7C00F77236 /* ScriptVisualObject.cpp in Sources */,
 				1145E3C5170ECEBB00480189 /* ScriptSimpleObject.cpp in Sources */,
 				112307F5171462E0001167DF /* ScriptParticlesObject.cpp in Sources */,
@@ -813,7 +791,10 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Libraries/webkit-master/WebKitBuild",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "$(OTHER_CFLAGS)";
@@ -836,7 +817,10 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				COMBINE_HIDPI_IMAGES = YES;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited)";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Libraries/webkit-master/WebKitBuild",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = NO;
 				GCC_PREFIX_HEADER = "";
 				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = "$(OTHER_CFLAGS)";

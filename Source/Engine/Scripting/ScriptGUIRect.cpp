@@ -3,11 +3,11 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 16.04.13.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
-#include "ScriptGUIView.h"
-
+#include "ScriptManager.h"
+/*
 void ScriptGUIRect::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
     ScriptScope();
     return ScriptException("GUIRect Constructor: Class can't be instantiated");
@@ -148,3 +148,4 @@ ScriptGUIRect::ScriptGUIRect() :ScriptGUIRect("GUIRect", Constructor) {
     ScriptMethod(objectTemplate, "delete", Delete);
     ScriptMethod(objectTemplate, "updateContent", UpdateContent);
 }
+*/

@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 20.04.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #ifndef LightObject_h
@@ -56,22 +56,6 @@ class DirectionalLight : public LightObject {
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 
-//! A LightObject with a cone shape and divergent light
-class SpotLight : public LightObject {
-    public:
-    SpotLight();
-    SpotLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
-    void setTransformation(const btTransform& transformation);
-    //! Updates the cone shape
-    void setBounds(float cutoff, float range);
-    //! Returns the cutoff angle of the cone shape in radians
-    float getCutoff();
-    bool updateShadowMap(bool shadowActive);
-    void draw();
-    float getPriority(const btVector3& position);
-    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
-};
-
 //! A LightObject with a parabolid or sphere / dual parabolid (omni directional) shape and divergent light
 class PositionalLight : public LightObject {
     ColorBuffer* shadowMapB; //!< The second shadow map used if omni directional
@@ -86,6 +70,22 @@ class PositionalLight : public LightObject {
     bool updateShadowMap(bool shadowActive);
     void draw();
     void deleteShadowMap();
+    float getPriority(const btVector3& position);
+    rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
+};
+
+//! A LightObject with a cone shape and divergent light
+class SpotLight : public LightObject {
+    public:
+    SpotLight();
+    SpotLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
+    void setTransformation(const btTransform& transformation);
+    //! Updates the cone shape
+    void setBounds(float cutoff, float range);
+    //! Returns the cutoff angle of the cone shape in radians
+    float getCutoff();
+    bool updateShadowMap(bool shadowActive);
+    void draw();
     float getPriority(const btVector3& position);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };

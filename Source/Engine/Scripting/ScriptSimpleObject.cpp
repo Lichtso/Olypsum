@@ -3,191 +3,234 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 05.04.13.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #include "ScriptManager.h"
 
-ScriptSimpleObject::ScriptSimpleObject() :ScriptBaseObject("SimpleObject") {
-    ScriptScope();
-    
-    ScriptInherit(scriptBaseClass);
+static JSObjectRef ScriptCamObjectConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    return ScriptException(context, exception, "CamObject Constructor: Class can't be instantiated");
 }
 
+ScriptClassStaticDefinition(CamObject);
 
-
-void ScriptCamObject::GetFov(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
-    ScriptReturn(objectPtr->fov);
+static JSValueRef ScriptCamObjectGetFov(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    CamObject* objectPtr = getDataOfInstance<CamObject>(instance);
+    return JSValueMakeNumber(context, objectPtr->fov);
 }
 
-void ScriptCamObject::SetFov(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsNumber()) return;
-    CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
-    objectPtr->fov = value->NumberValue();
+static bool ScriptCamObjectSetFov(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "CamObject setFov(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    if(isfinite(numberValue)) {
+        getDataOfInstance<CamObject>(instance)->fov = numberValue;
+        return true;
+    }else
+        return false;
 }
 
-void ScriptCamObject::GetNear(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
-    ScriptReturn(objectPtr->nearPlane);
+static JSValueRef ScriptCamObjectGetNear(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    CamObject* objectPtr = getDataOfInstance<CamObject>(instance);
+    return JSValueMakeNumber(context, objectPtr->nearPlane);
 }
 
-void ScriptCamObject::SetNear(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsNumber()) return;
-    CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
-    objectPtr->nearPlane = value->NumberValue();
+static bool ScriptCamObjectSetNear(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "CamObject setNear(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    if(numberValue > 0.0) {
+        getDataOfInstance<CamObject>(instance)->nearPlane = numberValue;
+        return true;
+    }else
+        return false;
 }
 
-void ScriptCamObject::GetFar(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
-    ScriptReturn(objectPtr->farPlane);
+static JSValueRef ScriptCamObjectGetFar(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    CamObject* objectPtr = getDataOfInstance<CamObject>(instance);
+    return JSValueMakeNumber(context, objectPtr->farPlane);
 }
 
-void ScriptCamObject::SetFar(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsNumber()) return;
-    CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
-    objectPtr->farPlane = value->NumberValue();
+static bool ScriptCamObjectSetFar(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "CamObject setFar(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    if(numberValue > 0.0) {
+        getDataOfInstance<CamObject>(instance)->farPlane = numberValue;
+        return true;
+    }else
+        return false;
 }
 
-void ScriptCamObject::GetViewRay(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    if(args.Length() < 2)
-        return ScriptException("CamObject getViewRay(): Too few arguments");
-    if(!args[0]->IsNumber() || !args[1]->IsNumber())
-        return ScriptException("CamObject getViewRay(): Invalid argument");
-    CamObject* objectPtr = getDataOfInstance<CamObject>(args.This());
-    Ray3 ray = objectPtr->getRayAt(args[0]->NumberValue(), args[1]->NumberValue());
-    
-    v8::Handle<v8::Object> result = v8::Object::New(v8::Isolate::GetCurrent());
-    result->Set(ScriptString("origin"), scriptVector3->newInstance(ray.origin));
-    result->Set(ScriptString("direction"), scriptVector3->newInstance(ray.direction));
-    ScriptReturn(result);
+static JSValueRef ScriptCamObjectGetIsMainCam(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    CamObject* objectPtr = getDataOfInstance<CamObject>(instance);
+    return JSValueMakeBoolean(context, objectPtr == mainCam);
 }
 
-void ScriptCamObject::SetMainCam(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    mainCam = getDataOfInstance<CamObject>(args.This());
+static bool ScriptCamObjectSetIsMainCam(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsBoolean(context, value)) {
+        ScriptException(context, exception, "CamObject setIsMainCam(): Expected Boolean");
+        return false;
+    }
+    if(JSValueMakeBoolean(context, value))
+        mainCam = getDataOfInstance<CamObject>(instance);
+    return true;
 }
 
-void ScriptCamObject::GetMainCam(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    v8::Handle<v8::Object> result(*mainCam->scriptInstance);
-    ScriptReturn(result);
+static JSValueRef ScriptCamObjectGetViewRay(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    if(argc < 2 || !JSValueIsNumber(context, argv[0]) || !JSValueIsNumber(context, argv[1]))
+        return ScriptException(context, exception, "CamObject getViewRay(): Expected Number, Number");
+    CamObject* objectPtr = getDataOfInstance<CamObject>(instance);
+    Ray3 ray = objectPtr->getRayAt(JSValueToNumber(context, argv[0], NULL), JSValueToNumber(context, argv[1], NULL));
+    JSObjectRef result = JSObjectMake(context, NULL, NULL);
+    JSObjectSetProperty(context, result, ScriptStringOrigin.str, newScriptVector3(context, ray.origin), 0, NULL);
+    JSObjectSetProperty(context, result, ScriptStringDirection.str, newScriptVector3(context, ray.direction), 0, NULL);
+    return result;
 }
 
-ScriptCamObject::ScriptCamObject() :ScriptSimpleObject("CamObject") {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    ScriptAccessor(objectTemplate, "fov", GetFov, SetFov);
-    ScriptAccessor(objectTemplate, "near", GetNear, SetNear);
-    ScriptAccessor(objectTemplate, "far", GetFar, SetFar);
-    ScriptMethod(objectTemplate, "getViewRay", GetViewRay);
-    ScriptMethod(objectTemplate, "setMainCam", SetMainCam);
-    ScriptMethod(*functionTemplate, "getMainCam", GetMainCam);
-    
-    ScriptInherit(scriptBaseObject);
+JSStaticValue ScriptCamObjectProperties[] = {
+    {"fov", ScriptCamObjectGetFov, ScriptCamObjectSetFov, kJSPropertyAttributeDontDelete},
+    {"near", ScriptCamObjectGetNear, ScriptCamObjectSetNear, kJSPropertyAttributeDontDelete},
+    {"far", ScriptCamObjectGetFar, ScriptCamObjectSetFar, kJSPropertyAttributeDontDelete},
+    {"isMainCam", ScriptCamObjectGetIsMainCam, ScriptCamObjectSetIsMainCam, kJSPropertyAttributeDontDelete},
+    {0, 0, 0, 0}
+};
+
+JSStaticFunction ScriptCamObjectMethods[] = {
+    {"getViewRay", ScriptCamObjectGetViewRay, ScriptMethodAttributes},
+    {0, 0, 0}
+};
+
+ScriptClassDefinition(CamObject, ScriptCamObjectProperties, ScriptCamObjectMethods);
+
+
+
+static JSObjectRef ScriptSoundObjectConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    return ScriptException(context, exception, "SoundObject Constructor: Class can't be instantiated");
 }
 
+ScriptClassStaticDefinition(SoundObject);
 
-
-void ScriptSoundObject::GetSoundTrack(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
+static JSValueRef ScriptSoundObjectGetSoundTrack(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(instance);
     std::string name;
     FilePackage* filePackage = fileManager.findResource<SoundTrack>(objectPtr->soundTrack, name);
-    if(filePackage)
-        ScriptReturn(fileManager.getPathOfResource(filePackage, name).c_str());
+    if(filePackage) {
+        ScriptString strName(fileManager.getPathOfResource(filePackage, name));
+        return strName.getJSStr(context);
+    }else
+        return ScriptException(context, exception, "SoundObject getSoundTrack(): Internal error");
 }
 
-void ScriptSoundObject::SetSoundTrack(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsString()) return;
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
-    auto soundTrack = fileManager.getResourceByPath<SoundTrack>(levelManager.levelPackage, stdStrOfV8(value));
-    if(soundTrack) objectPtr->setSoundTrack(soundTrack);
+static bool ScriptSoundObjectSetSoundTrack(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsString(context, value)) {
+        ScriptException(context, exception, "SoundObject setSoundTrack(): Expected String");
+        return false;
+    }
+    ScriptString strName(context, value);
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(instance);
+    auto soundTrack = fileManager.getResourceByPath<SoundTrack>(levelManager.levelPackage, strName.getStdStr());
+    if(soundTrack) {
+        objectPtr->setSoundTrack(soundTrack);
+        return true;
+    }else
+        return false;
 }
 
-void ScriptSoundObject::GetTimeOffset(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
-    ScriptReturn(objectPtr->getTimeOffset());
+static JSValueRef ScriptSoundObjectGetTimeOffset(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<SoundObject>(instance)->getTimeOffset());
 }
 
-void ScriptSoundObject::SetTimeOffset(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsNumber()) return;
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
-    objectPtr->setTimeOffset(value->NumberValue());
+static bool ScriptSoundObjectSetTimeOffset(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "SoundObject setTimeOffset(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(instance);
+    if(objectPtr->soundTrack && numberValue >= 0.0 && numberValue <= objectPtr->soundTrack->getLength()) {
+        objectPtr->setTimeOffset(numberValue);
+        return true;
+    }else
+        return false;
 }
 
-void ScriptSoundObject::GetVolume(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
-    ScriptReturn(objectPtr->getVolume());
+static JSValueRef ScriptSoundObjectGetVolume(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<SoundObject>(instance)->getVolume());
 }
 
-void ScriptSoundObject::SetVolume(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsNumber()) return;
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
-    objectPtr->setVolume(value->NumberValue());
+static bool ScriptSoundObjectSetVolume(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "SoundObject setVolume(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    if(numberValue >= 0.0 && numberValue <= 1.0) {
+        getDataOfInstance<SoundObject>(instance)->setVolume(numberValue);
+        return true;
+    }else
+        return false;
 }
 
-void ScriptSoundObject::GetPlaying(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
-    ScriptReturn(objectPtr->getPlaying());
+static JSValueRef ScriptSoundObjectGetIsPlaying(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeBoolean(context, getDataOfInstance<SoundObject>(instance)->getIsPlaying());
 }
 
-void ScriptSoundObject::SetPlaying(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsBoolean()) return;
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
-    objectPtr->setPlaying(value->BooleanValue());
+static bool ScriptSoundObjectSetIsPlaying(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsBoolean(context, value)) {
+        ScriptException(context, exception, "SoundObject setIsPlaying(): Expected Boolean");
+        return false;
+    }
+    getDataOfInstance<SoundObject>(instance)->setIsPlaying(JSValueToBoolean(context, value));
+    return true;
 }
 
-void ScriptSoundObject::GetMode(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
+static JSValueRef ScriptSoundObjectGetMode(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(instance);
     switch(objectPtr->mode) {
         case SoundObject::Mode::Looping:
-            ScriptReturn("looping");
+            return ScriptStringLooping.getJSStr(context);
         case SoundObject::Mode::Hold:
-            ScriptReturn("hold");
+            return ScriptStringHold.getJSStr(context);
         case SoundObject::Mode::Dispose:
-            ScriptReturn("dispose");
+            return ScriptStringDispose.getJSStr(context);
     }
 }
 
-void ScriptSoundObject::SetMode(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsString()) return;
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(args.This());
-    const char* str = cStrOfV8(value);
-    if(strcmp(str, "looping") == 0)
+static bool ScriptSoundObjectSetMode(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsString(context, value)) {
+        ScriptException(context, exception, "SoundObject setSoundTrack(): Expected String");
+        return false;
+    }
+    ScriptString strMode(context, value);
+    std::string mode = strMode.getStdStr();
+    SoundObject* objectPtr = getDataOfInstance<SoundObject>(instance);
+    if(mode == "looping") {
         objectPtr->mode = SoundObject::Mode::Looping;
-    else if(strcmp(str, "hold") == 0)
+        return true;
+    }else if(mode == "hold") {
         objectPtr->mode = SoundObject::Mode::Hold;
-    else if(strcmp(str, "dispose") == 0)
+        return true;
+    }else if(mode == "dispose") {
         objectPtr->mode = SoundObject::Mode::Dispose;
+        return true;
+    }else
+        return false;
 }
 
-ScriptSoundObject::ScriptSoundObject() :ScriptSimpleObject("SoundObject") {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    ScriptAccessor(objectTemplate, "soundTrack", GetSoundTrack, SetSoundTrack);
-    ScriptAccessor(objectTemplate, "timeOffset", GetTimeOffset, SetTimeOffset);
-    ScriptAccessor(objectTemplate, "volume", GetVolume, SetVolume);
-    ScriptAccessor(objectTemplate, "playing", GetPlaying, SetPlaying);
-    ScriptAccessor(objectTemplate, "mode", GetMode, SetMode);
-    
-    ScriptInherit(scriptBaseObject);
-}
+JSStaticValue ScriptSoundObjectProperties[] = {
+    {"soundTrack", ScriptSoundObjectGetSoundTrack, ScriptSoundObjectSetSoundTrack, kJSPropertyAttributeDontDelete},
+    {"timeOffset", ScriptSoundObjectGetTimeOffset, ScriptSoundObjectSetTimeOffset, kJSPropertyAttributeDontDelete},
+    {"volume", ScriptSoundObjectGetVolume, ScriptSoundObjectSetVolume, kJSPropertyAttributeDontDelete},
+    {"isPlaying", ScriptSoundObjectGetIsPlaying, ScriptSoundObjectSetIsPlaying, kJSPropertyAttributeDontDelete},
+    {"mode", ScriptSoundObjectGetMode, ScriptSoundObjectSetMode, kJSPropertyAttributeDontDelete},
+    {0, 0, 0, 0}
+};
+
+ScriptClassDefinition(SoundObject, ScriptSoundObjectProperties, NULL);

@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 13.10.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #ifndef LevelLoader_h
@@ -19,7 +19,7 @@ class LevelLoader {
     FilePackage* filePackage;
     btTransform transformation;
     LevelLoader();
-    v8::Handle<v8::Array> getResultsArray();
+    JSObjectRef getResultsArray(JSContextRef context);
     BaseObject* getObjectLinking(unsigned int index);
     void pushObject(BaseObject* object);
     bool loadContainer(std::string name, bool isLevelRoot);

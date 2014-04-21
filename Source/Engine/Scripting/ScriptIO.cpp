@@ -3,62 +3,94 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 20.04.13.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #include "AppMain.h"
 
-void ScriptMouse::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    return ScriptException("Mouse Constructor: Class can't be instantiated");
+static JSValueRef ScriptMouseGetX(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, menu.mouseX);
 }
 
-void ScriptMouse::AccessX(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    if(args.Length() == 1 && args[0]->IsNumber() && args[0]->NumberValue() >= -menu.screenView->width && args[0]->NumberValue() <= menu.screenView->width)
-        menu.mouseX = args[0]->NumberValue();
-    ScriptReturn(menu.mouseX);
+static bool ScriptMouseSetX(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "Mouse setX(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    if(numberValue >= -menu.screenView->width && numberValue <= menu.screenView->width) {
+        menu.mouseX = numberValue;
+        return true;
+    }else
+        return false;
 }
 
-void ScriptMouse::AccessY(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    if(args.Length() == 1 && args[0]->IsNumber() && args[0]->NumberValue() >= -menu.screenView->height && args[0]->NumberValue() <= menu.screenView->height)
-        menu.mouseY = args[0]->NumberValue();
-    ScriptReturn(menu.mouseY);
+static JSValueRef ScriptMouseGetY(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, menu.mouseY);
 }
 
-void ScriptMouse::AccessFixed(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    if(args.Length() == 1 && args[0]->IsBoolean())
-        menu.mouseFixed = args[0]->NumberValue();
-    ScriptReturn(menu.mouseFixed);
+static bool ScriptMouseSetY(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "Mouse setY(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    if(numberValue >= -menu.screenView->height && numberValue <= menu.screenView->height) {
+        menu.mouseY = numberValue;
+        return true;
+    }else
+        return false;
 }
 
-ScriptMouse::ScriptMouse() :ScriptClass("Mouse", Constructor) {
-    ScriptScope();
-    
-    ScriptMethod(*functionTemplate, "x", AccessX);
-    ScriptMethod(*functionTemplate, "y", AccessY);
-    ScriptMethod(*functionTemplate, "fixed", AccessFixed);
+static JSValueRef ScriptMouseGetIsFixed(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeBoolean(context, menu.mouseFixed);
 }
 
-
-
-void ScriptKeyboard::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    return ScriptException("Keyboard Constructor: Class can't be instantiated");
+static bool ScriptMouseSetIsFixed(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsBoolean(context, value)) {
+        ScriptException(context, exception, "Mouse setIsFixed(): Expected Boolean");
+        return false;
+    }
+    menu.mouseFixed = JSValueToBoolean(context, value);
+    return true;
 }
 
-void ScriptKeyboard::GetKeyCount(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptReturn(keyStateSize);
+JSStaticValue ScriptMouseProperties[] = {
+    {"x", ScriptMouseGetX, ScriptMouseSetX, kJSPropertyAttributeDontDelete},
+    {"y", ScriptMouseGetY, ScriptMouseSetY, kJSPropertyAttributeDontDelete},
+    {"isFixed", ScriptMouseGetIsFixed, ScriptMouseSetIsFixed, kJSPropertyAttributeDontDelete},
+    {0, 0, 0, 0}
+};
+
+JSStaticFunction ScriptMouseMethods[] = {
+    {0, 0, 0}
+};
+
+ScriptClassDefinition(Mouse, ScriptMouseProperties, ScriptMouseMethods);
+
+
+
+static JSValueRef ScriptKeyboardGetKeyCount(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, keyStateSize);
 }
 
-void ScriptKeyboard::IsKeyPressed(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    if(args.Length() < 1 || !args[0]->IntegerValue() || args[0]->IntegerValue() >= keyStateSize)
-        return ScriptException("Keyboard isKeyPressed(): Invalid argument");
-    ScriptReturn(keyState[args[0]->IntegerValue()]);
+static JSValueRef ScriptKeyboardIsKeyPressed(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    if(argc != 1 || !JSValueIsNumber(context, argv[0]))
+        return ScriptException(context, exception, "Keyboard isKeyPressed(): Expected Number");
+    unsigned int key = JSValueToNumber(context, argv[0], NULL);
+    if(key >= keyStateSize)
+        return ScriptException(context, exception, "Keyboard isKeyPressed(): Out of bounds");
+    return JSValueMakeBoolean(context, keyState[key]);
 }
 
-ScriptKeyboard::ScriptKeyboard() :ScriptClass("Keyboard", Constructor) {
-    ScriptScope();
-    
-    ScriptMethod(*functionTemplate, "getKeyCount", GetKeyCount);
-    ScriptMethod(*functionTemplate, "isKeyPressed", IsKeyPressed);
-}
+JSStaticValue ScriptKeyboardProperties[] = {
+    {"keyCount", ScriptKeyboardGetKeyCount, 0, ScriptMethodAttributes},
+    {0, 0, 0, 0}
+};
+
+JSStaticFunction ScriptKeyboardMethods[] = {
+    {"isKeyPressed", ScriptKeyboardIsKeyPressed, ScriptMethodAttributes},
+    {0, 0, 0}
+};
+
+ScriptClassDefinition(Keyboard, ScriptKeyboardProperties, ScriptKeyboardMethods);

@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 11.11.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #include "AppMain.h"
@@ -279,7 +279,7 @@ void ObjectManager::gameTick() {
     //Script Animations
     scriptManager->gameTick();
     
-    levelManager.mainScript->callFunction("ongametick", false, 0, NULL);
+    scriptManager->mainScript->callFunction("ongametick", false, 0, NULL);
     profiler.leaveSection("Execute script: ongametick()");
 }
 
@@ -299,7 +299,7 @@ void ObjectManager::physicsTick() {
         userObjectB->handleCollision(contactManifold, userObjectA);
 	}
     
-    levelManager.mainScript->callFunction("onphysicstick", false, 0, NULL);
+    scriptManager->mainScript->callFunction("onphysicstick", false, 0, NULL);
 }
 
 void ObjectManager::drawShadowCasters() {

@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 28.02.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #ifndef GUIRect_h
@@ -31,7 +31,7 @@ class GUIView;
 
 class GUIRect {
     public:
-    v8::Persistent<v8::Object> scriptInstance; //!< The script representation
+    JSObjectRef scriptInstance; //!< The script representation
     GUIView* parent;
     bool visible;
     int width, height, posX, posY;

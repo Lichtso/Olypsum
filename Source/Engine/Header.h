@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 04.03.14.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #ifndef Header_h
@@ -92,6 +92,6 @@
 #include <bulletPhysics/src/BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolverVertexBuffer_OpenGL.h>
 #include <bulletPhysics/src/BulletMultiThreaded/GpuSoftBodySolvers/OpenCL/btSoftBodySolverOutputCLtoGL.h>
 #include <netLink/include/netLink.h>
-#include <v8/include/v8.h>
+#include <JavaScriptCore/JavaScript.h>
 
 #endif

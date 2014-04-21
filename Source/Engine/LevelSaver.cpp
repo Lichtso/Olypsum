@@ -3,7 +3,7 @@
 //  Olypsum
 //
 //  Created by Alexander Meißner on 30.12.12.
-//  Copyright (c) 2012 Gamefortec. All rights reserved.
+//  Copyright (c) 2014 Gamefortec. All rights reserved.
 //
 
 #include "AppMain.h"
@@ -31,9 +31,7 @@ void LevelSaver::pushObject(BaseObject* object) {
     objectCounter ++;
 }
 
-bool LevelSaver::saveLevel(v8::Handle<v8::Value> localData, v8::Handle<v8::Value> globalData, v8::Handle<v8::Value> description) {
-    ScriptScope();
-    
+bool LevelSaver::saveLevel(JSContextRef context, JSValueRef localData, JSValueRef globalData, JSValueRef description) {
     rapidxml::xml_document<xmlUsedCharType> doc;
     rapidxml::xml_node<xmlUsedCharType>* container = doc.allocate_node(rapidxml::node_element);
     container->name("Container");
@@ -44,7 +42,7 @@ bool LevelSaver::saveLevel(v8::Handle<v8::Value> localData, v8::Handle<v8::Value
     rapidxml::xml_node<xmlUsedCharType>* node = doc.allocate_node(rapidxml::node_element);
     node->name("Level");
     container->append_node(node);
-    scriptManager->writeCdataXMLNode(doc, node, "Data", localData);
+    scriptManager->writeCdataXMLNode(doc, node, "Data", context, localData);
     rapidxml::xml_node<xmlUsedCharType>* parameterNode = doc.allocate_node(rapidxml::node_element);
     parameterNode->name("Gravity");
     btVector3 gravity = objectManager.physicsWorld->getGravity();
@@ -106,7 +104,7 @@ bool LevelSaver::saveLevel(v8::Handle<v8::Value> localData, v8::Handle<v8::Value
     node = doc.first_node("Status");
     node->first_node("EngineVersion")->first_attribute()->value(engineVersion);
     node->first_node("Level")->first_attribute()->value(levelManager.levelContainer.c_str());
-    scriptManager->writeCdataXMLNode(doc, node, "Data", globalData);
-    scriptManager->writeCdataXMLNode(doc, node, "Description", description);
+    scriptManager->writeCdataXMLNode(doc, node, "Data", context, globalData);
+    scriptManager->writeCdataXMLNode(doc, node, "Description", context, description);
     return writeXmlFile(doc, statusFilePath, true);
 }
