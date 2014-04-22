@@ -191,8 +191,7 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
     }
     
     mainFBO.init();
-    if(scriptManager)
-        scriptManager->clean();
+    if(scriptManager) scriptManager->clean();
     scriptManager.reset(new ScriptManager());
     scriptManager->mainScript = fileManager.getResourceByPath<ScriptFile>(package, "Main");
     

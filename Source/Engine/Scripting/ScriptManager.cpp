@@ -44,15 +44,15 @@ void initScriptClasses() {
     ScriptInitClassWithParent(SpotLight, LightObject);
     
     ScriptInitClassWithParent(BaseLink, BaseClass);
-    //ScriptInitClassWithParent(BoneLink, BaseLink);
-    //ScriptInitClassWithParent(TransformLink, BaseLink);
+    ScriptInitClassWithParent(BoneLink, BaseLink);
+    ScriptInitClassWithParent(TransformLink, BaseLink);
     ScriptInitClassWithParent(PhysicLink, BaseLink);
-    //ScriptInitClassWithParent(ConeTwistPhysicLink, PhysicLink);
-    //ScriptInitClassWithParent(Dof6PhysicLink, PhysicLink);
-    //ScriptInitClassWithParent(GearPhysicLink, PhysicLink);
-    //ScriptInitClassWithParent(HingePhysicLink, PhysicLink);
-    //ScriptInitClassWithParent(PointPhysicLink, PhysicLink);
-    //ScriptInitClassWithParent(SliderPhysicLink, PhysicLink);
+    ScriptInitClassWithParent(ConeTwistPhysicLink, PhysicLink);
+    ScriptInitClassWithParent(Dof6PhysicLink, PhysicLink);
+    ScriptInitClassWithParent(GearPhysicLink, PhysicLink);
+    ScriptInitClassWithParent(HingePhysicLink, PhysicLink);
+    ScriptInitClassWithParent(PointPhysicLink, PhysicLink);
+    ScriptInitClassWithParent(SliderPhysicLink, PhysicLink);
     
     /*ScriptInitClass(GUIRect);
     ScriptInitClassWithParent(GUIView, GUIRect);
@@ -122,6 +122,7 @@ ScriptManager::ScriptManager() {
     ScriptAddSingleton(Vector3);
     ScriptAddSingleton(Quaternion);
     ScriptAddSingleton(Matrix4);
+    
     ScriptAddSingleton(BaseClass);
     ScriptAddSingleton(BaseObject);
     ScriptAddSingleton(PhysicObject);
@@ -135,8 +136,31 @@ ScriptManager::ScriptManager() {
     ScriptAddSingleton(DirectionalLight);
     ScriptAddSingleton(SpotLight);
     ScriptAddSingleton(PositionalLight);
+    
     ScriptAddSingleton(BaseLink);
+    ScriptAddSingleton(BoneLink);
+    ScriptAddSingleton(TransformLink);
     ScriptAddSingleton(PhysicLink);
+    ScriptAddSingleton(ConeTwistPhysicLink);
+    ScriptAddSingleton(Dof6PhysicLink);
+    ScriptAddSingleton(GearPhysicLink);
+    ScriptAddSingleton(HingePhysicLink);
+    ScriptAddSingleton(PointPhysicLink);
+    ScriptAddSingleton(SliderPhysicLink);
+    
+    //ScriptAddSingleton(GUIRect);
+    //ScriptAddSingleton(GUIView);
+    //ScriptAddSingleton(GUIFramedView);
+    //ScriptAddSingleton(GUIScreenView);
+    //ScriptAddSingleton(GUIScrollView);
+    //ScriptAddSingleton(GUIButton);
+    //ScriptAddSingleton(GUICheckBox);
+    //ScriptAddSingleton(GUISlider);
+    //ScriptAddSingleton(GUITabs);
+    //ScriptAddSingleton(GUITextField);
+    //ScriptAddSingleton(GUIImage);
+    //ScriptAddSingleton(GUILabel);
+    //ScriptAddSingleton(GUIProgressBar);
     
     ScriptAddSingleton(Animation);
     ScriptAddSingleton(Intersection);
@@ -146,18 +170,11 @@ ScriptManager::ScriptManager() {
 }
 
 ScriptManager::~ScriptManager() {
-    //for(auto iterator : animations)
-    //    delete iterator.second;
     JSGlobalContextRelease(globalContext);
     JSContextGroupRelease(contextGroup);
 }
 
 void ScriptManager::gameTick() {
-    /*foreach_e(animations, iterator)
-        if(iterator->second->gameTick(iterator->first)) {
-            delete iterator->second;
-            animations.erase(iterator);
-        }*/
     auto timeNow = getTime();
     foreach_e(timers, iterator)
         if((*iterator)->timeNext < timeNow && (*iterator)->gameTick(timeNow)) {

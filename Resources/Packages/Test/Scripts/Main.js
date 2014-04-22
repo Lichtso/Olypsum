@@ -1,3 +1,5 @@
+var Cam = Engine.getScript('Cam');
+
 exports.explosion = function(object) {
 	object.integrity = 0.0;
 	if(object == exports.grabbedObject)
@@ -64,7 +66,6 @@ exports.onpause = function(paused) {
 
 exports.ongametick = function() {
 	if(Engine.gamePaused) return;
-	var Cam = Engine.getScript('Cam');
     
 	var transform = Cam.camObject.transformation(),
 		speed = Animation.factor*5.0;
@@ -122,7 +123,7 @@ exports.onmousewheel = function(deltaX, deltaY) {
 };
 
 exports.onmousedown = function() {
-	var transform = Engine.getScript('Cam').camObject.transformation();
+	var transform = Cam.camObject.transformation();
 	var hits = Intersection.rayCast(transform.w(), transform.z().mult(-100.0), 0xFFFF, true);
 	if(hits.objects.length == 0 || !hits.objects[0].mass)
 		exports.grabbedObject = null;

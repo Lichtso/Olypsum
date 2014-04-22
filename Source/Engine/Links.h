@@ -55,18 +55,15 @@ class BaseLink : public BaseClass {
     virtual rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
 
-//! A BaseLink with a btTypedConstraint
-class PhysicLink : public BaseLink {
-    ~PhysicLink();
+//! A BaseLink for skeletal animation
+class BoneLink : public BaseLink {
     public:
-    btTypedConstraint* constraint;
-    //! Enables/Disables collisions between the linked objects
-    void setCollisionDisabled(bool collisionDisabled);
-    //! Returns if collisions between the linked objects are disabled
-    bool isCollisionDisabled();
+    Bone* bone; //!< Bone which applies the transformation
+    //! Gets a bone by the name in the model of object a
+    Bone* getBoneByName(const std::string& name);
     void gameTick();
-    void removeClean();
-    bool init(LinkInitializer& initializer, btTypedConstraint* constraint);
+    bool isAttachingIsValid(LinkInitializer& initializer);
+    bool init(LinkInitializer& initializer, Bone* bone);
     bool init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
@@ -82,15 +79,18 @@ class TransformLink : public BaseLink {
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };
 
-//! A BaseLink for skeletal animation
-class BoneLink : public BaseLink {
+//! A BaseLink with a btTypedConstraint
+class PhysicLink : public BaseLink {
+    ~PhysicLink();
     public:
-    Bone* bone; //!< Bone which applies the transformation
-    //! Gets a bone by the name in the model of object a
-    Bone* getBoneByName(const char* name);
+    btTypedConstraint* constraint;
+    //! Enables/Disables collisions between the linked objects
+    void setCollisionDisabled(bool collisionDisabled);
+    //! Returns if collisions between the linked objects are disabled
+    bool isCollisionDisabled();
     void gameTick();
-    bool isAttachingIsValid(LinkInitializer& initializer);
-    bool init(LinkInitializer& initializer, Bone* bone);
+    void removeClean();
+    bool init(LinkInitializer& initializer, btTypedConstraint* constraint);
     bool init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver);
 };

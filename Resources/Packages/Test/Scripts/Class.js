@@ -1,3 +1,5 @@
+var Main = Engine.getScript('Main');
+
 /*exports.onload = function(data) {
 
 };
@@ -11,9 +13,9 @@ exports.oncollision = function(otherObject, posA, posB, dists, impulses) {
 	for(var i = 1; i < impulses.length; impulses ++)
 		if(impulses[i] > impulse)
 			impulse = impulses[i];
-	if(impulse < 20.0 || this.integrity <= 0.0) return;
-	Engine.getScript('Main').explosion(this);
-
+	if(impulse < 20.0 || this.integrity <= 0.0 || !Main.explosion) return;
+	Main.explosion(this);
+    
 	/*var now = new Date();
 	if(!this.spawnTimer || now.getTime() - this.spawnTimer.getTime() > 2000.0) {
 		var transform = this.transformation();

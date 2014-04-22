@@ -95,6 +95,7 @@ FileResourcePtr<FileResource> ScriptFile::load(FilePackage* _filePackage, const 
         return NULL;
     }else{
         exports = JSValueToObject(context, JSObjectGetProperty(context, globalObject, ScriptStringExports.str, NULL), NULL);
+        retainCount ++; //Deny unload
         return pointer;
     }
 }

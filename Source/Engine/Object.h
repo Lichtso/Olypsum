@@ -102,7 +102,8 @@ class SimpleObject : public BaseObject {
  @warning Don't use it directly
  */
 struct Bone {
-    btTransform relativeMat, absoluteInv;
+    btTransform relativeMat, //!< Transformation of this bone relative to its parent
+                absoluteInv; //!< Inverse of the absolute transformation
     unsigned int jointIndex; //!< The index of this Bone in the matrix array used for OpenGL
     std::string name; //!< A human readable name of this Bone found in the COLLADA-file
     std::vector<Bone*> children; //!< A array of all children of this Bone

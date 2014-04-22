@@ -90,11 +90,13 @@ static JSValueRef ScriptBaseObjectIterateLinks(JSContextRef context, JSObjectRef
     JSObjectRef callback = JSValueToObject(context, argv[0], NULL);
     if(!callback || !JSObjectIsFunction(context, callback))
         return ScriptException(context, exception, "BaseObject iterateLinks: Expected Function");
+    exception = NULL;
     BaseObject* objectPtr = getDataOfInstance<BaseObject>(instance);
     for(auto link : objectPtr->links) {
         JSValueRef args[] = { link->scriptInstance };
         JSObjectCallAsFunction(context, callback, callback, 1, args, exception);
-        return NULL;
+        if(exception)
+            return NULL;
     }
     return JSValueMakeUndefined(context);
 }

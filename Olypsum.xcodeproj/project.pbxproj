@@ -34,6 +34,7 @@
 		112672E91699BBFD000BB805 /* Links.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112672E71699BBFD000BB805 /* Links.cpp */; };
 		112672EC1699BCF1000BB805 /* TerrainObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112672EA1699BCF0000BB805 /* TerrainObject.cpp */; };
 		112BF180162AFE8100CF0C0D /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112BF17E162AFE8100CF0C0D /* Object.cpp */; };
+		112EFF8D1905DF2F00CE9BC9 /* ScriptPhysicLinks.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 112EFF8C1905DF2F00CE9BC9 /* ScriptPhysicLinks.cpp */; };
 		11329D5A16BD8A2A000CC025 /* Profiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11329D5816BD8A29000CC025 /* Profiler.cpp */; };
 		114325E218671C8800A6ADC3 /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 114325E018671C8800A6ADC3 /* Menu.cpp */; };
 		114325EC186724B000A6ADC3 /* GamesMenu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 114325E9186724B000A6ADC3 /* GamesMenu.cpp */; };
@@ -158,6 +159,7 @@
 		1129224318E80F2800BD9F21 /* city.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = city.h; sourceTree = "<group>"; };
 		112BF17E162AFE8100CF0C0D /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Object.cpp; sourceTree = "<group>"; };
 		112BF17F162AFE8100CF0C0D /* Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Object.h; sourceTree = "<group>"; };
+		112EFF8C1905DF2F00CE9BC9 /* ScriptPhysicLinks.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptPhysicLinks.cpp; sourceTree = "<group>"; };
 		11329D5816BD8A29000CC025 /* Profiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Profiler.cpp; sourceTree = "<group>"; };
 		11329D5916BD8A2A000CC025 /* Profiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Profiler.h; sourceTree = "<group>"; };
 		114325E018671C8800A6ADC3 /* Menu.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Menu.cpp; path = Menu/Menu.cpp; sourceTree = "<group>"; };
@@ -535,6 +537,7 @@
 				112307F3171462E0001167DF /* ScriptParticlesObject.cpp */,
 				112307F61718A082001167DF /* ScriptLightObject.cpp */,
 				11BCD05E1756686900939274 /* ScriptLinks.cpp */,
+				112EFF8C1905DF2F00CE9BC9 /* ScriptPhysicLinks.cpp */,
 				11623856171DF1050027561B /* ScriptGUI.h */,
 				11623855171DF1050027561B /* ScriptGUIRect.cpp */,
 				1178F6B517209036006EAE7D /* ScriptGUIView.cpp */,
@@ -661,6 +664,7 @@
 				11FE8AB216B5A3F400B682D0 /* ScriptManager.cpp in Sources */,
 				11A6811F16B96CFC000E4029 /* ScriptLinearAlgebra.cpp in Sources */,
 				11329D5A16BD8A2A000CC025 /* Profiler.cpp in Sources */,
+				112EFF8D1905DF2F00CE9BC9 /* ScriptPhysicLinks.cpp in Sources */,
 				117CBA9C16EBDC6800307B94 /* ScriptObject.cpp in Sources */,
 				11AD22DB16FCE77200B9FB12 /* main.cpp in Sources */,
 				114325EE186724B000A6ADC3 /* OptionsMenu.cpp in Sources */,

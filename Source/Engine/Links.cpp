@@ -78,7 +78,7 @@ bool BaseLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* leve
     
     initializer.object[0] = levelLoader->getObjectLinking(initializer.index[0]);
     initializer.object[1] = levelLoader->getObjectLinking(initializer.index[1]);
-    //ScriptInstance(scriptBaseLink);
+    ScriptInstance(ScriptBaseLink);
     
     return init(initializer);
 }
@@ -97,6 +97,125 @@ rapidxml::xml_node<xmlUsedCharType>* BaseLink::write(rapidxml::xml_document<xmlU
     attribute->name("indexB");
     attribute->value(doc.allocate_string(stringOf(linkSaver->index[1]).c_str()));
     objectNode->append_attribute(attribute);
+    return node;
+}
+
+
+
+Bone* BoneLink::getBoneByName(const std::string& name) {
+    Skeleton* skeleton = ((RigidObject*)a)->model->skeleton;
+    if(skeleton) return NULL;
+    auto iterator = skeleton->bones.find(name);
+    if(iterator == skeleton->bones.end()) return NULL;
+    return iterator->second;
+}
+
+void BoneLink::gameTick() {
+    ((RigidObject*)a)->skeletonPose.get()[bone->jointIndex] = b->getTransformation() * bone->absoluteInv;
+}
+
+bool BoneLink::isAttachingIsValid(LinkInitializer& initializer) {
+    if(!BaseLink::isAttachingIsValid(initializer)) return false;
+    if(!dynamic_cast<RigidObject*>(initializer.object[0])) {
+        log(error_log, "Tried to attach a BoneLink to non RigidObject as parent.");
+        return false;
+    }
+    foreach_e(initializer.object[1]->links, iterator)
+    if(*iterator != this && dynamic_cast<BoneLink*>(*iterator)) {
+        log(error_log, "Tried to attach a BoneLink to a child which already got a BoneLink.");
+        return false;
+    }
+    return true;
+}
+
+bool BoneLink::init(LinkInitializer& initializer, Bone* _bone) {
+    if(!BaseLink::init(initializer)) return false;
+    bone = _bone;
+    return true;
+}
+
+bool BoneLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+    if(!BaseLink::init(node, levelLoader)) return false;
+    
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("bone");
+    if(!attribute) {
+        log(error_log, "Tried to construct BoneLink without \"bone\"-attribute.");
+        removeClean();
+        return false;
+    }
+    bone = getBoneByName(attribute->value());
+    
+    ScriptInstance(ScriptBoneLink);
+    return true;
+}
+
+rapidxml::xml_node<xmlUsedCharType>* BoneLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver) {
+    rapidxml::xml_node<xmlUsedCharType>* node = BaseLink::write(doc, linkSaver);
+    node->name("BoneLink");
+    
+    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
+    attribute->name("bone");
+    attribute->value(bone->name.c_str());
+    node->append_attribute(attribute);
+    return node;
+}
+
+
+
+void TransformLink::gameTick() {
+    btTransform transform = transformations[0];
+    for(unsigned int i = 1; i < transformations.size(); i ++)
+        transform *= transformations[i];
+    b->setTransformation(a->getTransformation()*transform);
+}
+
+bool TransformLink::isAttachingIsValid(LinkInitializer& initializer) {
+    if(!BaseLink::isAttachingIsValid(initializer)) return false;
+    if(dynamic_cast<MatterObject*>(initializer.object[1])) {
+        log(error_log, "Tried to attach a TransformLink to a MatterObject as child.");
+        return false;
+    }
+    foreach_e(initializer.object[1]->links, iterator)
+    if(*iterator != this && (*iterator)->b == initializer.object[1] && dynamic_cast<TransformLink*>(*iterator)) {
+        log(error_log, "Tried to attach a TransformLink to a child which already got another parent.");
+        return false;
+    }
+    return true;
+}
+
+bool TransformLink::init(LinkInitializer& initializer, const std::vector<btTransform>& _transformations) {
+    if(!BaseLink::init(initializer)) return false;
+    transformations = _transformations;
+    return true;
+}
+
+bool TransformLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
+    if(!BaseLink::init(node, levelLoader)) return false;
+    
+    rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Frame");
+    while(parameterNode) {
+        transformations.push_back(readTransformationXML(parameterNode));
+        parameterNode = parameterNode->next_sibling("Frame");
+    }
+    if(transformations.size() == 0) {
+        log(error_log, "Tried to construct TransformLink without \"Frame\"-node.");
+        removeClean();
+        return false;
+    }
+    
+    ScriptInstance(ScriptTransformLink);
+    return true;
+}
+
+rapidxml::xml_node<xmlUsedCharType>* TransformLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver) {
+    rapidxml::xml_node<xmlUsedCharType> *parameterNode, *node = BaseLink::write(doc, linkSaver);
+    node->name("TransformLink");
+    for(btTransform transformation : transformations) {
+        parameterNode = doc.allocate_node(rapidxml::node_element);
+        parameterNode->name("Frame");
+        parameterNode->append_node(writeTransformationXML(doc, transformation));
+        node->append_node(parameterNode);
+    }
     return node;
 }
 
@@ -189,7 +308,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         btVector3 pointB = vecData.getVector3();
         
         constraint = new btPoint2PointConstraint(*rigidA->getBody(), *rigidB->getBody(), pointA, pointB);
-        //ScriptInstance(scriptPointPhysicLink);
+        ScriptInstance(ScriptPointPhysicLink);
     }else if(strcmp(attribute->value(), "gear") == 0) {
         rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Axis");
         if(!parameterNode) {
@@ -220,7 +339,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         sscanf(attribute->value(), "%f", &ratio);
         
         constraint = new btGearConstraint(*rigidA->getBody(), *rigidB->getBody(), axisA, axisB, ratio);
-        //ScriptInstance(scriptGearPhysicLink);
+        ScriptInstance(ScriptGearPhysicLink);
     }else if(strcmp(attribute->value(), "hinge") == 0 || strcmp(attribute->value(), "slider") == 0) {
         parameterNode = node->first_node("Frame");
         if(!parameterNode) {
@@ -246,10 +365,10 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             frameA *= transform;
             frameB *= transform;
             constraint = hinge = new btHingeConstraint(*rigidA->getBody(), *rigidB->getBody(), frameA, frameB, true);
-            //ScriptInstance(scriptHingePhysicLink);
+            ScriptInstance(ScriptHingePhysicLink);
         }else{
             constraint = slider = new btSliderConstraint(*rigidA->getBody(), *rigidB->getBody(), frameA, frameB, true);
-            //ScriptInstance(scriptSliderPhysicLink);
+            ScriptInstance(ScriptSliderPhysicLink);
         }
         
         parameterNode = node->first_node("AngularLimit");
@@ -411,7 +530,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             }
         }else
             constraint = dof6 = new btGeneric6DofConstraint(*rigidA->getBody(), *rigidB->getBody(), frameA, frameB, true);
-        //ScriptInstance(scriptDof6PhysicLink);
+        ScriptInstance(ScriptDof6PhysicLink);
         
         parameterNode = node->first_node("AngularLimit");
         if(parameterNode) {
@@ -520,7 +639,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         
         btConeTwistConstraint* coneTwist;
         constraint = coneTwist = new btConeTwistConstraint(*rigidA->getBody(), *rigidB->getBody(), frameA, frameB);
-        //ScriptInstance(scriptConeTwistPhysicLink);
+        ScriptInstance(ScriptConeTwistPhysicLink);
         
         parameterNode = node->first_node("AngularLimit");
         if(parameterNode) {
@@ -899,124 +1018,5 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicLink::write(rapidxml::xml_document<xm
         node->append_node(parameterNode);
     }
     
-    return node;
-}
-
-
-
-void TransformLink::gameTick() {
-    btTransform transform = transformations[0];
-    for(unsigned int i = 1; i < transformations.size(); i ++)
-        transform *= transformations[i];
-    b->setTransformation(a->getTransformation()*transform);
-}
-
-bool TransformLink::isAttachingIsValid(LinkInitializer& initializer) {
-    if(!BaseLink::isAttachingIsValid(initializer)) return false;
-    if(dynamic_cast<MatterObject*>(initializer.object[1])) {
-        log(error_log, "Tried to attach a TransformLink to a MatterObject as child.");
-        return false;
-    }
-    foreach_e(initializer.object[1]->links, iterator)
-        if(*iterator != this && (*iterator)->b == initializer.object[1] && dynamic_cast<TransformLink*>(*iterator)) {
-            log(error_log, "Tried to attach a TransformLink to a child which already got another parent.");
-            return false;
-        }
-    return true;
-}
-
-bool TransformLink::init(LinkInitializer& initializer, const std::vector<btTransform>& _transformations) {
-    if(!BaseLink::init(initializer)) return false;
-    transformations = _transformations;
-    return true;
-}
-
-bool TransformLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
-    if(!BaseLink::init(node, levelLoader)) return false;
-    
-    rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Frame");
-    while(parameterNode) {
-        transformations.push_back(readTransformationXML(parameterNode));
-        parameterNode = parameterNode->next_sibling("Frame");
-    }
-    if(transformations.size() == 0) {
-        log(error_log, "Tried to construct TransformLink without \"Frame\"-node.");
-        removeClean();
-        return false;
-    }
-    
-    //ScriptInstance(scriptTransformLink);
-    return true;
-}
-
-rapidxml::xml_node<xmlUsedCharType>* TransformLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver) {
-    rapidxml::xml_node<xmlUsedCharType> *parameterNode, *node = BaseLink::write(doc, linkSaver);
-    node->name("TransformLink");
-    for(btTransform transformation : transformations) {
-        parameterNode = doc.allocate_node(rapidxml::node_element);
-        parameterNode->name("Frame");
-        parameterNode->append_node(writeTransformationXML(doc, transformation));
-        node->append_node(parameterNode);
-    }
-    return node;
-}
-
-
-
-Bone* BoneLink::getBoneByName(const char* name) {
-    Skeleton* skeleton = ((RigidObject*)a)->model->skeleton;
-    if(skeleton) return NULL;
-    auto iterator = skeleton->bones.find(name);
-    if(iterator == skeleton->bones.end()) return NULL;
-    return iterator->second;
-}
-
-void BoneLink::gameTick() {
-    ((RigidObject*)a)->skeletonPose.get()[bone->jointIndex] = b->getTransformation() * bone->absoluteInv;
-}
-
-bool BoneLink::isAttachingIsValid(LinkInitializer& initializer) {
-    if(!BaseLink::isAttachingIsValid(initializer)) return false;
-    if(!dynamic_cast<RigidObject*>(initializer.object[0])) {
-        log(error_log, "Tried to attach a BoneLink to non RigidObject as parent.");
-        return false;
-    }
-    foreach_e(initializer.object[1]->links, iterator)
-        if(*iterator != this && dynamic_cast<BoneLink*>(*iterator)) {
-            log(error_log, "Tried to attach a BoneLink to a child which already got a BoneLink.");
-            return false;
-        }
-    return true;
-}
-
-bool BoneLink::init(LinkInitializer& initializer, Bone* _bone) {
-    if(!BaseLink::init(initializer)) return false;
-    bone = _bone;
-    return true;
-}
-
-bool BoneLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
-    if(!BaseLink::init(node, levelLoader)) return false;
-    
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = node->first_attribute("bone");
-    if(!attribute) {
-        log(error_log, "Tried to construct BoneLink without \"bone\"-attribute.");
-        removeClean();
-        return false;
-    }
-    bone = getBoneByName(attribute->value());
-    
-    //ScriptInstance(scriptBoneLink);
-    return true;
-}
-
-rapidxml::xml_node<xmlUsedCharType>* BoneLink::write(rapidxml::xml_document<xmlUsedCharType>& doc, LinkInitializer* linkSaver) {
-    rapidxml::xml_node<xmlUsedCharType>* node = BaseLink::write(doc, linkSaver);
-    node->name("BoneLink");
-    
-    rapidxml::xml_attribute<xmlUsedCharType>* attribute = doc.allocate_attribute();
-    attribute->name("bone");
-    attribute->value(bone->name.c_str());
-    node->append_attribute(attribute);
     return node;
 }

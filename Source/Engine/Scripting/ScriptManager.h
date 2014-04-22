@@ -68,7 +68,6 @@ class ScriptManager {
     JSGlobalContextRef globalContext;
     JSObjectRef staticObjects[ScriptStaticsCount];
     FileResourcePtr<ScriptFile> mainScript;
-    //std::unordered_map<std::string, AnimationProperty*> animations;
     std::unordered_set<AnimationTimer*> timers;
     static JSValueRef readCdataXMLNode(rapidxml::xml_node<xmlUsedCharType>* node, JSContextRef context);
     static void writeCdataXMLNode(rapidxml::xml_document<xmlUsedCharType>& doc,
