@@ -97,6 +97,8 @@ static JSValueRef ScriptGUIButtonGetState(JSContextRef context, JSObjectRef inst
             return ScriptStringHighlighted.getJSStr(context);
         case GUIButton::State::Pressed:
             return ScriptStringPressed.getJSStr(context);
+        default:
+            return ScriptException(context, exception, "GUIButton getState(): Internal error");
     }
 }
 
@@ -134,6 +136,8 @@ static JSValueRef ScriptGUIButtonGetType(JSContextRef context, JSObjectRef insta
             return ScriptStringEdit.getJSStr(context);
         case GUIButton::Type::Lockable:
             return ScriptStringLockable.getJSStr(context);
+        default:
+            return ScriptException(context, exception, "GUIButton getType(): Internal error");
     }
 }
 

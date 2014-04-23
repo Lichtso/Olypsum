@@ -51,7 +51,7 @@
     <ClCompile Include="Source\Engine\Ray3.cpp" />
     <ClCompile Include="Source\Engine\Script.cpp" />
     <ClCompile Include="Source\Engine\Scripting\ScriptAnimation.cpp" />
-    <ClCompile Include="Source\Engine\Scripting\ScriptGUIButton.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptEngine.cpp" />
     <ClCompile Include="Source\Engine\Scripting\ScriptGUIInput.cpp" />
     <ClCompile Include="Source\Engine\Scripting\ScriptGUIOutput.cpp" />
     <ClCompile Include="Source\Engine\Scripting\ScriptGUIRect.cpp" />
@@ -64,6 +64,7 @@
     <ClCompile Include="Source\Engine\Scripting\ScriptManager.cpp" />
     <ClCompile Include="Source\Engine\Scripting\ScriptObject.cpp" />
     <ClCompile Include="Source\Engine\Scripting\ScriptParticlesObject.cpp" />
+    <ClCompile Include="Source\Engine\Scripting\ScriptPhysicLinks.cpp" />
     <ClCompile Include="Source\Engine\Scripting\ScriptSimpleObject.cpp" />
     <ClCompile Include="Source\Engine\Scripting\ScriptVisualObject.cpp" />
     <ClCompile Include="Source\Engine\ShaderProgram.cpp" />
@@ -79,7 +80,7 @@
     <ClInclude Include="Source\Engine\AppMain.h" />
     <ClInclude Include="Source\Engine\Audio.h" />
     <ClInclude Include="Source\Engine\CamObject.h" />
-    <ClCompile Include="Source\Engine\cityhash\city.h" />
+    <ClInclude Include="Source\Engine\cityhash\city.h" />
     <ClInclude Include="Source\Engine\FBO.h" />
     <ClInclude Include="Source\Engine\FileManager.h" />
     <ClInclude Include="Source\Engine\GUI\GUIButton.h" />
@@ -114,9 +115,14 @@
     <ClInclude Include="Source\Engine\rapidxml-1.13\rapidxml_iterators.hpp" />
     <ClInclude Include="Source\Engine\rapidxml-1.13\rapidxml_print.hpp" />
     <ClInclude Include="Source\Engine\rapidxml-1.13\rapidxml_utils.hpp" />
+    <ClInclude Include="Source\Engine\rapidxml\rapidxml.hpp" />
+    <ClInclude Include="Source\Engine\rapidxml\rapidxml_iterators.hpp" />
+    <ClInclude Include="Source\Engine\rapidxml\rapidxml_print.hpp" />
+    <ClInclude Include="Source\Engine\rapidxml\rapidxml_utils.hpp" />
     <ClInclude Include="Source\Engine\Ray3.h" />
     <ClInclude Include="Source\Engine\Script.h" />
     <ClInclude Include="Source\Engine\Scripting\ScriptAnimation.h" />
+    <ClInclude Include="Source\Engine\Scripting\ScriptGUI.h" />
     <ClInclude Include="Source\Engine\Scripting\ScriptGUIButton.h" />
     <ClInclude Include="Source\Engine\Scripting\ScriptGUIInput.h" />
     <ClInclude Include="Source\Engine\Scripting\ScriptGUIOutput.h" />
@@ -190,7 +196,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;VERSION="0.4.3";_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;VERSION="0.5.0";_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:/Program Files (x86)/Intel/OpenCL SDK/3.0/include;Libraries;Libraries/libogg/include;Libraries/glew/include;Libraries/SDL2/include;Libraries/bulletPhysics/src;Source/Engine</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
@@ -210,7 +216,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;VERSION="0.4.3";_CRT_SECURE_NO_WARNINGS;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;VERSION="0.5.0";_CRT_SECURE_NO_WARNINGS;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>C:/Program Files (x86)/Intel/OpenCL SDK/3.0/include;Libraries;Libraries/libogg/include;Libraries/glew/include;Libraries/SDL2/include;Libraries/bulletPhysics/src;Source/Engine</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>

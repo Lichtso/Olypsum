@@ -22,6 +22,8 @@ template<typename T> static JSValueRef ScriptGUIGetSizeAlignment(JSContextRef co
             return ScriptStringHeight.getJSStr(context);
         case GUISizeAlignment::All:
             return ScriptStringAll.getJSStr(context);
+        default:
+            return ScriptException(context, exception, "GUI getSizeAlignment(): Internal error");
     }
 }
 
@@ -63,6 +65,8 @@ template<typename T> static JSValueRef ScriptGUIGetOrientation(JSContextRef cont
             return ScriptStringVertical.getJSStr(context);
         case GUIOrientation::Horizontal:
             return ScriptStringHorizontal.getJSStr(context);
+        default:
+            return ScriptException(context, exception, "GUI getOrientation(): Internal error");
     }
 }
 

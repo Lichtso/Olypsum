@@ -22,5 +22,6 @@ Skeletal animation
 Performance issue of explosions
 
 Bugs:
+Windows material refraction: sampler2DRect sampler3;
 Parallax Occlusion / Position
 Ortho projection / Logarithmic depth buffer

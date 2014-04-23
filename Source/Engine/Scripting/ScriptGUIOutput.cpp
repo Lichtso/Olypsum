@@ -17,6 +17,8 @@ static JSValueRef ScriptGUILabelGetTextAlignment(JSContextRef context, JSObjectR
             return ScriptStringCenter.getJSStr(context);
         case GUILabel::TextAlignment::Right:
             return ScriptStringRight.getJSStr(context);
+        default:
+            return ScriptException(context, exception, "GUILabel getTextAlignment(): Internal error");
     }
 }
 
