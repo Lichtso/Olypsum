@@ -76,7 +76,7 @@ CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* lev
     if(!mainCam) mainCam = this;
     
     objectManager.simpleObjects.insert(this);
-    ScriptInstance(ScriptCamObject);
+    ScriptInstance(CamObject);
 }
 
 void CamObject::removeClean() {

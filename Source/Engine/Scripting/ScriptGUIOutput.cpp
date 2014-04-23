@@ -7,186 +7,182 @@
 //
 
 #include "ScriptManager.h"
-/*
-void ScriptGUILabel::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    
-    if(args.Length() != 1 || !scriptGUIView->isCorrectInstance(args[0]))
-        return ScriptException("GUILabel Constructor: Invalid argument");
-    
-    GUILabel* objectPtr = new GUILabel();
-    ScriptReturn(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
-}
 
-void ScriptGUILabel::GetTextAlignment(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
+static JSValueRef ScriptGUILabelGetTextAlignment(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    auto objectPtr = getDataOfInstance<GUILabel>(instance);
     switch(objectPtr->textAlignment) {
         case GUILabel::TextAlignment::Left:
-            ScriptReturn("left");
-        case GUILabel::TextAlignment::Middle:
-            ScriptReturn("middle");
+            return ScriptStringLeft.getJSStr(context);
+        case GUILabel::TextAlignment::Center:
+            return ScriptStringCenter.getJSStr(context);
         case GUILabel::TextAlignment::Right:
-            ScriptReturn("right");
+            return ScriptStringRight.getJSStr(context);
     }
 }
 
-void ScriptGUILabel::SetTextAlignment(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsString()) return;
-    GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
-    const char* str = cStrOfV8(value);
-    if(strcmp(str, "left") == 0)
+static bool ScriptGUILabelSetTextAlignment(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsString(context, value)) {
+        ScriptException(context, exception, "GUILabel setTextAlignment(): Expected String");
+        return false;
+    }
+    ScriptString strValue(context, value);
+    std::string str = strValue.getStdStr();
+    auto objectPtr = getDataOfInstance<GUILabel>(instance);
+    if(str == "left")
         objectPtr->textAlignment = GUILabel::TextAlignment::Left;
-    else if(strcmp(str, "middle") == 0)
-        objectPtr->textAlignment = GUILabel::TextAlignment::Middle;
-    else if(strcmp(str, "right") == 0)
+    else if(str == "center")
+        objectPtr->textAlignment = GUILabel::TextAlignment::Center;
+    else if(str == "right")
         objectPtr->textAlignment = GUILabel::TextAlignment::Right;
+    else {
+        ScriptException(context, exception, "GUILabel setTextAlignment(): Invalid value");
+        return false;
+    }
+    return true;
 }
 
-void ScriptGUILabel::GetText(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
-    ScriptReturn(objectPtr->text.c_str());
+static JSValueRef ScriptGUILabelViewGetText(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    ScriptString strText(getDataOfInstance<GUILabel>(instance)->text);
+    return strText.getJSStr(context);
 }
 
-void ScriptGUILabel::SetText(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsString()) return;
-    GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
-    objectPtr->text = stdStrOfV8(value);
+static bool ScriptGUILabelViewSetText(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsString(context, value)) {
+        ScriptException(context, exception, "GUILabel setText(): Expected String");
+        return false;
+    }
+    ScriptString strText(context, value);
+    getDataOfInstance<GUILabel>(instance)->text = strText.getStdStr();
+    return true;
 }
 
-void ScriptGUILabel::GetFont(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
+static JSValueRef ScriptGUILabelViewGetFont(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    auto objectPtr = getDataOfInstance<GUILabel>(instance);
     std::string name;
     FilePackage* filePackage = fileManager.findResource<TextFont>(objectPtr->font, name);
-    if(filePackage)
-        ScriptReturn(fileManager.getPathOfResource(filePackage, name).c_str());
+    if(!filePackage)
+        return ScriptException(context, exception, "GUILabel getFont(): Internal error");
+    ScriptString strFont(fileManager.getPathOfResource(filePackage, name));
+    return strFont.getJSStr(context);
 }
 
-void ScriptGUILabel::SetFont(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsString()) return;
-    GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
-    auto font = fileManager.getResourceByPath<TextFont>(levelManager.levelPackage, stdStrOfV8(value));
-    if(font) objectPtr->font = font;
-}
-
-void ScriptGUILabel::GetFontHeight(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
-    ScriptReturn(objectPtr->fontHeight);
-}
-
-void ScriptGUILabel::SetFontHeight(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsInt32() || value->IntegerValue() < 0) return;
-    GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
-    objectPtr->fontHeight = value->IntegerValue();
-}
-
-void ScriptGUILabel::AccessColor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    GUILabel* objectPtr = getDataOfInstance<GUILabel>(args.This());
-    if(args.Length() == 1 && scriptQuaternion->isCorrectInstance(args[0])) {
-        objectPtr->color = Color4(scriptQuaternion->getDataOfInstance(args[0]));
-        ScriptReturn(args[0]);
+static bool ScriptGUILabelViewSetFont(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsString(context, value)) {
+        ScriptException(context, exception, "GUILabel setFont(): Expected String");
+        return false;
+    }
+    auto objectPtr = getDataOfInstance<GUILabel>(instance);
+    ScriptString strFont(context, value);
+    auto font = fileManager.getResourceByPath<TextFont>(levelManager.levelPackage, strFont.getStdStr());
+    if(font) {
+        objectPtr->font = font;
+        return true;
     }else
-        ScriptReturn(scriptQuaternion->newInstance(objectPtr->color.getQuaternion()));
+        return false;
 }
 
-ScriptGUILabel::ScriptGUILabel() :ScriptGUIRect("GUILabel", Constructor) {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    ScriptAccessor(objectTemplate, "sizeAlignment", GetSizeAlignment<GUILabel>, SetSizeAlignment<GUILabel>);
-    ScriptAccessor(objectTemplate, "textAlignment", GetTextAlignment, SetTextAlignment);
-    ScriptAccessor(objectTemplate, "text", GetText, SetText);
-    ScriptAccessor(objectTemplate, "font", GetFont, SetFont);
-    ScriptAccessor(objectTemplate, "fontHeight", GetFontHeight, SetFontHeight);
-    ScriptMethod(objectTemplate, "color", AccessColor);
-    
-    ScriptInherit(scriptGUIRect);
+static JSValueRef ScriptGUILabelViewGetFontHeight(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<GUILabel>(instance)->fontHeight);
 }
 
-
-
-void ScriptGUIProgressBar::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    
-    if(args.Length() != 1 || !scriptGUIView->isCorrectInstance(args[0]))
-        return ScriptException("GUIProgressBar Constructor: Invalid argument");
-    
-    GUIProgressBar* objectPtr = new GUIProgressBar();
-    ScriptReturn(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
+static bool ScriptGUILabelViewSetFontHeight(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "GUILabel setFontHeight(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    auto objectPtr = getDataOfInstance<GUILabel>(instance);
+    if(isfinite(numberValue)) {
+        objectPtr->fontHeight = numberValue;
+        return true;
+    }else
+        return false;
 }
 
-void ScriptGUIProgressBar::GetValue(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    GUIProgressBar* objectPtr = getDataOfInstance<GUIProgressBar>(args.This());
-    ScriptReturn(objectPtr->value);
+static JSValueRef ScriptGUILabelViewAccessColor(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    auto objectPtr = getDataOfInstance<GUILabel>(instance);
+    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptQuaternion])) {
+        objectPtr->color = getScriptQuaternion(context, argv[0]);
+        return argv[0];
+    }else
+        return newScriptQuaternion(context, objectPtr->color.getQuaternion());
 }
 
-void ScriptGUIProgressBar::SetValue(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->NumberValue()) return;
-    GUIProgressBar* objectPtr = getDataOfInstance<GUIProgressBar>(args.This());
-    objectPtr->value = clamp(value->NumberValue(), 0.0, 1.0);
+JSStaticValue ScriptGUILabelProperties[] = {
+    {"sizeAlignment", ScriptGUIGetSizeAlignment<GUILabel>, ScriptGUISetSizeAlignment<GUILabel>, kJSPropertyAttributeDontDelete},
+    {"textAlignment", ScriptGUILabelGetTextAlignment, ScriptGUILabelSetTextAlignment, kJSPropertyAttributeDontDelete},
+    {"text", ScriptGUILabelViewGetText, ScriptGUILabelViewSetText, kJSPropertyAttributeDontDelete},
+    {"font", ScriptGUILabelViewGetFont, ScriptGUILabelViewSetFont, kJSPropertyAttributeDontDelete},
+    {"fontHeight", ScriptGUILabelViewGetFontHeight, ScriptGUILabelViewSetFontHeight, kJSPropertyAttributeDontDelete},
+    {0, 0, 0, 0}
+};
+
+JSStaticFunction ScriptGUILabelMethods[] = {
+    {"color", ScriptGUILabelViewAccessColor, ScriptMethodAttributes},
+    {0, 0, 0}
+};
+
+ScriptClassDefinition(GUILabel, ScriptGUILabelProperties, ScriptGUILabelMethods);
+
+
+
+static JSValueRef ScriptGUIProgressBarGetValue(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<GUIProgressBar>(instance)->value);
 }
 
-ScriptGUIProgressBar::ScriptGUIProgressBar() :ScriptGUIRect("GUIProgressBar", Constructor) {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    objectTemplate->SetAccessor(ScriptString("orientation"), GetOrientation<GUIProgressBar>, SetOrientationDual<GUIProgressBar>);
-    objectTemplate->SetAccessor(ScriptString("value"), GetValue, SetValue);
-    
-    ScriptInherit(scriptGUIRect);
+static bool ScriptGUIProgressBarSetValue(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "GUILabel setValue(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    auto objectPtr = getDataOfInstance<GUIProgressBar>(instance);
+    if(isfinite(numberValue)) {
+        objectPtr->value = clamp(numberValue, 0.0, 1.0);
+        return true;
+    }else
+        return false;
 }
 
+JSStaticValue ScriptGUIProgressBarProperties[] = {
+    {"orientation", ScriptGUIGetOrientation<GUIProgressBar>, ScriptGUISetOrientationDual<GUIProgressBar>, kJSPropertyAttributeDontDelete},
+    {"value", ScriptGUIProgressBarGetValue, ScriptGUIProgressBarSetValue, kJSPropertyAttributeDontDelete},
+    {0, 0, 0, 0}
+};
+
+ScriptClassDefinition(GUIProgressBar, ScriptGUIProgressBarProperties, NULL);
 
 
-void ScriptGUIImage::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    
-    if(args.Length() != 2 || !scriptGUIView->isCorrectInstance(args[0]) || !args[1]->IsString())
-        return ScriptException("GUIImage Constructor: Invalid argument");
-    
-    auto image = fileManager.getResourceByPath<Texture>(levelManager.levelPackage, stdStrOfV8(args[1]));
-    if(!image)
-        return ScriptException("GUIImage Constructor: Invalid argument");
-    
-    GUIImage* objectPtr = new GUIImage();
-    objectPtr->texture = image;
-    ScriptReturn(initInstance(args.This(), getDataOfInstance<GUIView>(args[0]), objectPtr));
-}
 
-void ScriptGUIImage::GetImage(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    GUIImage* objectPtr = getDataOfInstance<GUIImage>(args.This());
+static JSValueRef ScriptGUIImageGetImage(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    auto objectPtr = getDataOfInstance<GUIImage>(instance);
     std::string name;
     FilePackage* filePackage = fileManager.findResource<Texture>(objectPtr->texture, name);
-    if(filePackage)
-        ScriptReturn(fileManager.getPathOfResource(filePackage, name).c_str());
+    if(!filePackage)
+        return ScriptException(context, exception, "GUIImage getImage(): Internal error");
+    ScriptString strFont(fileManager.getPathOfResource(filePackage, name));
+    return strFont.getJSStr(context);
 }
 
-void ScriptGUIImage::SetImage(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsString()) return;
-    GUIImage* objectPtr = getDataOfInstance<GUIImage>(args.This());
-    auto image = fileManager.getResourceByPath<Texture>(levelManager.levelPackage, stdStrOfV8(value));
-    if(image) objectPtr->texture = image;
+static bool ScriptGUIImageSetImage(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsString(context, value)) {
+        ScriptException(context, exception, "GUIImage setImage(): Expected String");
+        return false;
+    }
+    auto objectPtr = getDataOfInstance<GUIImage>(instance);
+    ScriptString strFont(context, value);
+    auto texture = fileManager.getResourceByPath<Texture>(levelManager.levelPackage, strFont.getStdStr());
+    if(texture) {
+        objectPtr->texture = texture;
+        return true;
+    }else
+        return false;
 }
 
-ScriptGUIImage::ScriptGUIImage() :ScriptGUIRect("GUIImage", Constructor) {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    ScriptAccessor(objectTemplate, "sizeAlignment", GetSizeAlignment<GUIImage>, SetSizeAlignment<GUIImage>);
-    ScriptAccessor(objectTemplate, "image", GetImage, SetImage);
-    
-    ScriptInherit(scriptGUIRect);
-}
-*/
+JSStaticValue ScriptGUIImageProperties[] = {
+    {"sizeAlignment", ScriptGUIGetSizeAlignment<GUIImage>, ScriptGUISetSizeAlignment<GUIImage>, kJSPropertyAttributeDontDelete},
+    {"image", ScriptGUIImageGetImage, ScriptGUIImageSetImage, kJSPropertyAttributeDontDelete},
+    {0, 0, 0, 0}
+};
+
+ScriptClassDefinition(GUIImage, ScriptGUIImageProperties, NULL);

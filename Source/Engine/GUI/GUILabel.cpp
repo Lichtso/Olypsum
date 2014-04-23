@@ -9,7 +9,7 @@
 #include "../Menu/Menu.h"
 
 GUILabel::GUILabel() :color(Color4(0.0, 1.0)), font(fileManager.getResourceByPath<TextFont>(NULL, "Core/font")),
-    textAlignment(TextAlignment::Middle), sizeAlignment(GUISizeAlignment::All) {
+    textAlignment(TextAlignment::Center), sizeAlignment(GUISizeAlignment::All) {
     fontHeight = menu.screenView->height*0.04;
     height = fontHeight >> 1;
 }
@@ -78,7 +78,7 @@ void GUILabel::updateContent() {
             case TextAlignment::Left:
                 line->posX = line->content.width-width;
                 break;
-            case TextAlignment::Middle:
+            case TextAlignment::Center:
                 line->posX = 0;
                 break;
             case TextAlignment::Right:
@@ -120,7 +120,7 @@ void GUILabel::getPosOfChar(unsigned int charIndex, unsigned int lineIndex, int&
             case TextAlignment::Left:
                 posX = -width;
             return;
-            case TextAlignment::Middle:
+            case TextAlignment::Center:
                 posX = 0;
             return;
             case TextAlignment::Right:

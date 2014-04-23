@@ -19,7 +19,7 @@ static JSValueRef ScriptParticlesObjectGetMaxParticles(JSContextRef context, JSO
 }
 
 static JSValueRef ScriptParticlesObjectGetTextures(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(instance);
+    auto objectPtr = getDataOfInstance<ParticlesObject>(instance);
     std::string name;
     FilePackage* filePackage = fileManager.findResource<Texture>(objectPtr->texture, name);
     if(filePackage) {
@@ -35,7 +35,7 @@ static bool ScriptParticlesObjectSetTextures(JSContextRef context, JSObjectRef i
         return false;
     }
     ScriptString strName(context, value);
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(instance);
+    auto objectPtr = getDataOfInstance<ParticlesObject>(instance);
     auto texture = fileManager.getResourceByPath<Texture>(levelManager.levelPackage, strName.getStdStr());
     if(texture) {
         objectPtr->texture = texture;
@@ -143,7 +143,7 @@ static bool ScriptParticlesObjectSetSizeMax(JSContextRef context, JSObjectRef in
 }
 
 static JSValueRef ScriptParticlesObjectAccessForce(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(instance);
+    auto objectPtr = getDataOfInstance<ParticlesObject>(instance);
     if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
         objectPtr->force = getScriptVector3(context, argv[0]);
         return argv[0];
@@ -152,7 +152,7 @@ static JSValueRef ScriptParticlesObjectAccessForce(JSContextRef context, JSObjec
 }
 
 static JSValueRef ScriptParticlesObjectAccessPosMin(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(instance);
+    auto objectPtr = getDataOfInstance<ParticlesObject>(instance);
     if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
         objectPtr->posMin = getScriptVector3(context, argv[0]);
         return argv[0];
@@ -161,7 +161,7 @@ static JSValueRef ScriptParticlesObjectAccessPosMin(JSContextRef context, JSObje
 }
 
 static JSValueRef ScriptParticlesObjectAccessPosMax(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(instance);
+    auto objectPtr = getDataOfInstance<ParticlesObject>(instance);
     if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
         objectPtr->posMin = getScriptVector3(context, argv[0]);
         return argv[0];
@@ -170,7 +170,7 @@ static JSValueRef ScriptParticlesObjectAccessPosMax(JSContextRef context, JSObje
 }
 
 static JSValueRef ScriptParticlesObjectAccessDirMin(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(instance);
+    auto objectPtr = getDataOfInstance<ParticlesObject>(instance);
     if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
         objectPtr->dirMin = getScriptVector3(context, argv[0]);
         return argv[0];
@@ -179,7 +179,7 @@ static JSValueRef ScriptParticlesObjectAccessDirMin(JSContextRef context, JSObje
 }
 
 static JSValueRef ScriptParticlesObjectAccessDirMax(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    ParticlesObject* objectPtr = getDataOfInstance<ParticlesObject>(instance);
+    auto objectPtr = getDataOfInstance<ParticlesObject>(instance);
     if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
         objectPtr->dirMin = getScriptVector3(context, argv[0]);
         return argv[0];

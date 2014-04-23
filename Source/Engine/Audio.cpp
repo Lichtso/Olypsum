@@ -151,7 +151,7 @@ SoundObject::SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
         setTimeOffset(time);
     }
     
-    ScriptInstance(ScriptSoundObject);
+    ScriptInstance(SoundObject);
 }
 
 SoundObject::~SoundObject() {

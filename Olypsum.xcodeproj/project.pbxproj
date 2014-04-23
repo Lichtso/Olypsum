@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1102B34C172AEF3500D6913E /* ScriptGUIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1102B34A172AEF3500D6913E /* ScriptGUIButton.cpp */; };
 		11056944190288AE002F2AFA /* ScriptIntersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11056943190288AE002F2AFA /* ScriptIntersection.cpp */; };
 		11056946190288D6002F2AFA /* ScriptEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 11056945190288D6002F2AFA /* ScriptEngine.cpp */; };
 		110E600618F7C609008AEC76 /* city.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 110E600518F7C609008AEC76 /* city.cpp */; };
@@ -131,7 +130,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1102B34A172AEF3500D6913E /* ScriptGUIButton.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptGUIButton.cpp; sourceTree = "<group>"; };
 		11056943190288AE002F2AFA /* ScriptIntersection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptIntersection.cpp; sourceTree = "<group>"; };
 		11056945190288D6002F2AFA /* ScriptEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ScriptEngine.cpp; sourceTree = "<group>"; };
 		110E600518F7C609008AEC76 /* city.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = city.cpp; sourceTree = "<group>"; };
@@ -541,9 +539,8 @@
 				11623856171DF1050027561B /* ScriptGUI.h */,
 				11623855171DF1050027561B /* ScriptGUIRect.cpp */,
 				1178F6B517209036006EAE7D /* ScriptGUIView.cpp */,
-				1199EC341723D793006BD235 /* ScriptGUIOutput.cpp */,
 				11D0C0F11727CE70004C30E9 /* ScriptGUIInput.cpp */,
-				1102B34A172AEF3500D6913E /* ScriptGUIButton.cpp */,
+				1199EC341723D793006BD235 /* ScriptGUIOutput.cpp */,
 				11FE8AB116B5A3F400B682D0 /* ScriptManager.h */,
 				11FE8AB016B5A3F400B682D0 /* ScriptManager.cpp */,
 			);
@@ -678,7 +675,6 @@
 				1199EC331722D205006BD235 /* ScriptIO.cpp in Sources */,
 				1199EC361723D795006BD235 /* ScriptGUIOutput.cpp in Sources */,
 				11D0C0F31727CE71004C30E9 /* ScriptGUIInput.cpp in Sources */,
-				1102B34C172AEF3500D6913E /* ScriptGUIButton.cpp in Sources */,
 				1188A5431745403900D535B2 /* ScriptAnimation.cpp in Sources */,
 				110E600618F7C609008AEC76 /* city.cpp in Sources */,
 				11BCD0601756686A00939274 /* ScriptLinks.cpp in Sources */,

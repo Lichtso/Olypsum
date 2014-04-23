@@ -7,145 +7,179 @@
 //
 
 #include "ScriptManager.h"
-/*
-void ScriptGUIRect::Constructor(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    return ScriptException("GUIRect Constructor: Class can't be instantiated");
+
+template<typename T, ScriptClassName name> static JSObjectRef ScriptGUIConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    if(argc != 1 || !JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptGUIView]))
+        return ScriptException(context, exception, "GUI Constructor: Expected GUIView");
+    auto objectPtr = new T();
+    getDataOfInstance<GUIView>(context, argv[0])->addChild(objectPtr);
+    objectPtr->scriptInstance = JSObjectMake(scriptManager->mainScript->context, ScriptClasses[name], objectPtr);
+    JSValueProtect(scriptManager->mainScript->context, objectPtr->scriptInstance);
+    return objectPtr->scriptInstance;
 }
 
-void ScriptGUIRect::GetPosX(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    ScriptReturn(objectPtr->posX);
+#define ScriptGUIStaticDefinition(name) \
+static bool Script##name##InstanceofCallback(JSContextRef context, JSObjectRef constructor, JSValueRef possibleInstance, JSValueRef* exception) {\
+    return JSValueIsObjectOfClass(context, possibleInstance, ScriptClasses[Script##name]);\
+}\
+JSClassDefinition Script##name##Static = {\
+    0, kJSClassAttributeNone, #name,\
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,\
+    ScriptGUIConstructor<name, Script##name>, Script##name##InstanceofCallback, NULL\
+};
+
+ScriptGUIStaticDefinition(GUIView);
+ScriptGUIStaticDefinition(GUIFramedView);
+ScriptGUIStaticDefinition(GUIScrollView);
+ScriptGUIStaticDefinition(GUIImage);
+ScriptGUIStaticDefinition(GUILabel);
+ScriptGUIStaticDefinition(GUIProgressBar);
+
+
+
+static JSObjectRef ScriptGUIRectConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    return ScriptException(context, exception, "GUIRect Constructor: Class can't be instantiated");
 }
 
-void ScriptGUIRect::SetPosX(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsInt32()) return;
-    GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    objectPtr->posX = value->IntegerValue();
+ScriptClassStaticDefinition(GUIRect);
+
+static JSValueRef ScriptGUIRectGetX(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<GUIRect>(instance)->posX);
 }
 
-void ScriptGUIRect::GetPosY(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    ScriptReturn(objectPtr->posY);
-}
-
-void ScriptGUIRect::SetPosY(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsInt32()) return;
-    GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    objectPtr->posY = value->IntegerValue();
-}
-
-void ScriptGUIRect::GetWidth(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    ScriptReturn(objectPtr->width);
-}
-
-void ScriptGUIRect::SetWidth(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsInt32()) return;
-    GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    objectPtr->width = value->IntegerValue();
-}
-
-void ScriptGUIRect::GetHeight(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    ScriptReturn(objectPtr->height);
-}
-
-void ScriptGUIRect::SetHeight(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsInt32()) return;
-    GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    objectPtr->height = value->IntegerValue();
-}
-
-void ScriptGUIRect::GetVisible(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    ScriptReturn(objectPtr->visible);
-}
-
-void ScriptGUIRect::SetVisible(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsBoolean()) return;
-    GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    objectPtr->visible = value->BooleanValue();
-}
-
-void ScriptGUIRect::GetFocused(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    ScriptReturn(objectPtr->isFocused());
-}
-
-void ScriptGUIRect::SetFocused(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsBoolean()) return;
-    GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    objectPtr->setFocused(value->BooleanValue());
-}
-
-void ScriptGUIRect::GetParent(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    ScriptReturn(objectPtr->parent->scriptInstance);
-}
-
-void ScriptGUIRect::SetParent(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!scriptGUIView->isCorrectInstance(value)) return;
-    GUIView* objectPtr = getDataOfInstance<GUIView>(value);
-    objectPtr->addChild(getDataOfInstance<GUIRect>(args.This()));
-}
-
-void ScriptGUIRect::Delete(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    objectPtr->parent->deleteChild(objectPtr->parent->getIndexOfChild(objectPtr));
-}
-
-void ScriptGUIRect::UpdateContent(const v8::FunctionCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    GUIRect* objectPtr = getDataOfInstance<GUIRect>(args.This());
-    objectPtr->updateContent();
-    ScriptReturn(args.This());
-}
-
-ScriptGUIRect::ScriptGUIRect(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args)) :ScriptClass(name, constructor) {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> instanceTemplate = (*functionTemplate)->InstanceTemplate();
-    instanceTemplate->SetInternalFieldCount(1);
-}
-
-v8::Handle<v8::Value> ScriptGUIRect::initInstance(v8::Local<v8::Object> instance, GUIView* parent, GUIRect* child) {
-    if(!parent->addChild(child)) {
-        delete child;
-        return v8::Isolate::GetCurrent()->ThrowException(ScriptString("GUIRect Constructor: Invalid parent"));
+static bool ScriptGUIRectSetX(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "GUIRect setX(): Expected Number");
+        return false;
     }
-    child->scriptInstance.Reset(v8::Isolate::GetCurrent(), instance);
-    instance->SetInternalField(0, v8::External::New(v8::Isolate::GetCurrent(), child));
-    return instance;
+    double numberValue = JSValueToNumber(context, value, NULL);
+    auto objectPtr = getDataOfInstance<GUIRect>(instance);
+    if(isfinite(numberValue)) {
+        objectPtr->posX = numberValue;
+        return true;
+    }else
+        return false;
 }
 
-ScriptGUIRect::ScriptGUIRect() :ScriptGUIRect("GUIRect", Constructor) {
-    ScriptScope();
-    
-    v8::Local<v8::ObjectTemplate> objectTemplate = (*functionTemplate)->PrototypeTemplate();
-    ScriptAccessor(objectTemplate, "x", GetPosX, SetPosX);
-    ScriptAccessor(objectTemplate, "y", GetPosY, SetPosY);
-    ScriptAccessor(objectTemplate, "width", GetWidth, SetWidth);
-    ScriptAccessor(objectTemplate, "height", GetHeight, SetHeight);
-    ScriptAccessor(objectTemplate, "visible", GetVisible, SetVisible);
-    ScriptAccessor(objectTemplate, "focused", GetFocused, SetFocused);
-    ScriptAccessor(objectTemplate, "parent", GetParent, SetParent);
-    ScriptMethod(objectTemplate, "delete", Delete);
-    ScriptMethod(objectTemplate, "updateContent", UpdateContent);
+static JSValueRef ScriptGUIRectGetY(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<GUIRect>(instance)->posY);
 }
-*/
+
+static bool ScriptGUIRectSetY(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "GUIRect setY(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    auto objectPtr = getDataOfInstance<GUIRect>(instance);
+    if(isfinite(numberValue)) {
+        objectPtr->posY = numberValue;
+        return true;
+    }else
+        return false;
+}
+
+static JSValueRef ScriptGUIRectGetWidth(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<GUIRect>(instance)->width);
+}
+
+static bool ScriptGUIRectSetWidth(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "GUIRect setWidth(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    auto objectPtr = getDataOfInstance<GUIRect>(instance);
+    if(isfinite(numberValue)) {
+        objectPtr->width = numberValue;
+        return true;
+    }else
+        return false;
+}
+
+static JSValueRef ScriptGUIRectGetHeight(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<GUIRect>(instance)->height);
+}
+
+static bool ScriptGUIRectSetHeight(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "GUIRect setHeight(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    auto objectPtr = getDataOfInstance<GUIRect>(instance);
+    if(isfinite(numberValue)) {
+        objectPtr->height = numberValue;
+        return true;
+    }else
+        return false;
+}
+
+static JSValueRef ScriptGUIRectGetVisible(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeBoolean(context, getDataOfInstance<GUIRect>(instance)->visible);
+}
+
+static bool ScriptGUIRectSetVisible(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsBoolean(context, value)) {
+        ScriptException(context, exception, "GUIRect setVisible(): Expected Boolean");
+        return false;
+    }
+    getDataOfInstance<GUIRect>(instance)->visible = JSValueToBoolean(context, value);
+    return true;
+}
+
+static JSValueRef ScriptGUIRectGetFocused(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeBoolean(context, getDataOfInstance<GUIRect>(instance)->isFocused());
+}
+
+static bool ScriptGUIRectSetFocused(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsBoolean(context, value)) {
+        ScriptException(context, exception, "GUIRect setFocused(): Expected Boolean");
+        return false;
+    }
+    getDataOfInstance<GUIRect>(instance)->setFocused(JSValueToBoolean(context, value));
+    return true;
+}
+
+static JSValueRef ScriptGUIRectGetParent(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return getDataOfInstance<GUIRect>(instance)->parent->scriptInstance;
+}
+
+static bool ScriptGUIRectSetParent(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsObjectOfClass(context, value, ScriptClasses[ScriptGUIView])) {
+        ScriptException(context, exception, "GUIRect setParent(): Expected GUIView");
+        return false;
+    }
+    getDataOfInstance<GUIView>(context, value)->addChild(getDataOfInstance<GUIRect>(instance));
+    return true;
+}
+
+static JSValueRef ScriptGUIRectDelete(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    auto objectPtr = getDataOfInstance<GUIRect>(instance);
+    objectPtr->parent->deleteChild(objectPtr->parent->getIndexOfChild(objectPtr));
+    return JSValueMakeUndefined(context);
+}
+
+static JSValueRef ScriptGUIRectUpdateContent(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    getDataOfInstance<GUIRect>(instance)->updateContent();
+    return JSValueMakeUndefined(context);
+}
+
+JSStaticValue ScriptGUIRectProperties[] = {
+    {"x", ScriptGUIRectGetX, ScriptGUIRectSetX, kJSPropertyAttributeDontDelete},
+    {"y", ScriptGUIRectGetY, ScriptGUIRectSetY, kJSPropertyAttributeDontDelete},
+    {"width", ScriptGUIRectGetWidth, ScriptGUIRectSetWidth, kJSPropertyAttributeDontDelete},
+    {"height", ScriptGUIRectGetHeight, ScriptGUIRectSetHeight, kJSPropertyAttributeDontDelete},
+    {"visible", ScriptGUIRectGetVisible, ScriptGUIRectSetVisible, kJSPropertyAttributeDontDelete},
+    {"focused", ScriptGUIRectGetFocused, ScriptGUIRectSetFocused, kJSPropertyAttributeDontDelete},
+    {"parent", ScriptGUIRectGetParent, ScriptGUIRectSetParent, kJSPropertyAttributeDontDelete},
+    {0, 0, 0, 0}
+};
+
+JSStaticFunction ScriptGUIRectMethods[] = {
+    {"delete", ScriptGUIRectDelete, ScriptMethodAttributes},
+    {"updateContent", ScriptGUIRectUpdateContent, ScriptMethodAttributes},
+    {0, 0, 0}
+};
+
+ScriptClassDefinition(GUIRect, ScriptGUIRectProperties, ScriptGUIRectMethods);

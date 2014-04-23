@@ -15,7 +15,7 @@ static JSObjectRef ScriptCamObjectConstructor(JSContextRef context, JSObjectRef 
 ScriptClassStaticDefinition(CamObject);
 
 static JSValueRef ScriptCamObjectGetFov(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    CamObject* objectPtr = getDataOfInstance<CamObject>(instance);
+    auto objectPtr = getDataOfInstance<CamObject>(instance);
     return JSValueMakeNumber(context, objectPtr->fov);
 }
 
@@ -33,7 +33,7 @@ static bool ScriptCamObjectSetFov(JSContextRef context, JSObjectRef instance, JS
 }
 
 static JSValueRef ScriptCamObjectGetNear(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    CamObject* objectPtr = getDataOfInstance<CamObject>(instance);
+    auto objectPtr = getDataOfInstance<CamObject>(instance);
     return JSValueMakeNumber(context, objectPtr->nearPlane);
 }
 
@@ -51,7 +51,7 @@ static bool ScriptCamObjectSetNear(JSContextRef context, JSObjectRef instance, J
 }
 
 static JSValueRef ScriptCamObjectGetFar(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    CamObject* objectPtr = getDataOfInstance<CamObject>(instance);
+    auto objectPtr = getDataOfInstance<CamObject>(instance);
     return JSValueMakeNumber(context, objectPtr->farPlane);
 }
 
@@ -69,7 +69,7 @@ static bool ScriptCamObjectSetFar(JSContextRef context, JSObjectRef instance, JS
 }
 
 static JSValueRef ScriptCamObjectGetIsMainCam(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    CamObject* objectPtr = getDataOfInstance<CamObject>(instance);
+    auto objectPtr = getDataOfInstance<CamObject>(instance);
     return JSValueMakeBoolean(context, objectPtr == mainCam);
 }
 
@@ -86,7 +86,7 @@ static bool ScriptCamObjectSetIsMainCam(JSContextRef context, JSObjectRef instan
 static JSValueRef ScriptCamObjectGetViewRay(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
     if(argc < 2 || !JSValueIsNumber(context, argv[0]) || !JSValueIsNumber(context, argv[1]))
         return ScriptException(context, exception, "CamObject getViewRay(): Expected Number, Number");
-    CamObject* objectPtr = getDataOfInstance<CamObject>(instance);
+    auto objectPtr = getDataOfInstance<CamObject>(instance);
     Ray3 ray = objectPtr->getRayAt(JSValueToNumber(context, argv[0], NULL), JSValueToNumber(context, argv[1], NULL));
     JSObjectRef result = JSObjectMake(context, NULL, NULL);
     JSObjectSetProperty(context, result, ScriptStringOrigin.str, newScriptVector3(context, ray.origin), 0, NULL);
@@ -118,7 +118,7 @@ static JSObjectRef ScriptSoundObjectConstructor(JSContextRef context, JSObjectRe
 ScriptClassStaticDefinition(SoundObject);
 
 static JSValueRef ScriptSoundObjectGetSoundTrack(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(instance);
+    auto objectPtr = getDataOfInstance<SoundObject>(instance);
     std::string name;
     FilePackage* filePackage = fileManager.findResource<SoundTrack>(objectPtr->soundTrack, name);
     if(filePackage) {
@@ -134,7 +134,7 @@ static bool ScriptSoundObjectSetSoundTrack(JSContextRef context, JSObjectRef ins
         return false;
     }
     ScriptString strName(context, value);
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(instance);
+    auto objectPtr = getDataOfInstance<SoundObject>(instance);
     auto soundTrack = fileManager.getResourceByPath<SoundTrack>(levelManager.levelPackage, strName.getStdStr());
     if(soundTrack) {
         objectPtr->setSoundTrack(soundTrack);
@@ -153,7 +153,7 @@ static bool ScriptSoundObjectSetTimeOffset(JSContextRef context, JSObjectRef ins
         return false;
     }
     double numberValue = JSValueToNumber(context, value, NULL);
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(instance);
+    auto objectPtr = getDataOfInstance<SoundObject>(instance);
     if(objectPtr->soundTrack && numberValue >= 0.0 && numberValue <= objectPtr->soundTrack->getLength()) {
         objectPtr->setTimeOffset(numberValue);
         return true;
@@ -192,7 +192,7 @@ static bool ScriptSoundObjectSetIsPlaying(JSContextRef context, JSObjectRef inst
 }
 
 static JSValueRef ScriptSoundObjectGetMode(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(instance);
+    auto objectPtr = getDataOfInstance<SoundObject>(instance);
     switch(objectPtr->mode) {
         case SoundObject::Mode::Looping:
             return ScriptStringLooping.getJSStr(context);
@@ -210,7 +210,7 @@ static bool ScriptSoundObjectSetMode(JSContextRef context, JSObjectRef instance,
     }
     ScriptString strMode(context, value);
     std::string mode = strMode.getStdStr();
-    SoundObject* objectPtr = getDataOfInstance<SoundObject>(instance);
+    auto objectPtr = getDataOfInstance<SoundObject>(instance);
     if(mode == "looping") {
         objectPtr->mode = SoundObject::Mode::Looping;
         return true;

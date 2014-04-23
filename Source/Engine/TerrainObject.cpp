@@ -141,7 +141,7 @@ TerrainObject::TerrainObject(rapidxml::xml_node<char> *node, LevelLoader *levelL
     delete [] indecies;
     updateModel();
     
-    ScriptInstance(ScriptTerrainObject);
+    ScriptInstance(TerrainObject);
 }
 
 TerrainObject::~TerrainObject() {
@@ -223,7 +223,7 @@ void TerrainObject::updateModel() {
 }
 
 rapidxml::xml_node<xmlUsedCharType>* TerrainObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
-    rapidxml::xml_node<xmlUsedCharType>* node = PhysicObject::writeWithoutCollisionShape(doc, levelSaver);
+    rapidxml::xml_node<xmlUsedCharType>* node = PhysicObject::writeFrictionAndRestitution(doc, levelSaver);
     node->name("TerrainObject");
     
     rapidxml::xml_node<xmlUsedCharType>* parameterNode = doc.allocate_node(rapidxml::node_element);

@@ -10,89 +10,106 @@
 #define ScriptGUIRect_h
 
 #include "ScriptAnimation.h"
-/*
-ScriptGUIRect(const char* name, void(constructor)(const v8::FunctionCallbackInfo<v8::Value>& args));
-public:
-template<typename T> static void GetSizeAlignment(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    T* objectPtr = getDataOfInstance<T>(args.This());
+
+template<typename T> static JSValueRef ScriptGUIGetSizeAlignment(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    auto objectPtr = getDataOfInstance<T>(instance);
     switch(objectPtr->sizeAlignment) {
         case GUISizeAlignment::None:
-            ScriptReturn("none");
+            return ScriptStringNone.getJSStr(context);
         case GUISizeAlignment::Width:
-            ScriptReturn("width");
+            return ScriptStringWidth.getJSStr(context);
         case GUISizeAlignment::Height:
-            ScriptReturn("height");
+            return ScriptStringHeight.getJSStr(context);
         case GUISizeAlignment::All:
-            ScriptReturn("all");
+            return ScriptStringAll.getJSStr(context);
     }
 }
-template<typename T> static void SetSizeAlignment(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsString()) return;
-    T* objectPtr = getDataOfInstance<T>(args.This());
-    const char* str = cStrOfV8(value);
-    if(strcmp(str, "none") == 0)
+
+template<typename T> static bool ScriptGUISetSizeAlignment(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsString(context, value)) {
+        ScriptException(context, exception, "GUI setSizeAlignment(): Expected String");
+        return false;
+    }
+    ScriptString strValue(context, value);
+    std::string str = strValue.getStdStr();
+    auto objectPtr = getDataOfInstance<T>(instance);
+    if(str == "none")
         objectPtr->sizeAlignment = GUISizeAlignment::None;
-    else if(strcmp(str, "width") == 0)
+    else if(str == "width")
         objectPtr->sizeAlignment = GUISizeAlignment::Width;
-    else if(strcmp(str, "height") == 0)
+    else if(str == "height")
         objectPtr->sizeAlignment = GUISizeAlignment::Height;
-    else if(strcmp(str, "all") == 0)
+    else if(str == "all")
         objectPtr->sizeAlignment = GUISizeAlignment::All;
+    else{
+        ScriptException(context, exception, "GUI setSizeAlignment(): Invalid value");
+        return false;
+    }
+    return true;
 }
-template<typename T> static void GetOrientation(v8::Local<v8::String> property, const v8::PropertyCallbackInfo<v8::Value>& args) {
-    ScriptScope();
-    T* objectPtr = getDataOfInstance<T>(args.This());
+
+template<typename T> static JSValueRef ScriptGUIGetOrientation(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    auto objectPtr = getDataOfInstance<T>(instance);
     switch(objectPtr->orientation) {
         case GUIOrientation::Left:
-            ScriptReturn("left");
+            return ScriptStringLeft.getJSStr(context);
         case GUIOrientation::Right:
-            ScriptReturn("right");
+            return ScriptStringRight.getJSStr(context);
         case GUIOrientation::Bottom:
-            ScriptReturn("bottom");
+            return ScriptStringBottom.getJSStr(context);
         case GUIOrientation::Top:
-            ScriptReturn("top");
+            return ScriptStringTop.getJSStr(context);
         case GUIOrientation::Vertical:
-            ScriptReturn("vertical");
+            return ScriptStringVertical.getJSStr(context);
         case GUIOrientation::Horizontal:
-            ScriptReturn("horizontal");
+            return ScriptStringHorizontal.getJSStr(context);
     }
 }
-template<typename T> static void SetOrientation(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsString()) return;
-    T* objectPtr = getDataOfInstance<T>(args.This());
-    const char* str = cStrOfV8(value);
-    if(strcmp(str, "left") == 0)
+
+template<typename T> static bool ScriptGUISetOrientation(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsString(context, value)) {
+        ScriptException(context, exception, "GUI setOrientation(): Expected String");
+        return false;
+    }
+    ScriptString strValue(context, value);
+    std::string str = strValue.getStdStr();
+    auto objectPtr = getDataOfInstance<T>(instance);
+    if(str == "left")
         objectPtr->orientation = GUIOrientation::Left;
-    else if(strcmp(str, "right") == 0)
+    else if(str == "right")
         objectPtr->orientation = GUIOrientation::Right;
-    else if(strcmp(str, "bottom") == 0)
+    else if(str == "bottom")
         objectPtr->orientation = GUIOrientation::Bottom;
-    else if(strcmp(str, "top") == 0)
+    else if(str == "top")
         objectPtr->orientation = GUIOrientation::Top;
-    else if(strcmp(str, "vertical") == 0)
+    else if(str == "vertical")
         objectPtr->orientation = GUIOrientation::Vertical;
-    else if(strcmp(str, "horizontal") == 0)
+    else if(str == "horizontal")
         objectPtr->orientation = GUIOrientation::Horizontal;
+    else{
+        ScriptException(context, exception, "GUI setOrientation(): Invalid value");
+        return false;
+    }
+    return true;
 }
-template<typename T> static void SetOrientationDual(v8::Local<v8::String> property, v8::Local<v8::Value> value, const v8::PropertyCallbackInfo<void>& args) {
-    ScriptScope();
-    if(!value->IsString()) return;
-    T* objectPtr = getDataOfInstance<T>(args.This());
-    const char* str = cStrOfV8(value);
-    if(strcmp(str, "vertical") == 0)
+
+template<typename T> static bool ScriptGUISetOrientationDual(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsString(context, value)) {
+        ScriptException(context, exception, "GUI setOrientation(): Expected String");
+        return false;
+    }
+    ScriptString strValue(context, value);
+    std::string str = strValue.getStdStr();
+    auto objectPtr = getDataOfInstance<T>(instance);
+    if(str == "vertical")
         objectPtr->orientation = GUIOrientation::Vertical;
-    else if(strcmp(str, "horizontal") == 0)
+    else if(str == "horizontal")
         objectPtr->orientation = GUIOrientation::Horizontal;
+    else{
+        ScriptException(context, exception, "GUI setOrientation(): Invalid value");
+        return false;
+    }
+    return true;
 }
-template<typename T> static T* getDataOfInstance(const v8::Local<v8::Value>& value) {
-    ScriptScope();
-    v8::Local<v8::Object> object = v8::Local<v8::Object>::Cast(value);
-    v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(object->GetInternalField(0));
-    return static_cast<T*>(wrap->Value());
-}
-*/
 
 #endif

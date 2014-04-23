@@ -78,7 +78,7 @@ bool BaseLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* leve
     
     initializer.object[0] = levelLoader->getObjectLinking(initializer.index[0]);
     initializer.object[1] = levelLoader->getObjectLinking(initializer.index[1]);
-    ScriptInstance(ScriptBaseLink);
+    ScriptInstance(BaseLink);
     
     return init(initializer);
 }
@@ -145,7 +145,7 @@ bool BoneLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* leve
     }
     bone = getBoneByName(attribute->value());
     
-    ScriptInstance(ScriptBoneLink);
+    ScriptInstance(BoneLink);
     return true;
 }
 
@@ -203,7 +203,7 @@ bool TransformLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
         return false;
     }
     
-    ScriptInstance(ScriptTransformLink);
+    ScriptInstance(TransformLink);
     return true;
 }
 
@@ -308,7 +308,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         btVector3 pointB = vecData.getVector3();
         
         constraint = new btPoint2PointConstraint(*rigidA->getBody(), *rigidB->getBody(), pointA, pointB);
-        ScriptInstance(ScriptPointPhysicLink);
+        ScriptInstance(PointPhysicLink);
     }else if(strcmp(attribute->value(), "gear") == 0) {
         rapidxml::xml_node<xmlUsedCharType>* parameterNode = node->first_node("Axis");
         if(!parameterNode) {
@@ -339,7 +339,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         sscanf(attribute->value(), "%f", &ratio);
         
         constraint = new btGearConstraint(*rigidA->getBody(), *rigidB->getBody(), axisA, axisB, ratio);
-        ScriptInstance(ScriptGearPhysicLink);
+        ScriptInstance(GearPhysicLink);
     }else if(strcmp(attribute->value(), "hinge") == 0 || strcmp(attribute->value(), "slider") == 0) {
         parameterNode = node->first_node("Frame");
         if(!parameterNode) {
@@ -365,10 +365,10 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             frameA *= transform;
             frameB *= transform;
             constraint = hinge = new btHingeConstraint(*rigidA->getBody(), *rigidB->getBody(), frameA, frameB, true);
-            ScriptInstance(ScriptHingePhysicLink);
+            ScriptInstance(HingePhysicLink);
         }else{
             constraint = slider = new btSliderConstraint(*rigidA->getBody(), *rigidB->getBody(), frameA, frameB, true);
-            ScriptInstance(ScriptSliderPhysicLink);
+            ScriptInstance(SliderPhysicLink);
         }
         
         parameterNode = node->first_node("AngularLimit");
@@ -530,7 +530,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
             }
         }else
             constraint = dof6 = new btGeneric6DofConstraint(*rigidA->getBody(), *rigidB->getBody(), frameA, frameB, true);
-        ScriptInstance(ScriptDof6PhysicLink);
+        ScriptInstance(Dof6PhysicLink);
         
         parameterNode = node->first_node("AngularLimit");
         if(parameterNode) {
@@ -639,7 +639,7 @@ bool PhysicLink::init(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* le
         
         btConeTwistConstraint* coneTwist;
         constraint = coneTwist = new btConeTwistConstraint(*rigidA->getBody(), *rigidB->getBody(), frameA, frameB);
-        ScriptInstance(ScriptConeTwistPhysicLink);
+        ScriptInstance(ConeTwistPhysicLink);
         
         parameterNode = node->first_node("AngularLimit");
         if(parameterNode) {

@@ -11,7 +11,7 @@
 
 #include "FBO.h"
 #define ScriptMethodAttributes (kJSPropertyAttributeReadOnly | kJSPropertyAttributeDontDelete)
-#define ScriptInstance(scriptClass) scriptInstance = JSObjectMake(scriptManager->mainScript->context, ScriptClasses[scriptClass], this);\
+#define ScriptInstance(name) scriptInstance = JSObjectMake(scriptManager->mainScript->context, ScriptClasses[Script##name], this);\
 JSValueProtect(scriptManager->mainScript->context, scriptInstance)
 #define ScriptClassStaticDefinition(name) \
 static bool Script##name##InstanceofCallback(JSContextRef context, JSObjectRef constructor, JSValueRef possibleInstance, JSValueRef* exception) {\
@@ -70,30 +70,23 @@ class ScriptFile : public FileResource {
 
 extern ScriptString
 ScriptStringClassNames[ScriptStaticsCount],
-ScriptStringChildren,
-ScriptStringDirection,
-ScriptStringDispose,
-ScriptStringDistance,
-ScriptStringExports,
+ScriptStringAdd, ScriptStringAll,
+ScriptStringBottom,
+ScriptStringCenter, ScriptStringChildren,
+ScriptStringDelete, ScriptStringDirection, ScriptStringDispose, ScriptStringDistance,
+ScriptStringEdit, ScriptStringExports,
 ScriptStringFrames,
-ScriptStringHold,
-ScriptStringLength,
-ScriptStringLooping,
+ScriptStringHeight, ScriptStringHighlighted, ScriptStringHold, ScriptStringHorizontal,
+ScriptStringLeft, ScriptStringLength, ScriptStringLockable, ScriptStringLooping,
 ScriptStringMessage,
-ScriptStringName,
-ScriptStringNormal,
-ScriptStringNormals,
-ScriptStringObjects,
-ScriptStringOrigin,
-ScriptStringPositions,
-ScriptStringRadii,
-ScriptStringRadius,
-ScriptStringSize,
-ScriptStringStack,
-ScriptStringTime,
-ScriptStringTransformations,
-ScriptStringType,
-ScriptStringW,
+ScriptStringName, ScriptStringNone, ScriptStringNormal, ScriptStringNormals,
+ScriptStringObjects, ScriptStringOrigin,
+ScriptStringPositions, ScriptStringPressed,
+ScriptStringRadii, ScriptStringRadius, ScriptStringReleased, ScriptStringRight,
+ScriptStringSize, ScriptStringStack,
+ScriptStringTime, ScriptStringTop, ScriptStringTransformations, ScriptStringType,
+ScriptStringVertical,
+ScriptStringW, ScriptStringWidth,
 ScriptStringX,
 ScriptStringY,
 ScriptStringZ;

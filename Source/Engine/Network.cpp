@@ -46,10 +46,12 @@ bool NetworkManager::enable() {
         udpSocket->portRemote = udpPort;
         udpSocket->setMulticastGroup(udpSocket->hostRemote, true);
         
+        std::vector<std::unique_ptr<MsgPack::Element>> packet;
+        packet.push_back(std::unique_ptr<MsgPack::Element>(new MsgPack::String("nickname")));
+        packet.push_back(std::unique_ptr<MsgPack::Element>(new MsgPack::String(optionsState.nickname)));
+        
         netLink::MsgPackSocket& msgPackSocket = *static_cast<netLink::MsgPackSocket*>(udpSocket.get());
-        msgPackSocket << new MsgPack::MapHeader(1);
-        msgPackSocket << new MsgPack::String("nickname");
-        msgPackSocket << new MsgPack::String(optionsState.nickname);
+        msgPackSocket << new MsgPack::Map(packet);
         
         return true;
     }catch(netLink::Exception exep) {

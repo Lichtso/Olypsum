@@ -228,7 +228,7 @@ RigidObject::RigidObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader*
     }
     
     PhysicObject::readFrictionAndRestitution(node);
-    ScriptInstance(ScriptRigidObject);
+    ScriptInstance(RigidObject);
 }
 
 void RigidObject::removeClean() {

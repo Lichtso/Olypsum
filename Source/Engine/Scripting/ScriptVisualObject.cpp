@@ -69,7 +69,7 @@ static bool ScriptMatterObjectSetRestitution(JSContextRef context, JSObjectRef i
 }
 
 static JSValueRef ScriptMatterObjectGetIntegrity(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    MatterObject* objectPtr = getDataOfInstance<MatterObject>(instance);
+    auto objectPtr = getDataOfInstance<MatterObject>(instance);
     return JSValueMakeNumber(context, objectPtr->integrity);
 }
 
@@ -78,7 +78,7 @@ static bool ScriptMatterObjectSetIntegrity(JSContextRef context, JSObjectRef ins
         ScriptException(context, exception, "MatterObject setIntegrity(): Expected Number");
         return false;
     }
-    MatterObject* objectPtr = getDataOfInstance<MatterObject>(instance);
+    auto objectPtr = getDataOfInstance<MatterObject>(instance);
     if(objectPtr->integrity <= 0.0) return false;
     double numberValue = JSValueToNumber(context, value, NULL);
     objectPtr->integrity = fmax(0.0, numberValue);
@@ -99,7 +99,7 @@ static JSValueRef ScriptMatterObjectAttachDecal(JSContextRef context, JSObjectRe
         ScriptString strHeightMap(context, argv[3]);
         decal->heightMap = fileManager.getResourceByPath<Texture>(levelManager.levelPackage, strHeightMap.getStdStr());
     }
-    MatterObject* objectPtr = getDataOfInstance<MatterObject>(instance);
+    auto objectPtr = getDataOfInstance<MatterObject>(instance);
     objectPtr->decals.insert(decal);
     return JSValueMakeUndefined(context);
 }
@@ -128,7 +128,7 @@ static JSObjectRef ScriptRigidObjectConstructor(JSContextRef context, JSObjectRe
 ScriptClassStaticDefinition(RigidObject);
 
 static JSValueRef ScriptRigidObjectGetModel(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    RigidObject* objectPtr = getDataOfInstance<RigidObject>(instance);
+    auto objectPtr = getDataOfInstance<RigidObject>(instance);
     std::string name;
     FilePackage* filePackage = fileManager.findResource<Model>(objectPtr->model, name);
     if(!filePackage)
@@ -142,7 +142,7 @@ static bool ScriptRigidObjectSetModel(JSContextRef context, JSObjectRef instance
         ScriptException(context, exception, "RigidObject setModel(): Expected String");
         return false;
     }
-    RigidObject* objectPtr = getDataOfInstance<RigidObject>(instance);
+    auto objectPtr = getDataOfInstance<RigidObject>(instance);
     ScriptString strModel(context, value);
     auto model = fileManager.getResourceByPath<Model>(levelManager.levelPackage, strModel.getStdStr());
     if(model) {
@@ -153,7 +153,7 @@ static bool ScriptRigidObjectSetModel(JSContextRef context, JSObjectRef instance
 }
 
 static JSValueRef ScriptRigidObjectGetMass(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    btRigidBody* body = getDataOfInstance<RigidObject>(instance)->getBody();
+    auto body = getDataOfInstance<RigidObject>(instance)->getBody();
     return JSValueMakeNumber(context, (body->getInvMass() == 0.0) ? 0.0 : 1.0/body->getInvMass());
 }
 
@@ -162,7 +162,7 @@ static bool ScriptRigidObjectSetMass(JSContextRef context, JSObjectRef instance,
         ScriptException(context, exception, "RigidObject setMass(): Expected Number");
         return false;
     }
-    btRigidBody* body = getDataOfInstance<RigidObject>(instance)->getBody();
+    auto body = getDataOfInstance<RigidObject>(instance)->getBody();
     double numberValue = JSValueToNumber(context, value, NULL);
     if(numberValue >= 0.0) {
         btVector3 inertia;
@@ -175,7 +175,7 @@ static bool ScriptRigidObjectSetMass(JSContextRef context, JSObjectRef instance,
 }
 
 static JSValueRef ScriptRigidObjectGetAngularDamping(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    btRigidBody* body = getDataOfInstance<RigidObject>(instance)->getBody();
+    auto body = getDataOfInstance<RigidObject>(instance)->getBody();
     return JSValueMakeNumber(context, body->getAngularDamping());
 }
 
@@ -184,7 +184,7 @@ static bool ScriptRigidObjectSetAngularDamping(JSContextRef context, JSObjectRef
         ScriptException(context, exception, "RigidObject setAngularDamping(): Expected Number");
         return false;
     }
-    btRigidBody* body = getDataOfInstance<RigidObject>(instance)->getBody();
+    auto body = getDataOfInstance<RigidObject>(instance)->getBody();
     double numberValue = JSValueToNumber(context, value, NULL);
     if(numberValue >= 0.0) {
         body->setAngularDamping(numberValue);
@@ -194,7 +194,7 @@ static bool ScriptRigidObjectSetAngularDamping(JSContextRef context, JSObjectRef
 }
 
 static JSValueRef ScriptRigidObjectGetLinearDamping(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    btRigidBody* body = getDataOfInstance<RigidObject>(instance)->getBody();
+    auto body = getDataOfInstance<RigidObject>(instance)->getBody();
     return JSValueMakeNumber(context, body->getLinearDamping());
 }
 
@@ -203,7 +203,7 @@ static bool ScriptRigidObjectSetLinearDamping(JSContextRef context, JSObjectRef 
         ScriptException(context, exception, "RigidObject setLinearDamping(): Expected Number");
         return false;
     }
-    btRigidBody* body = getDataOfInstance<RigidObject>(instance)->getBody();
+    auto body = getDataOfInstance<RigidObject>(instance)->getBody();
     double numberValue = JSValueToNumber(context, value, NULL);
     if(numberValue >= 0.0) {
         body->setLinearDamping(numberValue);
@@ -213,7 +213,7 @@ static bool ScriptRigidObjectSetLinearDamping(JSContextRef context, JSObjectRef 
 }
 
 static JSValueRef ScriptRigidObjectGetKinematic(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    RigidObject* objectPtr = getDataOfInstance<RigidObject>(instance);
+    auto objectPtr = getDataOfInstance<RigidObject>(instance);
     return JSValueMakeBoolean(context, objectPtr->getKinematic());
 }
 
@@ -222,7 +222,7 @@ static bool ScriptRigidObjectSetKinematic(JSContextRef context, JSObjectRef inst
         ScriptException(context, exception, "RigidObject setKinematic(): Expected Boolean");
         return false;
     }
-    RigidObject* objectPtr = getDataOfInstance<RigidObject>(instance);
+    auto objectPtr = getDataOfInstance<RigidObject>(instance);
     objectPtr->setKinematic(JSValueToBoolean(context, value));
     return true;
 }
@@ -231,7 +231,7 @@ static JSValueRef ScriptRigidObjectAccessTextureAnimationTime(JSContextRef conte
     if(argc < 1 || !JSValueIsNumber(context, argv[0]))
         return ScriptException(context, exception, "RigidObject textureAnimationTime(): Expected Number");
     unsigned int index = JSValueToNumber(context, argv[0], NULL);
-    RigidObject* objectPtr = getDataOfInstance<RigidObject>(instance);
+    auto objectPtr = getDataOfInstance<RigidObject>(instance);
     if(index >= objectPtr->textureAnimationTime.size())
         return ScriptException(context, exception, "RigidObject textureAnimationTime(): Out of bounds");
     
@@ -243,7 +243,7 @@ static JSValueRef ScriptRigidObjectAccessTextureAnimationTime(JSContextRef conte
 }
 
 static JSValueRef ScriptRigidObjectAccessTransformation(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    RigidObject* objectPtr = getDataOfInstance<RigidObject>(instance);
+    auto objectPtr = getDataOfInstance<RigidObject>(instance);
     if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4])) {
         Matrix4* matrix = getDataOfInstance<Matrix4>(context, argv[0]);
         if(matrix->isValid()) {
@@ -256,7 +256,7 @@ static JSValueRef ScriptRigidObjectAccessTransformation(JSContextRef context, JS
 }
 
 static JSValueRef ScriptRigidObjectAccessAngularVelocity(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    btRigidBody* body = getDataOfInstance<RigidObject>(instance)->getBody();
+    auto body = getDataOfInstance<RigidObject>(instance)->getBody();
     if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
         btVector3 vec = getScriptVector3(context, argv[0]);
         if(isValidVector(vec)) {
@@ -269,7 +269,7 @@ static JSValueRef ScriptRigidObjectAccessAngularVelocity(JSContextRef context, J
 }
 
 static JSValueRef ScriptRigidObjectAccessLinearVelocity(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    btRigidBody* body = getDataOfInstance<RigidObject>(instance)->getBody();
+    auto body = getDataOfInstance<RigidObject>(instance)->getBody();
     if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
         btVector3 vec = getScriptVector3(context, argv[0]);
         if(isValidVector(vec)) {
@@ -282,7 +282,7 @@ static JSValueRef ScriptRigidObjectAccessLinearVelocity(JSContextRef context, JS
 }
 
 static JSValueRef ScriptRigidObjectAccessAngularFactor(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    btRigidBody* body = getDataOfInstance<RigidObject>(instance)->getBody();
+    auto body = getDataOfInstance<RigidObject>(instance)->getBody();
     if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
         btVector3 vec = getScriptVector3(context, argv[0]);
         if(isValidVector(vec))
@@ -293,7 +293,7 @@ static JSValueRef ScriptRigidObjectAccessAngularFactor(JSContextRef context, JSO
 }
 
 static JSValueRef ScriptRigidObjectAccessLinearFactor(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    btRigidBody* body = getDataOfInstance<RigidObject>(instance)->getBody();
+    auto body = getDataOfInstance<RigidObject>(instance)->getBody();
     if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
         btVector3 vec = getScriptVector3(context, argv[0]);
         if(isValidVector(vec))
@@ -308,7 +308,7 @@ static JSValueRef ScriptRigidObjectApplyImpulseAtPoint(JSContextRef context, JSO
        !JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3]) ||
        !JSValueIsObjectOfClass(context, argv[1], ScriptClasses[ScriptVector3]))
         return ScriptException(context, exception, "RigidObject applyImpulseAtPoint(): Expected Vector3, Vector3");
-    btRigidBody* body = getDataOfInstance<RigidObject>(instance)->getBody();
+    auto body = getDataOfInstance<RigidObject>(instance)->getBody();
     btVector3 vecA = getScriptVector3(context, argv[0]), vecB = getScriptVector3(context, argv[1]);
     if(isValidVector(vecA) && isValidVector(vecB)) {
         body->applyImpulse(vecA, vecB);
@@ -320,7 +320,7 @@ static JSValueRef ScriptRigidObjectApplyImpulseAtPoint(JSContextRef context, JSO
 static JSValueRef ScriptRigidObjectApplyAngularImpulse(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
     if(argc != 1 || !JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3]))
         return ScriptException(context, exception, "RigidObject applyAngularImpulse(): Expected Vector3");
-    btRigidBody* body = getDataOfInstance<RigidObject>(instance)->getBody();
+    auto body = getDataOfInstance<RigidObject>(instance)->getBody();
     btVector3 vec = getScriptVector3(context, argv[0]);
     if(isValidVector(vec)) {
         body->applyTorqueImpulse(vec);
@@ -332,7 +332,7 @@ static JSValueRef ScriptRigidObjectApplyAngularImpulse(JSContextRef context, JSO
 static JSValueRef ScriptRigidObjectApplyLinearImpulse(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
     if(argc != 1 || !JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3]))
         return ScriptException(context, exception, "RigidObject applyLinearImpulse(): Expected Vector3");
-    btRigidBody* body = getDataOfInstance<RigidObject>(instance)->getBody();
+    auto body = getDataOfInstance<RigidObject>(instance)->getBody();
     btVector3 vec = getScriptVector3(context, argv[0]);
     if(isValidVector(vec)) {
         body->applyCentralImpulse(vec);
@@ -345,7 +345,7 @@ static JSValueRef ScriptRigidObjectGetBoneByName(JSContextRef context, JSObjectR
     if(argc != 1 || !JSValueIsString(context, argv[0]))
         return ScriptException(context, exception, "RigidObject getBoneByName(): Expected String");
     ScriptString strName(context, argv[0]);
-    RigidObject* objectPtr = getDataOfInstance<RigidObject>(instance);
+    auto objectPtr = getDataOfInstance<RigidObject>(instance);
     BoneLink* linkPrt = objectPtr->findBoneLinkOfName(strName.getStdStr());
     if(linkPrt)
         return linkPrt->b->scriptInstance;
@@ -386,18 +386,15 @@ static JSObjectRef ScriptTerrainObjectConstructor(JSContextRef context, JSObject
 ScriptClassStaticDefinition(TerrainObject);
 
 static JSValueRef ScriptTerrainObjectGetWidth(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(instance);
-    return JSValueMakeNumber(context, objectPtr->width);
+    return JSValueMakeNumber(context, getDataOfInstance<TerrainObject>(instance)->width);
 }
 
 static JSValueRef ScriptTerrainObjectGetLength(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(instance);
-    return JSValueMakeNumber(context, objectPtr->length);
+    return JSValueMakeNumber(context, getDataOfInstance<TerrainObject>(instance)->length);
 }
 
 static JSValueRef ScriptTerrainObjectGetBitDepth(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(instance);
-    return JSValueMakeNumber(context, objectPtr->bitDepth << 2);
+    return JSValueMakeNumber(context, getDataOfInstance<TerrainObject>(instance)->bitDepth << 2);
 }
 
 static bool ScriptTerrainObjectSetBitDepth(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
@@ -405,7 +402,7 @@ static bool ScriptTerrainObjectSetBitDepth(JSContextRef context, JSObjectRef ins
         ScriptException(context, exception, "TerrainObject setBitDepth(): Expected Number");
         return false;
     }
-    TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(instance);
+    auto objectPtr = getDataOfInstance<TerrainObject>(instance);
     unsigned int numberValue = JSValueToNumber(context, value, NULL);
     if(numberValue > 0 && numberValue <= 32 && numberValue % 4 == 0) {
         objectPtr->bitDepth = numberValue >> 2;
@@ -418,7 +415,7 @@ static JSValueRef ScriptTerrainObjectAccessCell(JSContextRef context, JSObjectRe
     if(argc < 2 || !JSValueIsNumber(context, argv[0]) || !JSValueIsNumber(context, argv[1]))
         return ScriptException(context, exception, "TerrainObject textureAnimationTime(): Expected Number, Number");
     unsigned int x = JSValueToNumber(context, argv[0], NULL), y = JSValueToNumber(context, argv[1], NULL);
-    TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(instance);
+    auto objectPtr = getDataOfInstance<TerrainObject>(instance);
     if(x >= objectPtr->width || y >= objectPtr->length)
         return ScriptException(context, exception, "TerrainObject accessCell(): Out of bounds");
     
@@ -433,7 +430,7 @@ static JSValueRef ScriptTerrainObjectAccessCell(JSContextRef context, JSObjectRe
 }
 
 static JSValueRef ScriptTerrainObjectUpdateModel(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(instance);
+    auto objectPtr = getDataOfInstance<TerrainObject>(instance);
     objectPtr->updateModel();
     objectPtr->updateTouchingObjects();
     return JSValueMakeUndefined(context);

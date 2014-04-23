@@ -159,7 +159,7 @@ ParticlesObject::ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, Leve
     texture = fileManager.getResourceByPath<Texture>(levelLoader->filePackage, attribute->value());
     texture->uploadTexture(GL_TEXTURE_2D_ARRAY, GL_COMPRESSED_RGBA);
     
-    ScriptInstance(ScriptParticlesObject);
+    ScriptInstance(ParticlesObject);
 }
 
 void ParticlesObject::clean() {

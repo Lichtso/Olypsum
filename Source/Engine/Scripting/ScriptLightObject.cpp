@@ -19,7 +19,7 @@ static JSValueRef ScriptLightObjectGetRange(JSContextRef context, JSObjectRef in
 }
 
 static JSValueRef ScriptLightObjectAccessColor(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    LightObject* objectPtr = getDataOfInstance<LightObject>(instance);
+    auto objectPtr = getDataOfInstance<LightObject>(instance);
     if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
         objectPtr->color = getScriptVector3(context, argv[0]);
         return argv[0];
@@ -48,7 +48,7 @@ static JSObjectRef ScriptDirectionalLightConstructor(JSContextRef context, JSObj
 ScriptClassStaticDefinition(DirectionalLight);
 
 static JSValueRef ScriptDirectionalLightAccessBounds(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    DirectionalLight* objectPtr = getDataOfInstance<DirectionalLight>(instance);
+    auto objectPtr = getDataOfInstance<DirectionalLight>(instance);
     if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptVector3])) {
         objectPtr->setBounds(getScriptVector3(context, argv[0]));
         return argv[0];
@@ -78,7 +78,7 @@ static JSValueRef ScriptPositionalLightGetOmniDirectional(JSContextRef context, 
 static JSValueRef ScriptPositionalLightSetBounds(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
     if(argc != 2 || !JSValueIsBoolean(context, argv[0]) || !JSValueIsNumber(context, argv[1]))
         return ScriptException(context, exception, "SpotLight setBounds(): Expected Number, Number");
-    PositionalLight* objectPtr = getDataOfInstance<PositionalLight>(instance);
+    auto objectPtr = getDataOfInstance<PositionalLight>(instance);
     objectPtr->setBounds(JSValueToBoolean(context, argv[0]), JSValueToNumber(context, argv[1], NULL));
     return JSValueMakeUndefined(context);
 }
@@ -110,7 +110,7 @@ static JSValueRef ScriptSpotLightGetCutoff(JSContextRef context, JSObjectRef ins
 static JSValueRef ScriptSpotLightSetBounds(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
     if(argc != 2 || !JSValueIsNumber(context, argv[0]) || !JSValueIsNumber(context, argv[1]))
         return ScriptException(context, exception, "SpotLight setBounds(): Expected Number, Number");
-    SpotLight* objectPtr = getDataOfInstance<SpotLight>(instance);
+    auto objectPtr = getDataOfInstance<SpotLight>(instance);
     objectPtr->setBounds(JSValueToNumber(context, argv[0], NULL), JSValueToNumber(context, argv[1], NULL));
     return JSValueMakeUndefined(context);
 }

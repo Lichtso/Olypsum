@@ -13,6 +13,26 @@ static void activateConstraint(btTypedConstraint* constraint) {
     constraint->getRigidBodyB().activate();
 }
 
+template<typename T> static JSValueRef ScriptPhysicLinkAccessFrameA(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    auto constraint = static_cast<T*>(getDataOfInstance<PhysicLink>(instance)->constraint);
+    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4])) {
+        activateConstraint(constraint);
+        constraint->setFrames(getDataOfInstance<Matrix4>(context, argv[0])->getBTTransform(), constraint->getFrameOffsetB());
+        return argv[0];
+    }else
+        return newScriptMatrix4(context, constraint->getFrameOffsetA());
+}
+
+template<typename T> static JSValueRef ScriptPhysicLinkAccessFrameB(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    auto constraint = static_cast<T*>(getDataOfInstance<PhysicLink>(instance)->constraint);
+    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4])) {
+        activateConstraint(constraint);
+        constraint->setFrames(constraint->getFrameOffsetA(), getDataOfInstance<Matrix4>(context, argv[0])->getBTTransform());
+        return argv[0];
+    }else
+        return newScriptMatrix4(context, constraint->getFrameOffsetB());
+}
+
 
 
 static JSObjectRef ScriptPhysicLinkConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
@@ -30,8 +50,14 @@ static bool ScriptPhysicLinkSetBurstImpulse(JSContextRef context, JSObjectRef in
         ScriptException(context, exception, "PhysicLink setBurstImpulse(): Expected Number");
         return false;
     }
-    getDataOfInstance<PhysicLink>(instance)->constraint->setBreakingImpulseThreshold(JSValueToNumber(context, value, NULL));
-    return true;
+    double numberValue = JSValueToNumber(context, value, NULL);
+    auto constraint = getDataOfInstance<PhysicLink>(instance)->constraint;
+    if(numberValue > 0.0) {
+        constraint->setBreakingImpulseThreshold(numberValue);
+        activateConstraint(constraint);
+        return true;
+    }else
+        return false;
 }
 
 static JSValueRef ScriptPhysicLinkGetCollisionDisabled(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
@@ -94,7 +120,7 @@ static JSObjectRef ScriptConeTwistPhysicLinkConstructor(JSContextRef context, JS
     initializer.object[1] = b = getDataOfInstance<RigidObject>(context, argv[1]);
     btTransform transA = getDataOfInstance<Matrix4>(context, argv[2])->getBTTransform(),
                 transB = getDataOfInstance<Matrix4>(context, argv[3])->getBTTransform();
-    PhysicLink* linkPtr = new PhysicLink();
+    auto linkPtr = new PhysicLink();
     auto constraint = new btConeTwistConstraint(*a->getBody(), *b->getBody(), transA, transB);
     if(linkPtr->init(initializer, constraint)) {
         linkPtr->scriptInstance = JSObjectMake(context, ScriptClasses[ScriptConeTwistPhysicLink], linkPtr);
@@ -114,10 +140,14 @@ static bool ScriptConeTwistPhysicLinkSetSwingSpanA(JSContextRef context, JSObjec
         ScriptException(context, exception, "ConeTwistPhysicLink setSwingSpanA(): Expected Number");
         return false;
     }
+    double numberValue = JSValueToNumber(context, value, NULL);
     auto constraint = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    constraint->setLimit(5, JSValueToNumber(context, value, NULL));
-    activateConstraint(constraint);
-    return true;
+    if(isfinite(numberValue)) {
+        constraint->setLimit(5, numberValue);
+        activateConstraint(constraint);
+        return true;
+    }else
+        return false;
 }
 
 static JSValueRef ScriptConeTwistPhysicLinkGetSwingSpanB(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
@@ -129,10 +159,14 @@ static bool ScriptConeTwistPhysicLinkSetSwingSpanB(JSContextRef context, JSObjec
         ScriptException(context, exception, "ConeTwistPhysicLink setSwingSpanB(): Expected Number");
         return false;
     }
+    double numberValue = JSValueToNumber(context, value, NULL);
     auto constraint = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    constraint->setLimit(4, JSValueToNumber(context, value, NULL));
-    activateConstraint(constraint);
-    return true;
+    if(isfinite(numberValue)) {
+        constraint->setLimit(4, numberValue);
+        activateConstraint(constraint);
+        return true;
+    }else
+        return false;
 }
 
 static JSValueRef ScriptConeTwistPhysicLinkGetTwistSpan(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
@@ -144,34 +178,18 @@ static bool ScriptConeTwistPhysicLinkSetTwistSpan(JSContextRef context, JSObject
         ScriptException(context, exception, "ConeTwistPhysicLink setTwistSpan(): Expected Number");
         return false;
     }
+    double numberValue = JSValueToNumber(context, value, NULL);
     auto constraint = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    constraint->setLimit(3, JSValueToNumber(context, value, NULL));
-    activateConstraint(constraint);
-    return true;
+    if(isfinite(numberValue)) {
+        constraint->setLimit(3, numberValue);
+        activateConstraint(constraint);
+        return true;
+    }else
+        return false;
 }
 
 static JSValueRef ScriptConeTwistPhysicLinkGetTwistAngle(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
     return JSValueMakeNumber(context, static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint)->getTwistAngle());
-}
-
-static JSValueRef ScriptConeTwistPhysicLinkAccessFrameA(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    auto constraint = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4])) {
-        activateConstraint(constraint);
-        constraint->setFrames(getDataOfInstance<Matrix4>(context, argv[0])->getBTTransform(), constraint->getFrameOffsetB());
-        return argv[0];
-    }else
-        return newScriptMatrix4(context, constraint->getFrameOffsetA());
-}
-
-static JSValueRef ScriptConeTwistPhysicLinkAccessFrameB(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    auto constraint = static_cast<btConeTwistConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4])) {
-        activateConstraint(constraint);
-        constraint->setFrames(constraint->getFrameOffsetA(), getDataOfInstance<Matrix4>(context, argv[0])->getBTTransform());
-        return argv[0];
-    }else
-        return newScriptMatrix4(context, constraint->getFrameOffsetB());
 }
 
 JSStaticValue ScriptConeTwistPhysicLinkProperties[] = {
@@ -183,8 +201,8 @@ JSStaticValue ScriptConeTwistPhysicLinkProperties[] = {
 };
 
 JSStaticFunction ScriptConeTwistPhysicLinkMethods[] = {
-    {"frameA", ScriptConeTwistPhysicLinkAccessFrameA, ScriptMethodAttributes},
-    {"frameB", ScriptConeTwistPhysicLinkAccessFrameB, ScriptMethodAttributes},
+    {"frameA", ScriptPhysicLinkAccessFrameA<btConeTwistConstraint>, ScriptMethodAttributes},
+    {"frameB", ScriptPhysicLinkAccessFrameB<btConeTwistConstraint>, ScriptMethodAttributes},
     {0, 0, 0}
 };
 
@@ -230,7 +248,7 @@ static JSObjectRef ScriptDof6PhysicLinkConstructor(JSContextRef context, JSObjec
     initializer.object[1] = b = getDataOfInstance<RigidObject>(context, argv[1]);
     btTransform transA = getDataOfInstance<Matrix4>(context, argv[2])->getBTTransform(),
                 transB = getDataOfInstance<Matrix4>(context, argv[3])->getBTTransform();
-    PhysicLink* linkPtr = new PhysicLink();
+    auto linkPtr = new PhysicLink();
     auto constraint = new btGeneric6DofConstraint(*a->getBody(), *b->getBody(), transA, transB, true);
     if(linkPtr->init(initializer, constraint)) {
         linkPtr->scriptInstance = JSObjectMake(context, ScriptClasses[ScriptDof6PhysicLink], linkPtr);
@@ -240,26 +258,6 @@ static JSObjectRef ScriptDof6PhysicLinkConstructor(JSContextRef context, JSObjec
 }
 
 ScriptClassStaticDefinition(Dof6PhysicLink);
-
-static JSValueRef ScriptDof6PhysicLinkAccessFrameA(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    auto constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4])) {
-        activateConstraint(constraint);
-        constraint->setFrames(getDataOfInstance<Matrix4>(context, argv[0])->getBTTransform(), constraint->getFrameOffsetB());
-        return argv[0];
-    }else
-        return newScriptMatrix4(context, constraint->getFrameOffsetA());
-}
-
-static JSValueRef ScriptDof6PhysicLinkAccessFrameB(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    auto constraint = static_cast<btGeneric6DofConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4])) {
-        activateConstraint(constraint);
-        constraint->setFrames(constraint->getFrameOffsetA(), getDataOfInstance<Matrix4>(context, argv[0])->getBTTransform());
-        return argv[0];
-    }else
-        return newScriptMatrix4(context, constraint->getFrameOffsetB());
-}
 
 static JSValueRef ScriptDof6PhysicLinkAccessSpringStiffness(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
     if(argc == 0 || !JSValueIsNumber(context, argv[0]))
@@ -301,8 +299,11 @@ static JSValueRef ScriptDof6PhysicLinkAccessSpringDamping(JSContextRef context, 
         return ScriptException(context, exception, "Dof6PhysicLink springDamping(): Out of bounds");
     auto link = getDataOfInstance<PhysicLink>(instance);
     if(argc == 2 && JSValueIsNumber(context, argv[1])) {
-        auto constraint = ScriptDof6PhysicLinkEnableSpring(link);
-        constraint->setDamping(index, JSValueToNumber(context, argv[1], NULL));
+        double numberValue = JSValueToNumber(context, argv[1], NULL);
+        if(isfinite(numberValue)) {
+            auto constraint = ScriptDof6PhysicLinkEnableSpring(link);
+            constraint->setDamping(index, numberValue);
+        }
         return argv[1];
     }else{
         auto constraint = static_cast<btGeneric6DofSpringConstraint*>(link->constraint);
@@ -320,8 +321,11 @@ static JSValueRef ScriptDof6PhysicLinkAccessSpringEquilibrium(JSContextRef conte
         return ScriptException(context, exception, "Dof6PhysicLink springEquilibrium(): Out of bounds");
     auto link = getDataOfInstance<PhysicLink>(instance);
     if(argc == 2 && JSValueIsNumber(context, argv[1])) {
-        auto constraint = ScriptDof6PhysicLinkEnableSpring(link);
-        constraint->setEquilibriumPoint(index, JSValueToNumber(context, argv[1], NULL));
+        double numberValue = JSValueToNumber(context, argv[1], NULL);
+        if(isfinite(numberValue)) {
+            auto constraint = ScriptDof6PhysicLinkEnableSpring(link);
+            constraint->setEquilibriumPoint(index, numberValue);
+        }
         return argv[1];
     }else{
         auto constraint = static_cast<btGeneric6DofSpringConstraint*>(link->constraint);
@@ -372,8 +376,11 @@ static JSValueRef ScriptDof6PhysicLinkAccessMotorVelocity(JSContextRef context, 
         value = &angularMotor->m_targetVelocity;
     }
     if(argc == 2 && JSValueIsNumber(context, argv[1])) {
-        activateConstraint(constraint);
-        *value = JSValueToNumber(context, argv[1], NULL);
+        double numberValue = JSValueToNumber(context, argv[1], NULL);
+        if(isfinite(numberValue)) {
+            *value = numberValue;
+            activateConstraint(constraint);
+        }
         return argv[1];
     }else
         return JSValueMakeNumber(context, *value);
@@ -396,8 +403,11 @@ static JSValueRef ScriptDof6PhysicLinkAccessMotorForce(JSContextRef context, JSO
         value = &angularMotor->m_maxMotorForce;
     }
     if(argc == 2 && JSValueIsNumber(context, argv[1])) {
-        activateConstraint(constraint);
-        *value = JSValueToNumber(context, argv[1], NULL);
+        double numberValue = JSValueToNumber(context, argv[1], NULL);
+        if(isfinite(numberValue)) {
+            *value = numberValue;
+            activateConstraint(constraint);
+        }
         return argv[1];
     }else
         return JSValueMakeNumber(context, *value);
@@ -456,8 +466,8 @@ static JSValueRef ScriptDof6PhysicLinkAccessLinearLimitMax(JSContextRef context,
 }
 
 JSStaticFunction ScriptDof6PhysicLinkMethods[] = {
-    {"frameA", ScriptDof6PhysicLinkAccessFrameA, ScriptMethodAttributes},
-    {"frameB", ScriptDof6PhysicLinkAccessFrameB, ScriptMethodAttributes},
+    {"frameA", ScriptPhysicLinkAccessFrameA<btGeneric6DofConstraint>, ScriptMethodAttributes},
+    {"frameB", ScriptPhysicLinkAccessFrameB<btGeneric6DofConstraint>, ScriptMethodAttributes},
     {"springStiffness", ScriptDof6PhysicLinkAccessSpringStiffness, ScriptMethodAttributes},
     {"springDamping", ScriptDof6PhysicLinkAccessSpringDamping, ScriptMethodAttributes},
     {"springEquilibrium", ScriptDof6PhysicLinkAccessSpringEquilibrium, ScriptMethodAttributes},
@@ -489,7 +499,7 @@ static JSObjectRef ScriptGearPhysicLinkConstructor(JSContextRef context, JSObjec
     initializer.object[1] = b = getDataOfInstance<RigidObject>(context, argv[1]);
     btVector3 axisA = getScriptVector3(context, argv[2]),
               axisB = getScriptVector3(context, argv[3]);
-    PhysicLink* linkPtr = new PhysicLink();
+    auto linkPtr = new PhysicLink();
     auto constraint = new btGearConstraint(*a->getBody(), *b->getBody(), axisA, axisB, JSValueToNumber(context, argv[4], NULL));
     if(linkPtr->init(initializer, constraint)) {
         linkPtr->scriptInstance = JSObjectMake(context, ScriptClasses[ScriptGearPhysicLink], linkPtr);
@@ -509,10 +519,14 @@ static bool ScriptGearPhysicLinkSetRatio(JSContextRef context, JSObjectRef insta
         ScriptException(context, exception, "GearPhysicLink setRatio(): Expected Number");
         return false;
     }
+    double numberValue = JSValueToNumber(context, value, NULL);
     auto constraint = static_cast<btGearConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    constraint->setRatio(JSValueToNumber(context, value, NULL));
-    activateConstraint(constraint);
-    return true;
+    if(numberValue > 0.0) {
+        constraint->setRatio(numberValue);
+        activateConstraint(constraint);
+        return true;
+    }else
+        return false;
 }
 
 static JSValueRef ScriptGearPhysicLinkAccessAxisA(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
@@ -565,7 +579,7 @@ static JSObjectRef ScriptHingePhysicLinkConstructor(JSContextRef context, JSObje
     initializer.object[1] = b = getDataOfInstance<RigidObject>(context, argv[1]);
     btTransform transA = getDataOfInstance<Matrix4>(context, argv[2])->getBTTransform(),
     transB = getDataOfInstance<Matrix4>(context, argv[3])->getBTTransform();
-    PhysicLink* linkPtr = new PhysicLink();
+    auto linkPtr = new PhysicLink();
     auto constraint = new btHingeConstraint(*a->getBody(), *b->getBody(), transA, transB, true);
     if(linkPtr->init(initializer, constraint)) {
         linkPtr->scriptInstance = JSObjectMake(context, ScriptClasses[ScriptHingePhysicLink], linkPtr);
@@ -589,10 +603,14 @@ static bool ScriptHingePhysicLinkSetAngularLimitMin(JSContextRef context, JSObje
         ScriptException(context, exception, "HingePhysicLink setAngularLimitMin(): Expected Number");
         return false;
     }
+    double numberValue = JSValueToNumber(context, value, NULL);
     auto constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    constraint->setLimit(JSValueToNumber(context, value, NULL), constraint->getUpperLimit());
-    activateConstraint(constraint);
-    return true;
+    if(isfinite(numberValue)) {
+        constraint->setLimit(numberValue, constraint->getUpperLimit());
+        activateConstraint(constraint);
+        return true;
+    }else
+        return false;
 }
 
 static JSValueRef ScriptHingePhysicLinkGetAngularLimitMax(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
@@ -604,10 +622,14 @@ static bool ScriptHingePhysicLinkSetAngularLimitMax(JSContextRef context, JSObje
         ScriptException(context, exception, "HingePhysicLink setAngularLimitMax(): Expected Number");
         return false;
     }
+    double numberValue = JSValueToNumber(context, value, NULL);
     auto constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    constraint->setLimit(constraint->getLowerLimit(), JSValueToNumber(context, value, NULL));
-    activateConstraint(constraint);
-    return true;
+    if(isfinite(numberValue)) {
+        constraint->setLimit(constraint->getLowerLimit(), numberValue);
+        activateConstraint(constraint);
+        return true;
+    }else
+        return false;
 }
 
 static JSValueRef ScriptHingePhysicLinkGetAngularMotorEnabled(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
@@ -636,12 +658,16 @@ static bool ScriptHingePhysicLinkSetAngularMotorVelocity(JSContextRef context, J
         ScriptException(context, exception, "HingePhysicLink setAngularMotorVelocity(): Expected Number");
         return false;
     }
+    double numberValue = JSValueToNumber(context, value, NULL);
     auto constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    constraint->enableAngularMotor(constraint->getEnableAngularMotor(),
-                                   JSValueToNumber(context, value, NULL),
-                                   constraint->getMaxMotorImpulse());
-    activateConstraint(constraint);
-    return true;
+    if(isfinite(numberValue)) {
+        constraint->enableAngularMotor(constraint->getEnableAngularMotor(),
+                                       numberValue,
+                                       constraint->getMaxMotorImpulse());
+        activateConstraint(constraint);
+        return true;
+    }else
+        return false;
 }
 
 static JSValueRef ScriptHingePhysicLinkGetAngularMotorForce(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
@@ -653,32 +679,16 @@ static bool ScriptHingePhysicLinkSetAngularMotorForce(JSContextRef context, JSOb
         ScriptException(context, exception, "HingePhysicLink setAngularMotorForce(): Expected Number");
         return false;
     }
+    double numberValue = JSValueToNumber(context, value, NULL);
     auto constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    constraint->enableAngularMotor(constraint->getEnableAngularMotor(),
-                                   constraint->getMotorTargetVelosity(),
-                                   JSValueToNumber(context, value, NULL));
-    activateConstraint(constraint);
-    return true;
-}
-
-static JSValueRef ScriptHingePhysicLinkAccessFrameA(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    auto constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4])) {
+    if(isfinite(numberValue)) {
+        constraint->enableAngularMotor(constraint->getEnableAngularMotor(),
+                                       constraint->getMotorTargetVelosity(),
+                                       numberValue);
         activateConstraint(constraint);
-        constraint->setFrames(getDataOfInstance<Matrix4>(context, argv[0])->getBTTransform(), constraint->getFrameOffsetB());
-        return argv[0];
+        return true;
     }else
-        return newScriptMatrix4(context, constraint->getFrameOffsetA());
-}
-
-static JSValueRef ScriptHingePhysicLinkAccessFrameB(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    auto constraint = static_cast<btHingeConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4])) {
-        activateConstraint(constraint);
-        constraint->setFrames(constraint->getFrameOffsetA(), getDataOfInstance<Matrix4>(context, argv[0])->getBTTransform());
-        return argv[0];
-    }else
-        return newScriptMatrix4(context, constraint->getFrameOffsetB());
+        return false;
 }
 
 JSStaticValue ScriptHingePhysicLinkProperties[] = {
@@ -692,8 +702,8 @@ JSStaticValue ScriptHingePhysicLinkProperties[] = {
 };
 
 JSStaticFunction ScriptHingePhysicLinkMethods[] = {
-    {"frameA", ScriptHingePhysicLinkAccessFrameA, ScriptMethodAttributes},
-    {"frameB", ScriptHingePhysicLinkAccessFrameB, ScriptMethodAttributes},
+    {"frameA", ScriptPhysicLinkAccessFrameA<btHingeConstraint>, ScriptMethodAttributes},
+    {"frameB", ScriptPhysicLinkAccessFrameB<btHingeConstraint>, ScriptMethodAttributes},
     {0, 0, 0}
 };
 
@@ -714,7 +724,7 @@ static JSObjectRef ScriptPointPhysicLinkConstructor(JSContextRef context, JSObje
     initializer.object[1] = b = getDataOfInstance<RigidObject>(context, argv[1]);
     btVector3 pointA = getScriptVector3(context, argv[2]),
     pointB = getScriptVector3(context, argv[3]);
-    PhysicLink* linkPtr = new PhysicLink();
+    auto linkPtr = new PhysicLink();
     auto constraint = new btPoint2PointConstraint(*a->getBody(), *b->getBody(), pointA, pointB);
     if(linkPtr->init(initializer, constraint)) {
         linkPtr->scriptInstance = JSObjectMake(context, ScriptClasses[ScriptPointPhysicLink], linkPtr);
@@ -770,7 +780,7 @@ static JSObjectRef ScriptSliderPhysicLinkConstructor(JSContextRef context, JSObj
     initializer.object[1] = b = getDataOfInstance<RigidObject>(context, argv[1]);
     btTransform transA = getDataOfInstance<Matrix4>(context, argv[2])->getBTTransform(),
     transB = getDataOfInstance<Matrix4>(context, argv[3])->getBTTransform();
-    PhysicLink* linkPtr = new PhysicLink();
+    auto linkPtr = new PhysicLink();
     auto constraint = new btSliderConstraint(*a->getBody(), *b->getBody(), transA, transB, true);
     if(linkPtr->init(initializer, constraint)) {
         linkPtr->scriptInstance = JSObjectMake(context, ScriptClasses[ScriptSliderPhysicLink], linkPtr);
@@ -798,10 +808,14 @@ static bool ScriptSliderPhysicLinkSetAngularLimitMin(JSContextRef context, JSObj
         ScriptException(context, exception, "SliderPhysicLink setAngularLimitMin(): Expected Number");
         return false;
     }
+    double numberValue = JSValueToNumber(context, value, NULL);
     auto constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    constraint->setLowerAngLimit(JSValueToNumber(context, value, NULL));
-    activateConstraint(constraint);
-    return true;
+    if(isfinite(numberValue)) {
+        constraint->setLowerAngLimit(numberValue);
+        activateConstraint(constraint);
+        return true;
+    }else
+        return false;
 }
 
 static JSValueRef ScriptSliderPhysicLinkGetAngularLimitMax(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
@@ -813,10 +827,14 @@ static bool ScriptSliderPhysicLinkSetAngularLimitMax(JSContextRef context, JSObj
         ScriptException(context, exception, "SliderPhysicLink setAngularLimitMax(): Expected Number");
         return false;
     }
+    double numberValue = JSValueToNumber(context, value, NULL);
     auto constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    constraint->setUpperAngLimit(JSValueToNumber(context, value, NULL));
-    activateConstraint(constraint);
-    return true;
+    if(isfinite(numberValue)) {
+        constraint->setUpperAngLimit(numberValue);
+        activateConstraint(constraint);
+        return true;
+    }else
+        return false;
 }
 
 static JSValueRef ScriptSliderPhysicLinkGetAngularMotorEnabled(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
@@ -843,10 +861,14 @@ static bool ScriptSliderPhysicLinkSetAngularMotorVelocity(JSContextRef context, 
         ScriptException(context, exception, "SliderPhysicLink setAngularMotorVelocity(): Expected Number");
         return false;
     }
+    double numberValue = JSValueToNumber(context, value, NULL);
     auto constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    constraint->setTargetAngMotorVelocity(JSValueToNumber(context, value, NULL));
-    activateConstraint(constraint);
-    return true;
+    if(isfinite(numberValue)) {
+        constraint->setTargetAngMotorVelocity(numberValue);
+        activateConstraint(constraint);
+        return true;
+    }else
+        return false;
 }
 
 static JSValueRef ScriptSliderPhysicLinkGetAngularMotorForce(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
@@ -858,10 +880,14 @@ static bool ScriptSliderPhysicLinkSetAngularMotorForce(JSContextRef context, JSO
         ScriptException(context, exception, "SliderPhysicLink setAngularMotorForce(): Expected Number");
         return false;
     }
+    double numberValue = JSValueToNumber(context, value, NULL);
     auto constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    constraint->setMaxAngMotorForce(JSValueToNumber(context, value, NULL));
-    activateConstraint(constraint);
-    return true;
+    if(isfinite(numberValue)) {
+        constraint->setMaxAngMotorForce(numberValue);
+        activateConstraint(constraint);
+        return true;
+    }else
+        return false;
 }
 
 static JSValueRef ScriptSliderPhysicLinkGetLinearLimitMin(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
@@ -873,10 +899,14 @@ static bool ScriptSliderPhysicLinkSetLinearLimitMin(JSContextRef context, JSObje
         ScriptException(context, exception, "SliderPhysicLink setLinearLimitMin(): Expected Number");
         return false;
     }
+    double numberValue = JSValueToNumber(context, value, NULL);
     auto constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    constraint->setLowerLinLimit(JSValueToNumber(context, value, NULL));
-    activateConstraint(constraint);
-    return true;
+    if(isfinite(numberValue)) {
+        constraint->setLowerLinLimit(numberValue);
+        activateConstraint(constraint);
+        return true;
+    }else
+        return false;
 }
 
 static JSValueRef ScriptSliderPhysicLinkGetLinearLimitMax(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
@@ -888,10 +918,14 @@ static bool ScriptSliderPhysicLinkSetLinearLimitMax(JSContextRef context, JSObje
         ScriptException(context, exception, "SliderPhysicLink setLinearLimitMax(): Expected Number");
         return false;
     }
+    double numberValue = JSValueToNumber(context, value, NULL);
     auto constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    constraint->setUpperLinLimit(JSValueToNumber(context, value, NULL));
-    activateConstraint(constraint);
-    return true;
+    if(isfinite(numberValue)) {
+        constraint->setUpperLinLimit(numberValue);
+        activateConstraint(constraint);
+        return true;
+    }else
+        return false;
 }
 
 static JSValueRef ScriptSliderPhysicLinkGetLinearMotorEnabled(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
@@ -918,10 +952,14 @@ static bool ScriptSliderPhysicLinkSetLinearMotorVelocity(JSContextRef context, J
         ScriptException(context, exception, "SliderPhysicLink setLinearMotorVelocity(): Expected Number");
         return false;
     }
+    double numberValue = JSValueToNumber(context, value, NULL);
     auto constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    constraint->setTargetLinMotorVelocity(JSValueToNumber(context, value, NULL));
-    activateConstraint(constraint);
-    return true;
+    if(isfinite(numberValue)) {
+        constraint->setTargetLinMotorVelocity(numberValue);
+        activateConstraint(constraint);
+        return true;
+    }else
+        return false;
 }
 
 static JSValueRef ScriptSliderPhysicLinkGetLinearMotorForce(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
@@ -933,30 +971,14 @@ static bool ScriptSliderPhysicLinkSetLinearMotorForce(JSContextRef context, JSOb
         ScriptException(context, exception, "SliderPhysicLink setLinearMotorForce(): Expected Number");
         return false;
     }
+    double numberValue = JSValueToNumber(context, value, NULL);
     auto constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    constraint->setMaxLinMotorForce(JSValueToNumber(context, value, NULL));
-    activateConstraint(constraint);
-    return true;
-}
-
-static JSValueRef ScriptSliderPhysicLinkAccessFrameA(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    auto constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4])) {
+    if(isfinite(numberValue)) {
+        constraint->setMaxLinMotorForce(numberValue);
         activateConstraint(constraint);
-        constraint->setFrames(getDataOfInstance<Matrix4>(context, argv[0])->getBTTransform(), constraint->getFrameOffsetB());
-        return argv[0];
+        return true;
     }else
-        return newScriptMatrix4(context, constraint->getFrameOffsetA());
-}
-
-static JSValueRef ScriptSliderPhysicLinkAccessFrameB(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    auto constraint = static_cast<btSliderConstraint*>(getDataOfInstance<PhysicLink>(instance)->constraint);
-    if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4])) {
-        activateConstraint(constraint);
-        constraint->setFrames(constraint->getFrameOffsetA(), getDataOfInstance<Matrix4>(context, argv[0])->getBTTransform());
-        return argv[0];
-    }else
-        return newScriptMatrix4(context, constraint->getFrameOffsetB());
+        return false;
 }
 
 JSStaticValue ScriptSliderPhysicLinkProperties[] = {
@@ -976,8 +998,8 @@ JSStaticValue ScriptSliderPhysicLinkProperties[] = {
 };
 
 JSStaticFunction ScriptSliderPhysicLinkMethods[] = {
-    {"frameA", ScriptSliderPhysicLinkAccessFrameA, ScriptMethodAttributes},
-    {"frameB", ScriptSliderPhysicLinkAccessFrameB, ScriptMethodAttributes},
+    {"frameA", ScriptPhysicLinkAccessFrameA<btSliderConstraint>, ScriptMethodAttributes},
+    {"frameB", ScriptPhysicLinkAccessFrameB<btSliderConstraint>, ScriptMethodAttributes},
     {0, 0, 0}
 };
 

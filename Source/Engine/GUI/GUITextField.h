@@ -22,7 +22,7 @@ class GUITextField : public GUIFramedView {
     public:
     unsigned int cursorX;
     bool enabled;
-    std::function<void(GUITextField*)> onFocus, onChange, onBlur;
+    std::function<void(GUITextField*)> onFocus, onChange;
     GUITextField();
     void setFocused(bool active);
     bool addChild(GUIRect* child);

@@ -54,19 +54,19 @@ void initScriptClasses() {
     ScriptInitClassWithParent(PointPhysicLink, PhysicLink);
     ScriptInitClassWithParent(SliderPhysicLink, PhysicLink);
     
-    /*ScriptInitClass(GUIRect);
+    ScriptInitClass(GUIRect);
     ScriptInitClassWithParent(GUIView, GUIRect);
-    ScriptInitClassWithParent(GUIFramedView, GUIView);
     ScriptInitClassWithParent(GUIScreenView, GUIView);
-    ScriptInitClassWithParent(GUIScrollView, GUIView);
+    ScriptInitClassWithParent(GUIFramedView, GUIView);
+    ScriptInitClassWithParent(GUIScrollView, GUIFramedView);
     ScriptInitClassWithParent(GUIButton, GUIRect);
-    ScriptInitClassWithParent(GUICheckBox, GUIRect);
+    ScriptInitClassWithParent(GUICheckBox, GUIButton);
+    ScriptInitClassWithParent(GUITabs, GUIView);
     ScriptInitClassWithParent(GUISlider, GUIRect);
-    ScriptInitClassWithParent(GUITabs, GUIRect);
     ScriptInitClassWithParent(GUITextField, GUIRect);
     ScriptInitClassWithParent(GUIImage, GUIRect);
     ScriptInitClassWithParent(GUILabel, GUIRect);
-    ScriptInitClassWithParent(GUIProgressBar, GUIRect);*/
+    ScriptInitClassWithParent(GUIProgressBar, GUIRect);
     
     ScriptInitSingleton(Animation);
     ScriptInitSingleton(Intersection);
@@ -116,9 +116,6 @@ ScriptManager::ScriptManager() {
     contextGroup = JSContextGroupCreate();
     globalContext = JSGlobalContextCreateInGroup(contextGroup, NULL);
     
-    for(unsigned i = 0; i < ScriptStaticsCount; i ++)
-        staticObjects[i] = NULL; //TODO: Remove
-    
     ScriptAddSingleton(Vector3);
     ScriptAddSingleton(Quaternion);
     ScriptAddSingleton(Matrix4);
@@ -148,19 +145,19 @@ ScriptManager::ScriptManager() {
     ScriptAddSingleton(PointPhysicLink);
     ScriptAddSingleton(SliderPhysicLink);
     
-    //ScriptAddSingleton(GUIRect);
-    //ScriptAddSingleton(GUIView);
-    //ScriptAddSingleton(GUIFramedView);
-    //ScriptAddSingleton(GUIScreenView);
-    //ScriptAddSingleton(GUIScrollView);
-    //ScriptAddSingleton(GUIButton);
-    //ScriptAddSingleton(GUICheckBox);
-    //ScriptAddSingleton(GUISlider);
-    //ScriptAddSingleton(GUITabs);
-    //ScriptAddSingleton(GUITextField);
-    //ScriptAddSingleton(GUIImage);
-    //ScriptAddSingleton(GUILabel);
-    //ScriptAddSingleton(GUIProgressBar);
+    ScriptAddSingleton(GUIRect);
+    ScriptAddSingleton(GUIView);
+    ScriptAddSingleton(GUIScreenView);
+    ScriptAddSingleton(GUIFramedView);
+    ScriptAddSingleton(GUIScrollView);
+    ScriptAddSingleton(GUIButton);
+    ScriptAddSingleton(GUICheckBox);
+    ScriptAddSingleton(GUITabs);
+    ScriptAddSingleton(GUISlider);
+    ScriptAddSingleton(GUITextField);
+    ScriptAddSingleton(GUIImage);
+    ScriptAddSingleton(GUILabel);
+    ScriptAddSingleton(GUIProgressBar);
     
     ScriptAddSingleton(Animation);
     ScriptAddSingleton(Intersection);

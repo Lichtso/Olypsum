@@ -86,7 +86,7 @@ std::unordered_set<BaseLink*>::iterator BaseObject::findLinkTo(BaseObject* linke
 
 
 SimpleObject::SimpleObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :SimpleObject() {
-    ScriptInstance(ScriptBaseObject);
+    ScriptInstance(BaseObject);
     objectManager.simpleObjects.insert(this);
     BaseObject::init(node, levelLoader);
 }
@@ -107,7 +107,7 @@ PhysicObject::PhysicObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoade
     body->setUserPointer(this);
     body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
     objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Zone, CollisionMask_Object);
-    ScriptInstance(ScriptPhysicObject);
+    ScriptInstance(PhysicObject);
 }
 
 void PhysicObject::removeClean() {
@@ -218,7 +218,7 @@ void PhysicObject::readFrictionAndRestitution(rapidxml::xml_node<xmlUsedCharType
     }
 }
 
-rapidxml::xml_node<xmlUsedCharType>* PhysicObject::writeWithoutCollisionShape(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
+rapidxml::xml_node<xmlUsedCharType>* PhysicObject::writeFrictionAndRestitution(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
     rapidxml::xml_node<xmlUsedCharType> *parameterNode, *node = BaseObject::write(doc, levelSaver);
     rapidxml::xml_attribute<xmlUsedCharType>* attribute;
     if(body->getFriction() != 0.5 || body->getRollingFriction() != 0.0) {
@@ -244,7 +244,7 @@ rapidxml::xml_node<xmlUsedCharType>* PhysicObject::writeWithoutCollisionShape(ra
 }
 
 rapidxml::xml_node<xmlUsedCharType>* PhysicObject::write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver) {
-    rapidxml::xml_node<xmlUsedCharType>* node = PhysicObject::writeWithoutCollisionShape(doc, levelSaver);
+    rapidxml::xml_node<xmlUsedCharType>* node = PhysicObject::writeFrictionAndRestitution(doc, levelSaver);
     node->name("PhysicObject");
     rapidxml::xml_node<xmlUsedCharType>* physicsBody = doc.allocate_node(rapidxml::node_element);
     physicsBody->name("PhysicsBody");

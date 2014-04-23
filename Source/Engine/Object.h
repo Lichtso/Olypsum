@@ -141,7 +141,7 @@ class PhysicObject : public BaseObject {
     btCollisionShape* readCollisionShape(rapidxml::xml_node<xmlUsedCharType>* node);
     //! Reads the friction and restitution from the objects rapidxml::xml_node
     void readFrictionAndRestitution(rapidxml::xml_node<xmlUsedCharType>* node);
-    rapidxml::xml_node<xmlUsedCharType>* writeWithoutCollisionShape(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
+    rapidxml::xml_node<xmlUsedCharType>* writeFrictionAndRestitution(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);
 };
 

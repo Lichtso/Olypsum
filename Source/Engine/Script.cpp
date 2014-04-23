@@ -85,8 +85,7 @@ FileResourcePtr<FileResource> ScriptFile::load(FilePackage* _filePackage, const 
     context = JSGlobalContextCreateInGroup(scriptManager->contextGroup, NULL);
     JSObjectRef globalObject = JSContextGetGlobalObject(context);
     for(unsigned i = 0; i < ScriptStaticsCount; i ++)
-        if(scriptManager->staticObjects[i]) //TODO: Remove
-            JSObjectSetProperty(context, globalObject, ScriptStringClassNames[i].str, scriptManager->staticObjects[i], kJSPropertyAttributeDontDelete, 0);
+        JSObjectSetProperty(context, globalObject, ScriptStringClassNames[i].str, scriptManager->staticObjects[i], kJSPropertyAttributeDontDelete, 0);
     JSObjectSetProperty(context, globalObject, ScriptStringExports.str, JSObjectMake(context, NULL, NULL), kJSPropertyAttributeDontDelete, 0);
     JSEvaluateScript(context, strSourceCode.str, NULL, strScriptName.str, 0, &exception);
     
@@ -131,30 +130,48 @@ JSValueRef ScriptFile::callFunction(const char* functionName, bool recvFirstArg,
 
 ScriptString
 ScriptStringClassNames[ScriptStaticsCount],
+ScriptStringAdd("add"),
+ScriptStringAll("all"),
+ScriptStringBottom("bottom"),
+ScriptStringCenter("center"),
 ScriptStringChildren("children"),
+ScriptStringDelete("delete"),
 ScriptStringDirection("direction"),
 ScriptStringDispose("dispose"),
 ScriptStringDistance("distance"),
+ScriptStringEdit("edit"),
 ScriptStringExports("exports"),
 ScriptStringFrames("frames"),
+ScriptStringHeight("height"),
+ScriptStringHighlighted("highlighted"),
 ScriptStringHold("hold"),
+ScriptStringHorizontal("horizontal"),
+ScriptStringLeft("left"),
 ScriptStringLength("length"),
+ScriptStringLockable("lockable"),
 ScriptStringLooping("looping"),
 ScriptStringMessage("message"),
 ScriptStringName("name"),
+ScriptStringNone("none"),
 ScriptStringNormal("normal"),
 ScriptStringNormals("normals"),
 ScriptStringObjects("objects"),
 ScriptStringOrigin("origin"),
 ScriptStringPositions("positions"),
+ScriptStringPressed("pressed"),
 ScriptStringRadii("radii"),
 ScriptStringRadius("radius"),
+ScriptStringReleased("released"),
+ScriptStringRight("right"),
 ScriptStringSize("size"),
 ScriptStringStack("stack"),
 ScriptStringTime("time"),
+ScriptStringTop("top"),
 ScriptStringTransformations("transformations"),
 ScriptStringType("type"),
+ScriptStringVertical("vertical"),
 ScriptStringW("w"),
+ScriptStringWidth("width"),
 ScriptStringX("x"),
 ScriptStringY("y"),
 ScriptStringZ("z");

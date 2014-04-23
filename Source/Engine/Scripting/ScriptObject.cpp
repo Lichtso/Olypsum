@@ -15,14 +15,17 @@ static JSObjectRef ScriptBaseClassConstructor(JSContextRef context, JSObjectRef 
 ScriptClassStaticDefinition(BaseClass);
 
 static JSValueRef ScriptBaseClassGetScriptClass(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    BaseClass* objectPtr = getDataOfInstance<BaseClass>(instance);
+    auto objectPtr = getDataOfInstance<BaseClass>(instance);
     ScriptString strClassName(fileManager.getPathOfResource(objectPtr->scriptFile->filePackage, objectPtr->scriptFile->name));
     return strClassName.getJSStr(context);
 }
 
 static bool ScriptBaseClassSetScriptClass(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
-    if(!JSValueIsString(context, value)) return false;
-    BaseClass* objectPtr = getDataOfInstance<BaseClass>(instance);
+    if(!JSValueIsString(context, value)) {
+        ScriptException(context, exception, "BaseClass setScriptClass(): Expected String");
+        return false;
+    }
+    auto objectPtr = getDataOfInstance<BaseClass>(instance);
     ScriptString strClassName(context, value);
     FileResourcePtr<ScriptFile> scriptFile = fileManager.getResourceByPath<ScriptFile>(levelManager.levelPackage, strClassName.getStdStr());
     if(scriptFile) {
@@ -58,7 +61,7 @@ static JSObjectRef ScriptBaseObjectConstructor(JSContextRef context, JSObjectRef
 ScriptClassStaticDefinition(BaseObject);
 
 static JSValueRef ScriptBaseObjectAccessTransformation(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(instance);
+    auto objectPtr = getDataOfInstance<BaseObject>(instance);
     if(argc == 1 && JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4])) {
         Matrix4* matrix = getDataOfInstance<Matrix4>(context, argv[0]);
         if(matrix->isValid())
@@ -69,7 +72,7 @@ static JSValueRef ScriptBaseObjectAccessTransformation(JSContextRef context, JSO
 }
 
 static JSValueRef ScriptBaseObjectGetTransformUpLink(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(instance);
+    auto objectPtr = getDataOfInstance<BaseObject>(instance);
     foreach_e(objectPtr->links, i)
         if(dynamic_cast<TransformLink*>(*i) && (*i)->b == objectPtr)
             return (*i)->scriptInstance;
@@ -77,7 +80,7 @@ static JSValueRef ScriptBaseObjectGetTransformUpLink(JSContextRef context, JSObj
 }
 
 static JSValueRef ScriptBaseObjectGetBoneUpLink(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(instance);
+    auto objectPtr = getDataOfInstance<BaseObject>(instance);
     foreach_e(objectPtr->links, i)
         if(dynamic_cast<BoneLink*>(*i) && (*i)->b == objectPtr)
             return (*i)->scriptInstance;
@@ -91,7 +94,7 @@ static JSValueRef ScriptBaseObjectIterateLinks(JSContextRef context, JSObjectRef
     if(!callback || !JSObjectIsFunction(context, callback))
         return ScriptException(context, exception, "BaseObject iterateLinks: Expected Function");
     exception = NULL;
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(instance);
+    auto objectPtr = getDataOfInstance<BaseObject>(instance);
     for(auto link : objectPtr->links) {
         JSValueRef args[] = { link->scriptInstance };
         JSObjectCallAsFunction(context, callback, callback, 1, args, exception);
@@ -102,8 +105,7 @@ static JSValueRef ScriptBaseObjectIterateLinks(JSContextRef context, JSObjectRef
 }
 
 static JSValueRef ScriptBaseObjectGetLinkCount(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    BaseObject* objectPtr = getDataOfInstance<BaseObject>(instance);
-    return JSValueMakeNumber(context, objectPtr->links.size());
+    return JSValueMakeNumber(context, getDataOfInstance<BaseObject>(instance)->links.size());
 }
 
 JSStaticValue ScriptBaseObjectProperties[] = {
@@ -146,7 +148,7 @@ static bool ScriptPhysicObjectSetCollisionShape(JSContextRef context, JSObjectRe
     ScriptString strName(context, value);
     btCollisionShape* shape = levelManager.getCollisionShape(strName.getStdStr());
     if(shape) {
-        PhysicObject* objectPtr = getDataOfInstance<PhysicObject>(instance);
+        auto objectPtr = getDataOfInstance<PhysicObject>(instance);
         objectPtr->getBody()->setCollisionShape(shape);
         objectPtr->updateTouchingObjects();
         return true;
@@ -179,7 +181,7 @@ static JSValueRef ScriptPhysicObjectGetCollisionShapeInfo(JSContextRef context, 
             JSObjectSetProperty(context, result, ScriptStringSize.str, JSValueMakeNumber(context, radius), 0, NULL);
         } break;
         case CAPSULE_SHAPE_PROXYTYPE: {
-            btCapsuleShape* capsuleShape = static_cast<btCapsuleShape*>(shape);
+            auto capsuleShape = static_cast<btCapsuleShape*>(shape);
             double radius = capsuleShape->getRadius(), length = capsuleShape->getHalfHeight();
             JSObjectSetProperty(context, result, ScriptStringRadius.str, JSValueMakeNumber(context, radius), 0, NULL);
             JSObjectSetProperty(context, result, ScriptStringLength.str, JSValueMakeNumber(context, length), 0, NULL);
@@ -191,7 +193,7 @@ static JSValueRef ScriptPhysicObjectGetCollisionShapeInfo(JSContextRef context, 
                 JSObjectSetProperty(context, result, ScriptStringDirection.str, ScriptStringY.getJSStr(context), 0, NULL);
         } break;
         case CONE_SHAPE_PROXYTYPE: {
-            btConeShape* coneShape = static_cast<btConeShape*>(shape);
+            auto coneShape = static_cast<btConeShape*>(shape);
             double radius = coneShape->getRadius(), length = coneShape->getHeight();
             JSObjectSetProperty(context, result, ScriptStringRadius.str, JSValueMakeNumber(context, radius), 0, NULL);
             JSObjectSetProperty(context, result, ScriptStringLength.str, JSValueMakeNumber(context, length), 0, NULL);
@@ -203,7 +205,7 @@ static JSValueRef ScriptPhysicObjectGetCollisionShapeInfo(JSContextRef context, 
                 JSObjectSetProperty(context, result, ScriptStringDirection.str, ScriptStringY.getJSStr(context), 0, NULL);
         } break;
         case MULTI_SPHERE_SHAPE_PROXYTYPE: {
-            btMultiSphereShape* multiSphereShape = static_cast<btMultiSphereShape*>(shape);
+            auto multiSphereShape = static_cast<btMultiSphereShape*>(shape);
             JSObjectRef positions = JSObjectMakeArray(context, 0, NULL, NULL),
                         radii = JSObjectMakeArray(context, 0, NULL, NULL);
             for(unsigned int i = 0; i < multiSphereShape->getSphereCount(); i ++) {
@@ -214,7 +216,7 @@ static JSValueRef ScriptPhysicObjectGetCollisionShapeInfo(JSContextRef context, 
             JSObjectSetProperty(context, result, ScriptStringRadii.str, radii, 0, NULL);
         } break;
         case COMPOUND_SHAPE_PROXYTYPE: {
-            btCompoundShape* compoundShape = static_cast<btCompoundShape*>(shape);
+            auto compoundShape = static_cast<btCompoundShape*>(shape);
             JSObjectRef transformations = JSObjectMakeArray(context, 0, NULL, NULL),
                         children = JSObjectMakeArray(context, 0, NULL, NULL);
             for(unsigned int i = 0; i < compoundShape->getNumChildShapes(); i ++) {
@@ -226,19 +228,19 @@ static JSValueRef ScriptPhysicObjectGetCollisionShapeInfo(JSContextRef context, 
             JSObjectSetProperty(context, result, ScriptStringChildren.str, children, 0, NULL);
         } break;
         case CONVEX_HULL_SHAPE_PROXYTYPE: {
-            btConvexHullShape* convexHullShape = static_cast<btConvexHullShape*>(shape);
+            auto convexHullShape = static_cast<btConvexHullShape*>(shape);
            JSObjectRef positions = JSObjectMakeArray(context, 0, NULL, NULL);
             for(unsigned int i = 0; i < convexHullShape->getNumPoints(); i ++)
                 JSObjectSetPropertyAtIndex(context, positions, i, newScriptVector3(context, convexHullShape->getUnscaledPoints()[i]), NULL);
             JSObjectSetProperty(context, result, ScriptStringPositions.str, positions, 0, NULL);
         } break;
         case STATIC_PLANE_PROXYTYPE: {
-            btStaticPlaneShape* staticPlaneShape = static_cast<btStaticPlaneShape*>(shape);
+            auto staticPlaneShape = static_cast<btStaticPlaneShape*>(shape);
             JSObjectSetProperty(context, result, ScriptStringNormal.str, newScriptVector3(context, staticPlaneShape->getPlaneNormal()), 0, NULL);
             JSObjectSetProperty(context, result, ScriptStringDistance.str, JSValueMakeNumber(context, staticPlaneShape->getPlaneConstant()), 0, NULL);
         } break;
         case TERRAIN_SHAPE_PROXYTYPE: {
-            TerrainObject* objectPtr = getDataOfInstance<TerrainObject>(instance);
+            auto objectPtr = getDataOfInstance<TerrainObject>(instance);
             btVector3 size = static_cast<btHeightfieldTerrainShape*>(shape)->getLocalScaling();
             size *= btVector3(objectPtr->width*0.5, 0.5, objectPtr->length*0.5);
             JSObjectSetProperty(context, result, ScriptStringSize.str, newScriptVector3(context, size), 0, NULL);

@@ -30,7 +30,7 @@ class GUILabel : public GUIRect {
     unsigned int fontHeight;
     enum TextAlignment {
         Left = 0,
-        Middle = 1,
+        Center = 1,
         Right = 2,
     } textAlignment;
     std::string text;

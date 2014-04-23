@@ -59,12 +59,11 @@ void GUITextField::setFocused(bool active) {
     if(active) {
         cursorDrawTick = 0.0;
         cursorX = 0;
-        if(onFocus) onFocus(this);
     }else{
         cursorX = -1;
         updateContent();
-        if(onBlur) onBlur(this);
     }
+    if(onFocus) onFocus(this);
     updateContent();
 }
 

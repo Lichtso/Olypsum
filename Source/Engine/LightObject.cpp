@@ -148,7 +148,7 @@ DirectionalLight::DirectionalLight(rapidxml::xml_node<xmlUsedCharType>* node, Le
     setBounds(vecData.getVector3());
     LightObject::init(node, levelLoader);
     
-    ScriptInstance(ScriptDirectionalLight);
+    ScriptInstance(DirectionalLight);
 }
 
 void DirectionalLight::setTransformation(const btTransform& transformation) {
@@ -245,7 +245,7 @@ PositionalLight::PositionalLight(rapidxml::xml_node<xmlUsedCharType>* node, Leve
     setBounds(strcmp(attribute->value(), "true") == 0, range);
     LightObject::init(node, levelLoader);
     
-    ScriptInstance(ScriptPositionalLight);
+    ScriptInstance(PositionalLight);
 }
 
 PositionalLight::~PositionalLight() {
@@ -433,7 +433,7 @@ SpotLight::SpotLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* lev
     setBounds(cutoff, range);
     LightObject::init(node, levelLoader);
     
-    ScriptInstance(ScriptSpotLight);
+    ScriptInstance(SpotLight);
 }
 
 void SpotLight::setTransformation(const btTransform& transformation) {
