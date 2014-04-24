@@ -200,6 +200,8 @@ static JSValueRef ScriptSoundObjectGetMode(JSContextRef context, JSObjectRef ins
             return ScriptStringHold.getJSStr(context);
         case SoundObject::Mode::Dispose:
             return ScriptStringDispose.getJSStr(context);
+        default:
+            return ScriptException(context, exception, "SoundObject getMode(): Internal error");
     }
 }
 

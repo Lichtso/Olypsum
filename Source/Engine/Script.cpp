@@ -175,3 +175,5 @@ ScriptStringWidth("width"),
 ScriptStringX("x"),
 ScriptStringY("y"),
 ScriptStringZ("z");
+
+JSStringRef ScriptLinearAlgebraPropertyNames[] = { ScriptStringX.str, ScriptStringY.str, ScriptStringZ.str, ScriptStringW.str };

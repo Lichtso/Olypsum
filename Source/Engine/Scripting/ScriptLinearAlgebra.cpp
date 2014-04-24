@@ -8,8 +8,6 @@
 
 #include "ScriptManager.h"
 
-JSStringRef propertyNames[] = { ScriptStringX.str, ScriptStringY.str, ScriptStringZ.str, ScriptStringW.str };
-
 static JSObjectRef ScriptVector3Constructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
     JSObjectRef instance = JSObjectMake(context, ScriptClasses[ScriptVector3], NULL);
     
@@ -27,14 +25,14 @@ static JSObjectRef ScriptVector3Constructor(JSContextRef context, JSObjectRef co
                     JSValueRef property = JSObjectGetPropertyAtIndex(context, valueObject, i, NULL);
                     if(!JSValueIsNumber(context, property))
                         return ScriptException(context, exception, "Vector3 Constructor: Element is not a Number");
-                    JSObjectSetProperty(context, instance, propertyNames[i], property, kJSPropertyAttributeDontDelete, NULL);
+                    JSObjectSetProperty(context, instance, ScriptLinearAlgebraPropertyNames[i], property, kJSPropertyAttributeDontDelete, NULL);
                 }
             }else{
                 for(unsigned int i = 0; i < 3; i ++) {
-                    JSValueRef property = JSObjectGetProperty(context, valueObject, propertyNames[i], NULL);
+                    JSValueRef property = JSObjectGetProperty(context, valueObject, ScriptLinearAlgebraPropertyNames[i], NULL);
                     if(!JSValueIsNumber(context, property))
                         return ScriptException(context, exception, "Vector3 Constructor: Element is not a Number");
-                    JSObjectSetProperty(context, instance, propertyNames[i], property, kJSPropertyAttributeDontDelete, NULL);
+                    JSObjectSetProperty(context, instance, ScriptLinearAlgebraPropertyNames[i], property, kJSPropertyAttributeDontDelete, NULL);
                 }
             }
             return instance;
@@ -42,7 +40,7 @@ static JSObjectRef ScriptVector3Constructor(JSContextRef context, JSObjectRef co
             for(unsigned int i = 0; i < 3; i ++) {
                 if(!JSValueIsNumber(context, argv[i]))
                     return ScriptException(context, exception, "Vector3 Constructor: Element is not a Number");
-                JSObjectSetProperty(context, instance, propertyNames[i], argv[i], kJSPropertyAttributeDontDelete, NULL);
+                JSObjectSetProperty(context, instance, ScriptLinearAlgebraPropertyNames[i], argv[i], kJSPropertyAttributeDontDelete, NULL);
             }
             return instance;
         default:
@@ -61,7 +59,7 @@ static JSValueRef ScriptVector3ToString(JSContextRef context, JSObjectRef functi
 static JSValueRef ScriptVector3ToJSON(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
     JSValueRef values[3];
     for(unsigned int i = 0; i < 3; i ++)
-        values[i] = JSObjectGetProperty(context, instance, propertyNames[i], NULL);
+        values[i] = JSObjectGetProperty(context, instance, ScriptLinearAlgebraPropertyNames[i], NULL);
     return JSObjectMakeArray(context, 3, values, NULL);
 }
 
@@ -234,7 +232,7 @@ btVector3 getScriptVector3(JSContextRef context, JSValueRef value) {
     JSObjectRef instance = JSValueToObject(context, value, NULL);
     double values[3];
     for(unsigned int i = 0; i < 3; i ++)
-        values[i] = JSValueToNumber(context, JSObjectGetProperty(context, instance, propertyNames[i], NULL), NULL);
+        values[i] = JSValueToNumber(context, JSObjectGetProperty(context, instance, ScriptLinearAlgebraPropertyNames[i], NULL), NULL);
     return btVector3(values[0], values[1], values[2]);
 }
 
@@ -242,14 +240,14 @@ void setScriptVector3(JSContextRef context, JSValueRef value, const btVector3& v
     JSObjectRef instance = JSValueToObject(context, value, NULL);
     double values[3] = { vec.x(), vec.y(), vec.z() };
     for(unsigned int i = 0; i < 3; i ++)
-        JSObjectSetProperty(context, instance, propertyNames[i], JSValueMakeNumber(context, values[i]), kJSPropertyAttributeDontDelete, NULL);
+        JSObjectSetProperty(context, instance, ScriptLinearAlgebraPropertyNames[i], JSValueMakeNumber(context, values[i]), kJSPropertyAttributeDontDelete, NULL);
 }
 
 JSObjectRef newScriptVector3(JSContextRef context, const btVector3& vec) {
     JSObjectRef instance = JSObjectMake(context, ScriptClasses[ScriptVector3], NULL);
     double values[3] = { vec.x(), vec.y(), vec.z() };
     for(unsigned int i = 0; i < 3; i ++)
-        JSObjectSetProperty(context, instance, propertyNames[i], JSValueMakeNumber(context, values[i]), kJSPropertyAttributeDontDelete, NULL);
+        JSObjectSetProperty(context, instance, ScriptLinearAlgebraPropertyNames[i], JSValueMakeNumber(context, values[i]), kJSPropertyAttributeDontDelete, NULL);
     return instance;
 }
 
@@ -278,7 +276,7 @@ static JSObjectRef ScriptQuaternionConstructor(JSContextRef context, JSObjectRef
                 }
             }else
                 for(unsigned int i = 0; i < 4; i ++) {
-                    JSValueRef property = JSObjectGetProperty(context, valueObject, propertyNames[i], NULL);
+                    JSValueRef property = JSObjectGetProperty(context, valueObject, ScriptLinearAlgebraPropertyNames[i], NULL);
                     if(!property && i == 3) break;
                     if(JSValueIsNumber(context, property))
                         values[i] = property;
@@ -307,7 +305,7 @@ static JSObjectRef ScriptQuaternionConstructor(JSContextRef context, JSObjectRef
     
     if(values[3])
         for(unsigned int i = 0; i < 4; i ++)
-            JSObjectSetProperty(context, instance, propertyNames[i], values[i], kJSPropertyAttributeDontDelete, NULL);
+            JSObjectSetProperty(context, instance, ScriptLinearAlgebraPropertyNames[i], values[i], kJSPropertyAttributeDontDelete, NULL);
     else
         setScriptQuaternion(context, instance, btQuaternion(JSValueToNumber(context, values[0], NULL),
                                                                   JSValueToNumber(context, values[1], NULL),
@@ -326,7 +324,7 @@ static JSValueRef ScriptQuaternionToString(JSContextRef context, JSObjectRef fun
 static JSValueRef ScriptQuaternionToJSON(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
     JSValueRef values[4];
     for(unsigned int i = 0; i < 4; i ++)
-        values[i] = JSObjectGetProperty(context, instance, propertyNames[i], NULL);
+        values[i] = JSObjectGetProperty(context, instance, ScriptLinearAlgebraPropertyNames[i], NULL);
     return JSObjectMakeArray(context, 4, values, NULL);
 }
 
@@ -476,7 +474,7 @@ btQuaternion getScriptQuaternion(JSContextRef context, JSValueRef value) {
     JSObjectRef instance = JSValueToObject(context, value, NULL);
     double values[4];
     for(unsigned int i = 0; i < 4; i ++)
-        values[i] = JSValueToNumber(context, JSObjectGetProperty(context, instance, propertyNames[i], NULL), NULL);
+        values[i] = JSValueToNumber(context, JSObjectGetProperty(context, instance, ScriptLinearAlgebraPropertyNames[i], NULL), NULL);
     return btQuaternion(values[0], values[1], values[2], values[3]);
 }
 
@@ -484,14 +482,14 @@ void setScriptQuaternion(JSContextRef context, JSValueRef value, const btQuatern
     JSObjectRef instance = JSValueToObject(context, value, NULL);
     double values[4] = { quaternion.x(), quaternion.y(), quaternion.z(), quaternion.w() };
     for(unsigned int i = 0; i < 4; i ++)
-        JSObjectSetProperty(context, instance, propertyNames[i], JSValueMakeNumber(context, values[i]), kJSPropertyAttributeDontDelete, NULL);
+        JSObjectSetProperty(context, instance, ScriptLinearAlgebraPropertyNames[i], JSValueMakeNumber(context, values[i]), kJSPropertyAttributeDontDelete, NULL);
 }
 
 JSObjectRef newScriptQuaternion(JSContextRef context, const btQuaternion& quaternion) {
     JSObjectRef instance = JSObjectMake(context, ScriptClasses[ScriptQuaternion], NULL);
     double values[4] = { quaternion.x(), quaternion.y(), quaternion.z(), quaternion.w() };
     for(unsigned int i = 0; i < 4; i ++)
-        JSObjectSetProperty(context, instance, propertyNames[i], JSValueMakeNumber(context, values[i]), kJSPropertyAttributeDontDelete, NULL);
+        JSObjectSetProperty(context, instance, ScriptLinearAlgebraPropertyNames[i], JSValueMakeNumber(context, values[i]), kJSPropertyAttributeDontDelete, NULL);
     return instance;
 }
 

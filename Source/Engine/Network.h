@@ -13,7 +13,8 @@
 
 class NetworkManager {
     const int udpPort = 8724, tcpPort = 8725;
-    const char* scanIPv4 = "224.0.0.1";
+    // http://en.wikipedia.org/wiki/Multicast_address
+    const char* scanIPv4 = "224.0.0.100";
     const char* scanIPv6 = "FF02:0001::";
     std::shared_ptr<netLink::Socket> udpSocket;
     netLink::SocketManager socketManager;

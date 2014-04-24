@@ -90,5 +90,6 @@ ScriptStringW, ScriptStringWidth,
 ScriptStringX,
 ScriptStringY,
 ScriptStringZ;
+extern JSStringRef ScriptLinearAlgebraPropertyNames[4];
 
 #endif
