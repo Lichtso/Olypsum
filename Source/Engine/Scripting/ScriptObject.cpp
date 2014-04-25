@@ -126,7 +126,18 @@ ScriptClassDefinition(BaseObject, ScriptBaseObjectProperties, ScriptBaseObjectMe
 
 
 static JSObjectRef ScriptPhysicObjectConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    return ScriptException(context, exception, "PhysicObject Constructor: Class can't be instantiated");
+    if(argc != 2 ||
+       !JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4]) ||
+       !JSValueIsString(context, argv[1]))
+        return ScriptException(context, exception, "PhysicObject Constructor: Expected Matrix4, String");
+    ScriptString strName(context, argv[1]);
+    btCollisionShape* collisionShape = levelManager.getCollisionShape(strName.getStdStr());
+    if(collisionShape) {
+        Matrix4* transformation = getDataOfInstance<Matrix4>(context, argv[0]);
+        auto objectPtr = new PhysicObject(transformation->getBTTransform(), collisionShape);
+        return objectPtr->scriptInstance;
+    }else
+        return ScriptException(context, exception, "PhysicObject Constructor: Invalid collision shape");
 }
 
 ScriptClassStaticDefinition(PhysicObject);

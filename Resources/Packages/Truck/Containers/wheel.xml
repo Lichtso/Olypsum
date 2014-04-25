@@ -1,0 +1,10 @@
+<Container>
+	<Objects>
+		<RigidObject>
+			<Model src="wheel.dae"/>
+			<PhysicsBody collisionShape="wheel" mass="200.0"/>
+			<Damping linear="0.01" angular="0.01"/>
+			<Friction linear="1.0" angular="1.0"/>
+		</RigidObject>
+	</Objects>
+</Container>

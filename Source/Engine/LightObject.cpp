@@ -137,6 +137,11 @@ DirectionalLight::DirectionalLight() {
     shadowCam.nearPlane = 1.0;
 }
 
+DirectionalLight::DirectionalLight(btTransform _transformation, btVector3 bounds) :DirectionalLight() {
+    setTransformation(_transformation);
+    setBounds(bounds);
+}
+
 DirectionalLight::DirectionalLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :DirectionalLight() {
     rapidxml::xml_node<xmlUsedCharType>* bounds = node->first_node("Bounds");
     if(!node) {
@@ -222,6 +227,11 @@ rapidxml::xml_node<xmlUsedCharType>* DirectionalLight::write(rapidxml::xml_docum
 
 PositionalLight::PositionalLight() :shadowMapB(NULL) {
     shadowCam.nearPlane = 0.1;
+}
+
+PositionalLight::PositionalLight(btTransform _transformation, bool omniDirectional, float range) :PositionalLight() {
+    setTransformation(_transformation);
+    setBounds(omniDirectional, range);
 }
 
 PositionalLight::PositionalLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :PositionalLight() {
@@ -409,6 +419,11 @@ rapidxml::xml_node<xmlUsedCharType>* PositionalLight::write(rapidxml::xml_docume
 
 SpotLight::SpotLight() {
     shadowCam.nearPlane = 0.1;
+}
+
+SpotLight::SpotLight(btTransform _transformation, float cutoff, float range) :SpotLight() {
+    setTransformation(_transformation);
+    setBounds(cutoff, range);
 }
 
 SpotLight::SpotLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) :SpotLight() {

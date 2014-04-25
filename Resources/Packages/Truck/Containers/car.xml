@@ -1,0 +1,111 @@
+<Container>
+	<Container src="wheel">
+		<Translate>-0.96 -0.4 -1.9295</Translate>
+		<Rotate>0.0 1.0 0.0 180.0</Rotate>
+	</Container>
+	<Container src="wheel">
+		<Translate>0.96 -0.4 -1.9295</Translate>
+	</Container>
+	<Container src="wheel">
+		<Translate>-0.96 -0.4 1.9295</Translate>
+		<Rotate>0.0 1.0 0.0 180.0</Rotate>
+	</Container>
+	<Container src="wheel">
+		<Translate>0.96 -0.4 1.9295</Translate>
+	</Container>
+	<Objects>
+		<RigidObject>
+			<Script src="Car"/>
+			<Model src="frame.dae"/>
+			<PhysicsBody collisionShape="car" mass="500.0"/>
+			<Damping linear="0.01" angular="0.01"/>
+		</RigidObject>
+		<LightObject type="spot">
+			<Color>0.6 0.8 1.0</Color>
+			<Bounds cutoff="0.7" range="50.0" />
+		</LightObject>
+		<LightObject type="spot">
+			<Color>0.6 0.8 1.0</Color>
+			<Bounds cutoff="0.7" range="50.0" />
+		</LightObject>
+		<CamObject>
+			<Translate>-5.0 6.0 -5.0</Translate>
+			<Bounds fov="1.25663" near="1.0" far="10000.0" />
+		</CamObject>
+	</Objects>
+	<Links>
+		<PhysicLink type="dof6">
+			<Objects indexA="0" indexB="-4"/>
+			<Frame>
+				<Translate>-0.96 -0.4 -1.9295</Translate>
+			</Frame>
+			<Frame>
+				<Rotate>0.0 1.0 0.0 180.0</Rotate>
+			</Frame>
+			<AngularLimit min="1.0 0.0 0.0" max="-1.0 0.0 0.0"/>
+			<LinearLimit min="0.0 -0.25 0.0" max="0.0 0.25 0.0"/>
+			<Spring index="1" stiffness="10000.0" damping="0.00005"/>
+			<Motor index="3" enabled="true" velocity="0.0" force="10"/>
+		</PhysicLink>
+		<PhysicLink type="dof6">
+			<Objects indexA="0" indexB="-3"/>
+			<Frame>
+				<Translate>0.96 -0.4 -1.9295</Translate>
+			</Frame>
+			<Frame>
+			</Frame>
+			<AngularLimit min="1.0 0.0 0.0" max="-1.0 0.0 0.0"/>
+			<LinearLimit min="0.0 -0.25 0.0" max="0.0 0.25 0.0"/>
+			<Spring index="1" stiffness="10000.0" damping="0.00005"/>
+			<Motor index="3" enabled="true" velocity="0.0" force="10"/>
+		</PhysicLink>
+		<PhysicLink type="dof6">
+			<Objects indexA="0" indexB="-2"/>
+			<Frame>
+				<Translate>-0.96 -0.4 1.9295</Translate>
+			</Frame>
+			<Frame>
+				<Rotate>0.0 1.0 0.0 180.0</Rotate>
+			</Frame>
+			<AngularLimit min="1.0 0.0 0.0" max="-1.0 0.0 0.0"/>
+			<LinearLimit min="0.0 -0.25 0.0" max="0.0 0.25 0.0"/>
+			<Spring index="1" stiffness="10000.0" damping="0.00005"/>
+			<Motor index="3" enabled="true" velocity="0.0" force="10"/>
+		</PhysicLink>
+		<PhysicLink type="dof6">
+			<Objects indexA="0" indexB="-1"/>
+			<Frame>
+				<Translate>0.96 -0.4 1.9295</Translate>
+			</Frame>
+			<Frame>
+			</Frame>
+			<AngularLimit min="1.0 0.0 0.0" max="-1.0 0.0 0.0"/>
+			<LinearLimit min="0.0 -0.25 0.0" max="0.0 0.25 0.0"/>
+			<Spring index="1" stiffness="10000.0" damping="0.00005"/>
+			<Motor index="3" enabled="true" velocity="0.0" force="10"/>
+		</PhysicLink>
+		<TransformLink>
+			<Objects indexA="0" indexB="1"/>
+			<Frame>
+				<Translate>0.8 0.5 3.5</Translate>
+				<Rotate>1.0 0.0 0.0 -162.0</Rotate>
+				<Rotate>0.0 1.0 0.0 -10.0</Rotate>
+			</Frame>
+		</TransformLink>
+		<TransformLink>
+			<Objects indexA="0" indexB="2"/>
+			<Frame>
+				<Translate>-0.8 0.5 3.5</Translate>
+				<Rotate>1.0 0.0 0.0 -162.0</Rotate>
+				<Rotate>0.0 1.0 0.0 10.0</Rotate>
+			</Frame>
+		</TransformLink>
+		<TransformLink>
+			<Objects indexA="0" indexB="3"/>
+			<Frame>
+				<Translate>0.0 2.0 -5.0</Translate>
+				<Rotate>0.0 1.0 0.0 180.0</Rotate>
+			</Frame>
+		</TransformLink>
+	</Links>
+</Container>

@@ -1,0 +1,10 @@
+<Package>
+	<EngineVersion value="0.5.0"/>
+	<InitialContainer value="start"/>
+	<Description>
+		<![CDATA[Car physics tests]]>
+	</Description>
+	<Dependencies>
+		<Package name="Test" hash="5b38374d65c313c0"/>
+	</Dependencies>
+</Package>

@@ -29,6 +29,7 @@ class CamObject : public SimpleObject {
           farPlane; //!< Distance of the far plane if fov < 90 else the radius of the parabolid or sphere
     //! Initialize as GUI cam
     CamObject();
+    CamObject(btTransform transformation);
     CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     void removeClean();
     //Returns a temporary Matrix4 which might differ from the transformation in reflection frames

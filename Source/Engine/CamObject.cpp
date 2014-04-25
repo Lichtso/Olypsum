@@ -43,6 +43,11 @@ CamObject::CamObject() :fov(-1.0), aspect(1.0), nearPlane(-1.0), farPlane(1.0) {
     setTransformation(btTransform::getIdentity());
 }
 
+CamObject::CamObject(btTransform _transformation)
+    :fov(M_PI_4), aspect((float)optionsState.videoWidth/optionsState.videoHeight), nearPlane(-1.0), farPlane(1.0) {
+    setTransformation(_transformation);
+}
+
 CamObject::CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader)
     :aspect((float)optionsState.videoWidth/optionsState.videoHeight) {
     SimpleObject::init(node, levelLoader);

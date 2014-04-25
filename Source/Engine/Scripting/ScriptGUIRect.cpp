@@ -31,7 +31,6 @@ JSClassDefinition Script##name##Static = {\
 ScriptGUIStaticDefinition(GUIView);
 ScriptGUIStaticDefinition(GUIFramedView);
 ScriptGUIStaticDefinition(GUIScrollView);
-ScriptGUIStaticDefinition(GUIImage);
 ScriptGUIStaticDefinition(GUILabel);
 ScriptGUIStaticDefinition(GUIProgressBar);
 

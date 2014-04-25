@@ -9,7 +9,23 @@
 #include "ScriptManager.h"
 
 static JSObjectRef ScriptParticlesObjectConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    return ScriptException(context, exception, "ParticlesObject Constructor: Class can't be instantiated");
+    if(argc != 3 ||
+       !JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4]) ||
+       !JSValueIsNumber(context, argv[1]) || !JSValueIsString(context, argv[2]) || !JSValueIsString(context, argv[3]))
+        return ScriptException(context, exception, "ParticlesObject Constructor: Expected Matrix4, String, String");
+    ScriptString strTexture(context, argv[2]);
+    auto texture = fileManager.getResourceByPath<Texture>(levelManager.levelPackage, strTexture.getStdStr());
+    if(texture) {
+        ScriptString strCollisionShape(context, argv[3]);
+        btCollisionShape* collisionShape = levelManager.getCollisionShape(strCollisionShape.getStdStr());
+        if(collisionShape) {
+            Matrix4* transformation = getDataOfInstance<Matrix4>(context, argv[0]);
+            auto objectPtr = new ParticlesObject(transformation->getBTTransform(), JSValueToNumber(context, argv[1], NULL), texture, collisionShape);
+            return objectPtr->scriptInstance;
+        }else
+            return ScriptException(context, exception, "ParticlesObject Constructor: Invalid collision shape");
+    }else
+        return ScriptException(context, exception, "ParticlesObject Constructor: Invalid texture");
 }
 
 ScriptClassStaticDefinition(ParticlesObject);
@@ -18,7 +34,7 @@ static JSValueRef ScriptParticlesObjectGetMaxParticles(JSContextRef context, JSO
     return JSValueMakeNumber(context, getDataOfInstance<ParticlesObject>(instance)->maxParticles);
 }
 
-static JSValueRef ScriptParticlesObjectGetTextures(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+static JSValueRef ScriptParticlesObjectGetTexture(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
     auto objectPtr = getDataOfInstance<ParticlesObject>(instance);
     std::string name;
     FilePackage* filePackage = fileManager.findResource<Texture>(objectPtr->texture, name);
@@ -26,12 +42,12 @@ static JSValueRef ScriptParticlesObjectGetTextures(JSContextRef context, JSObjec
         ScriptString strName(fileManager.getPathOfResource(filePackage, name));
         return strName.getJSStr(context);
     }else
-        return ScriptException(context, exception, "ParticlesObject getTextures(): Internal error");
+        return ScriptException(context, exception, "ParticlesObject getTexture(): Internal error");
 }
 
-static bool ScriptParticlesObjectSetTextures(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+static bool ScriptParticlesObjectSetTexture(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
     if(!JSValueIsString(context, value)) {
-        ScriptException(context, exception, "ParticlesObject setTextures(): Expected String");
+        ScriptException(context, exception, "ParticlesObject setTexture(): Expected String");
         return false;
     }
     ScriptString strName(context, value);
@@ -189,7 +205,7 @@ static JSValueRef ScriptParticlesObjectAccessDirMax(JSContextRef context, JSObje
 
 JSStaticValue ScriptParticlesObjectProperties[] = {
     {"maxParticles", ScriptParticlesObjectGetMaxParticles, 0, ScriptMethodAttributes},
-    {"texture", ScriptParticlesObjectGetTextures, ScriptParticlesObjectSetTextures, kJSPropertyAttributeDontDelete},
+    {"texture", ScriptParticlesObjectGetTexture, ScriptParticlesObjectSetTexture, kJSPropertyAttributeDontDelete},
     {"transformAligned", ScriptParticlesObjectGetTransformAligned, ScriptParticlesObjectSetTransformAligned, kJSPropertyAttributeDontDelete},
     {"systemLife", ScriptParticlesObjectGetSystemLife, ScriptParticlesObjectSetSystemLife, kJSPropertyAttributeDontDelete},
     {"lifeMin", ScriptParticlesObjectGetLifeMin, ScriptParticlesObjectSetLifeMin, kJSPropertyAttributeDontDelete},

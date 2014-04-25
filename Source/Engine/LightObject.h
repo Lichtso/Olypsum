@@ -42,8 +42,9 @@ class LightObject : public VisualObject {
 
 //! A LightObject with a box shape and parallel light
 class DirectionalLight : public LightObject {
-    public:
     DirectionalLight();
+    public:
+    DirectionalLight(btTransform transformation, btVector3 bounds);
     DirectionalLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     void setTransformation(const btTransform& transformation);
     //! Updates the box shape to the given half extends
@@ -59,9 +60,10 @@ class DirectionalLight : public LightObject {
 //! A LightObject with a parabolid or sphere / dual parabolid (omni directional) shape and divergent light
 class PositionalLight : public LightObject {
     ColorBuffer* shadowMapB; //!< The second shadow map used if omni directional
+    PositionalLight();
     ~PositionalLight();
     public:
-    PositionalLight();
+    PositionalLight(btTransform transformation, bool omniDirectional, float range);
     PositionalLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     void setTransformation(const btTransform& transformation);
     void setBounds(bool omniDirectional, float range);
@@ -76,8 +78,9 @@ class PositionalLight : public LightObject {
 
 //! A LightObject with a cone shape and divergent light
 class SpotLight : public LightObject {
-    public:
     SpotLight();
+    public:
+    SpotLight(btTransform transformation, float cutoff, float range);
     SpotLight(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     void setTransformation(const btTransform& transformation);
     //! Updates the cone shape

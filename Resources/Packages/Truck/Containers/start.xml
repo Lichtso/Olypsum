@@ -1,0 +1,32 @@
+<Container>
+	<Level>
+		<Gravity>0.0 -9.81 0.0</Gravity>
+		<Ambient>0.2 0.2 0.2</Ambient>
+	</Level>
+	<Container src="car">
+		<Translate>0.0 1.0 0.0</Translate>
+	</Container>
+	<Container src="Test/woodenBox">
+		<Translate>10.0 0.0 0.0</Translate>
+	</Container>
+	<Container src="Test/woodenBox">
+		<Translate>10.0 1.0 0.0</Translate>
+	</Container>
+	<Container src="Test/woodenBox">
+		<Translate>10.0 2.0 0.0</Translate>
+	</Container>
+	<Objects>
+		<RigidObject>
+			<PhysicsBody collisionShape="mapBox" mass="0.0" />
+		</RigidObject>
+		<TerrainObject>
+			<Diffuse src="Test/terrainDiffuse.png" />
+			<HeightsMap src="Test/terrainMap.png" />
+			<Bounds>100.0 5.0 100.0</Bounds>
+			<TextureScale>30.0 30.0</TextureScale>
+			<Friction linear="1.0" angular="1.0"/>
+		</TerrainObject>
+	</Objects>
+	<Links>
+	</Links>
+</Container>

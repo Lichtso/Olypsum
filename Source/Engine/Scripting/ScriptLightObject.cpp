@@ -42,7 +42,13 @@ ScriptClassDefinition(LightObject, ScriptLightObjectProperties, ScriptLightObjec
 
 
 static JSObjectRef ScriptDirectionalLightConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    return ScriptException(context, exception, "DirectionalLight Constructor: Class can't be instantiated");
+    if(argc != 2 ||
+       !JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4]) ||
+       !JSValueIsObjectOfClass(context, argv[1], ScriptClasses[ScriptVector3]))
+        return ScriptException(context, exception, "DirectionalLight Constructor: Expected Matrix4, Vector3");
+    Matrix4* transformation = getDataOfInstance<Matrix4>(context, argv[0]);
+    auto objectPtr = new DirectionalLight(transformation->getBTTransform(), getScriptVector3(context, argv[1]));
+    return objectPtr->scriptInstance;
 }
 
 ScriptClassStaticDefinition(DirectionalLight);
@@ -66,7 +72,14 @@ ScriptClassDefinition(DirectionalLight, NULL, ScriptDirectionalLightMethods);
 
 
 static JSObjectRef ScriptPositionalLightConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    return ScriptException(context, exception, "PositionalLight Constructor: Class can't be instantiated");
+    if(argc != 3 ||
+       !JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4]) ||
+       !JSValueIsBoolean(context, argv[1]) ||
+       !JSValueIsNumber(context, argv[2]))
+        return ScriptException(context, exception, "PositionalLight Constructor: Expected Matrix4, Boolean, Number");
+    Matrix4* transformation = getDataOfInstance<Matrix4>(context, argv[0]);
+    auto objectPtr = new PositionalLight(transformation->getBTTransform(), JSValueToBoolean(context, argv[1]), JSValueToNumber(context, argv[2], NULL));
+    return objectPtr->scriptInstance;
 }
 
 ScriptClassStaticDefinition(PositionalLight);
@@ -77,7 +90,7 @@ static JSValueRef ScriptPositionalLightGetOmniDirectional(JSContextRef context, 
 
 static JSValueRef ScriptPositionalLightSetBounds(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
     if(argc != 2 || !JSValueIsBoolean(context, argv[0]) || !JSValueIsNumber(context, argv[1]))
-        return ScriptException(context, exception, "SpotLight setBounds(): Expected Number, Number");
+        return ScriptException(context, exception, "SpotLight setBounds(): Expected Boolean, Number");
     auto objectPtr = getDataOfInstance<PositionalLight>(instance);
     objectPtr->setBounds(JSValueToBoolean(context, argv[0]), JSValueToNumber(context, argv[1], NULL));
     return JSValueMakeUndefined(context);
@@ -98,7 +111,14 @@ ScriptClassDefinition(PositionalLight, ScriptPositionalLightProperties, ScriptPo
 
 
 static JSObjectRef ScriptSpotLightConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    return ScriptException(context, exception, "SpotLight Constructor: Class can't be instantiated");
+    if(argc != 3 ||
+       !JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4]) ||
+       !JSValueIsNumber(context, argv[1]) ||
+       !JSValueIsNumber(context, argv[2]))
+        return ScriptException(context, exception, "SpotLight Constructor: Expected Matrix4, Number, Number");
+    Matrix4* transformation = getDataOfInstance<Matrix4>(context, argv[0]);
+    auto objectPtr = new SpotLight(transformation->getBTTransform(), JSValueToNumber(context, argv[1], NULL), JSValueToNumber(context, argv[2], NULL));
+    return objectPtr->scriptInstance;
 }
 
 ScriptClassStaticDefinition(SpotLight);

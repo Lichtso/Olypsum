@@ -43,7 +43,7 @@ class ParticlesObject : public VisualObject {
     /*! Constructs a new particle system
      @param maxParticles The maximal amount of simultaneously existing particles in the system
      */
-    ParticlesObject(unsigned int maxParticles, btCollisionShape* collisionShape);
+    ParticlesObject(btTransform transformation, unsigned int maxParticles, FileResourcePtr<Texture> texture, btCollisionShape* collisionShape);
     ParticlesObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     void removeClean();
     void removeFast();

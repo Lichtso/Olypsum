@@ -116,6 +116,9 @@ void Menu::updateVideoResulution() {
         case inGame:
             setInGameMenu();
             break;
+        case console:
+            setConsoleMenu();
+            break;
         case gameEsc:
             setGameEscMenu();
             break;
@@ -153,9 +156,8 @@ void Menu::consoleHandle(const std::string& message) {
             ScriptString strResult(scriptManager->mainScript->context, result);
             log(script_log, strResult.getStdStr());
         }
-    }else{
+    }else
         log(user_log, message);
-    }
 }
 
 void Menu::handleMouseDown(Uint8 button) {
@@ -210,18 +212,11 @@ void Menu::handleKeyUp(SDL_Keycode key) {
                 case saveGames:
                     setMainMenu();
                     return;
-                case inGame: {
-                    GUITextField* textField = static_cast<GUITextField*>(screenView->children[1]);
-                    if(textField->visible) {
-                        textField->visible = false;
-                        textField->setFocused(false);
-                        GUILabel* label = static_cast<GUILabel*>(textField->children[0]);
-                        label->text = "";
-                    }else{
-                        setGameEscMenu();
-                        sendPauseEvent();
-                    }
-                } return;
+                case inGame:
+                    setGameEscMenu();
+                    sendPauseEvent();
+                    return;
+                case console:
                 case gameEsc:
                     setInGameMenu();
                     sendPauseEvent();
@@ -231,18 +226,20 @@ void Menu::handleKeyUp(SDL_Keycode key) {
                     return;
             }
         case SDLK_RETURN:
-            if(current == inGame) {
-                GUITextField* textField = static_cast<GUITextField*>(screenView->children[1]);
-                if(textField->visible) {
+            switch(current) {
+                case inGame:
+                    setConsoleMenu();
+                    sendPauseEvent();
+                    return;
+                case console: {
+                    GUITextField* textField = static_cast<GUITextField*>(screenView->children[1]);
                     GUILabel* label = static_cast<GUILabel*>(textField->children[0]);
                     consoleHandle(label->text);
-                    label->text = "";
-                    textField->visible = false;
-                    textField->setFocused(false);
-                }else{
-                    textField->visible = true;
-                    textField->setFocused(true);
-                }
+                    setInGameMenu();
+                    sendPauseEvent();
+                } return;
+                default:
+                    return;
             }
             return;
     }
@@ -280,7 +277,21 @@ void Menu::gameTick() {
             if(loadingScreen <= 0.0)
                 setMainMenu();
         } break;
-        case inGame: {
+        case inGame:
+            if(mouseFixed) {
+                mouseX = optionsState.mouseSmoothing*mouseVelocityX;
+                mouseY = optionsState.mouseSmoothing*mouseVelocityY;
+                mouseVelocityX -= mouseX;
+                mouseVelocityY -= mouseY;
+                SDL_ShowCursor(0);
+                SDL_WarpMouseInWindow(mainWindow, optionsState.videoWidth >> 1, optionsState.videoHeight >> 1);
+            }else{
+                mouseVelocityX = 0.0;
+                mouseVelocityY = 0.0;
+                SDL_ShowCursor(1);
+            }
+        case console:
+        {
             GUIView* view = static_cast<GUIView*>(screenView->children[0]);
             int posY = view->height;
             for(int i = 0; i < consoleMessages.size(); i ++) {
@@ -319,19 +330,6 @@ void Menu::gameTick() {
             
             for(int i = consoleMessages.size(); i < view->children.size(); i ++)
                 view->deleteChild(i);
-            
-            if(mouseFixed) {
-                mouseX = optionsState.mouseSmoothing*mouseVelocityX;
-                mouseY = optionsState.mouseSmoothing*mouseVelocityY;
-                mouseVelocityX -= mouseX;
-                mouseVelocityY -= mouseY;
-                SDL_ShowCursor(0);
-                SDL_WarpMouseInWindow(mainWindow, optionsState.videoWidth >> 1, optionsState.videoHeight >> 1);
-            }else{
-                mouseVelocityX = 0.0;
-                mouseVelocityY = 0.0;
-                SDL_ShowCursor(1);
-            }
         } break;
         default:
             break;
@@ -339,6 +337,10 @@ void Menu::gameTick() {
 }
 
 void Menu::sendPauseEvent() {
+    if(current != Menu::inGame) {
+        SDL_ShowCursor(1);
+        SDL_WarpMouseInWindow(mainWindow, optionsState.videoWidth >> 1, optionsState.videoHeight >> 1);
+    }
     scriptManager->mainScript->callFunction("onpause", false, 0, NULL);
 }
 
@@ -572,12 +574,19 @@ void Menu::setInGameMenu() {
     view->height = screenView->height*0.68;
     screenView->addChild(view);
     
+    screenView->updateContent();
+}
+
+void Menu::setConsoleMenu() {
+    setInGameMenu();
+    current = console;
+    
     GUITextField* textField = new GUITextField();
     textField->posY = screenView->height*-0.8;
     textField->width = screenView->width*0.9;
     textField->height = screenView->height*0.07;
-    textField->visible = false;
     screenView->addChild(textField);
+    textField->setFocused(true);
     
     screenView->updateContent();
 }
@@ -586,8 +595,6 @@ void Menu::setGameEscMenu() {
     clear();
     current = gameEsc;
     
-    SDL_ShowCursor(1);
-    SDL_WarpMouseInWindow(mainWindow, optionsState.videoWidth >> 1, optionsState.videoHeight >> 1);
     std::function<void(GUIButton*)> onClick[] = {
         [](GUIButton* button) {
 			menu.setInGameMenu();

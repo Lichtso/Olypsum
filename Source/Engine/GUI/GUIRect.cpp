@@ -37,7 +37,7 @@ void GUIRect::setFocused(bool active) {
         if(screenView->focus)
             screenView->focus->setFocused(false);
         screenView->focus = this;
-    }else
+    }else if(screenView->focus == this)
         screenView->focus = NULL;
 }
 

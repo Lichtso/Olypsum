@@ -76,14 +76,14 @@ float SoundTrack::getLength() {
 
 
 
-SoundObject::SoundObject() :velocity(btVector3(0, 0, 0)) {
+SoundObject::SoundObject() :velocity(btVector3(0, 0, 0)), mode(Dispose) {
     alGenSources(1, &ALname);
     objectManager.simpleObjects.insert(this);
 }
 
-SoundObject::SoundObject(SoundTrack* _soundTrack, Mode _mode) :SoundObject() {
+SoundObject::SoundObject(btTransform _transformation, FileResourcePtr<SoundTrack> _soundTrack) :SoundObject() {
+    setTransformation(_transformation);
     soundTrack = _soundTrack;
-    mode = _mode;
     alSourcei(ALname, AL_BUFFER, soundTrack->ALname);
     setIsPlaying(true);
 }

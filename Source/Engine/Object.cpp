@@ -98,17 +98,19 @@ void SimpleObject::removeClean() {
 
 
 
-PhysicObject::PhysicObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader) {
-    btCollisionShape* collisionShape = readCollisionShape(node->first_node("PhysicsBody"));
+PhysicObject::PhysicObject(btTransform transformation, btCollisionShape* collisionShape) {
     if(!collisionShape) return;
     body = new btCollisionObject();
     body->setCollisionShape(collisionShape);
-    body->setWorldTransform(BaseObject::readTransformtion(node, levelLoader));
+    body->setWorldTransform(transformation);
     body->setUserPointer(this);
     body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
     objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Zone, CollisionMask_Object);
     ScriptInstance(PhysicObject);
 }
+
+PhysicObject::PhysicObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader)
+    : PhysicObject(BaseObject::readTransformtion(node, levelLoader), readCollisionShape(node->first_node("PhysicsBody"))) { }
 
 void PhysicObject::removeClean() {
     if(body) {

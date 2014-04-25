@@ -49,7 +49,7 @@ class SoundObject : public SimpleObject {
         Hold, //!< Stops playing if the SoundTrack reaches its end
         Dispose //!< Deletes this SoundObject if the SoundTrack reaches its end
     } mode;
-    SoundObject(SoundTrack* soundTrack, Mode mode);
+    SoundObject(btTransform transformation, FileResourcePtr<SoundTrack> soundTrack);
     SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     bool gameTick();
     rapidxml::xml_node<xmlUsedCharType>* write(rapidxml::xml_document<xmlUsedCharType>& doc, LevelSaver* levelSaver);

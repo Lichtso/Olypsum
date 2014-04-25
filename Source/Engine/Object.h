@@ -120,6 +120,7 @@ class PhysicObject : public BaseObject {
     btCollisionObject* body; //!< The physics-body
     PhysicObject() :body(NULL) { }
     public:
+    PhysicObject(btTransform transformation, btCollisionShape* collisionShape);
     PhysicObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     void removeClean();
     void removeFast();

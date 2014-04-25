@@ -9,7 +9,11 @@
 #include "ScriptManager.h"
 
 static JSObjectRef ScriptCamObjectConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    return ScriptException(context, exception, "CamObject Constructor: Class can't be instantiated");
+    if(argc != 1 || !JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4]))
+        return ScriptException(context, exception, "CamObject Constructor: Expected Matrix4");
+    Matrix4* transformation = getDataOfInstance<Matrix4>(context, argv[0]);
+    auto objectPtr = new CamObject(transformation->getBTTransform());
+    return objectPtr->scriptInstance;
 }
 
 ScriptClassStaticDefinition(CamObject);
@@ -112,7 +116,18 @@ ScriptClassDefinition(CamObject, ScriptCamObjectProperties, ScriptCamObjectMetho
 
 
 static JSObjectRef ScriptSoundObjectConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    return ScriptException(context, exception, "SoundObject Constructor: Class can't be instantiated");
+    if(argc != 2 ||
+       !JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptMatrix4]) ||
+       !JSValueIsString(context, argv[1]))
+        return ScriptException(context, exception, "SoundObject Constructor: Expected Matrix4, String");
+    ScriptString strName(context, argv[1]);
+    auto soundTrack = fileManager.getResourceByPath<SoundTrack>(levelManager.levelPackage, strName.getStdStr());
+    if(soundTrack) {
+        Matrix4* transformation = getDataOfInstance<Matrix4>(context, argv[0]);
+        auto objectPtr = new SoundObject(transformation->getBTTransform(), soundTrack);
+        return objectPtr->scriptInstance;
+    }else
+        return ScriptException(context, exception, "SoundObject Constructor: Invalid soundTrack");
 }
 
 ScriptClassStaticDefinition(SoundObject);

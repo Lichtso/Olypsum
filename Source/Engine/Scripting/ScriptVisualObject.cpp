@@ -122,7 +122,7 @@ ScriptClassDefinition(MatterObject, ScriptMatterObjectProperties, ScriptMatterOb
 
 
 static JSObjectRef ScriptRigidObjectConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    return ScriptException(context, exception, "RigidObject Constructor: Class can't be instantiated");
+    return ScriptException(context, exception, "RigidObject Constructor: Use Engine.loadContainer() instead");
 }
 
 ScriptClassStaticDefinition(RigidObject);
@@ -380,7 +380,7 @@ ScriptClassDefinition(RigidObject, ScriptRigidObjectProperties, ScriptRigidObjec
 
 
 static JSObjectRef ScriptTerrainObjectConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
-    return ScriptException(context, exception, "TerrainObject Constructor: Class can't be instantiated");
+    return ScriptException(context, exception, "TerrainObject Constructor: Use Engine.loadContainer() instead");
 }
 
 ScriptClassStaticDefinition(TerrainObject);

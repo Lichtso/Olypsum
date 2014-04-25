@@ -96,7 +96,7 @@ ScriptClassDefinition(TransformLink, NULL, ScriptTransformLinkMethods);
 
 static JSObjectRef ScriptBoneLinkConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
     if(argc != 3 ||
-       !JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptBaseObject]) ||
+       !JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptRigidObject]) ||
        !JSValueIsObjectOfClass(context, argv[1], ScriptClasses[ScriptBaseObject]) ||
        !JSValueIsString(context, argv[2]))
         return ScriptException(context, exception, "BoneLink Constructor: Expected BaseObject, BaseObject, String");

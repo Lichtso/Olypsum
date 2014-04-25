@@ -108,9 +108,11 @@ void ParticlesObject::init() {
     }
 }
 
-ParticlesObject::ParticlesObject(unsigned int _maxParticles, btCollisionShape* collisionShape) :ParticlesObject() {
+ParticlesObject::ParticlesObject(btTransform _transformation, unsigned int _maxParticles, FileResourcePtr<Texture> _texture, btCollisionShape* collisionShape) :ParticlesObject() {
+    setTransformation(_transformation);
     maxParticles = _maxParticles;
     init();
+    texture = _texture;
     body->setCollisionShape(collisionShape);
     objectManager.physicsWorld->addCollisionObject(body, CollisionMask_Light, 0);
 }

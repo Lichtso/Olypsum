@@ -1,0 +1,39 @@
+<CollisionShapes>
+	<Compound id="mapBox">
+		<Child collisionShape="staticPlane">
+			<Translate>0.0 -100.0 0.0</Translate>
+		</Child>
+		<Child collisionShape="staticPlane">
+			<Translate>0.0 100.0 0.0</Translate>
+			<Rotate>0.0 0.0 1.0 180.0</Rotate>
+		</Child>
+		<Child collisionShape="staticPlane">
+			<Translate>-90.0 0.0 0.0</Translate>
+			<Rotate>0.0 0.0 1.0 -90.0</Rotate>
+		</Child>
+		<Child collisionShape="staticPlane">
+			<Translate>90.0 0.0 0.0</Translate>
+			<Rotate>0.0 0.0 1.0 90.0</Rotate>
+		</Child>
+		<Child collisionShape="staticPlane">
+			<Translate>0.0 0.0 -90.0</Translate>
+			<Rotate>1.0 0.0 0.0 90.0</Rotate>
+		</Child>
+		<Child collisionShape="staticPlane">
+			<Translate>0.0 0.0 90.0</Translate>
+			<Rotate>1.0 0.0 0.0 -90.0</Rotate>
+		</Child>
+	</Compound>
+	<Box id="carFrame" size="0.5 0.325 2.6"/>
+	<Box id="carSetup" size="1.0 0.05 2.6"/>
+	<Compound id="car">
+		<Child collisionShape="carFrame">
+			<Translate>0.0 0.0 0.0</Translate>
+		</Child>
+		<Child collisionShape="carSetup">
+			<Translate>0.0 0.3 0.0</Translate>
+		</Child>
+	</Compound>
+	<Cylinder id="wheel" size="0.16 0.45 0.45" direction="x"/>
+	<Capsule id="manCapsule0" radius="0.25" length="1.55" direction="y"/>
+</CollisionShapes>

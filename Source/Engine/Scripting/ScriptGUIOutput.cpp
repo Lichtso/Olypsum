@@ -156,6 +156,24 @@ ScriptClassDefinition(GUIProgressBar, ScriptGUIProgressBarProperties, NULL);
 
 
 
+static JSObjectRef ScriptGUIImageConstructor(JSContextRef context, JSObjectRef constructor, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
+    if(argc != 2 || !JSValueIsObjectOfClass(context, argv[0], ScriptClasses[ScriptGUIView]) || !JSValueIsString(context, argv[1]))
+        return ScriptException(context, exception, "GUIImage Constructor: Expected GUIView, String");
+    ScriptString strFont(context, argv[1]);
+    auto texture = fileManager.getResourceByPath<Texture>(levelManager.levelPackage, strFont.getStdStr());
+    if(texture) {
+        auto objectPtr = new GUIImage();
+        objectPtr->texture = texture;
+        getDataOfInstance<GUIView>(context, argv[0])->addChild(objectPtr);
+        objectPtr->scriptInstance = JSObjectMake(scriptManager->mainScript->context, ScriptClasses[ScriptGUIImage], objectPtr);
+        JSValueProtect(scriptManager->mainScript->context, objectPtr->scriptInstance);
+        return objectPtr->scriptInstance;
+    }else
+        return ScriptException(context, exception, "GUIImage Constructor: Invalid image");
+}
+
+ScriptClassStaticDefinition(GUIImage);
+
 static JSValueRef ScriptGUIImageGetImage(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
     auto objectPtr = getDataOfInstance<GUIImage>(instance);
     std::string name;

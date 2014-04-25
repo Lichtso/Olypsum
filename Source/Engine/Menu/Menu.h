@@ -24,6 +24,7 @@ class Menu {
         languages,
         credits,
         inGame,
+        console,
         gameEsc,
         saveGames,
         newGame,
@@ -59,6 +60,7 @@ class Menu {
     void setLanguagesMenu();
     void setCreditsMenu();
     void setInGameMenu();
+    void setConsoleMenu();
     void setGameEscMenu();
     void setSaveGamesMenu();
     void setNewGameMenu();
