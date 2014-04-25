@@ -1,5 +1,4 @@
 Implement btSoftBody
-Logarithmic Shadow Mapping
 Water physics
 Split screen support
 Enviornment maping
@@ -22,4 +21,3 @@ Performance issue of explosions
 
 Bugs:
 Parallax Occlusion / Position
-Ortho projection / Logarithmic depth buffer

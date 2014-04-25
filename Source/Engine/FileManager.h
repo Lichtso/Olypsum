@@ -187,7 +187,8 @@ class FileManager {
 class OptionsState {
     public:
     std::string language, nickname, ipVersion = "auto";
-    float anisotropy = 1.0,
+    float //logarithmicDepth = 0.0,
+          anisotropy = 1.0,
           screenBlurFactor = -1.0,
           globalVolume = 0.5,
           musicVolume = 0.5,

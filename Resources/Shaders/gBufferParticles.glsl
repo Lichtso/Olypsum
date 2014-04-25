@@ -22,7 +22,6 @@ out vec4 colorOut;
 out vec4 materialOut;
 out vec4 normalOut;
 out vec4 positionOut;
-uniform float depthNear, depthFar;
 #if TEXTURE_ANIMATION == 0
 uniform sampler2D sampler0;
 #else
@@ -43,7 +42,6 @@ void main() {
     materialOut = vec4(0.0, 0.0, 0.0, 1.0);
     normalOut = vec4(vNormal, colorOut.a);
     positionOut = vec4(vPosition, colorOut.a);
-    //gl_FragDepth = log2(max(1.0/gl_FragCoord.w+depthNear, 0.5))*depthFar*0.5; //Depth
 }
 
 #separator

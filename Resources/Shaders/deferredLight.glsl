@@ -12,7 +12,6 @@ out vec3 diffuseOut;
 out vec3 specularOut;
 
 uniform mat4 camMat;
-uniform float depthNear, depthFar;
 uniform float lInvRange;
 uniform vec3 lColor, lDirection;
 #if LIGHT_TYPE > 1
@@ -156,5 +155,4 @@ void main() {
         diffuseOut = vec3(0.0);
         specularOut = vec3(0.0);
     }
-    //gl_FragDepth = log2(max(1.0/gl_FragCoord.w+depthNear, 0.5))*depthFar*0.5;
 }

@@ -155,8 +155,9 @@ void ShaderProgram::use () {
     }
     if(currentCam) {
         Matrix4 transform = currentCam->getCamMatrix();
-        setUniformF("depthNear", 1.0-currentCam->nearPlane);
-        setUniformF("depthFar", 2.0/log2(currentCam->farPlane/currentCam->nearPlane));
+        /*const float logDepthFactor = 1.0;
+        setUniformF("logDepthFactorA", logDepthFactor);
+        setUniformF("logDepthFactorB", 1.0/log(currentCam->farPlane*logDepthFactor+1.0));*/
         setUniformMatrix4("viewMat", &currentCam->viewMat);
         setUniformMatrix4("camMat", &transform);
         if(checkUniformExistence("modelViewMat")) {
@@ -392,12 +393,15 @@ void loadStaticShaderPrograms() {
 }
 
 void updateGBufferShaderPrograms() {
+    //char logarithmicDepthMacro[32];
+    //sprintf(logarithmicDepthMacro, "LOGARITHMIC_DEPTH %d", (optionsState.logarithmicDepth > 0.0) ? 1 : 0);
     char bumpMappingMacro[32], blendingQualityMacro[32];
     sprintf(bumpMappingMacro, "BUMP_MAPPING %d", optionsState.surfaceQuality);
     sprintf(blendingQualityMacro, "BLENDING_QUALITY %d", optionsState.blendingQuality);
     
     for(unsigned int p = 0; p < 48; p ++) {
         std::vector<const char*> macros;
+        //macros.push_back(logarithmicDepthMacro);
         
         if(p % 2 < 1)
             macros.push_back("SKELETAL_ANIMATION 0");
@@ -445,6 +449,7 @@ void updateGBufferShaderPrograms() {
         shaderPrograms[solidGSP+p]->link();
     }
     
+    //shaderPrograms[waterGSP]->loadShaderProgram("gBuffer", shaderTypeVertexFragmentGeometry, { logarithmicDepthMacro, "SKELETAL_ANIMATION 0", blendingQualityMacro, "BUMP_MAPPING 4", "TEXTURE_ANIMATION 1", "REFLECTION_TYPE 1" });
     shaderPrograms[waterGSP]->loadShaderProgram("gBuffer", shaderTypeVertexFragmentGeometry, { "SKELETAL_ANIMATION 0", blendingQualityMacro, "BUMP_MAPPING 4", "TEXTURE_ANIMATION 1", "REFLECTION_TYPE 1" });
     shaderPrograms[waterGSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[waterGSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");

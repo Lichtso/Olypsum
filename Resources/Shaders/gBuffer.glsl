@@ -14,7 +14,7 @@ uniform mat3 normalMat;
 #endif
 uniform vec4 clipPlane[1];
 
-#if BUMP_MAPPING > 0
+#if BUMP_MAPPING
 out vec3 gPosition;
 out vec2 gTexCoord;
 out vec3 gNormal;
@@ -23,6 +23,15 @@ out vec3 vPosition;
 out vec2 vTexCoord;
 out vec3 vNormal;
 #endif
+
+/*#if LOGARITHMIC_DEPTH
+uniform float logDepthFactorA, logDepthFactorB;
+#if BUMP_MAPPING
+out float gLogDepth;
+#else
+out float vLogDepth;
+#endif
+#endif*/
 
 void main() {
     #if SKELETAL_ANIMATION
@@ -56,17 +65,27 @@ void main() {
     vTexCoord = texCoord;
     gl_ClipDistance[0] = dot(vec4(vPosition, 1.0), clipPlane[0]);
     #endif
+    /*#if LOGARITHMIC_DEPTH
+    #if BUMP_MAPPING
+    gLogDepth = log(gl_Position.w*logDepthFactorA+1.0)*logDepthFactorB;
+    #else
+    vLogDepth = log(gl_Position.w*logDepthFactorA+1.0)*logDepthFactorB;
+    #endif
+    #endif*/
 }
 
 #separator
 
-#define M_PI 3.14159265358979323846
-//#extension GL_ARB_conservative_depth : enable
+/*#if LOGARITHMIC_DEPTH
+#extension GL_ARB_conservative_depth : enable
+layout(depth_less) out float gl_FragDepth;
+in float vLogDepth;
+#endif*/
 
 in vec3 vPosition;
 in vec2 vTexCoord;
 in vec3 vNormal;
-#if BUMP_MAPPING > 0
+#if BUMP_MAPPING
 in vec3 vTangent;
 in vec3 vBitangent;
 #endif
@@ -94,7 +113,6 @@ uniform samplerCube sampler4;
 
 uniform float discardDensity;
 uniform mat4 camMat;
-uniform float depthNear, depthFar;
 
 #include random.glsl
 
@@ -119,7 +137,9 @@ void main() {
     vec3 viewVec = normalize(camMat[3].xyz-vPosition);
     normalOut = normalize(vNormal);
     positionOut = vPosition;
-    //gl_FragDepth = log2(max(1.0/gl_FragCoord.w+depthNear, 0.5))*depthFar*0.5;
+    /*#if LOGARITHMIC_DEPTH
+    gl_FragDepth = vLogDepth;
+    #endif*/
     
     #if BUMP_MAPPING > 0
     #if BUMP_MAPPING == 1 //Normal mapping
@@ -154,7 +174,6 @@ void main() {
 	}
     //positionOut -= viewVec*length(texCoord.xy-vTexCoord)*factor;
     //gl_FragDepth = dot(camMat[3].xyz-positionOut, camMat[2].xyz);
-    //gl_FragDepth = log2(max(gl_FragDepth+depthNear, 0.5))*depthFar*0.5;
     #endif //Parallax occlusion
     setColor(texCoord.xy);
     vec3 modelNormal = texture(sampler2, texCoord.xy).xyz;
@@ -208,6 +227,10 @@ out vec2 vTexCoord;
 out vec3 vNormal;
 out vec3 vTangent;
 out vec3 vBitangent;
+/*#if LOGARITHMIC_DEPTH
+in float gLogDepth[3];
+out float vLogDepth;
+#endif*/
 
 void main() {
 	vec3 posBA = gPosition[1]-gPosition[0], posCA = gPosition[2]-gPosition[0];
@@ -223,6 +246,9 @@ void main() {
 		vNormal = gNormal[i];
 		vTangent = tangent;
 		vBitangent = bitangent;
+        /*#if LOGARITHMIC_DEPTH
+        vLogDepth = gLogDepth[i];
+        #endif*/
 		EmitVertex();
 	}
 }

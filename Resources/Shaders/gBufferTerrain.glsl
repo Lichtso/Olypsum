@@ -32,7 +32,6 @@ out vec3 positionOut;
 out vec3 specularOut;
 
 uniform float discardDensity;
-uniform float depthNear, depthFar;
 uniform sampler2DArray sampler0;
 uniform sampler2DArray sampler1;
 
@@ -54,6 +53,5 @@ void main() {
     
     normalOut = normalize(vNormal);
 	positionOut = vPosition;
-    //gl_FragDepth = log2(max(1.0/gl_FragCoord.w+depthNear, 0.5))*depthFar*0.5;
     specularOut = vec3(0.0);
 }
