@@ -88,6 +88,8 @@ static bool ScriptGUIButtonSetEnabled(JSContextRef context, JSObjectRef instance
     return true;
 }
 
+ScriptString ScriptStringReleased("released"), ScriptStringHighlighted("highlighted"), ScriptStringPressed("pressed");
+
 static JSValueRef ScriptGUIButtonGetState(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
     auto objectPtr = getDataOfInstance<GUIButton>(instance);
     switch(objectPtr->state) {
@@ -110,11 +112,11 @@ static bool ScriptGUIButtonSetState(JSContextRef context, JSObjectRef instance, 
     ScriptString strValue(context, value);
     std::string str = strValue.getStdStr();
     auto objectPtr = getDataOfInstance<GUIButton>(instance);
-    if(str == "released")
+    if(str == ScriptStringReleased.getStdStr())
         objectPtr->state = GUIButton::State::Released;
-    else if(str == "highlighted")
+    else if(str == ScriptStringHighlighted.getStdStr())
         objectPtr->state = GUIButton::State::Highlighted;
-    else if(str == "pressed")
+    else if(str == ScriptStringPressed.getStdStr())
         objectPtr->state = GUIButton::State::Pressed;
     else{
         ScriptException(context, exception, "GUIButton setState(): Invalid value");
@@ -149,15 +151,15 @@ static bool ScriptGUIButtonSetType(JSContextRef context, JSObjectRef instance, J
     ScriptString strValue(context, value);
     std::string str = strValue.getStdStr();
     auto objectPtr = getDataOfInstance<GUIButton>(instance);
-    if(str == "normal")
+    if(str == ScriptStringNormal.getStdStr())
         objectPtr->type = GUIButton::Type::Normal;
-    else if(str == "delete")
+    else if(str == ScriptStringDelete.getStdStr())
         objectPtr->type = GUIButton::Type::Delete;
-    else if(str == "add")
+    else if(str == ScriptStringAdd.getStdStr())
         objectPtr->type = GUIButton::Type::Add;
-    else if(str == "edit")
+    else if(str == ScriptStringEdit.getStdStr())
         objectPtr->type = GUIButton::Type::Edit;
-    else if(str == "lockable")
+    else if(str == ScriptStringLockable.getStdStr())
         objectPtr->type = GUIButton::Type::Lockable;
     else{
         ScriptException(context, exception, "GUIButton setType(): Invalid value");

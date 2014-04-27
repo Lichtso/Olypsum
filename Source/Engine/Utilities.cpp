@@ -225,6 +225,13 @@ std::string trimPath(std::string path, size_t n) {
     return ss.str();
 }
 
+std::string stringOf(time_t value) {
+    struct tm* date = gmtime(&value);
+    char buffer[256];
+    sprintf(buffer, "%04d.%02d.%02d %02d:%02d:%02d", 1900+date->tm_year, 1+date->tm_mon, date->tm_mday, date->tm_hour, date->tm_min, date->tm_sec);
+    return buffer;
+}
+
 std::string stringOf(int value) {
     char buffer[32];
     sprintf(buffer, "%d", value);

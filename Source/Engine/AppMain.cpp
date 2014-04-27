@@ -10,11 +10,6 @@
 
 void AppMain() {
     //Init paths
-    /*if(resourcesPath.size() == 0) {
-        char cwdPath[512];
-        getcwd(cwdPath, sizeof(cwdPath)/sizeof(char)-1);
-        resourcesPath = std::string(cwdPath)+'/'+executablePath;
-    }*/
     resourcesPath = trimPath(resourcesPath, 2)+"/Resources/";
     
 #ifdef WIN32
@@ -63,11 +58,8 @@ void AppMain() {
         }
 #endif
         
-        time_t t = time(0);
-        struct tm* date = gmtime(&t);
         char* buffer = new char[2048];
-        sprintf(buffer, "Date / Time: %04d.%02d.%02d %02d:%02d:%02d", 1900+date->tm_year, 1+date->tm_mon, date->tm_mday, date->tm_hour, date->tm_min, date->tm_sec);
-        log(typeless_log, buffer);
+        log(typeless_log, std::string("Date / Time: ")+stringOf(time(0)));
         log(typeless_log, std::string("Engine Version: ")+engineVersion);
         //log(typeless_log, std::string("Multi Threading: ")+stringOf(std::thread::hardware_concurrency()));
         char* glStr = NULL;
@@ -111,102 +103,97 @@ void AppMain() {
         glFrontFace(GL_CCW);
     }
     
-    /* JSC Heisen Bug
-    ScriptClasses[ScriptVector3] = NULL;
-    JSGlobalContextRef context = JSGlobalContextCreate(NULL);
-    for(unsigned int j = 0; j < 1024; j ++) {
-        printf("TEST %d\n", j);
-        JSValueRef *pointsA = new JSValueRef[1];
-        pointsA[0] = newScriptVector3(context, btVector3(1.0, 1.0, 1.0));
-        for(unsigned int i = 0; i < 1024; i ++)
-            newScriptVector3(context, btVector3(1.0, 1.0, 1.0));
-        JSObjectMakeArray(context, 1, pointsA, NULL);
-        delete [] pointsA;
-    }*/
-    
-    initScriptClasses();
-    networkManager.init();
     objectManager.init();
+    networkManager.init();
+    AppGameTick();
+    updateGBufferShaderPrograms();
+    updateIlluminationShaderPrograms();
+    updateSSAOShaderPrograms();
+    updateDOFShaderProgram();
+    AppGameTick();
+    initScriptClasses();
     
+    while(true)
+        AppGameTick();
+}
+
+void AppGameTick() {
     SDL_Event event;
-    while(true) {
-        while(SDL_PollEvent(&event)) {
-            switch(event.type) {
-                case SDL_WINDOWEVENT:
-                    switch (event.window.event) {
-                        case SDL_WINDOWEVENT_FOCUS_LOST:
-                            if(menu.current == Menu::inGame) {
-                                menu.setGameEscMenu();
-                                menu.sendPauseEvent();
-                            }
+    while(SDL_PollEvent(&event)) {
+        switch(event.type) {
+            case SDL_WINDOWEVENT:
+                switch(event.window.event) {
+                    case SDL_WINDOWEVENT_FOCUS_LOST:
+                        if(menu.current == Menu::inGame) {
+                            menu.setGameEscMenu();
+                            menu.sendPauseEvent();
+                        }
                         break;
-                        case SDL_WINDOWEVENT_RESIZED:
-                            menu.updateVideoResulution();
+                    case SDL_WINDOWEVENT_RESIZED:
+                        menu.updateVideoResulution();
                         break;
-                    }
+                }
                 break;
-                case SDL_KEYDOWN: {
-                    SDL_Keycode keycode = event.key.keysym.sym;
-                    if(SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_TEXTINPUT, SDL_TEXTINPUT))
-                        menu.handleKeyDown(keycode, event.text.text);
-                    else
-                        menu.handleKeyDown(keycode, "");
-                } break;
-                case SDL_KEYUP:
-                    menu.handleKeyUp(event.key.keysym.sym);
+            case SDL_KEYDOWN: {
+                SDL_Keycode keycode = event.key.keysym.sym;
+                if(SDL_PeepEvents(&event, 1, SDL_GETEVENT, SDL_TEXTINPUT, SDL_TEXTINPUT))
+                    menu.handleKeyDown(keycode, event.text.text);
+                else
+                    menu.handleKeyDown(keycode, "");
+            } break;
+            case SDL_KEYUP:
+                menu.handleKeyUp(event.key.keysym.sym);
                 break;
-                case SDL_MOUSEBUTTONDOWN:
-                    menu.handleMouseDown(event.button.button);
+            case SDL_MOUSEBUTTONDOWN:
+                menu.handleMouseDown(event.button.button);
                 break;
-                case SDL_MOUSEBUTTONUP:
-                    menu.handleMouseUp(event.button.button);
+            case SDL_MOUSEBUTTONUP:
+                menu.handleMouseUp(event.button.button);
                 break;
-                case SDL_MOUSEWHEEL:
-                    menu.handleMouseWheel(event.wheel.x, event.wheel.y);
+            case SDL_MOUSEWHEEL:
+                menu.handleMouseWheel(event.wheel.x, event.wheel.y);
                 break;
-                case SDL_MOUSEMOTION: {
-                    int mouseX = event.motion.x*optionsState.videoScale - menu.screenView->width;
-                    int mouseY = menu.screenView->height - event.motion.y*optionsState.videoScale;
-                    if(menu.current == Menu::inGame && menu.mouseFixed) {
-                        menu.mouseVelocityX += optionsState.mouseSensitivity*mouseX;
-                        menu.mouseVelocityY += optionsState.mouseSensitivity*mouseY;
-                    }else{
-                        menu.mouseX = mouseX;
-                        menu.mouseY = mouseY;
-                        menu.screenView->handleMouseMove(menu.mouseX, menu.mouseY);
-                    }
-                } break;
-                case SDL_QUIT:
-                    AppTerminate();
+            case SDL_MOUSEMOTION: {
+                int mouseX = event.motion.x*optionsState.videoScale - menu.screenView->width;
+                int mouseY = menu.screenView->height - event.motion.y*optionsState.videoScale;
+                if(menu.current == Menu::inGame && menu.mouseFixed) {
+                    menu.mouseVelocityX += optionsState.mouseSensitivity*mouseX;
+                    menu.mouseVelocityY += optionsState.mouseSensitivity*mouseY;
+                }else{
+                    menu.mouseX = mouseX;
+                    menu.mouseY = mouseY;
+                    menu.screenView->handleMouseMove(menu.mouseX, menu.mouseY);
+                }
+            } break;
+            case SDL_QUIT:
+                AppTerminate();
                 break;
-                default:
+            default:
                 break;
-            }
         }
-        keyState = SDL_GetKeyboardState(&keyStateSize);
-        
-        if(menu.current == Menu::Name::inGame && profiler.isFirstFrameInSec()) {
-            char str[64];
-            sprintf(str, "FPS: %d", profiler.FPS);
-            menu.consoleAdd(str, 1.0);
-        }
-        
-        networkManager.gameTick();
-        menu.gameTick();
-        if(levelManager.gameStatus == noGame) {
-            glClearColor(1, 1, 1, 1);
-            glViewport(0, 0, optionsState.videoWidth*optionsState.videoScale, optionsState.videoHeight*optionsState.videoScale);
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glClear(GL_COLOR_BUFFER_BIT);
-        }else{
-            profiler.leaveSection("Rest");
-            objectManager.gameTick();
-        }
-        menu.screenView->drawScreen();
-        SDL_GL_SwapWindow(mainWindow);
-        profiler.leaveSection("Swap Buffers");
-        profiler.markFrame();
     }
+    keyState = SDL_GetKeyboardState(&keyStateSize);
+    
+    if(menu.current == Menu::Name::inGame && profiler.isFirstFrameInSec()) {
+        char str[64];
+        sprintf(str, "FPS: %d", profiler.FPS);
+        menu.consoleAdd(str, 1.0);
+    }
+    
+    networkManager.gameTick();
+    menu.gameTick();
+    if(levelManager.gameStatus == noGame) {
+        glViewport(0, 0, optionsState.videoWidth*optionsState.videoScale, optionsState.videoHeight*optionsState.videoScale);
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glClear(GL_COLOR_BUFFER_BIT);
+    }else{
+        profiler.leaveSection("Rest");
+        objectManager.gameTick();
+    }
+    menu.screenView->drawScreen();
+    SDL_GL_SwapWindow(mainWindow);
+    profiler.leaveSection("Swap Buffers");
+    profiler.markFrame();
 }
 
 void AppTerminate() {

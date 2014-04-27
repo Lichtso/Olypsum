@@ -9,14 +9,17 @@
 #include "../Menu/Menu.h"
 
 GUITextField::GUITextField() :highlighted(false), enabled(true), cursorX(0), cursorDrawTick(0.0) {
-    content.innerShadow = 0;
     GUILabel* label = new GUILabel();
     GUIFramedView::addChild(label);
     label->width = 0;
     height = (float)label->fontHeight/1.2;
     cursor.width = 1;
     cursor.borderColor = Color4(0.0);
-    cursor.cornerRadius = cursor.innerShadow = 0;
+    cursor.cornerRadius = 0;
+    content.decorationType = GUIDecorationType::Stipple;
+    content.cornerRadius = menu.screenView->width*0.014;
+    content.edgeGradientCenter = 1.0;
+    content.edgeGradientBorder = 0.6;
 }
 
 void GUITextField::insertStr(const char* str) {
@@ -74,8 +77,7 @@ bool GUITextField::addChild(GUIRect* child) {
 void GUITextField::updateContent() {
     content.width = width;
     content.height = height;
-    content.cornerRadius = menu.screenView->width*0.014;
-    content.borderColor = (highlighted) ? Color4(0.31, 0.51, 1.0) : Color4(0.51);
+    content.borderColor = (isFocused()) ? Color4(0.31, 0.51, 1.0) : Color4(0.51);
     content.updateContent();
     
     GUILabel* label = static_cast<GUILabel*>(children[0]);

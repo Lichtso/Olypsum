@@ -32,6 +32,8 @@ class CamObject : public SimpleObject {
     CamObject(btTransform transformation);
     CamObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);
     void removeClean();
+    //Returns the aspect of this Cam if > 0.0 else the one of the screen
+    float getAspect();
     //Returns a temporary Matrix4 which might differ from the transformation in reflection frames
     Matrix4 getCamMatrix();
     /*! Calculates a ray shot from this Cam in local space

@@ -10,7 +10,7 @@
 
 const std::string consoleJSCommand = "#! ";
 const std::string homepage = "http://gamefortec.net/";
-const float loadingScreenTime = 3.0;
+const float loadingScreenTime = 5.0;
 float loadingScreen = loadingScreenTime;
 
 Menu::Menu() :current(none), screenView(NULL) {
@@ -86,9 +86,8 @@ void Menu::updateVideoResulution() {
     optionsState.videoHeight -= optionsState.videoHeight % 2;
     SDL_SetWindowSize(mainWindow, optionsState.videoWidth, optionsState.videoHeight);
     
+    mainFBO.init();
     if(levelManager.gameStatus != noGame) {
-        mainFBO.init();
-        mainCam->aspect = (float)optionsState.videoWidth/optionsState.videoHeight;
         mainCam->updateViewMat();
         for(auto lightObject : objectManager.lightObjects)
             lightObject->deleteShadowMap();
@@ -262,17 +261,8 @@ void Menu::gameTick() {
     
     switch(current) {
         case loading: {
-            if(!shaderPrograms[solidGSP]->linked())
-                updateGBufferShaderPrograms();
-            else if(!shaderPrograms[directionalShadowLightSP]->linked())
-                updateIlluminationShaderPrograms();
-            else if(optionsState.ssaoQuality && !shaderPrograms[ssaoSP]->linked())
-                updateSSAOShaderPrograms();
-            else if(!shaderPrograms[depthOfFieldSP]->linked())
-                updateDOFShaderProgram();
-            
-            loadingScreen -= profiler.animationFactor;
-            GUIProgressBar* progressBar = static_cast<GUIProgressBar*>(screenView->children[0]);
+            loadingScreen -= profiler.animationFactor * ((keyState[SDL_SCANCODE_RETURN]) ? 10.0 : 1.0);
+            GUIProgressBar* progressBar = static_cast<GUIProgressBar*>(screenView->children[1]);
             progressBar->value = 1.0-loadingScreen/loadingScreenTime;
             if(loadingScreen <= 0.0)
                 setMainMenu();
@@ -400,7 +390,6 @@ void Menu::setModalView(const std::string& title, const std::string& text, std::
     button->addChild(label);
     
     screenView->setModalView(modalView);
-    
 }
 
 void Menu::clear() {
@@ -414,7 +403,7 @@ void Menu::clearAndAddBackground() {
     clear();
     
     GUIImage* image = new GUIImage();
-    image->texture = fileManager.getResourceByPath<Texture>(NULL, "Core/background.jpg");
+    image->texture = fileManager.getResourceByPath<Texture>(NULL, "Core/background.png");
     image->texture->uploadTexture(GL_TEXTURE_2D, GL_COMPRESSED_RGB);
     if((float)image->texture->width/image->texture->height <= (float)screenView->width/screenView->height) {
         image->sizeAlignment = GUISizeAlignment::Height;
@@ -425,15 +414,12 @@ void Menu::clearAndAddBackground() {
     }
     image->updateContent();
     screenView->addChild(image);
+    screenView->updateContent();
 }
 
 void Menu::setLoadingMenu() {
     clear();
     current = loading;
-    
-    GUIProgressBar* progressBar = new GUIProgressBar();
-    progressBar->posY = screenView->height*-0.7;
-    screenView->addChild(progressBar);
     
     GUIImage* image = new GUIImage();
     image->sizeAlignment = GUISizeAlignment::Height;
@@ -443,10 +429,15 @@ void Menu::setLoadingMenu() {
     image->posY = screenView->height*0.2;
     screenView->addChild(image);
     
+    GUIProgressBar* progressBar = new GUIProgressBar();
+    progressBar->posY = screenView->height*-0.7;
+    screenView->addChild(progressBar);
+    
     GUILabel* label = new GUILabel();
     label->text = fileManager.localizeString("loading");
     label->posY = screenView->height*-0.5;
     label->fontHeight = screenView->height*0.16;
+    label->color = Color4(1.0);
     screenView->addChild(label);
     
     screenView->updateContent();
@@ -480,24 +471,26 @@ void Menu::setMainMenu() {
         GUIButton* button = new GUIButton();
         button->posY = screenView->height*(0.32-0.16*i);
         button->onClick = onClick[i];
+        //if(i == 1) button->enabled = false;
         view->addChild(button);
         GUILabel* label = new GUILabel();
         label->text = fileManager.localizeString(buttonLabels[i]);
         label->textAlignment = GUILabel::TextAlignment::Left;
         label->fontHeight = screenView->height*0.1;
         label->sizeAlignment = GUISizeAlignment::Height;
-        label->width = view->width+view->content.innerShadow*2.2-button->paddingX;
+        label->width = view->width-view->content.cornerRadius*1.1-button->paddingX;
         button->addChild(label);
     }
     
     GUILabel* label = new GUILabel();
-    label->text = fileManager.localizeString("version")+": "+engineVersion+" (Alpha)\nDO NOT DISTRIBUTE!";
+    label->text = fileManager.localizeString("version")+": "+engineVersion+"\nClosed Beta";
     label->textAlignment = GUILabel::TextAlignment::Left;
     label->sizeAlignment = GUISizeAlignment::Height;
     label->width = screenView->width*0.4;
     label->posX = screenView->width*-0.59;
     label->posY = screenView->height*-0.92;
     label->fontHeight = screenView->height*0.08;
+    label->color = Color4(1.0);
     screenView->addChild(label);
     
     screenView->updateContent();
@@ -511,12 +504,13 @@ void Menu::setCreditsMenu() {
     label->posY = screenView->height*0.88;
     label->text = fileManager.localizeString("credits");
     label->fontHeight = screenView->height*0.2;
+    label->color = Color4(1.0);
     screenView->addChild(label);
     
-    GUIScrollView* view = new GUIScrollView();
+    GUIFramedView* view = new GUIFramedView();
     view->width = screenView->width*0.7;
     view->height = screenView->height*0.6;
-    view->content.innerShadow = view->content.cornerRadius * 0.5;
+    view->content.edgeGradientBorder = 0.5;
     screenView->addChild(view);
     
     label = new GUILabel();

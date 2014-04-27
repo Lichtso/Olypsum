@@ -194,11 +194,13 @@ bool Texture::uploadNormalMap(float processingValue) {
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, normalMap, 0);
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
     
-    shaderPrograms[normalMapGenSP]->use();
+    shaderPrograms[genNormalMapSP]->use();
     currentShaderProgram->setUniformF("processingValue", processingValue);
-    glDisable(GL_BLEND);
+    //glDepthMask(GL_FALSE);
     glDisable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
     rectVAO.draw();
+    //glDepthMask(GL_TRUE);
     glEnable(GL_DEPTH_TEST);
     //glEnable(GL_BLEND);
     unloadTexture();

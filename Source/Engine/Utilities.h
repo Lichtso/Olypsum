@@ -96,6 +96,9 @@ bool removeDir(std::string path);
  */
 std::string trimPath(std::string path, size_t n);
 
+//! Converts a time into a std::string
+std::string stringOf(time_t value);
+
 //! Converts a int into a std::string
 std::string stringOf(int value);
 std::string stringOf(unsigned int value);

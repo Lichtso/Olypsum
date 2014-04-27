@@ -39,12 +39,11 @@ struct FrustumCullingCallback : btDbvt::ICollide {
 
 
 
-CamObject::CamObject() :fov(-1.0), aspect(1.0), nearPlane(-1.0), farPlane(1.0) {
+CamObject::CamObject() :fov(-1.0), aspect(0.0), nearPlane(-1.0), farPlane(1.0) {
     setTransformation(btTransform::getIdentity());
 }
 
-CamObject::CamObject(btTransform _transformation)
-    :fov(M_PI_4), aspect((float)optionsState.videoWidth/optionsState.videoHeight), nearPlane(-1.0), farPlane(1.0) {
+CamObject::CamObject(btTransform _transformation) :fov(M_PI_4), aspect(0.0), nearPlane(-1.0), farPlane(1.0) {
     setTransformation(_transformation);
 }
 
@@ -90,6 +89,10 @@ void CamObject::removeClean() {
     SimpleObject::removeClean();
 }
 
+float CamObject::getAspect() {
+    return (aspect > 0.0) ? aspect : (float)optionsState.videoWidth/optionsState.videoHeight;
+}
+
 Matrix4 CamObject::getCamMatrix() {
     PlaneReflective* planeReflective = dynamic_cast<PlaneReflective*>(objectManager.currentReflective);
     if(planeReflective) {
@@ -105,6 +108,7 @@ Matrix4 CamObject::getCamMatrix() {
 
 Ray3 CamObject::getRelativeRayAt(float x, float y) {
     Ray3 ray;
+    float aspect = getAspect();
     if(fov > 0.0) { //Perspective
         float aux = tan(fov*0.5);
         ray.direction.setX(x*aux*aspect);
@@ -133,6 +137,7 @@ bool CamObject::doFrustumCulling() {
     planes_o[1] = -planes_n[1].dot(virtualMat.w-planes_n[1]*farPlane);
     planes_n[0] = -planes_n[1];
     
+    float aspect = getAspect();
     if(fov < M_PI) {
         planes_o[0] = -planes_n[0].dot(virtualMat.w+planes_n[0]*nearPlane);
         
@@ -309,6 +314,7 @@ void CamObject::use() {
 void CamObject::updateViewMat() {
     viewMat = getCamMatrix().getInverse();
     
+    float aspect = getAspect();
     if(fov < 0.0) //Ortho
         viewMat.ortho(-fov*aspect, -fov, nearPlane, farPlane);
     else if(fov < M_PI) //Perspective

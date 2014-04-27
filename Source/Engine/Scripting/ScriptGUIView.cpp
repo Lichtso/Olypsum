@@ -94,24 +94,6 @@ ScriptClassDefinition(GUIScreenView, ScriptGUIScreenViewProperties, NULL);
 
 
 
-static JSValueRef ScriptGUIFramedViewGetInnerShadow(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    return JSValueMakeNumber(context, getDataOfInstance<GUIFramedView>(instance)->content.innerShadow);
-}
-
-static bool ScriptGUIFramedViewSetInnerShadow(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
-    if(!JSValueIsNumber(context, value)) {
-        ScriptException(context, exception, "GUIFramedView setInnerShadow(): Expected Number");
-        return false;
-    }
-    double numberValue = JSValueToNumber(context, value, NULL);
-    auto objectPtr = getDataOfInstance<GUIFramedView>(instance);
-    if(isfinite(numberValue)) {
-        objectPtr->content.innerShadow = numberValue;
-        return true;
-    }else
-        return false;
-}
-
 static JSValueRef ScriptGUIFramedViewGetCornerRadius(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
     return JSValueMakeNumber(context, getDataOfInstance<GUIFramedView>(instance)->content.cornerRadius);
 }
@@ -128,6 +110,79 @@ static bool ScriptGUIFramedViewSetCornerRadius(JSContextRef context, JSObjectRef
         return true;
     }else
         return false;
+}
+
+static JSValueRef ScriptGUIFramedViewGetEdgeGradientCenter(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<GUIFramedView>(instance)->content.edgeGradientCenter);
+}
+
+static bool ScriptGUIFramedViewSetEdgeGradientCenter(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "GUIFramedView setEdgeGradientCenter(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    auto objectPtr = getDataOfInstance<GUIFramedView>(instance);
+    if(isfinite(numberValue)) {
+        objectPtr->content.edgeGradientCenter = numberValue;
+        return true;
+    }else
+        return false;
+}
+
+static JSValueRef ScriptGUIFramedViewGetEdgeGradientBorder(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    return JSValueMakeNumber(context, getDataOfInstance<GUIFramedView>(instance)->content.edgeGradientBorder);
+}
+
+static bool ScriptGUIFramedViewSetEdgeGradientBorder(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "GUIFramedView setEdgeGradientBorder(): Expected Number");
+        return false;
+    }
+    double numberValue = JSValueToNumber(context, value, NULL);
+    auto objectPtr = getDataOfInstance<GUIFramedView>(instance);
+    if(isfinite(numberValue)) {
+        objectPtr->content.edgeGradientBorder = numberValue;
+        return true;
+    }else
+        return false;
+}
+
+ScriptString ScriptStringMonochrome("monochrome"), ScriptStringBrushedSteel("brushedSteel"), ScriptStringStipple("stipple");
+
+static JSValueRef ScriptGUIFramedViewGetDecorationType(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
+    auto objectPtr = getDataOfInstance<GUIFramedView>(instance);
+    switch(objectPtr->content.decorationType) {
+        case GUIDecorationType::Monochrome:
+            return ScriptStringMonochrome.getJSStr(context);
+        case GUIDecorationType::BrushedSteel:
+            return ScriptStringBrushedSteel.getJSStr(context);
+        case GUIDecorationType::Stipple:
+            return ScriptStringStipple.getJSStr(context);
+        default:
+            return ScriptException(context, exception, "GUIFramedView getDecorationType(): Internal error");
+    }
+}
+
+static bool ScriptGUIFramedViewSetDecorationType(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
+    if(!JSValueIsString(context, value)) {
+        ScriptException(context, exception, "GUIButton setState(): Expected String");
+        return false;
+    }
+    ScriptString strValue(context, value);
+    std::string str = strValue.getStdStr();
+    auto objectPtr = getDataOfInstance<GUIFramedView>(instance);
+    if(str == ScriptStringMonochrome.getStdStr())
+        objectPtr->content.decorationType = GUIDecorationType::Monochrome;
+    else if(str == ScriptStringBrushedSteel.getStdStr())
+        objectPtr->content.decorationType = GUIDecorationType::BrushedSteel;
+    else if(str == ScriptStringStipple.getStdStr())
+        objectPtr->content.decorationType = GUIDecorationType::Stipple;
+    else{
+        ScriptException(context, exception, "GUIFramedView setDecorationType(): Invalid value");
+        return false;
+    }
+    return true;
 }
 
 static JSValueRef ScriptGUIFramedViewAccessTopColor(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {
@@ -158,8 +213,10 @@ static JSValueRef ScriptGUIFramedViewAccessBorderColor(JSContextRef context, JSO
 }
 
 JSStaticValue ScriptGUIFramedViewProperties[] = {
-    {"innerShadow", ScriptGUIFramedViewGetInnerShadow, ScriptGUIFramedViewSetInnerShadow, kJSPropertyAttributeDontDelete},
     {"cornerRadius", ScriptGUIFramedViewGetCornerRadius, ScriptGUIFramedViewSetCornerRadius, kJSPropertyAttributeDontDelete},
+    {"edgeGradientCenter", ScriptGUIFramedViewGetEdgeGradientCenter, ScriptGUIFramedViewSetEdgeGradientCenter, kJSPropertyAttributeDontDelete},
+    {"edgeGradientBorder", ScriptGUIFramedViewGetEdgeGradientBorder, ScriptGUIFramedViewSetEdgeGradientBorder, kJSPropertyAttributeDontDelete},
+    {"decorationType", ScriptGUIFramedViewGetDecorationType, ScriptGUIFramedViewSetDecorationType, kJSPropertyAttributeDontDelete},
     {0, 0, 0, 0}
 };
 

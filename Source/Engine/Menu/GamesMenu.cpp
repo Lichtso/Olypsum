@@ -32,6 +32,7 @@ void Menu::setSaveGamesMenu() {
     label->posY = screenView->height*0.88;
     label->text = fileManager.localizeString("saveGames");
     label->fontHeight = screenView->height*0.2;
+    label->color = Color4(1.0);
     screenView->addChild(label);
     
     GUIScrollView* scrollView = new GUIScrollView();
@@ -53,7 +54,7 @@ void Menu::setSaveGamesMenu() {
         std::string container = node->first_node("Level")->first_attribute()->value();
         GUIButton* button = new GUIButton();
         button->posX = screenView->width*-0.18;
-        button->posY = scrollView->height*(0.8-validSaveGames*0.4);
+        button->posY = scrollView->height*(0.84-validSaveGames*0.4)-scrollView->content.cornerRadius;
         button->onClick = [name, package, container](GUIButton* button) {
             levelManager.loadGame(package, name, container);
         };
@@ -96,7 +97,7 @@ void Menu::setSaveGamesMenu() {
         
         button = new GUIButton();
         button->posX = screenView->width*0.8;
-        button->posY = scrollView->height*(0.8-validSaveGames*0.4);
+        button->posY = scrollView->height*(0.84-validSaveGames*0.4)-scrollView->content.cornerRadius;
         button->width = screenView->width*0.14;
         button->sizeAlignment = GUISizeAlignment::Height;
         scrollView->addChild(button);
@@ -152,10 +153,10 @@ void Menu::setNewGameMenu() {
     label->posY = screenView->height*0.88;
     label->text = fileManager.localizeString("newGame");
     label->fontHeight = screenView->height*0.2;
+    label->color = Color4(1.0);
     screenView->addChild(label);
     
     GUIScrollView* scrollView = new GUIScrollView();
-    scrollView->visible = false;
     scrollView->width = screenView->width*0.97;
     scrollView->height = screenView->height*0.7;
     scrollView->contentHeight = (fileManager.filePackages.size()-1)*0.4*scrollView->height;
@@ -163,7 +164,7 @@ void Menu::setNewGameMenu() {
     
     GUITextField* textField = new GUITextField();
     label = static_cast<GUILabel*>(textField->children[0]);
-    label->text = fileManager.localizeString("newGame");
+    label->text = fileManager.localizeString("newGame")+" "+stringOf(time(0));
     textField->posY = screenView->height*-0.8;
     textField->width = screenView->width*0.4;
     textField->height = screenView->height*0.07;

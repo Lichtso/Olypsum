@@ -1,3 +1,4 @@
+#define M_PI 3.1415926535897932384626433832795
 const float InverseMaxInt = 1.0 / 4294967295.0;
 
 int int2Rand(in int a, in int b) {

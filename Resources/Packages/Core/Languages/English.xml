@@ -48,7 +48,7 @@
 	<Entry key="packageError_Dependency">Could not load level package,
 because its dependencies are corrupted.</Entry>
     <Entry key="packageError_Version">Could not load level package,
-        because its version is outdated.</Entry>
+because its version is outdated.</Entry>
 	<Entry key="packageError_FilesMissing">Could not load level package,
 because some files are missing.</Entry>
 	<Entry key="packageError_Corrupted">Could not load saved game,

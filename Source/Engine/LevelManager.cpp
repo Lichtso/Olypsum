@@ -190,7 +190,6 @@ bool LevelManager::loadGame(FilePackage* package, const std::string& name, const
         delete *compound;
     }
     
-    mainFBO.init();
     if(scriptManager) scriptManager->clean();
     scriptManager.reset(new ScriptManager());
     scriptManager->mainScript = fileManager.getResourceByPath<ScriptFile>(package, "Main");

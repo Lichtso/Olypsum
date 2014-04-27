@@ -94,9 +94,9 @@ bool GUIView::handleMouseWheel(int mouseX, int mouseY, float deltaX, float delta
 
 
 GUIFramedView::GUIFramedView() {
-    content.topColor = Color4(0.78);
-    content.bottomColor = Color4(0.78);
-    content.borderColor = Color4(0.78);
+    content.decorationType = GUIDecorationType::BrushedSteel;
+    content.topColor = content.bottomColor = content.borderColor = Color4(0.78);
+    content.edgeGradientBorder = 1.3;
 }
 
 void GUIFramedView::updateContent() {
@@ -116,11 +116,10 @@ void GUIFramedView::draw(const btVector3& parentTransform, GUIClipRect& parentCl
     
     btVector3 transform = parentTransform + btVector3(posX, posY, 0.0);
     content.drawOnScreen(transform, 0, 0, clipRect);
-    float inset = abs(content.innerShadow);
-    clipRect.minPosX += inset;
-    clipRect.maxPosX -= inset;
-    clipRect.minPosY += inset;
-    clipRect.maxPosY -= inset;
+    clipRect.minPosX += content.cornerRadius;
+    clipRect.maxPosX -= content.cornerRadius;
+    clipRect.minPosY += content.cornerRadius;
+    clipRect.maxPosY -= content.cornerRadius;
     
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->draw(transform, clipRect);
@@ -132,17 +131,11 @@ GUIScreenView::GUIScreenView() :modalView(NULL), focus(NULL) {
     updateContent();
 }
 
-GUIScreenView::~GUIScreenView() {
-    //if(!scriptInstance.IsEmpty())
-    //    scriptInstance.Reset();
-}
-
 void GUIScreenView::updateContent() {
     width = (optionsState.videoWidth >> 1) * optionsState.videoScale;
     height = (optionsState.videoHeight >> 1) * optionsState.videoScale;
     
     guiCam->fov = -height;
-    guiCam->aspect = (float)width/height;
     guiCam->updateViewMat();
     
     for(unsigned int i = 0; i < children.size(); i ++)

@@ -29,40 +29,27 @@ void GUISlider::updateContent() {
         barL.height = barR.height = height-sliderRadius+barHeight;
     }
     
-    barL.innerShadow = barR.innerShadow = 0;
     barL.cornerRadius = barR.cornerRadius = barHeight;
+    barL.topColor = Color4(0.55, 0.78, 0.94);
+    barL.bottomColor = Color4(0.0, 0.24, 0.63);
+    barR.topColor = Color4(0.71);
+    barR.bottomColor = Color4(1.0);
     barL.borderColor = barR.borderColor = Color4(0.63);
+    slider.width = sliderRadius;
+    slider.height = sliderRadius;
+    slider.cornerRadius = sliderRadius;
+    slider.topColor = Color4(0.98);
+    slider.bottomColor = Color4(0.82);
+    slider.borderColor = Color4(0.63);
     if(enabled) {
-        barL.topColor = Color4(0.0, 0.24, 0.63);
-        barL.bottomColor = Color4(0.55, 0.78, 0.94);
-        barR.topColor = Color4(0.71);
-        barR.bottomColor = Color4(1.0);
+        slider.edgeGradientCenter = (highlighted) ? 1.2 : 1.0;
+        slider.edgeGradientBorder = 1.0;
     }else{
-        barL.topColor = Color4(0.0, 0.12, 0.51);
-        barL.bottomColor = Color4(0.35, 0.59, 0.75);
-        barR.topColor = Color4(0.47);
-        barR.bottomColor = Color4(0.71);
+        slider.edgeGradientCenter = 0.6;
+        slider.edgeGradientBorder = 0.8;
     }
     barL.updateContent();
     barR.updateContent();
-    
-    slider.width = sliderRadius;
-    slider.height = sliderRadius;
-    slider.innerShadow = 0;
-    slider.cornerRadius = sliderRadius;
-    slider.borderColor = Color4(0.63);
-    if(enabled) {
-        if(highlighted) {
-            slider.topColor = Color4(0.98);
-            slider.bottomColor = Color4(0.82);
-        }else{
-            slider.topColor = Color4(0.94);
-            slider.bottomColor = Color4(0.71);
-        }
-    }else{
-        slider.topColor = Color4(0.59);
-        slider.bottomColor = Color4(0.43);
-    }
     slider.updateContent();
 }
 

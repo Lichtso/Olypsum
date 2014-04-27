@@ -23,11 +23,12 @@ void GUIProgressBar::updateContent() {
         barL.width = barR.width = width;
     }
     
-    barL.innerShadow = barR.innerShadow = 0;
     barL.cornerRadius = barR.cornerRadius = menu.screenView->width*0.01;
     barL.borderColor = barR.borderColor = Color4(0.63);
     barL.topColor = Color4(0.4, 0.98, 0.75);
     barL.bottomColor = Color4(0.04, 0.59, 0.2);
+    barL.edgeGradientCenter = 1.2;
+    barL.edgeGradientBorder = 1.0;
     barR.topColor = Color4(0.71);
     barR.bottomColor = Color4(1.0);
     

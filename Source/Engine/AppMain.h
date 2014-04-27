@@ -17,6 +17,9 @@ float getMaxVideoScale();
 //! Initializes and starts the main run loop
 void AppMain();
 
+//! Does one game tick (main run loop)
+void AppGameTick();
+
 //! Saves the options, cleans up and quits
 void AppTerminate();
 

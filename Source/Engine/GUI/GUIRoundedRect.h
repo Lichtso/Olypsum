@@ -18,6 +18,12 @@ enum GUICorner {
     BottomRight = 8
 };
 
+enum GUIDecorationType {
+    Monochrome = 0,
+    BrushedSteel = 1,
+    Stipple = 2
+};
+
 class GUIDrawableRect {
     public:
     int width, height;
@@ -33,9 +39,10 @@ class GUIRoundedRect : public GUIDrawableRect {
     GLuint texture;
     bool transposed;
     GUICorner roundedCorners;
-    Color4 topColor, bottomColor, borderColor;
-    int innerShadow;
+    GUIDecorationType decorationType;
     unsigned int cornerRadius;
+    float edgeGradientCenter, edgeGradientBorder;
+    Color4 topColor, bottomColor, borderColor;
     GUIRoundedRect();
     ~GUIRoundedRect();
     void updateContent();

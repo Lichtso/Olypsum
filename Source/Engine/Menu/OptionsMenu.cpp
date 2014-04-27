@@ -16,6 +16,7 @@ void Menu::setOptionsMenu() {
     label->posY = screenView->height*0.88;
     label->text = fileManager.localizeString("options");
     label->fontHeight = screenView->height*0.2;
+    label->color = Color4(1.0);
     screenView->addChild(label);
     
     label = new GUILabel();
@@ -23,10 +24,11 @@ void Menu::setOptionsMenu() {
     label->posY = screenView->height*0.65;
     label->text = fileManager.localizeString("graphics");
     label->fontHeight = screenView->height*0.14;
+    label->color = Color4(1.0);
     screenView->addChild(label);
     
     GUIFramedView* view = new GUIFramedView();
-    view->width = screenView->width*0.4;
+    view->width = screenView->width*0.45;
     view->height = screenView->height*0.5;
     view->posX = screenView->width*-0.5;
     screenView->addChild(view);
@@ -36,8 +38,8 @@ void Menu::setOptionsMenu() {
             optionsState.vSyncEnabled = (checkBox->state == GUIButton::State::Pressed);
             SDL_GL_SetSwapInterval(optionsState.vSyncEnabled);
         }, [this](GUICheckBox* checkBox) {
-            SDL_SetWindowFullscreen(mainWindow, (SDL_GetWindowFlags(mainWindow) & SDL_WINDOW_FULLSCREEN_DESKTOP)
-                                    ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
+            SDL_SetWindowFullscreen(mainWindow, (checkBox->state == GUIButton::State::Pressed)
+                                    ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
             updateVideoResulution();
         }, [this](GUICheckBox* checkBox) {
             optionsState.videoScale = (optionsState.videoScale > 1) ? 1 : 2;
@@ -70,7 +72,7 @@ void Menu::setOptionsMenu() {
     };
     for(unsigned char i = 0; i < 6; i ++) {
         label = new GUILabel();
-        label->posX = view->width*((i < 3) ? -0.25 : 0.55);
+        label->posX = view->width*((i < 3) ? -0.3 : 0.55);
         label->posY = screenView->height*(0.42-0.12*(i%3));
         label->width = view->width*0.5;
         label->fontHeight = screenView->height*0.1;
@@ -79,7 +81,7 @@ void Menu::setOptionsMenu() {
         label->sizeAlignment = GUISizeAlignment::Height;
         view->addChild(label);
         GUICheckBox* checkBox = new GUICheckBox();
-        checkBox->posX = view->width*((i < 3) ? -0.85 : -0.07);
+        checkBox->posX = view->width*((i < 3) ? -0.89 : -0.05);
         checkBox->posY = label->posY;
         checkBox->onClick = onClick[i];
         checkBox->state = (checkBoxActive[i]) ? GUIButton::State::Pressed : GUIButton::State::Released;
@@ -144,9 +146,9 @@ void Menu::setOptionsMenu() {
         label->sizeAlignment = GUISizeAlignment::Height;
         view->addChild(label);
         GUISlider* slider = new GUISlider();
-        slider->posX = view->width*-0.45;
+        slider->posX = view->width*-0.47;
         slider->posY = label->posY;
-        slider->width = view->width*0.4;
+        slider->width = view->width*0.48;
         slider->value = (float)sliderValuesGraphics[i]/(float)sliderSteps[i];
         slider->steps = sliderSteps[i];
         slider->onChange = onChangeGraphics[i];
@@ -182,9 +184,10 @@ void Menu::setOptionsMenu() {
         label->posY = screenView->height*(0.65-0.35*m);
         label->text = fileManager.localizeString((m == 0) ? "sound" : "mouse");
         label->fontHeight = screenView->height*0.14;
+        label->color = Color4(1.0);
         screenView->addChild(label);
         view = new GUIFramedView();
-        view->width = screenView->width*0.4;
+        view->width = screenView->width*0.45;
         view->height = screenView->height*0.15;
         view->posX = screenView->width*0.5;
         view->posY = screenView->height*(0.35-0.35*m);
@@ -245,6 +248,7 @@ void Menu::setLanguagesMenu() {
     label->posY = screenView->height*0.88;
     label->text = fileManager.localizeString("language");
     label->fontHeight = screenView->height*0.2;
+    label->color = Color4(1.0);
     screenView->addChild(label);
     GUIButton* button = new GUIButton();
     button->posY = screenView->height*-0.8;
@@ -286,7 +290,7 @@ void Menu::setLanguagesMenu() {
             tabs->selected = i;
     }
     view->addChild(tabs);
-    tabs->posY = view->height-tabs->height;
+    tabs->posY = view->height-view->content.cornerRadius-tabs->height;
     view->contentHeight = tabs->height*2;
     
     screenView->updateContent();

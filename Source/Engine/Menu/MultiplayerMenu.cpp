@@ -39,12 +39,13 @@ void Menu::setMultiplayerMenu() {
     label->posY = screenView->height*0.88;
     label->text = fileManager.localizeString("multiplayer");
     label->fontHeight = screenView->height*0.2;
+    label->color = Color4(1.0);
     screenView->addChild(label);
     
     GUIScrollView* view = new GUIScrollView();
     view->width = screenView->width*0.8;
     view->height = screenView->height*0.6;
-    view->content.innerShadow = view->content.cornerRadius * 0.5;
+    view->content.edgeGradientBorder = 0.5;
     screenView->addChild(view);
     
     GUIButton* button = new GUIButton();

@@ -42,7 +42,6 @@ class GUIScreenView : public GUIView {
     public:
     GUIRect *modalView, *focus;
     GUIScreenView();
-    ~GUIScreenView();
     void updateContent();
     void drawScreen();
     bool handleMouseDown(int mouseX, int mouseY);

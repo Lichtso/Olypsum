@@ -477,7 +477,7 @@ bool SpotLight::updateShadowMap(bool shadowActive) {
     
     mainFBO.renderInTexture(shadowMap, GL_TEXTURE_2D);
     //Render circle mask
-    shaderPrograms[circleMaskSP]->use();
+    shaderPrograms[genCircleMaskSP]->use();
     rectVAO.draw();
     objectManager.drawShadowCasters();
     

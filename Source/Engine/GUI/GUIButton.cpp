@@ -9,6 +9,9 @@
 #include "../Menu/Menu.h"
 
 GUIButton::GUIButton() :sizeAlignment(GUISizeAlignment::All), type(GUIButton::Type::Normal), enabled(true), state(GUIButton::State::Released) {
+    content.decorationType = GUIDecorationType::Monochrome;
+    content.cornerRadius = menu.screenView->width*0.014;
+    content.borderColor = Color4(0.5);
     paddingX = menu.screenView->width*0.01;
     paddingY = menu.screenView->height*0.01;
 }
@@ -72,9 +75,14 @@ void GUIButton::updateContent() {
     
     content.width = width;
     content.height = height;
-    content.cornerRadius = menu.screenView->width*0.014;
-    content.innerShadow = (state >= GUIButton::State::Pressed) ? menu.screenView->width*0.01 : 0;
-    content.borderColor = Color4(0.5);
+    
+    if(state >= GUIButton::State::Pressed) {
+        content.edgeGradientCenter = 1.0;
+        content.edgeGradientBorder = 0.6;
+    }else{
+        content.edgeGradientCenter = 1.1;
+        content.edgeGradientBorder = 1.0;
+    }
     
     if(enabled) {
         switch(state) {

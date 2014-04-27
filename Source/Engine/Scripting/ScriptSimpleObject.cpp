@@ -228,13 +228,13 @@ static bool ScriptSoundObjectSetMode(JSContextRef context, JSObjectRef instance,
     ScriptString strMode(context, value);
     std::string mode = strMode.getStdStr();
     auto objectPtr = getDataOfInstance<SoundObject>(instance);
-    if(mode == "looping") {
+    if(mode == ScriptStringLooping.getStdStr()) {
         objectPtr->mode = SoundObject::Mode::Looping;
         return true;
-    }else if(mode == "hold") {
+    }else if(mode == ScriptStringHold.getStdStr()) {
         objectPtr->mode = SoundObject::Mode::Hold;
         return true;
-    }else if(mode == "dispose") {
+    }else if(mode == ScriptStringDispose.getStdStr()) {
         objectPtr->mode = SoundObject::Mode::Dispose;
         return true;
     }else

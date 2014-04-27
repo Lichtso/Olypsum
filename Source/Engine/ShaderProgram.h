@@ -60,6 +60,8 @@ class ShaderProgram {
     void setUniformVec3(const char* name, const btVector3& value);
     //! Sets a vec4 uniform
     void setUniformVec4(const char* name, const btVector3& value);
+    //! Sets a vec4 uniform
+    void setUniformVec4(const char* name, const btQuaternion& value);
     //! Sets a mat3 uniform
     void setUniformMatrix3(const char* name, const btMatrix3x3* mat);
     //! Sets a mat3uniform
@@ -73,21 +75,24 @@ class ShaderProgram {
 };
 
 extern btTransform modelMat; //!< The model transformation to be set in the next ShaderProgram::use() call
-extern ShaderProgram *shaderPrograms[81], //!< All available ShaderPrograms
+extern ShaderProgram *shaderPrograms[84], //!< All available ShaderPrograms
                      *currentShaderProgram; //!< The active ShaderProgram
 
 enum ShaderProgramName {
     //Static Shaders
-    normalMapGenSP = 0,
+    genCircleMaskSP = 0,
+    genNormalMapSP,
+    genRoundedRectSP,
+    genRoundedRectBrushedSP,
+    genRoundedRectStippleSP,
     blurSP,
-    circleMaskSP,
     spriteSP,
     monochromeSP,
     deferredCombineSP0,
-    deferredCombine1SP,
-    deferredCombine2SP,
+    deferredCombineSP1,
+    deferredCombineSP2,
     //G-Buffer Shaders
-    solidGSP = 8,
+    solidGSP = 11,
     skeletalGSP,
     solidAnimatedGSP,
     skeletalAnimatedGSP,
@@ -96,7 +101,7 @@ enum ShaderProgramName {
     solidAnimatedBumpGSP,
     skeletalAnimatedBumpGSP,
     //G-Buffer Shaders (Glass)
-    solidGlassGSP = 16,
+    solidGlassGSP = 19,
     skeletalGlassGSP,
     solidAnimatedGlassGSP,
     skeletalAnimatedGlassGSP,
@@ -105,7 +110,7 @@ enum ShaderProgramName {
     solidAnimatedBumpGlassGSP,
     skeletalAnimatedBumpGlassGSP,
     //G-Buffer Shaders (Mirror)
-    solidMirrorGSP = 24,
+    solidMirrorGSP = 27,
     skeletalMirrorGSP,
     solidAnimatedMirrorGSP,
     skeletalAnimatedMirrorGSP,
@@ -114,7 +119,7 @@ enum ShaderProgramName {
     solidAnimatedBumpMirrorGSP,
     skeletalAnimatedBumpMirrorGSP,
     //G-Buffer Shaders (Glass, Mirror)
-    solidGlassMirrorGSP = 32,
+    solidGlassMirrorGSP = 35,
     skeletalGlassMirrorGSP,
     solidAnimatedGlassMirrorGSP,
     skeletalAnimatedGlassMirrorGSP,
@@ -123,7 +128,7 @@ enum ShaderProgramName {
     solidAnimatedBumpGlassMirrorGSP,
     skeletalAnimatedBumpGlassMirrorGSP,
     //G-Buffer Shaders (Reflection)
-    solidReflectionGSP = 40,
+    solidReflectionGSP = 43,
     skeletalReflectionGSP,
     solidAnimatedReflectionGSP,
     skeletalAnimatedReflectionGSP,
@@ -132,7 +137,7 @@ enum ShaderProgramName {
     solidAnimatedBumpReflectionGSP,
     skeletalAnimatedBumpReflectionGSP,
     //G-Buffer Shaders (Glass, Reflection)
-    solidGlassReflectionGSP = 48,
+    solidGlassReflectionGSP = 51,
     skeletalGlassReflectionGSP,
     solidAnimatedGlassReflectionGSP,
     skeletalAnimatedGlassReflectionGSP,
@@ -143,7 +148,7 @@ enum ShaderProgramName {
     waterGSP,
     terrainGSP,
     //Shadow Map Generators
-    solidShadowSP = 58,
+    solidShadowSP = 61,
     skeletalShadowSP,
     solidAnimatedShadowSP,
     skeletalAnimatedShadowSP,
@@ -152,7 +157,7 @@ enum ShaderProgramName {
     solidAnimatedParabolidShadowSP,
     skeletalAnimatedParabolidShadowSP,
     //Illumination Shaders
-    directionalLightSP = 66,
+    directionalLightSP = 69,
     directionalShadowLightSP,
     spotLightSP,
     spotShadowLightSP,
@@ -160,7 +165,7 @@ enum ShaderProgramName {
     positionalShadowLightSP,
     positionalShadowDualLightSP,
     //Post Effect Shaders
-    ssaoSP = 73,
+    ssaoSP = 76,
     ssaoCombineSP,
     edgeSmoothSP,
     depthOfFieldSP,

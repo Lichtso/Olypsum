@@ -96,7 +96,8 @@ bool ObjectManager::initOpenCL() {
 }
 
 void ObjectManager::init() {
-    //Init VAOs
+    //Init FBOs and VAOs
+    mainFBO.init();
     initLightVolumes();
     
     float vertices[] = {
@@ -121,6 +122,12 @@ void ObjectManager::init() {
     rectVAO.indeciesCount = 4;
     rectVAO.drawType = GL_TRIANGLE_STRIP;
     
+    //Show loading screen
+    guiCam = new CamObject();
+    loadStaticShaderPrograms();
+    menu.setLoadingMenu();
+    AppGameTick();
+    
     //Init OpenCL
     initOpenCL();
     
@@ -130,11 +137,6 @@ void ObjectManager::init() {
     alcMakeContextCurrent(soundContext);
     alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED);
     log(typeless_log, std::string("OpenAL sound output: ")+alcGetString(soundDevice, ALC_DEVICE_SPECIFIER));
-    
-    //Show loading screen
-    guiCam = new CamObject();
-    loadStaticShaderPrograms();
-    menu.setLoadingMenu();
 }
 
 void ObjectManager::clear() {
@@ -405,7 +407,7 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
         
         for(unsigned int i = 0; i < transparentAccumulator.size(); i ++) {
             AccumulatedTransparent* transparent = transparentAccumulator[i];
-            ShaderProgramName sp = deferredCombine1SP;
+            ShaderProgramName sp = deferredCombineSP1;
             
             mainFBO.renderInGBuffers(buffersCombine[1], transparent->mesh != NULL);
             glEnable(GL_DEPTH_TEST);
@@ -413,7 +415,7 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
                 if(optionsState.blendingQuality > 1) {
                     glActiveTexture(GL_TEXTURE3);
                     glBindTexture(GL_TEXTURE_RECTANGLE, buffersCombine[3]);
-                    sp = deferredCombine2SP;
+                    sp = deferredCombineSP2;
                 }
                 glDisable(GL_BLEND);
                 glDepthMask(GL_TRUE);
@@ -429,7 +431,7 @@ void ObjectManager::drawFrame(GLuint renderTarget) {
             delete transparent;
             
             illuminate();
-            if(sp == deferredCombine1SP) {
+            if(sp == deferredCombineSP1) {
                 glEnable(GL_BLEND);
                 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             }else

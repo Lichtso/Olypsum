@@ -35,13 +35,13 @@ template<typename T> static bool ScriptGUISetSizeAlignment(JSContextRef context,
     ScriptString strValue(context, value);
     std::string str = strValue.getStdStr();
     auto objectPtr = getDataOfInstance<T>(instance);
-    if(str == "none")
+    if(str == ScriptStringNone.getStdStr())
         objectPtr->sizeAlignment = GUISizeAlignment::None;
-    else if(str == "width")
+    else if(str == ScriptStringWidth.getStdStr())
         objectPtr->sizeAlignment = GUISizeAlignment::Width;
-    else if(str == "height")
+    else if(str == ScriptStringHeight.getStdStr())
         objectPtr->sizeAlignment = GUISizeAlignment::Height;
-    else if(str == "all")
+    else if(str == ScriptStringAll.getStdStr())
         objectPtr->sizeAlignment = GUISizeAlignment::All;
     else{
         ScriptException(context, exception, "GUI setSizeAlignment(): Invalid value");
@@ -78,17 +78,17 @@ template<typename T> static bool ScriptGUISetOrientation(JSContextRef context, J
     ScriptString strValue(context, value);
     std::string str = strValue.getStdStr();
     auto objectPtr = getDataOfInstance<T>(instance);
-    if(str == "left")
+    if(str == ScriptStringLeft.getStdStr())
         objectPtr->orientation = GUIOrientation::Left;
-    else if(str == "right")
+    else if(str == ScriptStringRight.getStdStr())
         objectPtr->orientation = GUIOrientation::Right;
-    else if(str == "bottom")
+    else if(str == ScriptStringBottom.getStdStr())
         objectPtr->orientation = GUIOrientation::Bottom;
-    else if(str == "top")
+    else if(str == ScriptStringTop.getStdStr())
         objectPtr->orientation = GUIOrientation::Top;
-    else if(str == "vertical")
+    else if(str == ScriptStringVertical.getStdStr())
         objectPtr->orientation = GUIOrientation::Vertical;
-    else if(str == "horizontal")
+    else if(str == ScriptStringHorizontal.getStdStr())
         objectPtr->orientation = GUIOrientation::Horizontal;
     else{
         ScriptException(context, exception, "GUI setOrientation(): Invalid value");
@@ -105,9 +105,9 @@ template<typename T> static bool ScriptGUISetOrientationDual(JSContextRef contex
     ScriptString strValue(context, value);
     std::string str = strValue.getStdStr();
     auto objectPtr = getDataOfInstance<T>(instance);
-    if(str == "vertical")
+    if(str == ScriptStringVertical.getStdStr())
         objectPtr->orientation = GUIOrientation::Vertical;
-    else if(str == "horizontal")
+    else if(str == ScriptStringHorizontal.getStdStr())
         objectPtr->orientation = GUIOrientation::Horizontal;
     else{
         ScriptException(context, exception, "GUI setOrientation(): Invalid value");

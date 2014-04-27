@@ -42,9 +42,9 @@ int GUIScrollView::getBarPosY() {
 
 GUIScrollView::GUIScrollView() {
     scrollPosX = scrollPosY = 0;
+    content.cornerRadius = 0;
     contentWidth = width;
     contentHeight = height;
-    content.innerShadow = 0;
     mouseDragPosX = mouseDragPosY = -2;
     sliderX = sliderY = true;
 }
@@ -74,15 +74,14 @@ void GUIScrollView::draw(const btVector3& parentTransform, GUIClipRect& parentCl
     if(!getLimSize(clipRect, parentClipRect)) return;
     
     btVector3 transform = parentTransform + btVector3(posX, posY, 0.0);
-    float inset = abs(content.innerShadow);
-    if(content.innerShadow != 0)
+    if(content.cornerRadius > 0)
         content.drawOnScreen(transform, 0, 0, clipRect);
     fixedClipRect = clipRect;
     
-    clipRect.minPosX += scrollPosX+inset;
-    clipRect.maxPosX += scrollPosX-inset;
-    clipRect.minPosY += -scrollPosY+inset;
-    clipRect.maxPosY += -scrollPosY-inset;
+    clipRect.minPosX += scrollPosX+content.cornerRadius;
+    clipRect.maxPosX += scrollPosX-content.cornerRadius;
+    clipRect.minPosY += -scrollPosY+content.cornerRadius;
+    clipRect.maxPosY += -scrollPosY-content.cornerRadius;
     btVector3 childTransform = transform+btVector3(-scrollPosX, scrollPosY, 0.0);
     for(unsigned int i = 0; i < children.size(); i ++)
         children[i]->draw(childTransform, clipRect);

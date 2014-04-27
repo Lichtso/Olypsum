@@ -155,9 +155,6 @@ void ShaderProgram::use () {
     }
     if(currentCam) {
         Matrix4 transform = currentCam->getCamMatrix();
-        /*const float logDepthFactor = 1.0;
-        setUniformF("logDepthFactorA", logDepthFactor);
-        setUniformF("logDepthFactorB", 1.0/log(currentCam->farPlane*logDepthFactor+1.0));*/
         setUniformMatrix4("viewMat", &currentCam->viewMat);
         setUniformMatrix4("camMat", &transform);
         if(checkUniformExistence("modelViewMat")) {
@@ -206,6 +203,10 @@ void ShaderProgram::setUniformVec3(const char* name, const btVector3& value) {
 }
 
 void ShaderProgram::setUniformVec4(const char* name, const btVector3& value) {
+    glUniform4f(getUniformLocation(name), value.x(), value.y(), value.z(), value.w());
+}
+
+void ShaderProgram::setUniformVec4(const char* name, const btQuaternion& value) {
     glUniform4f(getUniformLocation(name), value.x(), value.y(), value.z(), value.w());
 }
 
@@ -276,22 +277,31 @@ std::vector<const char*> gBufferFiveOut = { "colorOut", "materialOut", "normalOu
 std::vector<const char*> lightFragsOut = { "diffuseOut", "specularOut" };
 
 void loadStaticShaderPrograms() {
+    char iteratorMacro[32];
     for(unsigned int p = 0; p < sizeof(shaderPrograms)/sizeof(void*); p ++)
         shaderPrograms[p] = new ShaderProgram();
     
-    shaderPrograms[normalMapGenSP]->loadShaderProgram("normalMap", shaderTypeVertexFragment, { });
-    shaderPrograms[normalMapGenSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[normalMapGenSP]->addFragDataLocations({ "normalOut" });
-    shaderPrograms[normalMapGenSP]->link();
+    shaderPrograms[genCircleMaskSP]->loadShaderProgram("genCircleMask", shaderTypeVertexFragment, { });
+    shaderPrograms[genCircleMaskSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[genCircleMaskSP]->link();
+    
+    shaderPrograms[genNormalMapSP]->loadShaderProgram("genNormalMap", shaderTypeVertexFragment, { });
+    shaderPrograms[genNormalMapSP]->addAttribute(POSITION_ATTRIBUTE, "position");
+    shaderPrograms[genNormalMapSP]->addFragDataLocations({ "normalOut" });
+    shaderPrograms[genNormalMapSP]->link();
+    
+    for(unsigned int i = 0; i < 3; i ++) {
+        sprintf(iteratorMacro, "DECORATION_TYPE %d", i);
+        shaderPrograms[genRoundedRectSP+i]->loadShaderProgram("genRoundedRect", shaderTypeVertexFragment, { iteratorMacro });
+        shaderPrograms[genRoundedRectSP+i]->addAttribute(POSITION_ATTRIBUTE, "position");
+        shaderPrograms[genRoundedRectSP+i]->addFragDataLocations(colorFragOut);
+        shaderPrograms[genRoundedRectSP+i]->link();
+    }
     
     shaderPrograms[blurSP]->loadShaderProgram("postScreenBlur", shaderTypeVertexFragment, { });
     shaderPrograms[blurSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[blurSP]->addFragDataLocations(colorFragOut);
     shaderPrograms[blurSP]->link();
-    
-    shaderPrograms[circleMaskSP]->loadShaderProgram("circleMask", shaderTypeVertexFragment, { });
-    shaderPrograms[circleMaskSP]->addAttribute(POSITION_ATTRIBUTE, "position");
-    shaderPrograms[circleMaskSP]->link();
     
     shaderPrograms[spriteSP]->loadShaderProgram("sprite", shaderTypeVertexFragment, { });
     shaderPrograms[spriteSP]->addAttribute(POSITION_ATTRIBUTE, "position");
@@ -303,10 +313,9 @@ void loadStaticShaderPrograms() {
     shaderPrograms[monochromeSP]->addFragDataLocations(gBufferOut);
     shaderPrograms[monochromeSP]->link();
     
-    char blendingQualityMacro[32];
     for(unsigned int i = 0; i < 3; i ++) {
-        sprintf(blendingQualityMacro, "BLENDING_QUALITY %d", i);
-        shaderPrograms[deferredCombineSP0+i]->loadShaderProgram("deferredShader", shaderTypeVertexFragment, { blendingQualityMacro });
+        sprintf(iteratorMacro, "BLENDING_QUALITY %d", i);
+        shaderPrograms[deferredCombineSP0+i]->loadShaderProgram("deferredShader", shaderTypeVertexFragment, { iteratorMacro });
         shaderPrograms[deferredCombineSP0+i]->addAttribute(POSITION_ATTRIBUTE, "position");
         shaderPrograms[deferredCombineSP0+i]->addFragDataLocations(colorFragOut);
         shaderPrograms[deferredCombineSP0+i]->link();
@@ -393,15 +402,12 @@ void loadStaticShaderPrograms() {
 }
 
 void updateGBufferShaderPrograms() {
-    //char logarithmicDepthMacro[32];
-    //sprintf(logarithmicDepthMacro, "LOGARITHMIC_DEPTH %d", (optionsState.logarithmicDepth > 0.0) ? 1 : 0);
     char bumpMappingMacro[32], blendingQualityMacro[32];
     sprintf(bumpMappingMacro, "BUMP_MAPPING %d", optionsState.surfaceQuality);
     sprintf(blendingQualityMacro, "BLENDING_QUALITY %d", optionsState.blendingQuality);
     
     for(unsigned int p = 0; p < 48; p ++) {
         std::vector<const char*> macros;
-        //macros.push_back(logarithmicDepthMacro);
         
         if(p % 2 < 1)
             macros.push_back("SKELETAL_ANIMATION 0");
@@ -449,7 +455,6 @@ void updateGBufferShaderPrograms() {
         shaderPrograms[solidGSP+p]->link();
     }
     
-    //shaderPrograms[waterGSP]->loadShaderProgram("gBuffer", shaderTypeVertexFragmentGeometry, { logarithmicDepthMacro, "SKELETAL_ANIMATION 0", blendingQualityMacro, "BUMP_MAPPING 4", "TEXTURE_ANIMATION 1", "REFLECTION_TYPE 1" });
     shaderPrograms[waterGSP]->loadShaderProgram("gBuffer", shaderTypeVertexFragmentGeometry, { "SKELETAL_ANIMATION 0", blendingQualityMacro, "BUMP_MAPPING 4", "TEXTURE_ANIMATION 1", "REFLECTION_TYPE 1" });
     shaderPrograms[waterGSP]->addAttribute(POSITION_ATTRIBUTE, "position");
     shaderPrograms[waterGSP]->addAttribute(TEXTURE_COORD_ATTRIBUTE, "texCoord");

@@ -1,18 +1,21 @@
-Implement btSoftBody
-Water physics
 Split screen support
 Enviornment maping
+Parallax Occlusion / Position
 Light scattering / HDRR
 PCSS
+
+Implement btSoftBody
+Water physics
 Magnetic Attraction PhysicLink
 Gear Rack PhysicLink
+PhysicLink: Softness, Restitution, Damping
 Destructible objects / Voronoi
+
 Networking / Multiplayer
 Procedural models / Plants
+KI and path finding
 3D GUI transformations
 GUILabel texture mask
-KI and path finding
-PhysicLink: Softness, Restitution, Damping
 
 Test:
 Ubuntu .deb package
@@ -20,4 +23,5 @@ Skeletal animation
 Performance issue of explosions
 
 Bugs:
-Parallax Occlusion / Position
+Windows resize button: crash
+Mac fullscreen SDL 2.0.3 bugs
