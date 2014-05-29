@@ -12,6 +12,7 @@ const std::string consoleJSCommand = "#! ";
 const std::string homepage = "http://gamefortec.net/";
 const float loadingScreenTime = 5.0;
 float loadingScreen = loadingScreenTime;
+unsigned int matrixEasterEgg_X = 0, matrixEasterEgg_Y = 0;
 
 Menu::Menu() :current(none), screenView(NULL) {
     
@@ -267,6 +268,31 @@ void Menu::gameTick() {
             if(loadingScreen <= 0.0)
                 setMainMenu();
         } break;
+        case main:
+            for(unsigned int x = 0; x < matrixEasterEgg_X; x ++) {
+                if(rand()%100 > 25) continue;
+                for(unsigned int y = matrixEasterEgg_Y-1; y > 0; y --) {
+                    GUILabel *above = reinterpret_cast<GUILabel*>(screenView->children[(y-1)*matrixEasterEgg_X+x]),
+                    *label = reinterpret_cast<GUILabel*>(screenView->children[y*matrixEasterEgg_X+x]);
+                    label->text = above->text;
+                    label->color = above->color;
+                    label->updateContent();
+                }
+                GUILabel* label = reinterpret_cast<GUILabel*>(screenView->children[x]);
+                short character = 12353+(rand()%180);
+                char buffer[4];
+                buffer[0] = 0xE0 | (0x0F & (character >> 12));
+                buffer[1] = 0x80 | (0x3F & (character >> 6));
+                buffer[2] = 0x80 | (0x3F & character);
+                buffer[3] = 0;
+                label->text = buffer;
+                if(rand()%10 > 8)
+                    label->color = Color4(0.0, 1.0, 0.0, 1.0);
+                else
+                    label->color.g *= 0.85;
+                label->updateContent();
+            }
+            break;
         case inGame:
             if(mouseFixed) {
                 mouseX = optionsState.mouseSmoothing*mouseVelocityX;
@@ -444,7 +470,24 @@ void Menu::setLoadingMenu() {
 }
 
 void Menu::setMainMenu() {
-    clearAndAddBackground();
+    time_t t = time(0);
+    struct tm* date = localtime(&t);
+    if(date->tm_mon == 2 && date->tm_mday == 31) {
+        clear();
+        matrixEasterEgg_X = matrixEasterEgg_Y = 20;
+        for(unsigned int y = 0; y < matrixEasterEgg_Y; y ++)
+            for(unsigned int x = 0; x < matrixEasterEgg_X; x ++) {
+                GUILabel* label = new GUILabel();
+                label->posX = screenView->width*((float)x/matrixEasterEgg_X*2.0-0.95);
+                label->posY = screenView->height*(0.9-(float)y/matrixEasterEgg_Y*2.0);
+                label->width = screenView->width*0.1;
+                label->fontHeight = label->height = screenView->height*0.1;
+                label->textAlignment = GUILabel::TextAlignment::Center;
+                label->sizeAlignment = GUISizeAlignment::None;
+                screenView->addChild(label);
+            }
+    }else
+        clearAndAddBackground();
     current = main;
     
     GUIFramedView* view = new GUIFramedView();

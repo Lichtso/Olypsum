@@ -148,41 +148,21 @@ static bool ScriptGUIFramedViewSetEdgeGradientBorder(JSContextRef context, JSObj
         return false;
 }
 
-ScriptString ScriptStringMonochrome("monochrome"), ScriptStringBrushedSteel("brushedSteel"), ScriptStringStipple("stipple");
-
 static JSValueRef ScriptGUIFramedViewGetDecorationType(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    auto objectPtr = getDataOfInstance<GUIFramedView>(instance);
-    switch(objectPtr->content.decorationType) {
-        case GUIDecorationType::Monochrome:
-            return ScriptStringMonochrome.getJSStr(context);
-        case GUIDecorationType::BrushedSteel:
-            return ScriptStringBrushedSteel.getJSStr(context);
-        case GUIDecorationType::Stipple:
-            return ScriptStringStipple.getJSStr(context);
-        default:
-            return ScriptException(context, exception, "GUIFramedView getDecorationType(): Internal error");
-    }
+    return JSValueMakeNumber(context, getDataOfInstance<GUIFramedView>(instance)->content.decorationType);
 }
 
 static bool ScriptGUIFramedViewSetDecorationType(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
-    if(!JSValueIsString(context, value)) {
-        ScriptException(context, exception, "GUIButton setState(): Expected String");
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "GUIButton setState(): Expected Number");
         return false;
     }
-    ScriptString strValue(context, value);
-    std::string str = strValue.getStdStr();
-    auto objectPtr = getDataOfInstance<GUIFramedView>(instance);
-    if(str == ScriptStringMonochrome.getStdStr())
-        objectPtr->content.decorationType = GUIDecorationType::Monochrome;
-    else if(str == ScriptStringBrushedSteel.getStdStr())
-        objectPtr->content.decorationType = GUIDecorationType::BrushedSteel;
-    else if(str == ScriptStringStipple.getStdStr())
-        objectPtr->content.decorationType = GUIDecorationType::Stipple;
-    else{
-        ScriptException(context, exception, "GUIFramedView setDecorationType(): Invalid value");
+    unsigned int numberValue = JSValueToNumber(context, value, NULL);
+    if(numberValue <= GUIDecorationType::Stipple) {
+        getDataOfInstance<GUIFramedView>(instance)->content.decorationType = static_cast<GUIDecorationType>(numberValue);
+        return true;
+    }else
         return false;
-    }
-    return true;
 }
 
 static JSValueRef ScriptGUIFramedViewAccessTopColor(JSContextRef context, JSObjectRef function, JSObjectRef instance, size_t argc, const JSValueRef argv[], JSValueRef* exception) {

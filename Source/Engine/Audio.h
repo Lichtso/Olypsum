@@ -45,9 +45,9 @@ class SoundObject : public SimpleObject {
     FileResourcePtr<SoundTrack> soundTrack; //!< The SoundTrack used for audio playback
     //! The playback state
     enum Mode {
-        Looping, //!< Restart playing if the SoundTrack reaches its end
-        Hold, //!< Stops playing if the SoundTrack reaches its end
-        Dispose //!< Deletes this SoundObject if the SoundTrack reaches its end
+        Looping = 0, //!< Restart playing if the SoundTrack reaches its end
+        Hold = 1, //!< Stops playing if the SoundTrack reaches its end
+        Dispose = 2 //!< Deletes this SoundObject if the SoundTrack reaches its end
     } mode;
     SoundObject(btTransform transformation, FileResourcePtr<SoundTrack> soundTrack);
     SoundObject(rapidxml::xml_node<xmlUsedCharType>* node, LevelLoader* levelLoader);

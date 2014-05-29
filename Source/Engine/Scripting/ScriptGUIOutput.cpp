@@ -9,38 +9,20 @@
 #include "ScriptManager.h"
 
 static JSValueRef ScriptGUILabelGetTextAlignment(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    auto objectPtr = getDataOfInstance<GUILabel>(instance);
-    switch(objectPtr->textAlignment) {
-        case GUILabel::TextAlignment::Left:
-            return ScriptStringLeft.getJSStr(context);
-        case GUILabel::TextAlignment::Center:
-            return ScriptStringCenter.getJSStr(context);
-        case GUILabel::TextAlignment::Right:
-            return ScriptStringRight.getJSStr(context);
-        default:
-            return ScriptException(context, exception, "GUILabel getTextAlignment(): Internal error");
-    }
+    return JSValueMakeNumber(context, getDataOfInstance<GUILabel>(instance)->textAlignment);
 }
 
 static bool ScriptGUILabelSetTextAlignment(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
-    if(!JSValueIsString(context, value)) {
-        ScriptException(context, exception, "GUILabel setTextAlignment(): Expected String");
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "GUILabel setTextAlignment(): Expected Number");
         return false;
     }
-    ScriptString strValue(context, value);
-    std::string str = strValue.getStdStr();
-    auto objectPtr = getDataOfInstance<GUILabel>(instance);
-    if(str == "left")
-        objectPtr->textAlignment = GUILabel::TextAlignment::Left;
-    else if(str == "center")
-        objectPtr->textAlignment = GUILabel::TextAlignment::Center;
-    else if(str == "right")
-        objectPtr->textAlignment = GUILabel::TextAlignment::Right;
-    else {
-        ScriptException(context, exception, "GUILabel setTextAlignment(): Invalid value");
+    unsigned int numberValue = JSValueToNumber(context, value, NULL);
+    if(numberValue <= GUILabel::TextAlignment::Right) {
+        getDataOfInstance<GUILabel>(instance)->textAlignment = static_cast<GUILabel::TextAlignment>(numberValue);
+        return true;
+    }else
         return false;
-    }
-    return true;
 }
 
 static JSValueRef ScriptGUILabelViewGetText(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {

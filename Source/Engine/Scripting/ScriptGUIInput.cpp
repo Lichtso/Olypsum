@@ -88,84 +88,38 @@ static bool ScriptGUIButtonSetEnabled(JSContextRef context, JSObjectRef instance
     return true;
 }
 
-ScriptString ScriptStringReleased("released"), ScriptStringHighlighted("highlighted"), ScriptStringPressed("pressed");
-
 static JSValueRef ScriptGUIButtonGetState(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    auto objectPtr = getDataOfInstance<GUIButton>(instance);
-    switch(objectPtr->state) {
-        case GUIButton::State::Released:
-            return ScriptStringReleased.getJSStr(context);
-        case GUIButton::State::Highlighted:
-            return ScriptStringHighlighted.getJSStr(context);
-        case GUIButton::State::Pressed:
-            return ScriptStringPressed.getJSStr(context);
-        default:
-            return ScriptException(context, exception, "GUIButton getState(): Internal error");
-    }
+    return JSValueMakeNumber(context, getDataOfInstance<GUIButton>(instance)->state);
 }
 
 static bool ScriptGUIButtonSetState(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
-    if(!JSValueIsString(context, value)) {
-        ScriptException(context, exception, "GUIButton setState(): Expected String");
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "GUIButton setState(): Expected Number");
         return false;
     }
-    ScriptString strValue(context, value);
-    std::string str = strValue.getStdStr();
-    auto objectPtr = getDataOfInstance<GUIButton>(instance);
-    if(str == ScriptStringReleased.getStdStr())
-        objectPtr->state = GUIButton::State::Released;
-    else if(str == ScriptStringHighlighted.getStdStr())
-        objectPtr->state = GUIButton::State::Highlighted;
-    else if(str == ScriptStringPressed.getStdStr())
-        objectPtr->state = GUIButton::State::Pressed;
-    else{
-        ScriptException(context, exception, "GUIButton setState(): Invalid value");
+    unsigned int numberValue = JSValueToNumber(context, value, NULL);
+    if(numberValue <= GUIButton::State::Pressed) {
+        getDataOfInstance<GUIButton>(instance)->state = static_cast<GUIButton::State>(numberValue);
+        return true;
+    }else
         return false;
-    }
-    return true;
 }
 
 static JSValueRef ScriptGUIButtonGetType(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    auto objectPtr = getDataOfInstance<GUIButton>(instance);
-    switch(objectPtr->type) {
-        case GUIButton::Type::Normal:
-            return ScriptStringNormal.getJSStr(context);
-        case GUIButton::Type::Delete:
-            return ScriptStringDelete.getJSStr(context);
-        case GUIButton::Type::Add:
-            return ScriptStringAdd.getJSStr(context);
-        case GUIButton::Type::Edit:
-            return ScriptStringEdit.getJSStr(context);
-        case GUIButton::Type::Lockable:
-            return ScriptStringLockable.getJSStr(context);
-        default:
-            return ScriptException(context, exception, "GUIButton getType(): Internal error");
-    }
+    return JSValueMakeNumber(context, getDataOfInstance<GUIButton>(instance)->type);
 }
 
 static bool ScriptGUIButtonSetType(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
-    if(!JSValueIsString(context, value)) {
-        ScriptException(context, exception, "GUIButton setType(): Expected String");
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "GUIButton setType(): Expected Number");
         return false;
     }
-    ScriptString strValue(context, value);
-    std::string str = strValue.getStdStr();
-    auto objectPtr = getDataOfInstance<GUIButton>(instance);
-    if(str == ScriptStringNormal.getStdStr())
-        objectPtr->type = GUIButton::Type::Normal;
-    else if(str == ScriptStringDelete.getStdStr())
-        objectPtr->type = GUIButton::Type::Delete;
-    else if(str == ScriptStringAdd.getStdStr())
-        objectPtr->type = GUIButton::Type::Add;
-    else if(str == ScriptStringEdit.getStdStr())
-        objectPtr->type = GUIButton::Type::Edit;
-    else if(str == ScriptStringLockable.getStdStr())
-        objectPtr->type = GUIButton::Type::Lockable;
-    else{
-        ScriptException(context, exception, "GUIButton setType(): Invalid value");
+    unsigned int numberValue = JSValueToNumber(context, value, NULL);
+    if(numberValue <= GUIButton::Type::Lockable) {
+        getDataOfInstance<GUIButton>(instance)->type = static_cast<GUIButton::Type>(numberValue);
+        return true;
+    }else
         return false;
-    }
-    return true;
 }
 
 JSStaticValue ScriptGUIButtonProperties[] = {

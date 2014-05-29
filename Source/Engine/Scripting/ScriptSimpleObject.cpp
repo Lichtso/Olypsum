@@ -207,35 +207,17 @@ static bool ScriptSoundObjectSetIsPlaying(JSContextRef context, JSObjectRef inst
 }
 
 static JSValueRef ScriptSoundObjectGetMode(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef* exception) {
-    auto objectPtr = getDataOfInstance<SoundObject>(instance);
-    switch(objectPtr->mode) {
-        case SoundObject::Mode::Looping:
-            return ScriptStringLooping.getJSStr(context);
-        case SoundObject::Mode::Hold:
-            return ScriptStringHold.getJSStr(context);
-        case SoundObject::Mode::Dispose:
-            return ScriptStringDispose.getJSStr(context);
-        default:
-            return ScriptException(context, exception, "SoundObject getMode(): Internal error");
-    }
+    return JSValueMakeNumber(context, getDataOfInstance<SoundObject>(instance)->mode);
 }
 
 static bool ScriptSoundObjectSetMode(JSContextRef context, JSObjectRef instance, JSStringRef propertyName, JSValueRef value, JSValueRef* exception) {
-    if(!JSValueIsString(context, value)) {
-        ScriptException(context, exception, "SoundObject setSoundTrack(): Expected String");
+    if(!JSValueIsNumber(context, value)) {
+        ScriptException(context, exception, "SoundObject setSoundTrack(): Expected Number");
         return false;
     }
-    ScriptString strMode(context, value);
-    std::string mode = strMode.getStdStr();
-    auto objectPtr = getDataOfInstance<SoundObject>(instance);
-    if(mode == ScriptStringLooping.getStdStr()) {
-        objectPtr->mode = SoundObject::Mode::Looping;
-        return true;
-    }else if(mode == ScriptStringHold.getStdStr()) {
-        objectPtr->mode = SoundObject::Mode::Hold;
-        return true;
-    }else if(mode == ScriptStringDispose.getStdStr()) {
-        objectPtr->mode = SoundObject::Mode::Dispose;
+    unsigned int numberValue = JSValueToNumber(context, value, NULL);
+    if(numberValue <= SoundObject::Mode::Dispose) {
+        getDataOfInstance<SoundObject>(instance)->mode = static_cast<SoundObject::Mode>(numberValue);
         return true;
     }else
         return false;
