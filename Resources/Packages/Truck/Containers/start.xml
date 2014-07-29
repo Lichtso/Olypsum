@@ -16,7 +16,8 @@
 		<Translate>10.0 2.0 0.0</Translate>
 	</Container>
 	<Objects>
-		<RigidObject>
+        <RigidObject>
+			<Model src="sceneBox.dae" />
 			<PhysicsBody collisionShape="mapBox" mass="0.0" />
 		</RigidObject>
 		<TerrainObject>

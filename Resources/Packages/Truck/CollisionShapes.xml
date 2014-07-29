@@ -1,10 +1,10 @@
 <CollisionShapes>
 	<Compound id="mapBox">
 		<Child collisionShape="staticPlane">
-			<Translate>0.0 -100.0 0.0</Translate>
+			<Translate>0.0 -90.0 0.0</Translate>
 		</Child>
 		<Child collisionShape="staticPlane">
-			<Translate>0.0 100.0 0.0</Translate>
+			<Translate>0.0 90.0 0.0</Translate>
 			<Rotate>0.0 0.0 1.0 180.0</Rotate>
 		</Child>
 		<Child collisionShape="staticPlane">

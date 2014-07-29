@@ -526,7 +526,7 @@ void Menu::setMainMenu() {
     }
     
     GUILabel* label = new GUILabel();
-    label->text = fileManager.localizeString("version")+": "+engineVersion+"\nClosed Beta";
+    label->text = fileManager.localizeString("version")+": "+engineVersion+"\nOpen Beta";
     label->textAlignment = GUILabel::TextAlignment::Left;
     label->sizeAlignment = GUISizeAlignment::Height;
     label->width = screenView->width*0.4;

@@ -5,6 +5,6 @@
 		<![CDATA[Car physics tests]]>
 	</Description>
 	<Dependencies>
-		<Package name="Test" hash="5b38374d65c313c0"/>
+		<Package name="Test" hash="cbc726c001267c47"/>
 	</Dependencies>
 </Package>
