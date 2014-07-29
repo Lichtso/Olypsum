@@ -1,5 +1,5 @@
 <Package>
-	<EngineVersion value="0.5.5"/>
+	<EngineVersion value="0.5.6"/>
 	<InitialContainer value="start"/>
 	<Description>
 		<![CDATA[Car physics tests]]>
